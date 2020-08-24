@@ -1,0 +1,4 @@
+type Result {
+    success: Boolean!
+    message: String!
+}
