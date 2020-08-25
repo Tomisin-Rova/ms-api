@@ -63,10 +63,7 @@ func init() {
 func GetSecrets() Secrets {
 	return secrets
 }
-
-/**
-Watch Secrets does management of hot update on Secrets from vault and any secret store provided.
-*/
+// Watch Secrets does management of hot update on Secrets from vault and any secret store provided.
 func WatchSecrets() {
 	secrets.mu.Lock()
 	defer secrets.mu.Unlock()
