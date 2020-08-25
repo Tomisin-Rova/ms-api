@@ -59,9 +59,7 @@ func init() {
 	secrets.wg.Wait()
 }
 
-/**
-Get Secrets is used to get value from the Secrets runtime.
-*/
+// Get Secrets is used to get value from the Secrets runtime.
 func GetSecrets() Secrets {
 	return secrets
 }
