@@ -13,12 +13,7 @@ import (
 	"regexp"
 )
 
-var ProtectedCalls []string
 
-func init() {
-	// Mount all protected endpoints here.
-	ProtectedCalls = calls
-}
 
 type ResWriter struct {
 	http.ResponseWriter
@@ -40,7 +35,7 @@ func (mrw *ResWriter) Write(p []byte) (int, error) {
 }
 
 func ValidateAPICall(query string) (string, bool) {
-	for _, protectedCall := range ProtectedCalls {
+	for _, protectedCall := range protectedCalls {
 		// Match things like this `QueryOrMutationName(` or `QueryOrMutationName{` even if there is a whitespace between `...Name {` or `...Name (` specific target.
 		match := fmt.Sprintf(`(?m)%s\s*[\(\{]`, protectedCall)
 		r := regexp.MustCompile(match)

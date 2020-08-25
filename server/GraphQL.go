@@ -1,4 +1,4 @@
-package Server
+package server
 
 import (
 	"github.com/99designs/gqlgen/graphql/handler/extension"

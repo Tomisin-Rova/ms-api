@@ -1,4 +1,4 @@
-package Session
+package sessions
 
 import (
 	"errors"
@@ -38,7 +38,6 @@ type Session struct {
 	Id             string         `json:"_id" bson:"_id"`
 	Token          string         `json:"token" bson:"token"`
 	AccountId      string         `json:"accountId" bson:"accountId" validate:"required"`
-	AccountType    AccountTypes   `json:"accountType" bson:"accountType" validate:"required"`
 	TimeCreated    time.Time      `json:"timeCreated" bson:"timeCreated"`
 	Validity       time.Duration  `json:"validity" bson:"validity" validate:"required"`
 	UnitOfValidity UnitOfValidity `json:"unitOfValidity" bson:"unitOfValidity" validate:"required"`
@@ -52,7 +51,7 @@ type TokenPayload struct {
 }
 
 // Generate Token.
-func GenerateToken(id, client string) string {
+func GenerateToken(id string) (string, error) {
 	// Removed time. To handle Session and token invalidation on the server side.
 	// Using inactivity token mechanism, db-centric source of truth.
 	secret := jwt.NewHS256([]byte(config.GetSecrets().JWTSecrets))
@@ -64,14 +63,15 @@ func GenerateToken(id, client string) string {
 			IssuedAt: jwt.NumericDate(time.Now()),
 			JWTID:    "RoavaGunjigalis",
 		},
-		Client: client,
+		//Client: client,
 		Id:     id}
 
 	token, err := jwt.Sign(payload, secret)
 	if err != nil {
 		fmt.Println(err.Error(), " Err generating JWT Token")
+		return "", err
 	}
-	return string(token)
+	return string(token), nil
 }
 
 //

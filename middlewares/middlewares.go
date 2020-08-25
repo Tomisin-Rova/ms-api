@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"strings"
 
-	"ms.api/libs/session"
+	"ms.api/libs/sessions"
 	"ms.api/models"
 )
 
@@ -22,7 +22,7 @@ const (
 func _handleSessionByToken(token string) (AuthenticatedUser utils.JSON, result *models.Result) {
 	AuthenticatedUser = make(utils.JSON)
 
-	session, err := Session.GetSessionByToken(token)
+	session, err := sessions.GetSessionByToken(token)
 	if err != nil {
 		result := &models.Result{}
 		result.Success = false
@@ -44,14 +44,14 @@ func _handleSessionByToken(token string) (AuthenticatedUser utils.JSON, result *
 	//	AuthenticatedUser[models.AccountTypesSigner.String()], _ = Signers.ViewSigner(_id)
 	//	break
 	//}
-	//_ = Session.ExtendSession(token)
+	//_ = sessions.ExtendSession(token)
 	return AuthenticatedUser, nil
 }
-func GetAuthenticatedUser(ctx context.Context) (User interface{}, Token string) {
-	AuthenticatedUser, _ := ctx.Value(AuthenticatedUserContextKey).(utils.JSON)
-	User = AuthenticatedUser["user"]
-	Token = AuthenticatedUser[TokenContextKey].(string)
-	return User, Token
+func GetAuthenticatedUser(ctx context.Context) (user interface{}, token string) {
+	authenticatedUser, _ := ctx.Value(AuthenticatedUserContextKey).(utils.JSON)
+	user = authenticatedUser["user"]
+	token = authenticatedUser[TokenContextKey].(string)
+	return user, token
 }
 
 func AuthMiddleWare(c *fiber.Ctx) {
@@ -89,5 +89,5 @@ func DestroyAuthenticatedUser(ctx context.Context) error {
 	if token == "" {
 		return nil
 	}
-	return Session.DestroySession(token)
+	return sessions.DestroySession(token)
 }

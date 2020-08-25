@@ -4,11 +4,14 @@ import (
 	"fmt"
 	"github.com/go-redis/redis/v7"
 	"github.com/hashicorp/vault/api"
+	"github.com/joho/godotenv"
 	"log"
 	"ms.api/utils"
 	"os"
 	"sync"
 )
+
+var _ = godotenv.Load()
 
 const (
 	ServiceName = "kyc"
@@ -63,6 +66,7 @@ func init() {
 func GetSecrets() Secrets {
 	return secrets
 }
+
 // Watch Secrets does management of hot update on Secrets from vault and any secret store provided.
 func WatchSecrets() {
 	secrets.mu.Lock()

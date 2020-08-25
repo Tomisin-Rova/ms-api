@@ -1,4 +1,4 @@
-package Session
+package sessions
 
 import (
 	"errors"
@@ -31,8 +31,10 @@ func GetSessionByToken(token string) (*Session, error) {
 	}
 
 	if err := session.AssertValidity(); err != nil {
-		_ = DestroySession(session.Token) // Destroy it.
-		return nil, InvalidTokenString
+		// Destroy it in case it still exists in the store,
+		// We don't need this error, because it'll never pass the third line at this point.
+		_ = DestroySession(session.Token)
+		return nil, err
 	}
 
 	return &session, nil
@@ -46,7 +48,10 @@ func CreateSession(payload Session) (*Session, error) {
 	if !payload.UnitOfValidity.IsValid() {
 		return nil, UnitOfValidityError
 	}
-	s := NewSession(payload.AccountId, payload.AccountType, payload.Validity, payload.UnitOfValidity)
+	s, e := NewSession(payload.AccountId, payload.Validity, payload.UnitOfValidity)
+	if e != nil {
+		return nil, e
+	}
 
 	// TODO: Save to redis store with expiration for 4hours and keep extending the expiration for each usage, and not db.
 	if err := sessionCache.Set(s.Token, s); err != nil {
@@ -63,7 +68,8 @@ func ExtendSession(token string) error {
 		return err
 	}
 
-	_ = s.UpdateLastUsage() // Actual refresh.
+	_ = s.UpdateLastUsage() // Actual refresh. ( returns time not, error. )
+	//TODO: Save extend the token by expiration time returned above.
 
 	return sessionCache.Update(s.Token, s)
 }

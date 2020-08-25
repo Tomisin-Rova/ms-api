@@ -1,4 +1,4 @@
-package Session
+package sessions
 
 import (
 	"errors"
@@ -43,18 +43,20 @@ func (sm *Session) AssertValidity() error {
 	return nil
 }
 
-func NewSession(AccountId string, AccountType AccountTypes, Validity time.Duration, unitOfValidity UnitOfValidity) *Session {
+func NewSession(AccountId string, Validity time.Duration, unitOfValidity UnitOfValidity) (*Session, error) {
 	Id, _ := utils.GenerateUUID(24)
 	uv := strings.ToUpper(unitOfValidity.String()) // ensuring caps.
-	token := GenerateToken(AccountId, AccountType.String())
+	token, err := GenerateToken(AccountId)
+	if err != nil {
+		return nil, err
+	}
 	return &Session{
 		Id:             Id,
 		Token:          token,
 		AccountId:      AccountId,
-		AccountType:    AccountType,
 		Validity:       Validity,
 		LastUsage:      time.Now(),
 		UnitOfValidity: UnitOfValidity(uv),
 		TimeCreated:    time.Now(),
-	}
+	}, nil
 }

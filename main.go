@@ -6,15 +6,12 @@ import (
 	"github.com/gofiber/fiber"
 	"github.com/gofiber/helmet"
 	"github.com/gofiber/recover"
-	"github.com/joho/godotenv"
 	"log"
 	"ms.api/config"
 	"ms.api/middlewares"
 	"ms.api/playground"
 	"ms.api/server"
 )
-
-var _ = godotenv.Load()
 
 func main() {
 	app := fiber.New(&fiber.Settings{
@@ -54,7 +51,7 @@ func main() {
 		})
 	}
 
-	app.All("/graphql", Server.GraphQL().ServeGraphQL)
+	app.All("/graphql", server.GraphQL().ServeGraphQL)
 
 	// ***************** API Server **********************//
 	host := "0.0.0.0"

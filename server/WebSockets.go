@@ -1,4 +1,5 @@
-package Server
+package server
+
 
 import (
 	secrets "ms.api/config"
