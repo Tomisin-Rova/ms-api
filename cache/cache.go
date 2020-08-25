@@ -5,5 +5,4 @@ type Cache interface {
 	Get(key string, output interface{}) error
 	Update(key string, value interface{}) error
 	Delete(key string)
-	Client() interface{}
 }
