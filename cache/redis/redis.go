@@ -3,7 +3,7 @@ package redisConnector
 import (
 	"encoding/json"
 	"github.com/go-redis/redis/v7"
-	"log"
+	"github.com/sirupsen/logrus"
 	"ms.api/cache"
 	"time"
 )
@@ -16,7 +16,7 @@ type redisCache struct {
 
 func NewCache(client *redis.Client, ttl time.Duration, keyPrefix string) cache.Cache {
 	if client == nil {
-		log.Fatal("Redis client not connected")
+		logrus.Fatal("Redis client not connected")
 	}
 	return &redisCache{
 		keyPrefix: keyPrefix,

@@ -2,7 +2,7 @@ GOPATH:=$(shell go env GOPATH)
 
 .PHONY: proto
 proto :
-	protoc -I proto/ -I${PWD}/ --go_out=plugins=grpc:proto proto/*.proto
+	./scripts/mage -d ./scripts genProto
 
 .PHONY: build
 build: proto
@@ -21,4 +21,4 @@ local:
 
 .PHONY: schema
 schema:
-	./generate.sh
+	./scripts/generate.sh

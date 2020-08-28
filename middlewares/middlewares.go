@@ -2,7 +2,6 @@ package middlewares
 
 import (
 	"context"
-	"github.com/gofiber/fiber"
 	"ms.api/libs/ObjectID"
 	"ms.api/utils"
 	"net/http"
@@ -19,7 +18,7 @@ const (
 	Bearer = "BEARER"
 )
 
-func _handleSessionByToken(token string) (AuthenticatedUser utils.JSON, result *models.Result) {
+func handleSessionByToken(token string) (AuthenticatedUser utils.JSON, result *models.Result) {
 	AuthenticatedUser = make(utils.JSON)
 
 	session, err := sessions.GetSessionByToken(token)
@@ -32,6 +31,7 @@ func _handleSessionByToken(token string) (AuthenticatedUser utils.JSON, result *
 	}
 
 	_, _ = ObjectID.UnmarshalID(session.AccountId)
+	// TODO: Come here and apply an actual session thing for the connected client to carry out any sensitive business.
 	//switch accountType.String() {
 
 	//case models.AccountTypesAdministrator.String():
@@ -54,34 +54,38 @@ func GetAuthenticatedUser(ctx context.Context) (user interface{}, token string) 
 	return user, token
 }
 
-func AuthMiddleWare(c *fiber.Ctx) {
-	Authorization := c.Get("Authorization")
-	var token string
+func AuthMiddleWare(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-	if Authorization == "" {
-		c.Next()
+		Authorization := r.Header.Get("Authorization")
+		var token string
+
+		if Authorization == "" {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		if len(Authorization) > len(Bearer) && strings.ToUpper(Authorization[0:len(Bearer)]) == Bearer {
+			token = Authorization[len(Bearer)+1:]
+		} else {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		AuthenticatedUser, result := handleSessionByToken(token)
+		if result != nil {
+			w.WriteHeader(http.StatusUnauthorized)
+			// TODO: Write the bad result here.
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		AuthenticatedUser[TokenContextKey] = token
+
+		ctx := context.WithValue(r.Context(), AuthenticatedUserContextKey, AuthenticatedUser)
+		next.ServeHTTP(w, r.WithContext(ctx))
 		return
-	}
-
-	if len(Authorization) > len(Bearer) && strings.ToUpper(Authorization[0:len(Bearer)]) == Bearer {
-		token = Authorization[len(Bearer)+1:]
-	} else {
-		c.Next(nil)
-		return
-	}
-
-	AuthenticatedUser, result := _handleSessionByToken(token)
-	if result != nil {
-		c.Status(http.StatusUnauthorized)
-		_ = c.JSON(result)
-		return
-	}
-
-	AuthenticatedUser[TokenContextKey] = token
-
-	c.Fasthttp.SetUserValue(AuthenticatedUserContextKey, AuthenticatedUser)
-	c.Next(nil)
-	return
+	})
 }
 
 func DestroyAuthenticatedUser(ctx context.Context) error {

@@ -2,11 +2,11 @@ package sessions
 
 import (
 	"errors"
-	"fmt"
+	"github.com/sirupsen/logrus"
 	"time"
 
-	"ms.api/config"
 	"github.com/gbrlsnchs/jwt/v3"
+	"ms.api/config"
 )
 
 type UnitOfValidity string
@@ -68,7 +68,7 @@ func GenerateToken(id string) (string, error) {
 
 	token, err := jwt.Sign(payload, secret)
 	if err != nil {
-		fmt.Println(err.Error(), " Err generating JWT Token")
+		logrus.Println(err.Error(), " Err generating JWT Token")
 		return "", err
 	}
 	return string(token), nil

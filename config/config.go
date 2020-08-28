@@ -5,7 +5,7 @@ import (
 	"github.com/go-redis/redis/v7"
 	"github.com/hashicorp/vault/api"
 	"github.com/joho/godotenv"
-	"log"
+	"github.com/sirupsen/logrus"
 	"ms.api/utils"
 	"os"
 	"sync"
@@ -21,6 +21,7 @@ const (
 )
 
 type Secrets struct {
+	KYCServiceURL    string
 	VaultAddress     string        `json:"vault_address"`
 	VaultToken       string        `json:"vault_token"`
 	VaultSecretsPath string        `json:"vault_secrets_path"`
@@ -47,7 +48,7 @@ func init() {
 	secrets.mu = &sync.Mutex{}
 
 	if secrets.Port = os.Getenv("PORT"); secrets.Port == "" {
-		secrets.Port = "8080"
+		secrets.Port = "20002"
 	}
 	secrets.PulsarURL = os.Getenv("PULSAR_URL")
 	secrets.RedisURL = os.Getenv("REDIS_URL")
@@ -57,6 +58,7 @@ func init() {
 	secrets.VaultAddress = os.Getenv("VAULT_ADDRESS")
 	secrets.VaultToken = os.Getenv("VAULT_TOKEN")
 	secrets.VaultSecretsPath = os.Getenv("VAULT_SECRETS_PATH")
+	secrets.KYCServiceURL = os.Getenv("KYC_SERVICE")
 	secrets.wg.Add(1)
 	go secrets.connectRedis()
 	secrets.wg.Wait()
@@ -74,13 +76,13 @@ func WatchSecrets() {
 
 	data, err := connectVault(secrets.VaultAddress, secrets.VaultToken, secrets.VaultSecretsPath)
 	if err != nil {
-		log.Print("There was an error parsing secrets from vault: ", err)
+		logrus.Print("There was an error parsing secrets from vault: ", err)
 		return
 	}
 
 	var _s Secrets
 	if err := utils.Pack(data, &_s); err != nil {
-		log.Print("There was an error parsing secrets from vault: ", err)
+		logrus.Print("There was an error parsing secrets from vault: ", err)
 		return
 	}
 	secrets.PulsarURL = _s.PulsarURL
@@ -110,7 +112,7 @@ func (s *Secrets) connectRedis() {
 	})
 
 	if s.RedisClient == nil {
-		log.Fatal("Redis client invalid.")
+		logrus.Fatal("Redis client invalid.")
 	}
 }
 
@@ -121,13 +123,13 @@ func connectVault(address, token, path string) (utils.JSON, error) {
 
 	client, err := api.NewClient(config)
 	if err != nil {
-		log.Print("There was an error connecting to vault: ", err)
+		logrus.Print("There was an error connecting to vault: ", err)
 		return nil, err
 	}
 	client.SetToken(token)
 	s, err := client.Logical().Read(path)
 	if err != nil {
-		log.Print("There was an error reading secrets from vault: ", err)
+		logrus.Print("There was an error reading secrets from vault: ", err)
 		return nil, err
 	}
 

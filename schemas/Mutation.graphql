@@ -1,0 +1,8 @@
+type Mutation {
+    submitLiveVideo(
+        id: ID!
+    ): Result
+    pingKYCService(
+        message: String!
+    ): Result
+}

@@ -3,9 +3,11 @@ package middlewares
 import (
 	"bufio"
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/gofiber/fiber"
+	"io"
+	"io/ioutil"
 	"ms.api/models"
 	"ms.api/utils"
 	"net"
@@ -46,22 +48,39 @@ func ValidateAPICall(query string) (string, bool) {
 	return "", false
 }
 
-func ProtectedMiddleware(c *fiber.Ctx) {
-	query := string(c.Fasthttp.Request.Body())
-	if _, isProtected := ValidateAPICall(query); isProtected {
-		AuthenticatedUser, ok := c.Fasthttp.Value(AuthenticatedUserContextKey).(utils.JSON)
-		if !ok || AuthenticatedUser == nil {
-			result := models.Result{
-				Success: false,
-				Message: "Sorry, you must be authenticated/logged in to continue.",
-				//ReturnStatus: models.ReturnStatusAuthenticationError,
+func ProtectedMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Check Protected Routes here.
+		s, _ := ioutil.ReadAll(r.Body)
+		r.Body = ioutil.NopCloser(bytes.NewBuffer(s))
+		query := string(s) // We can further do checks with this query body here.
+
+		if _, isProtected := ValidateAPICall(query); isProtected {
+			ctx := r.Context()
+			AuthenticatedUser, ok := ctx.Value(AuthenticatedUserContextKey).(utils.JSON)
+			if !ok || AuthenticatedUser == nil {
+				result := models.Result{
+					Success:      false,
+					Message:      "Sorry, you must be authenticated/logged in to continue.",
+					//ReturnStatus: models.ReturnStatusAuthenticationError,
+				}
+				w.WriteHeader(http.StatusUnauthorized)
+				b, _ := json.Marshal(result)
+				_, _ = w.Write(b)
+				return
 			}
-			c.Status(http.StatusUnauthorized)
-			_ = c.JSON(result)
+		}
+
+		protected := &ResWriter{
+			ResponseWriter: w,
+			buf:            &bytes.Buffer{},
+		}
+
+		next.ServeHTTP(protected, r)
+		if _, e := io.Copy(w, protected.buf); e != nil {
+			// To handle copying a dead-body.
 			return
 		}
-	}
-
-	c.Next()
-	return
+		return
+	})
 }
