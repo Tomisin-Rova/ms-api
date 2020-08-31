@@ -4,6 +4,10 @@ GOPATH:=$(shell go env GOPATH)
 proto :
 	./scripts/mage -d ./scripts genProto
 
+.PHONY: schema
+schema:
+	./scripts/mage -d ./scripts genSchema
+
 .PHONY: build
 build: proto
 	go build -o srv *.go
@@ -18,7 +22,3 @@ docker:
 
 local:
 	go run .
-
-.PHONY: schema
-schema:
-	./scripts/generate.sh

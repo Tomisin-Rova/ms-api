@@ -2,10 +2,10 @@ package server
 
 import (
 	"github.com/99designs/gqlgen/graphql/handler"
-	"ms.api/api"
-	"ms.api/api/generated"
+	"ms.api/handlers"
+	"ms.api/handlers/generated"
 )
 
-func MountGraphql(resolvers *api.Resolver) *handler.Server {
+func MountGraphql(resolvers *handlers.Resolver) *handler.Server {
 	return handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: resolvers}))
 }

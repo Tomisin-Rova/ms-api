@@ -2,7 +2,33 @@
 
 package models
 
+import (
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
+
+type Applicant struct {
+	ID        primitive.ObjectID `json:"id"`
+	PersonID  primitive.ObjectID `json:"personId"`
+	FirstName string             `json:"firstName"`
+	LastName  string             `json:"lastName"`
+	Dob       string             `json:"dob"`
+	Email     string             `json:"email"`
+	Address   *Address           `json:"address"`
+}
+
 type Result struct {
 	Success bool   `json:"success"`
 	Message string `json:"message"`
+}
+
+type Address struct {
+	FlatNumber     string `json:"flatNumber"`
+	BuildingNumber string `json:"buildingNumber"`
+	BuildingName   string `json:"buildingName"`
+	Street         string `json:"street"`
+	SubStreet      string `json:"subStreet"`
+	Town           string `json:"town"`
+	State          string `json:"state"`
+	PostCode       string `json:"postCode"`
+	Country        string `json:"country"`
 }

@@ -7,7 +7,7 @@ import (
 	"context"
 	"fmt"
 
-	"ms.api/api/generated"
+	"ms.api/handlers/generated"
 )
 
 func (r *queryResolver) Playground(ctx context.Context) (*string, error) {

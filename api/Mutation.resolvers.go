@@ -5,13 +5,19 @@ package api
 
 import (
 	"context"
+	"fmt"
+
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"ms.api/api/generated"
+	"ms.api/handlers/generated"
 	"ms.api/models"
 )
 
 func (r *mutationResolver) SubmitLiveVideo(ctx context.Context, id primitive.ObjectID) (*models.Result, error) {
-	return nil, nil
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *mutationResolver) PingKYCService(ctx context.Context, message string) (*models.Result, error) {
+	panic(fmt.Errorf("not implemented"))
 }
 
 // Mutation returns generated.MutationResolver implementation.

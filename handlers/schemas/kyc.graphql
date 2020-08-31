@@ -1,0 +1,21 @@
+type Applicant {
+    id: ID!
+    personId: ID!
+    firstName: String!
+    lastName: String!
+    dob: String!
+    email: String!
+    address: address!
+}
+
+type address {
+    flatNumber: String!
+    buildingNumber: String!
+    buildingName: String!
+    street: String!
+    subStreet: String!
+    town: String!
+    state: String!
+    postCode: String!
+    country: String!
+}

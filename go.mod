@@ -7,6 +7,7 @@ require (
 	github.com/gbrlsnchs/jwt/v3 v3.0.0-rc.2
 	github.com/go-chi/chi v3.3.2+incompatible
 	github.com/go-redis/redis/v7 v7.4.0
+	github.com/golang/protobuf v1.4.1
 	github.com/hashicorp/vault/api v1.0.4
 	github.com/joho/godotenv v1.3.0
 	github.com/kr/pretty v0.2.1 // indirect
@@ -17,7 +18,7 @@ require (
 	golang.org/x/net v0.0.0-20200602114024-627f9648deb9 // indirect
 	golang.org/x/sys v0.0.0-20200602225109-6fdc65e7d980 // indirect
 	google.golang.org/grpc v1.27.0
-	google.golang.org/protobuf v1.25.0 // indirect
+	google.golang.org/protobuf v1.25.0
 	gopkg.in/square/go-jose.v2 v2.4.1 // indirect
 	gopkg.in/yaml.v2 v2.2.7 // indirect
 )

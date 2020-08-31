@@ -7,8 +7,8 @@ import (
 	"github.com/go-chi/chi/middleware"
 	"github.com/rs/cors"
 	"github.com/sirupsen/logrus"
-	"ms.api/api"
 	"ms.api/config"
+	"ms.api/handlers"
 	"ms.api/middlewares"
 	"ms.api/server"
 	"net/http"
@@ -40,7 +40,7 @@ func main() {
 	}
 
 	// ***************** API Server **********************
-	resolvers := &api.Resolver{}
+	resolvers := &handlers.Resolver{}
 	resolvers.ConnectServiceDependencies()
 	router.Handle("/graphql", server.MountGraphql(resolvers))
 
