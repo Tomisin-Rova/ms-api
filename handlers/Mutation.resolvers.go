@@ -9,14 +9,14 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"ms.api/handlers/generated"
-	"ms.api/models"
+	"ms.api/types"
 )
 
-func (r *mutationResolver) SubmitLiveVideo(ctx context.Context, id primitive.ObjectID) (*models.Result, error) {
+func (r *mutationResolver) SubmitLiveVideo(ctx context.Context, id primitive.ObjectID) (*types.Result, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *mutationResolver) PingKYCService(ctx context.Context, message string) (*models.Result, error) {
+func (r *mutationResolver) PingKYCService(ctx context.Context, message string) (*types.Result, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
