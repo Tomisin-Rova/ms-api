@@ -6,6 +6,7 @@ type Applicant {
     dob: String!
     email: String!
     address: address!
+    vendor: String!
 }
 
 type address {

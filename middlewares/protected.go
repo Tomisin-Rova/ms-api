@@ -8,14 +8,12 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"ms.api/models"
+	"ms.api/types"
 	"ms.api/utils"
 	"net"
 	"net/http"
 	"regexp"
 )
-
-
 
 type ResWriter struct {
 	http.ResponseWriter
@@ -59,9 +57,9 @@ func ProtectedMiddleware(next http.Handler) http.Handler {
 			ctx := r.Context()
 			AuthenticatedUser, ok := ctx.Value(AuthenticatedUserContextKey).(utils.JSON)
 			if !ok || AuthenticatedUser == nil {
-				result := models.Result{
-					Success:      false,
-					Message:      "Sorry, you must be authenticated/logged in to continue.",
+				result := types.Result{
+					Success: false,
+					Message: "Sorry, you must be authenticated/logged in to continue.",
 					//ReturnStatus: models.ReturnStatusAuthenticationError,
 				}
 				w.WriteHeader(http.StatusUnauthorized)

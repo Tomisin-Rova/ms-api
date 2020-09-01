@@ -8,13 +8,13 @@ import (
 	"errors"
 	"strconv"
 	"sync"
+	"sync/atomic"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"ms.api/libs/ObjectID"
+	"ms.api/services/kycService"
 	"ms.api/types"
 )
 
@@ -36,6 +36,7 @@ type Config struct {
 }
 
 type ResolverRoot interface {
+	Applicant() ApplicantResolver
 	Mutation() MutationResolver
 	Query() QueryResolver
 }
@@ -49,18 +50,19 @@ type ComplexityRoot struct {
 		Dob       func(childComplexity int) int
 		Email     func(childComplexity int) int
 		FirstName func(childComplexity int) int
-		ID        func(childComplexity int) int
+		Id        func(childComplexity int) int
 		LastName  func(childComplexity int) int
-		PersonID  func(childComplexity int) int
+		PersonId  func(childComplexity int) int
+		Vendor    func(childComplexity int) int
 	}
 
 	Mutation struct {
 		PingKYCService  func(childComplexity int, message string) int
-		SubmitLiveVideo func(childComplexity int, id primitive.ObjectID) int
+		SubmitLiveVideo func(childComplexity int, id string) int
 	}
 
 	Query struct {
-		Playground func(childComplexity int) int
+		HelloWorld func(childComplexity int) int
 	}
 
 	Result struct {
@@ -81,12 +83,15 @@ type ComplexityRoot struct {
 	}
 }
 
+type ApplicantResolver interface {
+	Address(ctx context.Context, obj *kycService.Applicant) (*types.Address, error)
+}
 type MutationResolver interface {
-	SubmitLiveVideo(ctx context.Context, id primitive.ObjectID) (*types.Result, error)
+	SubmitLiveVideo(ctx context.Context, id string) (*types.Result, error)
 	PingKYCService(ctx context.Context, message string) (*types.Result, error)
 }
 type QueryResolver interface {
-	Playground(ctx context.Context) (*string, error)
+	HelloWorld(ctx context.Context) (*kycService.Applicant, error)
 }
 
 type executableSchema struct {
@@ -133,11 +138,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		return e.complexity.Applicant.FirstName(childComplexity), true
 
 	case "Applicant.id":
-		if e.complexity.Applicant.ID == nil {
+		if e.complexity.Applicant.Id == nil {
 			break
 		}
 
-		return e.complexity.Applicant.ID(childComplexity), true
+		return e.complexity.Applicant.Id(childComplexity), true
 
 	case "Applicant.lastName":
 		if e.complexity.Applicant.LastName == nil {
@@ -147,11 +152,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		return e.complexity.Applicant.LastName(childComplexity), true
 
 	case "Applicant.personId":
-		if e.complexity.Applicant.PersonID == nil {
+		if e.complexity.Applicant.PersonId == nil {
 			break
 		}
 
-		return e.complexity.Applicant.PersonID(childComplexity), true
+		return e.complexity.Applicant.PersonId(childComplexity), true
+
+	case "Applicant.vendor":
+		if e.complexity.Applicant.Vendor == nil {
+			break
+		}
+
+		return e.complexity.Applicant.Vendor(childComplexity), true
 
 	case "Mutation.pingKYCService":
 		if e.complexity.Mutation.PingKYCService == nil {
@@ -175,14 +187,14 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.SubmitLiveVideo(childComplexity, args["id"].(primitive.ObjectID)), true
+		return e.complexity.Mutation.SubmitLiveVideo(childComplexity, args["id"].(string)), true
 
-	case "Query.Playground":
-		if e.complexity.Query.Playground == nil {
+	case "Query.helloWorld":
+		if e.complexity.Query.HelloWorld == nil {
 			break
 		}
 
-		return e.complexity.Query.Playground(childComplexity), true
+		return e.complexity.Query.HelloWorld(childComplexity), true
 
 	case "Result.message":
 		if e.complexity.Result.Message == nil {
@@ -334,7 +346,7 @@ var sources = []*ast.Source{
     ): Result
 }`, BuiltIn: false},
 	{Name: "handlers/schemas/Query.graphql", Input: `type Query {
-    Playground: String
+    helloWorld: Applicant
 }`, BuiltIn: false},
 	{Name: "handlers/schemas/Shared.graphql", Input: `type Result {
     success: Boolean!
@@ -348,6 +360,7 @@ var sources = []*ast.Source{
     dob: String!
     email: String!
     address: address!
+    vendor: String!
 }
 
 type address {
@@ -386,10 +399,10 @@ func (ec *executionContext) field_Mutation_pingKYCService_args(ctx context.Conte
 func (ec *executionContext) field_Mutation_submitLiveVideo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 primitive.ObjectID
+	var arg0 string
 	if tmp, ok := rawArgs["id"]; ok {
 		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("id"))
-		arg0, err = ec.unmarshalNID2goᚗmongodbᚗorgᚋmongoᚑdriverᚋbsonᚋprimitiveᚐObjectID(ctx, tmp)
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -451,7 +464,7 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _Applicant_id(ctx context.Context, field graphql.CollectedField, obj *types.Applicant) (ret graphql.Marshaler) {
+func (ec *executionContext) _Applicant_id(ctx context.Context, field graphql.CollectedField, obj *kycService.Applicant) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -468,7 +481,7 @@ func (ec *executionContext) _Applicant_id(ctx context.Context, field graphql.Col
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
+		return obj.Id, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -480,12 +493,12 @@ func (ec *executionContext) _Applicant_id(ctx context.Context, field graphql.Col
 		}
 		return graphql.Null
 	}
-	res := resTmp.(primitive.ObjectID)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNID2goᚗmongodbᚗorgᚋmongoᚑdriverᚋbsonᚋprimitiveᚐObjectID(ctx, field.Selections, res)
+	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Applicant_personId(ctx context.Context, field graphql.CollectedField, obj *types.Applicant) (ret graphql.Marshaler) {
+func (ec *executionContext) _Applicant_personId(ctx context.Context, field graphql.CollectedField, obj *kycService.Applicant) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -502,7 +515,7 @@ func (ec *executionContext) _Applicant_personId(ctx context.Context, field graph
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.PersonID, nil
+		return obj.PersonId, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -514,12 +527,12 @@ func (ec *executionContext) _Applicant_personId(ctx context.Context, field graph
 		}
 		return graphql.Null
 	}
-	res := resTmp.(primitive.ObjectID)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNID2goᚗmongodbᚗorgᚋmongoᚑdriverᚋbsonᚋprimitiveᚐObjectID(ctx, field.Selections, res)
+	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Applicant_firstName(ctx context.Context, field graphql.CollectedField, obj *types.Applicant) (ret graphql.Marshaler) {
+func (ec *executionContext) _Applicant_firstName(ctx context.Context, field graphql.CollectedField, obj *kycService.Applicant) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -553,7 +566,7 @@ func (ec *executionContext) _Applicant_firstName(ctx context.Context, field grap
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Applicant_lastName(ctx context.Context, field graphql.CollectedField, obj *types.Applicant) (ret graphql.Marshaler) {
+func (ec *executionContext) _Applicant_lastName(ctx context.Context, field graphql.CollectedField, obj *kycService.Applicant) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -587,7 +600,7 @@ func (ec *executionContext) _Applicant_lastName(ctx context.Context, field graph
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Applicant_dob(ctx context.Context, field graphql.CollectedField, obj *types.Applicant) (ret graphql.Marshaler) {
+func (ec *executionContext) _Applicant_dob(ctx context.Context, field graphql.CollectedField, obj *kycService.Applicant) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -621,7 +634,7 @@ func (ec *executionContext) _Applicant_dob(ctx context.Context, field graphql.Co
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Applicant_email(ctx context.Context, field graphql.CollectedField, obj *types.Applicant) (ret graphql.Marshaler) {
+func (ec *executionContext) _Applicant_email(ctx context.Context, field graphql.CollectedField, obj *kycService.Applicant) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -655,7 +668,41 @@ func (ec *executionContext) _Applicant_email(ctx context.Context, field graphql.
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Applicant_address(ctx context.Context, field graphql.CollectedField, obj *types.Applicant) (ret graphql.Marshaler) {
+func (ec *executionContext) _Applicant_address(ctx context.Context, field graphql.CollectedField, obj *kycService.Applicant) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Applicant",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Applicant().Address(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.Address)
+	fc.Result = res
+	return ec.marshalNaddress2ᚖmsᚗapiᚋtypesᚐAddress(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Applicant_vendor(ctx context.Context, field graphql.CollectedField, obj *kycService.Applicant) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -672,7 +719,7 @@ func (ec *executionContext) _Applicant_address(ctx context.Context, field graphq
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Address, nil
+		return obj.Vendor, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -684,9 +731,9 @@ func (ec *executionContext) _Applicant_address(ctx context.Context, field graphq
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*types.Address)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNaddress2ᚖmsᚗapiᚋtypesᚐAddress(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_submitLiveVideo(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -713,7 +760,7 @@ func (ec *executionContext) _Mutation_submitLiveVideo(ctx context.Context, field
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().SubmitLiveVideo(rctx, args["id"].(primitive.ObjectID))
+		return ec.resolvers.Mutation().SubmitLiveVideo(rctx, args["id"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -765,7 +812,7 @@ func (ec *executionContext) _Mutation_pingKYCService(ctx context.Context, field 
 	return ec.marshalOResult2ᚖmsᚗapiᚋtypesᚐResult(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_Playground(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_helloWorld(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -782,7 +829,7 @@ func (ec *executionContext) _Query_Playground(ctx context.Context, field graphql
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Playground(rctx)
+		return ec.resolvers.Query().HelloWorld(rctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -791,9 +838,9 @@ func (ec *executionContext) _Query_Playground(ctx context.Context, field graphql
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(*kycService.Applicant)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalOApplicant2ᚖmsᚗapiᚋservicesᚋkycServiceᚐApplicant(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2304,7 +2351,7 @@ func (ec *executionContext) _address_country(ctx context.Context, field graphql.
 
 var applicantImplementors = []string{"Applicant"}
 
-func (ec *executionContext) _Applicant(ctx context.Context, sel ast.SelectionSet, obj *types.Applicant) graphql.Marshaler {
+func (ec *executionContext) _Applicant(ctx context.Context, sel ast.SelectionSet, obj *kycService.Applicant) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, applicantImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -2316,37 +2363,51 @@ func (ec *executionContext) _Applicant(ctx context.Context, sel ast.SelectionSet
 		case "id":
 			out.Values[i] = ec._Applicant_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "personId":
 			out.Values[i] = ec._Applicant_personId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "firstName":
 			out.Values[i] = ec._Applicant_firstName(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "lastName":
 			out.Values[i] = ec._Applicant_lastName(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "dob":
 			out.Values[i] = ec._Applicant_dob(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "email":
 			out.Values[i] = ec._Applicant_email(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "address":
-			out.Values[i] = ec._Applicant_address(ctx, field, obj)
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Applicant_address(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "vendor":
+			out.Values[i] = ec._Applicant_vendor(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -2404,7 +2465,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
-		case "Playground":
+		case "helloWorld":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -2412,7 +2473,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_Playground(ctx, field)
+				res = ec._Query_helloWorld(ctx, field)
 				return res
 			})
 		case "__type":
@@ -2789,13 +2850,13 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) unmarshalNID2goᚗmongodbᚗorgᚋmongoᚑdriverᚋbsonᚋprimitiveᚐObjectID(ctx context.Context, v interface{}) (primitive.ObjectID, error) {
-	res, err := ObjectID.UnmarshalID(v)
+func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
+	res, err := graphql.UnmarshalID(v)
 	return res, graphql.WrapErrorWithInputPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNID2goᚗmongodbᚗorgᚋmongoᚑdriverᚋbsonᚋprimitiveᚐObjectID(ctx context.Context, sel ast.SelectionSet, v primitive.ObjectID) graphql.Marshaler {
-	res := ObjectID.MarshalID(v)
+func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	res := graphql.MarshalID(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -3048,6 +3109,10 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	return res
 }
 
+func (ec *executionContext) marshalNaddress2msᚗapiᚋtypesᚐAddress(ctx context.Context, sel ast.SelectionSet, v types.Address) graphql.Marshaler {
+	return ec._address(ctx, sel, &v)
+}
+
 func (ec *executionContext) marshalNaddress2ᚖmsᚗapiᚋtypesᚐAddress(ctx context.Context, sel ast.SelectionSet, v *types.Address) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -3056,6 +3121,13 @@ func (ec *executionContext) marshalNaddress2ᚖmsᚗapiᚋtypesᚐAddress(ctx co
 		return graphql.Null
 	}
 	return ec._address(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOApplicant2ᚖmsᚗapiᚋservicesᚋkycServiceᚐApplicant(ctx context.Context, sel ast.SelectionSet, v *kycService.Applicant) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Applicant(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v interface{}) (bool, error) {

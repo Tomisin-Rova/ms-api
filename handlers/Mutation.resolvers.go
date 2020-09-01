@@ -7,12 +7,11 @@ import (
 	"context"
 	"fmt"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"ms.api/handlers/generated"
 	"ms.api/types"
 )
 
-func (r *mutationResolver) SubmitLiveVideo(ctx context.Context, id primitive.ObjectID) (*types.Result, error) {
+func (r *mutationResolver) SubmitLiveVideo(ctx context.Context, id string) (*types.Result, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 

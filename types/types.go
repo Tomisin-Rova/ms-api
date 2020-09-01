@@ -2,20 +2,6 @@
 
 package types
 
-import (
-	"go.mongodb.org/mongo-driver/bson/primitive"
-)
-
-type Applicant struct {
-	ID        primitive.ObjectID `json:"id"`
-	PersonID  primitive.ObjectID `json:"personId"`
-	FirstName string             `json:"firstName"`
-	LastName  string             `json:"lastName"`
-	Dob       string             `json:"dob"`
-	Email     string             `json:"email"`
-	Address   *Address           `json:"address"`
-}
-
 type Result struct {
 	Success bool   `json:"success"`
 	Message string `json:"message"`

@@ -43,8 +43,6 @@ autobind:
 # modelgen, the others will be allowed when binding to fields. Configure them to
 # your liking
 models:
-  ID:
-    model: ms.api/libs/ObjectID.ID
   Int:
     model:
       - github.com/99designs/gqlgen/graphql.Int
@@ -52,3 +50,5 @@ models:
       - github.com/99designs/gqlgen/graphql.Int32
   DateTime:
     model: ms.api/libs/DateTime.DateTime
+  Applicant:
+    model: ms.api/services/kycService.Applicant

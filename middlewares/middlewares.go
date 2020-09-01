@@ -3,12 +3,12 @@ package middlewares
 import (
 	"context"
 	"ms.api/libs/ObjectID"
+	"ms.api/types"
 	"ms.api/utils"
 	"net/http"
 	"strings"
 
 	"ms.api/libs/sessions"
-	"ms.api/models"
 )
 
 const (
@@ -18,15 +18,15 @@ const (
 	Bearer = "BEARER"
 )
 
-func handleSessionByToken(token string) (AuthenticatedUser utils.JSON, result *models.Result) {
+func handleSessionByToken(token string) (AuthenticatedUser utils.JSON, result *types.Result) {
 	AuthenticatedUser = make(utils.JSON)
 
 	session, err := sessions.GetSessionByToken(token)
 	if err != nil {
-		result := &models.Result{}
+		result := &types.Result{}
 		result.Success = false
 		result.Message = "Sorry, your session has expired, Please login to continue. "
-		//result.ReturnStatus = models.ReturnStatusTokenExpired
+		//result.ReturnStatus = types.ReturnStatusTokenExpired
 		return nil, result
 	}
 
@@ -34,14 +34,14 @@ func handleSessionByToken(token string) (AuthenticatedUser utils.JSON, result *m
 	// TODO: Come here and apply an actual session thing for the connected client to carry out any sensitive business.
 	//switch accountType.String() {
 
-	//case models.AccountTypesAdministrator.String():
-	//	AuthenticatedUser[models.AccountTypesAdministrator.String()], _ = Administrators.ViewAdmin(_id)
+	//case types.AccountTypesAdministrator.String():
+	//	AuthenticatedUser[types.AccountTypesAdministrator.String()], _ = Administrators.ViewAdmin(_id)
 	//	break
-	//case models.AccountTypesScheduler.String():
-	//	AuthenticatedUser[models.AccountTypesScheduler.String()], _ = Schedulers.ViewScheduler(_id)
+	//case types.AccountTypesScheduler.String():
+	//	AuthenticatedUser[types.AccountTypesScheduler.String()], _ = Schedulers.ViewScheduler(_id)
 	//	break
-	//case models.AccountTypesSigner.String():
-	//	AuthenticatedUser[models.AccountTypesSigner.String()], _ = Signers.ViewSigner(_id)
+	//case types.AccountTypesSigner.String():
+	//	AuthenticatedUser[types.AccountTypesSigner.String()], _ = Signers.ViewSigner(_id)
 	//	break
 	//}
 	//_ = sessions.ExtendSession(token)

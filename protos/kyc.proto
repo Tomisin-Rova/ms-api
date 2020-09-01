@@ -10,7 +10,10 @@ service KycService {
   rpc listApplicants(listApplicantsRequest) returns(applicantsList){}
   rpc getApplicantById(getApplicantByIdRequest) returns(applicant) {}
   rpc getApplicantByPersonId(getApplicantByPersonIdRequest) returns(applicant) {}
+  rpc helloWorld(void) returns(applicant){}
 }
+
+message void {}
 
 message address {
   string flat_number = 1;

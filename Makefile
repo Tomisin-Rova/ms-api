@@ -5,7 +5,7 @@ proto :
 	./scripts/mage -d ./scripts genProto
 
 .PHONY: schema
-schema:
+schema: proto
 	./scripts/mage -d ./scripts genSchema
 
 .PHONY: build
