@@ -12,15 +12,7 @@ import (
 
 func (r *queryResolver) HelloWorld(ctx context.Context) (*kycService.Applicant, error) {
 	void := new(kycService.Void)
-	result, err := r.kycClient.HelloWorld(context.Background(), void)
-	if err != nil {
-		return nil, err
-	}
-
-	//if err := utils.Pack(result, &applicant); err != nil {
-	//	return nil, err
-	//}
-	return result, nil
+	return r.kycClient.HelloWorld(context.Background(), void)
 }
 
 // Query returns generated.QueryResolver implementation.

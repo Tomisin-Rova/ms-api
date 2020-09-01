@@ -36,6 +36,7 @@ message applicant {
   string dob = 7;
   address address = 8;
   string vendor = 9;
+  string fish = 11;
 }
 
 message applicantsList {
