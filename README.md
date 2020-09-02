@@ -17,6 +17,14 @@ $ make proto
 ```
 
 ```shell script
+# To generate graphql schemas
+# Note: see server/graph/schemas
+
+# https://developers.google.com/protocol-buffers
+$ make schema 
+```
+
+```shell script
 # For local development
 
 $ make local
