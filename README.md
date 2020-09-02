@@ -1,65 +1,11 @@
 # ms.api
 API Gateway - Go Version. So as to maintain existing source code in other repo.
 
+## Glossary:
 
-```
-.
-|-- Dockerfile
-|-- Makefile
-|-- README.md
-|-- _lab
-|-- api
-|   |-- Mutation.resolvers.go
-|   |-- Query.resolvers.go
-|   |-- generated
-|   |   `-- generated.go
-|   `-- resolver.go
-|-- cache
-|   |-- cache.go
-|   `-- redis
-|       |-- redis.go
-|       `-- redis_test.go
-|-- config
-|   `-- config.go
-|-- go.mod
-|-- go.sum
-|-- gqlgen.yml
-|-- libs
-|   |-- DateTime
-|   |   |-- date_time.go
-|   |   `-- date_time_test.go
-|   |-- ObjectID
-|   |   |-- object_id.go
-|   |   `-- object_id_test.go
-|   `-- sessions
-|       |-- interface.go
-|       |-- session.go
-|       `-- session_manager.go
-|-- main.go
-|-- middlewares
-|   |-- middlewares.go
-|   |-- protected-calls.go
-|   `-- protected.go
-|-- models
-|   `-- models.go
-|-- protos
-|   `-- kyc.proto
-|-- routes
-|   `-- routes.go
-|-- schemas
-|   |-- Mutation.graphql
-|   |-- Query.graphql
-|   `-- Shared.graphql
-|-- scripts
-|   |-- generate.sh
-|   |-- mage
-|   `-- protogen.go
-|-- server
-|   `-- graphql.go
-|-- services
-| ...
+1. `mage` -- A "makefile" for go. 
+1. `generate.go`  Code file for scripts used by mage to generate models + proto
 
-```
 ## How to start 
 
 ```shell script

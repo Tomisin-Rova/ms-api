@@ -2,19 +2,11 @@
 
 package types
 
+type Address struct {
+	Street *string `json:"street"`
+}
+
 type Result struct {
 	Success bool   `json:"success"`
 	Message string `json:"message"`
-}
-
-type Address struct {
-	FlatNumber     string `json:"flatNumber"`
-	BuildingNumber string `json:"buildingNumber"`
-	BuildingName   string `json:"buildingName"`
-	Street         string `json:"street"`
-	SubStreet      string `json:"subStreet"`
-	Town           string `json:"town"`
-	State          string `json:"state"`
-	PostCode       string `json:"postCode"`
-	Country        string `json:"country"`
 }

@@ -2,11 +2,11 @@ GOPATH:=$(shell go env GOPATH)
 
 .PHONY: proto
 proto :
-	./scripts/mage -d ./scripts genProto
+	./libs/mage genProto
 
 .PHONY: schema
 schema: proto
-	./scripts/mage -d ./scripts genSchema
+	./libs/mage genSchema
 
 .PHONY: build
 build: proto

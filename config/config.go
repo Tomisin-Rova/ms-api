@@ -6,19 +6,18 @@ import (
 	"github.com/hashicorp/vault/api"
 	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
+	"ms.api/log"
 	"ms.api/utils"
 	"os"
 	"sync"
 )
 
-var _ = godotenv.Load()
-
 const (
 	ServiceName = "kyc"
 	Domain      = "io.roava"
-	Local       = "local"
-	Production  = "production"
 )
+
+var _ = godotenv.Load()
 
 type Secrets struct {
 	KYCServiceURL    string
@@ -28,7 +27,7 @@ type Secrets struct {
 	JWTSecrets       string        `json:"jwt_secrets"`
 	PulsarURL        string        `json:"pulsar_url"`
 	Port             string        `json:"port"`
-	Environment      string        `json:"environment"`
+	Environment      Environment   `json:"environment"`
 	RedisURL         string        `json:"redis_url"`
 	RedisPassword    string        `json:"redis_password"`
 	RedisClient      *redis.Client `json:"redis_client"`
@@ -54,14 +53,14 @@ func init() {
 	secrets.RedisURL = os.Getenv("REDIS_URL")
 	secrets.RedisPassword = os.Getenv("REDIS_PASSWORD")
 	secrets.JWTSecrets = os.Getenv("JWT_SECRETS")
-	secrets.Environment = os.Getenv("ENVIRONMENT")
+	secrets.Environment = Environment(os.Getenv("ENVIRONMENT"))
 	secrets.VaultAddress = os.Getenv("VAULT_ADDRESS")
 	secrets.VaultToken = os.Getenv("VAULT_TOKEN")
 	secrets.VaultSecretsPath = os.Getenv("VAULT_SECRETS_PATH")
 	secrets.KYCServiceURL = os.Getenv("KYC_SERVICE")
-	secrets.wg.Add(1)
-	go secrets.connectRedis()
-	secrets.wg.Wait()
+	if err := secrets.Environment.IsValid(); err != nil {
+		log.Error("Error in environment variables: %v", err)
+	}
 }
 
 // Get Secrets is used to get value from the Secrets runtime.
@@ -92,16 +91,6 @@ func WatchSecrets() {
 	//go secrets.connectEventStore()
 	secrets.wg.Wait()
 }
-
-//func (s *Secrets) connectEventStore() {
-//	defer s.wg.Done()
-//	p, err := pulsar.NewClient(pulsar.ClientOptions{URL: s.PulsarURL})
-//	if err != nil {
-//		log.Fatal("Unable to connect with Pulsar secrets. Failed with error: ", err)
-//		return
-//	}
-//	s.EventStore = &p
-//}
 
 func (s *Secrets) connectRedis() {
 	defer s.wg.Done()

@@ -2,7 +2,7 @@ package sessions
 
 import (
 	"errors"
-	redisConnector "ms.api/cache/redis"
+	redisConnector "ms.api/libs/cache/redis"
 	"strings"
 
 	"ms.api/config"
