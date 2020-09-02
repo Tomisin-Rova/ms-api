@@ -18,9 +18,7 @@ $ make proto
 
 ```shell script
 # To generate graphql schemas
-# Note: see server/graph/schemas
-
-# https://developers.google.com/protocol-buffers
+# Note: see server/graph/schemas and also ./gqlgen.yml
 $ make schema 
 ```
 
