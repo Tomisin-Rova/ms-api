@@ -22,6 +22,7 @@ var _ = godotenv.Load()
 type Secrets struct {
 	OnfidoServiceURL    string
 	KYCServiceURL    string
+	OnboardingServiceURL    string
 	VaultAddress     string        `json:"vault_address"`
 	VaultToken       string        `json:"vault_token"`
 	VaultSecretsPath string        `json:"vault_secrets_path"`
@@ -60,6 +61,7 @@ func init() {
 	secrets.VaultSecretsPath = os.Getenv("VAULT_SECRETS_PATH")
 	secrets.OnfidoServiceURL = os.Getenv("ONFIDO_SERVICE")
 	secrets.KYCServiceURL = os.Getenv("KYC_SERVICE")
+	secrets.OnboardingServiceURL = os.Getenv("ONBOARDING_SERVICE")
 	if err := secrets.Environment.IsValid(); err != nil {
 		log.Error("Error in environment variables: %v", err)
 	}

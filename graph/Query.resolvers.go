@@ -5,9 +5,9 @@ package graph
 
 import (
 	"context"
-	"ms.api/protos/pb/kycService"
 
 	"ms.api/graph/generated"
+	"ms.api/protos/pb/kycService"
 	"ms.api/protos/pb/onfidoService"
 )
 

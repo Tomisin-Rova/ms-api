@@ -2,4 +2,8 @@ type Mutation {
     submitKYCApplication(
         applicantId: String!
     ): Result
+    CreatePasscode(
+        userId: String!,
+        passcode: String!
+    ): Result
 }

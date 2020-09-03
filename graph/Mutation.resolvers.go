@@ -8,6 +8,7 @@ import (
 
 	"ms.api/graph/generated"
 	"ms.api/protos/pb/kycService"
+	"ms.api/protos/pb/onboardingService"
 	"ms.api/types"
 )
 
@@ -22,6 +23,21 @@ func (r *mutationResolver) SubmitKYCApplication(ctx context.Context, applicantID
 	}
 	return &types.Result{
 		Success: res.Success,
+		Message: res.Message,
+	}, nil
+}
+
+func (r *mutationResolver) CreatePasscode(ctx context.Context, userID string, passcode string) (*types.Result, error) {
+	payload := onboardingService.CreatePasscodeRequest{
+		PersonId: userID,
+		Passcode: passcode,
+	}
+	res, err := r.onboardingClient.CreatePasscode(context.Background(), &payload)
+	if err != nil {
+		return nil, err
+	}
+	return &types.Result{
+		Success: true,
 		Message: res.Message,
 	}, nil
 }
