@@ -6,14 +6,35 @@ import (
 	"google.golang.org/grpc"
 	"ms.api/config"
 	"ms.api/protos/pb/kycService"
+	onboarding "ms.api/protos/pb/onboardingService"
+	verify "ms.api/protos/pb/verifyService"
 )
 
 // This file will not be regenerated automatically.
 //
 // It serves as dependency injection for your app, add any dependencies you require here.
 
+type ResolverOpts struct {
+	kycClient kycService.KycServiceClient
+	OnBoardingService onboarding.OnBoardingServiceClient
+	VerifyService verify.VerifyServiceClient
+	Logger *logrus.Logger
+}
+
 type Resolver struct {
 	kycClient kycService.KycServiceClient
+	onBoardingService onboarding.OnBoardingServiceClient
+	verifyService verify.VerifyServiceClient
+	logger *logrus.Logger
+}
+
+func NewResolver(opt ResolverOpts) *Resolver {
+	return &Resolver{
+		kycClient: opt.kycClient,
+		onBoardingService: opt.OnBoardingService,
+		verifyService: opt.VerifyService,
+		logger: opt.Logger,
+	}
 }
 
 func (r *Resolver) ConnectServiceDependencies() {

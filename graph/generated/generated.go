@@ -55,8 +55,10 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
+		CreatePhone     func(childComplexity int, input types.CreatePhoneInput) int
 		PingKYCService  func(childComplexity int, message string) int
 		SubmitLiveVideo func(childComplexity int, id string) int
+		VerifyOtp       func(childComplexity int, phone string, code string) int
 	}
 
 	Query struct {
@@ -75,6 +77,8 @@ type ApplicantResolver interface {
 type MutationResolver interface {
 	SubmitLiveVideo(ctx context.Context, id string) (*types.Result, error)
 	PingKYCService(ctx context.Context, message string) (*types.Result, error)
+	CreatePhone(ctx context.Context, input types.CreatePhoneInput) (*types.Result, error)
+	VerifyOtp(ctx context.Context, phone string, code string) (*types.Result, error)
 }
 type QueryResolver interface {
 	HelloWorld(ctx context.Context) (*kycService.Applicant, error)
@@ -116,6 +120,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Applicant.Fish(childComplexity), true
 
+	case "Mutation.createPhone":
+		if e.complexity.Mutation.CreatePhone == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createPhone_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreatePhone(childComplexity, args["input"].(types.CreatePhoneInput)), true
+
 	case "Mutation.pingKYCService":
 		if e.complexity.Mutation.PingKYCService == nil {
 			break
@@ -139,6 +155,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.SubmitLiveVideo(childComplexity, args["id"].(string)), true
+
+	case "Mutation.verifyOtp":
+		if e.complexity.Mutation.VerifyOtp == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_verifyOtp_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.VerifyOtp(childComplexity, args["phone"].(string), args["code"].(string)), true
 
 	case "Query.helloWorld":
 		if e.complexity.Query.HelloWorld == nil {
@@ -225,21 +253,6 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "graph/schemas/Mutation.graphql", Input: `type Mutation {
-    submitLiveVideo(
-        id: ID!
-    ): Result
-    pingKYCService(
-        message: String!
-    ): Result
-}`, BuiltIn: false},
-	{Name: "graph/schemas/Query.graphql", Input: `type Query {
-    helloWorld: Applicant
-}`, BuiltIn: false},
-	{Name: "graph/schemas/Shared.graphql", Input: `type Result {
-    success: Boolean!
-    message: String!
-}`, BuiltIn: false},
 	{Name: "graph/schemas/kyc.graphql", Input: `type Applicant {
     Fish: String!
     Address: Address
@@ -248,12 +261,57 @@ var sources = []*ast.Source{
 type Address {
     street: String
 }`, BuiltIn: false},
+	{Name: "graph/schemas/mutation.graphql", Input: `type Mutation {
+    submitLiveVideo(
+        id: ID!
+    ): Result
+    pingKYCService(
+        message: String!
+    ): Result
+    createPhone(input: CreatePhoneInput!): Result
+    verifyOtp(phone: String!, code: String!): Result
+}
+`, BuiltIn: false},
+	{Name: "graph/schemas/onboarding.graphql", Input: `input CreatePhoneInput {
+    phone: String!
+    device: Device!
+}
+
+input Device {
+    os: String!
+    brand: String!
+    deviceId: String!
+    deviceToken: String!
+}
+`, BuiltIn: false},
+	{Name: "graph/schemas/query.graphql", Input: `type Query {
+    helloWorld: Applicant
+}`, BuiltIn: false},
+	{Name: "graph/schemas/shared.graphql", Input: `type Result {
+    success: Boolean!
+    message: String!
+}`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Mutation_createPhone_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 types.CreatePhoneInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("input"))
+		arg0, err = ec.unmarshalNCreatePhoneInput2msᚗapiᚋtypesᚐCreatePhoneInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
 
 func (ec *executionContext) field_Mutation_pingKYCService_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -282,6 +340,30 @@ func (ec *executionContext) field_Mutation_submitLiveVideo_args(ctx context.Cont
 		}
 	}
 	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_verifyOtp_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["phone"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("phone"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["phone"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["code"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("code"))
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["code"] = arg1
 	return args, nil
 }
 
@@ -497,6 +579,82 @@ func (ec *executionContext) _Mutation_pingKYCService(ctx context.Context, field 
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().PingKYCService(rctx, args["message"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*types.Result)
+	fc.Result = res
+	return ec.marshalOResult2ᚖmsᚗapiᚋtypesᚐResult(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_createPhone(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createPhone_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreatePhone(rctx, args["input"].(types.CreatePhoneInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*types.Result)
+	fc.Result = res
+	return ec.marshalOResult2ᚖmsᚗapiᚋtypesᚐResult(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_verifyOtp(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_verifyOtp_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().VerifyOtp(rctx, args["phone"].(string), args["code"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1733,6 +1891,78 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputCreatePhoneInput(ctx context.Context, obj interface{}) (types.CreatePhoneInput, error) {
+	var it types.CreatePhoneInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "phone":
+			var err error
+
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("phone"))
+			it.Phone, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "device":
+			var err error
+
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("device"))
+			it.Device, err = ec.unmarshalNDevice2ᚖmsᚗapiᚋtypesᚐDevice(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputDevice(ctx context.Context, obj interface{}) (types.Device, error) {
+	var it types.Device
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "os":
+			var err error
+
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("os"))
+			it.Os, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "brand":
+			var err error
+
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("brand"))
+			it.Brand, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "deviceId":
+			var err error
+
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("deviceId"))
+			it.DeviceID, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "deviceToken":
+			var err error
+
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("deviceToken"))
+			it.DeviceToken, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -1822,6 +2052,10 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec._Mutation_submitLiveVideo(ctx, field)
 		case "pingKYCService":
 			out.Values[i] = ec._Mutation_pingKYCService(ctx, field)
+		case "createPhone":
+			out.Values[i] = ec._Mutation_createPhone(ctx, field)
+		case "verifyOtp":
+			out.Values[i] = ec._Mutation_verifyOtp(ctx, field)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2164,6 +2398,16 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNCreatePhoneInput2msᚗapiᚋtypesᚐCreatePhoneInput(ctx context.Context, v interface{}) (types.CreatePhoneInput, error) {
+	res, err := ec.unmarshalInputCreatePhoneInput(ctx, v)
+	return res, graphql.WrapErrorWithInputPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNDevice2ᚖmsᚗapiᚋtypesᚐDevice(ctx context.Context, v interface{}) (*types.Device, error) {
+	res, err := ec.unmarshalInputDevice(ctx, v)
+	return &res, graphql.WrapErrorWithInputPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {

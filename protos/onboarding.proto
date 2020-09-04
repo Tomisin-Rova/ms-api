@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package onboarding;
+
+message CreatePhoneRequest {
+    string phoneNumber = 1;
+    Device device = 2;
+}
+
+message Device {
+    string os = 1;
+    string brand = 2;
+    string deviceToken = 3;
+    string deviceId = 4;
+}
+
+message SuccessResponse {
+    string message = 1;
+}
+
+message CreatePasscodeRequest {
+    string personId = 1;
+    string passcode = 2;
+}
+
+message CreateEmailRequest {
+    string name = 1;
+    string value = 2;
+    bool primary =3;
+    bool verified =4;
+}
+
+service OnBoardingService {
+    rpc CreatePhone(CreatePhoneRequest) returns (SuccessResponse) {}
+    rpc CreateEmail(CreateEmailRequest) returns (SuccessResponse) {}
+    rpc CreatePasscode(CreatePasscodeRequest) returns (SuccessResponse) {}
+}

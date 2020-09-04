@@ -13,6 +13,7 @@ require (
 	github.com/kr/pretty v0.2.1 // indirect
 	github.com/rs/cors v1.6.0
 	github.com/sirupsen/logrus v1.4.2
+	github.com/stretchr/testify v1.4.0
 	github.com/vektah/gqlparser/v2 v2.0.1
 	go.mongodb.org/mongo-driver v1.4.0 // indirect
 	golang.org/x/net v0.0.0-20200602114024-627f9648deb9 // indirect
