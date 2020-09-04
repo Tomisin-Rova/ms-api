@@ -2,10 +2,6 @@
 
 package types
 
-type Address struct {
-	Street *string `json:"street"`
-}
-
 type Result struct {
 	Success bool   `json:"success"`
 	Message string `json:"message"`

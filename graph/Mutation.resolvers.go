@@ -5,18 +5,25 @@ package graph
 
 import (
 	"context"
-	"fmt"
 
 	"ms.api/graph/generated"
+	"ms.api/protos/pb/kycService"
 	"ms.api/types"
 )
 
-func (r *mutationResolver) SubmitLiveVideo(ctx context.Context, id string) (*types.Result, error) {
-	panic(fmt.Errorf("not implemented"))
-}
+func (r *mutationResolver) SubmitKYCApplication(ctx context.Context, applicantID string) (*types.Result, error) {
+	payload := kycService.ApplicationRequest{
+		ApplicantId: applicantID,
+	}
 
-func (r *mutationResolver) PingKYCService(ctx context.Context, message string) (*types.Result, error) {
-	panic(fmt.Errorf("not implemented"))
+	res, err := r.kycClient.SubmitKYCApplication(ctx, &payload)
+	if err != nil {
+		return nil, err
+	}
+	return &types.Result{
+		Success: res.Success,
+		Message: res.Message,
+	}, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

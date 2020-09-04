@@ -1,8 +1,0 @@
-type Applicant {
-    Fish: String!
-    Address: Address
-}
-
-type Address {
-    street: String
-}
