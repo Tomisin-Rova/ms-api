@@ -6,18 +6,6 @@ type Address struct {
 	Street *string `json:"street"`
 }
 
-type CreatePhoneInput struct {
-	Phone  string  `json:"phone"`
-	Device *Device `json:"device"`
-}
-
-type Device struct {
-	Os          string `json:"os"`
-	Brand       string `json:"brand"`
-	DeviceID    string `json:"deviceId"`
-	DeviceToken string `json:"deviceToken"`
-}
-
 type Result struct {
 	Success bool   `json:"success"`
 	Message string `json:"message"`
