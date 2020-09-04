@@ -5,6 +5,4 @@ type Mutation {
     pingKYCService(
         message: String!
     ): Result
-    createPhone(input: CreatePhoneInput!): Result
-    verifyOtp(phone: String!, code: String!): Result
 }

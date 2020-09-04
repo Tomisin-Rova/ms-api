@@ -64,7 +64,7 @@ func GenerateToken(id string) (string, error) {
 			JWTID:    "RoavaGunjigalis",
 		},
 		//Client: client,
-		Id: id}
+		Id:     id}
 
 	token, err := jwt.Sign(payload, secret)
 	if err != nil {
