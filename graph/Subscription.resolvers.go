@@ -21,25 +21,26 @@ func (r *subscriptionResolver) GetKYCApplicationResult(ctx context.Context, appl
 		return nil, err
 	}
 
-	for {
-		check, err := response.Recv()
-		fmt.Print(check)
-		if err != nil {
-			return nil, err
+	ch := make(chan *types.Result)
+	go func(response kycService.KycService_GetKYCCheckStatusClient, ch chan *types.Result) {
+		for {
+			check, err := response.Recv()
+			fmt.Print(check)
+			if err != nil {
+				return
+			}
+
+			if check != nil {
+				var result types.Result
+
+				result.Success = check.Success
+				result.Message = check.Message
+
+				ch <- &result
+			}
 		}
-
-		if check != nil {
-			var result types.Result
-
-			ch := make(chan *types.Result)
-
-			result.Success = check.Success
-			result.Message = check.Message
-
-			ch <- &result
-			resultChan = ch
-		}
-	}
+	}(response, ch)
+	return ch, nil
 }
 
 // Subscription returns generated.SubscriptionResolver implementation.
