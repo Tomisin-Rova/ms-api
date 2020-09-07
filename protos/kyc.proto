@@ -3,17 +3,23 @@ package kyc;
 option go_package = ".;kycService";
 
 service KycService {
-  rpc submitLiveVideo(liveVideoRequest) returns(serviceResponse) {}
-  rpc submitLivePhoto(livePhotoRequest) returns(serviceResponse){}
-  rpc submitDocument(documentRequest) returns(serviceResponse){}
-  rpc handleKYCVendorResults(vendorResultsRequest) returns(serviceResponse){}
-  rpc listApplicants(listApplicantsRequest) returns(applicantsList){}
-  rpc getApplicantById(getApplicantByIdRequest) returns(applicant) {}
-  rpc getApplicantByPersonId(getApplicantByPersonIdRequest) returns(applicant) {}
-  rpc helloWorld(void) returns(applicant){}
+  rpc submitKYCApplication(applicationRequest) returns(applicationResult){}
+  rpc getKYCCheckStatus(applicationRequest) returns(stream applicationResult){}
 }
 
-message void {}
+message applicationRequest{
+  string applicantId = 1;
+}
+
+message kycCheckStatus {
+
+}
+
+message applicationResult {
+  bool success = 1;
+  string message = 2;
+  string applicantId = 3;
+}
 
 message address {
   string flat_number = 1;
@@ -36,7 +42,6 @@ message applicant {
   string dob = 7;
   address address = 8;
   string vendor = 9;
-  string fish = 11;
 }
 
 message applicantsList {
@@ -44,44 +49,7 @@ message applicantsList {
   repeated applicant applicants = 2;
 }
 
-message liveVideoRequest {
-  string personId = 1;
-  bytes video = 2;
-}
-
-message livePhotoRequest {
-  string personId = 1;
-  string kind = 2;
-  string title = 3;
-  bytes content = 4;
-}
-
-message documentRequest {
-  string personId = 1;
-  string kind = 2;
-  string title = 3;
-  bytes content = 4;
-}
-
 message serviceResponse {
   bool success = 1;
   string message = 2;
-}
-
-message vendorResultsRequest {
-  //  string
-}
-
-message listApplicantsRequest {
-  map<string, string> filters = 1;
-  int64 limit = 2;
-  int64 offset = 3;
-}
-
-message getApplicantByIdRequest {
-  string id = 1;
-}
-
-message getApplicantByPersonIdRequest {
-  string personId = 1;
 }

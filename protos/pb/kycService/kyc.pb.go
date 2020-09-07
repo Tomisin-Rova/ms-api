@@ -29,14 +29,16 @@ const (
 // of the legacy proto package is being used.
 const _ = proto.ProtoPackageIsVersion4
 
-type Void struct {
+type ApplicationRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
+
+	ApplicantId string `protobuf:"bytes,1,opt,name=applicantId,proto3" json:"applicantId,omitempty"`
 }
 
-func (x *Void) Reset() {
-	*x = Void{}
+func (x *ApplicationRequest) Reset() {
+	*x = ApplicationRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_kyc_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -44,13 +46,13 @@ func (x *Void) Reset() {
 	}
 }
 
-func (x *Void) String() string {
+func (x *ApplicationRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Void) ProtoMessage() {}
+func (*ApplicationRequest) ProtoMessage() {}
 
-func (x *Void) ProtoReflect() protoreflect.Message {
+func (x *ApplicationRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_kyc_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -62,9 +64,117 @@ func (x *Void) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Void.ProtoReflect.Descriptor instead.
-func (*Void) Descriptor() ([]byte, []int) {
+// Deprecated: Use ApplicationRequest.ProtoReflect.Descriptor instead.
+func (*ApplicationRequest) Descriptor() ([]byte, []int) {
 	return file_kyc_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *ApplicationRequest) GetApplicantId() string {
+	if x != nil {
+		return x.ApplicantId
+	}
+	return ""
+}
+
+type KycCheckStatus struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *KycCheckStatus) Reset() {
+	*x = KycCheckStatus{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_kyc_proto_msgTypes[1]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *KycCheckStatus) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*KycCheckStatus) ProtoMessage() {}
+
+func (x *KycCheckStatus) ProtoReflect() protoreflect.Message {
+	mi := &file_kyc_proto_msgTypes[1]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use KycCheckStatus.ProtoReflect.Descriptor instead.
+func (*KycCheckStatus) Descriptor() ([]byte, []int) {
+	return file_kyc_proto_rawDescGZIP(), []int{1}
+}
+
+type ApplicationResult struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Success     bool   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message     string `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	ApplicantId string `protobuf:"bytes,3,opt,name=applicantId,proto3" json:"applicantId,omitempty"`
+}
+
+func (x *ApplicationResult) Reset() {
+	*x = ApplicationResult{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_kyc_proto_msgTypes[2]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ApplicationResult) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ApplicationResult) ProtoMessage() {}
+
+func (x *ApplicationResult) ProtoReflect() protoreflect.Message {
+	mi := &file_kyc_proto_msgTypes[2]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ApplicationResult.ProtoReflect.Descriptor instead.
+func (*ApplicationResult) Descriptor() ([]byte, []int) {
+	return file_kyc_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *ApplicationResult) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *ApplicationResult) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *ApplicationResult) GetApplicantId() string {
+	if x != nil {
+		return x.ApplicantId
+	}
+	return ""
 }
 
 type Address struct {
@@ -86,7 +196,7 @@ type Address struct {
 func (x *Address) Reset() {
 	*x = Address{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_kyc_proto_msgTypes[1]
+		mi := &file_kyc_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -99,7 +209,7 @@ func (x *Address) String() string {
 func (*Address) ProtoMessage() {}
 
 func (x *Address) ProtoReflect() protoreflect.Message {
-	mi := &file_kyc_proto_msgTypes[1]
+	mi := &file_kyc_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -112,7 +222,7 @@ func (x *Address) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Address.ProtoReflect.Descriptor instead.
 func (*Address) Descriptor() ([]byte, []int) {
-	return file_kyc_proto_rawDescGZIP(), []int{1}
+	return file_kyc_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *Address) GetFlatNumber() string {
@@ -191,13 +301,12 @@ type Applicant struct {
 	Dob       string   `protobuf:"bytes,7,opt,name=dob,proto3" json:"dob,omitempty"`
 	Address   *Address `protobuf:"bytes,8,opt,name=address,proto3" json:"address,omitempty"`
 	Vendor    string   `protobuf:"bytes,9,opt,name=vendor,proto3" json:"vendor,omitempty"`
-	Fish      string   `protobuf:"bytes,11,opt,name=fish,proto3" json:"fish,omitempty"`
 }
 
 func (x *Applicant) Reset() {
 	*x = Applicant{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_kyc_proto_msgTypes[2]
+		mi := &file_kyc_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -210,7 +319,7 @@ func (x *Applicant) String() string {
 func (*Applicant) ProtoMessage() {}
 
 func (x *Applicant) ProtoReflect() protoreflect.Message {
-	mi := &file_kyc_proto_msgTypes[2]
+	mi := &file_kyc_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -223,7 +332,7 @@ func (x *Applicant) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Applicant.ProtoReflect.Descriptor instead.
 func (*Applicant) Descriptor() ([]byte, []int) {
-	return file_kyc_proto_rawDescGZIP(), []int{2}
+	return file_kyc_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *Applicant) GetId() string {
@@ -282,13 +391,6 @@ func (x *Applicant) GetVendor() string {
 	return ""
 }
 
-func (x *Applicant) GetFish() string {
-	if x != nil {
-		return x.Fish
-	}
-	return ""
-}
-
 type ApplicantsList struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -301,7 +403,7 @@ type ApplicantsList struct {
 func (x *ApplicantsList) Reset() {
 	*x = ApplicantsList{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_kyc_proto_msgTypes[3]
+		mi := &file_kyc_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -314,7 +416,7 @@ func (x *ApplicantsList) String() string {
 func (*ApplicantsList) ProtoMessage() {}
 
 func (x *ApplicantsList) ProtoReflect() protoreflect.Message {
-	mi := &file_kyc_proto_msgTypes[3]
+	mi := &file_kyc_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -327,7 +429,7 @@ func (x *ApplicantsList) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ApplicantsList.ProtoReflect.Descriptor instead.
 func (*ApplicantsList) Descriptor() ([]byte, []int) {
-	return file_kyc_proto_rawDescGZIP(), []int{3}
+	return file_kyc_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *ApplicantsList) GetCount() int64 {
@@ -344,203 +446,6 @@ func (x *ApplicantsList) GetApplicants() []*Applicant {
 	return nil
 }
 
-type LiveVideoRequest struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	PersonId string `protobuf:"bytes,1,opt,name=personId,proto3" json:"personId,omitempty"`
-	Video    []byte `protobuf:"bytes,2,opt,name=video,proto3" json:"video,omitempty"`
-}
-
-func (x *LiveVideoRequest) Reset() {
-	*x = LiveVideoRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_kyc_proto_msgTypes[4]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *LiveVideoRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*LiveVideoRequest) ProtoMessage() {}
-
-func (x *LiveVideoRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_kyc_proto_msgTypes[4]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use LiveVideoRequest.ProtoReflect.Descriptor instead.
-func (*LiveVideoRequest) Descriptor() ([]byte, []int) {
-	return file_kyc_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *LiveVideoRequest) GetPersonId() string {
-	if x != nil {
-		return x.PersonId
-	}
-	return ""
-}
-
-func (x *LiveVideoRequest) GetVideo() []byte {
-	if x != nil {
-		return x.Video
-	}
-	return nil
-}
-
-type LivePhotoRequest struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	PersonId string `protobuf:"bytes,1,opt,name=personId,proto3" json:"personId,omitempty"`
-	Kind     string `protobuf:"bytes,2,opt,name=kind,proto3" json:"kind,omitempty"`
-	Title    string `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`
-	Content  []byte `protobuf:"bytes,4,opt,name=content,proto3" json:"content,omitempty"`
-}
-
-func (x *LivePhotoRequest) Reset() {
-	*x = LivePhotoRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_kyc_proto_msgTypes[5]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *LivePhotoRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*LivePhotoRequest) ProtoMessage() {}
-
-func (x *LivePhotoRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_kyc_proto_msgTypes[5]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use LivePhotoRequest.ProtoReflect.Descriptor instead.
-func (*LivePhotoRequest) Descriptor() ([]byte, []int) {
-	return file_kyc_proto_rawDescGZIP(), []int{5}
-}
-
-func (x *LivePhotoRequest) GetPersonId() string {
-	if x != nil {
-		return x.PersonId
-	}
-	return ""
-}
-
-func (x *LivePhotoRequest) GetKind() string {
-	if x != nil {
-		return x.Kind
-	}
-	return ""
-}
-
-func (x *LivePhotoRequest) GetTitle() string {
-	if x != nil {
-		return x.Title
-	}
-	return ""
-}
-
-func (x *LivePhotoRequest) GetContent() []byte {
-	if x != nil {
-		return x.Content
-	}
-	return nil
-}
-
-type DocumentRequest struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	PersonId string `protobuf:"bytes,1,opt,name=personId,proto3" json:"personId,omitempty"`
-	Kind     string `protobuf:"bytes,2,opt,name=kind,proto3" json:"kind,omitempty"`
-	Title    string `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`
-	Content  []byte `protobuf:"bytes,4,opt,name=content,proto3" json:"content,omitempty"`
-}
-
-func (x *DocumentRequest) Reset() {
-	*x = DocumentRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_kyc_proto_msgTypes[6]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *DocumentRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*DocumentRequest) ProtoMessage() {}
-
-func (x *DocumentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_kyc_proto_msgTypes[6]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use DocumentRequest.ProtoReflect.Descriptor instead.
-func (*DocumentRequest) Descriptor() ([]byte, []int) {
-	return file_kyc_proto_rawDescGZIP(), []int{6}
-}
-
-func (x *DocumentRequest) GetPersonId() string {
-	if x != nil {
-		return x.PersonId
-	}
-	return ""
-}
-
-func (x *DocumentRequest) GetKind() string {
-	if x != nil {
-		return x.Kind
-	}
-	return ""
-}
-
-func (x *DocumentRequest) GetTitle() string {
-	if x != nil {
-		return x.Title
-	}
-	return ""
-}
-
-func (x *DocumentRequest) GetContent() []byte {
-	if x != nil {
-		return x.Content
-	}
-	return nil
-}
-
 type ServiceResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -553,7 +458,7 @@ type ServiceResponse struct {
 func (x *ServiceResponse) Reset() {
 	*x = ServiceResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_kyc_proto_msgTypes[7]
+		mi := &file_kyc_proto_msgTypes[6]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -566,7 +471,7 @@ func (x *ServiceResponse) String() string {
 func (*ServiceResponse) ProtoMessage() {}
 
 func (x *ServiceResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_kyc_proto_msgTypes[7]
+	mi := &file_kyc_proto_msgTypes[6]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -579,7 +484,7 @@ func (x *ServiceResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ServiceResponse.ProtoReflect.Descriptor instead.
 func (*ServiceResponse) Descriptor() ([]byte, []int) {
-	return file_kyc_proto_rawDescGZIP(), []int{7}
+	return file_kyc_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *ServiceResponse) GetSuccess() bool {
@@ -596,323 +501,74 @@ func (x *ServiceResponse) GetMessage() string {
 	return ""
 }
 
-type VendorResultsRequest struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-}
-
-func (x *VendorResultsRequest) Reset() {
-	*x = VendorResultsRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_kyc_proto_msgTypes[8]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *VendorResultsRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*VendorResultsRequest) ProtoMessage() {}
-
-func (x *VendorResultsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_kyc_proto_msgTypes[8]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use VendorResultsRequest.ProtoReflect.Descriptor instead.
-func (*VendorResultsRequest) Descriptor() ([]byte, []int) {
-	return file_kyc_proto_rawDescGZIP(), []int{8}
-}
-
-type ListApplicantsRequest struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Filters map[string]string `protobuf:"bytes,1,rep,name=filters,proto3" json:"filters,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
-	Limit   int64             `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
-	Offset  int64             `protobuf:"varint,3,opt,name=offset,proto3" json:"offset,omitempty"`
-}
-
-func (x *ListApplicantsRequest) Reset() {
-	*x = ListApplicantsRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_kyc_proto_msgTypes[9]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *ListApplicantsRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ListApplicantsRequest) ProtoMessage() {}
-
-func (x *ListApplicantsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_kyc_proto_msgTypes[9]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ListApplicantsRequest.ProtoReflect.Descriptor instead.
-func (*ListApplicantsRequest) Descriptor() ([]byte, []int) {
-	return file_kyc_proto_rawDescGZIP(), []int{9}
-}
-
-func (x *ListApplicantsRequest) GetFilters() map[string]string {
-	if x != nil {
-		return x.Filters
-	}
-	return nil
-}
-
-func (x *ListApplicantsRequest) GetLimit() int64 {
-	if x != nil {
-		return x.Limit
-	}
-	return 0
-}
-
-func (x *ListApplicantsRequest) GetOffset() int64 {
-	if x != nil {
-		return x.Offset
-	}
-	return 0
-}
-
-type GetApplicantByIdRequest struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-}
-
-func (x *GetApplicantByIdRequest) Reset() {
-	*x = GetApplicantByIdRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_kyc_proto_msgTypes[10]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *GetApplicantByIdRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetApplicantByIdRequest) ProtoMessage() {}
-
-func (x *GetApplicantByIdRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_kyc_proto_msgTypes[10]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetApplicantByIdRequest.ProtoReflect.Descriptor instead.
-func (*GetApplicantByIdRequest) Descriptor() ([]byte, []int) {
-	return file_kyc_proto_rawDescGZIP(), []int{10}
-}
-
-func (x *GetApplicantByIdRequest) GetId() string {
-	if x != nil {
-		return x.Id
-	}
-	return ""
-}
-
-type GetApplicantByPersonIdRequest struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	PersonId string `protobuf:"bytes,1,opt,name=personId,proto3" json:"personId,omitempty"`
-}
-
-func (x *GetApplicantByPersonIdRequest) Reset() {
-	*x = GetApplicantByPersonIdRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_kyc_proto_msgTypes[11]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *GetApplicantByPersonIdRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetApplicantByPersonIdRequest) ProtoMessage() {}
-
-func (x *GetApplicantByPersonIdRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_kyc_proto_msgTypes[11]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetApplicantByPersonIdRequest.ProtoReflect.Descriptor instead.
-func (*GetApplicantByPersonIdRequest) Descriptor() ([]byte, []int) {
-	return file_kyc_proto_rawDescGZIP(), []int{11}
-}
-
-func (x *GetApplicantByPersonIdRequest) GetPersonId() string {
-	if x != nil {
-		return x.PersonId
-	}
-	return ""
-}
-
 var File_kyc_proto protoreflect.FileDescriptor
 
 var file_kyc_proto_rawDesc = []byte{
 	0x0a, 0x09, 0x6b, 0x79, 0x63, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x03, 0x6b, 0x79, 0x63,
-	0x22, 0x06, 0x0a, 0x04, 0x76, 0x6f, 0x69, 0x64, 0x22, 0x8f, 0x02, 0x0a, 0x07, 0x61, 0x64, 0x64,
-	0x72, 0x65, 0x73, 0x73, 0x12, 0x1f, 0x0a, 0x0b, 0x66, 0x6c, 0x61, 0x74, 0x5f, 0x6e, 0x75, 0x6d,
-	0x62, 0x65, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0a, 0x66, 0x6c, 0x61, 0x74, 0x4e,
-	0x75, 0x6d, 0x62, 0x65, 0x72, 0x12, 0x27, 0x0a, 0x0f, 0x62, 0x75, 0x69, 0x6c, 0x64, 0x69, 0x6e,
-	0x67, 0x5f, 0x6e, 0x75, 0x6d, 0x62, 0x65, 0x72, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0e,
-	0x62, 0x75, 0x69, 0x6c, 0x64, 0x69, 0x6e, 0x67, 0x4e, 0x75, 0x6d, 0x62, 0x65, 0x72, 0x12, 0x23,
-	0x0a, 0x0d, 0x62, 0x75, 0x69, 0x6c, 0x64, 0x69, 0x6e, 0x67, 0x5f, 0x6e, 0x61, 0x6d, 0x65, 0x18,
-	0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0c, 0x62, 0x75, 0x69, 0x6c, 0x64, 0x69, 0x6e, 0x67, 0x4e,
-	0x61, 0x6d, 0x65, 0x12, 0x16, 0x0a, 0x06, 0x73, 0x74, 0x72, 0x65, 0x65, 0x74, 0x18, 0x04, 0x20,
-	0x01, 0x28, 0x09, 0x52, 0x06, 0x73, 0x74, 0x72, 0x65, 0x65, 0x74, 0x12, 0x1d, 0x0a, 0x0a, 0x73,
-	0x75, 0x62, 0x5f, 0x73, 0x74, 0x72, 0x65, 0x65, 0x74, 0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x52,
-	0x09, 0x73, 0x75, 0x62, 0x53, 0x74, 0x72, 0x65, 0x65, 0x74, 0x12, 0x12, 0x0a, 0x04, 0x74, 0x6f,
-	0x77, 0x6e, 0x18, 0x06, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x74, 0x6f, 0x77, 0x6e, 0x12, 0x14,
-	0x0a, 0x05, 0x73, 0x74, 0x61, 0x74, 0x65, 0x18, 0x07, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x73,
-	0x74, 0x61, 0x74, 0x65, 0x12, 0x1a, 0x0a, 0x08, 0x70, 0x6f, 0x73, 0x74, 0x63, 0x6f, 0x64, 0x65,
-	0x18, 0x08, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x70, 0x6f, 0x73, 0x74, 0x63, 0x6f, 0x64, 0x65,
-	0x12, 0x18, 0x0a, 0x07, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x72, 0x79, 0x18, 0x09, 0x20, 0x01, 0x28,
-	0x09, 0x52, 0x07, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x72, 0x79, 0x22, 0xef, 0x01, 0x0a, 0x09, 0x61,
-	0x70, 0x70, 0x6c, 0x69, 0x63, 0x61, 0x6e, 0x74, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01,
-	0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x12, 0x1a, 0x0a, 0x08, 0x70, 0x65, 0x72, 0x73,
-	0x6f, 0x6e, 0x49, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x70, 0x65, 0x72, 0x73,
-	0x6f, 0x6e, 0x49, 0x64, 0x12, 0x1d, 0x0a, 0x0a, 0x66, 0x69, 0x72, 0x73, 0x74, 0x5f, 0x6e, 0x61,
-	0x6d, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x66, 0x69, 0x72, 0x73, 0x74, 0x4e,
-	0x61, 0x6d, 0x65, 0x12, 0x1b, 0x0a, 0x09, 0x6c, 0x61, 0x73, 0x74, 0x5f, 0x6e, 0x61, 0x6d, 0x65,
-	0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x6c, 0x61, 0x73, 0x74, 0x4e, 0x61, 0x6d, 0x65,
-	0x12, 0x14, 0x0a, 0x05, 0x65, 0x6d, 0x61, 0x69, 0x6c, 0x18, 0x06, 0x20, 0x01, 0x28, 0x09, 0x52,
-	0x05, 0x65, 0x6d, 0x61, 0x69, 0x6c, 0x12, 0x10, 0x0a, 0x03, 0x64, 0x6f, 0x62, 0x18, 0x07, 0x20,
-	0x01, 0x28, 0x09, 0x52, 0x03, 0x64, 0x6f, 0x62, 0x12, 0x26, 0x0a, 0x07, 0x61, 0x64, 0x64, 0x72,
-	0x65, 0x73, 0x73, 0x18, 0x08, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0c, 0x2e, 0x6b, 0x79, 0x63, 0x2e,
-	0x61, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x52, 0x07, 0x61, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73,
-	0x12, 0x16, 0x0a, 0x06, 0x76, 0x65, 0x6e, 0x64, 0x6f, 0x72, 0x18, 0x09, 0x20, 0x01, 0x28, 0x09,
-	0x52, 0x06, 0x76, 0x65, 0x6e, 0x64, 0x6f, 0x72, 0x12, 0x12, 0x0a, 0x04, 0x66, 0x69, 0x73, 0x68,
-	0x18, 0x0b, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x66, 0x69, 0x73, 0x68, 0x22, 0x56, 0x0a, 0x0e,
-	0x61, 0x70, 0x70, 0x6c, 0x69, 0x63, 0x61, 0x6e, 0x74, 0x73, 0x4c, 0x69, 0x73, 0x74, 0x12, 0x14,
-	0x0a, 0x05, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x05, 0x63,
-	0x6f, 0x75, 0x6e, 0x74, 0x12, 0x2e, 0x0a, 0x0a, 0x61, 0x70, 0x70, 0x6c, 0x69, 0x63, 0x61, 0x6e,
-	0x74, 0x73, 0x18, 0x02, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x0e, 0x2e, 0x6b, 0x79, 0x63, 0x2e, 0x61,
-	0x70, 0x70, 0x6c, 0x69, 0x63, 0x61, 0x6e, 0x74, 0x52, 0x0a, 0x61, 0x70, 0x70, 0x6c, 0x69, 0x63,
-	0x61, 0x6e, 0x74, 0x73, 0x22, 0x44, 0x0a, 0x10, 0x6c, 0x69, 0x76, 0x65, 0x56, 0x69, 0x64, 0x65,
-	0x6f, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1a, 0x0a, 0x08, 0x70, 0x65, 0x72, 0x73,
-	0x6f, 0x6e, 0x49, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x70, 0x65, 0x72, 0x73,
-	0x6f, 0x6e, 0x49, 0x64, 0x12, 0x14, 0x0a, 0x05, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x18, 0x02, 0x20,
-	0x01, 0x28, 0x0c, 0x52, 0x05, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x22, 0x72, 0x0a, 0x10, 0x6c, 0x69,
-	0x76, 0x65, 0x50, 0x68, 0x6f, 0x74, 0x6f, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1a,
-	0x0a, 0x08, 0x70, 0x65, 0x72, 0x73, 0x6f, 0x6e, 0x49, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09,
-	0x52, 0x08, 0x70, 0x65, 0x72, 0x73, 0x6f, 0x6e, 0x49, 0x64, 0x12, 0x12, 0x0a, 0x04, 0x6b, 0x69,
-	0x6e, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6b, 0x69, 0x6e, 0x64, 0x12, 0x14,
-	0x0a, 0x05, 0x74, 0x69, 0x74, 0x6c, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x74,
-	0x69, 0x74, 0x6c, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x18,
-	0x04, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x07, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x22, 0x71,
-	0x0a, 0x0f, 0x64, 0x6f, 0x63, 0x75, 0x6d, 0x65, 0x6e, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
-	0x74, 0x12, 0x1a, 0x0a, 0x08, 0x70, 0x65, 0x72, 0x73, 0x6f, 0x6e, 0x49, 0x64, 0x18, 0x01, 0x20,
-	0x01, 0x28, 0x09, 0x52, 0x08, 0x70, 0x65, 0x72, 0x73, 0x6f, 0x6e, 0x49, 0x64, 0x12, 0x12, 0x0a,
-	0x04, 0x6b, 0x69, 0x6e, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6b, 0x69, 0x6e,
-	0x64, 0x12, 0x14, 0x0a, 0x05, 0x74, 0x69, 0x74, 0x6c, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09,
-	0x52, 0x05, 0x74, 0x69, 0x74, 0x6c, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x63, 0x6f, 0x6e, 0x74, 0x65,
-	0x6e, 0x74, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x07, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x6e,
-	0x74, 0x22, 0x45, 0x0a, 0x0f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x52, 0x65, 0x73, 0x70,
-	0x6f, 0x6e, 0x73, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x73, 0x75, 0x63, 0x63, 0x65, 0x73, 0x73, 0x18,
-	0x01, 0x20, 0x01, 0x28, 0x08, 0x52, 0x07, 0x73, 0x75, 0x63, 0x63, 0x65, 0x73, 0x73, 0x12, 0x18,
-	0x0a, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52,
-	0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x22, 0x16, 0x0a, 0x14, 0x76, 0x65, 0x6e, 0x64,
-	0x6f, 0x72, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
-	0x22, 0xc4, 0x01, 0x0a, 0x15, 0x6c, 0x69, 0x73, 0x74, 0x41, 0x70, 0x70, 0x6c, 0x69, 0x63, 0x61,
-	0x6e, 0x74, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x41, 0x0a, 0x07, 0x66, 0x69,
-	0x6c, 0x74, 0x65, 0x72, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x27, 0x2e, 0x6b, 0x79,
-	0x63, 0x2e, 0x6c, 0x69, 0x73, 0x74, 0x41, 0x70, 0x70, 0x6c, 0x69, 0x63, 0x61, 0x6e, 0x74, 0x73,
-	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x2e, 0x46, 0x69, 0x6c, 0x74, 0x65, 0x72, 0x73, 0x45,
-	0x6e, 0x74, 0x72, 0x79, 0x52, 0x07, 0x66, 0x69, 0x6c, 0x74, 0x65, 0x72, 0x73, 0x12, 0x14, 0x0a,
-	0x05, 0x6c, 0x69, 0x6d, 0x69, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x05, 0x6c, 0x69,
-	0x6d, 0x69, 0x74, 0x12, 0x16, 0x0a, 0x06, 0x6f, 0x66, 0x66, 0x73, 0x65, 0x74, 0x18, 0x03, 0x20,
-	0x01, 0x28, 0x03, 0x52, 0x06, 0x6f, 0x66, 0x66, 0x73, 0x65, 0x74, 0x1a, 0x3a, 0x0a, 0x0c, 0x46,
-	0x69, 0x6c, 0x74, 0x65, 0x72, 0x73, 0x45, 0x6e, 0x74, 0x72, 0x79, 0x12, 0x10, 0x0a, 0x03, 0x6b,
-	0x65, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x6b, 0x65, 0x79, 0x12, 0x14, 0x0a,
-	0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x76, 0x61,
-	0x6c, 0x75, 0x65, 0x3a, 0x02, 0x38, 0x01, 0x22, 0x29, 0x0a, 0x17, 0x67, 0x65, 0x74, 0x41, 0x70,
-	0x70, 0x6c, 0x69, 0x63, 0x61, 0x6e, 0x74, 0x42, 0x79, 0x49, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65,
-	0x73, 0x74, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02,
-	0x69, 0x64, 0x22, 0x3b, 0x0a, 0x1d, 0x67, 0x65, 0x74, 0x41, 0x70, 0x70, 0x6c, 0x69, 0x63, 0x61,
-	0x6e, 0x74, 0x42, 0x79, 0x50, 0x65, 0x72, 0x73, 0x6f, 0x6e, 0x49, 0x64, 0x52, 0x65, 0x71, 0x75,
-	0x65, 0x73, 0x74, 0x12, 0x1a, 0x0a, 0x08, 0x70, 0x65, 0x72, 0x73, 0x6f, 0x6e, 0x49, 0x64, 0x18,
-	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x70, 0x65, 0x72, 0x73, 0x6f, 0x6e, 0x49, 0x64, 0x32,
-	0xa1, 0x04, 0x0a, 0x0a, 0x4b, 0x79, 0x63, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x40,
-	0x0a, 0x0f, 0x73, 0x75, 0x62, 0x6d, 0x69, 0x74, 0x4c, 0x69, 0x76, 0x65, 0x56, 0x69, 0x64, 0x65,
-	0x6f, 0x12, 0x15, 0x2e, 0x6b, 0x79, 0x63, 0x2e, 0x6c, 0x69, 0x76, 0x65, 0x56, 0x69, 0x64, 0x65,
-	0x6f, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x14, 0x2e, 0x6b, 0x79, 0x63, 0x2e, 0x73,
-	0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00,
-	0x12, 0x40, 0x0a, 0x0f, 0x73, 0x75, 0x62, 0x6d, 0x69, 0x74, 0x4c, 0x69, 0x76, 0x65, 0x50, 0x68,
-	0x6f, 0x74, 0x6f, 0x12, 0x15, 0x2e, 0x6b, 0x79, 0x63, 0x2e, 0x6c, 0x69, 0x76, 0x65, 0x50, 0x68,
-	0x6f, 0x74, 0x6f, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x14, 0x2e, 0x6b, 0x79, 0x63,
-	0x2e, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
-	0x22, 0x00, 0x12, 0x3e, 0x0a, 0x0e, 0x73, 0x75, 0x62, 0x6d, 0x69, 0x74, 0x44, 0x6f, 0x63, 0x75,
-	0x6d, 0x65, 0x6e, 0x74, 0x12, 0x14, 0x2e, 0x6b, 0x79, 0x63, 0x2e, 0x64, 0x6f, 0x63, 0x75, 0x6d,
-	0x65, 0x6e, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x14, 0x2e, 0x6b, 0x79, 0x63,
-	0x2e, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
-	0x22, 0x00, 0x12, 0x4b, 0x0a, 0x16, 0x68, 0x61, 0x6e, 0x64, 0x6c, 0x65, 0x4b, 0x59, 0x43, 0x56,
-	0x65, 0x6e, 0x64, 0x6f, 0x72, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x73, 0x12, 0x19, 0x2e, 0x6b,
-	0x79, 0x63, 0x2e, 0x76, 0x65, 0x6e, 0x64, 0x6f, 0x72, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x73,
-	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x14, 0x2e, 0x6b, 0x79, 0x63, 0x2e, 0x73, 0x65,
-	0x72, 0x76, 0x69, 0x63, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12,
-	0x43, 0x0a, 0x0e, 0x6c, 0x69, 0x73, 0x74, 0x41, 0x70, 0x70, 0x6c, 0x69, 0x63, 0x61, 0x6e, 0x74,
-	0x73, 0x12, 0x1a, 0x2e, 0x6b, 0x79, 0x63, 0x2e, 0x6c, 0x69, 0x73, 0x74, 0x41, 0x70, 0x70, 0x6c,
-	0x69, 0x63, 0x61, 0x6e, 0x74, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x13, 0x2e,
-	0x6b, 0x79, 0x63, 0x2e, 0x61, 0x70, 0x70, 0x6c, 0x69, 0x63, 0x61, 0x6e, 0x74, 0x73, 0x4c, 0x69,
-	0x73, 0x74, 0x22, 0x00, 0x12, 0x42, 0x0a, 0x10, 0x67, 0x65, 0x74, 0x41, 0x70, 0x70, 0x6c, 0x69,
-	0x63, 0x61, 0x6e, 0x74, 0x42, 0x79, 0x49, 0x64, 0x12, 0x1c, 0x2e, 0x6b, 0x79, 0x63, 0x2e, 0x67,
-	0x65, 0x74, 0x41, 0x70, 0x70, 0x6c, 0x69, 0x63, 0x61, 0x6e, 0x74, 0x42, 0x79, 0x49, 0x64, 0x52,
-	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x0e, 0x2e, 0x6b, 0x79, 0x63, 0x2e, 0x61, 0x70, 0x70,
-	0x6c, 0x69, 0x63, 0x61, 0x6e, 0x74, 0x22, 0x00, 0x12, 0x4e, 0x0a, 0x16, 0x67, 0x65, 0x74, 0x41,
-	0x70, 0x70, 0x6c, 0x69, 0x63, 0x61, 0x6e, 0x74, 0x42, 0x79, 0x50, 0x65, 0x72, 0x73, 0x6f, 0x6e,
-	0x49, 0x64, 0x12, 0x22, 0x2e, 0x6b, 0x79, 0x63, 0x2e, 0x67, 0x65, 0x74, 0x41, 0x70, 0x70, 0x6c,
-	0x69, 0x63, 0x61, 0x6e, 0x74, 0x42, 0x79, 0x50, 0x65, 0x72, 0x73, 0x6f, 0x6e, 0x49, 0x64, 0x52,
-	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x0e, 0x2e, 0x6b, 0x79, 0x63, 0x2e, 0x61, 0x70, 0x70,
-	0x6c, 0x69, 0x63, 0x61, 0x6e, 0x74, 0x22, 0x00, 0x12, 0x29, 0x0a, 0x0a, 0x68, 0x65, 0x6c, 0x6c,
-	0x6f, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x12, 0x09, 0x2e, 0x6b, 0x79, 0x63, 0x2e, 0x76, 0x6f, 0x69,
-	0x64, 0x1a, 0x0e, 0x2e, 0x6b, 0x79, 0x63, 0x2e, 0x61, 0x70, 0x70, 0x6c, 0x69, 0x63, 0x61, 0x6e,
-	0x74, 0x22, 0x00, 0x42, 0x0e, 0x5a, 0x0c, 0x2e, 0x3b, 0x6b, 0x79, 0x63, 0x53, 0x65, 0x72, 0x76,
-	0x69, 0x63, 0x65, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x22, 0x36, 0x0a, 0x12, 0x61, 0x70, 0x70, 0x6c, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52,
+	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x20, 0x0a, 0x0b, 0x61, 0x70, 0x70, 0x6c, 0x69, 0x63,
+	0x61, 0x6e, 0x74, 0x49, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x61, 0x70, 0x70,
+	0x6c, 0x69, 0x63, 0x61, 0x6e, 0x74, 0x49, 0x64, 0x22, 0x10, 0x0a, 0x0e, 0x6b, 0x79, 0x63, 0x43,
+	0x68, 0x65, 0x63, 0x6b, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x22, 0x69, 0x0a, 0x11, 0x61, 0x70,
+	0x70, 0x6c, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x12,
+	0x18, 0x0a, 0x07, 0x73, 0x75, 0x63, 0x63, 0x65, 0x73, 0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x08,
+	0x52, 0x07, 0x73, 0x75, 0x63, 0x63, 0x65, 0x73, 0x73, 0x12, 0x18, 0x0a, 0x07, 0x6d, 0x65, 0x73,
+	0x73, 0x61, 0x67, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x6d, 0x65, 0x73, 0x73,
+	0x61, 0x67, 0x65, 0x12, 0x20, 0x0a, 0x0b, 0x61, 0x70, 0x70, 0x6c, 0x69, 0x63, 0x61, 0x6e, 0x74,
+	0x49, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x61, 0x70, 0x70, 0x6c, 0x69, 0x63,
+	0x61, 0x6e, 0x74, 0x49, 0x64, 0x22, 0x8f, 0x02, 0x0a, 0x07, 0x61, 0x64, 0x64, 0x72, 0x65, 0x73,
+	0x73, 0x12, 0x1f, 0x0a, 0x0b, 0x66, 0x6c, 0x61, 0x74, 0x5f, 0x6e, 0x75, 0x6d, 0x62, 0x65, 0x72,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0a, 0x66, 0x6c, 0x61, 0x74, 0x4e, 0x75, 0x6d, 0x62,
+	0x65, 0x72, 0x12, 0x27, 0x0a, 0x0f, 0x62, 0x75, 0x69, 0x6c, 0x64, 0x69, 0x6e, 0x67, 0x5f, 0x6e,
+	0x75, 0x6d, 0x62, 0x65, 0x72, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0e, 0x62, 0x75, 0x69,
+	0x6c, 0x64, 0x69, 0x6e, 0x67, 0x4e, 0x75, 0x6d, 0x62, 0x65, 0x72, 0x12, 0x23, 0x0a, 0x0d, 0x62,
+	0x75, 0x69, 0x6c, 0x64, 0x69, 0x6e, 0x67, 0x5f, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x03, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x0c, 0x62, 0x75, 0x69, 0x6c, 0x64, 0x69, 0x6e, 0x67, 0x4e, 0x61, 0x6d, 0x65,
+	0x12, 0x16, 0x0a, 0x06, 0x73, 0x74, 0x72, 0x65, 0x65, 0x74, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x06, 0x73, 0x74, 0x72, 0x65, 0x65, 0x74, 0x12, 0x1d, 0x0a, 0x0a, 0x73, 0x75, 0x62, 0x5f,
+	0x73, 0x74, 0x72, 0x65, 0x65, 0x74, 0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x73, 0x75,
+	0x62, 0x53, 0x74, 0x72, 0x65, 0x65, 0x74, 0x12, 0x12, 0x0a, 0x04, 0x74, 0x6f, 0x77, 0x6e, 0x18,
+	0x06, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x74, 0x6f, 0x77, 0x6e, 0x12, 0x14, 0x0a, 0x05, 0x73,
+	0x74, 0x61, 0x74, 0x65, 0x18, 0x07, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x73, 0x74, 0x61, 0x74,
+	0x65, 0x12, 0x1a, 0x0a, 0x08, 0x70, 0x6f, 0x73, 0x74, 0x63, 0x6f, 0x64, 0x65, 0x18, 0x08, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x08, 0x70, 0x6f, 0x73, 0x74, 0x63, 0x6f, 0x64, 0x65, 0x12, 0x18, 0x0a,
+	0x07, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x72, 0x79, 0x18, 0x09, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07,
+	0x63, 0x6f, 0x75, 0x6e, 0x74, 0x72, 0x79, 0x22, 0xdb, 0x01, 0x0a, 0x09, 0x61, 0x70, 0x70, 0x6c,
+	0x69, 0x63, 0x61, 0x6e, 0x74, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x02, 0x69, 0x64, 0x12, 0x1a, 0x0a, 0x08, 0x70, 0x65, 0x72, 0x73, 0x6f, 0x6e, 0x49,
+	0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x70, 0x65, 0x72, 0x73, 0x6f, 0x6e, 0x49,
+	0x64, 0x12, 0x1d, 0x0a, 0x0a, 0x66, 0x69, 0x72, 0x73, 0x74, 0x5f, 0x6e, 0x61, 0x6d, 0x65, 0x18,
+	0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x66, 0x69, 0x72, 0x73, 0x74, 0x4e, 0x61, 0x6d, 0x65,
+	0x12, 0x1b, 0x0a, 0x09, 0x6c, 0x61, 0x73, 0x74, 0x5f, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x05, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x08, 0x6c, 0x61, 0x73, 0x74, 0x4e, 0x61, 0x6d, 0x65, 0x12, 0x14, 0x0a,
+	0x05, 0x65, 0x6d, 0x61, 0x69, 0x6c, 0x18, 0x06, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x65, 0x6d,
+	0x61, 0x69, 0x6c, 0x12, 0x10, 0x0a, 0x03, 0x64, 0x6f, 0x62, 0x18, 0x07, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x03, 0x64, 0x6f, 0x62, 0x12, 0x26, 0x0a, 0x07, 0x61, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73,
+	0x18, 0x08, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0c, 0x2e, 0x6b, 0x79, 0x63, 0x2e, 0x61, 0x64, 0x64,
+	0x72, 0x65, 0x73, 0x73, 0x52, 0x07, 0x61, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x12, 0x16, 0x0a,
+	0x06, 0x76, 0x65, 0x6e, 0x64, 0x6f, 0x72, 0x18, 0x09, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x76,
+	0x65, 0x6e, 0x64, 0x6f, 0x72, 0x22, 0x56, 0x0a, 0x0e, 0x61, 0x70, 0x70, 0x6c, 0x69, 0x63, 0x61,
+	0x6e, 0x74, 0x73, 0x4c, 0x69, 0x73, 0x74, 0x12, 0x14, 0x0a, 0x05, 0x63, 0x6f, 0x75, 0x6e, 0x74,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x05, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x12, 0x2e, 0x0a,
+	0x0a, 0x61, 0x70, 0x70, 0x6c, 0x69, 0x63, 0x61, 0x6e, 0x74, 0x73, 0x18, 0x02, 0x20, 0x03, 0x28,
+	0x0b, 0x32, 0x0e, 0x2e, 0x6b, 0x79, 0x63, 0x2e, 0x61, 0x70, 0x70, 0x6c, 0x69, 0x63, 0x61, 0x6e,
+	0x74, 0x52, 0x0a, 0x61, 0x70, 0x70, 0x6c, 0x69, 0x63, 0x61, 0x6e, 0x74, 0x73, 0x22, 0x45, 0x0a,
+	0x0f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
+	0x12, 0x18, 0x0a, 0x07, 0x73, 0x75, 0x63, 0x63, 0x65, 0x73, 0x73, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x08, 0x52, 0x07, 0x73, 0x75, 0x63, 0x63, 0x65, 0x73, 0x73, 0x12, 0x18, 0x0a, 0x07, 0x6d, 0x65,
+	0x73, 0x73, 0x61, 0x67, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x6d, 0x65, 0x73,
+	0x73, 0x61, 0x67, 0x65, 0x32, 0xa1, 0x01, 0x0a, 0x0a, 0x4b, 0x79, 0x63, 0x53, 0x65, 0x72, 0x76,
+	0x69, 0x63, 0x65, 0x12, 0x49, 0x0a, 0x14, 0x73, 0x75, 0x62, 0x6d, 0x69, 0x74, 0x4b, 0x59, 0x43,
+	0x41, 0x70, 0x70, 0x6c, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x17, 0x2e, 0x6b, 0x79,
+	0x63, 0x2e, 0x61, 0x70, 0x70, 0x6c, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x71,
+	0x75, 0x65, 0x73, 0x74, 0x1a, 0x16, 0x2e, 0x6b, 0x79, 0x63, 0x2e, 0x61, 0x70, 0x70, 0x6c, 0x69,
+	0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x22, 0x00, 0x12, 0x48,
+	0x0a, 0x11, 0x67, 0x65, 0x74, 0x4b, 0x59, 0x43, 0x43, 0x68, 0x65, 0x63, 0x6b, 0x53, 0x74, 0x61,
+	0x74, 0x75, 0x73, 0x12, 0x17, 0x2e, 0x6b, 0x79, 0x63, 0x2e, 0x61, 0x70, 0x70, 0x6c, 0x69, 0x63,
+	0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x16, 0x2e, 0x6b,
+	0x79, 0x63, 0x2e, 0x61, 0x70, 0x70, 0x6c, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65,
+	0x73, 0x75, 0x6c, 0x74, 0x22, 0x00, 0x30, 0x01, 0x42, 0x0e, 0x5a, 0x0c, 0x2e, 0x3b, 0x6b, 0x79,
+	0x63, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -927,47 +583,28 @@ func file_kyc_proto_rawDescGZIP() []byte {
 	return file_kyc_proto_rawDescData
 }
 
-var file_kyc_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
+var file_kyc_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_kyc_proto_goTypes = []interface{}{
-	(*Void)(nil),                          // 0: kyc.void
-	(*Address)(nil),                       // 1: kyc.address
-	(*Applicant)(nil),                     // 2: kyc.applicant
-	(*ApplicantsList)(nil),                // 3: kyc.applicantsList
-	(*LiveVideoRequest)(nil),              // 4: kyc.liveVideoRequest
-	(*LivePhotoRequest)(nil),              // 5: kyc.livePhotoRequest
-	(*DocumentRequest)(nil),               // 6: kyc.documentRequest
-	(*ServiceResponse)(nil),               // 7: kyc.serviceResponse
-	(*VendorResultsRequest)(nil),          // 8: kyc.vendorResultsRequest
-	(*ListApplicantsRequest)(nil),         // 9: kyc.listApplicantsRequest
-	(*GetApplicantByIdRequest)(nil),       // 10: kyc.getApplicantByIdRequest
-	(*GetApplicantByPersonIdRequest)(nil), // 11: kyc.getApplicantByPersonIdRequest
-	nil,                                   // 12: kyc.listApplicantsRequest.FiltersEntry
+	(*ApplicationRequest)(nil), // 0: kyc.applicationRequest
+	(*KycCheckStatus)(nil),     // 1: kyc.kycCheckStatus
+	(*ApplicationResult)(nil),  // 2: kyc.applicationResult
+	(*Address)(nil),            // 3: kyc.address
+	(*Applicant)(nil),          // 4: kyc.applicant
+	(*ApplicantsList)(nil),     // 5: kyc.applicantsList
+	(*ServiceResponse)(nil),    // 6: kyc.serviceResponse
 }
 var file_kyc_proto_depIdxs = []int32{
-	1,  // 0: kyc.applicant.address:type_name -> kyc.address
-	2,  // 1: kyc.applicantsList.applicants:type_name -> kyc.applicant
-	12, // 2: kyc.listApplicantsRequest.filters:type_name -> kyc.listApplicantsRequest.FiltersEntry
-	4,  // 3: kyc.KycService.submitLiveVideo:input_type -> kyc.liveVideoRequest
-	5,  // 4: kyc.KycService.submitLivePhoto:input_type -> kyc.livePhotoRequest
-	6,  // 5: kyc.KycService.submitDocument:input_type -> kyc.documentRequest
-	8,  // 6: kyc.KycService.handleKYCVendorResults:input_type -> kyc.vendorResultsRequest
-	9,  // 7: kyc.KycService.listApplicants:input_type -> kyc.listApplicantsRequest
-	10, // 8: kyc.KycService.getApplicantById:input_type -> kyc.getApplicantByIdRequest
-	11, // 9: kyc.KycService.getApplicantByPersonId:input_type -> kyc.getApplicantByPersonIdRequest
-	0,  // 10: kyc.KycService.helloWorld:input_type -> kyc.void
-	7,  // 11: kyc.KycService.submitLiveVideo:output_type -> kyc.serviceResponse
-	7,  // 12: kyc.KycService.submitLivePhoto:output_type -> kyc.serviceResponse
-	7,  // 13: kyc.KycService.submitDocument:output_type -> kyc.serviceResponse
-	7,  // 14: kyc.KycService.handleKYCVendorResults:output_type -> kyc.serviceResponse
-	3,  // 15: kyc.KycService.listApplicants:output_type -> kyc.applicantsList
-	2,  // 16: kyc.KycService.getApplicantById:output_type -> kyc.applicant
-	2,  // 17: kyc.KycService.getApplicantByPersonId:output_type -> kyc.applicant
-	2,  // 18: kyc.KycService.helloWorld:output_type -> kyc.applicant
-	11, // [11:19] is the sub-list for method output_type
-	3,  // [3:11] is the sub-list for method input_type
-	3,  // [3:3] is the sub-list for extension type_name
-	3,  // [3:3] is the sub-list for extension extendee
-	0,  // [0:3] is the sub-list for field type_name
+	3, // 0: kyc.applicant.address:type_name -> kyc.address
+	4, // 1: kyc.applicantsList.applicants:type_name -> kyc.applicant
+	0, // 2: kyc.KycService.submitKYCApplication:input_type -> kyc.applicationRequest
+	0, // 3: kyc.KycService.getKYCCheckStatus:input_type -> kyc.applicationRequest
+	2, // 4: kyc.KycService.submitKYCApplication:output_type -> kyc.applicationResult
+	2, // 5: kyc.KycService.getKYCCheckStatus:output_type -> kyc.applicationResult
+	4, // [4:6] is the sub-list for method output_type
+	2, // [2:4] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_kyc_proto_init() }
@@ -977,7 +614,7 @@ func file_kyc_proto_init() {
 	}
 	if !protoimpl.UnsafeEnabled {
 		file_kyc_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Void); i {
+			switch v := v.(*ApplicationRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -989,7 +626,7 @@ func file_kyc_proto_init() {
 			}
 		}
 		file_kyc_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Address); i {
+			switch v := v.(*KycCheckStatus); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1001,7 +638,7 @@ func file_kyc_proto_init() {
 			}
 		}
 		file_kyc_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Applicant); i {
+			switch v := v.(*ApplicationResult); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1013,7 +650,7 @@ func file_kyc_proto_init() {
 			}
 		}
 		file_kyc_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ApplicantsList); i {
+			switch v := v.(*Address); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1025,7 +662,7 @@ func file_kyc_proto_init() {
 			}
 		}
 		file_kyc_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*LiveVideoRequest); i {
+			switch v := v.(*Applicant); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1037,7 +674,7 @@ func file_kyc_proto_init() {
 			}
 		}
 		file_kyc_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*LivePhotoRequest); i {
+			switch v := v.(*ApplicantsList); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1049,67 +686,7 @@ func file_kyc_proto_init() {
 			}
 		}
 		file_kyc_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*DocumentRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_kyc_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*ServiceResponse); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_kyc_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*VendorResultsRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_kyc_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ListApplicantsRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_kyc_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetApplicantByIdRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_kyc_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetApplicantByPersonIdRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1127,7 +704,7 @@ func file_kyc_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_kyc_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   13,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
@@ -1153,14 +730,8 @@ const _ = grpc.SupportPackageIsVersion6
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type KycServiceClient interface {
-	SubmitLiveVideo(ctx context.Context, in *LiveVideoRequest, opts ...grpc.CallOption) (*ServiceResponse, error)
-	SubmitLivePhoto(ctx context.Context, in *LivePhotoRequest, opts ...grpc.CallOption) (*ServiceResponse, error)
-	SubmitDocument(ctx context.Context, in *DocumentRequest, opts ...grpc.CallOption) (*ServiceResponse, error)
-	HandleKYCVendorResults(ctx context.Context, in *VendorResultsRequest, opts ...grpc.CallOption) (*ServiceResponse, error)
-	ListApplicants(ctx context.Context, in *ListApplicantsRequest, opts ...grpc.CallOption) (*ApplicantsList, error)
-	GetApplicantById(ctx context.Context, in *GetApplicantByIdRequest, opts ...grpc.CallOption) (*Applicant, error)
-	GetApplicantByPersonId(ctx context.Context, in *GetApplicantByPersonIdRequest, opts ...grpc.CallOption) (*Applicant, error)
-	HelloWorld(ctx context.Context, in *Void, opts ...grpc.CallOption) (*Applicant, error)
+	SubmitKYCApplication(ctx context.Context, in *ApplicationRequest, opts ...grpc.CallOption) (*ApplicationResult, error)
+	GetKYCCheckStatus(ctx context.Context, in *ApplicationRequest, opts ...grpc.CallOption) (KycService_GetKYCCheckStatusClient, error)
 }
 
 type kycServiceClient struct {
@@ -1171,265 +742,105 @@ func NewKycServiceClient(cc grpc.ClientConnInterface) KycServiceClient {
 	return &kycServiceClient{cc}
 }
 
-func (c *kycServiceClient) SubmitLiveVideo(ctx context.Context, in *LiveVideoRequest, opts ...grpc.CallOption) (*ServiceResponse, error) {
-	out := new(ServiceResponse)
-	err := c.cc.Invoke(ctx, "/kyc.KycService/submitLiveVideo", in, out, opts...)
+func (c *kycServiceClient) SubmitKYCApplication(ctx context.Context, in *ApplicationRequest, opts ...grpc.CallOption) (*ApplicationResult, error) {
+	out := new(ApplicationResult)
+	err := c.cc.Invoke(ctx, "/kyc.KycService/submitKYCApplication", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *kycServiceClient) SubmitLivePhoto(ctx context.Context, in *LivePhotoRequest, opts ...grpc.CallOption) (*ServiceResponse, error) {
-	out := new(ServiceResponse)
-	err := c.cc.Invoke(ctx, "/kyc.KycService/submitLivePhoto", in, out, opts...)
+func (c *kycServiceClient) GetKYCCheckStatus(ctx context.Context, in *ApplicationRequest, opts ...grpc.CallOption) (KycService_GetKYCCheckStatusClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_KycService_serviceDesc.Streams[0], "/kyc.KycService/getKYCCheckStatus", opts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &kycServiceGetKYCCheckStatusClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
 }
 
-func (c *kycServiceClient) SubmitDocument(ctx context.Context, in *DocumentRequest, opts ...grpc.CallOption) (*ServiceResponse, error) {
-	out := new(ServiceResponse)
-	err := c.cc.Invoke(ctx, "/kyc.KycService/submitDocument", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
+type KycService_GetKYCCheckStatusClient interface {
+	Recv() (*ApplicationResult, error)
+	grpc.ClientStream
 }
 
-func (c *kycServiceClient) HandleKYCVendorResults(ctx context.Context, in *VendorResultsRequest, opts ...grpc.CallOption) (*ServiceResponse, error) {
-	out := new(ServiceResponse)
-	err := c.cc.Invoke(ctx, "/kyc.KycService/handleKYCVendorResults", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
+type kycServiceGetKYCCheckStatusClient struct {
+	grpc.ClientStream
 }
 
-func (c *kycServiceClient) ListApplicants(ctx context.Context, in *ListApplicantsRequest, opts ...grpc.CallOption) (*ApplicantsList, error) {
-	out := new(ApplicantsList)
-	err := c.cc.Invoke(ctx, "/kyc.KycService/listApplicants", in, out, opts...)
-	if err != nil {
+func (x *kycServiceGetKYCCheckStatusClient) Recv() (*ApplicationResult, error) {
+	m := new(ApplicationResult)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
-	return out, nil
-}
-
-func (c *kycServiceClient) GetApplicantById(ctx context.Context, in *GetApplicantByIdRequest, opts ...grpc.CallOption) (*Applicant, error) {
-	out := new(Applicant)
-	err := c.cc.Invoke(ctx, "/kyc.KycService/getApplicantById", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *kycServiceClient) GetApplicantByPersonId(ctx context.Context, in *GetApplicantByPersonIdRequest, opts ...grpc.CallOption) (*Applicant, error) {
-	out := new(Applicant)
-	err := c.cc.Invoke(ctx, "/kyc.KycService/getApplicantByPersonId", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *kycServiceClient) HelloWorld(ctx context.Context, in *Void, opts ...grpc.CallOption) (*Applicant, error) {
-	out := new(Applicant)
-	err := c.cc.Invoke(ctx, "/kyc.KycService/helloWorld", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
+	return m, nil
 }
 
 // KycServiceServer is the server API for KycService service.
 type KycServiceServer interface {
-	SubmitLiveVideo(context.Context, *LiveVideoRequest) (*ServiceResponse, error)
-	SubmitLivePhoto(context.Context, *LivePhotoRequest) (*ServiceResponse, error)
-	SubmitDocument(context.Context, *DocumentRequest) (*ServiceResponse, error)
-	HandleKYCVendorResults(context.Context, *VendorResultsRequest) (*ServiceResponse, error)
-	ListApplicants(context.Context, *ListApplicantsRequest) (*ApplicantsList, error)
-	GetApplicantById(context.Context, *GetApplicantByIdRequest) (*Applicant, error)
-	GetApplicantByPersonId(context.Context, *GetApplicantByPersonIdRequest) (*Applicant, error)
-	HelloWorld(context.Context, *Void) (*Applicant, error)
+	SubmitKYCApplication(context.Context, *ApplicationRequest) (*ApplicationResult, error)
+	GetKYCCheckStatus(*ApplicationRequest, KycService_GetKYCCheckStatusServer) error
 }
 
 // UnimplementedKycServiceServer can be embedded to have forward compatible implementations.
 type UnimplementedKycServiceServer struct {
 }
 
-func (*UnimplementedKycServiceServer) SubmitLiveVideo(context.Context, *LiveVideoRequest) (*ServiceResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SubmitLiveVideo not implemented")
+func (*UnimplementedKycServiceServer) SubmitKYCApplication(context.Context, *ApplicationRequest) (*ApplicationResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SubmitKYCApplication not implemented")
 }
-func (*UnimplementedKycServiceServer) SubmitLivePhoto(context.Context, *LivePhotoRequest) (*ServiceResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SubmitLivePhoto not implemented")
-}
-func (*UnimplementedKycServiceServer) SubmitDocument(context.Context, *DocumentRequest) (*ServiceResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SubmitDocument not implemented")
-}
-func (*UnimplementedKycServiceServer) HandleKYCVendorResults(context.Context, *VendorResultsRequest) (*ServiceResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method HandleKYCVendorResults not implemented")
-}
-func (*UnimplementedKycServiceServer) ListApplicants(context.Context, *ListApplicantsRequest) (*ApplicantsList, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListApplicants not implemented")
-}
-func (*UnimplementedKycServiceServer) GetApplicantById(context.Context, *GetApplicantByIdRequest) (*Applicant, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetApplicantById not implemented")
-}
-func (*UnimplementedKycServiceServer) GetApplicantByPersonId(context.Context, *GetApplicantByPersonIdRequest) (*Applicant, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetApplicantByPersonId not implemented")
-}
-func (*UnimplementedKycServiceServer) HelloWorld(context.Context, *Void) (*Applicant, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method HelloWorld not implemented")
+func (*UnimplementedKycServiceServer) GetKYCCheckStatus(*ApplicationRequest, KycService_GetKYCCheckStatusServer) error {
+	return status.Errorf(codes.Unimplemented, "method GetKYCCheckStatus not implemented")
 }
 
 func RegisterKycServiceServer(s *grpc.Server, srv KycServiceServer) {
 	s.RegisterService(&_KycService_serviceDesc, srv)
 }
 
-func _KycService_SubmitLiveVideo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(LiveVideoRequest)
+func _KycService_SubmitKYCApplication_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ApplicationRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(KycServiceServer).SubmitLiveVideo(ctx, in)
+		return srv.(KycServiceServer).SubmitKYCApplication(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/kyc.KycService/SubmitLiveVideo",
+		FullMethod: "/kyc.KycService/SubmitKYCApplication",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KycServiceServer).SubmitLiveVideo(ctx, req.(*LiveVideoRequest))
+		return srv.(KycServiceServer).SubmitKYCApplication(ctx, req.(*ApplicationRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _KycService_SubmitLivePhoto_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(LivePhotoRequest)
-	if err := dec(in); err != nil {
-		return nil, err
+func _KycService_GetKYCCheckStatus_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(ApplicationRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
 	}
-	if interceptor == nil {
-		return srv.(KycServiceServer).SubmitLivePhoto(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/kyc.KycService/SubmitLivePhoto",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KycServiceServer).SubmitLivePhoto(ctx, req.(*LivePhotoRequest))
-	}
-	return interceptor(ctx, in, info, handler)
+	return srv.(KycServiceServer).GetKYCCheckStatus(m, &kycServiceGetKYCCheckStatusServer{stream})
 }
 
-func _KycService_SubmitDocument_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DocumentRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KycServiceServer).SubmitDocument(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/kyc.KycService/SubmitDocument",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KycServiceServer).SubmitDocument(ctx, req.(*DocumentRequest))
-	}
-	return interceptor(ctx, in, info, handler)
+type KycService_GetKYCCheckStatusServer interface {
+	Send(*ApplicationResult) error
+	grpc.ServerStream
 }
 
-func _KycService_HandleKYCVendorResults_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(VendorResultsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KycServiceServer).HandleKYCVendorResults(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/kyc.KycService/HandleKYCVendorResults",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KycServiceServer).HandleKYCVendorResults(ctx, req.(*VendorResultsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
+type kycServiceGetKYCCheckStatusServer struct {
+	grpc.ServerStream
 }
 
-func _KycService_ListApplicants_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListApplicantsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KycServiceServer).ListApplicants(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/kyc.KycService/ListApplicants",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KycServiceServer).ListApplicants(ctx, req.(*ListApplicantsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KycService_GetApplicantById_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetApplicantByIdRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KycServiceServer).GetApplicantById(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/kyc.KycService/GetApplicantById",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KycServiceServer).GetApplicantById(ctx, req.(*GetApplicantByIdRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KycService_GetApplicantByPersonId_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetApplicantByPersonIdRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KycServiceServer).GetApplicantByPersonId(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/kyc.KycService/GetApplicantByPersonId",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KycServiceServer).GetApplicantByPersonId(ctx, req.(*GetApplicantByPersonIdRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KycService_HelloWorld_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Void)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KycServiceServer).HelloWorld(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/kyc.KycService/HelloWorld",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KycServiceServer).HelloWorld(ctx, req.(*Void))
-	}
-	return interceptor(ctx, in, info, handler)
+func (x *kycServiceGetKYCCheckStatusServer) Send(m *ApplicationResult) error {
+	return x.ServerStream.SendMsg(m)
 }
 
 var _KycService_serviceDesc = grpc.ServiceDesc{
@@ -1437,38 +848,16 @@ var _KycService_serviceDesc = grpc.ServiceDesc{
 	HandlerType: (*KycServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "submitLiveVideo",
-			Handler:    _KycService_SubmitLiveVideo_Handler,
-		},
-		{
-			MethodName: "submitLivePhoto",
-			Handler:    _KycService_SubmitLivePhoto_Handler,
-		},
-		{
-			MethodName: "submitDocument",
-			Handler:    _KycService_SubmitDocument_Handler,
-		},
-		{
-			MethodName: "handleKYCVendorResults",
-			Handler:    _KycService_HandleKYCVendorResults_Handler,
-		},
-		{
-			MethodName: "listApplicants",
-			Handler:    _KycService_ListApplicants_Handler,
-		},
-		{
-			MethodName: "getApplicantById",
-			Handler:    _KycService_GetApplicantById_Handler,
-		},
-		{
-			MethodName: "getApplicantByPersonId",
-			Handler:    _KycService_GetApplicantByPersonId_Handler,
-		},
-		{
-			MethodName: "helloWorld",
-			Handler:    _KycService_HelloWorld_Handler,
+			MethodName: "submitKYCApplication",
+			Handler:    _KycService_SubmitKYCApplication_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "getKYCCheckStatus",
+			Handler:       _KycService_GetKYCCheckStatus_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "kyc.proto",
 }

@@ -5,14 +5,13 @@ package graph
 
 import (
 	"context"
+	"fmt"
 
 	"ms.api/graph/generated"
-	"ms.api/protos/pb/kycService"
 )
 
-func (r *queryResolver) HelloWorld(ctx context.Context) (*kycService.Applicant, error) {
-	void := new(kycService.Void)
-	return r.kycClient.HelloWorld(context.Background(), void)
+func (r *queryResolver) SayPlayground(ctx context.Context) (*string, error) {
+	panic(fmt.Errorf("not implemented"))
 }
 
 // Query returns generated.QueryResolver implementation.
