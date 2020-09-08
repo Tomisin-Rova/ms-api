@@ -1,3 +1,6 @@
 type Query {
-    SayPlayground: String
+    getApplicantSDKToken(
+        applicantId: String!
+        applicationId: String!
+    ): ApplicantSDKTokenResponse
 }

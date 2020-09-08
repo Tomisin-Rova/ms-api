@@ -6,6 +6,7 @@ import (
 	"google.golang.org/grpc"
 	"ms.api/config"
 	"ms.api/protos/pb/kycService"
+	"ms.api/protos/pb/onfidoService"
 )
 
 // This file will not be regenerated automatically.
@@ -13,13 +14,18 @@ import (
 // It serves as dependency injection for your app, add any dependencies you require here.
 
 type Resolver struct {
-	kycClient kycService.KycServiceClient
+	onfidoClient onfidoService.OnfidoServiceClient
+	kycClient    kycService.KycServiceClient
 }
 
 func (r *Resolver) ConnectServiceDependencies() {
 	// TODO: Ensure it is secure when connecting.
 	// TODO: Find a way to watch the service outage and handle response to client.
 	// TODO: Read heartbeat from these services, if a heartbeat is out, buzz the admin.
+	if connection := dialRPC(config.GetSecrets().OnfidoServiceURL); connection != nil {
+		fmt.Print("Connected to ms.onfido \n")
+		r.onfidoClient = onfidoService.NewOnfidoServiceClient(connection)
+	}
 	if connection := dialRPC(config.GetSecrets().KYCServiceURL); connection != nil {
 		fmt.Print("Connected to ms.kyc \n")
 		r.kycClient = kycService.NewKycServiceClient(connection)

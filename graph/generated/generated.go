@@ -14,6 +14,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/introspection"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
+	"ms.api/protos/pb/onfidoService"
 	"ms.api/types"
 )
 
@@ -44,12 +45,21 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	ApplicantSDKTokenRequest struct {
+		ApplicantId   func(childComplexity int) int
+		ApplicationId func(childComplexity int) int
+	}
+
+	ApplicantSDKTokenResponse struct {
+		Token func(childComplexity int) int
+	}
+
 	Mutation struct {
 		SubmitKYCApplication func(childComplexity int, applicantID string) int
 	}
 
 	Query struct {
-		SayPlayground func(childComplexity int) int
+		GetApplicantSDKToken func(childComplexity int, applicantID string, applicationID string) int
 	}
 
 	Result struct {
@@ -66,7 +76,7 @@ type MutationResolver interface {
 	SubmitKYCApplication(ctx context.Context, applicantID string) (*types.Result, error)
 }
 type QueryResolver interface {
-	SayPlayground(ctx context.Context) (*string, error)
+	GetApplicantSDKToken(ctx context.Context, applicantID string, applicationID string) (*onfidoService.ApplicantSDKTokenResponse, error)
 }
 type SubscriptionResolver interface {
 	GetKYCApplicationResult(ctx context.Context, applicantID string) (<-chan *types.Result, error)
@@ -87,6 +97,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
+	case "ApplicantSDKTokenRequest.applicantId":
+		if e.complexity.ApplicantSDKTokenRequest.ApplicantId == nil {
+			break
+		}
+
+		return e.complexity.ApplicantSDKTokenRequest.ApplicantId(childComplexity), true
+
+	case "ApplicantSDKTokenRequest.applicationId":
+		if e.complexity.ApplicantSDKTokenRequest.ApplicationId == nil {
+			break
+		}
+
+		return e.complexity.ApplicantSDKTokenRequest.ApplicationId(childComplexity), true
+
+	case "ApplicantSDKTokenResponse.token":
+		if e.complexity.ApplicantSDKTokenResponse.Token == nil {
+			break
+		}
+
+		return e.complexity.ApplicantSDKTokenResponse.Token(childComplexity), true
+
 	case "Mutation.submitKYCApplication":
 		if e.complexity.Mutation.SubmitKYCApplication == nil {
 			break
@@ -99,12 +130,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.SubmitKYCApplication(childComplexity, args["applicantId"].(string)), true
 
-	case "Query.SayPlayground":
-		if e.complexity.Query.SayPlayground == nil {
+	case "Query.getApplicantSDKToken":
+		if e.complexity.Query.GetApplicantSDKToken == nil {
 			break
 		}
 
-		return e.complexity.Query.SayPlayground(childComplexity), true
+		args, err := ec.field_Query_getApplicantSDKToken_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetApplicantSDKToken(childComplexity, args["applicantId"].(string), args["applicationId"].(string)), true
 
 	case "Result.message":
 		if e.complexity.Result.Message == nil {
@@ -218,8 +254,19 @@ var sources = []*ast.Source{
         applicantId: String!
     ): Result
 }`, BuiltIn: false},
+	{Name: "graph/schemas/Onfido.graphql", Input: `type ApplicantSDKTokenRequest {
+    applicantId: String!
+    applicationId: String!
+}
+
+type ApplicantSDKTokenResponse {
+    token: String!
+}`, BuiltIn: false},
 	{Name: "graph/schemas/Query.graphql", Input: `type Query {
-    SayPlayground: String
+    getApplicantSDKToken(
+        applicantId: String!
+        applicationId: String!
+    ): ApplicantSDKTokenResponse
 }`, BuiltIn: false},
 	{Name: "graph/schemas/Shared.graphql", Input: `type Result {
     success: Boolean!
@@ -262,6 +309,30 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		}
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getApplicantSDKToken_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["applicantId"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("applicantId"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["applicantId"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["applicationId"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("applicationId"))
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["applicationId"] = arg1
 	return args, nil
 }
 
@@ -318,6 +389,108 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
+func (ec *executionContext) _ApplicantSDKTokenRequest_applicantId(ctx context.Context, field graphql.CollectedField, obj *onfidoService.ApplicantSDKTokenRequest) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ApplicantSDKTokenRequest",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ApplicantId, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ApplicantSDKTokenRequest_applicationId(ctx context.Context, field graphql.CollectedField, obj *onfidoService.ApplicantSDKTokenRequest) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ApplicantSDKTokenRequest",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ApplicationId, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ApplicantSDKTokenResponse_token(ctx context.Context, field graphql.CollectedField, obj *onfidoService.ApplicantSDKTokenResponse) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ApplicantSDKTokenResponse",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Token, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Mutation_submitKYCApplication(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -356,7 +529,7 @@ func (ec *executionContext) _Mutation_submitKYCApplication(ctx context.Context, 
 	return ec.marshalOResult2ᚖmsᚗapiᚋtypesᚐResult(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_SayPlayground(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_getApplicantSDKToken(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -371,9 +544,16 @@ func (ec *executionContext) _Query_SayPlayground(ctx context.Context, field grap
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getApplicantSDKToken_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().SayPlayground(rctx)
+		return ec.resolvers.Query().GetApplicantSDKToken(rctx, args["applicantId"].(string), args["applicationId"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -382,9 +562,9 @@ func (ec *executionContext) _Query_SayPlayground(ctx context.Context, field grap
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(*onfidoService.ApplicantSDKTokenResponse)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalOApplicantSDKTokenResponse2ᚖmsᚗapiᚋprotosᚋpbᚋonfidoServiceᚐApplicantSDKTokenResponse(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1638,6 +1818,65 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** object.gotpl ****************************
 
+var applicantSDKTokenRequestImplementors = []string{"ApplicantSDKTokenRequest"}
+
+func (ec *executionContext) _ApplicantSDKTokenRequest(ctx context.Context, sel ast.SelectionSet, obj *onfidoService.ApplicantSDKTokenRequest) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, applicantSDKTokenRequestImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ApplicantSDKTokenRequest")
+		case "applicantId":
+			out.Values[i] = ec._ApplicantSDKTokenRequest_applicantId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "applicationId":
+			out.Values[i] = ec._ApplicantSDKTokenRequest_applicationId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var applicantSDKTokenResponseImplementors = []string{"ApplicantSDKTokenResponse"}
+
+func (ec *executionContext) _ApplicantSDKTokenResponse(ctx context.Context, sel ast.SelectionSet, obj *onfidoService.ApplicantSDKTokenResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, applicantSDKTokenResponseImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ApplicantSDKTokenResponse")
+		case "token":
+			out.Values[i] = ec._ApplicantSDKTokenResponse_token(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var mutationImplementors = []string{"Mutation"}
 
 func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -1681,7 +1920,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
-		case "SayPlayground":
+		case "getApplicantSDKToken":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -1689,7 +1928,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_SayPlayground(ctx, field)
+				res = ec._Query_getApplicantSDKToken(ctx, field)
 				return res
 			})
 		case "__type":
@@ -2275,6 +2514,13 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalOApplicantSDKTokenResponse2ᚖmsᚗapiᚋprotosᚋpbᚋonfidoServiceᚐApplicantSDKTokenResponse(ctx context.Context, sel ast.SelectionSet, v *onfidoService.ApplicantSDKTokenResponse) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._ApplicantSDKTokenResponse(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
