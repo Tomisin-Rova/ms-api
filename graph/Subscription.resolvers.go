@@ -12,7 +12,7 @@ import (
 	"ms.api/types"
 )
 
-func (r *subscriptionResolver) GetKYCApplicationResult(ctx context.Context, applicantID string) (resultChan <-chan *types.Result, err error) {
+func (r *subscriptionResolver) GetKYCApplicationResult(ctx context.Context, applicantID string) (<-chan *types.Result, error) {
 	payload := kycService.ApplicationRequest{
 		ApplicantId: applicantID,
 	}

@@ -5,11 +5,19 @@ package graph
 
 import (
 	"context"
-
 	"ms.api/graph/generated"
 	"ms.api/protos/pb/kycService"
+	"ms.api/protos/pb/onfidoService"
 	"ms.api/types"
 )
+
+func (r *mutationResolver) GetApplicantSDKToken(ctx context.Context, applicantID string, applicationID string) (*onfidoService.ApplicantSDKTokenResponse, error) {
+	payload := onfidoService.ApplicantSDKTokenRequest{
+		ApplicantId:   applicantID,
+		ApplicationId: applicationID,
+	}
+	return r.onfidoClient.GenerateApplicantSDKToken(context.Background(), &payload)
+}
 
 func (r *mutationResolver) SubmitKYCApplication(ctx context.Context, applicantID string) (*types.Result, error) {
 	payload := kycService.ApplicationRequest{
