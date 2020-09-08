@@ -10,10 +10,14 @@ import (
 	"ms.api/protos/pb/onfidoService"
 )
 
-func (r *queryResolver) GetApplicantSDKToken(ctx context.Context, applicantID string, applicationID string) (*onfidoService.ApplicantSDKTokenResponse, error) {
+func (r *queryResolver) GetApplicantSDKToken(ctx context.Context) (*onfidoService.ApplicantSDKTokenResponse, error) {
+	// TODO: Get person's profile from JWT Token.
+	// TODO: Use person's ID to get their applicant_id from kyc service.
+
+	// Sample Valid Payload Hard-Coded.
+
 	payload := onfidoService.ApplicantSDKTokenRequest{
-		ApplicantId:   applicantID,
-		ApplicationId: applicationID,
+		ApplicantId: "f429d65a-331f-4199-bf59-a74c75266aed",
 	}
 	return r.onfidoClient.GenerateApplicantSDKToken(context.Background(), &payload)
 }

@@ -1,6 +1,3 @@
 type Query {
-    getApplicantSDKToken(
-        applicantId: String!
-        applicationId: String!
-    ): ApplicantSDKTokenResponse
+    getApplicantSDKToken: ApplicantSDKTokenResponse
 }
