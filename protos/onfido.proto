@@ -8,7 +8,6 @@ service OnfidoService {
 
 message ApplicantSDKTokenRequest {
   string applicantId = 1;
-  string applicationId = 2;
 }
 
 message ApplicantSDKTokenResponse {
