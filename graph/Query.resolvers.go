@@ -5,13 +5,17 @@ package graph
 
 import (
 	"context"
-	"fmt"
 
 	"ms.api/graph/generated"
+	"ms.api/protos/pb/onfidoService"
 )
 
-func (r *queryResolver) SayPlayground(ctx context.Context) (*string, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *queryResolver) GetApplicantSDKToken(ctx context.Context, applicantID string, applicationID string) (*onfidoService.ApplicantSDKTokenResponse, error) {
+	payload := onfidoService.ApplicantSDKTokenRequest{
+		ApplicantId:   applicantID,
+		ApplicationId: applicationID,
+	}
+	return r.onfidoClient.GenerateApplicantSDKToken(context.Background(), &payload)
 }
 
 // Query returns generated.QueryResolver implementation.

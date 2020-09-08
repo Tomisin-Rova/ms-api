@@ -9,7 +9,6 @@ import (
 	"io"
 	"strconv"
 	"sync"
-	"sync/atomic"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
@@ -37,7 +36,6 @@ type Config struct {
 }
 
 type ResolverRoot interface {
-	ApplicantSDKTokenRequest() ApplicantSDKTokenRequestResolver
 	Mutation() MutationResolver
 	Query() QueryResolver
 	Subscription() SubscriptionResolver
@@ -48,8 +46,8 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	ApplicantSDKTokenRequest struct {
-		ApplicaitonID func(childComplexity int) int
 		ApplicantId   func(childComplexity int) int
+		ApplicationId func(childComplexity int) int
 	}
 
 	ApplicantSDKTokenResponse struct {
@@ -57,12 +55,11 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		GetApplicantSDKToken func(childComplexity int, applicantID string, applicationID string) int
 		SubmitKYCApplication func(childComplexity int, applicantID string) int
 	}
 
 	Query struct {
-		SayPlayground func(childComplexity int) int
+		GetApplicantSDKToken func(childComplexity int, applicantID string, applicationID string) int
 	}
 
 	Result struct {
@@ -75,15 +72,11 @@ type ComplexityRoot struct {
 	}
 }
 
-type ApplicantSDKTokenRequestResolver interface {
-	ApplicaitonID(ctx context.Context, obj *onfidoService.ApplicantSDKTokenRequest) (string, error)
-}
 type MutationResolver interface {
-	GetApplicantSDKToken(ctx context.Context, applicantID string, applicationID string) (*onfidoService.ApplicantSDKTokenResponse, error)
 	SubmitKYCApplication(ctx context.Context, applicantID string) (*types.Result, error)
 }
 type QueryResolver interface {
-	SayPlayground(ctx context.Context) (*string, error)
+	GetApplicantSDKToken(ctx context.Context, applicantID string, applicationID string) (*onfidoService.ApplicantSDKTokenResponse, error)
 }
 type SubscriptionResolver interface {
 	GetKYCApplicationResult(ctx context.Context, applicantID string) (<-chan *types.Result, error)
@@ -104,13 +97,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "ApplicantSDKTokenRequest.applicaitonId":
-		if e.complexity.ApplicantSDKTokenRequest.ApplicaitonID == nil {
-			break
-		}
-
-		return e.complexity.ApplicantSDKTokenRequest.ApplicaitonID(childComplexity), true
-
 	case "ApplicantSDKTokenRequest.applicantId":
 		if e.complexity.ApplicantSDKTokenRequest.ApplicantId == nil {
 			break
@@ -118,24 +104,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ApplicantSDKTokenRequest.ApplicantId(childComplexity), true
 
+	case "ApplicantSDKTokenRequest.applicationId":
+		if e.complexity.ApplicantSDKTokenRequest.ApplicationId == nil {
+			break
+		}
+
+		return e.complexity.ApplicantSDKTokenRequest.ApplicationId(childComplexity), true
+
 	case "ApplicantSDKTokenResponse.token":
 		if e.complexity.ApplicantSDKTokenResponse.Token == nil {
 			break
 		}
 
 		return e.complexity.ApplicantSDKTokenResponse.Token(childComplexity), true
-
-	case "Mutation.getApplicantSDKToken":
-		if e.complexity.Mutation.GetApplicantSDKToken == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_getApplicantSDKToken_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.GetApplicantSDKToken(childComplexity, args["applicantId"].(string), args["applicationId"].(string)), true
 
 	case "Mutation.submitKYCApplication":
 		if e.complexity.Mutation.SubmitKYCApplication == nil {
@@ -149,12 +130,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.SubmitKYCApplication(childComplexity, args["applicantId"].(string)), true
 
-	case "Query.SayPlayground":
-		if e.complexity.Query.SayPlayground == nil {
+	case "Query.getApplicantSDKToken":
+		if e.complexity.Query.GetApplicantSDKToken == nil {
 			break
 		}
 
-		return e.complexity.Query.SayPlayground(childComplexity), true
+		args, err := ec.field_Query_getApplicantSDKToken_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetApplicantSDKToken(childComplexity, args["applicantId"].(string), args["applicationId"].(string)), true
 
 	case "Result.message":
 		if e.complexity.Result.Message == nil {
@@ -264,24 +250,23 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 
 var sources = []*ast.Source{
 	{Name: "graph/schemas/Mutation.graphql", Input: `type Mutation {
-    getApplicantSDKToken(
-        applicantId: String!
-        applicationId: String!
-    ): ApplicantSDKTokenResponse
     submitKYCApplication(
         applicantId: String!
     ): Result
 }`, BuiltIn: false},
 	{Name: "graph/schemas/Onfido.graphql", Input: `type ApplicantSDKTokenRequest {
     applicantId: String!
-    applicaitonId: String!
+    applicationId: String!
 }
 
 type ApplicantSDKTokenResponse {
     token: String!
 }`, BuiltIn: false},
 	{Name: "graph/schemas/Query.graphql", Input: `type Query {
-    SayPlayground: String
+    getApplicantSDKToken(
+        applicantId: String!
+        applicationId: String!
+    ): ApplicantSDKTokenResponse
 }`, BuiltIn: false},
 	{Name: "graph/schemas/Shared.graphql", Input: `type Result {
     success: Boolean!
@@ -296,30 +281,6 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
-
-func (ec *executionContext) field_Mutation_getApplicantSDKToken_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["applicantId"]; ok {
-		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("applicantId"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["applicantId"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["applicationId"]; ok {
-		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("applicationId"))
-		arg1, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["applicationId"] = arg1
-	return args, nil
-}
 
 func (ec *executionContext) field_Mutation_submitKYCApplication_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -348,6 +309,30 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		}
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getApplicantSDKToken_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["applicantId"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("applicantId"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["applicantId"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["applicationId"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("applicationId"))
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["applicationId"] = arg1
 	return args, nil
 }
 
@@ -438,7 +423,7 @@ func (ec *executionContext) _ApplicantSDKTokenRequest_applicantId(ctx context.Co
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _ApplicantSDKTokenRequest_applicaitonId(ctx context.Context, field graphql.CollectedField, obj *onfidoService.ApplicantSDKTokenRequest) (ret graphql.Marshaler) {
+func (ec *executionContext) _ApplicantSDKTokenRequest_applicationId(ctx context.Context, field graphql.CollectedField, obj *onfidoService.ApplicantSDKTokenRequest) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -449,13 +434,13 @@ func (ec *executionContext) _ApplicantSDKTokenRequest_applicaitonId(ctx context.
 		Object:   "ApplicantSDKTokenRequest",
 		Field:    field,
 		Args:     nil,
-		IsMethod: true,
+		IsMethod: false,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.ApplicantSDKTokenRequest().ApplicaitonID(rctx, obj)
+		return obj.ApplicationId, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -506,44 +491,6 @@ func (ec *executionContext) _ApplicantSDKTokenResponse_token(ctx context.Context
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Mutation_getApplicantSDKToken(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Mutation",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_getApplicantSDKToken_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().GetApplicantSDKToken(rctx, args["applicantId"].(string), args["applicationId"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*onfidoService.ApplicantSDKTokenResponse)
-	fc.Result = res
-	return ec.marshalOApplicantSDKTokenResponse2ᚖmsᚗapiᚋprotosᚋpbᚋonfidoServiceᚐApplicantSDKTokenResponse(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Mutation_submitKYCApplication(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -582,7 +529,7 @@ func (ec *executionContext) _Mutation_submitKYCApplication(ctx context.Context, 
 	return ec.marshalOResult2ᚖmsᚗapiᚋtypesᚐResult(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_SayPlayground(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_getApplicantSDKToken(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -597,9 +544,16 @@ func (ec *executionContext) _Query_SayPlayground(ctx context.Context, field grap
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getApplicantSDKToken_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().SayPlayground(rctx)
+		return ec.resolvers.Query().GetApplicantSDKToken(rctx, args["applicantId"].(string), args["applicationId"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -608,9 +562,9 @@ func (ec *executionContext) _Query_SayPlayground(ctx context.Context, field grap
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(*onfidoService.ApplicantSDKTokenResponse)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalOApplicantSDKTokenResponse2ᚖmsᚗapiᚋprotosᚋpbᚋonfidoServiceᚐApplicantSDKTokenResponse(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1878,22 +1832,13 @@ func (ec *executionContext) _ApplicantSDKTokenRequest(ctx context.Context, sel a
 		case "applicantId":
 			out.Values[i] = ec._ApplicantSDKTokenRequest_applicantId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
-		case "applicaitonId":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._ApplicantSDKTokenRequest_applicaitonId(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
+		case "applicationId":
+			out.Values[i] = ec._ApplicantSDKTokenRequest_applicationId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -1947,8 +1892,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Mutation")
-		case "getApplicantSDKToken":
-			out.Values[i] = ec._Mutation_getApplicantSDKToken(ctx, field)
 		case "submitKYCApplication":
 			out.Values[i] = ec._Mutation_submitKYCApplication(ctx, field)
 		default:
@@ -1977,7 +1920,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
-		case "SayPlayground":
+		case "getApplicantSDKToken":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -1985,7 +1928,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_SayPlayground(ctx, field)
+				res = ec._Query_getApplicantSDKToken(ctx, field)
 				return res
 			})
 		case "__type":

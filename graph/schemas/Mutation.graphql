@@ -1,8 +1,4 @@
 type Mutation {
-    getApplicantSDKToken(
-        applicantId: String!
-        applicationId: String!
-    ): ApplicantSDKTokenResponse
     submitKYCApplication(
         applicantId: String!
     ): Result

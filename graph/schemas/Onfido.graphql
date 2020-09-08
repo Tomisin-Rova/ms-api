@@ -1,6 +1,6 @@
 type ApplicantSDKTokenRequest {
     applicantId: String!
-    applicaitonId: String!
+    applicationId: String!
 }
 
 type ApplicantSDKTokenResponse {
