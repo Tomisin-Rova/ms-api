@@ -5,25 +5,22 @@ package graph
 
 import (
 	"context"
-	"ms.api/protos/pb/kycService"
-
 	"ms.api/graph/generated"
+	"ms.api/protos/pb/kycService"
 	"ms.api/protos/pb/onfidoService"
 )
 
 func (r *queryResolver) GetApplicantSDKToken(ctx context.Context) (*onfidoService.ApplicantSDKTokenResponse, error) {
 	// TODO: Get person's profile from JWT Token.
-
+	//person, _ := middlewares.GetAuthenticatedUser(ctx)
 	// Sample Hard Coded PersonID
-	applicant, err := r.kycClient.GetApplicantByPersonId(context.Background(),
-		&kycService.ApplicantByPersonIdRequest{PersonId: "X1X2X3X4X5X6X7X8X9"})
+	applicant, err := r.kycClient.GetApplicantByPersonId(ctx, &kycService.ApplicantByPersonIdRequest{PersonId: "X1X2X3X4X5X6X7X8X9X10"})
 	if err != nil {
 		return nil, err
 	}
 
 	// Sample Valid Payload Hard-Coded.
-	payload := onfidoService.ApplicantSDKTokenRequest{ApplicantId: applicant.Id}
-	return r.onfidoClient.GenerateApplicantSDKToken(context.Background(), &payload)
+	return r.onfidoClient.GenerateApplicantSDKToken(ctx, &onfidoService.ApplicantSDKTokenRequest{ApplicantId: applicant.Id})
 }
 
 // Query returns generated.QueryResolver implementation.
