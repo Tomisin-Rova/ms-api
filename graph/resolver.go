@@ -7,6 +7,7 @@ import (
 	"ms.api/config"
 	"ms.api/protos/pb/kycService"
 	"ms.api/protos/pb/onfidoService"
+	"ms.api/protos/pb/onboardingService"
 )
 
 // This file will not be regenerated automatically.
@@ -16,6 +17,7 @@ import (
 type Resolver struct {
 	onfidoClient onfidoService.OnfidoServiceClient
 	kycClient    kycService.KycServiceClient
+	onboardingClient onboardingService.OnBoardingServiceClient
 }
 
 func (r *Resolver) ConnectServiceDependencies() {
@@ -29,6 +31,10 @@ func (r *Resolver) ConnectServiceDependencies() {
 	if connection := dialRPC(config.GetSecrets().KYCServiceURL); connection != nil {
 		fmt.Print("Connected to ms.kyc \n")
 		r.kycClient = kycService.NewKycServiceClient(connection)
+	}
+	if connection := dialRPC(config.GetSecrets().OnboardingServiceURL); connection != nil {
+		fmt.Print("Connected to ms.onboarding \n")
+		r.onboardingClient = onboardingService.NewOnBoardingServiceClient(connection)
 	}
 }
 

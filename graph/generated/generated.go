@@ -54,6 +54,7 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
+		CreatePasscode       func(childComplexity int, userID string, passcode string) int
 		SubmitKYCApplication func(childComplexity int, applicantID string) int
 	}
 
@@ -73,6 +74,7 @@ type ComplexityRoot struct {
 
 type MutationResolver interface {
 	SubmitKYCApplication(ctx context.Context, applicantID string) (*types.Result, error)
+	CreatePasscode(ctx context.Context, userID string, passcode string) (*types.Result, error)
 }
 type QueryResolver interface {
 	GetApplicantSDKToken(ctx context.Context) (*onfidoService.ApplicantSDKTokenResponse, error)
@@ -109,6 +111,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ApplicantSDKTokenResponse.Token(childComplexity), true
+
+	case "Mutation.CreatePasscode":
+		if e.complexity.Mutation.CreatePasscode == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_CreatePasscode_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreatePasscode(childComplexity, args["userId"].(string), args["passcode"].(string)), true
 
 	case "Mutation.submitKYCApplication":
 		if e.complexity.Mutation.SubmitKYCApplication == nil {
@@ -240,6 +254,10 @@ var sources = []*ast.Source{
     submitKYCApplication(
         applicantId: String!
     ): Result
+    CreatePasscode(
+        userId: String!,
+        passcode: String!
+    ): Result
 }`, BuiltIn: false},
 	{Name: "graph/schemas/Onfido.graphql", Input: `type ApplicantSDKTokenRequest {
     applicantId: String!
@@ -264,6 +282,30 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Mutation_CreatePasscode_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["userId"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("userId"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["userId"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["passcode"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("passcode"))
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["passcode"] = arg1
+	return args, nil
+}
 
 func (ec *executionContext) field_Mutation_submitKYCApplication_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -441,6 +483,44 @@ func (ec *executionContext) _Mutation_submitKYCApplication(ctx context.Context, 
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().SubmitKYCApplication(rctx, args["applicantId"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*types.Result)
+	fc.Result = res
+	return ec.marshalOResult2ᚖmsᚗapiᚋtypesᚐResult(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_CreatePasscode(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_CreatePasscode_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreatePasscode(rctx, args["userId"].(string), args["passcode"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1807,6 +1887,8 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = graphql.MarshalString("Mutation")
 		case "submitKYCApplication":
 			out.Values[i] = ec._Mutation_submitKYCApplication(ctx, field)
+		case "CreatePasscode":
+			out.Values[i] = ec._Mutation_CreatePasscode(ctx, field)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
