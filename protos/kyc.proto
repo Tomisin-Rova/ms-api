@@ -1,18 +1,31 @@
 syntax = "proto3";
 package kyc;
-option go_package = ".;kycService";
+option go_package = "pb/kycService";
+import "google/protobuf/timestamp.proto";
+//import "github.com/amsokolprotoc-gen-gotag/tagger/tagger.proto";
 
 service KycService {
   rpc submitKYCApplication(applicationRequest) returns(applicationResult){}
-  rpc getKYCCheckStatus(applicationRequest) returns(stream applicationResult){}
+  rpc getKYCCheckStatus(applicationRequest) returns(stream check){}
+  rpc getApplicantByPersonId(applicantByPersonIdRequest) returns(applicant){}
 }
 
 message applicationRequest{
   string applicantId = 1;
 }
 
-message kycCheckStatus {
+message applicantByPersonIdRequest {
+  string person_id = 1;
+}
 
+message check {
+  string id = 1;
+  string person_id = 2;
+  string applicant_id = 3;
+  string status = 4;
+  repeated tag tags = 5;
+  repeated document documents = 6;
+  google.protobuf.Timestamp timestamp = 7;
 }
 
 message applicationResult {
@@ -35,7 +48,7 @@ message address {
 
 message applicant {
   string id = 1;
-  string personId = 2;
+  string person_id = 2;
   string first_name = 3;
   string last_name = 5;
   string email = 6;
@@ -52,4 +65,12 @@ message applicantsList {
 message serviceResponse {
   bool success = 1;
   string message = 2;
+}
+
+message tag {
+
+}
+
+message document {
+
 }
