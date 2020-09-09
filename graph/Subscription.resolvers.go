@@ -33,8 +33,8 @@ func (r *subscriptionResolver) GetKYCApplicationResult(ctx context.Context, appl
 			if check != nil {
 				var result types.Result
 
-				result.Success = check.Success
-				result.Message = check.Message
+				//result.Success = check.Success
+				//result.Message = check.Message
 
 				ch <- &result
 			}
