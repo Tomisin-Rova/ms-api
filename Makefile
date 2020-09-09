@@ -22,3 +22,20 @@ docker:
 
 local:
 	go run .
+
+docker-pulsar:
+	docker run -d \
+      -p 6650:6650 \
+      -p 8080:8080 \
+      --mount source=pulsardata,target=/var/pulsar/data \
+      --mount source=pulsarconf,target=/var/pulsar/conf \
+      apachepulsar/pulsar:2.6.1 \
+      bin/pulsar standalone
+
+docker-mongo:
+	docker run -d  \
+	  -p 27017:27017 \
+	  --env MONGO_INITDB_ROOT_USERNAME=root \
+	  --env MONGO_INITDB_ROOT_PASSWORD=root \
+	  --env MONGO_INITDB_DATABASE=roava \
+	  mongo:4.2.9

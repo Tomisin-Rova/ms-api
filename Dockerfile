@@ -17,6 +17,7 @@ RUN apk add --no-cache tzdata
 ENV TZ Africa/Lagos
 
 RUN mkdir -p /svc/
+RUN touch /svc/.env
 COPY --from=builder /go/src/ms.api/ms.api /svc/
 
 WORKDIR /svc/
