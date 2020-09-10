@@ -42,6 +42,39 @@ func (r *mutationResolver) CreatePasscode(ctx context.Context, userID string, pa
 	}, nil
 }
 
+func (r *mutationResolver) UpdatePersonBiodata(ctx context.Context, personID string, address string, firstName string, lastName string, dob string) (*types.Result, error) {
+	payload := onboardingService.UpdatePersonRequest{
+		PersonId:  personID,
+		Address:   address,
+		FirstName: firstName,
+		LastName:  lastName,
+		Dob:       dob,
+	}
+	res, err := r.onboardingClient.UpdatePersonBiodata(context.Background(), &payload)
+	if err != nil {
+		return nil, err
+	}
+	return &types.Result{
+		Success: true,
+		Message: res.Message,
+	}, nil
+}
+
+func (r *mutationResolver) AddReasonsForUsingRoava(ctx context.Context, personID string, reasons string) (*types.Result, error) {
+	payload := onboardingService.RoavaReasonsRequest{
+		PersonId: personID,
+		Reasons:  reasons,
+	}
+	res, err := r.onboardingClient.AddReasonsForUsingRoava(context.Background(), &payload)
+	if err != nil {
+		return nil, err
+	}
+	return &types.Result{
+		Success: true,
+		Message: res.Message,
+	}, nil
+}
+
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 
