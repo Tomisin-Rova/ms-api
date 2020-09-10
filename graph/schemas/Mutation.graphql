@@ -6,4 +6,15 @@ type Mutation {
         userId: String!,
         passcode: String!
     ): Result
+    updatePersonBiodata(
+        personId: String!,
+        address: String!
+        firstName: String!,
+        lastName: String!
+        dob: String!,
+    ) : Result
+    addReasonsForUsingRoava(
+        personId: String!,
+        reasons: String!
+    ) : Result
 }

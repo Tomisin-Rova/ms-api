@@ -1,11 +1,13 @@
 syntax = "proto3";
 
 package onboarding;
-option go_package = ".;onboardingService";
+option go_package = "pb/onboardingService";
 
 service OnBoardingService {
     rpc CreatePhone(CreatePhoneRequest) returns(MsgResponse) {}
     rpc CreatePasscode(CreatePasscodeRequest) returns(MsgResponse) {}
+    rpc UpdatePersonBiodata(UpdatePersonRequest) returns (SuccessResponse) {}
+    rpc AddReasonsForUsingRoava(RoavaReasonsRequest) returns (SuccessResponse) {}
 }
 
 message CreatePhoneRequest {
@@ -31,4 +33,17 @@ message CreatePasscodeRequest {
 
 message MsgResponse {
     string message = 1;
+}
+
+message UpdatePersonRequest {
+    string personId = 1;
+    string address = 2;
+    string firstName =3;
+    string lastName =4;
+    string dob = 5;
+}
+
+message RoavaReasonsRequest {
+    string personId = 1;
+    string reasons = 2;
 }
