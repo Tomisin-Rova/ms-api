@@ -4,7 +4,7 @@
 // 	protoc        v3.12.3
 // source: onboarding.proto
 
-package onboarding
+package onboardingService
 
 import (
 	context "context"
@@ -257,19 +257,16 @@ func (x *CreatePasscodeRequest) GetPasscode() string {
 	return ""
 }
 
-type CreateEmailRequest struct {
+type MsgResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Name     string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Value    string `protobuf:"bytes,2,opt,name=value,proto3" json:"value,omitempty"`
-	Primary  bool   `protobuf:"varint,3,opt,name=primary,proto3" json:"primary,omitempty"`
-	Verified bool   `protobuf:"varint,4,opt,name=verified,proto3" json:"verified,omitempty"`
+	Message string `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 }
 
-func (x *CreateEmailRequest) Reset() {
-	*x = CreateEmailRequest{}
+func (x *MsgResponse) Reset() {
+	*x = MsgResponse{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_onboarding_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -277,13 +274,13 @@ func (x *CreateEmailRequest) Reset() {
 	}
 }
 
-func (x *CreateEmailRequest) String() string {
+func (x *MsgResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*CreateEmailRequest) ProtoMessage() {}
+func (*MsgResponse) ProtoMessage() {}
 
-func (x *CreateEmailRequest) ProtoReflect() protoreflect.Message {
+func (x *MsgResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_onboarding_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -295,37 +292,150 @@ func (x *CreateEmailRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use CreateEmailRequest.ProtoReflect.Descriptor instead.
-func (*CreateEmailRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use MsgResponse.ProtoReflect.Descriptor instead.
+func (*MsgResponse) Descriptor() ([]byte, []int) {
 	return file_onboarding_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *CreateEmailRequest) GetName() string {
+func (x *MsgResponse) GetMessage() string {
 	if x != nil {
-		return x.Name
+		return x.Message
 	}
 	return ""
 }
 
-func (x *CreateEmailRequest) GetValue() string {
+type UpdatePersonRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	PersonId  string `protobuf:"bytes,1,opt,name=personId,proto3" json:"personId,omitempty"`
+	Address   string `protobuf:"bytes,2,opt,name=address,proto3" json:"address,omitempty"`
+	FirstName string `protobuf:"bytes,3,opt,name=firstName,proto3" json:"firstName,omitempty"`
+	LastName  string `protobuf:"bytes,4,opt,name=lastName,proto3" json:"lastName,omitempty"`
+	Dob       string `protobuf:"bytes,5,opt,name=dob,proto3" json:"dob,omitempty"`
+}
+
+func (x *UpdatePersonRequest) Reset() {
+	*x = UpdatePersonRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_onboarding_proto_msgTypes[5]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *UpdatePersonRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdatePersonRequest) ProtoMessage() {}
+
+func (x *UpdatePersonRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_onboarding_proto_msgTypes[5]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdatePersonRequest.ProtoReflect.Descriptor instead.
+func (*UpdatePersonRequest) Descriptor() ([]byte, []int) {
+	return file_onboarding_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *UpdatePersonRequest) GetPersonId() string {
 	if x != nil {
-		return x.Value
+		return x.PersonId
 	}
 	return ""
 }
 
-func (x *CreateEmailRequest) GetPrimary() bool {
+func (x *UpdatePersonRequest) GetAddress() string {
 	if x != nil {
-		return x.Primary
+		return x.Address
 	}
-	return false
+	return ""
 }
 
-func (x *CreateEmailRequest) GetVerified() bool {
+func (x *UpdatePersonRequest) GetFirstName() string {
 	if x != nil {
-		return x.Verified
+		return x.FirstName
 	}
-	return false
+	return ""
+}
+
+func (x *UpdatePersonRequest) GetLastName() string {
+	if x != nil {
+		return x.LastName
+	}
+	return ""
+}
+
+func (x *UpdatePersonRequest) GetDob() string {
+	if x != nil {
+		return x.Dob
+	}
+	return ""
+}
+
+type RoavaReasonsRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	PersonId string `protobuf:"bytes,1,opt,name=personId,proto3" json:"personId,omitempty"`
+	Reasons  string `protobuf:"bytes,2,opt,name=reasons,proto3" json:"reasons,omitempty"`
+}
+
+func (x *RoavaReasonsRequest) Reset() {
+	*x = RoavaReasonsRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_onboarding_proto_msgTypes[6]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *RoavaReasonsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RoavaReasonsRequest) ProtoMessage() {}
+
+func (x *RoavaReasonsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_onboarding_proto_msgTypes[6]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RoavaReasonsRequest.ProtoReflect.Descriptor instead.
+func (*RoavaReasonsRequest) Descriptor() ([]byte, []int) {
+	return file_onboarding_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *RoavaReasonsRequest) GetPersonId() string {
+	if x != nil {
+		return x.PersonId
+	}
+	return ""
+}
+
+func (x *RoavaReasonsRequest) GetReasons() string {
+	if x != nil {
+		return x.Reasons
+	}
+	return ""
 }
 
 var File_onboarding_proto protoreflect.FileDescriptor
@@ -353,32 +463,48 @@ var file_onboarding_proto_rawDesc = []byte{
 	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1a, 0x0a, 0x08, 0x70, 0x65, 0x72, 0x73, 0x6f, 0x6e,
 	0x49, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x70, 0x65, 0x72, 0x73, 0x6f, 0x6e,
 	0x49, 0x64, 0x12, 0x1a, 0x0a, 0x08, 0x70, 0x61, 0x73, 0x73, 0x63, 0x6f, 0x64, 0x65, 0x18, 0x02,
-	0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x70, 0x61, 0x73, 0x73, 0x63, 0x6f, 0x64, 0x65, 0x22, 0x74,
-	0x0a, 0x12, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x45, 0x6d, 0x61, 0x69, 0x6c, 0x52, 0x65, 0x71,
-	0x75, 0x65, 0x73, 0x74, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01,
-	0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x14, 0x0a, 0x05, 0x76, 0x61, 0x6c, 0x75,
-	0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x12, 0x18,
-	0x0a, 0x07, 0x70, 0x72, 0x69, 0x6d, 0x61, 0x72, 0x79, 0x18, 0x03, 0x20, 0x01, 0x28, 0x08, 0x52,
-	0x07, 0x70, 0x72, 0x69, 0x6d, 0x61, 0x72, 0x79, 0x12, 0x1a, 0x0a, 0x08, 0x76, 0x65, 0x72, 0x69,
-	0x66, 0x69, 0x65, 0x64, 0x18, 0x04, 0x20, 0x01, 0x28, 0x08, 0x52, 0x08, 0x76, 0x65, 0x72, 0x69,
-	0x66, 0x69, 0x65, 0x64, 0x32, 0x83, 0x02, 0x0a, 0x11, 0x4f, 0x6e, 0x42, 0x6f, 0x61, 0x72, 0x64,
-	0x69, 0x6e, 0x67, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x4c, 0x0a, 0x0b, 0x43, 0x72,
-	0x65, 0x61, 0x74, 0x65, 0x50, 0x68, 0x6f, 0x6e, 0x65, 0x12, 0x1e, 0x2e, 0x6f, 0x6e, 0x62, 0x6f,
-	0x61, 0x72, 0x64, 0x69, 0x6e, 0x67, 0x2e, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x50, 0x68, 0x6f,
-	0x6e, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1b, 0x2e, 0x6f, 0x6e, 0x62, 0x6f,
-	0x61, 0x72, 0x64, 0x69, 0x6e, 0x67, 0x2e, 0x53, 0x75, 0x63, 0x63, 0x65, 0x73, 0x73, 0x52, 0x65,
-	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x4c, 0x0a, 0x0b, 0x43, 0x72, 0x65, 0x61,
-	0x74, 0x65, 0x45, 0x6d, 0x61, 0x69, 0x6c, 0x12, 0x1e, 0x2e, 0x6f, 0x6e, 0x62, 0x6f, 0x61, 0x72,
-	0x64, 0x69, 0x6e, 0x67, 0x2e, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x45, 0x6d, 0x61, 0x69, 0x6c,
-	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1b, 0x2e, 0x6f, 0x6e, 0x62, 0x6f, 0x61, 0x72,
-	0x64, 0x69, 0x6e, 0x67, 0x2e, 0x53, 0x75, 0x63, 0x63, 0x65, 0x73, 0x73, 0x52, 0x65, 0x73, 0x70,
-	0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x52, 0x0a, 0x0e, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65,
-	0x50, 0x61, 0x73, 0x73, 0x63, 0x6f, 0x64, 0x65, 0x12, 0x21, 0x2e, 0x6f, 0x6e, 0x62, 0x6f, 0x61,
-	0x72, 0x64, 0x69, 0x6e, 0x67, 0x2e, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x50, 0x61, 0x73, 0x73,
-	0x63, 0x6f, 0x64, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1b, 0x2e, 0x6f, 0x6e,
-	0x62, 0x6f, 0x61, 0x72, 0x64, 0x69, 0x6e, 0x67, 0x2e, 0x53, 0x75, 0x63, 0x63, 0x65, 0x73, 0x73,
-	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x33,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x70, 0x61, 0x73, 0x73, 0x63, 0x6f, 0x64, 0x65, 0x22, 0x27,
+	0x0a, 0x0b, 0x4d, 0x73, 0x67, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x18, 0x0a,
+	0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07,
+	0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x22, 0x97, 0x01, 0x0a, 0x13, 0x55, 0x70, 0x64, 0x61,
+	0x74, 0x65, 0x50, 0x65, 0x72, 0x73, 0x6f, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12,
+	0x1a, 0x0a, 0x08, 0x70, 0x65, 0x72, 0x73, 0x6f, 0x6e, 0x49, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x08, 0x70, 0x65, 0x72, 0x73, 0x6f, 0x6e, 0x49, 0x64, 0x12, 0x18, 0x0a, 0x07, 0x61,
+	0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x61, 0x64,
+	0x64, 0x72, 0x65, 0x73, 0x73, 0x12, 0x1c, 0x0a, 0x09, 0x66, 0x69, 0x72, 0x73, 0x74, 0x4e, 0x61,
+	0x6d, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x66, 0x69, 0x72, 0x73, 0x74, 0x4e,
+	0x61, 0x6d, 0x65, 0x12, 0x1a, 0x0a, 0x08, 0x6c, 0x61, 0x73, 0x74, 0x4e, 0x61, 0x6d, 0x65, 0x18,
+	0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x6c, 0x61, 0x73, 0x74, 0x4e, 0x61, 0x6d, 0x65, 0x12,
+	0x10, 0x0a, 0x03, 0x64, 0x6f, 0x62, 0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x64, 0x6f,
+	0x62, 0x22, 0x4b, 0x0a, 0x13, 0x52, 0x6f, 0x61, 0x76, 0x61, 0x52, 0x65, 0x61, 0x73, 0x6f, 0x6e,
+	0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1a, 0x0a, 0x08, 0x70, 0x65, 0x72, 0x73,
+	0x6f, 0x6e, 0x49, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x70, 0x65, 0x72, 0x73,
+	0x6f, 0x6e, 0x49, 0x64, 0x12, 0x18, 0x0a, 0x07, 0x72, 0x65, 0x61, 0x73, 0x6f, 0x6e, 0x73, 0x18,
+	0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x72, 0x65, 0x61, 0x73, 0x6f, 0x6e, 0x73, 0x32, 0xdf,
+	0x02, 0x0a, 0x11, 0x4f, 0x6e, 0x42, 0x6f, 0x61, 0x72, 0x64, 0x69, 0x6e, 0x67, 0x53, 0x65, 0x72,
+	0x76, 0x69, 0x63, 0x65, 0x12, 0x48, 0x0a, 0x0b, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x50, 0x68,
+	0x6f, 0x6e, 0x65, 0x12, 0x1e, 0x2e, 0x6f, 0x6e, 0x62, 0x6f, 0x61, 0x72, 0x64, 0x69, 0x6e, 0x67,
+	0x2e, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x50, 0x68, 0x6f, 0x6e, 0x65, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x1a, 0x17, 0x2e, 0x6f, 0x6e, 0x62, 0x6f, 0x61, 0x72, 0x64, 0x69, 0x6e, 0x67,
+	0x2e, 0x4d, 0x73, 0x67, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x4e,
+	0x0a, 0x0e, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x50, 0x61, 0x73, 0x73, 0x63, 0x6f, 0x64, 0x65,
+	0x12, 0x21, 0x2e, 0x6f, 0x6e, 0x62, 0x6f, 0x61, 0x72, 0x64, 0x69, 0x6e, 0x67, 0x2e, 0x43, 0x72,
+	0x65, 0x61, 0x74, 0x65, 0x50, 0x61, 0x73, 0x73, 0x63, 0x6f, 0x64, 0x65, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x1a, 0x17, 0x2e, 0x6f, 0x6e, 0x62, 0x6f, 0x61, 0x72, 0x64, 0x69, 0x6e, 0x67,
+	0x2e, 0x4d, 0x73, 0x67, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x55,
+	0x0a, 0x13, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x50, 0x65, 0x72, 0x73, 0x6f, 0x6e, 0x42, 0x69,
+	0x6f, 0x64, 0x61, 0x74, 0x61, 0x12, 0x1f, 0x2e, 0x6f, 0x6e, 0x62, 0x6f, 0x61, 0x72, 0x64, 0x69,
+	0x6e, 0x67, 0x2e, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x50, 0x65, 0x72, 0x73, 0x6f, 0x6e, 0x52,
+	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1b, 0x2e, 0x6f, 0x6e, 0x62, 0x6f, 0x61, 0x72, 0x64,
+	0x69, 0x6e, 0x67, 0x2e, 0x53, 0x75, 0x63, 0x63, 0x65, 0x73, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f,
+	0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x59, 0x0a, 0x17, 0x41, 0x64, 0x64, 0x52, 0x65, 0x61, 0x73,
+	0x6f, 0x6e, 0x73, 0x46, 0x6f, 0x72, 0x55, 0x73, 0x69, 0x6e, 0x67, 0x52, 0x6f, 0x61, 0x76, 0x61,
+	0x12, 0x1f, 0x2e, 0x6f, 0x6e, 0x62, 0x6f, 0x61, 0x72, 0x64, 0x69, 0x6e, 0x67, 0x2e, 0x52, 0x6f,
+	0x61, 0x76, 0x61, 0x52, 0x65, 0x61, 0x73, 0x6f, 0x6e, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
+	0x74, 0x1a, 0x1b, 0x2e, 0x6f, 0x6e, 0x62, 0x6f, 0x61, 0x72, 0x64, 0x69, 0x6e, 0x67, 0x2e, 0x53,
+	0x75, 0x63, 0x63, 0x65, 0x73, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00,
+	0x42, 0x16, 0x5a, 0x14, 0x70, 0x62, 0x2f, 0x6f, 0x6e, 0x62, 0x6f, 0x61, 0x72, 0x64, 0x69, 0x6e,
+	0x67, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -393,24 +519,28 @@ func file_onboarding_proto_rawDescGZIP() []byte {
 	return file_onboarding_proto_rawDescData
 }
 
-var file_onboarding_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_onboarding_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_onboarding_proto_goTypes = []interface{}{
 	(*CreatePhoneRequest)(nil),    // 0: onboarding.CreatePhoneRequest
 	(*Device)(nil),                // 1: onboarding.Device
 	(*SuccessResponse)(nil),       // 2: onboarding.SuccessResponse
 	(*CreatePasscodeRequest)(nil), // 3: onboarding.CreatePasscodeRequest
-	(*CreateEmailRequest)(nil),    // 4: onboarding.CreateEmailRequest
+	(*MsgResponse)(nil),           // 4: onboarding.MsgResponse
+	(*UpdatePersonRequest)(nil),   // 5: onboarding.UpdatePersonRequest
+	(*RoavaReasonsRequest)(nil),   // 6: onboarding.RoavaReasonsRequest
 }
 var file_onboarding_proto_depIdxs = []int32{
 	1, // 0: onboarding.CreatePhoneRequest.device:type_name -> onboarding.Device
 	0, // 1: onboarding.OnBoardingService.CreatePhone:input_type -> onboarding.CreatePhoneRequest
-	4, // 2: onboarding.OnBoardingService.CreateEmail:input_type -> onboarding.CreateEmailRequest
-	3, // 3: onboarding.OnBoardingService.CreatePasscode:input_type -> onboarding.CreatePasscodeRequest
-	2, // 4: onboarding.OnBoardingService.CreatePhone:output_type -> onboarding.SuccessResponse
-	2, // 5: onboarding.OnBoardingService.CreateEmail:output_type -> onboarding.SuccessResponse
-	2, // 6: onboarding.OnBoardingService.CreatePasscode:output_type -> onboarding.SuccessResponse
-	4, // [4:7] is the sub-list for method output_type
-	1, // [1:4] is the sub-list for method input_type
+	3, // 2: onboarding.OnBoardingService.CreatePasscode:input_type -> onboarding.CreatePasscodeRequest
+	5, // 3: onboarding.OnBoardingService.UpdatePersonBiodata:input_type -> onboarding.UpdatePersonRequest
+	6, // 4: onboarding.OnBoardingService.AddReasonsForUsingRoava:input_type -> onboarding.RoavaReasonsRequest
+	4, // 5: onboarding.OnBoardingService.CreatePhone:output_type -> onboarding.MsgResponse
+	4, // 6: onboarding.OnBoardingService.CreatePasscode:output_type -> onboarding.MsgResponse
+	2, // 7: onboarding.OnBoardingService.UpdatePersonBiodata:output_type -> onboarding.SuccessResponse
+	2, // 8: onboarding.OnBoardingService.AddReasonsForUsingRoava:output_type -> onboarding.SuccessResponse
+	5, // [5:9] is the sub-list for method output_type
+	1, // [1:5] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
 	1, // [1:1] is the sub-list for extension extendee
 	0, // [0:1] is the sub-list for field type_name
@@ -471,7 +601,31 @@ func file_onboarding_proto_init() {
 			}
 		}
 		file_onboarding_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CreateEmailRequest); i {
+			switch v := v.(*MsgResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_onboarding_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*UpdatePersonRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_onboarding_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*RoavaReasonsRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -489,7 +643,7 @@ func file_onboarding_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_onboarding_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
@@ -515,9 +669,10 @@ const _ = grpc.SupportPackageIsVersion6
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type OnBoardingServiceClient interface {
-	CreatePhone(ctx context.Context, in *CreatePhoneRequest, opts ...grpc.CallOption) (*SuccessResponse, error)
-	CreateEmail(ctx context.Context, in *CreateEmailRequest, opts ...grpc.CallOption) (*SuccessResponse, error)
-	CreatePasscode(ctx context.Context, in *CreatePasscodeRequest, opts ...grpc.CallOption) (*SuccessResponse, error)
+	CreatePhone(ctx context.Context, in *CreatePhoneRequest, opts ...grpc.CallOption) (*MsgResponse, error)
+	CreatePasscode(ctx context.Context, in *CreatePasscodeRequest, opts ...grpc.CallOption) (*MsgResponse, error)
+	UpdatePersonBiodata(ctx context.Context, in *UpdatePersonRequest, opts ...grpc.CallOption) (*SuccessResponse, error)
+	AddReasonsForUsingRoava(ctx context.Context, in *RoavaReasonsRequest, opts ...grpc.CallOption) (*SuccessResponse, error)
 }
 
 type onBoardingServiceClient struct {
@@ -528,8 +683,8 @@ func NewOnBoardingServiceClient(cc grpc.ClientConnInterface) OnBoardingServiceCl
 	return &onBoardingServiceClient{cc}
 }
 
-func (c *onBoardingServiceClient) CreatePhone(ctx context.Context, in *CreatePhoneRequest, opts ...grpc.CallOption) (*SuccessResponse, error) {
-	out := new(SuccessResponse)
+func (c *onBoardingServiceClient) CreatePhone(ctx context.Context, in *CreatePhoneRequest, opts ...grpc.CallOption) (*MsgResponse, error) {
+	out := new(MsgResponse)
 	err := c.cc.Invoke(ctx, "/onboarding.OnBoardingService/CreatePhone", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -537,18 +692,27 @@ func (c *onBoardingServiceClient) CreatePhone(ctx context.Context, in *CreatePho
 	return out, nil
 }
 
-func (c *onBoardingServiceClient) CreateEmail(ctx context.Context, in *CreateEmailRequest, opts ...grpc.CallOption) (*SuccessResponse, error) {
-	out := new(SuccessResponse)
-	err := c.cc.Invoke(ctx, "/onboarding.OnBoardingService/CreateEmail", in, out, opts...)
+func (c *onBoardingServiceClient) CreatePasscode(ctx context.Context, in *CreatePasscodeRequest, opts ...grpc.CallOption) (*MsgResponse, error) {
+	out := new(MsgResponse)
+	err := c.cc.Invoke(ctx, "/onboarding.OnBoardingService/CreatePasscode", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *onBoardingServiceClient) CreatePasscode(ctx context.Context, in *CreatePasscodeRequest, opts ...grpc.CallOption) (*SuccessResponse, error) {
+func (c *onBoardingServiceClient) UpdatePersonBiodata(ctx context.Context, in *UpdatePersonRequest, opts ...grpc.CallOption) (*SuccessResponse, error) {
 	out := new(SuccessResponse)
-	err := c.cc.Invoke(ctx, "/onboarding.OnBoardingService/CreatePasscode", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/onboarding.OnBoardingService/UpdatePersonBiodata", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *onBoardingServiceClient) AddReasonsForUsingRoava(ctx context.Context, in *RoavaReasonsRequest, opts ...grpc.CallOption) (*SuccessResponse, error) {
+	out := new(SuccessResponse)
+	err := c.cc.Invoke(ctx, "/onboarding.OnBoardingService/AddReasonsForUsingRoava", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -557,23 +721,27 @@ func (c *onBoardingServiceClient) CreatePasscode(ctx context.Context, in *Create
 
 // OnBoardingServiceServer is the server API for OnBoardingService service.
 type OnBoardingServiceServer interface {
-	CreatePhone(context.Context, *CreatePhoneRequest) (*SuccessResponse, error)
-	CreateEmail(context.Context, *CreateEmailRequest) (*SuccessResponse, error)
-	CreatePasscode(context.Context, *CreatePasscodeRequest) (*SuccessResponse, error)
+	CreatePhone(context.Context, *CreatePhoneRequest) (*MsgResponse, error)
+	CreatePasscode(context.Context, *CreatePasscodeRequest) (*MsgResponse, error)
+	UpdatePersonBiodata(context.Context, *UpdatePersonRequest) (*SuccessResponse, error)
+	AddReasonsForUsingRoava(context.Context, *RoavaReasonsRequest) (*SuccessResponse, error)
 }
 
 // UnimplementedOnBoardingServiceServer can be embedded to have forward compatible implementations.
 type UnimplementedOnBoardingServiceServer struct {
 }
 
-func (*UnimplementedOnBoardingServiceServer) CreatePhone(context.Context, *CreatePhoneRequest) (*SuccessResponse, error) {
+func (*UnimplementedOnBoardingServiceServer) CreatePhone(context.Context, *CreatePhoneRequest) (*MsgResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreatePhone not implemented")
 }
-func (*UnimplementedOnBoardingServiceServer) CreateEmail(context.Context, *CreateEmailRequest) (*SuccessResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateEmail not implemented")
-}
-func (*UnimplementedOnBoardingServiceServer) CreatePasscode(context.Context, *CreatePasscodeRequest) (*SuccessResponse, error) {
+func (*UnimplementedOnBoardingServiceServer) CreatePasscode(context.Context, *CreatePasscodeRequest) (*MsgResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreatePasscode not implemented")
+}
+func (*UnimplementedOnBoardingServiceServer) UpdatePersonBiodata(context.Context, *UpdatePersonRequest) (*SuccessResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdatePersonBiodata not implemented")
+}
+func (*UnimplementedOnBoardingServiceServer) AddReasonsForUsingRoava(context.Context, *RoavaReasonsRequest) (*SuccessResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddReasonsForUsingRoava not implemented")
 }
 
 func RegisterOnBoardingServiceServer(s *grpc.Server, srv OnBoardingServiceServer) {
@@ -598,24 +766,6 @@ func _OnBoardingService_CreatePhone_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
-func _OnBoardingService_CreateEmail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateEmailRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(OnBoardingServiceServer).CreateEmail(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/onboarding.OnBoardingService/CreateEmail",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OnBoardingServiceServer).CreateEmail(ctx, req.(*CreateEmailRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _OnBoardingService_CreatePasscode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreatePasscodeRequest)
 	if err := dec(in); err != nil {
@@ -634,6 +784,42 @@ func _OnBoardingService_CreatePasscode_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _OnBoardingService_UpdatePersonBiodata_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdatePersonRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OnBoardingServiceServer).UpdatePersonBiodata(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/onboarding.OnBoardingService/UpdatePersonBiodata",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OnBoardingServiceServer).UpdatePersonBiodata(ctx, req.(*UpdatePersonRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _OnBoardingService_AddReasonsForUsingRoava_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RoavaReasonsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OnBoardingServiceServer).AddReasonsForUsingRoava(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/onboarding.OnBoardingService/AddReasonsForUsingRoava",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OnBoardingServiceServer).AddReasonsForUsingRoava(ctx, req.(*RoavaReasonsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _OnBoardingService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "onboarding.OnBoardingService",
 	HandlerType: (*OnBoardingServiceServer)(nil),
@@ -643,12 +829,16 @@ var _OnBoardingService_serviceDesc = grpc.ServiceDesc{
 			Handler:    _OnBoardingService_CreatePhone_Handler,
 		},
 		{
-			MethodName: "CreateEmail",
-			Handler:    _OnBoardingService_CreateEmail_Handler,
-		},
-		{
 			MethodName: "CreatePasscode",
 			Handler:    _OnBoardingService_CreatePasscode_Handler,
+		},
+		{
+			MethodName: "UpdatePersonBiodata",
+			Handler:    _OnBoardingService_UpdatePersonBiodata_Handler,
+		},
+		{
+			MethodName: "AddReasonsForUsingRoava",
+			Handler:    _OnBoardingService_AddReasonsForUsingRoava_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

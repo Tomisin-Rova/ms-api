@@ -1,0 +1,26 @@
+type Mutation {
+    submitKYCApplication(
+        applicantId: String!
+    ): Result
+
+    CreatePasscode(
+        userId: String!,
+        passcode: String!
+    ): Result
+
+    updatePersonBiodata(
+        personId: String!,
+        address: String!
+        firstName: String!,
+        lastName: String!
+        dob: String!,
+    ) : Result
+
+    addReasonsForUsingRoava(
+        personId: String!,
+        reasons: String!
+    ) : Result
+
+    createPhone(input: CreatePhoneInput!): Result
+    verifyOtp(phone: String!, code: String!): Result
+}

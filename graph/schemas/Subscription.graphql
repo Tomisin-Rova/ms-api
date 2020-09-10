@@ -1,0 +1,3 @@
+type Subscription {
+    getKYCApplicationResult(applicantId: String!): Result!
+}

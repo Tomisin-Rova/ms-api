@@ -5,8 +5,6 @@ package graph
 
 import (
 	"context"
-	"errors"
-	"ms.api/protos/pb/verifyService"
 
 	"ms.api/graph/generated"
 	"ms.api/protos/pb/kycService"
@@ -34,7 +32,7 @@ func (r *mutationResolver) CreatePasscode(ctx context.Context, userID string, pa
 		PersonId: userID,
 		Passcode: passcode,
 	}
-	res, err := r.onBoardingService.CreatePasscode(context.Background(), &payload)
+	res, err := r.onboardingClient.CreatePasscode(context.Background(), &payload)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +50,7 @@ func (r *mutationResolver) UpdatePersonBiodata(ctx context.Context, personID str
 		LastName:  lastName,
 		Dob:       dob,
 	}
-	res, err := r.onBoardingService.UpdatePersonBiodata(context.Background(), &payload)
+	res, err := r.onboardingClient.UpdatePersonBiodata(context.Background(), &payload)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +65,7 @@ func (r *mutationResolver) AddReasonsForUsingRoava(ctx context.Context, personID
 		PersonId: personID,
 		Reasons:  reasons,
 	}
-	res, err := r.onBoardingService.AddReasonsForUsingRoava(context.Background(), &payload)
+	res, err := r.onboardingClient.AddReasonsForUsingRoava(context.Background(), &payload)
 	if err != nil {
 		return nil, err
 	}
@@ -75,30 +73,6 @@ func (r *mutationResolver) AddReasonsForUsingRoava(ctx context.Context, personID
 		Success: true,
 		Message: res.Message,
 	}, nil
-}
-
-func (r *mutationResolver) CreatePhone(ctx context.Context, input types.CreatePhoneInput) (*types.Result, error) {
-	if input.Phone == "" || len(input.Phone) < 6 {
-		return nil, errors.New("invalid phone number")
-	}
-	result, err := r.onBoardingService.CreatePhone(ctx,
-		&onboardingService.CreatePhoneRequest{PhoneNumber: input.Phone, Device: &onboardingService.Device{Os: input.Device.Os}})
-	if err != nil {
-		r.logger.Infof("onBoardingService.createPhone() failed: %v", err)
-		return nil, err
-	}
-	return &types.Result{Message: result.Message, Success: true}, nil
-}
-
-func (r *mutationResolver) VerifyOtp(ctx context.Context, phone string, code string) (*types.Result, error) {
-	resp, err := r.verifyService.VerifySmsOtp(context.Background(), &verifyService.OtpVerificationRequest{
-		Phone: phone, Code: code,
-	})
-	if err != nil {
-		r.logger.Infof("verifyService.verifySmsOtp() failed: %v", err)
-		return nil, err
-	}
-	return &types.Result{Success: resp.Match, Message: resp.Message}, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

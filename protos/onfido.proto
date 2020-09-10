@@ -1,0 +1,16 @@
+syntax = "proto3";
+package onfido;
+option go_package = "pb/onfidoService";
+
+service OnfidoService {
+  rpc generateApplicantSDKToken(ApplicantSDKTokenRequest) returns(ApplicantSDKTokenResponse){}
+}
+
+message ApplicantSDKTokenRequest {
+  string applicantId = 1;
+}
+
+message ApplicantSDKTokenResponse {
+  string token = 1;
+}
+

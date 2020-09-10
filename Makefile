@@ -2,7 +2,9 @@ GOPATH:=$(shell go env GOPATH)
 
 .PHONY: proto
 proto :
-	./libs/mage genProto
+	#./libs/mage genProto
+	# Add: option go_option = "pb/onfidoService"; to your proto. modify onfidoService to follow suite with your proto.
+	protoc -I protos/ -I${PWD}/ --go_out=plugins=grpc:protos protos/*.proto
 
 .PHONY: schema
 schema: proto

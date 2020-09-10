@@ -2,10 +2,6 @@
 
 package types
 
-type Address struct {
-	Street *string `json:"street"`
-}
-
 type CreatePhoneInput struct {
 	Phone  string  `json:"phone"`
 	Device *Device `json:"device"`

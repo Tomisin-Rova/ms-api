@@ -20,21 +20,22 @@ const (
 var _ = godotenv.Load()
 
 type Secrets struct {
-	KYCServiceURL    string `json:"kyc_service_url"`
-	VerifyServiceUrl string `json:"verify_service_url"`
-	OnBoardingServiceUrl string `json:"onboarding_service_url"`
-	VaultAddress     string        `json:"vault_address"`
-	VaultToken       string        `json:"vault_token"`
-	VaultSecretsPath string        `json:"vault_secrets_path"`
-	JWTSecrets       string        `json:"jwt_secrets"`
-	PulsarURL        string        `json:"pulsar_url"`
-	Port             string        `json:"port"`
-	Environment      Environment   `json:"environment"`
-	RedisURL         string        `json:"redis_url"`
-	RedisPassword    string        `json:"redis_password"`
-	RedisClient      *redis.Client `json:"redis_client"`
-	wg               *sync.WaitGroup
-	mu               *sync.Mutex
+	OnfidoServiceURL     string
+	KYCServiceURL        string
+	OnboardingServiceURL string
+	VerifyServiceURL     string
+	VaultAddress         string        `json:"vault_address"`
+	VaultToken           string        `json:"vault_token"`
+	VaultSecretsPath     string        `json:"vault_secrets_path"`
+	JWTSecrets           string        `json:"jwt_secrets"`
+	PulsarURL            string        `json:"pulsar_url"`
+	Port                 string        `json:"port"`
+	Environment          Environment   `json:"environment"`
+	RedisURL             string        `json:"redis_url"`
+	RedisPassword        string        `json:"redis_password"`
+	RedisClient          *redis.Client `json:"redis_client"`
+	wg                   *sync.WaitGroup
+	mu                   *sync.Mutex
 }
 
 var secrets Secrets
@@ -45,6 +46,11 @@ This loads up Secrets from the .env file once.
 If an env file is present, Secrets will be loaded, else it'll be ignored.
 */
 func init() {
+
+}
+
+func LoadSecrets() (*Secrets, error) {
+	ss := &Secrets{}
 	secrets.wg = &sync.WaitGroup{}
 	secrets.mu = &sync.Mutex{}
 
@@ -59,12 +65,14 @@ func init() {
 	secrets.VaultAddress = os.Getenv("VAULT_ADDRESS")
 	secrets.VaultToken = os.Getenv("VAULT_TOKEN")
 	secrets.VaultSecretsPath = os.Getenv("VAULT_SECRETS_PATH")
+	secrets.OnfidoServiceURL = os.Getenv("ONFIDO_SERVICE")
 	secrets.KYCServiceURL = os.Getenv("KYC_SERVICE")
-	secrets.OnBoardingServiceUrl = os.Getenv("ONBOARDING_SERVICE_URL")
-	secrets.VerifyServiceUrl = os.Getenv("VERIFY_SERVICE_URL")
+	secrets.OnboardingServiceURL = os.Getenv("ONBOARDING_SERVICE")
+	secrets.VerifyServiceURL = os.Getenv("VERIFY_SERVICE_URL")
 	if err := secrets.Environment.IsValid(); err != nil {
 		log.Error("Error in environment variables: %v", err)
 	}
+	return ss, nil
 }
 
 // Get Secrets is used to get value from the Secrets runtime.

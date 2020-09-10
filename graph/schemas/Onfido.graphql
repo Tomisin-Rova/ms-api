@@ -1,0 +1,7 @@
+type ApplicantSDKTokenRequest {
+    applicantId: String!
+}
+
+type ApplicantSDKTokenResponse {
+    token: String!
+}

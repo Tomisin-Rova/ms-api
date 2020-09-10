@@ -1,3 +1,8 @@
+type Result {
+    success: Boolean!
+    message: String!
+}
+
 input CreatePhoneInput {
     phone: String!
     device: Device!

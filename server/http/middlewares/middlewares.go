@@ -13,12 +13,11 @@ import (
 const (
 	AuthenticatedUserContextKey = "AuthenticatedUser"
 	TokenContextKey             = "Token"
-	//AccountTypeContextKey       = "AccountType"
 	Bearer = "BEARER"
 )
 
-func handleSessionByToken(token string) (AuthenticatedUser utils.JSON, result *types.Result) {
-	AuthenticatedUser = make(utils.JSON)
+func handleSessionByToken(token string) (authenticatedUser utils.JSON, result *types.Result) {
+	authenticatedUser = make(utils.JSON)
 
 	session, err := sessions.GetSessionByToken(token)
 	if err != nil {
@@ -34,17 +33,17 @@ func handleSessionByToken(token string) (AuthenticatedUser utils.JSON, result *t
 	//switch accountType.String() {
 
 	//case types.AccountTypesAdministrator.String():
-	//	AuthenticatedUser[types.AccountTypesAdministrator.String()], _ = Administrators.ViewAdmin(_id)
+	//	authenticatedUser[types.AccountTypesAdministrator.String()], _ = Administrators.ViewAdmin(_id)
 	//	break
 	//case types.AccountTypesScheduler.String():
-	//	AuthenticatedUser[types.AccountTypesScheduler.String()], _ = Schedulers.ViewScheduler(_id)
+	//	authenticatedUser[types.AccountTypesScheduler.String()], _ = Schedulers.ViewScheduler(_id)
 	//	break
 	//case types.AccountTypesSigner.String():
-	//	AuthenticatedUser[types.AccountTypesSigner.String()], _ = Signers.ViewSigner(_id)
+	//	authenticatedUser[types.AccountTypesSigner.String()], _ = Signers.ViewSigner(_id)
 	//	break
 	//}
 	//_ = sessions.ExtendSession(token)
-	return AuthenticatedUser, nil
+	return authenticatedUser, nil
 }
 func GetAuthenticatedUser(ctx context.Context) (user interface{}, token string) {
 	authenticatedUser, _ := ctx.Value(AuthenticatedUserContextKey).(utils.JSON)

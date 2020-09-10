@@ -50,5 +50,7 @@ models:
       - github.com/99designs/gqlgen/graphql.Int32
   DateTime:
     model: ms.api/libs/DateTime.DateTime
-  Applicant:
-    model: ms.api/protos/pb/kycService.Applicant
+  ApplicantSDKTokenRequest:
+    model: ms.api/protos/pb/onfidoService.ApplicantSDKTokenRequest
+  ApplicantSDKTokenResponse:
+    model: ms.api/protos/pb/onfidoService.ApplicantSDKTokenResponse

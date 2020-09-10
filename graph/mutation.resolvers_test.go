@@ -13,8 +13,9 @@ import (
 )
 
 func TestMutationResolver_CreatePhone(t *testing.T) {
-	svc := fakes.NewFakeOnBoardingClient(&onboarding.SuccessResponse{Message: "phone added"}, nil)
-	r := NewResolver(ResolverOpts{OnBoardingService: svc, Logger: logrus.StandardLogger()})
+	svc := fakes.NewFakeOnBoardingClient(&onboarding.SuccessResponse{Message: "phone added"},
+		&onboarding.MsgResponse{Message: "phone added"}, nil)
+	r := NewResolver(&ResolverOpts{onBoardingService: svc}, logrus.StandardLogger())
 	mu := &mutationResolver{r}
 	resp, err := mu.CreatePhone(context.Background(), types.CreatePhoneInput{
 		Phone: "09088776655", Device: &types.Device{},
@@ -25,8 +26,8 @@ func TestMutationResolver_CreatePhone(t *testing.T) {
 }
 
 func TestMutationResolver_CreatePhone_Error(t *testing.T) {
-	svc := fakes.NewFakeOnBoardingClient(nil, errors.New("error occurred"))
-	r := NewResolver(ResolverOpts{OnBoardingService: svc, Logger: logrus.StandardLogger()})
+	svc := fakes.NewFakeOnBoardingClient(nil, nil, errors.New("error occurred"))
+	r := NewResolver(&ResolverOpts{onBoardingService: svc}, logrus.StandardLogger())
 	mu := &mutationResolver{r}
 	resp, err := mu.CreatePhone(context.Background(), types.CreatePhoneInput{
 		Phone: "09088776655", Device: &types.Device{},
@@ -37,7 +38,7 @@ func TestMutationResolver_CreatePhone_Error(t *testing.T) {
 
 func TestMutationResolver_VerifySmsOtp(t *testing.T) {
 	svc := fakes.NewFakeVerifyClient(&verify.OtpVerificationResponse{Message: "phone added", Match: true}, nil, nil)
-	r := NewResolver(ResolverOpts{VerifyService: svc, Logger: logrus.StandardLogger()})
+	r := NewResolver(&ResolverOpts{verifyService: svc}, logrus.StandardLogger())
 	mu := &mutationResolver{r}
 	resp, err := mu.VerifyOtp(context.Background(), "09088776655", "009988")
 	assert.Nil(t, err)
@@ -47,7 +48,7 @@ func TestMutationResolver_VerifySmsOtp(t *testing.T) {
 
 func TestMutationResolver_VerifySmsOtp_Error(t *testing.T) {
 	svc := fakes.NewFakeVerifyClient(nil, nil, errors.New("failed to validate OTP"))
-	r := NewResolver(ResolverOpts{VerifyService: svc, Logger: logrus.StandardLogger()})
+	r := NewResolver(&ResolverOpts{verifyService: svc}, logrus.StandardLogger())
 	mu := &mutationResolver{r}
 	resp, err := mu.VerifyOtp(context.Background(), "09088776655", "009988")
 	assert.NotNil(t, err)
