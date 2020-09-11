@@ -18,7 +18,7 @@ const (
 func handleSessionByToken(token string) (AuthenticatedUser utils.JSON, result *types.Result) {
 	AuthenticatedUser = make(utils.JSON)
 	// TODO: use token to call ms.auth to return person & identity for use by this gateway going forward.
-	//AuthenticatedUser[types.AccountTypesAdministrator.String()], _ = authService.GetUserFromToken(token)
+	//AuthenticatedUser["person"], _ = authService.GetUserFromToken(token)
 	return AuthenticatedUser, nil
 }
 

@@ -9,7 +9,6 @@ import (
 	"io"
 	"strconv"
 	"sync"
-	"sync/atomic"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
@@ -38,8 +37,6 @@ type Config struct {
 }
 
 type ResolverRoot interface {
-	Application() ApplicationResolver
-	CDD() CDDResolver
 	Mutation() MutationResolver
 	Query() QueryResolver
 	Subscription() SubscriptionResolver
@@ -63,12 +60,12 @@ type ComplexityRoot struct {
 
 	Applicant struct {
 		Address     func(childComplexity int) int
-		ApplciantID func(childComplexity int) int
+		ApplicantId func(childComplexity int) int
 		Dob         func(childComplexity int) int
 		Email       func(childComplexity int) int
 		FirstName   func(childComplexity int) int
 		LastName    func(childComplexity int) int
-		Vendo       func(childComplexity int) int
+		Vendor      func(childComplexity int) int
 	}
 
 	ApplicantSDKTokenRequest struct {
@@ -117,15 +114,6 @@ type ComplexityRoot struct {
 	}
 }
 
-type ApplicationResolver interface {
-	Applicant(ctx context.Context, obj *kycService.Application) (*types.Applicant, error)
-	TimeCreated(ctx context.Context, obj *kycService.Application) (int64, error)
-	TimeUpdated(ctx context.Context, obj *kycService.Application) (int64, error)
-}
-type CDDResolver interface {
-	TimeCreated(ctx context.Context, obj *kycService.Cdd) (int64, error)
-	TimeUpdated(ctx context.Context, obj *kycService.Cdd) (int64, error)
-}
 type MutationResolver interface {
 	SubmitKYCApplication(ctx context.Context, applicationID string) (*types.Result, error)
 	CreatePasscode(ctx context.Context, userID string, passcode string) (*types.Result, error)
@@ -224,12 +212,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Applicant.Address(childComplexity), true
 
-	case "Applicant.applciant_id":
-		if e.complexity.Applicant.ApplciantID == nil {
+	case "Applicant.applicant_id":
+		if e.complexity.Applicant.ApplicantId == nil {
 			break
 		}
 
-		return e.complexity.Applicant.ApplciantID(childComplexity), true
+		return e.complexity.Applicant.ApplicantId(childComplexity), true
 
 	case "Applicant.dob":
 		if e.complexity.Applicant.Dob == nil {
@@ -259,12 +247,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Applicant.LastName(childComplexity), true
 
-	case "Applicant.vendo":
-		if e.complexity.Applicant.Vendo == nil {
+	case "Applicant.vendor":
+		if e.complexity.Applicant.Vendor == nil {
 			break
 		}
 
-		return e.complexity.Applicant.Vendo(childComplexity), true
+		return e.complexity.Applicant.Vendor(childComplexity), true
 
 	case "ApplicantSDKTokenRequest.applicantId":
 		if e.complexity.ApplicantSDKTokenRequest.ApplicantId == nil {
@@ -534,13 +522,13 @@ var sources = []*ast.Source{
 
 
 type Applicant {
-    applciant_id: String
+    applicant_id: String
     first_name: String!
     last_name: String!
     email: String!
     dob: String!
     address: Address!
-    vendo: String
+    vendor: String!
 }
 
 type Address {
@@ -806,7 +794,7 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _Address_flat_number(ctx context.Context, field graphql.CollectedField, obj *types.Address) (ret graphql.Marshaler) {
+func (ec *executionContext) _Address_flat_number(ctx context.Context, field graphql.CollectedField, obj *kycService.Address) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -832,12 +820,12 @@ func (ec *executionContext) _Address_flat_number(ctx context.Context, field grap
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalOString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Address_building_number(ctx context.Context, field graphql.CollectedField, obj *types.Address) (ret graphql.Marshaler) {
+func (ec *executionContext) _Address_building_number(ctx context.Context, field graphql.CollectedField, obj *kycService.Address) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -863,12 +851,12 @@ func (ec *executionContext) _Address_building_number(ctx context.Context, field 
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalOString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Address_building_name(ctx context.Context, field graphql.CollectedField, obj *types.Address) (ret graphql.Marshaler) {
+func (ec *executionContext) _Address_building_name(ctx context.Context, field graphql.CollectedField, obj *kycService.Address) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -894,12 +882,12 @@ func (ec *executionContext) _Address_building_name(ctx context.Context, field gr
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalOString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Address_street(ctx context.Context, field graphql.CollectedField, obj *types.Address) (ret graphql.Marshaler) {
+func (ec *executionContext) _Address_street(ctx context.Context, field graphql.CollectedField, obj *kycService.Address) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -933,7 +921,7 @@ func (ec *executionContext) _Address_street(ctx context.Context, field graphql.C
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Address_sub_street(ctx context.Context, field graphql.CollectedField, obj *types.Address) (ret graphql.Marshaler) {
+func (ec *executionContext) _Address_sub_street(ctx context.Context, field graphql.CollectedField, obj *kycService.Address) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -959,12 +947,12 @@ func (ec *executionContext) _Address_sub_street(ctx context.Context, field graph
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalOString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Address_town(ctx context.Context, field graphql.CollectedField, obj *types.Address) (ret graphql.Marshaler) {
+func (ec *executionContext) _Address_town(ctx context.Context, field graphql.CollectedField, obj *kycService.Address) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -990,12 +978,12 @@ func (ec *executionContext) _Address_town(ctx context.Context, field graphql.Col
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalOString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Address_state(ctx context.Context, field graphql.CollectedField, obj *types.Address) (ret graphql.Marshaler) {
+func (ec *executionContext) _Address_state(ctx context.Context, field graphql.CollectedField, obj *kycService.Address) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1029,7 +1017,7 @@ func (ec *executionContext) _Address_state(ctx context.Context, field graphql.Co
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Address_postcode(ctx context.Context, field graphql.CollectedField, obj *types.Address) (ret graphql.Marshaler) {
+func (ec *executionContext) _Address_postcode(ctx context.Context, field graphql.CollectedField, obj *kycService.Address) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1063,7 +1051,7 @@ func (ec *executionContext) _Address_postcode(ctx context.Context, field graphql
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Address_country(ctx context.Context, field graphql.CollectedField, obj *types.Address) (ret graphql.Marshaler) {
+func (ec *executionContext) _Address_country(ctx context.Context, field graphql.CollectedField, obj *kycService.Address) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1097,7 +1085,7 @@ func (ec *executionContext) _Address_country(ctx context.Context, field graphql.
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Applicant_applciant_id(ctx context.Context, field graphql.CollectedField, obj *types.Applicant) (ret graphql.Marshaler) {
+func (ec *executionContext) _Applicant_applicant_id(ctx context.Context, field graphql.CollectedField, obj *kycService.Applicant) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1114,7 +1102,7 @@ func (ec *executionContext) _Applicant_applciant_id(ctx context.Context, field g
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.ApplciantID, nil
+		return obj.ApplicantId, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1123,12 +1111,12 @@ func (ec *executionContext) _Applicant_applciant_id(ctx context.Context, field g
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalOString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Applicant_first_name(ctx context.Context, field graphql.CollectedField, obj *types.Applicant) (ret graphql.Marshaler) {
+func (ec *executionContext) _Applicant_first_name(ctx context.Context, field graphql.CollectedField, obj *kycService.Applicant) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1162,7 +1150,7 @@ func (ec *executionContext) _Applicant_first_name(ctx context.Context, field gra
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Applicant_last_name(ctx context.Context, field graphql.CollectedField, obj *types.Applicant) (ret graphql.Marshaler) {
+func (ec *executionContext) _Applicant_last_name(ctx context.Context, field graphql.CollectedField, obj *kycService.Applicant) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1196,7 +1184,7 @@ func (ec *executionContext) _Applicant_last_name(ctx context.Context, field grap
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Applicant_email(ctx context.Context, field graphql.CollectedField, obj *types.Applicant) (ret graphql.Marshaler) {
+func (ec *executionContext) _Applicant_email(ctx context.Context, field graphql.CollectedField, obj *kycService.Applicant) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1230,7 +1218,7 @@ func (ec *executionContext) _Applicant_email(ctx context.Context, field graphql.
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Applicant_dob(ctx context.Context, field graphql.CollectedField, obj *types.Applicant) (ret graphql.Marshaler) {
+func (ec *executionContext) _Applicant_dob(ctx context.Context, field graphql.CollectedField, obj *kycService.Applicant) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1264,7 +1252,7 @@ func (ec *executionContext) _Applicant_dob(ctx context.Context, field graphql.Co
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Applicant_address(ctx context.Context, field graphql.CollectedField, obj *types.Applicant) (ret graphql.Marshaler) {
+func (ec *executionContext) _Applicant_address(ctx context.Context, field graphql.CollectedField, obj *kycService.Applicant) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1293,12 +1281,12 @@ func (ec *executionContext) _Applicant_address(ctx context.Context, field graphq
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*types.Address)
+	res := resTmp.(*kycService.Address)
 	fc.Result = res
-	return ec.marshalNAddress2ᚖmsᚗapiᚋtypesᚐAddress(ctx, field.Selections, res)
+	return ec.marshalNAddress2ᚖmsᚗapiᚋprotosᚋpbᚋkycServiceᚐAddress(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Applicant_vendo(ctx context.Context, field graphql.CollectedField, obj *types.Applicant) (ret graphql.Marshaler) {
+func (ec *executionContext) _Applicant_vendor(ctx context.Context, field graphql.CollectedField, obj *kycService.Applicant) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1315,18 +1303,21 @@ func (ec *executionContext) _Applicant_vendo(ctx context.Context, field graphql.
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Vendo, nil
+		return obj.Vendor, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _ApplicantSDKTokenRequest_applicantId(ctx context.Context, field graphql.CollectedField, obj *onfidoService.ApplicantSDKTokenRequest) (ret graphql.Marshaler) {
@@ -1476,13 +1467,13 @@ func (ec *executionContext) _Application_applicant(ctx context.Context, field gr
 		Object:   "Application",
 		Field:    field,
 		Args:     nil,
-		IsMethod: true,
+		IsMethod: false,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Application().Applicant(rctx, obj)
+		return obj.Applicant, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1494,9 +1485,9 @@ func (ec *executionContext) _Application_applicant(ctx context.Context, field gr
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*types.Applicant)
+	res := resTmp.(*kycService.Applicant)
 	fc.Result = res
-	return ec.marshalNApplicant2ᚖmsᚗapiᚋtypesᚐApplicant(ctx, field.Selections, res)
+	return ec.marshalNApplicant2ᚖmsᚗapiᚋprotosᚋpbᚋkycServiceᚐApplicant(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Application_time_created(ctx context.Context, field graphql.CollectedField, obj *kycService.Application) (ret graphql.Marshaler) {
@@ -1510,13 +1501,13 @@ func (ec *executionContext) _Application_time_created(ctx context.Context, field
 		Object:   "Application",
 		Field:    field,
 		Args:     nil,
-		IsMethod: true,
+		IsMethod: false,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Application().TimeCreated(rctx, obj)
+		return obj.TimeCreated, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1544,13 +1535,13 @@ func (ec *executionContext) _Application_time_updated(ctx context.Context, field
 		Object:   "Application",
 		Field:    field,
 		Args:     nil,
-		IsMethod: true,
+		IsMethod: false,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Application().TimeUpdated(rctx, obj)
+		return obj.TimeUpdated, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1714,13 +1705,13 @@ func (ec *executionContext) _CDD_time_created(ctx context.Context, field graphql
 		Object:   "CDD",
 		Field:    field,
 		Args:     nil,
-		IsMethod: true,
+		IsMethod: false,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.CDD().TimeCreated(rctx, obj)
+		return obj.TimeCreated, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1748,13 +1739,13 @@ func (ec *executionContext) _CDD_time_updated(ctx context.Context, field graphql
 		Object:   "CDD",
 		Field:    field,
 		Args:     nil,
-		IsMethod: true,
+		IsMethod: false,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.CDD().TimeUpdated(rctx, obj)
+		return obj.TimeUpdated, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3214,7 +3205,7 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 var addressImplementors = []string{"Address"}
 
-func (ec *executionContext) _Address(ctx context.Context, sel ast.SelectionSet, obj *types.Address) graphql.Marshaler {
+func (ec *executionContext) _Address(ctx context.Context, sel ast.SelectionSet, obj *kycService.Address) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, addressImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -3266,7 +3257,7 @@ func (ec *executionContext) _Address(ctx context.Context, sel ast.SelectionSet, 
 
 var applicantImplementors = []string{"Applicant"}
 
-func (ec *executionContext) _Applicant(ctx context.Context, sel ast.SelectionSet, obj *types.Applicant) graphql.Marshaler {
+func (ec *executionContext) _Applicant(ctx context.Context, sel ast.SelectionSet, obj *kycService.Applicant) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, applicantImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -3275,8 +3266,8 @@ func (ec *executionContext) _Applicant(ctx context.Context, sel ast.SelectionSet
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Applicant")
-		case "applciant_id":
-			out.Values[i] = ec._Applicant_applciant_id(ctx, field, obj)
+		case "applicant_id":
+			out.Values[i] = ec._Applicant_applicant_id(ctx, field, obj)
 		case "first_name":
 			out.Values[i] = ec._Applicant_first_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -3302,8 +3293,11 @@ func (ec *executionContext) _Applicant(ctx context.Context, sel ast.SelectionSet
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "vendo":
-			out.Values[i] = ec._Applicant_vendo(ctx, field, obj)
+		case "vendor":
+			out.Values[i] = ec._Applicant_vendor(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3383,55 +3377,28 @@ func (ec *executionContext) _Application(ctx context.Context, sel ast.SelectionS
 		case "id":
 			out.Values[i] = ec._Application_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
 		case "person_id":
 			out.Values[i] = ec._Application_person_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
 		case "applicant":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Application_applicant(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
+			out.Values[i] = ec._Application_applicant(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "time_created":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Application_time_created(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
+			out.Values[i] = ec._Application_time_created(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "time_updated":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Application_time_updated(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
+			out.Values[i] = ec._Application_time_updated(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3457,51 +3424,33 @@ func (ec *executionContext) _CDD(ctx context.Context, sel ast.SelectionSet, obj 
 		case "id":
 			out.Values[i] = ec._CDD_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
 		case "person_id":
 			out.Values[i] = ec._CDD_person_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
 		case "applicant_id":
 			out.Values[i] = ec._CDD_applicant_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
 		case "status":
 			out.Values[i] = ec._CDD_status(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
 		case "time_created":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._CDD_time_created(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
+			out.Values[i] = ec._CDD_time_created(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "time_updated":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._CDD_time_updated(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
+			out.Values[i] = ec._CDD_time_updated(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3885,7 +3834,7 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) marshalNAddress2ᚖmsᚗapiᚋtypesᚐAddress(ctx context.Context, sel ast.SelectionSet, v *types.Address) graphql.Marshaler {
+func (ec *executionContext) marshalNAddress2ᚖmsᚗapiᚋprotosᚋpbᚋkycServiceᚐAddress(ctx context.Context, sel ast.SelectionSet, v *kycService.Address) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -3895,11 +3844,7 @@ func (ec *executionContext) marshalNAddress2ᚖmsᚗapiᚋtypesᚐAddress(ctx co
 	return ec._Address(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNApplicant2msᚗapiᚋtypesᚐApplicant(ctx context.Context, sel ast.SelectionSet, v types.Applicant) graphql.Marshaler {
-	return ec._Applicant(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNApplicant2ᚖmsᚗapiᚋtypesᚐApplicant(ctx context.Context, sel ast.SelectionSet, v *types.Applicant) graphql.Marshaler {
+func (ec *executionContext) marshalNApplicant2ᚖmsᚗapiᚋprotosᚋpbᚋkycServiceᚐApplicant(ctx context.Context, sel ast.SelectionSet, v *kycService.Applicant) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
