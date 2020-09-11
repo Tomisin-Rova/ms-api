@@ -124,7 +124,7 @@ type QueryResolver interface {
 	GetApplicantSDKToken(ctx context.Context, personID string) (*onfidoService.ApplicantSDKTokenResponse, error)
 }
 type SubscriptionResolver interface {
-	GetKYCApplicationResult(ctx context.Context, applicantID string) (<-chan *types.Result, error)
+	GetKYCApplicationResult(ctx context.Context, applicantID string) (<-chan *kycService.Cdd, error)
 }
 
 type executableSchema struct {
@@ -588,7 +588,7 @@ type ApplicantSDKTokenResponse {
     message: String!
 }`, BuiltIn: false},
 	{Name: "graph/schemas/Subscription.graphql", Input: `type Subscription {
-    getKYCApplicationResult(applicantId: String!): Result!
+    getKYCApplicationResult(applicantId: String!): CDD!
 }`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
@@ -2126,7 +2126,7 @@ func (ec *executionContext) _Subscription_getKYCApplicationResult(ctx context.Co
 		return nil
 	}
 	return func() graphql.Marshaler {
-		res, ok := <-resTmp.(<-chan *types.Result)
+		res, ok := <-resTmp.(<-chan *kycService.Cdd)
 		if !ok {
 			return nil
 		}
@@ -2134,7 +2134,7 @@ func (ec *executionContext) _Subscription_getKYCApplicationResult(ctx context.Co
 			w.Write([]byte{'{'})
 			graphql.MarshalString(field.Alias).MarshalGQL(w)
 			w.Write([]byte{':'})
-			ec.marshalNResult2ᚖmsᚗapiᚋtypesᚐResult(ctx, field.Selections, res).MarshalGQL(w)
+			ec.marshalNCDD2ᚖmsᚗapiᚋprotosᚋpbᚋkycServiceᚐCdd(ctx, field.Selections, res).MarshalGQL(w)
 			w.Write([]byte{'}'})
 		})
 	}
@@ -3869,6 +3869,20 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
+func (ec *executionContext) marshalNCDD2msᚗapiᚋprotosᚋpbᚋkycServiceᚐCdd(ctx context.Context, sel ast.SelectionSet, v kycService.Cdd) graphql.Marshaler {
+	return ec._CDD(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNCDD2ᚖmsᚗapiᚋprotosᚋpbᚋkycServiceᚐCdd(ctx context.Context, sel ast.SelectionSet, v *kycService.Cdd) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._CDD(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNInt2int64(ctx context.Context, v interface{}) (int64, error) {
 	res, err := graphql.UnmarshalInt64(v)
 	return res, graphql.WrapErrorWithInputPath(ctx, err)
@@ -3882,20 +3896,6 @@ func (ec *executionContext) marshalNInt2int64(ctx context.Context, sel ast.Selec
 		}
 	}
 	return res
-}
-
-func (ec *executionContext) marshalNResult2msᚗapiᚋtypesᚐResult(ctx context.Context, sel ast.SelectionSet, v types.Result) graphql.Marshaler {
-	return ec._Result(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNResult2ᚖmsᚗapiᚋtypesᚐResult(ctx context.Context, sel ast.SelectionSet, v *types.Result) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._Result(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
