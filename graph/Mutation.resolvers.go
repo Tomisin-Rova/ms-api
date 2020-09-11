@@ -12,18 +12,15 @@ import (
 	"ms.api/types"
 )
 
-func (r *mutationResolver) SubmitKYCApplication(ctx context.Context, applicantID string) (*types.Result, error) {
-	payload := kycService.ApplicationRequest{
-		ApplicantId: applicantID,
-	}
-
-	res, err := r.kycClient.SubmitKYCApplication(ctx, &payload)
-	if err != nil {
+func (r *mutationResolver) SubmitKYCApplication(ctx context.Context, applicationID string) (*types.Result, error) {
+	if _, err := r.kycClient.StartApplicationCDD(ctx, &kycService.ApplicationIdRequest{
+		ApplicationId: applicationID,
+	}); err != nil {
 		return nil, err
 	}
 	return &types.Result{
-		Success: res.Success,
-		Message: res.Message,
+		Success: true,
+		Message: "Successfully started CDD check, you'll be notified once completed.",
 	}, nil
 }
 

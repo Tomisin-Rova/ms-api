@@ -5,38 +5,31 @@ package graph
 
 import (
 	"context"
-	"fmt"
 
 	"ms.api/graph/generated"
 	"ms.api/protos/pb/kycService"
-	"ms.api/types"
 )
 
-func (r *subscriptionResolver) GetKYCApplicationResult(ctx context.Context, applicantID string) (<-chan *types.Result, error) {
-	payload := kycService.ApplicationRequest{
-		ApplicantId: applicantID,
+func (r *subscriptionResolver) GetKYCApplicationResult(ctx context.Context, applicantID string) (<-chan *kycService.Cdd, error) {
+	payload := kycService.ApplicationIdRequest{
+		ApplicationId: applicantID,
 	}
-	response, err := r.kycClient.GetKYCCheckStatus(ctx, &payload)
+	response, err := r.kycClient.AwaitApplicationCDDResult(ctx, &payload)
 	if err != nil {
 		return nil, err
 	}
 
-	ch := make(chan *types.Result)
-	go func(response kycService.KycService_GetKYCCheckStatusClient, ch chan *types.Result) {
+	ch := make(chan *kycService.Cdd)
+	go func(response kycService.KycService_AwaitApplicationCDDResultClient, ch chan *kycService.Cdd) {
 		for {
-			check, err := response.Recv()
-			fmt.Print(check)
+			cdd, err := response.Recv()
 			if err != nil {
 				return
 			}
 
-			if check != nil {
-				var result types.Result
-
-				//result.Success = check.Success
-				//result.Message = check.Message
-
-				ch <- &result
+			if cdd != nil {
+				// Disconnect client here after they've received their data.
+				ch <- cdd
 			}
 		}
 	}(response, ch)
