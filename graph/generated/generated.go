@@ -97,7 +97,10 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		SubmitKYCApplication func(childComplexity int, applicationID string) int
+		AddReasonsForUsingRoava func(childComplexity int, personID string, reasons string) int
+		CreatePasscode          func(childComplexity int, userID string, passcode string) int
+		SubmitKYCApplication    func(childComplexity int, applicationID string) int
+		UpdatePersonBiodata     func(childComplexity int, personID string, address string, firstName string, lastName string, dob string) int
 	}
 
 	Query struct {
@@ -125,6 +128,9 @@ type CDDResolver interface {
 }
 type MutationResolver interface {
 	SubmitKYCApplication(ctx context.Context, applicationID string) (*types.Result, error)
+	CreatePasscode(ctx context.Context, userID string, passcode string) (*types.Result, error)
+	UpdatePersonBiodata(ctx context.Context, personID string, address string, firstName string, lastName string, dob string) (*types.Result, error)
+	AddReasonsForUsingRoava(ctx context.Context, personID string, reasons string) (*types.Result, error)
 }
 type QueryResolver interface {
 	GetApplicantSDKToken(ctx context.Context, personID string) (*onfidoService.ApplicantSDKTokenResponse, error)
@@ -351,6 +357,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Cdd.TimeUpdated(childComplexity), true
 
+	case "Mutation.addReasonsForUsingRoava":
+		if e.complexity.Mutation.AddReasonsForUsingRoava == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_addReasonsForUsingRoava_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.AddReasonsForUsingRoava(childComplexity, args["personId"].(string), args["reasons"].(string)), true
+
+	case "Mutation.CreatePasscode":
+		if e.complexity.Mutation.CreatePasscode == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_CreatePasscode_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreatePasscode(childComplexity, args["userId"].(string), args["passcode"].(string)), true
+
 	case "Mutation.submitKYCApplication":
 		if e.complexity.Mutation.SubmitKYCApplication == nil {
 			break
@@ -362,6 +392,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.SubmitKYCApplication(childComplexity, args["application_id"].(string)), true
+
+	case "Mutation.updatePersonBiodata":
+		if e.complexity.Mutation.UpdatePersonBiodata == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updatePersonBiodata_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdatePersonBiodata(childComplexity, args["personId"].(string), args["address"].(string), args["firstName"].(string), args["lastName"].(string), args["dob"].(string)), true
 
 	case "Query.getApplicantSDKToken":
 		if e.complexity.Query.GetApplicantSDKToken == nil {
@@ -527,6 +569,21 @@ type CDD {
     submitKYCApplication(
         application_id: String!
     ): Result
+    CreatePasscode(
+        userId: String!,
+        passcode: String!
+    ): Result
+    updatePersonBiodata(
+        personId: String!,
+        address: String!
+        firstName: String!,
+        lastName: String!
+        dob: String!,
+    ) : Result
+    addReasonsForUsingRoava(
+        personId: String!,
+        reasons: String!
+    ) : Result
 }`, BuiltIn: false},
 	{Name: "graph/schemas/Onfido.graphql", Input: `type ApplicantSDKTokenRequest {
     applicantId: String!
@@ -552,6 +609,54 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // region    ***************************** args.gotpl *****************************
 
+func (ec *executionContext) field_Mutation_CreatePasscode_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["userId"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("userId"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["userId"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["passcode"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("passcode"))
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["passcode"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_addReasonsForUsingRoava_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["personId"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("personId"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["personId"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["reasons"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("reasons"))
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["reasons"] = arg1
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_submitKYCApplication_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -564,6 +669,57 @@ func (ec *executionContext) field_Mutation_submitKYCApplication_args(ctx context
 		}
 	}
 	args["application_id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updatePersonBiodata_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["personId"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("personId"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["personId"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["address"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("address"))
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["address"] = arg1
+	var arg2 string
+	if tmp, ok := rawArgs["firstName"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("firstName"))
+		arg2, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["firstName"] = arg2
+	var arg3 string
+	if tmp, ok := rawArgs["lastName"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("lastName"))
+		arg3, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["lastName"] = arg3
+	var arg4 string
+	if tmp, ok := rawArgs["dob"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("dob"))
+		arg4, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["dob"] = arg4
 	return args, nil
 }
 
@@ -1640,6 +1796,120 @@ func (ec *executionContext) _Mutation_submitKYCApplication(ctx context.Context, 
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().SubmitKYCApplication(rctx, args["application_id"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*types.Result)
+	fc.Result = res
+	return ec.marshalOResult2ᚖmsᚗapiᚋtypesᚐResult(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_CreatePasscode(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_CreatePasscode_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreatePasscode(rctx, args["userId"].(string), args["passcode"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*types.Result)
+	fc.Result = res
+	return ec.marshalOResult2ᚖmsᚗapiᚋtypesᚐResult(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_updatePersonBiodata(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updatePersonBiodata_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdatePersonBiodata(rctx, args["personId"].(string), args["address"].(string), args["firstName"].(string), args["lastName"].(string), args["dob"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*types.Result)
+	fc.Result = res
+	return ec.marshalOResult2ᚖmsᚗapiᚋtypesᚐResult(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_addReasonsForUsingRoava(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_addReasonsForUsingRoava_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().AddReasonsForUsingRoava(rctx, args["personId"].(string), args["reasons"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3260,6 +3530,12 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = graphql.MarshalString("Mutation")
 		case "submitKYCApplication":
 			out.Values[i] = ec._Mutation_submitKYCApplication(ctx, field)
+		case "CreatePasscode":
+			out.Values[i] = ec._Mutation_CreatePasscode(ctx, field)
+		case "updatePersonBiodata":
+			out.Values[i] = ec._Mutation_updatePersonBiodata(ctx, field)
+		case "addReasonsForUsingRoava":
+			out.Values[i] = ec._Mutation_addReasonsForUsingRoava(ctx, field)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
