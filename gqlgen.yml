@@ -45,11 +45,13 @@ autobind:
 models:
   Int:
     model:
-      - github.com/99designs/gqlgen/graphql.Int
       - github.com/99designs/gqlgen/graphql.Int64
-      - github.com/99designs/gqlgen/graphql.Int32
   DateTime:
     model: ms.api/libs/DateTime.DateTime
+  Application:
+    model: ms.api/protos/pb/kycService.Application
+  CDD:
+      model: ms.api/protos/pb/kycService.Cdd
   ApplicantSDKTokenRequest:
     model: ms.api/protos/pb/onfidoService.ApplicantSDKTokenRequest
   ApplicantSDKTokenResponse:

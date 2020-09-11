@@ -1,5 +1,5 @@
 type Mutation {
     submitKYCApplication(
-        applicantId: String!
+        application_id: String!
     ): Result
 }

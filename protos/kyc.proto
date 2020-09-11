@@ -2,36 +2,44 @@ syntax = "proto3";
 package kyc;
 option go_package = "pb/kycService";
 import "google/protobuf/timestamp.proto";
-//import "github.com/amsokolprotoc-gen-gotag/tagger/tagger.proto";
 
 service KycService {
-  rpc submitKYCApplication(applicationRequest) returns(applicationResult){}
-  rpc getKYCCheckStatus(applicationRequest) returns(stream check){}
-  rpc getApplicantByPersonId(applicantByPersonIdRequest) returns(applicant){}
+  rpc getApplicationByPersonId(PersonIdRequest) returns(application){}
+  rpc startApplicationCDD(ApplicationIdRequest) returns(void){}
+  // Proposing this is moved to ms.cdd // For the fully aggregated KYC + AML + Roava Internal Checklist result set.
+  rpc awaitApplicationCDDResult(ApplicationIdRequest) returns(stream cdd){}
 }
 
-message applicationRequest{
-  string applicantId = 1;
+message void {}
+
+message ApplicationIdRequest {
+  string application_id = 1;
 }
 
-message applicantByPersonIdRequest {
+message PersonIdRequest {
   string person_id = 1;
 }
 
-message check {
+
+message cdd {
   string id = 1;
   string person_id = 2;
   string applicant_id = 3;
   string status = 4;
-  repeated tag tags = 5;
-  repeated document documents = 6;
-  google.protobuf.Timestamp timestamp = 7;
+  //  repeated tag tags = 5;
+  //  repeated document documents = 6;
+  google.protobuf.Timestamp time_created = 5;
+  google.protobuf.Timestamp time_updated = 6;
 }
 
-message applicationResult {
-  bool success = 1;
-  string message = 2;
-  string applicantId = 3;
+
+message application {
+  string id = 1;
+  string person_id = 2;
+  applicant applicant = 3;
+  cdd cdd = 4;
+  google.protobuf.Timestamp time_created = 5;
+  google.protobuf.Timestamp time_updated = 6;
 }
 
 message address {
@@ -47,30 +55,12 @@ message address {
 }
 
 message applicant {
-  string id = 1;
-  string person_id = 2;
+  string application_id = 1;
+  string applicant_id = 2;
   string first_name = 3;
-  string last_name = 5;
-  string email = 6;
-  string dob = 7;
-  address address = 8;
-  string vendor = 9;
-}
-
-message applicantsList {
-  int64 count = 1;
-  repeated applicant applicants = 2;
-}
-
-message serviceResponse {
-  bool success = 1;
-  string message = 2;
-}
-
-message tag {
-
-}
-
-message document {
-
+  string last_name = 4;
+  string email = 5;
+  string dob = 6;
+  address address = 7;
+  string vendor = 8;
 }

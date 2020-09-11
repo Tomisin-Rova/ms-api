@@ -5,7 +5,6 @@ package graph
 
 import (
 	"context"
-	"fmt"
 
 	"ms.api/graph/generated"
 	"ms.api/protos/pb/kycService"
@@ -13,24 +12,23 @@ import (
 )
 
 func (r *subscriptionResolver) GetKYCApplicationResult(ctx context.Context, applicantID string) (<-chan *types.Result, error) {
-	payload := kycService.ApplicationRequest{
-		ApplicantId: applicantID,
+	payload := kycService.ApplicationIdRequest{
+		ApplicationId: applicantID,
 	}
-	response, err := r.kycClient.GetKYCCheckStatus(ctx, &payload)
+	response, err := r.kycClient.AwaitApplicationCDDResult(ctx, &payload)
 	if err != nil {
 		return nil, err
 	}
 
 	ch := make(chan *types.Result)
-	go func(response kycService.KycService_GetKYCCheckStatusClient, ch chan *types.Result) {
+	go func(response kycService.KycService_AwaitApplicationCDDResultClient, ch chan *types.Result) {
 		for {
-			check, err := response.Recv()
-			fmt.Print(check)
+			cdd, err := response.Recv()
 			if err != nil {
 				return
 			}
 
-			if check != nil {
+			if cdd != nil {
 				var result types.Result
 
 				//result.Success = check.Success

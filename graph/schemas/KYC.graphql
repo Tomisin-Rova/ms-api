@@ -1,0 +1,41 @@
+type Application {
+    id: String!
+    person_id: String!
+    applicant: Applicant!
+    time_created: Int!
+    time_updated: Int!
+}
+
+
+type Applicant {
+    applciant_id: String
+    first_name: String!
+    last_name: String!
+    email: String!
+    dob: String!
+    address: Address!
+    vendo: String
+}
+
+type Address {
+    flat_number: String
+    building_number: String
+    building_name: String
+    street: String!
+    sub_street: String
+    town : String
+    state : String!
+    postcode: String!
+    country: String!
+}
+
+type CDD {
+    id: String!
+    person_id: String!
+    applicant_id: String!
+    status: String!
+    #    //  repeated tag tags = 5;
+    #    //  repeated document documents = 6;
+    time_created: Int!
+    time_updated: Int!
+}

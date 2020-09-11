@@ -2,6 +2,28 @@
 
 package types
 
+type Address struct {
+	FlatNumber     *string `json:"flat_number"`
+	BuildingNumber *string `json:"building_number"`
+	BuildingName   *string `json:"building_name"`
+	Street         string  `json:"street"`
+	SubStreet      *string `json:"sub_street"`
+	Town           *string `json:"town"`
+	State          string  `json:"state"`
+	Postcode       string  `json:"postcode"`
+	Country        string  `json:"country"`
+}
+
+type Applicant struct {
+	ApplciantID *string  `json:"applciant_id"`
+	FirstName   string   `json:"first_name"`
+	LastName    string   `json:"last_name"`
+	Email       string   `json:"email"`
+	Dob         string   `json:"dob"`
+	Address     *Address `json:"address"`
+	Vendo       *string  `json:"vendo"`
+}
+
 type Result struct {
 	Success bool   `json:"success"`
 	Message string `json:"message"`
