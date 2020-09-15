@@ -45,7 +45,10 @@ func HandleOnfidoWebhook(rpc onfidoService.OnfidoServiceClient) http.HandlerFunc
 		var onfido onfidoWebhook
 		err := decoder.Decode(&onfido)
 		if err != nil {
-			panic(err)
+			writer.WriteHeader(http.StatusInternalServerError)
+			_, _ = writer.Write([]byte("failed to process onfido webhook push"))
+			log.Errorf("Failed to decode onfido webhook push, Got the following error: %v", err)
+			return
 		}
 
 		if onfido.Payload.Action != OnfidoCheckCompleted {
