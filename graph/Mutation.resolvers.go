@@ -6,11 +6,11 @@ package graph
 import (
 	"context"
 	"errors"
+
+	"ms.api/graph/generated"
 	"ms.api/protos/pb/kycService"
 	"ms.api/protos/pb/onboardingService"
 	"ms.api/protos/pb/verifyService"
-
-	"ms.api/graph/generated"
 	"ms.api/types"
 )
 
@@ -25,6 +25,7 @@ func (r *mutationResolver) SubmitKYCApplication(ctx context.Context, application
 		Message: "Successfully started CDD check, you'll be notified once completed.",
 	}, nil
 }
+
 func (r *mutationResolver) CreatePasscode(ctx context.Context, userID string, passcode string) (*types.Result, error) {
 	payload := onboardingService.CreatePasscodeRequest{
 		PersonId: userID,

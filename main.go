@@ -15,9 +15,9 @@ func main() {
 	if err != nil {
 		logger.Fatalf("failed to load config: %v", err)
 	}
-	address := fmt.Sprintf(":%s", secrets.Port)
+	address := fmt.Sprintf("0.0.0.0:%s", secrets.Port)
 	logger.Infof("Connect to http://%s/ for GraphQL playground", address)
-	if err := http.ListenAndServe(address, httpServer.MountGraphql(secrets, logger)); err != nil {
+	if err := http.ListenAndServe(address, httpServer.MountServer(secrets, logger)); err != nil {
 		logrus.Fatalf("Could not start server on %s. Got error: %s", address, err.Error())
 	}
 }

@@ -10,10 +10,11 @@ import (
 	"ms.api/config"
 	"ms.api/graph"
 	"ms.api/graph/generated"
+	"ms.api/server/http/webhooks"
 	"net/http"
 )
 
-func MountGraphql(secrets *config.Secrets, logger *logrus.Logger) *chi.Mux {
+func MountServer(secrets *config.Secrets, logger *logrus.Logger) *chi.Mux {
 	router := chi.NewRouter()
 	// Middlewares
 	router.Use(cors.New(cors.Options{
@@ -34,13 +35,15 @@ func MountGraphql(secrets *config.Secrets, logger *logrus.Logger) *chi.Mux {
 		})
 	}
 
-	opt, err := graph.ConnectServiceDependencies(secrets)
+	clientConnections, err := graph.ConnectServiceDependencies(secrets)
 	if err != nil {
 		logger.Fatalf("failed to setup service dependencies: %v", err)
 	}
 
-	resolvers := graph.NewResolver(opt, logger)
+	resolvers := graph.NewResolver(clientConnections, logger)
 	// API Server
 	router.Handle("/graphql", handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: resolvers})))
+	// Webhooks
+	router.HandleFunc("/webhooks/onfido", webhooks.HandleOnfidoWebhook(clientConnections.OnfidoClient))
 	return router
 }
