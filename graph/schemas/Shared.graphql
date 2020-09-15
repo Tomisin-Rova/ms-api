@@ -2,3 +2,34 @@ type Result {
     success: Boolean!
     message: String!
 }
+
+type CreatePhoneResult {
+    success: Boolean!
+    message: String!
+    emailToken: String!
+}
+
+input CreatePhoneInput {
+    phone: String!
+    device: Device!
+}
+
+input CreateEmailInput {
+    emailToken: String!
+    value: String!
+}
+
+input Device {
+    os: String!
+    brand: String!
+    deviceId: String!
+    deviceToken: String!
+}
+
+input UpdateBioDataInput {
+    personId: String!
+    address: String!
+    firstName: String!
+    lastName: String!
+    dob: String!
+}

@@ -1,0 +1,70 @@
+name: Build, Push to GCR
+on:
+  push:
+    branches:
+      - develop
+      - master
+    tags:
+      - '*'
+env:
+  PROJECT_ID: ${{ secrets.RUN_PROJECT }}
+  GITHUB_SHA: ${{ github.sha }}
+  GITHUB_REF: ${{ github.ref }}
+  ORG: roava.io/services
+  IMAGE: ms.api
+  REGISTRY_HOSTNAME: gcr.io/${{ secrets.RUN_PROJECT }}
+jobs:
+  setup-build-deploy:
+    name: Setup, Build, and Deploy
+    runs-on: ubuntu-latest
+    steps:
+      # INSERT STEP: TESTS
+      # INSERT STEP: STATIC ANALYSIS / SONARQUBE
+      # extract the version (tag pushed)
+      - name: Get the version
+        id: get_version
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+      - name: Print version
+        run: |
+          echo [github.tag]: ${{ steps.get_version.outputs.VERSION }}
+          echo [github.sha]: ${{ github.sha }}
+          echo [github.ref]: ${{ github.ref }}
+          echo [github.actor]: trigered by $GITHUB_ACTOR
+      - name: Checkout
+        uses: actions/checkout@v2
+      # Setup gcloud CLI
+      - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        with:
+          version: '290.0.1'
+          service_account_key: ${{ secrets.RUN_SA_KEY }}
+          project_id: ${{ secrets.RUN_PROJECT }}
+      # Configure docker to use the gcloud command-line tool as a credential helper
+      - run: |
+          # Set up docker to authenticate
+          # via gcloud command-line tool.
+          gcloud auth configure-docker
+      # Build the Docker image
+      # images name in format - [ORG]/[IMAGE] e.g. roava.io/myimage
+      - name: Test
+        run: |
+          # run tests
+          go test -v ./... -cover
+      - name: Build
+        run: |
+          export TAG=$(git rev-parse --short "$GITHUB_SHA")
+          export CONTAINER=`echo $ORG/$IMAGE`
+          docker build -t "$REGISTRY_HOSTNAME"/"$CONTAINER":"$TAG" \
+            --build-arg GITHUB_SHA="$GITHUB_SHA" \
+            --build-arg GITHUB_REF="$GITHUB_REF" .
+      # Push the Docker image to Google Container Registry
+      # images name in format - [ORG]/[IMAGE] e.g. roava.io/myimage
+      # docker push "$REGISTRY_HOSTNAME"/"$CONTAINER":"$GITHUB_SHA"
+      - name: Publish
+        run: |
+          export TAG=$(git rev-parse --short "$GITHUB_SHA")
+          export CONTAINER=`echo $ORG/$IMAGE`
+          docker push "$REGISTRY_HOSTNAME"/"$CONTAINER":"$TAG"
+          docker tag "$REGISTRY_HOSTNAME"/"$CONTAINER":"$TAG" "$REGISTRY_HOSTNAME"/"$CONTAINER":stable
+          docker push "$REGISTRY_HOSTNAME"/"$CONTAINER":stable
+          docker tag "$REGISTRY_HOSTNAME"/"$CONTAINER":"$TAG" "$REGISTRY_HOSTNAME"/"$CONTAINER":"latest"
+          docker push "$REGISTRY_HOSTNAME"/"$CONTAINER":"latest"

@@ -1,0 +1,36 @@
+ syntax = "proto3";
+
+ package verify;
+
+ option go_package = "pb/verifyService";
+
+ message ValidateEmailRequest {
+     string name = 1;
+     string email = 2;
+     string password = 3;
+ }
+
+ message SuccessResponse {
+     string message = 1;
+ }
+
+ message OtpVerificationResponse {
+     bool match = 1;
+     string message = 2;
+ }
+
+ message OtpVerificationRequest {
+     string phone = 1;
+     string code = 2;
+ }
+
+ message OtpVerificationByEmailRequest {
+     string email = 1;
+     string code = 2;
+ }
+
+ service VerifyService {
+     rpc ValidateEmail(ValidateEmailRequest) returns (SuccessResponse) {}
+     rpc VerifySmsOtp(OtpVerificationRequest) returns (OtpVerificationResponse) {}
+     rpc VerifyEmailOtp(OtpVerificationByEmailRequest) returns (OtpVerificationResponse) {}
+ }

@@ -1,51 +1,89 @@
 package graph
 
 import (
+	"context"
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"ms.api/config"
 	"ms.api/protos/pb/kycService"
-	"ms.api/protos/pb/onfidoService"
 	"ms.api/protos/pb/onboardingService"
+	"ms.api/protos/pb/onfidoService"
+	"ms.api/protos/pb/verifyService"
+	"time"
 )
 
-// This file will not be regenerated automatically.
-//
-// It serves as dependency injection for your app, add any dependencies you require here.
-
-type Resolver struct {
-	onfidoClient onfidoService.OnfidoServiceClient
-	kycClient    kycService.KycServiceClient
-	onboardingClient onboardingService.OnBoardingServiceClient
+type ResolverOpts struct {
+	onfidoClient      onfidoService.OnfidoServiceClient
+	kycClient         kycService.KycServiceClient
+	onBoardingService onboardingService.OnBoardingServiceClient
+	verifyService     verifyService.VerifyServiceClient
 }
 
-func (r *Resolver) ConnectServiceDependencies() {
+type Resolver struct {
+	kycClient         kycService.KycServiceClient
+	onBoardingService onboardingService.OnBoardingServiceClient
+	verifyService     verifyService.VerifyServiceClient
+	onfidoClient      onfidoService.OnfidoServiceClient
+	logger            *logrus.Logger
+}
+
+func NewResolver(opt *ResolverOpts, logger *logrus.Logger) *Resolver {
+	return &Resolver{
+		kycClient:         opt.kycClient,
+		onBoardingService: opt.onBoardingService,
+		verifyService:     opt.verifyService,
+		onfidoClient:      opt.onfidoClient,
+		logger:            logger,
+	}
+}
+
+func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) {
 	// TODO: Ensure it is secure when connecting.
 	// TODO: Find a way to watch the service outage and handle response to client.
 	// TODO: Read heartbeat from these services, if a heartbeat is out, buzz the admin.
-	if connection := dialRPC(config.GetSecrets().OnfidoServiceURL); connection != nil {
-		fmt.Print("Connected to ms.onfido \n")
-		r.onfidoClient = onfidoService.NewOnfidoServiceClient(connection)
+	ctx, cancel := context.WithTimeout(context.Background(), 5 * time.Second)
+	defer cancel()
+	opt := &ResolverOpts{}
+
+	// OnBoarding
+	connection, err := dialRPC(ctx, secrets.OnboardingServiceURL)
+	if err != nil {
+		return nil, fmt.Errorf("%v: %s", err, secrets.OnboardingServiceURL)
 	}
-	if connection := dialRPC(config.GetSecrets().KYCServiceURL); connection != nil {
-		fmt.Print("Connected to ms.kyc \n")
-		r.kycClient = kycService.NewKycServiceClient(connection)
+	opt.onBoardingService = onboardingService.NewOnBoardingServiceClient(connection)
+
+	// OnFido
+	/*connection, err = dialRPC(ctx, secrets.OnfidoServiceURL)
+	if err != nil {
+		return nil, errors.Wrap(err, secrets.OnfidoServiceURL)
 	}
-	if connection := dialRPC(config.GetSecrets().OnboardingServiceURL); connection != nil {
-		fmt.Print("Connected to ms.onboarding \n")
-		r.onboardingClient = onboardingService.NewOnBoardingServiceClient(connection)
+	opt.onfidoClient = onfidoService.NewOnfidoServiceClient(connection)*/
+
+	// KYC
+	/*connection, err = dialRPC(ctx, secrets.KYCServiceURL)
+	if err != nil {
+		return nil, errors.Wrap(err, secrets.KYCServiceURL)
 	}
+	opt.kycClient = kycService.NewKycServiceClient(connection)*/
+
+	// Verify
+	ctx, cancel = context.WithTimeout(context.Background(), 5 * time.Second)
+	defer cancel()
+	connection, err = dialRPC(ctx, secrets.VerifyServiceURL)
+	if err != nil {
+		return nil, fmt.Errorf("%v: %s", err, secrets.VerifyServiceURL)
+	}
+	opt.verifyService = verifyService.NewVerifyServiceClient(connection)
+	return opt, nil
 }
 
-func dialRPC(address string) *grpc.ClientConn {
+func dialRPC(ctx context.Context, address string) (*grpc.ClientConn, error) {
 	//cred := new(tls.Config) // TODO: Find a way to read this from the right source.
 	//connection, err := grpc.Dial(address, grpc.WithTransportCredentials(credentials.NewTLS(cred)))
-	connection, err := grpc.Dial(address, grpc.WithInsecure())
+	connection, err := grpc.DialContext(ctx, address, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
-		logrus.Error(err)
-		return nil
+		return nil, err
 	}
-
-	return connection
+	return connection, nil
 }
