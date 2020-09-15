@@ -6,45 +6,23 @@ import (
 	"ms.api/utils"
 	"net/http"
 	"strings"
-
-	"ms.api/libs/sessions"
 )
 
 const (
 	AuthenticatedUserContextKey = "AuthenticatedUser"
 	TokenContextKey             = "Token"
+	//AccountTypeContextKey       = "AccountType"
 	Bearer = "BEARER"
 )
 
-func handleSessionByToken(token string) (authenticatedUser utils.JSON, result *types.Result) {
-	authenticatedUser = make(utils.JSON)
-
-	session, err := sessions.GetSessionByToken(token)
-	if err != nil {
-		result := &types.Result{}
-		result.Success = false
-		result.Message = "Sorry, your session has expired, Please login to continue. "
-		//result.ReturnStatus = types.ReturnStatusTokenExpired
-		return nil, result
-	}
-
-	println(session.AccountId)
-	// TODO: Come here and apply an actual session thing for the connected client to carry out any sensitive business.
-	//switch accountType.String() {
-
-	//case types.AccountTypesAdministrator.String():
-	//	authenticatedUser[types.AccountTypesAdministrator.String()], _ = Administrators.ViewAdmin(_id)
-	//	break
-	//case types.AccountTypesScheduler.String():
-	//	authenticatedUser[types.AccountTypesScheduler.String()], _ = Schedulers.ViewScheduler(_id)
-	//	break
-	//case types.AccountTypesSigner.String():
-	//	authenticatedUser[types.AccountTypesSigner.String()], _ = Signers.ViewSigner(_id)
-	//	break
-	//}
-	//_ = sessions.ExtendSession(token)
-	return authenticatedUser, nil
+func handleSessionByToken(token string) (AuthenticatedUser utils.JSON, result *types.Result) {
+	AuthenticatedUser = make(utils.JSON)
+	// TODO: use token to call ms.auth to return person & identity for use by this gateway going forward.
+	//AuthenticatedUser["person"], _ = authService.GetUserFromToken(token)
+	return AuthenticatedUser, nil
 }
+
+// TODO: here user should be the direct type of protos.Person from the auth or person service.
 func GetAuthenticatedUser(ctx context.Context) (user interface{}, token string) {
 	authenticatedUser, _ := ctx.Value(AuthenticatedUserContextKey).(utils.JSON)
 	user = authenticatedUser["user"]
@@ -91,5 +69,6 @@ func DestroyAuthenticatedUser(ctx context.Context) error {
 	if token == "" {
 		return nil
 	}
-	return sessions.DestroySession(token)
+	// TODO: Call ms.auth to logout this authenticated user via a token.
+	return nil
 }
