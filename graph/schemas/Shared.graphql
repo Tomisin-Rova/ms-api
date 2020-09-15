@@ -3,9 +3,20 @@ type Result {
     message: String!
 }
 
+type CreatePhoneResult {
+    success: Boolean!
+    message: String!
+    emailToken: String!
+}
+
 input CreatePhoneInput {
     phone: String!
     device: Device!
+}
+
+input CreateEmailInput {
+    emailToken: String!
+    value: String!
 }
 
 input Device {
@@ -13,4 +24,12 @@ input Device {
     brand: String!
     deviceId: String!
     deviceToken: String!
+}
+
+input UpdateBioDataInput {
+    personId: String!
+    address: String!
+    firstName: String!
+    lastName: String!
+    dob: String!
 }

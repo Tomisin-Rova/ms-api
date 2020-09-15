@@ -11,16 +11,9 @@ import (
 	"ms.api/graph"
 	"ms.api/graph/generated"
 	"net/http"
-	"os"
 )
 
-func MountGraphql() *chi.Mux {
-	secrets, err := config.LoadSecrets()
-	logger := setupLogger()
-	if err != nil {
-		logger.Fatal("failed to load secrets: %v", err)
-	}
-
+func MountGraphql(secrets *config.Secrets, logger *logrus.Logger) *chi.Mux {
 	router := chi.NewRouter()
 	// Middlewares
 	router.Use(cors.New(cors.Options{
@@ -41,25 +34,13 @@ func MountGraphql() *chi.Mux {
 		})
 	}
 
-	// API Server
 	opt, err := graph.ConnectServiceDependencies(secrets)
 	if err != nil {
 		logger.Fatalf("failed to setup service dependencies: %v", err)
 	}
 
 	resolvers := graph.NewResolver(opt, logger)
+	// API Server
 	router.Handle("/graphql", handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: resolvers})))
 	return router
-}
-
-func setupLogger() *logrus.Logger {
-	var logFormatter logrus.Formatter
-	if os.Getenv("env") == "dev" {
-		logFormatter = &logrus.TextFormatter{}
-	} else {
-		logFormatter = &logrus.JSONFormatter{}
-	}
-	logger := logrus.New()
-	logger.Formatter = logFormatter
-	return logger
 }

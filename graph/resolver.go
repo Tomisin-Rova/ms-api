@@ -2,7 +2,7 @@ package graph
 
 import (
 	"context"
-	"github.com/pkg/errors"
+	"fmt"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"ms.api/config"
@@ -12,10 +12,6 @@ import (
 	"ms.api/protos/pb/verifyService"
 	"time"
 )
-
-// This file will not be regenerated automatically.
-//
-// It serves as dependency injection for your app, add any dependencies you require here.
 
 type ResolverOpts struct {
 	onfidoClient      onfidoService.OnfidoServiceClient
@@ -46,35 +42,37 @@ func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) 
 	// TODO: Ensure it is secure when connecting.
 	// TODO: Find a way to watch the service outage and handle response to client.
 	// TODO: Read heartbeat from these services, if a heartbeat is out, buzz the admin.
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5 * time.Second)
 	defer cancel()
 	opt := &ResolverOpts{}
 
 	// OnBoarding
 	connection, err := dialRPC(ctx, secrets.OnboardingServiceURL)
 	if err != nil {
-		return nil, errors.Wrap(err, secrets.OnboardingServiceURL)
+		return nil, fmt.Errorf("%v: %s", err, secrets.OnboardingServiceURL)
 	}
 	opt.onBoardingService = onboardingService.NewOnBoardingServiceClient(connection)
 
 	// OnFido
-	connection, err = dialRPC(ctx, secrets.OnfidoServiceURL)
+	/*connection, err = dialRPC(ctx, secrets.OnfidoServiceURL)
 	if err != nil {
 		return nil, errors.Wrap(err, secrets.OnfidoServiceURL)
 	}
-	opt.onfidoClient = onfidoService.NewOnfidoServiceClient(connection)
+	opt.onfidoClient = onfidoService.NewOnfidoServiceClient(connection)*/
 
 	// KYC
-	connection, err = dialRPC(ctx, secrets.KYCServiceURL)
+	/*connection, err = dialRPC(ctx, secrets.KYCServiceURL)
 	if err != nil {
 		return nil, errors.Wrap(err, secrets.KYCServiceURL)
 	}
-	opt.kycClient = kycService.NewKycServiceClient(connection)
+	opt.kycClient = kycService.NewKycServiceClient(connection)*/
 
 	// Verify
+	ctx, cancel = context.WithTimeout(context.Background(), 5 * time.Second)
+	defer cancel()
 	connection, err = dialRPC(ctx, secrets.VerifyServiceURL)
 	if err != nil {
-		return nil, errors.Wrap(err, secrets.VerifyServiceURL)
+		return nil, fmt.Errorf("%v: %s", err, secrets.VerifyServiceURL)
 	}
 	opt.verifyService = verifyService.NewVerifyServiceClient(connection)
 	return opt, nil

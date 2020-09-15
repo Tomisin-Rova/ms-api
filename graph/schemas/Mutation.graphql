@@ -8,19 +8,14 @@ type Mutation {
         passcode: String!
     ): Result
 
-    updatePersonBiodata(
-        personId: String!,
-        address: String!
-        firstName: String!,
-        lastName: String!
-        dob: String!,
-    ) : Result
+    updatePersonBiodata(input: UpdateBioDataInput) : Result
 
     addReasonsForUsingRoava(
         personId: String!,
         reasons: String!
     ) : Result
 
-    createPhone(input: CreatePhoneInput!): Result
+    createPhone(input: CreatePhoneInput!): CreatePhoneResult
     verifyOtp(phone: String!, code: String!): Result
+    createEmail(input: CreateEmailInput): Result
 }

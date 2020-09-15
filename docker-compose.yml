@@ -6,7 +6,7 @@ services:
     container_name: eventstore
     restart: on-failure
     volumes:
-      - "${HOME}/var/pulsar/events/store:/pulsar/data"
+      - "${HOME}/fresh/events/new:/pulsar/data"
     ports:
       - 6650:6650
       - 8090:8080
@@ -21,7 +21,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: root
       MONGO_INITDB_DATABASE: roava
     volumes:
-      - "${HOME}/mnt/mongo/data:/data/db"
+      - "${HOME}/mnt/datastore/mongo:/data/db"
     ports:
       - 27018:27017
 
@@ -34,6 +34,8 @@ services:
       DATABASE_URL: mongodb://root:root@mongodb:27017
       PULSAR_URL: pulsar://eventstore:6650
       DATABASE_NAME: roava
+      SERVICE_NAME: ms.verify
+      ENVIRONMENT: local
     depends_on:
       - mongodb
       - eventstore
@@ -49,6 +51,7 @@ services:
       DATABASE_URL: mongodb://root:root@mongodb:27017
       PULSAR_URL: pulsar://eventstore:6650
       DATABASE_NAME: roava
+      SERVICE_NAME: ms.onboarding
     depends_on:
       - eventstore
       - mongodb
@@ -64,6 +67,7 @@ services:
       DATABASE_URL: mongodb://root:root@mongodb:27017
       PULSAR_URL: pulsar://eventstore:6650
       DATABASE_NAME: roava
+      SERVICE_NAME: ms.identity
     depends_on:
       - eventstore
       - mongodb
@@ -79,20 +83,22 @@ services:
       DATABASE_URL: mongodb://root:root@mongodb:27017
       PULSAR_URL: pulsar://eventstore:6650
       DATABASE_NAME: roava
+      SERVICE_NAME: ms.person
     depends_on:
       - eventstore
       - mongodb
     ports:
       - 2003:2003
 
-  ms.api:
-    container_name: ms.api
+  api:
+    container_name: api
     build:
       context: ./
     environment:
       PORT: 9000
       ONBOARDING_SERVICE_URL: ms.onboarding:2001
       VERIFY_SERVICE_URL: ms.verify:2000
+      SERVICE_NAME: ms.api
     depends_on:
       - ms.onboarding
       - ms.verify

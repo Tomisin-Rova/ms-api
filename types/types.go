@@ -2,9 +2,20 @@
 
 package types
 
+type CreateEmailInput struct {
+	EmailToken string `json:"emailToken"`
+	Value      string `json:"value"`
+}
+
 type CreatePhoneInput struct {
 	Phone  string  `json:"phone"`
 	Device *Device `json:"device"`
+}
+
+type CreatePhoneResult struct {
+	Success    bool   `json:"success"`
+	Message    string `json:"message"`
+	EmailToken string `json:"emailToken"`
 }
 
 type Device struct {
@@ -17,4 +28,12 @@ type Device struct {
 type Result struct {
 	Success bool   `json:"success"`
 	Message string `json:"message"`
+}
+
+type UpdateBioDataInput struct {
+	PersonID  string `json:"personId"`
+	Address   string `json:"address"`
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+	Dob       string `json:"dob"`
 }

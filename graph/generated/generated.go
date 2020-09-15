@@ -53,12 +53,19 @@ type ComplexityRoot struct {
 		Token func(childComplexity int) int
 	}
 
+	CreatePhoneResult struct {
+		EmailToken func(childComplexity int) int
+		Message    func(childComplexity int) int
+		Success    func(childComplexity int) int
+	}
+
 	Mutation struct {
 		AddReasonsForUsingRoava func(childComplexity int, personID string, reasons string) int
+		CreateEmail             func(childComplexity int, input *types.CreateEmailInput) int
 		CreatePasscode          func(childComplexity int, userID string, passcode string) int
 		CreatePhone             func(childComplexity int, input types.CreatePhoneInput) int
 		SubmitKYCApplication    func(childComplexity int, applicantID string) int
-		UpdatePersonBiodata     func(childComplexity int, personID string, address string, firstName string, lastName string, dob string) int
+		UpdatePersonBiodata     func(childComplexity int, input *types.UpdateBioDataInput) int
 		VerifyOtp               func(childComplexity int, phone string, code string) int
 	}
 
@@ -79,10 +86,11 @@ type ComplexityRoot struct {
 type MutationResolver interface {
 	SubmitKYCApplication(ctx context.Context, applicantID string) (*types.Result, error)
 	CreatePasscode(ctx context.Context, userID string, passcode string) (*types.Result, error)
-	UpdatePersonBiodata(ctx context.Context, personID string, address string, firstName string, lastName string, dob string) (*types.Result, error)
+	UpdatePersonBiodata(ctx context.Context, input *types.UpdateBioDataInput) (*types.Result, error)
 	AddReasonsForUsingRoava(ctx context.Context, personID string, reasons string) (*types.Result, error)
-	CreatePhone(ctx context.Context, input types.CreatePhoneInput) (*types.Result, error)
+	CreatePhone(ctx context.Context, input types.CreatePhoneInput) (*types.CreatePhoneResult, error)
 	VerifyOtp(ctx context.Context, phone string, code string) (*types.Result, error)
+	CreateEmail(ctx context.Context, input *types.CreateEmailInput) (*types.Result, error)
 }
 type QueryResolver interface {
 	GetApplicantSDKToken(ctx context.Context) (*onfidoService.ApplicantSDKTokenResponse, error)
@@ -120,6 +128,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ApplicantSDKTokenResponse.Token(childComplexity), true
 
+	case "CreatePhoneResult.emailToken":
+		if e.complexity.CreatePhoneResult.EmailToken == nil {
+			break
+		}
+
+		return e.complexity.CreatePhoneResult.EmailToken(childComplexity), true
+
+	case "CreatePhoneResult.message":
+		if e.complexity.CreatePhoneResult.Message == nil {
+			break
+		}
+
+		return e.complexity.CreatePhoneResult.Message(childComplexity), true
+
+	case "CreatePhoneResult.success":
+		if e.complexity.CreatePhoneResult.Success == nil {
+			break
+		}
+
+		return e.complexity.CreatePhoneResult.Success(childComplexity), true
+
 	case "Mutation.addReasonsForUsingRoava":
 		if e.complexity.Mutation.AddReasonsForUsingRoava == nil {
 			break
@@ -131,6 +160,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.AddReasonsForUsingRoava(childComplexity, args["personId"].(string), args["reasons"].(string)), true
+
+	case "Mutation.createEmail":
+		if e.complexity.Mutation.CreateEmail == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createEmail_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateEmail(childComplexity, args["input"].(*types.CreateEmailInput)), true
 
 	case "Mutation.CreatePasscode":
 		if e.complexity.Mutation.CreatePasscode == nil {
@@ -178,7 +219,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdatePersonBiodata(childComplexity, args["personId"].(string), args["address"].(string), args["firstName"].(string), args["lastName"].(string), args["dob"].(string)), true
+		return e.complexity.Mutation.UpdatePersonBiodata(childComplexity, args["input"].(*types.UpdateBioDataInput)), true
 
 	case "Mutation.verifyOtp":
 		if e.complexity.Mutation.VerifyOtp == nil {
@@ -316,21 +357,16 @@ var sources = []*ast.Source{
         passcode: String!
     ): Result
 
-    updatePersonBiodata(
-        personId: String!,
-        address: String!
-        firstName: String!,
-        lastName: String!
-        dob: String!,
-    ) : Result
+    updatePersonBiodata(input: UpdateBioDataInput) : Result
 
     addReasonsForUsingRoava(
         personId: String!,
         reasons: String!
     ) : Result
 
-    createPhone(input: CreatePhoneInput!): Result
+    createPhone(input: CreatePhoneInput!): CreatePhoneResult
     verifyOtp(phone: String!, code: String!): Result
+    createEmail(input: CreateEmailInput): Result
 }
 `, BuiltIn: false},
 	{Name: "graph/schemas/Onfido.graphql", Input: `type ApplicantSDKTokenRequest {
@@ -348,9 +384,20 @@ type ApplicantSDKTokenResponse {
     message: String!
 }
 
+type CreatePhoneResult {
+    success: Boolean!
+    message: String!
+    emailToken: String!
+}
+
 input CreatePhoneInput {
     phone: String!
     device: Device!
+}
+
+input CreateEmailInput {
+    emailToken: String!
+    value: String!
 }
 
 input Device {
@@ -358,6 +405,14 @@ input Device {
     brand: String!
     deviceId: String!
     deviceToken: String!
+}
+
+input UpdateBioDataInput {
+    personId: String!
+    address: String!
+    firstName: String!
+    lastName: String!
+    dob: String!
 }
 `, BuiltIn: false},
 	{Name: "graph/schemas/Subscription.graphql", Input: `type Subscription {
@@ -418,6 +473,21 @@ func (ec *executionContext) field_Mutation_addReasonsForUsingRoava_args(ctx cont
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_createEmail_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *types.CreateEmailInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("input"))
+		arg0, err = ec.unmarshalOCreateEmailInput2ᚖmsᚗapiᚋtypesᚐCreateEmailInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_createPhone_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -451,51 +521,15 @@ func (ec *executionContext) field_Mutation_submitKYCApplication_args(ctx context
 func (ec *executionContext) field_Mutation_updatePersonBiodata_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["personId"]; ok {
-		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("personId"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+	var arg0 *types.UpdateBioDataInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("input"))
+		arg0, err = ec.unmarshalOUpdateBioDataInput2ᚖmsᚗapiᚋtypesᚐUpdateBioDataInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["personId"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["address"]; ok {
-		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("address"))
-		arg1, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["address"] = arg1
-	var arg2 string
-	if tmp, ok := rawArgs["firstName"]; ok {
-		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("firstName"))
-		arg2, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["firstName"] = arg2
-	var arg3 string
-	if tmp, ok := rawArgs["lastName"]; ok {
-		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("lastName"))
-		arg3, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["lastName"] = arg3
-	var arg4 string
-	if tmp, ok := rawArgs["dob"]; ok {
-		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("dob"))
-		arg4, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["dob"] = arg4
+	args["input"] = arg0
 	return args, nil
 }
 
@@ -659,6 +693,108 @@ func (ec *executionContext) _ApplicantSDKTokenResponse_token(ctx context.Context
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _CreatePhoneResult_success(ctx context.Context, field graphql.CollectedField, obj *types.CreatePhoneResult) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "CreatePhoneResult",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Success, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _CreatePhoneResult_message(ctx context.Context, field graphql.CollectedField, obj *types.CreatePhoneResult) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "CreatePhoneResult",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Message, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _CreatePhoneResult_emailToken(ctx context.Context, field graphql.CollectedField, obj *types.CreatePhoneResult) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "CreatePhoneResult",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.EmailToken, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Mutation_submitKYCApplication(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -759,7 +895,7 @@ func (ec *executionContext) _Mutation_updatePersonBiodata(ctx context.Context, f
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdatePersonBiodata(rctx, args["personId"].(string), args["address"].(string), args["firstName"].(string), args["lastName"].(string), args["dob"].(string))
+		return ec.resolvers.Mutation().UpdatePersonBiodata(rctx, args["input"].(*types.UpdateBioDataInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -844,9 +980,9 @@ func (ec *executionContext) _Mutation_createPhone(ctx context.Context, field gra
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*types.Result)
+	res := resTmp.(*types.CreatePhoneResult)
 	fc.Result = res
-	return ec.marshalOResult2ᚖmsᚗapiᚋtypesᚐResult(ctx, field.Selections, res)
+	return ec.marshalOCreatePhoneResult2ᚖmsᚗapiᚋtypesᚐCreatePhoneResult(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_verifyOtp(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -874,6 +1010,44 @@ func (ec *executionContext) _Mutation_verifyOtp(ctx context.Context, field graph
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().VerifyOtp(rctx, args["phone"].(string), args["code"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*types.Result)
+	fc.Result = res
+	return ec.marshalOResult2ᚖmsᚗapiᚋtypesᚐResult(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_createEmail(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createEmail_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateEmail(rctx, args["input"].(*types.CreateEmailInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2161,6 +2335,34 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputCreateEmailInput(ctx context.Context, obj interface{}) (types.CreateEmailInput, error) {
+	var it types.CreateEmailInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "emailToken":
+			var err error
+
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("emailToken"))
+			it.EmailToken, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "value":
+			var err error
+
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("value"))
+			it.Value, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputCreatePhoneInput(ctx context.Context, obj interface{}) (types.CreatePhoneInput, error) {
 	var it types.CreatePhoneInput
 	var asMap = obj.(map[string]interface{})
@@ -2233,6 +2435,58 @@ func (ec *executionContext) unmarshalInputDevice(ctx context.Context, obj interf
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputUpdateBioDataInput(ctx context.Context, obj interface{}) (types.UpdateBioDataInput, error) {
+	var it types.UpdateBioDataInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "personId":
+			var err error
+
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("personId"))
+			it.PersonID, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "address":
+			var err error
+
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("address"))
+			it.Address, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "firstName":
+			var err error
+
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("firstName"))
+			it.FirstName, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "lastName":
+			var err error
+
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("lastName"))
+			it.LastName, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "dob":
+			var err error
+
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("dob"))
+			it.Dob, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -2295,6 +2549,43 @@ func (ec *executionContext) _ApplicantSDKTokenResponse(ctx context.Context, sel 
 	return out
 }
 
+var createPhoneResultImplementors = []string{"CreatePhoneResult"}
+
+func (ec *executionContext) _CreatePhoneResult(ctx context.Context, sel ast.SelectionSet, obj *types.CreatePhoneResult) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, createPhoneResultImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("CreatePhoneResult")
+		case "success":
+			out.Values[i] = ec._CreatePhoneResult_success(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "message":
+			out.Values[i] = ec._CreatePhoneResult_message(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "emailToken":
+			out.Values[i] = ec._CreatePhoneResult_emailToken(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var mutationImplementors = []string{"Mutation"}
 
 func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -2322,6 +2613,8 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec._Mutation_createPhone(ctx, field)
 		case "verifyOtp":
 			out.Values[i] = ec._Mutation_verifyOtp(ctx, field)
+		case "createEmail":
+			out.Values[i] = ec._Mutation_createEmail(ctx, field)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2985,6 +3278,21 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return graphql.MarshalBoolean(*v)
 }
 
+func (ec *executionContext) unmarshalOCreateEmailInput2ᚖmsᚗapiᚋtypesᚐCreateEmailInput(ctx context.Context, v interface{}) (*types.CreateEmailInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputCreateEmailInput(ctx, v)
+	return &res, graphql.WrapErrorWithInputPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOCreatePhoneResult2ᚖmsᚗapiᚋtypesᚐCreatePhoneResult(ctx context.Context, sel ast.SelectionSet, v *types.CreatePhoneResult) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._CreatePhoneResult(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalOResult2ᚖmsᚗapiᚋtypesᚐResult(ctx context.Context, sel ast.SelectionSet, v *types.Result) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -3014,6 +3322,14 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 		return graphql.Null
 	}
 	return graphql.MarshalString(*v)
+}
+
+func (ec *executionContext) unmarshalOUpdateBioDataInput2ᚖmsᚗapiᚋtypesᚐUpdateBioDataInput(ctx context.Context, v interface{}) (*types.UpdateBioDataInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputUpdateBioDataInput(ctx, v)
+	return &res, graphql.WrapErrorWithInputPath(ctx, err)
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {
