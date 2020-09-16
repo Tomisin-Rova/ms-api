@@ -14,9 +14,9 @@ import (
 	"ms.api/types"
 )
 
-func (r *mutationResolver) SubmitKYCApplication(ctx context.Context, applicationID string) (*types.Result, error) {
-	if _, err := r.kycClient.StartApplicationCDD(ctx, &kycService.ApplicationIdRequest{
-		ApplicationId: applicationID,
+func (r *mutationResolver) SubmitKYCApplication(ctx context.Context, personID string) (*types.Result, error) {
+	if _, err := r.kycClient.SubmitKycApplicationByPersonId(ctx, &kycService.PersonIdRequest{
+		PersonId: personID,
 	}); err != nil {
 		return nil, err
 	}

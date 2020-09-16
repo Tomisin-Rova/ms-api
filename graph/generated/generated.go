@@ -76,18 +76,11 @@ type ComplexityRoot struct {
 		Token func(childComplexity int) int
 	}
 
-	Application struct {
-		Applicant   func(childComplexity int) int
-		Id          func(childComplexity int) int
-		PersonId    func(childComplexity int) int
-		TimeCreated func(childComplexity int) int
-		TimeUpdated func(childComplexity int) int
-	}
-
 	Cdd struct {
-		ApplicantId func(childComplexity int) int
+		Details     func(childComplexity int) int
 		Id          func(childComplexity int) int
-		PersonId    func(childComplexity int) int
+		Kyc         func(childComplexity int) int
+		Owner       func(childComplexity int) int
 		Status      func(childComplexity int) int
 		TimeCreated func(childComplexity int) int
 		TimeUpdated func(childComplexity int) int
@@ -99,12 +92,21 @@ type ComplexityRoot struct {
 		Success    func(childComplexity int) int
 	}
 
+	Kyc struct {
+		Applicant   func(childComplexity int) int
+		Id          func(childComplexity int) int
+		Status      func(childComplexity int) int
+		TimeCreated func(childComplexity int) int
+		TimeUpdated func(childComplexity int) int
+		Vendor      func(childComplexity int) int
+	}
+
 	Mutation struct {
 		AddReasonsForUsingRoava func(childComplexity int, personID string, reasons string) int
 		CreateEmail             func(childComplexity int, input *types.CreateEmailInput) int
 		CreatePasscode          func(childComplexity int, userID string, passcode string) int
 		CreatePhone             func(childComplexity int, input types.CreatePhoneInput) int
-		SubmitKYCApplication    func(childComplexity int, applicationID string) int
+		SubmitKYCApplication    func(childComplexity int, personID string) int
 		UpdatePersonBiodata     func(childComplexity int, input *types.UpdateBioDataInput) int
 		VerifyOtp               func(childComplexity int, phone string, code string) int
 	}
@@ -124,7 +126,7 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
-	SubmitKYCApplication(ctx context.Context, applicationID string) (*types.Result, error)
+	SubmitKYCApplication(ctx context.Context, personID string) (*types.Result, error)
 	CreatePasscode(ctx context.Context, userID string, passcode string) (*types.Result, error)
 	UpdatePersonBiodata(ctx context.Context, input *types.UpdateBioDataInput) (*types.Result, error)
 	AddReasonsForUsingRoava(ctx context.Context, personID string, reasons string) (*types.Result, error)
@@ -280,47 +282,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ApplicantSDKTokenResponse.Token(childComplexity), true
 
-	case "Application.applicant":
-		if e.complexity.Application.Applicant == nil {
+	case "CDD.details":
+		if e.complexity.Cdd.Details == nil {
 			break
 		}
 
-		return e.complexity.Application.Applicant(childComplexity), true
-
-	case "Application.id":
-		if e.complexity.Application.Id == nil {
-			break
-		}
-
-		return e.complexity.Application.Id(childComplexity), true
-
-	case "Application.person_id":
-		if e.complexity.Application.PersonId == nil {
-			break
-		}
-
-		return e.complexity.Application.PersonId(childComplexity), true
-
-	case "Application.time_created":
-		if e.complexity.Application.TimeCreated == nil {
-			break
-		}
-
-		return e.complexity.Application.TimeCreated(childComplexity), true
-
-	case "Application.time_updated":
-		if e.complexity.Application.TimeUpdated == nil {
-			break
-		}
-
-		return e.complexity.Application.TimeUpdated(childComplexity), true
-
-	case "CDD.applicant_id":
-		if e.complexity.Cdd.ApplicantId == nil {
-			break
-		}
-
-		return e.complexity.Cdd.ApplicantId(childComplexity), true
+		return e.complexity.Cdd.Details(childComplexity), true
 
 	case "CDD.id":
 		if e.complexity.Cdd.Id == nil {
@@ -329,12 +296,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Cdd.Id(childComplexity), true
 
-	case "CDD.person_id":
-		if e.complexity.Cdd.PersonId == nil {
+	case "CDD.kyc":
+		if e.complexity.Cdd.Kyc == nil {
 			break
 		}
 
-		return e.complexity.Cdd.PersonId(childComplexity), true
+		return e.complexity.Cdd.Kyc(childComplexity), true
+
+	case "CDD.owner":
+		if e.complexity.Cdd.Owner == nil {
+			break
+		}
+
+		return e.complexity.Cdd.Owner(childComplexity), true
 
 	case "CDD.status":
 		if e.complexity.Cdd.Status == nil {
@@ -377,6 +351,48 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.CreatePhoneResult.Success(childComplexity), true
+
+	case "KYC.applicant":
+		if e.complexity.Kyc.Applicant == nil {
+			break
+		}
+
+		return e.complexity.Kyc.Applicant(childComplexity), true
+
+	case "KYC.id":
+		if e.complexity.Kyc.Id == nil {
+			break
+		}
+
+		return e.complexity.Kyc.Id(childComplexity), true
+
+	case "KYC.Status":
+		if e.complexity.Kyc.Status == nil {
+			break
+		}
+
+		return e.complexity.Kyc.Status(childComplexity), true
+
+	case "KYC.time_created":
+		if e.complexity.Kyc.TimeCreated == nil {
+			break
+		}
+
+		return e.complexity.Kyc.TimeCreated(childComplexity), true
+
+	case "KYC.time_updated":
+		if e.complexity.Kyc.TimeUpdated == nil {
+			break
+		}
+
+		return e.complexity.Kyc.TimeUpdated(childComplexity), true
+
+	case "KYC.vendor":
+		if e.complexity.Kyc.Vendor == nil {
+			break
+		}
+
+		return e.complexity.Kyc.Vendor(childComplexity), true
 
 	case "Mutation.addReasonsForUsingRoava":
 		if e.complexity.Mutation.AddReasonsForUsingRoava == nil {
@@ -436,7 +452,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.SubmitKYCApplication(childComplexity, args["application_id"].(string)), true
+		return e.complexity.Mutation.SubmitKYCApplication(childComplexity, args["person_id"].(string)), true
 
 	case "Mutation.updatePersonBiodata":
 		if e.complexity.Mutation.UpdatePersonBiodata == nil {
@@ -581,10 +597,11 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "graph/schemas/KYC.graphql", Input: `type Application {
+	{Name: "graph/schemas/KYC.graphql", Input: `type KYC {
     id: String!
-    person_id: String!
     applicant: Applicant!
+    vendor: String
+    Status: String
     time_created: Int!
     time_updated: Int!
 }
@@ -597,7 +614,7 @@ type Applicant {
     email: String!
     dob: String!
     address: Address!
-    vendor: String!
+    vendor: String
 }
 
 type Address {
@@ -614,9 +631,10 @@ type Address {
 
 type CDD {
     id: String!
-    person_id: String!
-    applicant_id: String!
+    owner: String!
+    details: String!
     status: String!
+    kyc: KYC!
     #    //  repeated tag tags = 5;
     #    //  repeated document documents = 6;
     time_created: Int!
@@ -624,7 +642,7 @@ type CDD {
 }`, BuiltIn: false},
 	{Name: "graph/schemas/Mutation.graphql", Input: `type Mutation {
     submitKYCApplication(
-        application_id: String!
+        person_id: String!
     ): Result
 
     CreatePasscode(
@@ -782,14 +800,14 @@ func (ec *executionContext) field_Mutation_submitKYCApplication_args(ctx context
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["application_id"]; ok {
-		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("application_id"))
+	if tmp, ok := rawArgs["person_id"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("person_id"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["application_id"] = arg0
+	args["person_id"] = arg0
 	return args, nil
 }
 
@@ -1431,14 +1449,11 @@ func (ec *executionContext) _Applicant_vendor(ctx context.Context, field graphql
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
 	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalOString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _ApplicantSDKTokenRequest_applicantId(ctx context.Context, field graphql.CollectedField, obj *onfidoService.ApplicantSDKTokenRequest) (ret graphql.Marshaler) {
@@ -1509,176 +1524,6 @@ func (ec *executionContext) _ApplicantSDKTokenResponse_token(ctx context.Context
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Application_id(ctx context.Context, field graphql.CollectedField, obj *kycService.Application) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Application",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Id, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Application_person_id(ctx context.Context, field graphql.CollectedField, obj *kycService.Application) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Application",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.PersonId, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Application_applicant(ctx context.Context, field graphql.CollectedField, obj *kycService.Application) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Application",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Applicant, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*kycService.Applicant)
-	fc.Result = res
-	return ec.marshalNApplicant2ᚖmsᚗapiᚋprotosᚋpbᚋkycServiceᚐApplicant(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Application_time_created(ctx context.Context, field graphql.CollectedField, obj *kycService.Application) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Application",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.TimeCreated, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int64)
-	fc.Result = res
-	return ec.marshalNInt2int64(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Application_time_updated(ctx context.Context, field graphql.CollectedField, obj *kycService.Application) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Application",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.TimeUpdated, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int64)
-	fc.Result = res
-	return ec.marshalNInt2int64(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _CDD_id(ctx context.Context, field graphql.CollectedField, obj *kycService.Cdd) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -1713,7 +1558,7 @@ func (ec *executionContext) _CDD_id(ctx context.Context, field graphql.Collected
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _CDD_person_id(ctx context.Context, field graphql.CollectedField, obj *kycService.Cdd) (ret graphql.Marshaler) {
+func (ec *executionContext) _CDD_owner(ctx context.Context, field graphql.CollectedField, obj *kycService.Cdd) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1730,7 +1575,7 @@ func (ec *executionContext) _CDD_person_id(ctx context.Context, field graphql.Co
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.PersonId, nil
+		return obj.Owner, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1747,7 +1592,7 @@ func (ec *executionContext) _CDD_person_id(ctx context.Context, field graphql.Co
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _CDD_applicant_id(ctx context.Context, field graphql.CollectedField, obj *kycService.Cdd) (ret graphql.Marshaler) {
+func (ec *executionContext) _CDD_details(ctx context.Context, field graphql.CollectedField, obj *kycService.Cdd) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1764,7 +1609,7 @@ func (ec *executionContext) _CDD_applicant_id(ctx context.Context, field graphql
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.ApplicantId, nil
+		return obj.Details, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1813,6 +1658,40 @@ func (ec *executionContext) _CDD_status(ctx context.Context, field graphql.Colle
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _CDD_kyc(ctx context.Context, field graphql.CollectedField, obj *kycService.Cdd) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "CDD",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Kyc, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*kycService.Kyc)
+	fc.Result = res
+	return ec.marshalNKYC2ᚖmsᚗapiᚋprotosᚋpbᚋkycServiceᚐKyc(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _CDD_time_created(ctx context.Context, field graphql.CollectedField, obj *kycService.Cdd) (ret graphql.Marshaler) {
@@ -1985,6 +1864,204 @@ func (ec *executionContext) _CreatePhoneResult_emailToken(ctx context.Context, f
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _KYC_id(ctx context.Context, field graphql.CollectedField, obj *kycService.Kyc) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "KYC",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Id, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _KYC_applicant(ctx context.Context, field graphql.CollectedField, obj *kycService.Kyc) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "KYC",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Applicant, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*kycService.Applicant)
+	fc.Result = res
+	return ec.marshalNApplicant2ᚖmsᚗapiᚋprotosᚋpbᚋkycServiceᚐApplicant(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _KYC_vendor(ctx context.Context, field graphql.CollectedField, obj *kycService.Kyc) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "KYC",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Vendor, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _KYC_Status(ctx context.Context, field graphql.CollectedField, obj *kycService.Kyc) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "KYC",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Status, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _KYC_time_created(ctx context.Context, field graphql.CollectedField, obj *kycService.Kyc) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "KYC",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TimeCreated, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int64)
+	fc.Result = res
+	return ec.marshalNInt2int64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _KYC_time_updated(ctx context.Context, field graphql.CollectedField, obj *kycService.Kyc) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "KYC",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TimeUpdated, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int64)
+	fc.Result = res
+	return ec.marshalNInt2int64(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Mutation_submitKYCApplication(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -2009,7 +2086,7 @@ func (ec *executionContext) _Mutation_submitKYCApplication(ctx context.Context, 
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().SubmitKYCApplication(rctx, args["application_id"].(string))
+		return ec.resolvers.Mutation().SubmitKYCApplication(rctx, args["person_id"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3784,9 +3861,6 @@ func (ec *executionContext) _Applicant(ctx context.Context, sel ast.SelectionSet
 			}
 		case "vendor":
 			out.Values[i] = ec._Applicant_vendor(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3852,53 +3926,6 @@ func (ec *executionContext) _ApplicantSDKTokenResponse(ctx context.Context, sel 
 	return out
 }
 
-var applicationImplementors = []string{"Application"}
-
-func (ec *executionContext) _Application(ctx context.Context, sel ast.SelectionSet, obj *kycService.Application) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, applicationImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("Application")
-		case "id":
-			out.Values[i] = ec._Application_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "person_id":
-			out.Values[i] = ec._Application_person_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "applicant":
-			out.Values[i] = ec._Application_applicant(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "time_created":
-			out.Values[i] = ec._Application_time_created(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "time_updated":
-			out.Values[i] = ec._Application_time_updated(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
 var cDDImplementors = []string{"CDD"}
 
 func (ec *executionContext) _CDD(ctx context.Context, sel ast.SelectionSet, obj *kycService.Cdd) graphql.Marshaler {
@@ -3915,18 +3942,23 @@ func (ec *executionContext) _CDD(ctx context.Context, sel ast.SelectionSet, obj 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "person_id":
-			out.Values[i] = ec._CDD_person_id(ctx, field, obj)
+		case "owner":
+			out.Values[i] = ec._CDD_owner(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "applicant_id":
-			out.Values[i] = ec._CDD_applicant_id(ctx, field, obj)
+		case "details":
+			out.Values[i] = ec._CDD_details(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "status":
 			out.Values[i] = ec._CDD_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "kyc":
+			out.Values[i] = ec._CDD_kyc(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -3974,6 +4006,52 @@ func (ec *executionContext) _CreatePhoneResult(ctx context.Context, sel ast.Sele
 			}
 		case "emailToken":
 			out.Values[i] = ec._CreatePhoneResult_emailToken(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var kYCImplementors = []string{"KYC"}
+
+func (ec *executionContext) _KYC(ctx context.Context, sel ast.SelectionSet, obj *kycService.Kyc) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, kYCImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("KYC")
+		case "id":
+			out.Values[i] = ec._KYC_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "applicant":
+			out.Values[i] = ec._KYC_applicant(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "vendor":
+			out.Values[i] = ec._KYC_vendor(ctx, field, obj)
+		case "Status":
+			out.Values[i] = ec._KYC_Status(ctx, field, obj)
+		case "time_created":
+			out.Values[i] = ec._KYC_time_created(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "time_updated":
+			out.Values[i] = ec._KYC_time_updated(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -4438,6 +4516,16 @@ func (ec *executionContext) marshalNInt2int64(ctx context.Context, sel ast.Selec
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalNKYC2ᚖmsᚗapiᚋprotosᚋpbᚋkycServiceᚐKyc(ctx context.Context, sel ast.SelectionSet, v *kycService.Kyc) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._KYC(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {

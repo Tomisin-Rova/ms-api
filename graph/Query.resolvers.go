@@ -15,12 +15,10 @@ func (r *queryResolver) GetApplicantSDKToken(ctx context.Context, personID strin
 	// TODO: Get person's profile from JWT Token.
 	//person, _ := middlewares.GetAuthenticatedUser(ctx)
 	// Sample Hard Coded PersonID
-	application, err := r.kycClient.GetApplicationByPersonId(ctx, &kycService.PersonIdRequest{PersonId: personID})
+	applicant, err := r.kycClient.GetKycApplicantByPersonId(ctx, &kycService.PersonIdRequest{PersonId: personID})
 	if err != nil {
 		return nil, err
 	}
-
-	applicant := application.Applicant
 	// Sample Valid Payload Hard-Coded.
 	return r.onfidoClient.GenerateApplicantSDKToken(ctx, &onfidoService.ApplicantSDKTokenRequest{ApplicantId: applicant.ApplicantId})
 }
