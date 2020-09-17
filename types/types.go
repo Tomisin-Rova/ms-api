@@ -2,6 +2,11 @@
 
 package types
 
+type AuthResult struct {
+	Token        string `json:"token"`
+	RefreshToken string `json:"refreshToken"`
+}
+
 type CreateEmailInput struct {
 	EmailToken string `json:"emailToken"`
 	Value      string `json:"value"`

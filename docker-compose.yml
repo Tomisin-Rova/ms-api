@@ -1,16 +1,16 @@
 version: "3.0"
 
 services:
-  eventstore:
-    image: apachepulsar/pulsar:2.6.1
-    container_name: eventstore
-    restart: on-failure
-    volumes:
-      - "${HOME}/fresh/events/new:/pulsar/data"
-    ports:
-      - 6650:6650
-      - 8090:8080
-    command: bin/pulsar standalone
+  #eventstore:
+  #  image: apachepulsar/pulsar:2.6.1
+  #  container_name: eventstore
+  #  restart: on-failure
+  #  volumes:
+  #    - "${HOME}/fresh/events/streaming/tests:/pulsar/data"
+  #  ports:
+  #    - 6650:6650
+  #    - 8090:8080
+  #  command: bin/pulsar standalone
 
   mongodb:
     image: mongo:4.2.9
@@ -32,13 +32,13 @@ services:
     environment:
       PORT: 2000
       DATABASE_URL: mongodb://root:root@mongodb:27017
-      PULSAR_URL: pulsar://eventstore:6650
+      PULSAR_URL: pulsar://35.223.216.161:6650
       DATABASE_NAME: roava
       SERVICE_NAME: ms.verify
       ENVIRONMENT: local
     depends_on:
       - mongodb
-      - eventstore
+      #- eventstore
     ports:
       - 2000:2000
 
@@ -49,11 +49,11 @@ services:
     environment:
       PORT: 2001
       DATABASE_URL: mongodb://root:root@mongodb:27017
-      PULSAR_URL: pulsar://eventstore:6650
+      PULSAR_URL: pulsar://35.223.216.161:6650
       DATABASE_NAME: roava
       SERVICE_NAME: ms.onboarding
     depends_on:
-      - eventstore
+      #- eventstore
       - mongodb
     ports:
       - 2001:2001
@@ -65,11 +65,11 @@ services:
     environment:
       PORT: 2002
       DATABASE_URL: mongodb://root:root@mongodb:27017
-      PULSAR_URL: pulsar://eventstore:6650
+      PULSAR_URL: pulsar://35.223.216.161:6650
       DATABASE_NAME: roava
       SERVICE_NAME: ms.identity
     depends_on:
-      - eventstore
+      #- eventstore
       - mongodb
     ports:
       - 2002:2002
@@ -81,14 +81,30 @@ services:
     environment:
       PORT: 2003
       DATABASE_URL: mongodb://root:root@mongodb:27017
-      PULSAR_URL: pulsar://eventstore:6650
+      PULSAR_URL: pulsar://35.223.216.161:6650
       DATABASE_NAME: roava
       SERVICE_NAME: ms.person
     depends_on:
-      - eventstore
+      #- eventstore
       - mongodb
     ports:
       - 2003:2003
+
+  ms.auth:
+    container_name: ms.auth
+    image: gcr.io/labs-271617/roava.io/services/ms.auth
+    restart: on-failure
+    environment:
+      PORT: 2005
+      DATABASE_URL: mongodb://root:root@mongodb:27017
+      PULSAR_URL: pulsar://35.223.216.161:6650
+      DATABASE_NAME: roava
+      SERVICE_NAME: ms.auth
+    depends_on:
+      #- eventstore
+      - mongodb
+    ports:
+      - 2005:2005
 
   api:
     container_name: api
@@ -98,10 +114,12 @@ services:
       PORT: 9000
       ONBOARDING_SERVICE_URL: ms.onboarding:2001
       VERIFY_SERVICE_URL: ms.verify:2000
+      AUTH_SERVICE_URL: ms.auth:2005
       SERVICE_NAME: ms.api
     depends_on:
       - ms.onboarding
       - ms.verify
+      - ms.auth
     ports:
       - 9000:9000
     restart: on-failure

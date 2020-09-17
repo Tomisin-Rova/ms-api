@@ -2,73 +2,75 @@ package middlewares
 
 import (
 	"context"
-	"ms.api/types"
-	"ms.api/utils"
+	"errors"
+	"github.com/sirupsen/logrus"
+	"ms.api/protos/pb/authService"
 	"net/http"
 	"strings"
 )
 
 const (
 	AuthenticatedUserContextKey = "AuthenticatedUser"
-	TokenContextKey             = "Token"
-	//AccountTypeContextKey       = "AccountType"
-	Bearer = "BEARER"
+	Bearer                      = "Bearer"
 )
 
-func handleSessionByToken(token string) (AuthenticatedUser utils.JSON, result *types.Result) {
-	AuthenticatedUser = make(utils.JSON)
-	// TODO: use token to call ms.auth to return person & identity for use by this gateway going forward.
-	//AuthenticatedUser["person"], _ = authService.GetUserFromToken(token)
-	return AuthenticatedUser, nil
+type AuthMiddleware struct {
+	authService authService.AuthServiceClient
+	logger      *logrus.Logger
+}
+
+func NewAuthMiddleware(service authService.AuthServiceClient, logger *logrus.Logger) *AuthMiddleware {
+	return &AuthMiddleware{authService: service, logger: logger}
+}
+
+func (mw *AuthMiddleware) ValidateToken(token string) (string, error) {
+	resp, err := mw.authService.ValidateToken(context.Background(),
+		&authService.ValidateTokenRequest{Token: token})
+	if err != nil {
+		return "", err
+	}
+	return resp.PersonId, nil
 }
 
 // TODO: here user should be the direct type of protos.Person from the auth or person service.
-func GetAuthenticatedUser(ctx context.Context) (user interface{}, token string) {
-	authenticatedUser, _ := ctx.Value(AuthenticatedUserContextKey).(utils.JSON)
-	user = authenticatedUser["user"]
-	token = authenticatedUser[TokenContextKey].(string)
-	return user, token
+func GetAuthenticatedUser(ctx context.Context) (string, error) {
+	personId, ok := ctx.Value(AuthenticatedUserContextKey).(string)
+	if !ok {
+		return "", errors.New("unable to parse authenticated user")
+	}
+	return personId, nil
 }
 
-func AuthMiddleWare(next http.Handler) http.Handler {
+func (mw *AuthMiddleware) Middeware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-		Authorization := r.Header.Get("Authorization")
-		var token string
-
-		if Authorization == "" {
+		authorization := r.Header.Get("Authorization")
+		token := ""
+		if authorization == "" {
 			next.ServeHTTP(w, r)
 			return
 		}
 
-		if len(Authorization) > len(Bearer) && strings.ToUpper(Authorization[0:len(Bearer)]) == Bearer {
-			token = Authorization[len(Bearer)+1:]
-		} else {
+		sp := strings.Split(authorization, " ")
+		mw.logger.Info(sp)
+		if len(sp) > 1 {
+			token = sp[1]
+		}
+
+		if token == "" {
+			mw.logger.Info("no token supplied")
 			next.ServeHTTP(w, r)
 			return
 		}
 
-		AuthenticatedUser, result := handleSessionByToken(token)
-		if result != nil {
-			w.WriteHeader(http.StatusUnauthorized)
-			// TODO: Write the bad result here.
+		personId, err := mw.ValidateToken(token)
+		if err != nil {
+			mw.logger.WithField("token", token).Infof("failed to validate token: %v", err)
 			next.ServeHTTP(w, r)
 			return
 		}
 
-		AuthenticatedUser[TokenContextKey] = token
-
-		ctx := context.WithValue(r.Context(), AuthenticatedUserContextKey, AuthenticatedUser)
+		ctx := context.WithValue(r.Context(), AuthenticatedUserContextKey, personId)
 		next.ServeHTTP(w, r.WithContext(ctx))
 		return
 	})
-}
-
-func DestroyAuthenticatedUser(ctx context.Context) error {
-	_, token := GetAuthenticatedUser(ctx)
-	if token == "" {
-		return nil
-	}
-	// TODO: Call ms.auth to logout this authenticated user via a token.
-	return nil
 }

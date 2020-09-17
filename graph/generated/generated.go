@@ -84,6 +84,11 @@ type ComplexityRoot struct {
 		TimeUpdated func(childComplexity int) int
 	}
 
+	AuthResult struct {
+		RefreshToken func(childComplexity int) int
+		Token        func(childComplexity int) int
+	}
+
 	Cdd struct {
 		ApplicantId func(childComplexity int) int
 		Id          func(childComplexity int) int
@@ -101,6 +106,7 @@ type ComplexityRoot struct {
 
 	Mutation struct {
 		AddReasonsForUsingRoava func(childComplexity int, personID string, reasons string) int
+		AuthenticateCustomer    func(childComplexity int, email string, passcode string) int
 		CreateEmail             func(childComplexity int, input *types.CreateEmailInput) int
 		CreatePasscode          func(childComplexity int, userID string, passcode string) int
 		CreatePhone             func(childComplexity int, input types.CreatePhoneInput) int
@@ -131,6 +137,7 @@ type MutationResolver interface {
 	CreatePhone(ctx context.Context, input types.CreatePhoneInput) (*types.CreatePhoneResult, error)
 	VerifyOtp(ctx context.Context, phone string, code string) (*types.Result, error)
 	CreateEmail(ctx context.Context, input *types.CreateEmailInput) (*types.Result, error)
+	AuthenticateCustomer(ctx context.Context, email string, passcode string) (*types.AuthResult, error)
 }
 type QueryResolver interface {
 	GetApplicantSDKToken(ctx context.Context, personID string) (*onfidoService.ApplicantSDKTokenResponse, error)
@@ -315,6 +322,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Application.TimeUpdated(childComplexity), true
 
+	case "AuthResult.refreshToken":
+		if e.complexity.AuthResult.RefreshToken == nil {
+			break
+		}
+
+		return e.complexity.AuthResult.RefreshToken(childComplexity), true
+
+	case "AuthResult.token":
+		if e.complexity.AuthResult.Token == nil {
+			break
+		}
+
+		return e.complexity.AuthResult.Token(childComplexity), true
+
 	case "CDD.applicant_id":
 		if e.complexity.Cdd.ApplicantId == nil {
 			break
@@ -389,6 +410,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.AddReasonsForUsingRoava(childComplexity, args["personId"].(string), args["reasons"].(string)), true
+
+	case "Mutation.authenticateCustomer":
+		if e.complexity.Mutation.AuthenticateCustomer == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_authenticateCustomer_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.AuthenticateCustomer(childComplexity, args["email"].(string), args["passcode"].(string)), true
 
 	case "Mutation.createEmail":
 		if e.complexity.Mutation.CreateEmail == nil {
@@ -642,6 +675,7 @@ type CDD {
     createPhone(input: CreatePhoneInput!): CreatePhoneResult
     verifyOtp(phone: String!, code: String!): Result
     createEmail(input: CreateEmailInput): Result
+    authenticateCustomer(email: String!, passcode: String!): AuthResult
 }
 `, BuiltIn: false},
 	{Name: "graph/schemas/Onfido.graphql", Input: `type ApplicantSDKTokenRequest {
@@ -688,6 +722,11 @@ input UpdateBioDataInput {
     firstName: String!
     lastName: String!
     dob: String!
+}
+
+type AuthResult {
+    token: String!,
+    refreshToken: String!
 }
 `, BuiltIn: false},
 	{Name: "graph/schemas/Subscription.graphql", Input: `type Subscription {
@@ -745,6 +784,30 @@ func (ec *executionContext) field_Mutation_addReasonsForUsingRoava_args(ctx cont
 		}
 	}
 	args["reasons"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_authenticateCustomer_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["email"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("email"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["email"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["passcode"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("passcode"))
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["passcode"] = arg1
 	return args, nil
 }
 
@@ -1679,6 +1742,74 @@ func (ec *executionContext) _Application_time_updated(ctx context.Context, field
 	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _AuthResult_token(ctx context.Context, field graphql.CollectedField, obj *types.AuthResult) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "AuthResult",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Token, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _AuthResult_refreshToken(ctx context.Context, field graphql.CollectedField, obj *types.AuthResult) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "AuthResult",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.RefreshToken, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _CDD_id(ctx context.Context, field graphql.CollectedField, obj *kycService.Cdd) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -2249,6 +2380,44 @@ func (ec *executionContext) _Mutation_createEmail(ctx context.Context, field gra
 	res := resTmp.(*types.Result)
 	fc.Result = res
 	return ec.marshalOResult2ᚖmsᚗapiᚋtypesᚐResult(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_authenticateCustomer(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_authenticateCustomer_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().AuthenticateCustomer(rctx, args["email"].(string), args["passcode"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*types.AuthResult)
+	fc.Result = res
+	return ec.marshalOAuthResult2ᚖmsᚗapiᚋtypesᚐAuthResult(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_getApplicantSDKToken(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -3899,6 +4068,38 @@ func (ec *executionContext) _Application(ctx context.Context, sel ast.SelectionS
 	return out
 }
 
+var authResultImplementors = []string{"AuthResult"}
+
+func (ec *executionContext) _AuthResult(ctx context.Context, sel ast.SelectionSet, obj *types.AuthResult) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, authResultImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("AuthResult")
+		case "token":
+			out.Values[i] = ec._AuthResult_token(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "refreshToken":
+			out.Values[i] = ec._AuthResult_refreshToken(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var cDDImplementors = []string{"CDD"}
 
 func (ec *executionContext) _CDD(ctx context.Context, sel ast.SelectionSet, obj *kycService.Cdd) graphql.Marshaler {
@@ -4017,6 +4218,8 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec._Mutation_verifyOtp(ctx, field)
 		case "createEmail":
 			out.Values[i] = ec._Mutation_createEmail(ctx, field)
+		case "authenticateCustomer":
+			out.Values[i] = ec._Mutation_authenticateCustomer(ctx, field)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4689,6 +4892,13 @@ func (ec *executionContext) marshalOApplicantSDKTokenResponse2ᚖmsᚗapiᚋprot
 		return graphql.Null
 	}
 	return ec._ApplicantSDKTokenResponse(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOAuthResult2ᚖmsᚗapiᚋtypesᚐAuthResult(ctx context.Context, sel ast.SelectionSet, v *types.AuthResult) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._AuthResult(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v interface{}) (bool, error) {

@@ -6,11 +6,14 @@ package graph
 import (
 	"context"
 	"errors"
+
+	"ms.api/graph/generated"
+	emailvalidator "ms.api/libs/email"
+	"ms.api/protos/pb/authService"
 	"ms.api/protos/pb/kycService"
 	"ms.api/protos/pb/onboardingService"
 	"ms.api/protos/pb/verifyService"
-
-	"ms.api/graph/generated"
+	"ms.api/server/http/middlewares"
 	"ms.api/types"
 )
 
@@ -25,6 +28,7 @@ func (r *mutationResolver) SubmitKYCApplication(ctx context.Context, application
 		Message: "Successfully started CDD check, you'll be notified once completed.",
 	}, nil
 }
+
 func (r *mutationResolver) CreatePasscode(ctx context.Context, userID string, passcode string) (*types.Result, error) {
 	payload := onboardingService.CreatePasscodeRequest{
 		PersonId: userID,
@@ -41,8 +45,12 @@ func (r *mutationResolver) CreatePasscode(ctx context.Context, userID string, pa
 }
 
 func (r *mutationResolver) UpdatePersonBiodata(ctx context.Context, input *types.UpdateBioDataInput) (*types.Result, error) {
+	personId, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
 	payload := onboardingService.UpdatePersonRequest{
-		PersonId:  input.PersonID,
+		PersonId:  personId,
 		Address:   input.Address,
 		FirstName: input.FirstName,
 		LastName:  input.LastName,
@@ -59,8 +67,12 @@ func (r *mutationResolver) UpdatePersonBiodata(ctx context.Context, input *types
 }
 
 func (r *mutationResolver) AddReasonsForUsingRoava(ctx context.Context, personID string, reasons string) (*types.Result, error) {
+	personId, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
 	payload := onboardingService.RoavaReasonsRequest{
-		PersonId: personID,
+		PersonId: personId,
 		Reasons:  reasons,
 	}
 	res, err := r.onBoardingService.AddReasonsForUsingRoava(context.Background(), &payload)
@@ -109,7 +121,33 @@ func (r *mutationResolver) CreateEmail(ctx context.Context, input *types.CreateE
 	return &types.Result{Message: resp.Message, Success: true}, nil
 }
 
+func (r *mutationResolver) AuthenticateCustomer(ctx context.Context, email string, passcode string) (*types.AuthResult, error) {
+	if err := emailvalidator.Validate(email); err != nil {
+		r.logger.WithField("email", email).Info("invalid email supplied")
+		return nil, errors.New("invalid email address")
+	}
+	req := &authService.LoginRequest{Email: email, Passcode: passcode}
+	resp, err := r.authService.Login(ctx, req)
+	if err != nil {
+		r.logger.Info("authService.Login() failed: %v", err)
+		return nil, err
+	}
+	return &types.AuthResult{
+		Token: resp.Token, RefreshToken: resp.RefreshToken,
+	}, nil
+}
+
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 
 type mutationResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//    it when you're done.
+//  - You have helper methods in this file. Move them out to keep these resolver files clean.
+var (
+	ErrUnAuthenticated = errors.New("user not authenticated")
+)
