@@ -44,6 +44,6 @@ func MountServer(secrets *config.Secrets, logger *logrus.Logger) *chi.Mux {
 	// API Server
 	router.Handle("/graphql", handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: resolvers})))
 	// Webhooks
-	router.HandleFunc("/webhooks/onfido", webhooks.HandleOnfidoWebhook(clientConnections.OnfidoClient))
+	router.Post("/webhooks/onfido", webhooks.HandleOnfidoWebhook(clientConnections.OnfidoClient))
 	return router
 }
