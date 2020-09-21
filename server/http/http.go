@@ -10,6 +10,7 @@ import (
 	"ms.api/config"
 	"ms.api/graph"
 	"ms.api/graph/generated"
+	"ms.api/server/http/middlewares"
 	"net/http"
 )
 
@@ -24,6 +25,13 @@ func MountGraphql(secrets *config.Secrets, logger *logrus.Logger) *chi.Mux {
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.RequestID)
 	router.Use(middleware.Logger)
+	opt, err := graph.ConnectServiceDependencies(secrets)
+	if err != nil {
+		logger.Fatalf("failed to setup service dependencies: %v", err)
+	}
+
+	mw := middlewares.NewAuthMiddleware(opt.AuthService, logger)
+	router.Use(mw.Middeware)
 
 	if secrets.Environment != config.Production {
 		router.Handle("/", playground.Handler("GraphQL playground", "/graphql"))
@@ -32,11 +40,6 @@ func MountGraphql(secrets *config.Secrets, logger *logrus.Logger) *chi.Mux {
 			writer.Header().Set("content-type", "text/html")
 			_, _ = writer.Write([]byte("Welcome to Roava API. Please use our APP for a better experience.</a>"))
 		})
-	}
-
-	opt, err := graph.ConnectServiceDependencies(secrets)
-	if err != nil {
-		logger.Fatalf("failed to setup service dependencies: %v", err)
 	}
 
 	resolvers := graph.NewResolver(opt, logger)

@@ -14,7 +14,7 @@ import (
 
 func TestMutationResolver_CreatePhone(t *testing.T) {
 	svc := fakes.NewFakeOnBoardingClient(&onboarding.SuccessResponse{Message: "phone added"},
-		&onboarding.MsgResponse{Message: "phone added"}, nil)
+		&onboarding.CreatePhoneResponse{Message: "phone added", EmailToken: "token"}, nil)
 	r := NewResolver(&ResolverOpts{onBoardingService: svc}, logrus.StandardLogger())
 	mu := &mutationResolver{r}
 	resp, err := mu.CreatePhone(context.Background(), types.CreatePhoneInput{
@@ -53,4 +53,8 @@ func TestMutationResolver_VerifySmsOtp_Error(t *testing.T) {
 	resp, err := mu.VerifyOtp(context.Background(), "09088776655", "009988")
 	assert.NotNil(t, err)
 	assert.Nil(t, resp)
+}
+
+func TestMutationResolver_CreateEmail_BadEmail(t *testing.T) {
+
 }

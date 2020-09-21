@@ -22,6 +22,7 @@ type Secrets struct {
 	KYCServiceURL        string
 	OnboardingServiceURL string
 	VerifyServiceURL     string
+	AuthServiceURL       string
 	VaultAddress         string        `json:"vault_address"`
 	VaultToken           string        `json:"vault_token"`
 	VaultSecretsPath     string        `json:"vault_secrets_path"`
@@ -38,7 +39,6 @@ type Secrets struct {
 
 var _secrets Secrets
 var EventRoot = fmt.Sprintf("%s.%s", Domain, ServiceName)
-
 
 // LoadSecrets loads up Secrets from the .env file once.
 // If an env file is present, Secrets will be loaded, else it'll be ignored.
@@ -65,6 +65,7 @@ func LoadSecrets() (*Secrets, error) {
 	ss.KYCServiceURL = os.Getenv("KYC_SERVICE")
 	ss.OnboardingServiceURL = os.Getenv("ONBOARDING_SERVICE_URL")
 	ss.VerifyServiceURL = os.Getenv("VERIFY_SERVICE_URL")
+	ss.AuthServiceURL = os.Getenv("AUTH_SERVICE_URL")
 	if err := ss.Environment.IsValid(); err != nil {
 		log.Error("Error in environment variables: %v", err)
 	}
