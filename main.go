@@ -22,7 +22,6 @@ func main() {
 	}
 }
 
-
 func setupLogger() *logrus.Logger {
 	var logFormatter logrus.Formatter
 	if os.Getenv("env") == "dev" {

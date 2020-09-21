@@ -39,7 +39,7 @@ message CreateEmailRequest {
 
 message UpdatePersonRequest {
     string personId = 1;
-    string address = 2;
+    Address address = 2;
     string firstName =3;
     string lastName =4;
     string dob = 5;
@@ -48,6 +48,13 @@ message UpdatePersonRequest {
 message RoavaReasonsRequest {
     string personId = 1;
     string reasons = 2;
+}
+
+message Address {
+    string country = 1;
+    string street = 2;
+    string city = 3;
+    string postcode = 4;
 }
 
 service OnBoardingService {

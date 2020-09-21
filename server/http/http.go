@@ -10,9 +10,11 @@ import (
 	"ms.api/config"
 	"ms.api/graph"
 	"ms.api/graph/generated"
+	"ms.api/server/http/middlewares"
 	"ms.api/server/http/webhooks"
 	"net/http"
 )
+
 
 func MountServer(secrets *config.Secrets, logger *logrus.Logger) *chi.Mux {
 	router := chi.NewRouter()
@@ -25,6 +27,13 @@ func MountServer(secrets *config.Secrets, logger *logrus.Logger) *chi.Mux {
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.RequestID)
 	router.Use(middleware.Logger)
+	clientConnections, err := graph.ConnectServiceDependencies(secrets)
+	if err != nil {
+		logger.Fatalf("failed to setup service dependencies: %v", err)
+	}
+
+	mw := middlewares.NewAuthMiddleware(clientConnections.AuthService, logger)
+	router.Use(mw.Middeware)
 
 	if secrets.Environment != config.Production {
 		router.Handle("/", playground.Handler("GraphQL playground", "/graphql"))
@@ -35,10 +44,6 @@ func MountServer(secrets *config.Secrets, logger *logrus.Logger) *chi.Mux {
 		})
 	}
 
-	clientConnections, err := graph.ConnectServiceDependencies(secrets)
-	if err != nil {
-		logger.Fatalf("failed to setup service dependencies: %v", err)
-	}
 
 	resolvers := graph.NewResolver(clientConnections, logger)
 	// API Server
