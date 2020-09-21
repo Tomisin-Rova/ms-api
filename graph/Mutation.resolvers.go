@@ -51,7 +51,10 @@ func (r *mutationResolver) UpdatePersonBiodata(ctx context.Context, input *types
 	}
 	payload := onboardingService.UpdatePersonRequest{
 		PersonId:  personId,
-		Address:   input.Address,
+		Address:   &onboardingService.Address{
+			Postcode: input.Address.Postcode, Street: input.Address.Street,
+			City: input.Address.City, Country: input.Address.Country,
+		},
 		FirstName: input.FirstName,
 		LastName:  input.LastName,
 		Dob:       input.Dob,
@@ -90,7 +93,8 @@ func (r *mutationResolver) CreatePhone(ctx context.Context, input types.CreatePh
 		return nil, errors.New("invalid phone number")
 	}
 	result, err := r.onBoardingService.CreatePhone(ctx,
-		&onboardingService.CreatePhoneRequest{PhoneNumber: input.Phone, Device: &onboardingService.Device{Os: input.Device.Os}})
+		&onboardingService.CreatePhoneRequest{PhoneNumber: input.Phone,
+			Device: &onboardingService.Device{Os: input.Device.Os, Brand: input.Device.Brand, DeviceId: input.Device.DeviceID, DeviceToken: input.Device.DeviceToken}})
 	if err != nil {
 		r.logger.Infof("onBoardingService.createPhone() failed: %v", err)
 		return nil, err
@@ -129,12 +133,22 @@ func (r *mutationResolver) AuthenticateCustomer(ctx context.Context, email strin
 	req := &authService.LoginRequest{Email: email, Passcode: passcode}
 	resp, err := r.authService.Login(ctx, req)
 	if err != nil {
-		r.logger.Info("authService.Login() failed: %v", err)
+		r.logger.Infof("authService.Login() failed: %v", err)
 		return nil, err
 	}
 	return &types.AuthResult{
 		Token: resp.Token, RefreshToken: resp.RefreshToken,
 	}, nil
+}
+
+func (r *mutationResolver) RefreshToken(ctx context.Context, refreshToken string) (*types.AuthResult, error) {
+	req := &authService.RefreshTokenRequest{RefreshToken: refreshToken}
+	resp, err := r.authService.RefreshToken(ctx, req)
+	if err != nil {
+		r.logger.Infof("authService.RefreshToken() failed: %v", err)
+		return nil, err
+	}
+	return &types.AuthResult{Token: resp.Token, RefreshToken: resp.RefreshToken}, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

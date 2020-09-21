@@ -28,7 +28,7 @@ input Device {
 
 input UpdateBioDataInput {
     personId: String!
-    address: String!
+    address: InputAddress!
     firstName: String!
     lastName: String!
     dob: String!
@@ -37,4 +37,11 @@ input UpdateBioDataInput {
 type AuthResult {
     token: String!,
     refreshToken: String!
+}
+
+input InputAddress {
+    country: String!,
+    street: String!,
+    city: String!,
+    postcode: String!
 }

@@ -19,4 +19,5 @@ type Mutation {
     verifyOtp(phone: String!, code: String!): Result
     createEmail(input: CreateEmailInput): Result
     authenticateCustomer(email: String!, passcode: String!): AuthResult
+    refreshToken(refreshToken: String!): AuthResult
 }

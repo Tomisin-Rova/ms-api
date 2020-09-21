@@ -30,15 +30,22 @@ type Device struct {
 	DeviceToken string `json:"deviceToken"`
 }
 
+type InputAddress struct {
+	Country  string `json:"country"`
+	Street   string `json:"street"`
+	City     string `json:"city"`
+	Postcode string `json:"postcode"`
+}
+
 type Result struct {
 	Success bool   `json:"success"`
 	Message string `json:"message"`
 }
 
 type UpdateBioDataInput struct {
-	PersonID  string `json:"personId"`
-	Address   string `json:"address"`
-	FirstName string `json:"firstName"`
-	LastName  string `json:"lastName"`
-	Dob       string `json:"dob"`
+	PersonID  string        `json:"personId"`
+	Address   *InputAddress `json:"address"`
+	FirstName string        `json:"firstName"`
+	LastName  string        `json:"lastName"`
+	Dob       string        `json:"dob"`
 }
