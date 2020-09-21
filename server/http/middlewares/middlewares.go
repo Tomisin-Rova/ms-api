@@ -51,7 +51,6 @@ func (mw *AuthMiddleware) Middeware(next http.Handler) http.Handler {
 		}
 
 		sp := strings.Split(authorization, " ")
-		mw.logger.Info(sp)
 		if len(sp) > 1 {
 			token = sp[1]
 		}
