@@ -17,9 +17,14 @@ import (
 	"ms.api/types"
 )
 
-func (r *mutationResolver) SubmitKYCApplication(ctx context.Context, personID string) (*types.Result, error) {
+func (r *mutationResolver) SubmitKYCApplication(ctx context.Context) (*types.Result, error) {
+	personId, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+
 	if _, err := r.kycClient.SubmitKycApplicationByPersonId(ctx, &kycService.PersonIdRequest{
-		PersonId: personID,
+		PersonId: personId,
 	}); err != nil {
 		return nil, err
 	}

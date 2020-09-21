@@ -1,7 +1,5 @@
 type Mutation {
-    submitKYCApplication(
-        person_id: String!
-    ): Result
+    submitKYCApplication: Result
 
     CreatePasscode(
         userId: String!,

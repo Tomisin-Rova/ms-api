@@ -113,7 +113,7 @@ type ComplexityRoot struct {
 		CreatePasscode          func(childComplexity int, userID string, passcode string) int
 		CreatePhone             func(childComplexity int, input types.CreatePhoneInput) int
 		RefreshToken            func(childComplexity int, refreshToken string) int
-		SubmitKYCApplication    func(childComplexity int, personID string) int
+		SubmitKYCApplication    func(childComplexity int) int
 		UpdatePersonBiodata     func(childComplexity int, input *types.UpdateBioDataInput) int
 		VerifyOtp               func(childComplexity int, phone string, code string) int
 	}
@@ -133,7 +133,7 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
-	SubmitKYCApplication(ctx context.Context, personID string) (*types.Result, error)
+	SubmitKYCApplication(ctx context.Context) (*types.Result, error)
 	CreatePasscode(ctx context.Context, userID string, passcode string) (*types.Result, error)
 	UpdatePersonBiodata(ctx context.Context, input *types.UpdateBioDataInput) (*types.Result, error)
 	AddReasonsForUsingRoava(ctx context.Context, personID string, reasons string) (*types.Result, error)
@@ -494,12 +494,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_submitKYCApplication_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.SubmitKYCApplication(childComplexity, args["person_id"].(string)), true
+		return e.complexity.Mutation.SubmitKYCApplication(childComplexity), true
 
 	case "Mutation.updatePersonBiodata":
 		if e.complexity.Mutation.UpdatePersonBiodata == nil {
@@ -688,9 +683,7 @@ type CDD {
     time_updated: Int!
 }`, BuiltIn: false},
 	{Name: "graph/schemas/Mutation.graphql", Input: `type Mutation {
-    submitKYCApplication(
-        person_id: String!
-    ): Result
+    submitKYCApplication: Result
 
     CreatePasscode(
         userId: String!,
@@ -893,21 +886,6 @@ func (ec *executionContext) field_Mutation_refreshToken_args(ctx context.Context
 		}
 	}
 	args["refreshToken"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_submitKYCApplication_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["person_id"]; ok {
-		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("person_id"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["person_id"] = arg0
 	return args, nil
 }
 
@@ -2245,16 +2223,9 @@ func (ec *executionContext) _Mutation_submitKYCApplication(ctx context.Context, 
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_submitKYCApplication_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().SubmitKYCApplication(rctx, args["person_id"].(string))
+		return ec.resolvers.Mutation().SubmitKYCApplication(rctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
