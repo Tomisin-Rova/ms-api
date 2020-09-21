@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-type ClientConnections struct {
+type ResolverOpts struct {
 	OnfidoClient      onfidoService.OnfidoServiceClient
 	kycClient         kycService.KycServiceClient
 	onBoardingService onboardingService.OnBoardingServiceClient
@@ -32,7 +32,7 @@ type Resolver struct {
 	logger            *logrus.Logger
 }
 
-func NewResolver(opt *ClientConnections, logger *logrus.Logger) *Resolver {
+func NewResolver(opt *ResolverOpts, logger *logrus.Logger) *Resolver {
 	return &Resolver{
 		kycClient:         opt.kycClient,
 		onBoardingService: opt.onBoardingService,
@@ -43,13 +43,13 @@ func NewResolver(opt *ClientConnections, logger *logrus.Logger) *Resolver {
 	}
 }
 
-func ConnectServiceDependencies(secrets *config.Secrets) (*ClientConnections, error) {
+func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) {
 	// TODO: Ensure it is secure when connecting.
 	// TODO: Find a way to watch the service outage and handle response to client.
 	// TODO: Read heartbeat from these services, if a heartbeat is out, buzz the admin.
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	conns := &ClientConnections{}
+	opts := &ResolverOpts{}
 
 	// OnBoarding
 	//connection, err := dialRPC(ctx, secrets.OnboardingServiceURL)
@@ -63,14 +63,14 @@ func ConnectServiceDependencies(secrets *config.Secrets) (*ClientConnections, er
 	if err != nil {
 		return nil, errors.Wrap(err, secrets.OnfidoServiceURL)
 	}
-	conns.OnfidoClient = onfidoService.NewOnfidoServiceClient(connection)
+	opts.OnfidoClient = onfidoService.NewOnfidoServiceClient(connection)
 
 	// KYC
 	connection, err = dialRPC(ctx, secrets.KYCServiceURL)
 	if err != nil {
 		return nil, errors.Wrap(err, secrets.KYCServiceURL)
 	}
-	conns.kycClient = kycService.NewKycServiceClient(connection)
+	opts.kycClient = kycService.NewKycServiceClient(connection)
 
 	// Verify
 	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
@@ -79,7 +79,7 @@ func ConnectServiceDependencies(secrets *config.Secrets) (*ClientConnections, er
 	if err != nil {
 		return nil, fmt.Errorf("%v: %s", err, secrets.VerifyServiceURL)
 	}
-	conns.verifyService = verifyService.NewVerifyServiceClient(connection)
+	opts.verifyService = verifyService.NewVerifyServiceClient(connection)
 
 	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -87,8 +87,8 @@ func ConnectServiceDependencies(secrets *config.Secrets) (*ClientConnections, er
 	if err != nil {
 		return nil, fmt.Errorf("%v: %s", err, secrets.VerifyServiceURL)
 	}
-	conns.AuthService = authService.NewAuthServiceClient(connection)
-	return conns, nil
+	opts.AuthService = authService.NewAuthServiceClient(connection)
+	return opts, nil
 }
 
 func dialRPC(ctx context.Context, address string) (*grpc.ClientConn, error) {
