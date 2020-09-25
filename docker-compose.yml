@@ -89,6 +89,22 @@ services:
       - mongodb
     ports:
       - 2003:2003
+  ms.kyc:
+    container_name: ms.kyc
+    image: gcr.io/labs-271617/roava.io/services/ms.kyc
+    restart: on-failure
+    environment:
+      PORT: 2004
+      DATABASE_URL: mongodb://root:root@mongodb:27017
+      PULSAR_URL: pulsar://35.223.216.161:6650
+      DATABASE_NAME: roava
+      SERVICE_NAME: ms.kyc
+      ENVIRONMENT: local
+    depends_on:
+      - mongodb
+      #- eventstore
+    ports:
+      - 2004:2004
 
   ms.auth:
     container_name: ms.auth
@@ -105,6 +121,20 @@ services:
       - mongodb
     ports:
       - 2005:2005
+
+  ms.onfido:
+    container_name: ms.onfido
+    image: gcr.io/labs-271617/roava.io/services/ms.onfido
+    restart: on-failure
+    environment:
+      PORT: 2006
+      PULSAR_URL: pulsar://35.223.216.161:6650
+      SERVICE_NAME: ms.onfido
+      ONFIDO_API_TOKEN: api_sandbox.KvH4KL7hNtd.PRVpelPdt6fpZmYmfEcf8BvUNjRoyfrB
+      ONFIDO_APPLICATION_ID: com.roava.app
+      ENVIRONMENT: local
+    ports:
+      - 2006:2006
 
   api:
     container_name: api
