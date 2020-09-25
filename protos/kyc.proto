@@ -3,10 +3,9 @@ package kyc;
 option go_package = "pb/kycService";
 
 service KycService {
-  rpc getApplicationByPersonId(PersonIdRequest) returns(application){}
-  rpc startApplicationCDD(ApplicationIdRequest) returns(void){}
-  // Proposing this is moved to ms.cdd // For the fully aggregated KYC + AML + Roava Internal Checklist result set.
-  rpc awaitApplicationCDDResult(ApplicationIdRequest) returns(stream cdd){}
+  rpc getKycApplicantByPersonId(PersonIdRequest) returns(applicant){}
+  rpc submitKycApplicationByPersonId(PersonIdRequest) returns(void){}
+  rpc awaitCDDReport(ApplicationIdRequest) returns(stream cdd){}
 }
 
 message void {}
@@ -22,24 +21,28 @@ message PersonIdRequest {
 
 message cdd {
   string id = 1;
-  string person_id = 2;
-  string applicant_id = 3;
+  string owner = 2;
+  string details = 3;
   string status = 4;
-  //  repeated tag tags = 5;
-  //  repeated document documents = 6;
-  int64 time_created = 5;
-  int64 time_updated = 6;
+  kyc kyc = 5;
+  aml aml = 6;
+  roava roava = 7;
+  int64 time_created = 8;
+  int64 time_updated = 9;
 }
 
 
-message application {
+message kyc {
   string id = 1;
-  string person_id = 2;
-  applicant applicant = 3;
-  cdd cdd = 4;
+  applicant applicant = 2;
+  string status = 3;
+  string vendor = 4;
   int64 time_created = 5;
   int64 time_updated = 6;
 }
+
+message aml {}
+message roava {}
 
 message address {
   string flat_number = 1;

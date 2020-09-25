@@ -17,9 +17,14 @@ import (
 	"ms.api/types"
 )
 
-func (r *mutationResolver) SubmitKYCApplication(ctx context.Context, applicationID string) (*types.Result, error) {
-	if _, err := r.kycClient.StartApplicationCDD(ctx, &kycService.ApplicationIdRequest{
-		ApplicationId: applicationID,
+func (r *mutationResolver) SubmitKYCApplication(ctx context.Context) (*types.Result, error) {
+	personId, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+
+	if _, err := r.kycClient.SubmitKycApplicationByPersonId(ctx, &kycService.PersonIdRequest{
+		PersonId: personId,
 	}); err != nil {
 		return nil, err
 	}
@@ -50,8 +55,8 @@ func (r *mutationResolver) UpdatePersonBiodata(ctx context.Context, input *types
 		return nil, ErrUnAuthenticated
 	}
 	payload := onboardingService.UpdatePersonRequest{
-		PersonId:  personId,
-		Address:   &onboardingService.Address{
+		PersonId: personId,
+		Address: &onboardingService.Address{
 			Postcode: input.Address.Postcode, Street: input.Address.Street,
 			City: input.Address.City, Country: input.Address.Country,
 		},

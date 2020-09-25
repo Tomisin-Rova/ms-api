@@ -14,13 +14,13 @@ func (r *subscriptionResolver) GetKYCApplicationResult(ctx context.Context, appl
 	payload := kycService.ApplicationIdRequest{
 		ApplicationId: applicantID,
 	}
-	response, err := r.kycClient.AwaitApplicationCDDResult(ctx, &payload)
+	response, err := r.kycClient.AwaitCDDReport(ctx, &payload)
 	if err != nil {
 		return nil, err
 	}
 
 	ch := make(chan *kycService.Cdd)
-	go func(response kycService.KycService_AwaitApplicationCDDResultClient, ch chan *kycService.Cdd) {
+	go func(response kycService.KycService_AwaitCDDReportClient, ch chan *kycService.Cdd) {
 		for {
 			cdd, err := response.Recv()
 			if err != nil {

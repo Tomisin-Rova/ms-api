@@ -4,7 +4,10 @@ option go_package = "pb/onfidoService";
 
 service OnfidoService {
   rpc generateApplicantSDKToken(ApplicantSDKTokenRequest) returns(ApplicantSDKTokenResponse){}
+  rpc webhookPush(onfidoCheckWebhookRequest) returns(void) {}
 }
+
+message void {}
 
 message ApplicantSDKTokenRequest {
   string applicantId = 1;
@@ -14,3 +17,8 @@ message ApplicantSDKTokenResponse {
   string token = 1;
 }
 
+message onfidoCheckWebhookRequest {
+  string id = 1;
+  string status = 2;
+  string completed_at = 3;
+}

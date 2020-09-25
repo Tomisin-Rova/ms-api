@@ -3,6 +3,7 @@ package graph
 import (
 	"context"
 	"fmt"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"ms.api/config"
@@ -15,7 +16,7 @@ import (
 )
 
 type ResolverOpts struct {
-	onfidoClient      onfidoService.OnfidoServiceClient
+	OnfidoClient      onfidoService.OnfidoServiceClient
 	kycClient         kycService.KycServiceClient
 	onBoardingService onboardingService.OnBoardingServiceClient
 	verifyService     verifyService.VerifyServiceClient
@@ -36,7 +37,7 @@ func NewResolver(opt *ResolverOpts, logger *logrus.Logger) *Resolver {
 		kycClient:         opt.kycClient,
 		onBoardingService: opt.onBoardingService,
 		verifyService:     opt.verifyService,
-		onfidoClient:      opt.onfidoClient,
+		onfidoClient:      opt.OnfidoClient,
 		authService:       opt.AuthService,
 		logger:            logger,
 	}
@@ -48,28 +49,28 @@ func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) 
 	// TODO: Read heartbeat from these services, if a heartbeat is out, buzz the admin.
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	opt := &ResolverOpts{}
+	opts := &ResolverOpts{}
 
 	// OnBoarding
-	connection, err := dialRPC(ctx, secrets.OnboardingServiceURL)
-	if err != nil {
-		return nil, fmt.Errorf("%v: %s", err, secrets.OnboardingServiceURL)
-	}
-	opt.onBoardingService = onboardingService.NewOnBoardingServiceClient(connection)
+	//connection, err := dialRPC(ctx, secrets.OnboardingServiceURL)
+	//if err != nil {
+	//	return nil, fmt.Errorf("%v: %s", err, secrets.OnboardingServiceURL)
+	//}
+	//conns.onBoardingService = onboardingService.NewOnBoardingServiceClient(connection)
 
 	// OnFido
-	/*connection, err = dialRPC(ctx, secrets.OnfidoServiceURL)
+	connection, err := dialRPC(ctx, secrets.OnfidoServiceURL)
 	if err != nil {
 		return nil, errors.Wrap(err, secrets.OnfidoServiceURL)
 	}
-	opt.onfidoClient = onfidoService.NewOnfidoServiceClient(connection)*/
+	opts.OnfidoClient = onfidoService.NewOnfidoServiceClient(connection)
 
 	// KYC
-	/*connection, err = dialRPC(ctx, secrets.KYCServiceURL)
+	connection, err = dialRPC(ctx, secrets.KYCServiceURL)
 	if err != nil {
 		return nil, errors.Wrap(err, secrets.KYCServiceURL)
 	}
-	opt.kycClient = kycService.NewKycServiceClient(connection)*/
+	opts.kycClient = kycService.NewKycServiceClient(connection)
 
 	// Verify
 	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
@@ -78,7 +79,7 @@ func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) 
 	if err != nil {
 		return nil, fmt.Errorf("%v: %s", err, secrets.VerifyServiceURL)
 	}
-	opt.verifyService = verifyService.NewVerifyServiceClient(connection)
+	opts.verifyService = verifyService.NewVerifyServiceClient(connection)
 
 	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -86,8 +87,8 @@ func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) 
 	if err != nil {
 		return nil, fmt.Errorf("%v: %s", err, secrets.VerifyServiceURL)
 	}
-	opt.AuthService = authService.NewAuthServiceClient(connection)
-	return opt, nil
+	opts.AuthService = authService.NewAuthServiceClient(connection)
+	return opts, nil
 }
 
 func dialRPC(ctx context.Context, address string) (*grpc.ClientConn, error) {

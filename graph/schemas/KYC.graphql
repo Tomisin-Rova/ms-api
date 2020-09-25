@@ -1,7 +1,8 @@
-type Application {
+type KYC {
     id: String!
-    person_id: String!
     applicant: Applicant!
+    vendor: String
+    Status: String
     time_created: Int!
     time_updated: Int!
 }
@@ -14,7 +15,7 @@ type Applicant {
     email: String!
     dob: String!
     address: Address!
-    vendor: String!
+    vendor: String
 }
 
 type Address {
@@ -31,9 +32,10 @@ type Address {
 
 type CDD {
     id: String!
-    person_id: String!
-    applicant_id: String!
+    owner: String!
+    details: String!
     status: String!
+    kyc: KYC!
     #    //  repeated tag tags = 5;
     #    //  repeated document documents = 6;
     time_created: Int!
