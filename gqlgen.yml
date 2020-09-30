@@ -60,7 +60,3 @@ models:
     model: ms.api/protos/pb/onfidoService.ApplicantSDKTokenRequest
   ApplicantSDKTokenResponse:
     model: ms.api/protos/pb/onfidoService.ApplicantSDKTokenResponse
-  PasscodeResetAddress:
-    model: ms.api/protos/pb/authService.Address
-  PasswordResetUserDetails:
-    model: ms.api/protos/pb/authService.PasswordResetUserDetails

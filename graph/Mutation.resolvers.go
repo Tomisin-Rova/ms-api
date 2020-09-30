@@ -6,6 +6,7 @@ package graph
 import (
 	"context"
 	"errors"
+
 	"ms.api/graph/generated"
 	emailvalidator "ms.api/libs/email"
 	"ms.api/protos/pb/authService"
@@ -32,12 +33,17 @@ func (r *mutationResolver) ResetPassword(ctx context.Context, email string, newP
 	}, err
 }
 
-func (r *mutationResolver) ConfirmPasswordResetDetails(ctx context.Context, payload *authService.PasswordResetUserDetails) (*types.Result, error) {
-	if payload == nil {
-		return nil, ErrPayloadInvalid
-	}
-
-	result, err := r.authService.ConfirmPasswordResetDetails(ctx, payload)
+func (r *mutationResolver) ConfirmPasswordResetDetails(ctx context.Context, email string, dob string, address types.InputAddress) (*types.Result, error) {
+	result, err := r.authService.ConfirmPasswordResetDetails(ctx, &authService.PasswordResetUserDetails{
+		Email:   email,
+		Dob:     dob,
+		Address: &authService.Address{
+			Country:  address.Country,
+			Street:   address.Street,
+			City:     address.City,
+			Postcode: address.Postcode,
+		},
+	})
 	if err != nil {
 		r.logger.Infof("authService.ConfirmPasswordResetDetails() failed: %v", err)
 		return nil, err
