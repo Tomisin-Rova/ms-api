@@ -107,15 +107,17 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		AddReasonsForUsingRoava func(childComplexity int, personID string, reasons string) int
-		AuthenticateCustomer    func(childComplexity int, email string, passcode string) int
-		CreateEmail             func(childComplexity int, input *types.CreateEmailInput) int
-		CreatePasscode          func(childComplexity int, userID string, passcode string) int
-		CreatePhone             func(childComplexity int, input types.CreatePhoneInput) int
-		RefreshToken            func(childComplexity int, refreshToken string) int
-		SubmitKYCApplication    func(childComplexity int) int
-		UpdatePersonBiodata     func(childComplexity int, input *types.UpdateBioDataInput) int
-		VerifyOtp               func(childComplexity int, phone string, code string) int
+		AddReasonsForUsingRoava     func(childComplexity int, personID string, reasons string) int
+		AuthenticateCustomer        func(childComplexity int, email string, passcode string) int
+		ConfirmPasswordResetDetails func(childComplexity int, email string, dob string, address types.InputAddress) int
+		CreateEmail                 func(childComplexity int, input *types.CreateEmailInput) int
+		CreatePasscode              func(childComplexity int, userID string, passcode string) int
+		CreatePhone                 func(childComplexity int, input types.CreatePhoneInput) int
+		RefreshToken                func(childComplexity int, refreshToken string) int
+		ResetPassword               func(childComplexity int, email string, newPassword string, verificationToken string) int
+		SubmitKYCApplication        func(childComplexity int) int
+		UpdatePersonBiodata         func(childComplexity int, input *types.UpdateBioDataInput) int
+		VerifyOtp                   func(childComplexity int, phone string, code string) int
 	}
 
 	Query struct {
@@ -133,6 +135,8 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
+	ResetPassword(ctx context.Context, email string, newPassword string, verificationToken string) (*types.Result, error)
+	ConfirmPasswordResetDetails(ctx context.Context, email string, dob string, address types.InputAddress) (*types.Result, error)
 	SubmitKYCApplication(ctx context.Context) (*types.Result, error)
 	CreatePasscode(ctx context.Context, userID string, passcode string) (*types.Result, error)
 	UpdatePersonBiodata(ctx context.Context, input *types.UpdateBioDataInput) (*types.Result, error)
@@ -441,6 +445,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.AuthenticateCustomer(childComplexity, args["email"].(string), args["passcode"].(string)), true
 
+	case "Mutation.confirmPasswordResetDetails":
+		if e.complexity.Mutation.ConfirmPasswordResetDetails == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_confirmPasswordResetDetails_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.ConfirmPasswordResetDetails(childComplexity, args["email"].(string), args["dob"].(string), args["address"].(types.InputAddress)), true
+
 	case "Mutation.createEmail":
 		if e.complexity.Mutation.CreateEmail == nil {
 			break
@@ -488,6 +504,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.RefreshToken(childComplexity, args["refreshToken"].(string)), true
+
+	case "Mutation.resetPassword":
+		if e.complexity.Mutation.ResetPassword == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_resetPassword_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.ResetPassword(childComplexity, args["email"].(string), args["newPassword"].(string), args["verificationToken"].(string)), true
 
 	case "Mutation.submitKYCApplication":
 		if e.complexity.Mutation.SubmitKYCApplication == nil {
@@ -683,6 +711,16 @@ type CDD {
     time_updated: Int!
 }`, BuiltIn: false},
 	{Name: "graph/schemas/Mutation.graphql", Input: `type Mutation {
+    resetPassword(
+        email: String!
+        newPassword: String!
+        verificationToken: String!
+    ): Result
+    confirmPasswordResetDetails(
+        email: String!
+        dob: String!
+        address: InputAddress!
+    ): Result
     submitKYCApplication: Result
 
     CreatePasscode(
@@ -844,6 +882,39 @@ func (ec *executionContext) field_Mutation_authenticateCustomer_args(ctx context
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_confirmPasswordResetDetails_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["email"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("email"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["email"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["dob"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("dob"))
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["dob"] = arg1
+	var arg2 types.InputAddress
+	if tmp, ok := rawArgs["address"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("address"))
+		arg2, err = ec.unmarshalNInputAddress2msᚗapiᚋtypesᚐInputAddress(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["address"] = arg2
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_createEmail_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -886,6 +957,39 @@ func (ec *executionContext) field_Mutation_refreshToken_args(ctx context.Context
 		}
 	}
 	args["refreshToken"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_resetPassword_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["email"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("email"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["email"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["newPassword"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("newPassword"))
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["newPassword"] = arg1
+	var arg2 string
+	if tmp, ok := rawArgs["verificationToken"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("verificationToken"))
+		arg2, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["verificationToken"] = arg2
 	return args, nil
 }
 
@@ -2206,6 +2310,82 @@ func (ec *executionContext) _KYC_time_updated(ctx context.Context, field graphql
 	res := resTmp.(int64)
 	fc.Result = res
 	return ec.marshalNInt2int64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_resetPassword(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_resetPassword_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().ResetPassword(rctx, args["email"].(string), args["newPassword"].(string), args["verificationToken"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*types.Result)
+	fc.Result = res
+	return ec.marshalOResult2ᚖmsᚗapiᚋtypesᚐResult(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_confirmPasswordResetDetails(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_confirmPasswordResetDetails_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().ConfirmPasswordResetDetails(rctx, args["email"].(string), args["dob"].(string), args["address"].(types.InputAddress))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*types.Result)
+	fc.Result = res
+	return ec.marshalOResult2ᚖmsᚗapiᚋtypesᚐResult(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_submitKYCApplication(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -4372,6 +4552,10 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Mutation")
+		case "resetPassword":
+			out.Values[i] = ec._Mutation_resetPassword(ctx, field)
+		case "confirmPasswordResetDetails":
+			out.Values[i] = ec._Mutation_confirmPasswordResetDetails(ctx, field)
 		case "submitKYCApplication":
 			out.Values[i] = ec._Mutation_submitKYCApplication(ctx, field)
 		case "CreatePasscode":
@@ -4796,6 +4980,11 @@ func (ec *executionContext) unmarshalNCreatePhoneInput2msᚗapiᚋtypesᚐCreate
 func (ec *executionContext) unmarshalNDevice2ᚖmsᚗapiᚋtypesᚐDevice(ctx context.Context, v interface{}) (*types.Device, error) {
 	res, err := ec.unmarshalInputDevice(ctx, v)
 	return &res, graphql.WrapErrorWithInputPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNInputAddress2msᚗapiᚋtypesᚐInputAddress(ctx context.Context, v interface{}) (types.InputAddress, error) {
+	res, err := ec.unmarshalInputInputAddress(ctx, v)
+	return res, graphql.WrapErrorWithInputPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNInputAddress2ᚖmsᚗapiᚋtypesᚐInputAddress(ctx context.Context, v interface{}) (*types.InputAddress, error) {

@@ -17,6 +17,44 @@ import (
 	"ms.api/types"
 )
 
+func (r *mutationResolver) ResetPassword(ctx context.Context, email string, newPassword string, verificationToken string) (*types.Result, error) {
+	result, err := r.authService.ResetPassword(ctx, &authService.PasswordResetRequest{
+		Email:             email,
+		NewPassword:       newPassword,
+		VerificationToken: verificationToken,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.Result{
+		Success: true,
+		Message: result.Message,
+	}, err
+}
+
+func (r *mutationResolver) ConfirmPasswordResetDetails(ctx context.Context, email string, dob string, address types.InputAddress) (*types.Result, error) {
+	result, err := r.authService.ConfirmPasswordResetDetails(ctx, &authService.PasswordResetUserDetails{
+		Email: email,
+		Dob:   dob,
+		Address: &authService.Address{
+			Country:  address.Country,
+			Street:   address.Street,
+			City:     address.City,
+			Postcode: address.Postcode,
+		},
+	})
+	if err != nil {
+		r.logger.Infof("authService.ConfirmPasswordResetDetails() failed: %v", err)
+		return nil, err
+	}
+
+	return &types.Result{
+		Success: true,
+		Message: result.Message,
+	}, nil
+}
+
 func (r *mutationResolver) SubmitKYCApplication(ctx context.Context) (*types.Result, error) {
 	personId, err := middlewares.GetAuthenticatedUser(ctx)
 	if err != nil {
@@ -26,6 +64,7 @@ func (r *mutationResolver) SubmitKYCApplication(ctx context.Context) (*types.Res
 	if _, err := r.kycClient.SubmitKycApplicationByPersonId(ctx, &kycService.PersonIdRequest{
 		PersonId: personId,
 	}); err != nil {
+		r.logger.Infof("kycService.SubmitKycApplicationByPersonId() failed: %v", err)
 		return nil, err
 	}
 	return &types.Result{
@@ -160,13 +199,3 @@ func (r *mutationResolver) RefreshToken(ctx context.Context, refreshToken string
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 
 type mutationResolver struct{ *Resolver }
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//    it when you're done.
-//  - You have helper methods in this file. Move them out to keep these resolver files clean.
-var (
-	ErrUnAuthenticated = errors.New("user not authenticated")
-)
