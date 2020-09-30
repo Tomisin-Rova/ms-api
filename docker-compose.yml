@@ -32,7 +32,7 @@ services:
     environment:
       PORT: 2000
       DATABASE_URL: mongodb://root:root@mongodb:27017
-      PULSAR_URL: pulsar://35.223.216.161:6650
+      PULSAR_URL: pulsar://34.67.160.200:6650
       DATABASE_NAME: roava
       SERVICE_NAME: ms.verify
       ENVIRONMENT: local
@@ -49,7 +49,7 @@ services:
     environment:
       PORT: 2001
       DATABASE_URL: mongodb://root:root@mongodb:27017
-      PULSAR_URL: pulsar://35.223.216.161:6650
+      PULSAR_URL: pulsar://34.67.160.200:6650
       DATABASE_NAME: roava
       SERVICE_NAME: ms.onboarding
     depends_on:
@@ -65,7 +65,7 @@ services:
     environment:
       PORT: 2002
       DATABASE_URL: mongodb://root:root@mongodb:27017
-      PULSAR_URL: pulsar://35.223.216.161:6650
+      PULSAR_URL: pulsar://34.67.160.200:6650
       DATABASE_NAME: roava
       SERVICE_NAME: ms.identity
     depends_on:
@@ -81,7 +81,7 @@ services:
     environment:
       PORT: 2003
       DATABASE_URL: mongodb://root:root@mongodb:27017
-      PULSAR_URL: pulsar://35.223.216.161:6650
+      PULSAR_URL: pulsar://34.67.160.200:6650
       DATABASE_NAME: roava
       SERVICE_NAME: ms.person
     depends_on:
@@ -94,17 +94,17 @@ services:
     image: gcr.io/labs-271617/roava.io/services/ms.kyc
     restart: on-failure
     environment:
-      PORT: 2004
+      PORT: 2006
       DATABASE_URL: mongodb://root:root@mongodb:27017
-      PULSAR_URL: pulsar://35.223.216.161:6650
+      PULSAR_URL: pulsar://34.67.160.200:6650
       DATABASE_NAME: roava
       SERVICE_NAME: ms.kyc
-      ENVIRONMENT: local
+      ENVIRONMENT: staging
     depends_on:
       - mongodb
       #- eventstore
     ports:
-      - 2004:2004
+      - 2006:2006
 
   ms.auth:
     container_name: ms.auth
@@ -113,7 +113,7 @@ services:
     environment:
       PORT: 2005
       DATABASE_URL: mongodb://root:root@mongodb:27017
-      PULSAR_URL: pulsar://35.223.216.161:6650
+      PULSAR_URL: pulsar://34.67.160.200:6650
       DATABASE_NAME: roava
       SERVICE_NAME: ms.auth
     depends_on:
@@ -127,14 +127,14 @@ services:
     image: gcr.io/labs-271617/roava.io/services/ms.onfido
     restart: on-failure
     environment:
-      PORT: 2006
-      PULSAR_URL: pulsar://35.223.216.161:6650
+      PORT: 2007
+      PULSAR_URL: pulsar://34.67.160.200:6650
       SERVICE_NAME: ms.onfido
       ONFIDO_API_TOKEN: api_sandbox.KvH4KL7hNtd.PRVpelPdt6fpZmYmfEcf8BvUNjRoyfrB
       ONFIDO_APPLICATION_ID: com.roava.app
-      ENVIRONMENT: local
+      ENVIRONMENT: staging
     ports:
-      - 2006:2006
+      - 2007:2007
 
   api:
     container_name: api
@@ -145,11 +145,16 @@ services:
       ONBOARDING_SERVICE_URL: ms.onboarding:2001
       VERIFY_SERVICE_URL: ms.verify:2000
       AUTH_SERVICE_URL: ms.auth:2005
+      ONFIDO_SERVICE_URL: ms.onfido:2007
+      KYC_SERVICE_URL: ms.kyc:2006
       SERVICE_NAME: ms.api
+      ENVIRONMENT: local
     depends_on:
       - ms.onboarding
       - ms.verify
       - ms.auth
+      - ms.onfido
+      - ms.kyc
     ports:
       - 9000:9000
     restart: on-failure

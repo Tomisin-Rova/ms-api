@@ -52,14 +52,14 @@ func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) 
 	opts := &ResolverOpts{}
 
 	// OnBoarding
-	//connection, err := dialRPC(ctx, secrets.OnboardingServiceURL)
-	//if err != nil {
-	//	return nil, fmt.Errorf("%v: %s", err, secrets.OnboardingServiceURL)
-	//}
-	//conns.onBoardingService = onboardingService.NewOnBoardingServiceClient(connection)
+	connection, err := dialRPC(ctx, secrets.OnboardingServiceURL)
+	if err != nil {
+		return nil, fmt.Errorf("%v: %s", err, secrets.OnboardingServiceURL)
+	}
+	opts.onBoardingService = onboardingService.NewOnBoardingServiceClient(connection)
 
 	// OnFido
-	connection, err := dialRPC(ctx, secrets.OnfidoServiceURL)
+	connection, err = dialRPC(ctx, secrets.OnfidoServiceURL)
 	if err != nil {
 		return nil, errors.Wrap(err, secrets.OnfidoServiceURL)
 	}
@@ -81,6 +81,7 @@ func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) 
 	}
 	opts.verifyService = verifyService.NewVerifyServiceClient(connection)
 
+	// Auth
 	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	connection, err = dialRPC(ctx, secrets.AuthServiceURL)
