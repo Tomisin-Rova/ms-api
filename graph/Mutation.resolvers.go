@@ -35,8 +35,8 @@ func (r *mutationResolver) ResetPassword(ctx context.Context, email string, newP
 
 func (r *mutationResolver) ConfirmPasswordResetDetails(ctx context.Context, email string, dob string, address types.InputAddress) (*types.Result, error) {
 	result, err := r.authService.ConfirmPasswordResetDetails(ctx, &authService.PasswordResetUserDetails{
-		Email:   email,
-		Dob:     dob,
+		Email: email,
+		Dob:   dob,
 		Address: &authService.Address{
 			Country:  address.Country,
 			Street:   address.Street,
