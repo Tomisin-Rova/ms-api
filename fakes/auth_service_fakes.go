@@ -13,6 +13,14 @@ type FakeAuthClient struct {
 	err error
 }
 
+func (f *FakeAuthClient) ConfirmPasswordResetDetails(ctx context.Context, in *authService.PasswordResetUserDetails, opts ...grpc.CallOption) (*authService.SuccessResponse, error) {
+	return &authService.SuccessResponse{}, nil
+}
+
+func (f *FakeAuthClient) ResetPassword(ctx context.Context, in *authService.PasswordResetRequest, opts ...grpc.CallOption) (*authService.SuccessResponse, error) {
+	panic("implement me")
+}
+
 func NewFakeAuthClient(resp *authService.ValidateTokenResponse,
 	loginResp *authService.LoginResponse, rResp *authService.RefreshTokenResponse, err error) *FakeAuthClient {
 	return &FakeAuthClient{resp: resp, err: err, loginResp: loginResp, rResp: rResp}
