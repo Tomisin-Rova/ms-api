@@ -1,0 +1,12 @@
+input PasscodeResetAddress {
+    country: String!
+    street: String!
+    city: String!
+    postcode: String!
+}
+
+input PasswordResetUserDetails {
+    email: String!
+    dob: String!
+    address: PasscodeResetAddress!
+}

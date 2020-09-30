@@ -4,6 +4,9 @@ type Mutation {
         newPassword: String!
         verificationToken: String!
     ): Result
+    confirmPasswordResetDetails(
+        payload: PasswordResetUserDetails
+    ): Result
     submitKYCApplication: Result
 
     CreatePasscode(

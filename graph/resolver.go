@@ -15,6 +15,13 @@ import (
 	"time"
 )
 
+// All error types here, so they don't get over-written in the mutation, query or subscription resolvers when generating schema
+var (
+	ErrUnAuthenticated = errors.New("user not authenticated")
+	ErrPayloadInvalid = errors.New("payload is empty/invalid")
+)
+
+
 type ResolverOpts struct {
 	OnfidoClient      onfidoService.OnfidoServiceClient
 	kycClient         kycService.KycServiceClient

@@ -32,6 +32,23 @@ func (r *mutationResolver) ResetPassword(ctx context.Context, email string, newP
 	}, err
 }
 
+func (r *mutationResolver) ConfirmPasswordResetDetails(ctx context.Context, payload *authService.PasswordResetUserDetails) (*types.Result, error) {
+	if payload == nil {
+		return nil, ErrPayloadInvalid
+	}
+
+	result, err := r.authService.ConfirmPasswordResetDetails(ctx, payload)
+	if err != nil {
+		r.logger.Infof("authService.ConfirmPasswordResetDetails() failed: %v", err)
+		return nil, err
+	}
+
+	return &types.Result{
+		Success: true,
+		Message: result.Message,
+	}, nil
+}
+
 func (r *mutationResolver) SubmitKYCApplication(ctx context.Context) (*types.Result, error) {
 	personId, err := middlewares.GetAuthenticatedUser(ctx)
 	if err != nil {
@@ -41,6 +58,7 @@ func (r *mutationResolver) SubmitKYCApplication(ctx context.Context) (*types.Res
 	if _, err := r.kycClient.SubmitKycApplicationByPersonId(ctx, &kycService.PersonIdRequest{
 		PersonId: personId,
 	}); err != nil {
+		r.logger.Infof("kycService.SubmitKycApplicationByPersonId() failed: %v", err)
 		return nil, err
 	}
 	return &types.Result{
@@ -175,13 +193,3 @@ func (r *mutationResolver) RefreshToken(ctx context.Context, refreshToken string
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 
 type mutationResolver struct{ *Resolver }
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//    it when you're done.
-//  - You have helper methods in this file. Move them out to keep these resolver files clean.
-var (
-	ErrUnAuthenticated = errors.New("user not authenticated")
-)

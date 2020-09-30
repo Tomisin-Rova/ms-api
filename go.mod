@@ -4,7 +4,7 @@ go 1.14
 
 require (
 	github.com/99designs/gqlgen v0.12.2
-	github.com/gbrlsnchs/jwt/v3 v3.0.0-rc.2
+	github.com/gbrlsnchs/jwt/v3 v3.0.0-rc.2 // indirect
 	github.com/go-chi/chi v3.3.2+incompatible
 	github.com/go-redis/redis/v7 v7.4.0
 	github.com/golang/protobuf v1.4.1
