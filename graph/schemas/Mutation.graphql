@@ -1,4 +1,9 @@
 type Mutation {
+    resetPassword(
+        email: String!
+        newPassword: String!
+        verificationToken: String!
+    ): Result
     submitKYCApplication: Result
 
     CreatePasscode(

@@ -6,6 +6,12 @@ service AuthService {
   rpc Login(LoginRequest) returns (LoginResponse) {}
   rpc ValidateToken(ValidateTokenRequest) returns (ValidateTokenResponse) {}
   rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse) {}
+  rpc ConfirmPasswordResetDetails(PasswordResetUserDetails) returns (SuccessResponse) {}
+  rpc ResetPassword(PasswordResetRequest) returns (SuccessResponse) {}
+}
+
+message SuccessResponse {
+  string message = 1;
 }
 
 message LoginRequest {
@@ -19,18 +25,37 @@ message LoginResponse {
 }
 
 message ValidateTokenRequest {
-   string token = 1;
+  string token = 1;
 }
 
 message ValidateTokenResponse {
-    string personId = 1;
+  string personId = 1;
 }
 
 message RefreshTokenRequest {
-    string refreshToken = 1;
+  string refreshToken = 1;
 }
 
 message RefreshTokenResponse {
-    string token = 1;
-    string refreshToken = 2;
+  string token = 1;
+  string refreshToken = 2;
+}
+
+message Address {
+  string country = 1;
+  string street = 2;
+  string city = 3;
+  string postcode = 4;
+}
+
+message PasswordResetUserDetails {
+  string email  = 1;
+  string  dob  = 2;
+  Address  address = 3;
+}
+
+message PasswordResetRequest {
+  string email = 1;
+  string newPassword = 2;
+  string verificationToken = 3;
 }

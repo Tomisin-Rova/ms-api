@@ -6,7 +6,6 @@ package graph
 import (
 	"context"
 	"errors"
-
 	"ms.api/graph/generated"
 	emailvalidator "ms.api/libs/email"
 	"ms.api/protos/pb/authService"
@@ -16,6 +15,22 @@ import (
 	"ms.api/server/http/middlewares"
 	"ms.api/types"
 )
+
+func (r *mutationResolver) ResetPassword(ctx context.Context, email string, newPassword string, verificationToken string) (*types.Result, error) {
+	result, err := r.authService.ResetPassword(ctx, &authService.PasswordResetRequest{
+		Email:             email,
+		NewPassword:       newPassword,
+		VerificationToken: verificationToken,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.Result{
+		Success: true,
+		Message: result.Message,
+	}, err
+}
 
 func (r *mutationResolver) SubmitKYCApplication(ctx context.Context) (*types.Result, error) {
 	personId, err := middlewares.GetAuthenticatedUser(ctx)
