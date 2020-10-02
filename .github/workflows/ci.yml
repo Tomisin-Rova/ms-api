@@ -21,6 +21,21 @@ jobs:
       # INSERT STEP: TESTS
       # INSERT STEP: STATIC ANALYSIS / SONARQUBE
       # extract the version (tag pushed)
+      - name: Import Secrets
+        id: secrets
+        uses: hashicorp/vault-action@master
+        with:
+            url: ${{ secrets.VAULT_IP }}
+            token: ${{ secrets.VAULT_TOKEN }}
+            caCertificate: ${{ secrets.VAULT_CERT }}
+            tlsSkipVerify: true
+            secrets: |
+                    roava/secrets/pulsar PULSAR_URL | PULSAR_URL ;
+                    roava/secrets/db DATABASE_URL | DATABASE_URL ;
+                    roava/secrets/onfido ONFIDO_SERVICE | ONFIDO_SERVICE ;
+                    roava/secrets/onfido ONFIDO_API_TOKEN | ONFIDO_API_TOKEN ;
+                    roava/secrets/onfido ONFIDO_MOBILE_TOKEN | ONFIDO_MOBILE_TOKEN ;
+
       - name: Get the version
         id: get_version
         run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
@@ -55,7 +70,12 @@ jobs:
           export CONTAINER=`echo $ORG/$IMAGE`
           docker build -t "$REGISTRY_HOSTNAME"/"$CONTAINER":"$TAG" \
             --build-arg GITHUB_SHA="$GITHUB_SHA" \
-            --build-arg GITHUB_REF="$GITHUB_REF" .
+            --build-arg GITHUB_REF="$GITHUB_REF" \
+            --build-arg PULSAR_URL="$PULSAR_URL" \
+            --build-arg DATABASE_URL="$DATABASE_URL" \
+            --build-arg ONFIDO_SERVICE="$ONFIDO_SERVICE" \
+            --build-arg ONFIDO_API_TOKEN="$ONFIDO_API_TOKEN"\
+            --build-arg ONFIDO_MOBILE_TOKEN="$ONFIDO_MOBILE_TOKEN" .
       # Push the Docker image to Google Container Registry
       # images name in format - [ORG]/[IMAGE] e.g. roava.io/myimage
       # docker push "$REGISTRY_HOSTNAME"/"$CONTAINER":"$GITHUB_SHA"
