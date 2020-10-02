@@ -1,4 +1,5 @@
 GOPATH:=$(shell go env GOPATH)
+PULSAR_CERT:=cert+data
 
 .PHONY: proto
 proto :
@@ -21,6 +22,9 @@ test:
 .PHONY: docker
 docker:
 	docker build . -t ms-api:alpine
+
+docker-compose:
+	PULSAR_TLS_CERT="string"
 
 local:
 	go run .

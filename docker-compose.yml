@@ -32,7 +32,8 @@ services:
     environment:
       PORT: 2000
       DATABASE_URL: mongodb://root:root@mongodb:27017
-      PULSAR_URL: pulsar://34.67.160.200:6650
+      PULSAR_URL: pulsar+ssl://pulsar.roava.io:6651
+      PULSAR_TLS_CERT: ${PULSAR_TLS_CERT}
       DATABASE_NAME: roava
       SERVICE_NAME: ms.verify
       ENVIRONMENT: local
@@ -49,7 +50,8 @@ services:
     environment:
       PORT: 2001
       DATABASE_URL: mongodb://root:root@mongodb:27017
-      PULSAR_URL: pulsar://34.67.160.200:6650
+      PULSAR_URL: pulsar+ssl://pulsar.roava.io:6651
+      PULSAR_TLS_CERT: ${PULSAR_TLS_CERT}
       DATABASE_NAME: roava
       SERVICE_NAME: ms.onboarding
     depends_on:
@@ -65,7 +67,8 @@ services:
     environment:
       PORT: 2002
       DATABASE_URL: mongodb://root:root@mongodb:27017
-      PULSAR_URL: pulsar://34.67.160.200:6650
+      PULSAR_URL: pulsar+ssl://pulsar.roava.io:6651
+      PULSAR_TLS_CERT: ${PULSAR_TLS_CERT}
       DATABASE_NAME: roava
       SERVICE_NAME: ms.identity
     depends_on:
@@ -81,7 +84,8 @@ services:
     environment:
       PORT: 2003
       DATABASE_URL: mongodb://root:root@mongodb:27017
-      PULSAR_URL: pulsar://34.67.160.200:6650
+      PULSAR_URL: pulsar+ssl://pulsar.roava.io:6651
+      PULSAR_TLS_CERT: ${PULSAR_TLS_CERT}
       DATABASE_NAME: roava
       SERVICE_NAME: ms.person
     depends_on:
@@ -96,7 +100,8 @@ services:
     environment:
       PORT: 2006
       DATABASE_URL: mongodb://root:root@mongodb:27017
-      PULSAR_URL: pulsar://34.67.160.200:6650
+      PULSAR_URL: pulsar+ssl://pulsar.roava.io:6651
+      PULSAR_TLS_CERT: ${PULSAR_TLS_CERT}
       DATABASE_NAME: roava
       SERVICE_NAME: ms.kyc
       ENVIRONMENT: staging
@@ -113,7 +118,8 @@ services:
     environment:
       PORT: 2005
       DATABASE_URL: mongodb://root:root@mongodb:27017
-      PULSAR_URL: pulsar://34.67.160.200:6650
+      PULSAR_URL: pulsar+ssl://pulsar.roava.io:6651
+      PULSAR_TLS_CERT: ${PULSAR_TLS_CERT}
       DATABASE_NAME: roava
       SERVICE_NAME: ms.auth
     depends_on:
@@ -128,7 +134,8 @@ services:
     restart: on-failure
     environment:
       PORT: 2007
-      PULSAR_URL: pulsar://34.67.160.200:6650
+      PULSAR_URL: pulsar+ssl://pulsar.roava.io:6651
+      PULSAR_TLS_CERT: ${PULSAR_TLS_CERT}
       SERVICE_NAME: ms.onfido
       ONFIDO_API_TOKEN: api_sandbox.KvH4KL7hNtd.PRVpelPdt6fpZmYmfEcf8BvUNjRoyfrB
       ONFIDO_APPLICATION_ID: com.roava.app

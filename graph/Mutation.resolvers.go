@@ -6,6 +6,7 @@ package graph
 import (
 	"context"
 	"errors"
+	rerrors "ms.api/libs/errors"
 
 	"ms.api/graph/generated"
 	emailvalidator "ms.api/libs/email"
@@ -24,7 +25,7 @@ func (r *mutationResolver) ResetPassword(ctx context.Context, email string, newP
 		VerificationToken: verificationToken,
 	})
 	if err != nil {
-		return nil, err
+		return nil, rerrors.NewFromGrpc(err)
 	}
 
 	return &types.Result{
@@ -46,7 +47,7 @@ func (r *mutationResolver) ConfirmPasswordResetDetails(ctx context.Context, emai
 	})
 	if err != nil {
 		r.logger.Infof("authService.ConfirmPasswordResetDetails() failed: %v", err)
-		return nil, err
+		return nil, rerrors.NewFromGrpc(err)
 	}
 
 	return &types.Result{
@@ -65,7 +66,7 @@ func (r *mutationResolver) SubmitKYCApplication(ctx context.Context) (*types.Res
 		PersonId: personId,
 	}); err != nil {
 		r.logger.Infof("kycService.SubmitKycApplicationByPersonId() failed: %v", err)
-		return nil, err
+		return nil, rerrors.NewFromGrpc(err)
 	}
 	return &types.Result{
 		Success: true,
@@ -80,7 +81,7 @@ func (r *mutationResolver) CreatePasscode(ctx context.Context, userID string, pa
 	}
 	res, err := r.onBoardingService.CreatePasscode(context.Background(), &payload)
 	if err != nil {
-		return nil, err
+		return nil, rerrors.NewFromGrpc(err)
 	}
 	return &types.Result{
 		Success: true,
@@ -105,7 +106,7 @@ func (r *mutationResolver) UpdatePersonBiodata(ctx context.Context, input *types
 	}
 	res, err := r.onBoardingService.UpdatePersonBiodata(context.Background(), &payload)
 	if err != nil {
-		return nil, err
+		return nil, rerrors.NewFromGrpc(err)
 	}
 	return &types.Result{
 		Success: true,
@@ -124,7 +125,7 @@ func (r *mutationResolver) AddReasonsForUsingRoava(ctx context.Context, personID
 	}
 	res, err := r.onBoardingService.AddReasonsForUsingRoava(context.Background(), &payload)
 	if err != nil {
-		return nil, err
+		return nil, rerrors.NewFromGrpc(err)
 	}
 	return &types.Result{
 		Success: true,
@@ -141,7 +142,7 @@ func (r *mutationResolver) CreatePhone(ctx context.Context, input types.CreatePh
 			Device: &onboardingService.Device{Os: input.Device.Os, Brand: input.Device.Brand, DeviceId: input.Device.DeviceID, DeviceToken: input.Device.DeviceToken}})
 	if err != nil {
 		r.logger.Infof("onBoardingService.createPhone() failed: %v", err)
-		return nil, err
+		return nil, rerrors.NewFromGrpc(err)
 	}
 	return &types.CreatePhoneResult{Message: result.Message, Success: true, EmailToken: result.EmailToken}, nil
 }
@@ -152,7 +153,7 @@ func (r *mutationResolver) VerifyOtp(ctx context.Context, phone string, code str
 	})
 	if err != nil {
 		r.logger.Infof("verifyService.verifySmsOtp() failed: %v", err)
-		return nil, err
+		return nil, rerrors.NewFromGrpc(err)
 	}
 	return &types.Result{Success: resp.Match, Message: resp.Message}, nil
 }
@@ -164,7 +165,7 @@ func (r *mutationResolver) CreateEmail(ctx context.Context, input *types.CreateE
 	})
 	if err != nil {
 		r.logger.Infof("onBoardingService.createEmail() failed: %v", err)
-		return nil, err
+		return nil, rerrors.NewFromGrpc(err)
 	}
 	return &types.Result{Message: resp.Message, Success: true}, nil
 }
@@ -178,7 +179,7 @@ func (r *mutationResolver) AuthenticateCustomer(ctx context.Context, email strin
 	resp, err := r.authService.Login(ctx, req)
 	if err != nil {
 		r.logger.Infof("authService.Login() failed: %v", err)
-		return nil, err
+		return nil, rerrors.NewFromGrpc(err)
 	}
 	return &types.AuthResult{
 		Token: resp.Token, RefreshToken: resp.RefreshToken,
@@ -190,7 +191,7 @@ func (r *mutationResolver) RefreshToken(ctx context.Context, refreshToken string
 	resp, err := r.authService.RefreshToken(ctx, req)
 	if err != nil {
 		r.logger.Infof("authService.RefreshToken() failed: %v", err)
-		return nil, err
+		return nil, rerrors.NewFromGrpc(err)
 	}
 	return &types.AuthResult{Token: resp.Token, RefreshToken: resp.RefreshToken}, nil
 }
