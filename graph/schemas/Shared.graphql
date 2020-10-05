@@ -45,3 +45,8 @@ input InputAddress {
     city: String!,
     postcode: String!
 }
+
+input CreatePasscodeInput {
+    token: String!,
+    passcode: String!
+}

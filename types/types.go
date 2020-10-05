@@ -12,6 +12,11 @@ type CreateEmailInput struct {
 	Value string `json:"value"`
 }
 
+type CreatePasscodeInput struct {
+	Token    string `json:"token"`
+	Passcode string `json:"passcode"`
+}
+
 type CreatePhoneInput struct {
 	Phone  string  `json:"phone"`
 	Device *Device `json:"device"`

@@ -25,8 +25,8 @@ message CreatePhoneResponse {
 }
 
 message CreatePasscodeRequest {
-    string token = 1;
-    string passcode = 2;
+    string passcode = 1;
+    string token = 2;
 }
 
 message CreateEmailRequest {

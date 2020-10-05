@@ -111,7 +111,7 @@ type ComplexityRoot struct {
 		AuthenticateCustomer        func(childComplexity int, email string, passcode string) int
 		ConfirmPasswordResetDetails func(childComplexity int, email string, dob string, address types.InputAddress) int
 		CreateEmail                 func(childComplexity int, input *types.CreateEmailInput) int
-		CreatePasscode              func(childComplexity int, token string, passcode string) int
+		CreatePasscode              func(childComplexity int, input *types.CreatePasscodeInput) int
 		CreatePhone                 func(childComplexity int, input types.CreatePhoneInput) int
 		RefreshToken                func(childComplexity int, refreshToken string) int
 		ResetPassword               func(childComplexity int, email string, newPassword string, verificationToken string) int
@@ -138,7 +138,7 @@ type MutationResolver interface {
 	ResetPassword(ctx context.Context, email string, newPassword string, verificationToken string) (*types.Result, error)
 	ConfirmPasswordResetDetails(ctx context.Context, email string, dob string, address types.InputAddress) (*types.Result, error)
 	SubmitKYCApplication(ctx context.Context) (*types.Result, error)
-	CreatePasscode(ctx context.Context, token string, passcode string) (*types.Result, error)
+	CreatePasscode(ctx context.Context, input *types.CreatePasscodeInput) (*types.Result, error)
 	UpdatePersonBiodata(ctx context.Context, input *types.UpdateBioDataInput) (*types.Result, error)
 	AddReasonsForUsingRoava(ctx context.Context, personID string, reasons string) (*types.Result, error)
 	CreatePhone(ctx context.Context, input types.CreatePhoneInput) (*types.CreatePhoneResult, error)
@@ -479,7 +479,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreatePasscode(childComplexity, args["token"].(string), args["passcode"].(string)), true
+		return e.complexity.Mutation.CreatePasscode(childComplexity, args["input"].(*types.CreatePasscodeInput)), true
 
 	case "Mutation.createPhone":
 		if e.complexity.Mutation.CreatePhone == nil {
@@ -723,10 +723,7 @@ type CDD {
     ): Result
     submitKYCApplication: Result
 
-    CreatePasscode(
-        token: String!,
-        passcode: String!
-    ): Result
+    CreatePasscode(input: CreatePasscodeInput): Result
 
     updatePersonBiodata(input: UpdateBioDataInput) : Result
 
@@ -799,6 +796,11 @@ input InputAddress {
     city: String!,
     postcode: String!
 }
+
+input CreatePasscodeInput {
+    token: String!,
+    passcode: String!
+}
 `, BuiltIn: false},
 	{Name: "graph/schemas/Subscription.graphql", Input: `type Subscription {
     getKYCApplicationResult(applicantId: String!): CDD!
@@ -813,24 +815,15 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 func (ec *executionContext) field_Mutation_CreatePasscode_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["token"]; ok {
-		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("token"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+	var arg0 *types.CreatePasscodeInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("input"))
+		arg0, err = ec.unmarshalOCreatePasscodeInput2ᚖmsᚗapiᚋtypesᚐCreatePasscodeInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["token"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["passcode"]; ok {
-		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("passcode"))
-		arg1, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["passcode"] = arg1
+	args["input"] = arg0
 	return args, nil
 }
 
@@ -2443,7 +2436,7 @@ func (ec *executionContext) _Mutation_CreatePasscode(ctx context.Context, field 
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreatePasscode(rctx, args["token"].(string), args["passcode"].(string))
+		return ec.resolvers.Mutation().CreatePasscode(rctx, args["input"].(*types.CreatePasscodeInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4032,6 +4025,34 @@ func (ec *executionContext) unmarshalInputCreateEmailInput(ctx context.Context, 
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputCreatePasscodeInput(ctx context.Context, obj interface{}) (types.CreatePasscodeInput, error) {
+	var it types.CreatePasscodeInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "token":
+			var err error
+
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("token"))
+			it.Token, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "passcode":
+			var err error
+
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("passcode"))
+			it.Passcode, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputCreatePhoneInput(ctx context.Context, obj interface{}) (types.CreatePhoneInput, error) {
 	var it types.CreatePhoneInput
 	var asMap = obj.(map[string]interface{})
@@ -5304,6 +5325,14 @@ func (ec *executionContext) unmarshalOCreateEmailInput2ᚖmsᚗapiᚋtypesᚐCre
 		return nil, nil
 	}
 	res, err := ec.unmarshalInputCreateEmailInput(ctx, v)
+	return &res, graphql.WrapErrorWithInputPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOCreatePasscodeInput2ᚖmsᚗapiᚋtypesᚐCreatePasscodeInput(ctx context.Context, v interface{}) (*types.CreatePasscodeInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputCreatePasscodeInput(ctx, v)
 	return &res, graphql.WrapErrorWithInputPath(ctx, err)
 }
 

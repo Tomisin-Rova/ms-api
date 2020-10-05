@@ -11,10 +11,7 @@ type Mutation {
     ): Result
     submitKYCApplication: Result
 
-    CreatePasscode(
-        token: String!,
-        passcode: String!
-    ): Result
+    CreatePasscode(input: CreatePasscodeInput): Result
 
     updatePersonBiodata(input: UpdateBioDataInput) : Result
 

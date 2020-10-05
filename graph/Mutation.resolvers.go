@@ -74,10 +74,11 @@ func (r *mutationResolver) SubmitKYCApplication(ctx context.Context) (*types.Res
 	}, nil
 }
 
-func (r *mutationResolver) CreatePasscode(ctx context.Context, token string, passcode string) (*types.Result, error) {
+func (r *mutationResolver) CreatePasscode(ctx context.Context, input *types.CreatePasscodeInput) (*types.Result, error) {
+	r.logger.Info(input)
 	payload := onboardingService.CreatePasscodeRequest{
-		Token: token,
-		Passcode: passcode,
+		Token:    input.Token,
+		Passcode: input.Passcode,
 	}
 	res, err := r.onBoardingService.CreatePasscode(context.Background(), &payload)
 	if err != nil {
@@ -160,7 +161,7 @@ func (r *mutationResolver) VerifyOtp(ctx context.Context, phone string, code str
 
 func (r *mutationResolver) CreateEmail(ctx context.Context, input *types.CreateEmailInput) (*types.Result, error) {
 	resp, err := r.onBoardingService.CreateEmail(ctx, &onboardingService.CreateEmailRequest{
-		Value:      input.Value,
+		Value: input.Value,
 		Token: input.Token,
 	})
 	if err != nil {
