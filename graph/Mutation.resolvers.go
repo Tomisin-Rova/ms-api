@@ -6,10 +6,10 @@ package graph
 import (
 	"context"
 	"errors"
-	rerrors "ms.api/libs/errors"
 
 	"ms.api/graph/generated"
 	emailvalidator "ms.api/libs/email"
+	rerrors "ms.api/libs/errors"
 	"ms.api/protos/pb/authService"
 	"ms.api/protos/pb/kycService"
 	"ms.api/protos/pb/onboardingService"
@@ -74,9 +74,9 @@ func (r *mutationResolver) SubmitKYCApplication(ctx context.Context) (*types.Res
 	}, nil
 }
 
-func (r *mutationResolver) CreatePasscode(ctx context.Context, userID string, passcode string) (*types.Result, error) {
+func (r *mutationResolver) CreatePasscode(ctx context.Context, token string, passcode string) (*types.Result, error) {
 	payload := onboardingService.CreatePasscodeRequest{
-		PersonId: userID,
+		Token: token,
 		Passcode: passcode,
 	}
 	res, err := r.onBoardingService.CreatePasscode(context.Background(), &payload)
@@ -144,7 +144,7 @@ func (r *mutationResolver) CreatePhone(ctx context.Context, input types.CreatePh
 		r.logger.Infof("onBoardingService.createPhone() failed: %v", err)
 		return nil, rerrors.NewFromGrpc(err)
 	}
-	return &types.CreatePhoneResult{Message: result.Message, Success: true, EmailToken: result.EmailToken}, nil
+	return &types.CreatePhoneResult{Message: result.Message, Success: true, Token: result.Token}, nil
 }
 
 func (r *mutationResolver) VerifyOtp(ctx context.Context, phone string, code string) (*types.Result, error) {
@@ -161,7 +161,7 @@ func (r *mutationResolver) VerifyOtp(ctx context.Context, phone string, code str
 func (r *mutationResolver) CreateEmail(ctx context.Context, input *types.CreateEmailInput) (*types.Result, error) {
 	resp, err := r.onBoardingService.CreateEmail(ctx, &onboardingService.CreateEmailRequest{
 		Value:      input.Value,
-		EmailToken: input.EmailToken,
+		Token: input.Token,
 	})
 	if err != nil {
 		r.logger.Infof("onBoardingService.createEmail() failed: %v", err)

@@ -8,8 +8,8 @@ type AuthResult struct {
 }
 
 type CreateEmailInput struct {
-	EmailToken string `json:"emailToken"`
-	Value      string `json:"value"`
+	Token string `json:"token"`
+	Value string `json:"value"`
 }
 
 type CreatePhoneInput struct {
@@ -18,9 +18,9 @@ type CreatePhoneInput struct {
 }
 
 type CreatePhoneResult struct {
-	Success    bool   `json:"success"`
-	Message    string `json:"message"`
-	EmailToken string `json:"emailToken"`
+	Success bool   `json:"success"`
+	Message string `json:"message"`
+	Token   string `json:"token"`
 }
 
 type Device struct {

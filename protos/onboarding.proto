@@ -21,18 +21,18 @@ message SuccessResponse {
 
 message CreatePhoneResponse {
     string message = 1;
-    string email_token = 2;
+    string token = 2;
 }
 
 message CreatePasscodeRequest {
-    string personId = 1;
+    string token = 1;
     string passcode = 2;
 }
 
 message CreateEmailRequest {
     string name = 1;
     string value = 2;
-    string emailToken = 3;
+    string token = 3;
     bool primary = 4;
     bool verified = 5;
 }

@@ -143,6 +143,42 @@ services:
     ports:
       - 2007:2007
 
+  ms.notify:
+    container_name: ms.notify
+    image: gcr.io/labs-271617/roava.io/services/ms.notify
+    restart: on-failure
+    environment:
+      PORT: 2008
+      DATABASE_URL: mongodb://root:root@mongodb:27017
+      PULSAR_URL: pulsar+ssl://pulsar.roava.io:6651
+      PULSAR_TLS_CERT: ${PULSAR_TLS_CERT}
+      DATABASE_NAME: roava
+      SERVICE_NAME: ms.notify
+      TWILIO_ACCOUNT_SID: ${TW_SID}
+      TWILIO_ACCOUNT_TOKEN: ${TW_TOKEN}
+    depends_on:
+      #- eventstore
+      - mongodb
+    ports:
+      - 2008:2008
+
+  ms.messaging:
+    container_name: ms.messaging
+    image: gcr.io/labs-271617/roava.io/services/ms.messaging
+    restart: on-failure
+    environment:
+      PORT: 2009
+      DATABASE_URL: mongodb://root:root@mongodb:27017
+      PULSAR_URL: pulsar+ssl://pulsar.roava.io:6651
+      PULSAR_TLS_CERT: ${PULSAR_TLS_CERT}
+      DATABASE_NAME: roava
+      SERVICE_NAME: ms.messaging
+    depends_on:
+      #- eventstore
+      - mongodb
+    ports:
+      - 2009:2009
+
   api:
     container_name: api
     build:

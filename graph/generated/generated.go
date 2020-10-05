@@ -92,9 +92,9 @@ type ComplexityRoot struct {
 	}
 
 	CreatePhoneResult struct {
-		EmailToken func(childComplexity int) int
-		Message    func(childComplexity int) int
-		Success    func(childComplexity int) int
+		Message func(childComplexity int) int
+		Success func(childComplexity int) int
+		Token   func(childComplexity int) int
 	}
 
 	Kyc struct {
@@ -111,7 +111,7 @@ type ComplexityRoot struct {
 		AuthenticateCustomer        func(childComplexity int, email string, passcode string) int
 		ConfirmPasswordResetDetails func(childComplexity int, email string, dob string, address types.InputAddress) int
 		CreateEmail                 func(childComplexity int, input *types.CreateEmailInput) int
-		CreatePasscode              func(childComplexity int, userID string, passcode string) int
+		CreatePasscode              func(childComplexity int, token string, passcode string) int
 		CreatePhone                 func(childComplexity int, input types.CreatePhoneInput) int
 		RefreshToken                func(childComplexity int, refreshToken string) int
 		ResetPassword               func(childComplexity int, email string, newPassword string, verificationToken string) int
@@ -138,7 +138,7 @@ type MutationResolver interface {
 	ResetPassword(ctx context.Context, email string, newPassword string, verificationToken string) (*types.Result, error)
 	ConfirmPasswordResetDetails(ctx context.Context, email string, dob string, address types.InputAddress) (*types.Result, error)
 	SubmitKYCApplication(ctx context.Context) (*types.Result, error)
-	CreatePasscode(ctx context.Context, userID string, passcode string) (*types.Result, error)
+	CreatePasscode(ctx context.Context, token string, passcode string) (*types.Result, error)
 	UpdatePersonBiodata(ctx context.Context, input *types.UpdateBioDataInput) (*types.Result, error)
 	AddReasonsForUsingRoava(ctx context.Context, personID string, reasons string) (*types.Result, error)
 	CreatePhone(ctx context.Context, input types.CreatePhoneInput) (*types.CreatePhoneResult, error)
@@ -358,13 +358,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Cdd.TimeUpdated(childComplexity), true
 
-	case "CreatePhoneResult.emailToken":
-		if e.complexity.CreatePhoneResult.EmailToken == nil {
-			break
-		}
-
-		return e.complexity.CreatePhoneResult.EmailToken(childComplexity), true
-
 	case "CreatePhoneResult.message":
 		if e.complexity.CreatePhoneResult.Message == nil {
 			break
@@ -378,6 +371,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.CreatePhoneResult.Success(childComplexity), true
+
+	case "CreatePhoneResult.token":
+		if e.complexity.CreatePhoneResult.Token == nil {
+			break
+		}
+
+		return e.complexity.CreatePhoneResult.Token(childComplexity), true
 
 	case "KYC.applicant":
 		if e.complexity.Kyc.Applicant == nil {
@@ -479,7 +479,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreatePasscode(childComplexity, args["userId"].(string), args["passcode"].(string)), true
+		return e.complexity.Mutation.CreatePasscode(childComplexity, args["token"].(string), args["passcode"].(string)), true
 
 	case "Mutation.createPhone":
 		if e.complexity.Mutation.CreatePhone == nil {
@@ -724,7 +724,7 @@ type CDD {
     submitKYCApplication: Result
 
     CreatePasscode(
-        userId: String!,
+        token: String!,
         passcode: String!
     ): Result
 
@@ -760,7 +760,7 @@ type ApplicantSDKTokenResponse {
 type CreatePhoneResult {
     success: Boolean!
     message: String!
-    emailToken: String!
+    token: String!
 }
 
 input CreatePhoneInput {
@@ -769,7 +769,7 @@ input CreatePhoneInput {
 }
 
 input CreateEmailInput {
-    emailToken: String!
+    token: String!
     value: String!
 }
 
@@ -814,14 +814,14 @@ func (ec *executionContext) field_Mutation_CreatePasscode_args(ctx context.Conte
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["userId"]; ok {
-		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("userId"))
+	if tmp, ok := rawArgs["token"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("token"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["userId"] = arg0
+	args["token"] = arg0
 	var arg1 string
 	if tmp, ok := rawArgs["passcode"]; ok {
 		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("passcode"))
@@ -2080,7 +2080,7 @@ func (ec *executionContext) _CreatePhoneResult_message(ctx context.Context, fiel
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _CreatePhoneResult_emailToken(ctx context.Context, field graphql.CollectedField, obj *types.CreatePhoneResult) (ret graphql.Marshaler) {
+func (ec *executionContext) _CreatePhoneResult_token(ctx context.Context, field graphql.CollectedField, obj *types.CreatePhoneResult) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -2097,7 +2097,7 @@ func (ec *executionContext) _CreatePhoneResult_emailToken(ctx context.Context, f
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.EmailToken, nil
+		return obj.Token, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2443,7 +2443,7 @@ func (ec *executionContext) _Mutation_CreatePasscode(ctx context.Context, field 
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreatePasscode(rctx, args["userId"].(string), args["passcode"].(string))
+		return ec.resolvers.Mutation().CreatePasscode(rctx, args["token"].(string), args["passcode"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4010,11 +4010,11 @@ func (ec *executionContext) unmarshalInputCreateEmailInput(ctx context.Context, 
 
 	for k, v := range asMap {
 		switch k {
-		case "emailToken":
+		case "token":
 			var err error
 
-			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("emailToken"))
-			it.EmailToken, err = ec.unmarshalNString2string(ctx, v)
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("token"))
+			it.Token, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -4475,8 +4475,8 @@ func (ec *executionContext) _CreatePhoneResult(ctx context.Context, sel ast.Sele
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "emailToken":
-			out.Values[i] = ec._CreatePhoneResult_emailToken(ctx, field, obj)
+		case "token":
+			out.Values[i] = ec._CreatePhoneResult_token(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

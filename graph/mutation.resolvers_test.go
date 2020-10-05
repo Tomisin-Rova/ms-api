@@ -14,7 +14,7 @@ import (
 
 func TestMutationResolver_CreatePhone(t *testing.T) {
 	svc := fakes.NewFakeOnBoardingClient(&onboarding.SuccessResponse{Message: "phone added"},
-		&onboarding.CreatePhoneResponse{Message: "phone added", EmailToken: "token"}, nil)
+		&onboarding.CreatePhoneResponse{Message: "phone added", Token: "token"}, nil)
 	r := NewResolver(&ResolverOpts{onBoardingService: svc}, logrus.StandardLogger())
 	mu := &mutationResolver{r}
 	resp, err := mu.CreatePhone(context.Background(), types.CreatePhoneInput{

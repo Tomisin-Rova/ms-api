@@ -12,7 +12,7 @@ type Mutation {
     submitKYCApplication: Result
 
     CreatePasscode(
-        userId: String!,
+        token: String!,
         passcode: String!
     ): Result
 

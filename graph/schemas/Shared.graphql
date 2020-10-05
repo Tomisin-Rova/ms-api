@@ -6,7 +6,7 @@ type Result {
 type CreatePhoneResult {
     success: Boolean!
     message: String!
-    emailToken: String!
+    token: String!
 }
 
 input CreatePhoneInput {
@@ -15,7 +15,7 @@ input CreatePhoneInput {
 }
 
 input CreateEmailInput {
-    emailToken: String!
+    token: String!
     value: String!
 }
 
