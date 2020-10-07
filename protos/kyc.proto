@@ -5,14 +5,11 @@ option go_package = "pb/kycService";
 service KycService {
   rpc getKycApplicantByPersonId(PersonIdRequest) returns(applicant){}
   rpc submitKycApplicationByPersonId(PersonIdRequest) returns(void){}
-  rpc awaitCDDReport(ApplicationIdRequest) returns(stream cdd){}
+  rpc awaitCDDReport(PersonIdRequest) returns(stream cdd){}
 }
 
 message void {}
 
-message ApplicationIdRequest {
-  string application_id = 1;
-}
 
 message PersonIdRequest {
   string person_id = 1;

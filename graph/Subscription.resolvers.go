@@ -11,8 +11,8 @@ import (
 )
 
 func (r *subscriptionResolver) GetKYCApplicationResult(ctx context.Context, applicantID string) (<-chan *kycService.Cdd, error) {
-	payload := kycService.ApplicationIdRequest{
-		ApplicationId: applicantID,
+	payload := kycService.PersonIdRequest{
+		PersonId: applicantID,
 	}
 	response, err := r.kycClient.AwaitCDDReport(ctx, &payload)
 	if err != nil {
