@@ -29,8 +29,13 @@
      string code = 2;
  }
 
- service VerifyService {
-     rpc ValidateEmail(ValidateEmailRequest) returns (SuccessResponse) {}
-     rpc VerifySmsOtp(OtpVerificationRequest) returns (OtpVerificationResponse) {}
-     rpc VerifyEmailOtp(OtpVerificationByEmailRequest) returns (OtpVerificationResponse) {}
- }
+message ResendOtpRequest {
+    string phone = 1;
+}
+
+service VerifyService {
+    rpc ValidateEmail(ValidateEmailRequest) returns (SuccessResponse) {}
+    rpc VerifySmsOtp(OtpVerificationRequest) returns (OtpVerificationResponse) {}
+    rpc VerifyEmailOtp(OtpVerificationByEmailRequest) returns (OtpVerificationResponse) {}
+    rpc ResendOtp(ResendOtpRequest) returns (SuccessResponse) {}
+}

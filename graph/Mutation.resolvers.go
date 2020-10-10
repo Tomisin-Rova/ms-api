@@ -75,7 +75,6 @@ func (r *mutationResolver) SubmitKYCApplication(ctx context.Context) (*types.Res
 }
 
 func (r *mutationResolver) CreatePasscode(ctx context.Context, input *types.CreatePasscodeInput) (*types.Result, error) {
-	r.logger.Info(input)
 	payload := onboardingService.CreatePasscodeRequest{
 		Token:    input.Token,
 		Passcode: input.Passcode,
@@ -195,6 +194,18 @@ func (r *mutationResolver) RefreshToken(ctx context.Context, refreshToken string
 		return nil, rerrors.NewFromGrpc(err)
 	}
 	return &types.AuthResult{Token: resp.Token, RefreshToken: resp.RefreshToken}, nil
+}
+
+func (r *mutationResolver) ResendOtp(ctx context.Context, phone string) (*types.Result, error) {
+	if phone == "" || len(phone) < 6 {
+		return nil, errors.New("invalid phone number")
+	}
+	resp, err := r.verifyService.ResendOtp(ctx, &verifyService.ResendOtpRequest{Phone: phone})
+	if err != nil {
+		r.logger.Infof("verifyService.ResendOtp() failed: %v", err)
+		return nil, rerrors.NewFromGrpc(err)
+	}
+	return &types.Result{Message: resp.Message, Success: true}, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.
