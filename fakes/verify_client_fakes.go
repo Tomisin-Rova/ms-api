@@ -31,3 +31,8 @@ func (f *FakeVerifyClient) VerifyEmailOtp(ctx context.Context, req *verifyServic
 	opt ...grpc.CallOption) (*verifyService.OtpVerificationResponse, error) {
 	return f.resp, f.err
 }
+
+func (f *FakeVerifyClient) ResendOtp(ctx context.Context, req *verifyService.ResendOtpRequest,
+	opt ...grpc.CallOption) (*verifyService.SuccessResponse, error) {
+	return f.successResp, f.err
+}

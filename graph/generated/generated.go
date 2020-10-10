@@ -114,6 +114,7 @@ type ComplexityRoot struct {
 		CreatePasscode              func(childComplexity int, input *types.CreatePasscodeInput) int
 		CreatePhone                 func(childComplexity int, input types.CreatePhoneInput) int
 		RefreshToken                func(childComplexity int, refreshToken string) int
+		ResendOtp                   func(childComplexity int, phone string) int
 		ResetPassword               func(childComplexity int, email string, newPassword string, verificationToken string) int
 		SubmitKYCApplication        func(childComplexity int) int
 		UpdatePersonBiodata         func(childComplexity int, input *types.UpdateBioDataInput) int
@@ -146,6 +147,7 @@ type MutationResolver interface {
 	CreateEmail(ctx context.Context, input *types.CreateEmailInput) (*types.Result, error)
 	AuthenticateCustomer(ctx context.Context, email string, passcode string) (*types.AuthResult, error)
 	RefreshToken(ctx context.Context, refreshToken string) (*types.AuthResult, error)
+	ResendOtp(ctx context.Context, phone string) (*types.Result, error)
 }
 type QueryResolver interface {
 	GetApplicantSDKToken(ctx context.Context, personID string) (*onfidoService.ApplicantSDKTokenResponse, error)
@@ -505,6 +507,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.RefreshToken(childComplexity, args["refreshToken"].(string)), true
 
+	case "Mutation.resendOtp":
+		if e.complexity.Mutation.ResendOtp == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_resendOtp_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.ResendOtp(childComplexity, args["phone"].(string)), true
+
 	case "Mutation.resetPassword":
 		if e.complexity.Mutation.ResetPassword == nil {
 			break
@@ -737,6 +751,7 @@ type CDD {
     createEmail(input: CreateEmailInput): Result
     authenticateCustomer(email: String!, passcode: String!): AuthResult
     refreshToken(refreshToken: String!): AuthResult
+    resendOtp(phone: String!): Result
 }
 `, BuiltIn: false},
 	{Name: "graph/schemas/Onfido.graphql", Input: `type ApplicantSDKTokenRequest {
@@ -950,6 +965,21 @@ func (ec *executionContext) field_Mutation_refreshToken_args(ctx context.Context
 		}
 	}
 	args["refreshToken"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_resendOtp_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["phone"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("phone"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["phone"] = arg0
 	return args, nil
 }
 
@@ -2714,6 +2744,44 @@ func (ec *executionContext) _Mutation_refreshToken(ctx context.Context, field gr
 	res := resTmp.(*types.AuthResult)
 	fc.Result = res
 	return ec.marshalOAuthResult2ᚖmsᚗapiᚋtypesᚐAuthResult(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_resendOtp(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_resendOtp_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().ResendOtp(rctx, args["phone"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*types.Result)
+	fc.Result = res
+	return ec.marshalOResult2ᚖmsᚗapiᚋtypesᚐResult(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_getApplicantSDKToken(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -4595,6 +4663,8 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec._Mutation_authenticateCustomer(ctx, field)
 		case "refreshToken":
 			out.Values[i] = ec._Mutation_refreshToken(ctx, field)
+		case "resendOtp":
+			out.Values[i] = ec._Mutation_resendOtp(ctx, field)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

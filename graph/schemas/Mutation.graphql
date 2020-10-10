@@ -25,4 +25,5 @@ type Mutation {
     createEmail(input: CreateEmailInput): Result
     authenticateCustomer(email: String!, passcode: String!): AuthResult
     refreshToken(refreshToken: String!): AuthResult
+    resendOtp(phone: String!): Result
 }
