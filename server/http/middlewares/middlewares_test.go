@@ -28,10 +28,9 @@ func TestAuthMiddleware_Middeware_InvalidJWT(t *testing.T) {
 	handler.ServeHTTP(w, r)
 }
 
-
 func TestAuthMiddleware_Middeware_Success(t *testing.T) {
 	authClient := fakes.NewFakeAuthClient(&authService.ValidateTokenResponse{PersonId: "personId"},
-	nil, nil, nil)
+		nil, nil, nil)
 	mw := NewAuthMiddleware(authClient, logrus.StandardLogger())
 
 	fn := func(w http.ResponseWriter, r *http.Request) {
@@ -46,7 +45,6 @@ func TestAuthMiddleware_Middeware_Success(t *testing.T) {
 	r.Header.Set("Authorization", "Bearer JWT")
 	handler.ServeHTTP(w, r)
 }
-
 
 func TestAuthMiddleware_Middeware_Header_Absent(t *testing.T) {
 	authClient := fakes.NewFakeAuthClient(nil,

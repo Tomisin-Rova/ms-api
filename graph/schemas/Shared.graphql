@@ -51,3 +51,8 @@ input CreatePasscodeInput {
     token: String!,
     passcode: String!
 }
+
+type CheckEmailExistenceResult {
+    exists: Boolean!
+    message: String!
+}

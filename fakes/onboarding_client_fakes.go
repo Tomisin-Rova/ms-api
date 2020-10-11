@@ -7,9 +7,9 @@ import (
 )
 
 type FakeOnBoardingClient struct {
-	resp    *onboardingService.SuccessResponse
+	resp            *onboardingService.SuccessResponse
 	createPhoneResp *onboardingService.CreatePhoneResponse
-	err     error
+	err             error
 }
 
 func NewFakeOnBoardingClient(resp *onboardingService.SuccessResponse, cResp *onboardingService.CreatePhoneResponse,
@@ -33,7 +33,7 @@ func (f *FakeOnBoardingClient) UpdatePersonBiodata(ctx context.Context,
 }
 
 func (f *FakeOnBoardingClient) CreateEmail(ctx context.Context, req *onboardingService.CreateEmailRequest,
-	opts... grpc.CallOption) (*onboardingService.CreateEmailResponse, error) {
+	opts ...grpc.CallOption) (*onboardingService.CreateEmailResponse, error) {
 	return &onboardingService.CreateEmailResponse{PersonId: "personId"}, f.err
 }
 

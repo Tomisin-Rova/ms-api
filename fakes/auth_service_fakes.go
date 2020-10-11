@@ -8,9 +8,9 @@ import (
 
 type FakeAuthClient struct {
 	loginResp *authService.LoginResponse
-	resp *authService.ValidateTokenResponse
-	rResp *authService.RefreshTokenResponse
-	err error
+	resp      *authService.ValidateTokenResponse
+	rResp     *authService.RefreshTokenResponse
+	err       error
 }
 
 func (f *FakeAuthClient) ConfirmPasswordResetDetails(ctx context.Context, in *authService.PasswordResetUserDetails, opts ...grpc.CallOption) (*authService.SuccessResponse, error) {
@@ -27,22 +27,21 @@ func NewFakeAuthClient(resp *authService.ValidateTokenResponse,
 }
 
 func (f *FakeAuthClient) Login(ctx context.Context, req *authService.LoginRequest,
-	opts...grpc.CallOption) (*authService.LoginResponse, error) {
+	opts ...grpc.CallOption) (*authService.LoginResponse, error) {
 	return f.loginResp, f.err
 }
 
 func (f *FakeAuthClient) ValidateToken(ctx context.Context, req *authService.ValidateTokenRequest,
-	opts...grpc.CallOption) (*authService.ValidateTokenResponse, error) {
+	opts ...grpc.CallOption) (*authService.ValidateTokenResponse, error) {
 	return f.resp, f.err
 }
 
 func (f *FakeAuthClient) RefreshToken(ctx context.Context, req *authService.RefreshTokenRequest,
-	opts... grpc.CallOption) (*authService.RefreshTokenResponse, error) {
+	opts ...grpc.CallOption) (*authService.RefreshTokenResponse, error) {
 	return f.rResp, f.err
 }
 
-
 func (f *FakeAuthClient) GenerateToken(ctx context.Context, req *authService.GenerateTokenRequest,
-	opts... grpc.CallOption) (*authService.LoginResponse, error) {
+	opts ...grpc.CallOption) (*authService.LoginResponse, error) {
 	return f.loginResp, f.err
 }

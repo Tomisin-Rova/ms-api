@@ -9,7 +9,7 @@ import (
 type OnfidoClientFakes struct {
 	void *onfidoService.Void
 	resp *onfidoService.ApplicantSDKTokenResponse
-	err error
+	err  error
 }
 
 func NewFakeOnFidoClient(void *onfidoService.Void, resp *onfidoService.ApplicantSDKTokenResponse, err error) *OnfidoClientFakes {
@@ -21,11 +21,11 @@ func NewFakeOnFidoClient(void *onfidoService.Void, resp *onfidoService.Applicant
 }
 
 func (f *OnfidoClientFakes) GenerateApplicantSDKToken(ctx context.Context, req *onfidoService.ApplicantSDKTokenRequest,
-	opts... grpc.CallOption) (*onfidoService.ApplicantSDKTokenResponse, error) {
+	opts ...grpc.CallOption) (*onfidoService.ApplicantSDKTokenResponse, error) {
 	return f.resp, f.err
 }
 
 func (f *OnfidoClientFakes) WebhookPush(ctx context.Context, req *onfidoService.OnfidoCheckWebhookRequest,
-	opts... grpc.CallOption) (*onfidoService.Void, error) {
+	opts ...grpc.CallOption) (*onfidoService.Void, error) {
 	return f.void, f.err
 }

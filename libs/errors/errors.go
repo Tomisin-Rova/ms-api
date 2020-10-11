@@ -4,9 +4,9 @@ import "google.golang.org/grpc/status"
 
 type roavaError struct {
 	ErrorString string `json:"error"`
-	Message string `json:"message"`
-	Detail string `json:"detail"`
-	Help string `json:"help"`
+	Message     string `json:"message"`
+	Detail      string `json:"detail"`
+	Help        string `json:"help"`
 }
 
 func NewFromGrpc(err error) error {

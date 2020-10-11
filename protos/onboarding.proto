@@ -61,10 +61,20 @@ message Address {
     string postcode = 4;
 }
 
+message CheckEmailExistenceRequest {
+    string email = 1;
+}
+
+message CheckEmailExistenceResponse {
+    bool exists = 1;
+    string message = 2;
+}
+
 service OnBoardingService {
     rpc CreatePhone(CreatePhoneRequest) returns (CreatePhoneResponse) {}
     rpc CreateEmail(CreateEmailRequest) returns (CreateEmailResponse) {}
     rpc CreatePasscode(CreatePasscodeRequest) returns (SuccessResponse) {}
     rpc UpdatePersonBiodata(UpdatePersonRequest) returns (SuccessResponse) {}
     rpc AddReasonsForUsingRoava(RoavaReasonsRequest) returns (SuccessResponse) {}
+    rpc CheckEmailExistence(CheckEmailExistenceRequest) returns (CheckEmailExistenceResponse) {}
 }

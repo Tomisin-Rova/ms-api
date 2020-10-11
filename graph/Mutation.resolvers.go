@@ -6,7 +6,6 @@ package graph
 import (
 	"context"
 	"errors"
-
 	"ms.api/graph/generated"
 	emailvalidator "ms.api/libs/email"
 	rerrors "ms.api/libs/errors"
@@ -164,8 +163,8 @@ func (r *mutationResolver) VerifyOtp(ctx context.Context, phone string, code str
 
 func (r *mutationResolver) CreateEmail(ctx context.Context, input *types.CreateEmailInput) (*types.AuthResult, error) {
 	resp, err := r.onBoardingService.CreateEmail(ctx, &onboardingService.CreateEmailRequest{
-		Email: input.Email,
-		Token: input.Token,
+		Email:    input.Email,
+		Token:    input.Token,
 		Passcode: input.Passcode,
 	})
 	if err != nil {
@@ -216,6 +215,18 @@ func (r *mutationResolver) ResendOtp(ctx context.Context, phone string) (*types.
 		return nil, rerrors.NewFromGrpc(err)
 	}
 	return &types.Result{Message: resp.Message, Success: true}, nil
+}
+
+func (r *mutationResolver) CheckEmailExistence(ctx context.Context, email string) (*types.CheckEmailExistenceResult, error) {
+	if err := emailvalidator.Validate(email); err != nil {
+		return nil, err
+	}
+	resp, err := r.onBoardingService.CheckEmailExistence(ctx, &onboardingService.CheckEmailExistenceRequest{Email: email})
+	if err != nil {
+		r.logger.WithError(err).Info("onboardingService.checkEmailExistence() failed")
+		return nil, rerrors.NewFromGrpc(err)
+	}
+	return &types.CheckEmailExistenceResult{Message: resp.Message, Exists: resp.Exists}, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.
