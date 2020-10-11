@@ -15,7 +15,6 @@ import (
 	"net/http"
 )
 
-
 func MountServer(secrets *config.Secrets, logger *logrus.Logger) *chi.Mux {
 	router := chi.NewRouter()
 	// Middlewares
@@ -43,7 +42,6 @@ func MountServer(secrets *config.Secrets, logger *logrus.Logger) *chi.Mux {
 			_, _ = writer.Write([]byte("Welcome to Roava API. Please use our APP for a better experience.</a>"))
 		})
 	}
-
 
 	resolvers := graph.NewResolver(opts, logger)
 	// API Server

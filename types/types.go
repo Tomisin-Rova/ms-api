@@ -7,6 +7,11 @@ type AuthResult struct {
 	RefreshToken string `json:"refreshToken"`
 }
 
+type CheckEmailExistenceResult struct {
+	Exists  bool   `json:"exists"`
+	Message string `json:"message"`
+}
+
 type CreateEmailInput struct {
 	Token    string `json:"token"`
 	Email    string `json:"email"`

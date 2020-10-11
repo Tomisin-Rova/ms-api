@@ -91,6 +91,11 @@ type ComplexityRoot struct {
 		TimeUpdated func(childComplexity int) int
 	}
 
+	CheckEmailExistenceResult struct {
+		Exists  func(childComplexity int) int
+		Message func(childComplexity int) int
+	}
+
 	CreatePhoneResult struct {
 		Message func(childComplexity int) int
 		Success func(childComplexity int) int
@@ -109,6 +114,7 @@ type ComplexityRoot struct {
 	Mutation struct {
 		AddReasonsForUsingRoava     func(childComplexity int, personID string, reasonValues []*string) int
 		AuthenticateCustomer        func(childComplexity int, email string, passcode string) int
+		CheckEmailExistence         func(childComplexity int, email string) int
 		ConfirmPasswordResetDetails func(childComplexity int, email string, dob string, address types.InputAddress) int
 		CreateEmail                 func(childComplexity int, input *types.CreateEmailInput) int
 		CreatePasscode              func(childComplexity int, input *types.CreatePasscodeInput) int
@@ -148,6 +154,7 @@ type MutationResolver interface {
 	AuthenticateCustomer(ctx context.Context, email string, passcode string) (*types.AuthResult, error)
 	RefreshToken(ctx context.Context, refreshToken string) (*types.AuthResult, error)
 	ResendOtp(ctx context.Context, phone string) (*types.Result, error)
+	CheckEmailExistence(ctx context.Context, email string) (*types.CheckEmailExistenceResult, error)
 }
 type QueryResolver interface {
 	GetApplicantSDKToken(ctx context.Context, personID string) (*onfidoService.ApplicantSDKTokenResponse, error)
@@ -360,6 +367,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Cdd.TimeUpdated(childComplexity), true
 
+	case "CheckEmailExistenceResult.exists":
+		if e.complexity.CheckEmailExistenceResult.Exists == nil {
+			break
+		}
+
+		return e.complexity.CheckEmailExistenceResult.Exists(childComplexity), true
+
+	case "CheckEmailExistenceResult.message":
+		if e.complexity.CheckEmailExistenceResult.Message == nil {
+			break
+		}
+
+		return e.complexity.CheckEmailExistenceResult.Message(childComplexity), true
+
 	case "CreatePhoneResult.message":
 		if e.complexity.CreatePhoneResult.Message == nil {
 			break
@@ -446,6 +467,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.AuthenticateCustomer(childComplexity, args["email"].(string), args["passcode"].(string)), true
+
+	case "Mutation.checkEmailExistence":
+		if e.complexity.Mutation.CheckEmailExistence == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_checkEmailExistence_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CheckEmailExistence(childComplexity, args["email"].(string)), true
 
 	case "Mutation.confirmPasswordResetDetails":
 		if e.complexity.Mutation.ConfirmPasswordResetDetails == nil {
@@ -752,6 +785,7 @@ type CDD {
     authenticateCustomer(email: String!, passcode: String!): AuthResult
     refreshToken(refreshToken: String!): AuthResult
     resendOtp(phone: String!): Result
+    checkEmailExistence(email: String!): CheckEmailExistenceResult
 }
 `, BuiltIn: false},
 	{Name: "graph/schemas/Onfido.graphql", Input: `type ApplicantSDKTokenRequest {
@@ -816,6 +850,11 @@ input InputAddress {
 input CreatePasscodeInput {
     token: String!,
     passcode: String!
+}
+
+type CheckEmailExistenceResult {
+    exists: Boolean!
+    message: String!
 }
 `, BuiltIn: false},
 	{Name: "graph/schemas/Subscription.graphql", Input: `type Subscription {
@@ -888,6 +927,21 @@ func (ec *executionContext) field_Mutation_authenticateCustomer_args(ctx context
 		}
 	}
 	args["passcode"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_checkEmailExistence_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["email"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("email"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["email"] = arg0
 	return args, nil
 }
 
@@ -2036,6 +2090,74 @@ func (ec *executionContext) _CDD_time_updated(ctx context.Context, field graphql
 	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _CheckEmailExistenceResult_exists(ctx context.Context, field graphql.CollectedField, obj *types.CheckEmailExistenceResult) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "CheckEmailExistenceResult",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Exists, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _CheckEmailExistenceResult_message(ctx context.Context, field graphql.CollectedField, obj *types.CheckEmailExistenceResult) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "CheckEmailExistenceResult",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Message, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _CreatePhoneResult_success(ctx context.Context, field graphql.CollectedField, obj *types.CreatePhoneResult) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -2783,6 +2905,44 @@ func (ec *executionContext) _Mutation_resendOtp(ctx context.Context, field graph
 	res := resTmp.(*types.Result)
 	fc.Result = res
 	return ec.marshalOResult2ᚖmsᚗapiᚋtypesᚐResult(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_checkEmailExistence(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_checkEmailExistence_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CheckEmailExistence(rctx, args["email"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*types.CheckEmailExistenceResult)
+	fc.Result = res
+	return ec.marshalOCheckEmailExistenceResult2ᚖmsᚗapiᚋtypesᚐCheckEmailExistenceResult(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_getApplicantSDKToken(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -4552,6 +4712,38 @@ func (ec *executionContext) _CDD(ctx context.Context, sel ast.SelectionSet, obj 
 	return out
 }
 
+var checkEmailExistenceResultImplementors = []string{"CheckEmailExistenceResult"}
+
+func (ec *executionContext) _CheckEmailExistenceResult(ctx context.Context, sel ast.SelectionSet, obj *types.CheckEmailExistenceResult) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, checkEmailExistenceResultImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("CheckEmailExistenceResult")
+		case "exists":
+			out.Values[i] = ec._CheckEmailExistenceResult_exists(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "message":
+			out.Values[i] = ec._CheckEmailExistenceResult_message(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var createPhoneResultImplementors = []string{"CreatePhoneResult"}
 
 func (ec *executionContext) _CreatePhoneResult(ctx context.Context, sel ast.SelectionSet, obj *types.CreatePhoneResult) graphql.Marshaler {
@@ -4674,6 +4866,8 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec._Mutation_refreshToken(ctx, field)
 		case "resendOtp":
 			out.Values[i] = ec._Mutation_resendOtp(ctx, field)
+		case "checkEmailExistence":
+			out.Values[i] = ec._Mutation_checkEmailExistence(ctx, field)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -5397,6 +5591,13 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 		return graphql.Null
 	}
 	return graphql.MarshalBoolean(*v)
+}
+
+func (ec *executionContext) marshalOCheckEmailExistenceResult2ᚖmsᚗapiᚋtypesᚐCheckEmailExistenceResult(ctx context.Context, sel ast.SelectionSet, v *types.CheckEmailExistenceResult) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._CheckEmailExistenceResult(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOCreateEmailInput2ᚖmsᚗapiᚋtypesᚐCreateEmailInput(ctx context.Context, v interface{}) (*types.CreateEmailInput, error) {
