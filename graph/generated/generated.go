@@ -107,7 +107,7 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		AddReasonsForUsingRoava     func(childComplexity int, personID string, reasons string) int
+		AddReasonsForUsingRoava     func(childComplexity int, personID string, reasonValues []*string) int
 		AuthenticateCustomer        func(childComplexity int, email string, passcode string) int
 		ConfirmPasswordResetDetails func(childComplexity int, email string, dob string, address types.InputAddress) int
 		CreateEmail                 func(childComplexity int, input *types.CreateEmailInput) int
@@ -141,10 +141,10 @@ type MutationResolver interface {
 	SubmitKYCApplication(ctx context.Context) (*types.Result, error)
 	CreatePasscode(ctx context.Context, input *types.CreatePasscodeInput) (*types.Result, error)
 	UpdatePersonBiodata(ctx context.Context, input *types.UpdateBioDataInput) (*types.Result, error)
-	AddReasonsForUsingRoava(ctx context.Context, personID string, reasons string) (*types.Result, error)
+	AddReasonsForUsingRoava(ctx context.Context, personID string, reasonValues []*string) (*types.Result, error)
 	CreatePhone(ctx context.Context, input types.CreatePhoneInput) (*types.CreatePhoneResult, error)
 	VerifyOtp(ctx context.Context, phone string, code string) (*types.Result, error)
-	CreateEmail(ctx context.Context, input *types.CreateEmailInput) (*types.Result, error)
+	CreateEmail(ctx context.Context, input *types.CreateEmailInput) (*types.AuthResult, error)
 	AuthenticateCustomer(ctx context.Context, email string, passcode string) (*types.AuthResult, error)
 	RefreshToken(ctx context.Context, refreshToken string) (*types.AuthResult, error)
 	ResendOtp(ctx context.Context, phone string) (*types.Result, error)
@@ -433,7 +433,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.AddReasonsForUsingRoava(childComplexity, args["personId"].(string), args["reasons"].(string)), true
+		return e.complexity.Mutation.AddReasonsForUsingRoava(childComplexity, args["personId"].(string), args["reasonValues"].([]*string)), true
 
 	case "Mutation.authenticateCustomer":
 		if e.complexity.Mutation.AuthenticateCustomer == nil {
@@ -743,12 +743,12 @@ type CDD {
 
     addReasonsForUsingRoava(
         personId: String!,
-        reasons: String!
+        reasonValues: [String]
     ) : Result
 
     createPhone(input: CreatePhoneInput!): CreatePhoneResult
     verifyOtp(phone: String!, code: String!): Result
-    createEmail(input: CreateEmailInput): Result
+    createEmail(input: CreateEmailInput): AuthResult
     authenticateCustomer(email: String!, passcode: String!): AuthResult
     refreshToken(refreshToken: String!): AuthResult
     resendOtp(phone: String!): Result
@@ -782,7 +782,8 @@ input CreatePhoneInput {
 
 input CreateEmailInput {
     token: String!
-    value: String!
+    email: String!
+    passcode: String!
 }
 
 input Device {
@@ -854,15 +855,15 @@ func (ec *executionContext) field_Mutation_addReasonsForUsingRoava_args(ctx cont
 		}
 	}
 	args["personId"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["reasons"]; ok {
-		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("reasons"))
-		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+	var arg1 []*string
+	if tmp, ok := rawArgs["reasonValues"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("reasonValues"))
+		arg1, err = ec.unmarshalOString2ᚕᚖstring(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["reasons"] = arg1
+	args["reasonValues"] = arg1
 	return args, nil
 }
 
@@ -2542,7 +2543,7 @@ func (ec *executionContext) _Mutation_addReasonsForUsingRoava(ctx context.Contex
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().AddReasonsForUsingRoava(rctx, args["personId"].(string), args["reasons"].(string))
+		return ec.resolvers.Mutation().AddReasonsForUsingRoava(rctx, args["personId"].(string), args["reasonValues"].([]*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2665,9 +2666,9 @@ func (ec *executionContext) _Mutation_createEmail(ctx context.Context, field gra
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*types.Result)
+	res := resTmp.(*types.AuthResult)
 	fc.Result = res
-	return ec.marshalOResult2ᚖmsᚗapiᚋtypesᚐResult(ctx, field.Selections, res)
+	return ec.marshalOAuthResult2ᚖmsᚗapiᚋtypesᚐAuthResult(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_authenticateCustomer(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -4079,11 +4080,19 @@ func (ec *executionContext) unmarshalInputCreateEmailInput(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
-		case "value":
+		case "email":
 			var err error
 
-			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("value"))
-			it.Value, err = ec.unmarshalNString2string(ctx, v)
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("email"))
+			it.Email, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "passcode":
+			var err error
+
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("passcode"))
+			it.Passcode, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5427,6 +5436,42 @@ func (ec *executionContext) unmarshalOString2string(ctx context.Context, v inter
 
 func (ec *executionContext) marshalOString2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
 	return graphql.MarshalString(v)
+}
+
+func (ec *executionContext) unmarshalOString2ᚕᚖstring(ctx context.Context, v interface{}) ([]*string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]*string, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithIndex(i))
+		res[i], err = ec.unmarshalOString2ᚖstring(ctx, vSlice[i])
+		if err != nil {
+			return nil, graphql.WrapErrorWithInputPath(ctx, err)
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOString2ᚕᚖstring(ctx context.Context, sel ast.SelectionSet, v []*string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalOString2ᚖstring(ctx, sel, v[i])
+	}
+
+	return ret
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v interface{}) (*string, error) {

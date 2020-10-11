@@ -33,8 +33,8 @@ func (f *FakeOnBoardingClient) UpdatePersonBiodata(ctx context.Context,
 }
 
 func (f *FakeOnBoardingClient) CreateEmail(ctx context.Context, req *onboardingService.CreateEmailRequest,
-	opts... grpc.CallOption) (*onboardingService.SuccessResponse, error) {
-	return f.resp, f.err
+	opts... grpc.CallOption) (*onboardingService.CreateEmailResponse, error) {
+	return &onboardingService.CreateEmailResponse{PersonId: "personId"}, f.err
 }
 
 func (f *FakeOnBoardingClient) AddReasonsForUsingRoava(ctx context.Context, req *onboardingService.RoavaReasonsRequest,

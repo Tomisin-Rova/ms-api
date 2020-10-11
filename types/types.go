@@ -8,8 +8,9 @@ type AuthResult struct {
 }
 
 type CreateEmailInput struct {
-	Token string `json:"token"`
-	Value string `json:"value"`
+	Token    string `json:"token"`
+	Email    string `json:"email"`
+	Passcode string `json:"passcode"`
 }
 
 type CreatePasscodeInput struct {

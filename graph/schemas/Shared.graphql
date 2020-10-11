@@ -16,7 +16,8 @@ input CreatePhoneInput {
 
 input CreateEmailInput {
     token: String!
-    value: String!
+    email: String!
+    passcode: String!
 }
 
 input Device {

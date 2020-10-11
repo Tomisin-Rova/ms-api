@@ -114,10 +114,14 @@ func (r *mutationResolver) UpdatePersonBiodata(ctx context.Context, input *types
 	}, nil
 }
 
-func (r *mutationResolver) AddReasonsForUsingRoava(ctx context.Context, personID string, reasons string) (*types.Result, error) {
+func (r *mutationResolver) AddReasonsForUsingRoava(ctx context.Context, personID string, reasonValues []*string) (*types.Result, error) {
 	personId, err := middlewares.GetAuthenticatedUser(ctx)
 	if err != nil {
 		return nil, ErrUnAuthenticated
+	}
+	reasons := make([]string, 0, len(reasonValues))
+	for _, reason := range reasonValues {
+		reasons = append(reasons, *reason)
 	}
 	payload := onboardingService.RoavaReasonsRequest{
 		PersonId: personId,
@@ -158,16 +162,22 @@ func (r *mutationResolver) VerifyOtp(ctx context.Context, phone string, code str
 	return &types.Result{Success: resp.Match, Message: resp.Message}, nil
 }
 
-func (r *mutationResolver) CreateEmail(ctx context.Context, input *types.CreateEmailInput) (*types.Result, error) {
+func (r *mutationResolver) CreateEmail(ctx context.Context, input *types.CreateEmailInput) (*types.AuthResult, error) {
 	resp, err := r.onBoardingService.CreateEmail(ctx, &onboardingService.CreateEmailRequest{
-		Value: input.Value,
+		Email: input.Email,
 		Token: input.Token,
+		Passcode: input.Passcode,
 	})
 	if err != nil {
 		r.logger.Infof("onBoardingService.createEmail() failed: %v", err)
 		return nil, rerrors.NewFromGrpc(err)
 	}
-	return &types.Result{Message: resp.Message, Success: true}, nil
+	tokens, err := r.authService.GenerateToken(ctx, &authService.GenerateTokenRequest{PersonId: resp.PersonId})
+	if err != nil {
+		r.logger.Infof("authService.generateToken() failed: %v", err)
+		return nil, rerrors.NewFromGrpc(err)
+	}
+	return &types.AuthResult{Token: tokens.Token, RefreshToken: tokens.RefreshToken}, nil
 }
 
 func (r *mutationResolver) AuthenticateCustomer(ctx context.Context, email string, passcode string) (*types.AuthResult, error) {

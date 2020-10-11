@@ -17,12 +17,12 @@ type Mutation {
 
     addReasonsForUsingRoava(
         personId: String!,
-        reasons: String!
+        reasonValues: [String]
     ) : Result
 
     createPhone(input: CreatePhoneInput!): CreatePhoneResult
     verifyOtp(phone: String!, code: String!): Result
-    createEmail(input: CreateEmailInput): Result
+    createEmail(input: CreateEmailInput): AuthResult
     authenticateCustomer(email: String!, passcode: String!): AuthResult
     refreshToken(refreshToken: String!): AuthResult
     resendOtp(phone: String!): Result
