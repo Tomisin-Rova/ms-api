@@ -3,6 +3,7 @@ syntax = "proto3";
 package onboarding;
 option go_package = "pb/onboardingService";
 
+
 message CreatePhoneRequest {
     string phoneNumber = 1;
     Device device = 2;
@@ -30,11 +31,14 @@ message CreatePasscodeRequest {
 }
 
 message CreateEmailRequest {
-    string name = 1;
-    string value = 2;
-    string token = 3;
-    bool primary = 4;
-    bool verified = 5;
+   string email = 1;
+   string passcode = 2;
+   string token = 3;
+}
+
+message CreateEmailResponse {
+    string personId = 1;
+    string message = 2;
 }
 
 message UpdatePersonRequest {
@@ -47,7 +51,7 @@ message UpdatePersonRequest {
 
 message RoavaReasonsRequest {
     string personId = 1;
-    string reasons = 2;
+    repeated string reasons = 2;
 }
 
 message Address {
@@ -59,7 +63,7 @@ message Address {
 
 service OnBoardingService {
     rpc CreatePhone(CreatePhoneRequest) returns (CreatePhoneResponse) {}
-    rpc CreateEmail(CreateEmailRequest) returns (SuccessResponse) {}
+    rpc CreateEmail(CreateEmailRequest) returns (CreateEmailResponse) {}
     rpc CreatePasscode(CreatePasscodeRequest) returns (SuccessResponse) {}
     rpc UpdatePersonBiodata(UpdatePersonRequest) returns (SuccessResponse) {}
     rpc AddReasonsForUsingRoava(RoavaReasonsRequest) returns (SuccessResponse) {}

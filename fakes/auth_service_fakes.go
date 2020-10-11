@@ -40,3 +40,9 @@ func (f *FakeAuthClient) RefreshToken(ctx context.Context, req *authService.Refr
 	opts... grpc.CallOption) (*authService.RefreshTokenResponse, error) {
 	return f.rResp, f.err
 }
+
+
+func (f *FakeAuthClient) GenerateToken(ctx context.Context, req *authService.GenerateTokenRequest,
+	opts... grpc.CallOption) (*authService.LoginResponse, error) {
+	return f.loginResp, f.err
+}
