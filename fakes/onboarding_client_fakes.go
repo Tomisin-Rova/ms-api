@@ -42,7 +42,6 @@ func (f *FakeOnBoardingClient) AddReasonsForUsingRoava(ctx context.Context, req 
 	return f.resp, f.err
 }
 
-
 func (f *FakeOnBoardingClient) CheckEmailExistence(ctx context.Context, req *onboardingService.CheckEmailExistenceRequest,
 	opts ...grpc.CallOption) (*onboardingService.CheckEmailExistenceResponse, error) {
 	return &onboardingService.CheckEmailExistenceResponse{Message: "", Exists: false}, f.err
