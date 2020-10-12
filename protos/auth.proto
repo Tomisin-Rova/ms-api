@@ -2,7 +2,6 @@ syntax = "proto3";
 package auth;
 option go_package = "pb/authService";
 
-
 service AuthService {
   rpc Login(LoginRequest) returns (LoginResponse) {}
   rpc ValidateToken(ValidateTokenRequest) returns (ValidateTokenResponse) {}
@@ -10,6 +9,7 @@ service AuthService {
   rpc ConfirmPasswordResetDetails(PasswordResetUserDetails) returns (SuccessResponse) {}
   rpc ResetPassword(PasswordResetRequest) returns (SuccessResponse) {}
   rpc GenerateToken(GenerateTokenRequest) returns (LoginResponse) {}
+   rpc GetPersonById(GetPersonByIdRequest) returns (GetPersonByIdResponse) {}
 }
 
 message SuccessResponse {
@@ -64,4 +64,35 @@ message PasswordResetRequest {
 
 message GenerateTokenRequest {
     string personId = 1;
+}
+
+message GetPersonByIdRequest {
+    string personId = 1;
+}
+
+message GetPersonByIdResponse {
+    string personId = 1;
+	string phoneNumber=2;
+	string title  =3;
+	string firstName=4;
+	string lastName=5;
+	string middleName=6;
+	string email=7;
+	string nationality=8;
+	repeated AddressResponse addresses=9;
+	bool phoneVerified=10;
+	bool EmailVerified=11;
+	string reason=12;
+	string DOB=13;
+}
+
+message AddressResponse {
+    string addressId = 1;
+	string street=2;
+	string city=3;
+	string country=4;
+	string postcode=5;
+	string addressType=6;
+	string nickname=7;
+	repeated double coordinate=8;
 }
