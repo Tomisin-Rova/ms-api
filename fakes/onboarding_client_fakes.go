@@ -25,11 +25,6 @@ func (f *FakeOnBoardingClient) CreatePhone(ctx context.Context,
 	return f.createPhoneResp, f.err
 }
 
-func (f *FakeOnBoardingClient) CreatePasscode(ctx context.Context,
-	req *onboardingService.CreatePasscodeRequest, opts ...grpc.CallOption) (*onboardingService.SuccessResponse, error) {
-	return f.resp, f.err
-}
-
 func (f *FakeOnBoardingClient) UpdatePersonBiodata(ctx context.Context,
 	req *onboardingService.UpdatePersonRequest, opts ...grpc.CallOption) (*onboardingService.SuccessResponse, error) {
 	return f.resp, f.err
