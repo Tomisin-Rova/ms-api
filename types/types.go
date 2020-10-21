@@ -3,8 +3,9 @@
 package types
 
 type AuthResult struct {
-	Token        string `json:"token"`
-	RefreshToken string `json:"refreshToken"`
+	Token                  string `json:"token"`
+	RefreshToken           string `json:"refreshToken"`
+	RegistrationCheckpoint string `json:"registrationCheckpoint"`
 }
 
 type CheckEmailExistenceResult struct {

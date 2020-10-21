@@ -143,7 +143,8 @@ func (r *mutationResolver) CreatePhone(ctx context.Context, input types.CreatePh
 	}
 	result, err := r.onBoardingService.CreatePhone(ctx,
 		&onboardingService.CreatePhoneRequest{PhoneNumber: input.Phone,
-			Device: &onboardingService.Device{Os: input.Device.Os, Brand: input.Device.Brand, DeviceId: input.Device.DeviceID, DeviceToken: input.Device.DeviceToken}})
+			Device: &onboardingService.Device{Os: input.Device.Os, Brand: input.Device.Brand,
+				DeviceId: input.Device.DeviceID, DeviceToken: input.Device.DeviceToken}})
 	if err != nil {
 		r.logger.Infof("onBoardingService.createPhone() failed: %v", err)
 		return nil, rerrors.NewFromGrpc(err)
@@ -192,7 +193,7 @@ func (r *mutationResolver) AuthenticateCustomer(ctx context.Context, email strin
 		return nil, rerrors.NewFromGrpc(err)
 	}
 	return &types.AuthResult{
-		Token: resp.Token, RefreshToken: resp.RefreshToken,
+		Token: resp.Token, RefreshToken: resp.RefreshToken, RegistrationCheckpoint: resp.RegistrationCheckpoint,
 	}, nil
 }
 

@@ -66,7 +66,7 @@ services:
     restart: on-failure
     environment:
       PORT: 2002
-      DATABASE_URL: mongodb+srv://roava-testing:rMgdGIuyYOix0vV9@testing.bul98.gcp.mongodb.net/testing #mongodb://root:root@mongodb:27017
+      DATABASE_URL: mongodb://root:root@mongodb:27017
       PULSAR_URL: pulsar+ssl://pulsar.roava.io:6651
       PULSAR_TLS_CERT: ${PULSAR_TLS_CERT}
       DATABASE_NAME: roava
@@ -79,7 +79,7 @@ services:
 
   ms.person:
     container_name: ms.person
-    image: gcr.io/labs-271617/roava.io/services/ms.person
+    image: localhost:15000/ms.person
     restart: on-failure
     environment:
       PORT: 2003
@@ -113,7 +113,7 @@ services:
 
   ms.auth:
     container_name: ms.auth
-    image: gcr.io/labs-271617/roava.io/services/ms.auth
+    image: localhost:15000/ms.auth
     restart: on-failure
     environment:
       PORT: 2005
