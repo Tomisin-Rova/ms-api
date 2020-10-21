@@ -79,7 +79,7 @@ services:
 
   ms.person:
     container_name: ms.person
-    image: localhost:15000/ms.person
+    image: localhost:15000/ms.person # gcr.io/labs-271617/roava.io/services/ms.person
     restart: on-failure
     environment:
       PORT: 2003
@@ -113,7 +113,7 @@ services:
 
   ms.auth:
     container_name: ms.auth
-    image: localhost:15000/ms.auth
+    image: localhost:15000/ms.auth # gcr.io/labs-271617/roava.io/services/ms.auth
     restart: on-failure
     environment:
       PORT: 2005
