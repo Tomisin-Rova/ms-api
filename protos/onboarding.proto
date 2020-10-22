@@ -70,6 +70,26 @@ message CheckEmailExistenceResponse {
     string message = 2;
 }
 
+
+message OtpVerificationResponse {
+    bool match = 1;
+    string message = 2;
+}
+
+message OtpVerificationRequest {
+    string phone = 1;
+    string code = 2;
+}
+
+message OtpVerificationByEmailRequest {
+    string email = 1;
+    string code = 2;
+}
+
+message ResendOtpRequest {
+    string phone = 1;
+}
+
 service OnBoardingService {
     rpc CreatePhone(CreatePhoneRequest) returns (CreatePhoneResponse) {}
     rpc CreateEmail(CreateEmailRequest) returns (CreateEmailResponse) {}
@@ -77,4 +97,7 @@ service OnBoardingService {
     rpc UpdatePersonBiodata(UpdatePersonRequest) returns (SuccessResponse) {}
     rpc AddReasonsForUsingRoava(RoavaReasonsRequest) returns (SuccessResponse) {}
     rpc CheckEmailExistence(CheckEmailExistenceRequest) returns (CheckEmailExistenceResponse) {}
+    rpc VerifySmsOtp(OtpVerificationRequest) returns (OtpVerificationResponse) {}
+    rpc VerifyEmailOtp(OtpVerificationByEmailRequest) returns (OtpVerificationResponse) {}
+    rpc ResendOtp(ResendOtpRequest) returns (SuccessResponse) {}
 }

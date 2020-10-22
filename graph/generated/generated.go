@@ -77,8 +77,9 @@ type ComplexityRoot struct {
 	}
 
 	AuthResult struct {
-		RefreshToken func(childComplexity int) int
-		Token        func(childComplexity int) int
+		RefreshToken           func(childComplexity int) int
+		RegistrationCheckpoint func(childComplexity int) int
+		Token                  func(childComplexity int) int
 	}
 
 	Cdd struct {
@@ -310,6 +311,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.AuthResult.RefreshToken(childComplexity), true
+
+	case "AuthResult.registrationCheckpoint":
+		if e.complexity.AuthResult.RegistrationCheckpoint == nil {
+			break
+		}
+
+		return e.complexity.AuthResult.RegistrationCheckpoint(childComplexity), true
 
 	case "AuthResult.token":
 		if e.complexity.AuthResult.Token == nil {
@@ -834,6 +842,7 @@ input UpdateBioDataInput {
 type AuthResult {
     token: String!,
     refreshToken: String!
+    registrationCheckpoint: String!
 }
 
 input InputAddress {
@@ -1817,6 +1826,40 @@ func (ec *executionContext) _AuthResult_refreshToken(ctx context.Context, field 
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.RefreshToken, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _AuthResult_registrationCheckpoint(ctx context.Context, field graphql.CollectedField, obj *types.AuthResult) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "AuthResult",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.RegistrationCheckpoint, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4615,6 +4658,11 @@ func (ec *executionContext) _AuthResult(ctx context.Context, sel ast.SelectionSe
 			}
 		case "refreshToken":
 			out.Values[i] = ec._AuthResult_refreshToken(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "registrationCheckpoint":
+			out.Values[i] = ec._AuthResult_registrationCheckpoint(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

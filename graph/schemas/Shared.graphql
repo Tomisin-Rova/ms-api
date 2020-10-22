@@ -38,6 +38,7 @@ input UpdateBioDataInput {
 type AuthResult {
     token: String!,
     refreshToken: String!
+    registrationCheckpoint: String!
 }
 
 input InputAddress {
