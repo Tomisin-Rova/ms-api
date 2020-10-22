@@ -13,7 +13,6 @@ import (
 	"ms.api/protos/pb/authService"
 	"ms.api/protos/pb/kycService"
 	"ms.api/protos/pb/onboardingService"
-	"ms.api/protos/pb/verifyService"
 	"ms.api/server/http/middlewares"
 	"ms.api/types"
 )
@@ -153,11 +152,11 @@ func (r *mutationResolver) CreatePhone(ctx context.Context, input types.CreatePh
 }
 
 func (r *mutationResolver) VerifyOtp(ctx context.Context, phone string, code string) (*types.Result, error) {
-	resp, err := r.verifyService.VerifySmsOtp(context.Background(), &verifyService.OtpVerificationRequest{
+	resp, err := r.onBoardingService.VerifySmsOtp(context.Background(), &onboardingService.OtpVerificationRequest{
 		Phone: phone, Code: code,
 	})
 	if err != nil {
-		r.logger.Infof("verifyService.verifySmsOtp() failed: %v", err)
+		r.logger.Infof("onboardingService.verifySmsOtp() failed: %v", err)
 		return nil, rerrors.NewFromGrpc(err)
 	}
 	return &types.Result{Success: resp.Match, Message: resp.Message}, nil
@@ -211,9 +210,9 @@ func (r *mutationResolver) ResendOtp(ctx context.Context, phone string) (*types.
 	if phone == "" || len(phone) < 6 {
 		return nil, errors.New("invalid phone number")
 	}
-	resp, err := r.verifyService.ResendOtp(ctx, &verifyService.ResendOtpRequest{Phone: phone})
+	resp, err := r.onBoardingService.ResendOtp(ctx, &onboardingService.ResendOtpRequest{Phone: phone})
 	if err != nil {
-		r.logger.Infof("verifyService.ResendOtp() failed: %v", err)
+		r.logger.Infof("onboardingService.ResendOtp() failed: %v", err)
 		return nil, rerrors.NewFromGrpc(err)
 	}
 	return &types.Result{Message: resp.Message, Success: true}, nil
