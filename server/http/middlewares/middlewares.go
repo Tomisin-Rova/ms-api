@@ -10,8 +10,9 @@ import (
 )
 
 type Key string
+
 const (
-	AuthenticatedUserContextKey Key = "AuthenticatedUser"
+	AuthenticatedUserContextKey Key    = "AuthenticatedUser"
 	Bearer                      string = "Bearer"
 )
 
