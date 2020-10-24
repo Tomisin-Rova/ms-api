@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	dateRegex = regexp.MustCompile("(0?[1-9]|[12][0-9]|3[01])/(0?[1-9]|1[012])/((19|20)\\d\\d)")
+	dateRegex = regexp.MustCompile(`(0?[1-9]|[12][0-9]|3[01])/(0?[1-9]|1[012])/((19|20)\\d\\d)`)
 
 	ErrInvalidFormat = errors.New("invalid date format. Date format must be dd/mm/yyyy")
 	ErrInvalidType   = errors.New("not a valid date")

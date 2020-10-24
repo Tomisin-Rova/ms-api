@@ -8,7 +8,7 @@ import (
 
 var ErrInvalidEmail = errors.New("invalid email address")
 var userRegexp = regexp.MustCompile("^[a-zA-Z0-9!#$%&'*+/=?^_`{|}~.-]+$")
-var hostRegexp = regexp.MustCompile("^[^\\s]+\\.[^\\s]+$")
+var hostRegexp = regexp.MustCompile(`^[^\\s]+\\.[^\\s]+$`)
 
 func Validate(email string) error {
 	email = strings.TrimSpace(email)

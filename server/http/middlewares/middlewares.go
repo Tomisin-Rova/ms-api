@@ -9,9 +9,10 @@ import (
 	"strings"
 )
 
+type Key string
 const (
-	AuthenticatedUserContextKey = "AuthenticatedUser"
-	Bearer                      = "Bearer"
+	AuthenticatedUserContextKey Key = "AuthenticatedUser"
+	Bearer                      string = "Bearer"
 )
 
 type AuthMiddleware struct {
@@ -70,6 +71,5 @@ func (mw *AuthMiddleware) Middeware(next http.Handler) http.Handler {
 
 		ctx := context.WithValue(r.Context(), AuthenticatedUserContextKey, personId)
 		next.ServeHTTP(w, r.WithContext(ctx))
-		return
 	})
 }

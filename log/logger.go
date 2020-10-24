@@ -13,8 +13,10 @@ const (
 	defaultLevel = 4
 )
 
+type ContextKey string
+
 const (
-	ContextKey string = "log_fields"
+	CtxKey ContextKey = "log_fields"
 )
 
 type Level string
@@ -182,7 +184,7 @@ type ContextData struct {
 }
 
 func FromContext(ctx context.Context) ContextData {
-	if data, ok := ctx.Value(ContextKey).(ContextData); ok {
+	if data, ok := ctx.Value(CtxKey).(ContextData); ok {
 		return data
 	}
 	return ContextData{}
@@ -190,5 +192,5 @@ func FromContext(ctx context.Context) ContextData {
 
 func WithContextData(ctx context.Context, data ContextData) context.Context {
 	// nolint:golint
-	return context.WithValue(ctx, ContextKey, data)
+	return context.WithValue(ctx, CtxKey, data)
 }
