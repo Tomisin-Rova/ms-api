@@ -39,7 +39,7 @@ func TestMutationResolver_CreatePhone_Error(t *testing.T) {
 func TestMutationResolver_VerifySmsOtp(t *testing.T) {
 	svc := fakes.NewFakeVerifyClient(&verify.OtpVerificationResponse{Message: "phone added", Match: true}, nil, nil)
 	onBoardingSvc := fakes.NewFakeOnBoardingClient(&onboarding.SuccessResponse{Message: ""},
-		&onboarding.CreatePhoneResponse{}, &onboarding.OtpVerificationResponse{Match: true},nil)
+		&onboarding.CreatePhoneResponse{}, &onboarding.OtpVerificationResponse{Match: true}, nil)
 	r := NewResolver(&ResolverOpts{verifyService: svc, onBoardingService: onBoardingSvc}, logrus.StandardLogger())
 	mu := &mutationResolver{r}
 	resp, err := mu.VerifyOtp(context.Background(), "09088776655", "009988")

@@ -84,7 +84,7 @@ type ComplexityRoot struct {
 
 	Cdd struct {
 		Details     func(childComplexity int) int
-		Id          func(childComplexity int) int
+		ID          func(childComplexity int) int
 		Kyc         func(childComplexity int) int
 		Owner       func(childComplexity int) int
 		Status      func(childComplexity int) int
@@ -161,7 +161,7 @@ type QueryResolver interface {
 	GetApplicantSDKToken(ctx context.Context) (*onfidoService.ApplicantSDKTokenResponse, error)
 }
 type SubscriptionResolver interface {
-	GetKYCApplicationResult(ctx context.Context, applicantID string) (<-chan *kycService.Cdd, error)
+	GetKYCApplicationResult(ctx context.Context, applicantID string) (<-chan *types.Cdd, error)
 }
 
 type executableSchema struct {
@@ -334,11 +334,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		return e.complexity.Cdd.Details(childComplexity), true
 
 	case "CDD.id":
-		if e.complexity.Cdd.Id == nil {
+		if e.complexity.Cdd.ID == nil {
 			break
 		}
 
-		return e.complexity.Cdd.Id(childComplexity), true
+		return e.complexity.Cdd.ID(childComplexity), true
 
 	case "CDD.kyc":
 		if e.complexity.Cdd.Kyc == nil {
@@ -1876,7 +1876,7 @@ func (ec *executionContext) _AuthResult_registrationCheckpoint(ctx context.Conte
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _CDD_id(ctx context.Context, field graphql.CollectedField, obj *kycService.Cdd) (ret graphql.Marshaler) {
+func (ec *executionContext) _CDD_id(ctx context.Context, field graphql.CollectedField, obj *types.Cdd) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1893,7 +1893,7 @@ func (ec *executionContext) _CDD_id(ctx context.Context, field graphql.Collected
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Id, nil
+		return obj.ID, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1910,7 +1910,7 @@ func (ec *executionContext) _CDD_id(ctx context.Context, field graphql.Collected
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _CDD_owner(ctx context.Context, field graphql.CollectedField, obj *kycService.Cdd) (ret graphql.Marshaler) {
+func (ec *executionContext) _CDD_owner(ctx context.Context, field graphql.CollectedField, obj *types.Cdd) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1944,7 +1944,7 @@ func (ec *executionContext) _CDD_owner(ctx context.Context, field graphql.Collec
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _CDD_details(ctx context.Context, field graphql.CollectedField, obj *kycService.Cdd) (ret graphql.Marshaler) {
+func (ec *executionContext) _CDD_details(ctx context.Context, field graphql.CollectedField, obj *types.Cdd) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1978,7 +1978,7 @@ func (ec *executionContext) _CDD_details(ctx context.Context, field graphql.Coll
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _CDD_status(ctx context.Context, field graphql.CollectedField, obj *kycService.Cdd) (ret graphql.Marshaler) {
+func (ec *executionContext) _CDD_status(ctx context.Context, field graphql.CollectedField, obj *types.Cdd) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -2012,7 +2012,7 @@ func (ec *executionContext) _CDD_status(ctx context.Context, field graphql.Colle
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _CDD_kyc(ctx context.Context, field graphql.CollectedField, obj *kycService.Cdd) (ret graphql.Marshaler) {
+func (ec *executionContext) _CDD_kyc(ctx context.Context, field graphql.CollectedField, obj *types.Cdd) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -2046,7 +2046,7 @@ func (ec *executionContext) _CDD_kyc(ctx context.Context, field graphql.Collecte
 	return ec.marshalNKYC2ᚖmsᚗapiᚋprotosᚋpbᚋkycServiceᚐKyc(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _CDD_time_created(ctx context.Context, field graphql.CollectedField, obj *kycService.Cdd) (ret graphql.Marshaler) {
+func (ec *executionContext) _CDD_time_created(ctx context.Context, field graphql.CollectedField, obj *types.Cdd) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -2080,7 +2080,7 @@ func (ec *executionContext) _CDD_time_created(ctx context.Context, field graphql
 	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _CDD_time_updated(ctx context.Context, field graphql.CollectedField, obj *kycService.Cdd) (ret graphql.Marshaler) {
+func (ec *executionContext) _CDD_time_updated(ctx context.Context, field graphql.CollectedField, obj *types.Cdd) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -3174,7 +3174,7 @@ func (ec *executionContext) _Subscription_getKYCApplicationResult(ctx context.Co
 		return nil
 	}
 	return func() graphql.Marshaler {
-		res, ok := <-resTmp.(<-chan *kycService.Cdd)
+		res, ok := <-resTmp.(<-chan *types.Cdd)
 		if !ok {
 			return nil
 		}
@@ -3182,7 +3182,7 @@ func (ec *executionContext) _Subscription_getKYCApplicationResult(ctx context.Co
 			w.Write([]byte{'{'})
 			graphql.MarshalString(field.Alias).MarshalGQL(w)
 			w.Write([]byte{':'})
-			ec.marshalNCDD2ᚖmsᚗapiᚋprotosᚋpbᚋkycServiceᚐCdd(ctx, field.Selections, res).MarshalGQL(w)
+			ec.marshalNCDD2ᚖmsᚗapiᚋtypesᚐCdd(ctx, field.Selections, res).MarshalGQL(w)
 			w.Write([]byte{'}'})
 		})
 	}
@@ -4679,7 +4679,7 @@ func (ec *executionContext) _AuthResult(ctx context.Context, sel ast.SelectionSe
 
 var cDDImplementors = []string{"CDD"}
 
-func (ec *executionContext) _CDD(ctx context.Context, sel ast.SelectionSet, obj *kycService.Cdd) graphql.Marshaler {
+func (ec *executionContext) _CDD(ctx context.Context, sel ast.SelectionSet, obj *types.Cdd) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, cDDImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -5274,11 +5274,11 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) marshalNCDD2msᚗapiᚋprotosᚋpbᚋkycServiceᚐCdd(ctx context.Context, sel ast.SelectionSet, v kycService.Cdd) graphql.Marshaler {
+func (ec *executionContext) marshalNCDD2msᚗapiᚋtypesᚐCdd(ctx context.Context, sel ast.SelectionSet, v types.Cdd) graphql.Marshaler {
 	return ec._CDD(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNCDD2ᚖmsᚗapiᚋprotosᚋpbᚋkycServiceᚐCdd(ctx context.Context, sel ast.SelectionSet, v *kycService.Cdd) graphql.Marshaler {
+func (ec *executionContext) marshalNCDD2ᚖmsᚗapiᚋtypesᚐCdd(ctx context.Context, sel ast.SelectionSet, v *types.Cdd) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")

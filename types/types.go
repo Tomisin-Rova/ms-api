@@ -2,10 +2,24 @@
 
 package types
 
+import (
+	"ms.api/protos/pb/kycService"
+)
+
 type AuthResult struct {
 	Token                  string `json:"token"`
 	RefreshToken           string `json:"refreshToken"`
 	RegistrationCheckpoint string `json:"registrationCheckpoint"`
+}
+
+type Cdd struct {
+	ID          string          `json:"id"`
+	Owner       string          `json:"owner"`
+	Details     string          `json:"details"`
+	Status      string          `json:"status"`
+	Kyc         *kycService.Kyc `json:"kyc"`
+	TimeCreated int64           `json:"time_created"`
+	TimeUpdated int64           `json:"time_updated"`
 }
 
 type CheckEmailExistenceResult struct {

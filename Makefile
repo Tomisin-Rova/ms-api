@@ -81,9 +81,9 @@ coverage:
 	fi
 
 .PHONY: schema
-schema: proto
+schema:
 	./libs/mage genSchema
-	
+
 docker-pulsar:
 	docker run -d \
       -p 6650:6650 \

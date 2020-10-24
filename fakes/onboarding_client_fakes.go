@@ -9,7 +9,7 @@ import (
 type FakeOnBoardingClient struct {
 	resp            *onboardingService.SuccessResponse
 	createPhoneResp *onboardingService.CreatePhoneResponse
-	otpResp *onboardingService.OtpVerificationResponse
+	otpResp         *onboardingService.OtpVerificationResponse
 	err             error
 }
 
@@ -62,5 +62,5 @@ func (f *FakeOnBoardingClient) VerifyEmailOtp(ctx context.Context, req *onboardi
 
 func (f *FakeOnBoardingClient) ResendOtp(ctx context.Context, req *onboardingService.ResendOtpRequest,
 	opts ...grpc.CallOption) (*onboardingService.SuccessResponse, error) {
-	return &onboardingService.SuccessResponse{Message: "",}, f.err
+	return &onboardingService.SuccessResponse{Message: ""}, f.err
 }
