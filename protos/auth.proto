@@ -1,6 +1,6 @@
 syntax = "proto3";
 package auth;
-option go_package = "pb/authService";
+option go_package = "authService";
 
 service AuthService {
   rpc Login(LoginRequest) returns (LoginResponse) {}
@@ -9,7 +9,10 @@ service AuthService {
   rpc ConfirmPasswordResetDetails(PasswordResetUserDetails) returns (SuccessResponse) {}
   rpc ResetPassword(PasswordResetRequest) returns (SuccessResponse) {}
   rpc GenerateToken(GenerateTokenRequest) returns (LoginResponse) {}
-   rpc GetPersonById(GetPersonByIdRequest) returns (GetPersonByIdResponse) {}
+  rpc GetPersonById(GetPersonByIdRequest) returns (GetPersonByIdResponse) {}
+  rpc ActivateBioLogin(ActivateBioLoginRequest) returns (ActivateBioLoginResponse) {}
+  rpc BioLogin(BioLoginRequest) returns (LoginResponse) {}
+  rpc DeactivateBioLogin(DeactivateBioLoginRequest) returns (SuccessResponse) {}
 }
 
 message SuccessResponse {
@@ -17,8 +20,8 @@ message SuccessResponse {
 }
 
 message LoginRequest {
-  string email  = 1;
-  string  passcode  = 2;
+  string email = 1;
+  string  passcode = 2;
 }
 
 message LoginResponse {
@@ -28,33 +31,33 @@ message LoginResponse {
 }
 
 message ValidateTokenRequest {
-   string token = 1;
+  string token = 1;
 }
 
 message ValidateTokenResponse {
-    string personId = 1;
+  string personId = 1;
 }
 
 message RefreshTokenRequest {
-    string refreshToken = 1;
+  string refreshToken = 1;
 }
 
 message RefreshTokenResponse {
-    string token = 1;
-    string refreshToken = 2;
+  string token = 1;
+  string refreshToken = 2;
 }
 
 message Address {
-    string country = 1;
-    string street = 2;
-    string city = 3;
-    string postcode = 4;
+  string country = 1;
+  string street = 2;
+  string city = 3;
+  string postcode = 4;
 }
 
 message PasswordResetUserDetails {
-    string email  = 1;
-    string  dob  = 2;
-    Address  address = 3;
+  string email = 1;
+  string  dob = 2;
+  Address  address = 3;
 }
 
 message PasswordResetRequest {
@@ -64,36 +67,63 @@ message PasswordResetRequest {
 }
 
 message GenerateTokenRequest {
-    string personId = 1;
+  string personId = 1;
 }
 
 message GetPersonByIdRequest {
-    string personId = 1;
+  string personId = 1;
 }
 
 message GetPersonByIdResponse {
-    string personId = 1;
-	string phoneNumber=2;
-	string title  =3;
-	string firstName=4;
-	string lastName=5;
-	string middleName=6;
-	string email=7;
-	string nationality=8;
-	repeated AddressResponse addresses=9;
-	bool phoneVerified=10;
-	bool EmailVerified=11;
-	string reason=12;
-	string DOB=13;
+  string personId = 1;
+  string phoneNumber = 2;
+  string title = 3;
+  string firstName = 4;
+  string lastName = 5;
+  string middleName = 6;
+  string email = 7;
+  string nationality = 8;
+  repeated AddressResponse addresses = 9;
+  bool phoneVerified = 10;
+  bool EmailVerified = 11;
+  string reason = 12;
+  string DOB = 13;
 }
 
 message AddressResponse {
-    string addressId = 1;
-	string street=2;
-	string city=3;
-	string country=4;
-	string postcode=5;
-	string addressType=6;
-	string nickname=7;
-	repeated double coordinate=8;
+  string addressId = 1;
+  string street = 2;
+  string city = 3;
+  string country = 4;
+  string postcode = 5;
+  string addressType = 6;
+  string nickname = 7;
+  repeated double coordinate = 8;
+}
+
+message ActivateBioLoginRequest {
+  string token = 1;
+  Device device = 2;
+}
+
+message Device {
+  string os = 1;
+  string brand = 2;
+  string deviceToken = 3;
+  string deviceId = 4;
+}
+
+message ActivateBioLoginResponse {
+  string biometricPasscode = 1;
+}
+
+message BioLoginRequest {
+  string email = 1;
+  string biometricPasscode = 2;
+  Device device = 3;
+}
+
+message DeactivateBioLoginRequest {
+  string email = 1;
+  Device device = 2;
 }

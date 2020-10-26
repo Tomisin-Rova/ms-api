@@ -6,7 +6,6 @@ package graph
 import (
 	"context"
 	"errors"
-
 	"ms.api/graph/generated"
 	emailvalidator "ms.api/libs/email"
 	rerrors "ms.api/libs/errors"
@@ -228,6 +227,69 @@ func (r *mutationResolver) CheckEmailExistence(ctx context.Context, email string
 		return nil, rerrors.NewFromGrpc(err)
 	}
 	return &types.CheckEmailExistenceResult{Message: resp.Message, Exists: resp.Exists}, nil
+}
+
+func (r *mutationResolver) ActivateBioLogin(ctx context.Context, token string, device *types.Device) (*types.ActivateBioLoginResponse, error) {
+	resp, err := r.authService.ActivateBioLogin(ctx, &authService.ActivateBioLoginRequest{
+		Token: token,
+		Device: &authService.Device{
+			Os:          device.Os,
+			Brand:       device.Brand,
+			DeviceToken: device.DeviceToken,
+			DeviceId:    device.DeviceID,
+		},
+	})
+
+	if err != nil {
+		r.logger.WithError(err).Info("authService.ActivateBioLogin() failed")
+		return nil, rerrors.NewFromGrpc(err)
+	}
+
+	return &types.ActivateBioLoginResponse{BiometricPasscode: resp.BiometricPasscode}, nil
+}
+
+func (r *mutationResolver) BioLoginRequest(ctx context.Context, input types.BioLoginInput) (*types.AuthResult, error) {
+	resp, err := r.authService.BioLogin(ctx, &authService.BioLoginRequest{
+		Email:             input.Email,
+		BiometricPasscode: input.BiometricPasscode,
+		Device: &authService.Device{
+			Os:          input.Device.Os,
+			Brand:       input.Device.Brand,
+			DeviceToken: input.Device.DeviceToken,
+			DeviceId:    input.Device.DeviceID,
+		},
+	})
+
+	if err != nil {
+		r.logger.WithError(err).Info("authService.BioLogin() failed")
+		return nil, rerrors.NewFromGrpc(err)
+	}
+
+	return &types.AuthResult{
+		Token:                  resp.Token,
+		RefreshToken:           resp.RefreshToken,
+		RegistrationCheckpoint: resp.RegistrationCheckpoint,
+	}, nil
+}
+
+func (r *mutationResolver) DeactivateBioLogin(ctx context.Context, input types.DeactivateBioLoginInput) (*types.Result, error) {
+	resp, err := r.authService.DeactivateBioLogin(ctx, &authService.DeactivateBioLoginRequest{
+		Email: input.Email,
+		Device: &authService.Device{
+			Os:          input.Device.Os,
+			Brand:       input.Device.Brand,
+			DeviceToken: input.Device.DeviceToken,
+			DeviceId:    input.Device.DeviceID,
+		},
+	})
+	if err != nil {
+		r.logger.WithError(err).Info("authService.DeactivateBioLogin() failed")
+		return nil, rerrors.NewFromGrpc(err)
+	}
+
+	return &types.Result{
+		Message: resp.Message,
+	}, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

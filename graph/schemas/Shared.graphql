@@ -53,7 +53,22 @@ input CreatePasscodeInput {
     passcode: String!
 }
 
+input BioLoginInput {
+    email: String!
+    biometricPasscode: String!
+    device: Device!
+}
+
+input DeactivateBioLoginInput {
+    email: String!
+    device: Device!
+}
+
 type CheckEmailExistenceResult {
     exists: Boolean!
     message: String!
+}
+
+type ActivateBioLoginResponse {
+    biometricPasscode: String!
 }
