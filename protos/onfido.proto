@@ -1,6 +1,6 @@
 syntax = "proto3";
 package onfido;
-option go_package = "pb/onfidoService";
+option go_package = "onfidoService";
 
 service OnfidoService {
   rpc generateApplicantSDKToken(ApplicantSDKTokenRequest) returns(ApplicantSDKTokenResponse){}

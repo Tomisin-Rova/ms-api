@@ -1,6 +1,6 @@
 syntax = "proto3";
 package kyc;
-option go_package = "pb/kycService";
+option go_package = "kycService";
 
 service KycService {
   rpc getKycApplicantByPersonId(PersonIdRequest) returns(applicant){}

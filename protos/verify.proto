@@ -2,7 +2,7 @@
 
  package verify;
 
- option go_package = "pb/verifyService";
+ option go_package = "verifyService";
 
  message ValidateEmailRequest {
      string name = 1;

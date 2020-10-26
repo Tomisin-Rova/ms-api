@@ -2,10 +2,20 @@
 
 package types
 
+type ActivateBioLoginResponse struct {
+	BiometricPasscode string `json:"biometricPasscode"`
+}
+
 type AuthResult struct {
 	Token                  string `json:"token"`
 	RefreshToken           string `json:"refreshToken"`
 	RegistrationCheckpoint string `json:"registrationCheckpoint"`
+}
+
+type BioLoginInput struct {
+	Email             string  `json:"email"`
+	BiometricPasscode string  `json:"biometricPasscode"`
+	Device            *Device `json:"device"`
 }
 
 type CheckEmailExistenceResult struct {
@@ -33,6 +43,11 @@ type CreatePhoneResult struct {
 	Success bool   `json:"success"`
 	Message string `json:"message"`
 	Token   string `json:"token"`
+}
+
+type DeactivateBioLoginInput struct {
+	Email  string  `json:"email"`
+	Device *Device `json:"device"`
 }
 
 type Device struct {
