@@ -9,9 +9,9 @@ import (
 func TestValidatePhoneNumber(t *testing.T) {
 	type testCase struct {
 		phoneNumber string
-		err error
+		err         error
 	}
-	cases := []testCase {
+	cases := []testCase{
 		{phoneNumber: "+2347035452307", err: nil},
 		{phoneNumber: "07035452307", err: nil},
 		{phoneNumber: "+2347035452307a", err: ErrInvalidPhoneNumber},
