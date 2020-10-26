@@ -8,8 +8,9 @@ import (
 	"errors"
 
 	"ms.api/graph/generated"
-	emailvalidator "ms.api/libs/email"
 	rerrors "ms.api/libs/errors"
+	"ms.api/libs/validator/datevalidator"
+	emailvalidator "ms.api/libs/validator/email"
 	"ms.api/protos/pb/authService"
 	"ms.api/protos/pb/kycService"
 	"ms.api/protos/pb/onboardingService"
@@ -92,6 +93,9 @@ func (r *mutationResolver) UpdatePersonBiodata(ctx context.Context, input *types
 	personId, err := middlewares.GetAuthenticatedUser(ctx)
 	if err != nil {
 		return nil, ErrUnAuthenticated
+	}
+	if err := datevalidator.ValidateDob(input.Dob); err != nil {
+		return nil, err
 	}
 	payload := onboardingService.UpdatePersonRequest{
 		PersonId: personId,
