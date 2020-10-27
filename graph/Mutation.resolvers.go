@@ -74,21 +74,6 @@ func (r *mutationResolver) SubmitKYCApplication(ctx context.Context) (*types.Res
 	}, nil
 }
 
-func (r *mutationResolver) CreatePasscode(ctx context.Context, input *types.CreatePasscodeInput) (*types.Result, error) {
-	payload := onboardingService.CreatePasscodeRequest{
-		Token:    input.Token,
-		Passcode: input.Passcode,
-	}
-	res, err := r.onBoardingService.CreatePasscode(context.Background(), &payload)
-	if err != nil {
-		return nil, rerrors.NewFromGrpc(err)
-	}
-	return &types.Result{
-		Success: true,
-		Message: res.Message,
-	}, nil
-}
-
 func (r *mutationResolver) UpdatePersonBiodata(ctx context.Context, input *types.UpdateBioDataInput) (*types.Result, error) {
 	personId, err := middlewares.GetAuthenticatedUser(ctx)
 	if err != nil {

@@ -11,8 +11,6 @@ type Mutation {
     ): Result
     submitKYCApplication: Result
 
-    CreatePasscode(input: CreatePasscodeInput): Result
-
     updatePersonBiodata(input: UpdateBioDataInput) : Result
 
     addReasonsForUsingRoava(

@@ -12,12 +12,14 @@ endif
 
 GO_SOURCES_OWN := $(filter-out vendor/%, $(GO_SOURCES))
 
-PROTO_SRC_DIR := ${PWD}/proto
-PROTO_DST_DIR := ${PWD}/proto/pb
+PROTO_SRC_DIR := ${PWD}/protos
+PROTO_DST_DIR := ${PWD}/protos/pb
 
 .PHONY: proto
-proto:
-	mkdir -p ${PROTO_DST_DIR} && protoc -I=${PROTO_SRC_DIR} --go_out=plugins=grpc:${PROTO_DST_DIR} ${PROTO_SRC_DIR}/service.proto
+proto :
+	#./libs/mage genProto
+	# Add: option go_option = "pb/onfidoService"; to your proto. modify onfidoService to follow suite with your proto.
+	protoc -I protos/ -I${PWD}/ --go_out=plugins=grpc:protos protos/*.proto
 
 .PHONY: build
 build: proto
