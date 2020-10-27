@@ -25,11 +25,6 @@ message CreatePhoneResponse {
     string token = 2;
 }
 
-message CreatePasscodeRequest {
-    string passcode = 1;
-    string token = 2;
-}
-
 message CreateEmailRequest {
    string email = 1;
    string passcode = 2;
@@ -93,7 +88,6 @@ message ResendOtpRequest {
 service OnBoardingService {
     rpc CreatePhone(CreatePhoneRequest) returns (CreatePhoneResponse) {}
     rpc CreateEmail(CreateEmailRequest) returns (CreateEmailResponse) {}
-    rpc CreatePasscode(CreatePasscodeRequest) returns (SuccessResponse) {}
     rpc UpdatePersonBiodata(UpdatePersonRequest) returns (SuccessResponse) {}
     rpc AddReasonsForUsingRoava(RoavaReasonsRequest) returns (SuccessResponse) {}
     rpc CheckEmailExistence(CheckEmailExistenceRequest) returns (CheckEmailExistenceResponse) {}

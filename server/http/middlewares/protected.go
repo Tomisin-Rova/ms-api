@@ -79,6 +79,5 @@ func ProtectedMiddleware(next http.Handler) http.Handler {
 			// To handle copying a dead-body.
 			return
 		}
-		return
 	})
 }

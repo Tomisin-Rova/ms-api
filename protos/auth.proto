@@ -20,8 +20,8 @@ message SuccessResponse {
 }
 
 message LoginRequest {
-  string email = 1;
-  string  passcode = 2;
+  string email  = 1;
+  string  passcode  = 2;
 }
 
 message LoginResponse {
@@ -55,8 +55,8 @@ message Address {
 }
 
 message PasswordResetUserDetails {
-  string email = 1;
-  string  dob = 2;
+  string email  = 1;
+  string  dob  = 2;
   Address  address = 3;
 }
 
@@ -76,34 +76,34 @@ message GetPersonByIdRequest {
 
 message GetPersonByIdResponse {
   string personId = 1;
-  string phoneNumber = 2;
-  string title = 3;
-  string firstName = 4;
-  string lastName = 5;
-  string middleName = 6;
-  string email = 7;
-  string nationality = 8;
-  repeated AddressResponse addresses = 9;
-  bool phoneVerified = 10;
-  bool EmailVerified = 11;
-  string reason = 12;
-  string DOB = 13;
+  string phoneNumber=2;
+  string title  =3;
+  string firstName=4;
+  string lastName=5;
+  string middleName=6;
+  string email=7;
+  string nationality=8;
+  repeated AddressResponse addresses=9;
+  bool phoneVerified=10;
+  bool EmailVerified=11;
+  repeated string reason=12;
+  string DOB=13;
 }
 
 message AddressResponse {
   string addressId = 1;
-  string street = 2;
-  string city = 3;
-  string country = 4;
-  string postcode = 5;
-  string addressType = 6;
-  string nickname = 7;
-  repeated double coordinate = 8;
+  string street=2;
+  string city=3;
+  string country=4;
+  string postcode=5;
+  string addressType=6;
+  string nickname=7;
+  repeated double coordinate=8;
 }
 
 message ActivateBioLoginRequest {
   string token = 1;
-  Device device = 2;
+  string DeviceId = 2;
 }
 
 message Device {
@@ -114,16 +114,17 @@ message Device {
 }
 
 message ActivateBioLoginResponse {
-  string biometricPasscode = 1;
+  string message = 1;
+  string biometricPasscode = 2;
 }
 
 message BioLoginRequest {
   string email = 1;
   string biometricPasscode = 2;
-  Device device = 3;
+  string DeviceId = 3;
 }
 
 message DeactivateBioLoginRequest {
   string email = 1;
-  Device device = 2;
+  string DeviceId = 2;
 }

@@ -2,7 +2,12 @@
 
 package types
 
+import (
+	"ms.api/protos/pb/kycService"
+)
+
 type ActivateBioLoginResponse struct {
+	Message           string `json:"message"`
 	BiometricPasscode string `json:"biometricPasscode"`
 }
 
@@ -13,9 +18,19 @@ type AuthResult struct {
 }
 
 type BioLoginInput struct {
-	Email             string  `json:"email"`
-	BiometricPasscode string  `json:"biometricPasscode"`
-	Device            *Device `json:"device"`
+	Email             string `json:"email"`
+	BiometricPasscode string `json:"biometricPasscode"`
+	DeviceID          string `json:"deviceId"`
+}
+
+type Cdd struct {
+	ID          string          `json:"id"`
+	Owner       string          `json:"owner"`
+	Details     string          `json:"details"`
+	Status      string          `json:"status"`
+	Kyc         *kycService.Kyc `json:"kyc"`
+	TimeCreated int64           `json:"time_created"`
+	TimeUpdated int64           `json:"time_updated"`
 }
 
 type CheckEmailExistenceResult struct {
@@ -46,8 +61,8 @@ type CreatePhoneResult struct {
 }
 
 type DeactivateBioLoginInput struct {
-	Email  string  `json:"email"`
-	Device *Device `json:"device"`
+	Email    string `json:"email"`
+	DeviceID string `json:"deviceId"`
 }
 
 type Device struct {

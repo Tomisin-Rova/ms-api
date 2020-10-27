@@ -56,12 +56,12 @@ input CreatePasscodeInput {
 input BioLoginInput {
     email: String!
     biometricPasscode: String!
-    device: Device!
+    deviceId: String!
 }
 
 input DeactivateBioLoginInput {
     email: String!
-    device: Device!
+    deviceId: String!
 }
 
 type CheckEmailExistenceResult {
@@ -70,5 +70,6 @@ type CheckEmailExistenceResult {
 }
 
 type ActivateBioLoginResponse {
+    message: String!
     biometricPasscode: String!
 }

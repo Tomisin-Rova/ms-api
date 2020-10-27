@@ -45,3 +45,8 @@ func (f *FakeAuthClient) GenerateToken(ctx context.Context, req *authService.Gen
 	opts ...grpc.CallOption) (*authService.LoginResponse, error) {
 	return f.loginResp, f.err
 }
+
+func (f *FakeAuthClient) GetPersonById(ctx context.Context, req *authService.GetPersonByIdRequest,
+	opts ...grpc.CallOption) (*authService.GetPersonByIdResponse, error) {
+	return &authService.GetPersonByIdResponse{}, f.err
+}

@@ -8,9 +8,10 @@ import (
 
 	"ms.api/graph/generated"
 	"ms.api/protos/pb/kycService"
+	"ms.api/types"
 )
 
-func (r *subscriptionResolver) GetKYCApplicationResult(ctx context.Context, applicantID string) (<-chan *kycService.Cdd, error) {
+func (r *subscriptionResolver) GetKYCApplicationResult(ctx context.Context, applicantID string) (<-chan *types.Cdd, error) {
 	payload := kycService.PersonIdRequest{
 		PersonId: applicantID,
 	}
@@ -19,8 +20,8 @@ func (r *subscriptionResolver) GetKYCApplicationResult(ctx context.Context, appl
 		return nil, err
 	}
 
-	ch := make(chan *kycService.Cdd)
-	go func(response kycService.KycService_AwaitCDDReportClient, ch chan *kycService.Cdd) {
+	ch := make(chan *types.Cdd)
+	go func(response kycService.KycService_AwaitCDDReportClient, ch chan *types.Cdd) {
 		for {
 			cdd, err := response.Recv()
 			if err != nil {
@@ -29,7 +30,15 @@ func (r *subscriptionResolver) GetKYCApplicationResult(ctx context.Context, appl
 
 			if cdd != nil {
 				// Disconnect client here after they've received their data.
-				ch <- cdd
+				ch <- &types.Cdd{
+					ID:          cdd.Id,
+					Owner:       cdd.Owner,
+					Details:     cdd.Details,
+					Status:      cdd.Status,
+					Kyc:         cdd.Kyc,
+					TimeCreated: cdd.TimeCreated,
+					TimeUpdated: cdd.TimeUpdated,
+				}
 			}
 		}
 	}(response, ch)

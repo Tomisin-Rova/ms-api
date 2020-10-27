@@ -48,8 +48,8 @@ models:
       - github.com/99designs/gqlgen/graphql.Int64
   DateTime:
     model: ms.api/libs/DateTime.DateTime
-  CDD:
-    model: ms.api/protos/pb/kycService.Cdd
+  #CDD:
+    #model: ms.api/protos/pb/kycService.Cdd
   KYC:
     model: ms.api/protos/pb/kycService.Kyc
   Address:

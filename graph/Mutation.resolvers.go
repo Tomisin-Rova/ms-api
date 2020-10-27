@@ -6,9 +6,11 @@ package graph
 import (
 	"context"
 	"errors"
+
 	"ms.api/graph/generated"
-	emailvalidator "ms.api/libs/email"
 	rerrors "ms.api/libs/errors"
+	"ms.api/libs/validator/datevalidator"
+	emailvalidator "ms.api/libs/validator/email"
 	"ms.api/protos/pb/authService"
 	"ms.api/protos/pb/kycService"
 	"ms.api/protos/pb/onboardingService"
@@ -72,25 +74,13 @@ func (r *mutationResolver) SubmitKYCApplication(ctx context.Context) (*types.Res
 	}, nil
 }
 
-func (r *mutationResolver) CreatePasscode(ctx context.Context, input *types.CreatePasscodeInput) (*types.Result, error) {
-	payload := onboardingService.CreatePasscodeRequest{
-		Token:    input.Token,
-		Passcode: input.Passcode,
-	}
-	res, err := r.onBoardingService.CreatePasscode(context.Background(), &payload)
-	if err != nil {
-		return nil, rerrors.NewFromGrpc(err)
-	}
-	return &types.Result{
-		Success: true,
-		Message: res.Message,
-	}, nil
-}
-
 func (r *mutationResolver) UpdatePersonBiodata(ctx context.Context, input *types.UpdateBioDataInput) (*types.Result, error) {
 	personId, err := middlewares.GetAuthenticatedUser(ctx)
 	if err != nil {
 		return nil, ErrUnAuthenticated
+	}
+	if err := datevalidator.ValidateDob(input.Dob); err != nil {
+		return nil, err
 	}
 	payload := onboardingService.UpdatePersonRequest{
 		PersonId: personId,
@@ -229,15 +219,10 @@ func (r *mutationResolver) CheckEmailExistence(ctx context.Context, email string
 	return &types.CheckEmailExistenceResult{Message: resp.Message, Exists: resp.Exists}, nil
 }
 
-func (r *mutationResolver) ActivateBioLogin(ctx context.Context, token string, device *types.Device) (*types.ActivateBioLoginResponse, error) {
+func (r *mutationResolver) ActivateBioLogin(ctx context.Context, token string, deviceID string) (*types.ActivateBioLoginResponse, error) {
 	resp, err := r.authService.ActivateBioLogin(ctx, &authService.ActivateBioLoginRequest{
-		Token: token,
-		Device: &authService.Device{
-			Os:          device.Os,
-			Brand:       device.Brand,
-			DeviceToken: device.DeviceToken,
-			DeviceId:    device.DeviceID,
-		},
+		Token:    token,
+		DeviceId: deviceID,
 	})
 
 	if err != nil {
@@ -245,19 +230,14 @@ func (r *mutationResolver) ActivateBioLogin(ctx context.Context, token string, d
 		return nil, rerrors.NewFromGrpc(err)
 	}
 
-	return &types.ActivateBioLoginResponse{BiometricPasscode: resp.BiometricPasscode}, nil
+	return &types.ActivateBioLoginResponse{BiometricPasscode: resp.BiometricPasscode, Message: resp.Message}, nil
 }
 
 func (r *mutationResolver) BioLoginRequest(ctx context.Context, input types.BioLoginInput) (*types.AuthResult, error) {
 	resp, err := r.authService.BioLogin(ctx, &authService.BioLoginRequest{
 		Email:             input.Email,
 		BiometricPasscode: input.BiometricPasscode,
-		Device: &authService.Device{
-			Os:          input.Device.Os,
-			Brand:       input.Device.Brand,
-			DeviceToken: input.Device.DeviceToken,
-			DeviceId:    input.Device.DeviceID,
-		},
+		DeviceId:          input.DeviceID,
 	})
 
 	if err != nil {
@@ -274,13 +254,8 @@ func (r *mutationResolver) BioLoginRequest(ctx context.Context, input types.BioL
 
 func (r *mutationResolver) DeactivateBioLogin(ctx context.Context, input types.DeactivateBioLoginInput) (*types.Result, error) {
 	resp, err := r.authService.DeactivateBioLogin(ctx, &authService.DeactivateBioLoginRequest{
-		Email: input.Email,
-		Device: &authService.Device{
-			Os:          input.Device.Os,
-			Brand:       input.Device.Brand,
-			DeviceToken: input.Device.DeviceToken,
-			DeviceId:    input.Device.DeviceID,
-		},
+		Email:    input.Email,
+		DeviceId: input.DeviceID,
 	})
 	if err != nil {
 		r.logger.WithError(err).Info("authService.DeactivateBioLogin() failed")

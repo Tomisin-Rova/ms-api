@@ -12,12 +12,9 @@ endif
 
 GO_SOURCES_OWN := $(filter-out vendor/%, $(GO_SOURCES))
 
-PROTO_SRC_DIR := ${PWD}/proto
-PROTO_DST_DIR := ${PWD}/proto/pb
 
 .PHONY: proto
 proto:
-	#mkdir -p ${PROTO_DST_DIR} && protoc -I=${PROTO_SRC_DIR} --go_out=plugins=grpc:${PROTO_DST_DIR} ${PROTO_SRC_DIR}/service.proto
 	# NOTE, to generate the protos, you have to have your local, vendor folder because of the magefile
 	./libs/mage genProto
 
@@ -85,7 +82,7 @@ coverage:
 .PHONY: schema
 schema: proto
 	./libs/mage genSchema
-	
+
 docker-pulsar:
 	docker run -d \
       -p 6650:6650 \
