@@ -6,7 +6,6 @@ package graph
 import (
 	"context"
 	"errors"
-
 	"ms.api/graph/generated"
 	rerrors "ms.api/libs/errors"
 	"ms.api/libs/validator/datevalidator"
@@ -18,10 +17,10 @@ import (
 	"ms.api/types"
 )
 
-func (r *mutationResolver) ResetPassword(ctx context.Context, email string, newPassword string, verificationToken string) (*types.Result, error) {
+func (r *mutationResolver) ResetPasscode(ctx context.Context, email string, newPasscode string, verificationToken string) (*types.Result, error) {
 	result, err := r.authService.ResetPassword(ctx, &authService.PasswordResetRequest{
 		Email:             email,
-		NewPassword:       newPassword,
+		NewPassword:       newPasscode,
 		VerificationToken: verificationToken,
 	})
 	if err != nil {
@@ -34,7 +33,7 @@ func (r *mutationResolver) ResetPassword(ctx context.Context, email string, newP
 	}, err
 }
 
-func (r *mutationResolver) ConfirmPasswordResetDetails(ctx context.Context, email string, dob string, address types.InputAddress) (*types.Result, error) {
+func (r *mutationResolver) ConfirmPasscodeResetDetails(ctx context.Context, email string, dob string, address types.InputAddress) (*types.Result, error) {
 	result, err := r.authService.ConfirmPasswordResetDetails(ctx, &authService.PasswordResetUserDetails{
 		Email: email,
 		Dob:   dob,
