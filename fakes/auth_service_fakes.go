@@ -50,3 +50,15 @@ func (f *FakeAuthClient) GetPersonById(ctx context.Context, req *authService.Get
 	opts ...grpc.CallOption) (*authService.GetPersonByIdResponse, error) {
 	return &authService.GetPersonByIdResponse{}, f.err
 }
+
+func (f *FakeAuthClient) ActivateBioLogin(ctx context.Context, req *authService.ActivateBioLoginRequest, opts ...grpc.CallOption) (*authService.ActivateBioLoginResponse, error) {
+	return &authService.ActivateBioLoginResponse{}, f.err
+}
+
+func (f *FakeAuthClient) BioLogin(ctx context.Context, req *authService.BioLoginRequest, opts ...grpc.CallOption) (*authService.LoginResponse, error) {
+	return &authService.LoginResponse{}, f.err
+}
+
+func (f *FakeAuthClient) DeactivateBioLogin(ctx context.Context, req *authService.DeactivateBioLoginRequest, opts ...grpc.CallOption) (*authService.SuccessResponse, error) {
+	return &authService.SuccessResponse{}, f.err
+}
