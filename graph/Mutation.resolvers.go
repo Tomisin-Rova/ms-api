@@ -12,7 +12,6 @@ import (
 	"ms.api/libs/validator/datevalidator"
 	emailvalidator "ms.api/libs/validator/email"
 	"ms.api/protos/pb/authService"
-	"ms.api/protos/pb/kycService"
 	"ms.api/protos/pb/onboardingService"
 	"ms.api/server/http/middlewares"
 	"ms.api/types"
@@ -57,17 +56,13 @@ func (r *mutationResolver) ConfirmPasswordResetDetails(ctx context.Context, emai
 }
 
 func (r *mutationResolver) SubmitKYCApplication(ctx context.Context) (*types.Result, error) {
-	personId, err := middlewares.GetAuthenticatedUser(ctx)
+	_, err := middlewares.GetAuthenticatedUser(ctx)
 	if err != nil {
 		return nil, ErrUnAuthenticated
 	}
 
-	if _, err := r.kycClient.SubmitKycApplicationByPersonId(ctx, &kycService.PersonIdRequest{
-		PersonId: personId,
-	}); err != nil {
-		r.logger.Infof("kycService.SubmitKycApplicationByPersonId() failed: %v", err)
-		return nil, rerrors.NewFromGrpc(err)
-	}
+	// TODO: @Lekan || @Lanre Implement Submitting KYC Application Here Via Onboarding Service Based on New Documentation
+
 	return &types.Result{
 		Success: true,
 		Message: "Successfully started CDD check, you'll be notified once completed.",

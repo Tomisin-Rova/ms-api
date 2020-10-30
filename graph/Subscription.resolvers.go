@@ -7,42 +7,43 @@ import (
 	"context"
 
 	"ms.api/graph/generated"
-	"ms.api/protos/pb/kycService"
 	"ms.api/types"
 )
 
 func (r *subscriptionResolver) GetKYCApplicationResult(ctx context.Context, applicantID string) (<-chan *types.Cdd, error) {
-	payload := kycService.PersonIdRequest{
-		PersonId: applicantID,
-	}
-	response, err := r.kycClient.AwaitCDDReport(ctx, &payload)
-	if err != nil {
-		return nil, err
-	}
+	//payload := kycService.PersonIdRequest{
+	//	PersonId: applicantID,
+	//}
+	//response, err := r.kycClient.AwaitCDDReport(ctx, &payload)
+	//if err != nil {
+	//	return nil, err
+	//}
 
-	ch := make(chan *types.Cdd)
-	go func(response kycService.KycService_AwaitCDDReportClient, ch chan *types.Cdd) {
-		for {
-			cdd, err := response.Recv()
-			if err != nil {
-				return
-			}
+	//ch := make(chan *types.Cdd)
+	//go func(response kycService.KycService_AwaitCDDReportClient, ch chan *types.Cdd) {
+	//	for {
+	//		cdd, err := response.Recv()
+	//		if err != nil {
+	//			return
+	//		}
+	//
+	//		if cdd != nil {
+	//			// Disconnect client here after they've received their data.
+	//			ch <- &types.Cdd{
+	//				ID:          cdd.Id,
+	//				Owner:       cdd.Owner,
+	//				Details:     cdd.Details,
+	//				Status:      cdd.Status,
+	//				Kyc:         cdd.Kyc,
+	//				TimeCreated: cdd.TimeCreated,
+	//				TimeUpdated: cdd.TimeUpdated,
+	//			}
+	//		}
+	//	}
+	//}(response, ch)
+	//return ch, nil
 
-			if cdd != nil {
-				// Disconnect client here after they've received their data.
-				ch <- &types.Cdd{
-					ID:          cdd.Id,
-					Owner:       cdd.Owner,
-					Details:     cdd.Details,
-					Status:      cdd.Status,
-					Kyc:         cdd.Kyc,
-					TimeCreated: cdd.TimeCreated,
-					TimeUpdated: cdd.TimeUpdated,
-				}
-			}
-		}
-	}(response, ch)
-	return ch, nil
+	panic("Awaiting new implementation based on new kyc/onfido codebase")
 }
 
 // Subscription returns generated.SubscriptionResolver implementation.

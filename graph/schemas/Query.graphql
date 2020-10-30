@@ -1,3 +1,4 @@
 type Query {
     getApplicantSDKToken: ApplicantSDKTokenResponse
+    getCDDReportSummary: CDDSummary
 }
