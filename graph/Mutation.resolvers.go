@@ -6,6 +6,7 @@ package graph
 import (
 	"context"
 	"errors"
+	"ms.api/libs/validator/phonenumbervalidator"
 
 	"ms.api/graph/generated"
 	rerrors "ms.api/libs/errors"
@@ -126,8 +127,10 @@ func (r *mutationResolver) AddReasonsForUsingRoava(ctx context.Context, personID
 }
 
 func (r *mutationResolver) CreatePhone(ctx context.Context, input types.CreatePhoneInput) (*types.CreatePhoneResult, error) {
-	if input.Phone == "" || len(input.Phone) < 6 {
-		return nil, errors.New("invalid phone number")
+	if err := phonenumbervalidator.ValidatePhoneNumber(input.Phone); err != nil {
+		r.logger.WithField("phone", input.Phone).WithError(err).
+			Error("failed to validate phone number")
+		return nil, err
 	}
 	result, err := r.onBoardingService.CreatePhone(ctx,
 		&onboardingService.CreatePhoneRequest{PhoneNumber: input.Phone,
@@ -196,8 +199,10 @@ func (r *mutationResolver) RefreshToken(ctx context.Context, refreshToken string
 }
 
 func (r *mutationResolver) ResendOtp(ctx context.Context, phone string) (*types.Result, error) {
-	if phone == "" || len(phone) < 6 {
-		return nil, errors.New("invalid phone number")
+	if err := phonenumbervalidator.ValidatePhoneNumber(phone); err != nil {
+		r.logger.WithField("phone", phone).WithError(err).
+			Error("failed to validate phone number")
+		return nil, err
 	}
 	resp, err := r.onBoardingService.ResendOtp(ctx, &onboardingService.ResendOtpRequest{Phone: phone})
 	if err != nil {
