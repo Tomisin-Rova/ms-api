@@ -46,7 +46,6 @@ func (r *subscriptionResolver) CreateApplication(ctx context.Context) (<-chan *t
 	return respChan, nil
 }
 
-
 func (r *subscriptionResolver) validateToken(ctx context.Context) (string, error) {
 	bearerToken := handler.GetInitPayload(ctx).Authorization()
 	parts := strings.Split(bearerToken, " ")
