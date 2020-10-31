@@ -13,6 +13,7 @@ const (
 )
 
 type Secrets struct {
+	CddServiceURL        string
 	OnfidoServiceURL     string
 	KYCServiceURL        string
 	OnboardingServiceURL string
@@ -55,6 +56,7 @@ func LoadSecrets() (*Secrets, error) {
 	ss.OnboardingServiceURL = os.Getenv("ONBOARDING_SERVICE_URL")
 	ss.VerifyServiceURL = os.Getenv("VERIFY_SERVICE_URL")
 	ss.AuthServiceURL = os.Getenv("AUTH_SERVICE_URL")
+	ss.CddServiceURL = os.Getenv("CDD_SERVICE_URL")
 	if err := ss.Environment.IsValid(); err != nil {
 		log.Error("Error in environment variables: %v", err)
 	}

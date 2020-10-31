@@ -50,12 +50,10 @@ models:
     model: ms.api/libs/DateTime.DateTime
   #CDD:
     #model: ms.api/protos/pb/kycService.Cdd
-  KYC:
-    model: ms.api/protos/pb/kycService.Kyc
   Address:
-      model: ms.api/protos/pb/kycService.Address
+      model: ms.api/protos/pb/cddService.Address
   Applicant:
-    model: ms.api/protos/pb/kycService.Applicant
+    model: ms.api/protos/pb/cddService.Applicant
   ApplicantSDKTokenRequest:
     model: ms.api/protos/pb/onfidoService.ApplicantSDKTokenRequest
   ApplicantSDKTokenResponse:

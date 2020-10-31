@@ -9,7 +9,6 @@ type Mutation {
         dob: String!
         address: InputAddress!
     ): Result
-    submitKYCApplication: Result
 
     updatePersonBiodata(input: UpdateBioDataInput) : Result
 
@@ -25,4 +24,7 @@ type Mutation {
     refreshToken(refreshToken: String!): AuthResult
     resendOtp(phone: String!): Result
     checkEmailExistence(email: String!): CheckEmailExistenceResult
+    activateBioLogin(token: String!, deviceId: String!): ActivateBioLoginResponse
+    bioLoginRequest(input: BioLoginInput!): AuthResult
+    deactivateBioLogin(input: DeactivateBioLoginInput!): Result
 }

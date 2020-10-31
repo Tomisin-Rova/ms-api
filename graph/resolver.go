@@ -8,7 +8,7 @@ import (
 	"google.golang.org/grpc"
 	"ms.api/config"
 	"ms.api/protos/pb/authService"
-	"ms.api/protos/pb/kycService"
+	"ms.api/protos/pb/cddService"
 	"ms.api/protos/pb/onboardingService"
 	"ms.api/protos/pb/onfidoService"
 	"ms.api/protos/pb/verifyService"
@@ -23,14 +23,14 @@ var (
 
 type ResolverOpts struct {
 	OnfidoClient      onfidoService.OnfidoServiceClient
-	kycClient         kycService.KycServiceClient
+	cddClient         cddService.CddServiceClient
 	onBoardingService onboardingService.OnBoardingServiceClient
 	verifyService     verifyService.VerifyServiceClient
 	AuthService       authService.AuthServiceClient
 }
 
 type Resolver struct {
-	kycClient         kycService.KycServiceClient
+	cddService        cddService.CddServiceClient
 	onBoardingService onboardingService.OnBoardingServiceClient
 	verifyService     verifyService.VerifyServiceClient
 	onfidoClient      onfidoService.OnfidoServiceClient
@@ -40,7 +40,7 @@ type Resolver struct {
 
 func NewResolver(opt *ResolverOpts, logger *logrus.Logger) *Resolver {
 	return &Resolver{
-		kycClient:         opt.kycClient,
+		cddService:        opt.cddClient,
 		onBoardingService: opt.onBoardingService,
 		verifyService:     opt.verifyService,
 		onfidoClient:      opt.OnfidoClient,
@@ -71,12 +71,12 @@ func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) 
 	}
 	opts.OnfidoClient = onfidoService.NewOnfidoServiceClient(connection)
 
-	// KYC
-	connection, err = dialRPC(ctx, secrets.KYCServiceURL)
+	// CDD
+	connection, err = dialRPC(ctx, secrets.CddServiceURL)
 	if err != nil {
-		return nil, errors.Wrap(err, secrets.KYCServiceURL)
+		return nil, errors.Wrap(err, secrets.CddServiceURL)
 	}
-	opts.kycClient = kycService.NewKycServiceClient(connection)
+	opts.cddClient = cddService.NewCddServiceClient(connection)
 
 	// Verify
 	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
@@ -87,7 +87,7 @@ func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) 
 	}
 	opts.verifyService = verifyService.NewVerifyServiceClient(connection)
 
-	// Auth
+	//// Auth
 	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	connection, err = dialRPC(ctx, secrets.AuthServiceURL)

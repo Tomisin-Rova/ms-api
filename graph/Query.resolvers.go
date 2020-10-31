@@ -7,22 +7,38 @@ import (
 	"context"
 
 	"ms.api/graph/generated"
-	"ms.api/protos/pb/kycService"
-	"ms.api/protos/pb/onfidoService"
+	rerrors "ms.api/libs/errors"
+	"ms.api/protos/pb/cddService"
 	"ms.api/server/http/middlewares"
+	"ms.api/types"
 )
 
-func (r *queryResolver) GetApplicantSDKToken(ctx context.Context) (*onfidoService.ApplicantSDKTokenResponse, error) {
+func (r *queryResolver) GetCDDReportSummary(ctx context.Context) (*types.CDDSummary, error) {
 	personId, err := middlewares.GetAuthenticatedUser(ctx)
 	if err != nil {
-		return nil, err
+		return nil, ErrUnAuthenticated
+	}
+	resp, err := r.cddService.GetCDDSummaryReport(ctx, &cddService.PersonIdRequest{PersonId: personId})
+	if err != nil {
+		return nil, rerrors.NewFromGrpc(err)
 	}
 
-	applicant, err := r.kycClient.GetKycApplicantByPersonId(ctx, &kycService.PersonIdRequest{PersonId: personId})
-	if err != nil {
-		return nil, err
+	output := &types.CDDSummary{}
+
+	documents := make([]*types.CDDSummaryDocument, 0)
+
+	for _, document := range resp.Documents {
+		documents = append(documents, &types.CDDSummaryDocument{
+			Name:   document.Name,
+			Status: document.Status,
+			Reason: document.Reason,
+		})
 	}
-	return r.onfidoClient.GenerateApplicantSDKToken(ctx, &onfidoService.ApplicantSDKTokenRequest{ApplicantId: applicant.ApplicantId})
+
+	output.Status = resp.Status
+	output.Documents = documents
+
+	return output, nil
 }
 
 // Query returns generated.QueryResolver implementation.

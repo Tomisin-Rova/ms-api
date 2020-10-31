@@ -12,14 +12,11 @@ endif
 
 GO_SOURCES_OWN := $(filter-out vendor/%, $(GO_SOURCES))
 
-PROTO_SRC_DIR := ${PWD}/protos
-PROTO_DST_DIR := ${PWD}/protos/pb
 
 .PHONY: proto
-proto :
-	#./libs/mage genProto
-	# Add: option go_option = "pb/onfidoService"; to your proto. modify onfidoService to follow suite with your proto.
-	protoc -I protos/ -I${PWD}/ --go_out=plugins=grpc:protos protos/*.proto
+proto:
+	# NOTE, to generate the protos, you have to have your local, vendor folder because of the magefile
+	./libs/mage genProto
 
 .PHONY: build
 build: proto
@@ -83,7 +80,7 @@ coverage:
 	fi
 
 .PHONY: schema
-schema:
+schema: proto
 	./libs/mage genSchema
 
 docker-pulsar:

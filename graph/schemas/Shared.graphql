@@ -48,7 +48,28 @@ input InputAddress {
     postcode: String!
 }
 
+input CreatePasscodeInput {
+    token: String!,
+    passcode: String!
+}
+
+input BioLoginInput {
+    email: String!
+    biometricPasscode: String!
+    deviceId: String!
+}
+
+input DeactivateBioLoginInput {
+    email: String!
+    deviceId: String!
+}
+
 type CheckEmailExistenceResult {
     exists: Boolean!
     message: String!
+}
+
+type ActivateBioLoginResponse {
+    message: String!
+    biometricPasscode: String!
 }

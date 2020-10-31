@@ -1,13 +1,3 @@
-type KYC {
-    id: String!
-    applicant: Applicant!
-    vendor: String
-    Status: String
-    time_created: Int!
-    time_updated: Int!
-}
-
-
 type Applicant {
     applicant_id: String
     first_name: String!
@@ -35,9 +25,19 @@ type CDD {
     owner: String!
     details: String!
     status: String!
-    kyc: KYC!
     #    //  repeated tag tags = 5;
     #    //  repeated document documents = 6;
     time_created: Int!
     time_updated: Int!
+}
+
+type CDDSummary {
+    status: String!
+    documents: [CDDSummaryDocument!]!
+}
+
+type CDDSummaryDocument {
+    name: String!
+    status: String!
+    reason: String!
 }
