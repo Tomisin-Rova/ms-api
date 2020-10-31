@@ -2,9 +2,42 @@
 
 package types
 
-import (
-	"ms.api/protos/pb/kycService"
-)
+type Aml struct {
+	CreatedAt   string        `json:"createdAt"`
+	UpdatedAt   string        `json:"updatedAt"`
+	Title       string        `json:"title"`
+	PersonID    string        `json:"personId"`
+	FirstName   string        `json:"firstName"`
+	LastName    string        `json:"lastName"`
+	MiddleName  string        `json:"middleName"`
+	Dob         string        `json:"dob"`
+	Email       string        `json:"email"`
+	Nationality string        `json:"nationality"`
+	Status      string        `json:"status"`
+	Reports     []interface{} `json:"reports"`
+}
+
+type Address struct {
+	FlatNumber     *string `json:"flat_number"`
+	BuildingNumber *string `json:"buildingNumber"`
+	BuildingName   *string `json:"buildingName"`
+	Street         string  `json:"street"`
+	SubStreet      *string `json:"subStreet"`
+	Town           *string `json:"town"`
+	State          string  `json:"state"`
+	Postcode       string  `json:"postcode"`
+	Country        string  `json:"country"`
+}
+
+type Applicant struct {
+	ApplicantID *string  `json:"applicantId"`
+	FirstName   string   `json:"firstName"`
+	LastName    string   `json:"lastName"`
+	Email       string   `json:"email"`
+	Dob         string   `json:"dob"`
+	Address     *Address `json:"address"`
+	Vendor      *string  `json:"vendor"`
+}
 
 type AuthResult struct {
 	Token                  string `json:"token"`
@@ -13,13 +46,31 @@ type AuthResult struct {
 }
 
 type Cdd struct {
-	ID          string          `json:"id"`
-	Owner       string          `json:"owner"`
-	Details     string          `json:"details"`
-	Status      string          `json:"status"`
-	Kyc         *kycService.Kyc `json:"kyc"`
-	TimeCreated int64           `json:"time_created"`
-	TimeUpdated int64           `json:"time_updated"`
+	ID        string `json:"id"`
+	Owner     string `json:"owner"`
+	Details   string `json:"details"`
+	Status    string `json:"status"`
+	Kyc       *Kyc   `json:"kyc"`
+	Aml       *Aml   `json:"aml"`
+	Roava     *Roava `json:"roava"`
+	Cra       *Cra   `json:"cra"`
+	CreatedAt string `json:"createdAt"`
+	UpdatedAt string `json:"updatedAt"`
+}
+
+type Cra struct {
+	Empty string `json:"empty"`
+}
+
+type CddDocument struct {
+	Name   string `json:"name"`
+	Status string `json:"status"`
+	Reason string `json:"reason"`
+}
+
+type CddSummary struct {
+	Status    string         `json:"status"`
+	Documents []*CddDocument `json:"documents"`
 }
 
 type CheckEmailExistenceResult struct {
@@ -58,9 +109,22 @@ type InputAddress struct {
 	Postcode string `json:"postcode"`
 }
 
+type Kyc struct {
+	ID        string     `json:"id"`
+	Applicant *Applicant `json:"applicant"`
+	Vendor    *string    `json:"vendor"`
+	Status    *string    `json:"status"`
+	CreatedAt string     `json:"createdAt"`
+	UpdatedAt string     `json:"updatedAt"`
+}
+
 type Result struct {
 	Success bool   `json:"success"`
 	Message string `json:"message"`
+}
+
+type Roava struct {
+	Empty string `json:"empty"`
 }
 
 type UpdateBioDataInput struct {
@@ -69,4 +133,8 @@ type UpdateBioDataInput struct {
 	FirstName string        `json:"firstName"`
 	LastName  string        `json:"lastName"`
 	Dob       string        `json:"dob"`
+}
+
+type CreateApplicationResponse struct {
+	Token string `json:"token"`
 }

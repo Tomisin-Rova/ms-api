@@ -5,47 +5,69 @@ package graph
 
 import (
 	"context"
+	"errors"
+	"io"
+	"strings"
 
+	"github.com/99designs/gqlgen/handler"
 	"ms.api/graph/generated"
-	"ms.api/protos/pb/kycService"
+	"ms.api/protos/pb/onboardingService"
 	"ms.api/types"
 )
 
-func (r *subscriptionResolver) GetKYCApplicationResult(ctx context.Context, applicantID string) (<-chan *types.Cdd, error) {
-	payload := kycService.PersonIdRequest{
-		PersonId: applicantID,
-	}
-	response, err := r.kycClient.AwaitCDDReport(ctx, &payload)
+func (r *subscriptionResolver) CreateApplication(ctx context.Context) (<-chan *types.CreateApplicationResponse, error) {
+	personId, err := r.validateToken(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	ch := make(chan *types.Cdd)
-	go func(response kycService.KycService_AwaitCDDReportClient, ch chan *types.Cdd) {
+	stream, err := r.onBoardingService.CreateApplication(context.Background(), &onboardingService.CreateApplicationRequest{PersonId: personId})
+	if err != nil {
+		r.logger.WithError(err).Error("onBoarding.createApplication() failed")
+		return nil, err
+	}
+	respChan := make(chan *types.CreateApplicationResponse, 1)
+	go func(ss onboardingService.OnBoardingService_CreateApplicationClient) {
 		for {
-			cdd, err := response.Recv()
+			rr, err := ss.Recv()
 			if err != nil {
-				return
-			}
-
-			if cdd != nil {
-				// Disconnect client here after they've received their data.
-				ch <- &types.Cdd{
-					ID:          cdd.Id,
-					Owner:       cdd.Owner,
-					Details:     cdd.Details,
-					Status:      cdd.Status,
-					Kyc:         cdd.Kyc,
-					TimeCreated: cdd.TimeCreated,
-					TimeUpdated: cdd.TimeUpdated,
+				if err == io.EOF {
+					break
 				}
+				r.logger.WithError(err).Info("error reading stream from sever")
+			}
+			if rr.Token != "" {
+				respChan <- &types.CreateApplicationResponse{Token: rr.Token}
+				break
 			}
 		}
-	}(response, ch)
-	return ch, nil
+	}(stream)
+	return respChan, nil
 }
 
 // Subscription returns generated.SubscriptionResolver implementation.
 func (r *Resolver) Subscription() generated.SubscriptionResolver { return &subscriptionResolver{r} }
 
 type subscriptionResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//    it when you're done.
+//  - You have helper methods in this file. Move them out to keep these resolver files clean.
+func (r *subscriptionResolver) validateToken(ctx context.Context) (string, error) {
+	bearerToken := handler.GetInitPayload(ctx).Authorization()
+	parts := strings.Split(bearerToken, " ")
+	if len(parts) != 2 {
+		r.logger.WithField("token_parts", parts).Info("invalid token supplied")
+		return "", errors.New("invalid authorization token")
+	}
+
+	personId, err := r.authMw.ValidateToken(parts[1])
+	if err != nil {
+		r.logger.WithError(err).Error("failed to authorize account")
+		return "", err
+	}
+	return personId, nil
+}

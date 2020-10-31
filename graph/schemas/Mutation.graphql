@@ -25,4 +25,5 @@ type Mutation {
     refreshToken(refreshToken: String!): AuthResult
     resendOtp(phone: String!): Result
     checkEmailExistence(email: String!): CheckEmailExistenceResult
+    submitApplication: Result
 }

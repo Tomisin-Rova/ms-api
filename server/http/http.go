@@ -33,6 +33,7 @@ func MountServer(secrets *config.Secrets, logger *logrus.Logger) *chi.Mux {
 
 	mw := middlewares.NewAuthMiddleware(opts.AuthService, logger)
 	router.Use(mw.Middeware)
+	opts.AuthMw = mw
 
 	if secrets.Environment != config.Production {
 		router.Handle("/", playground.Handler("GraphQL playground", "/graphql"))
@@ -45,7 +46,8 @@ func MountServer(secrets *config.Secrets, logger *logrus.Logger) *chi.Mux {
 
 	resolvers := graph.NewResolver(opts, logger)
 	// API Server
-	router.Handle("/graphql", handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: resolvers})))
+	router.Handle("/graphql",
+		handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: resolvers})))
 	// Webhooks
 	router.Post("/webhooks/onfido", webhooks.HandleOnfidoWebhook(opts.OnfidoClient))
 	return router

@@ -8,10 +8,12 @@ import (
 	"google.golang.org/grpc"
 	"ms.api/config"
 	"ms.api/protos/pb/authService"
+	"ms.api/protos/pb/cddService"
 	"ms.api/protos/pb/kycService"
 	"ms.api/protos/pb/onboardingService"
 	"ms.api/protos/pb/onfidoService"
 	"ms.api/protos/pb/verifyService"
+	"ms.api/server/http/middlewares"
 	"time"
 )
 
@@ -27,6 +29,8 @@ type ResolverOpts struct {
 	onBoardingService onboardingService.OnBoardingServiceClient
 	verifyService     verifyService.VerifyServiceClient
 	AuthService       authService.AuthServiceClient
+	cddService        cddService.CddServiceClient
+	AuthMw  *middlewares.AuthMiddleware
 }
 
 type Resolver struct {
@@ -35,6 +39,8 @@ type Resolver struct {
 	verifyService     verifyService.VerifyServiceClient
 	onfidoClient      onfidoService.OnfidoServiceClient
 	authService       authService.AuthServiceClient
+	cddService        cddService.CddServiceClient
+	authMw  *middlewares.AuthMiddleware
 	logger            *logrus.Logger
 }
 
@@ -45,6 +51,8 @@ func NewResolver(opt *ResolverOpts, logger *logrus.Logger) *Resolver {
 		verifyService:     opt.verifyService,
 		onfidoClient:      opt.OnfidoClient,
 		authService:       opt.AuthService,
+		cddService:        opt.cddService,
+		authMw: opt.AuthMw,
 		logger:            logger,
 	}
 }
@@ -70,22 +78,6 @@ func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) 
 		return nil, errors.Wrap(err, secrets.OnfidoServiceURL)
 	}
 	opts.OnfidoClient = onfidoService.NewOnfidoServiceClient(connection)
-
-	// KYC
-	connection, err = dialRPC(ctx, secrets.KYCServiceURL)
-	if err != nil {
-		return nil, errors.Wrap(err, secrets.KYCServiceURL)
-	}
-	opts.kycClient = kycService.NewKycServiceClient(connection)
-
-	// Verify
-	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	connection, err = dialRPC(ctx, secrets.VerifyServiceURL)
-	if err != nil {
-		return nil, fmt.Errorf("%v: %s", err, secrets.VerifyServiceURL)
-	}
-	opts.verifyService = verifyService.NewVerifyServiceClient(connection)
 
 	// Auth
 	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)

@@ -15,6 +15,7 @@ func main() {
 	if err != nil {
 		logger.Fatalf("failed to load config: %v", err)
 	}
+
 	address := fmt.Sprintf("0.0.0.0:%s", secrets.Port)
 	logger.Infof("Connect to http://%s/ for GraphQL playground", address)
 	if err := http.ListenAndServe(address, httpServer.MountServer(secrets, logger)); err != nil {
