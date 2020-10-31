@@ -55,20 +55,6 @@ func (r *mutationResolver) ConfirmPasswordResetDetails(ctx context.Context, emai
 	}, nil
 }
 
-func (r *mutationResolver) SubmitKYCApplication(ctx context.Context) (*types.Result, error) {
-	_, err := middlewares.GetAuthenticatedUser(ctx)
-	if err != nil {
-		return nil, ErrUnAuthenticated
-	}
-
-	// TODO: @Lekan || @Lanre Implement Submitting KYC Application Here Via Onboarding Service Based on New Documentation
-
-	return &types.Result{
-		Success: true,
-		Message: "Successfully started CDD check, you'll be notified once completed.",
-	}, nil
-}
-
 func (r *mutationResolver) UpdatePersonBiodata(ctx context.Context, input *types.UpdateBioDataInput) (*types.Result, error) {
 	personId, err := middlewares.GetAuthenticatedUser(ctx)
 	if err != nil {
@@ -229,6 +215,9 @@ func (r *mutationResolver) ActivateBioLogin(ctx context.Context, token string, d
 }
 
 func (r *mutationResolver) BioLoginRequest(ctx context.Context, input types.BioLoginInput) (*types.AuthResult, error) {
+	if err := emailvalidator.Validate(input.Email); err != nil {
+		return nil, err
+	}
 	resp, err := r.authService.BioLogin(ctx, &authService.BioLoginRequest{
 		Email:             input.Email,
 		BiometricPasscode: input.BiometricPasscode,
@@ -248,6 +237,9 @@ func (r *mutationResolver) BioLoginRequest(ctx context.Context, input types.BioL
 }
 
 func (r *mutationResolver) DeactivateBioLogin(ctx context.Context, input types.DeactivateBioLoginInput) (*types.Result, error) {
+	if err := emailvalidator.Validate(input.Email); err != nil {
+		return nil, err
+	}
 	resp, err := r.authService.DeactivateBioLogin(ctx, &authService.DeactivateBioLoginRequest{
 		Email:    input.Email,
 		DeviceId: input.DeviceID,

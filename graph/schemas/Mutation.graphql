@@ -9,7 +9,6 @@ type Mutation {
         dob: String!
         address: InputAddress!
     ): Result
-    submitKYCApplication: Result
 
     updatePersonBiodata(input: UpdateBioDataInput) : Result
 

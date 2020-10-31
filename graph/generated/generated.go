@@ -6,7 +6,6 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"io"
 	"strconv"
 	"sync"
 
@@ -39,7 +38,6 @@ type Config struct {
 type ResolverRoot interface {
 	Mutation() MutationResolver
 	Query() QueryResolver
-	Subscription() SubscriptionResolver
 }
 
 type DirectiveRoot struct {
@@ -131,30 +129,23 @@ type ComplexityRoot struct {
 		RefreshToken                func(childComplexity int, refreshToken string) int
 		ResendOtp                   func(childComplexity int, phone string) int
 		ResetPassword               func(childComplexity int, email string, newPassword string, verificationToken string) int
-		SubmitKYCApplication        func(childComplexity int) int
 		UpdatePersonBiodata         func(childComplexity int, input *types.UpdateBioDataInput) int
 		VerifyOtp                   func(childComplexity int, phone string, code string) int
 	}
 
 	Query struct {
-		GetApplicantSDKToken func(childComplexity int) int
-		GetCDDReportSummary  func(childComplexity int) int
+		GetCDDReportSummary func(childComplexity int) int
 	}
 
 	Result struct {
 		Message func(childComplexity int) int
 		Success func(childComplexity int) int
 	}
-
-	Subscription struct {
-		GetKYCApplicationResult func(childComplexity int, applicantID string) int
-	}
 }
 
 type MutationResolver interface {
 	ResetPassword(ctx context.Context, email string, newPassword string, verificationToken string) (*types.Result, error)
 	ConfirmPasswordResetDetails(ctx context.Context, email string, dob string, address types.InputAddress) (*types.Result, error)
-	SubmitKYCApplication(ctx context.Context) (*types.Result, error)
 	UpdatePersonBiodata(ctx context.Context, input *types.UpdateBioDataInput) (*types.Result, error)
 	AddReasonsForUsingRoava(ctx context.Context, personID string, reasonValues []*string) (*types.Result, error)
 	CreatePhone(ctx context.Context, input types.CreatePhoneInput) (*types.CreatePhoneResult, error)
@@ -169,11 +160,7 @@ type MutationResolver interface {
 	DeactivateBioLogin(ctx context.Context, input types.DeactivateBioLoginInput) (*types.Result, error)
 }
 type QueryResolver interface {
-	GetApplicantSDKToken(ctx context.Context) (*onfidoService.ApplicantSDKTokenResponse, error)
 	GetCDDReportSummary(ctx context.Context) (*types.CDDSummary, error)
-}
-type SubscriptionResolver interface {
-	GetKYCApplicationResult(ctx context.Context, applicantID string) (<-chan *types.Cdd, error)
 }
 
 type executableSchema struct {
@@ -608,13 +595,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.ResetPassword(childComplexity, args["email"].(string), args["newPassword"].(string), args["verificationToken"].(string)), true
 
-	case "Mutation.submitKYCApplication":
-		if e.complexity.Mutation.SubmitKYCApplication == nil {
-			break
-		}
-
-		return e.complexity.Mutation.SubmitKYCApplication(childComplexity), true
-
 	case "Mutation.updatePersonBiodata":
 		if e.complexity.Mutation.UpdatePersonBiodata == nil {
 			break
@@ -639,13 +619,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.VerifyOtp(childComplexity, args["phone"].(string), args["code"].(string)), true
 
-	case "Query.getApplicantSDKToken":
-		if e.complexity.Query.GetApplicantSDKToken == nil {
-			break
-		}
-
-		return e.complexity.Query.GetApplicantSDKToken(childComplexity), true
-
 	case "Query.getCDDReportSummary":
 		if e.complexity.Query.GetCDDReportSummary == nil {
 			break
@@ -666,18 +639,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Result.Success(childComplexity), true
-
-	case "Subscription.getKYCApplicationResult":
-		if e.complexity.Subscription.GetKYCApplicationResult == nil {
-			break
-		}
-
-		args, err := ec.field_Subscription_getKYCApplicationResult_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Subscription.GetKYCApplicationResult(childComplexity, args["applicantId"].(string)), true
 
 	}
 	return 0, false
@@ -711,23 +672,6 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			first = false
 			data := ec._Mutation(ctx, rc.Operation.SelectionSet)
 			var buf bytes.Buffer
-			data.MarshalGQL(&buf)
-
-			return &graphql.Response{
-				Data: buf.Bytes(),
-			}
-		}
-	case ast.Subscription:
-		next := ec._Subscription(ctx, rc.Operation.SelectionSet)
-
-		var buf bytes.Buffer
-		return func(ctx context.Context) *graphql.Response {
-			buf.Reset()
-			data := next()
-
-			if data == nil {
-				return nil
-			}
 			data.MarshalGQL(&buf)
 
 			return &graphql.Response{
@@ -814,7 +758,6 @@ type CDDSummaryDocument {
         dob: String!
         address: InputAddress!
     ): Result
-    submitKYCApplication: Result
 
     updatePersonBiodata(input: UpdateBioDataInput) : Result
 
@@ -843,7 +786,6 @@ type ApplicantSDKTokenResponse {
     token: String!
 }`, BuiltIn: false},
 	{Name: "graph/schemas/Query.graphql", Input: `type Query {
-    getApplicantSDKToken: ApplicantSDKTokenResponse
     getCDDReportSummary: CDDSummary
 }
 `, BuiltIn: false},
@@ -922,9 +864,7 @@ type ActivateBioLoginResponse {
     message: String!
     biometricPasscode: String!
 }`, BuiltIn: false},
-	{Name: "graph/schemas/Subscription.graphql", Input: `type Subscription {
-    getKYCApplicationResult(applicantId: String!): CDD!
-}`, BuiltIn: false},
+	{Name: "graph/schemas/Subscription.graphql", Input: ``, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
@@ -1226,21 +1166,6 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		}
 	}
 	args["name"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Subscription_getKYCApplicationResult_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["applicantId"]; ok {
-		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("applicantId"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["applicantId"] = arg0
 	return args, nil
 }
 
@@ -2663,37 +2588,6 @@ func (ec *executionContext) _Mutation_confirmPasswordResetDetails(ctx context.Co
 	return ec.marshalOResult2ᚖmsᚗapiᚋtypesᚐResult(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Mutation_submitKYCApplication(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Mutation",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().SubmitKYCApplication(rctx)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*types.Result)
-	fc.Result = res
-	return ec.marshalOResult2ᚖmsᚗapiᚋtypesᚐResult(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Mutation_updatePersonBiodata(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -3150,37 +3044,6 @@ func (ec *executionContext) _Mutation_deactivateBioLogin(ctx context.Context, fi
 	return ec.marshalOResult2ᚖmsᚗapiᚋtypesᚐResult(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_getApplicantSDKToken(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetApplicantSDKToken(rctx)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*onfidoService.ApplicantSDKTokenResponse)
-	fc.Result = res
-	return ec.marshalOApplicantSDKTokenResponse2ᚖmsᚗapiᚋprotosᚋpbᚋonfidoServiceᚐApplicantSDKTokenResponse(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Query_getCDDReportSummary(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -3347,57 +3210,6 @@ func (ec *executionContext) _Result_message(ctx context.Context, field graphql.C
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Subscription_getKYCApplicationResult(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = nil
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Subscription",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Subscription_getKYCApplicationResult_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return nil
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Subscription().GetKYCApplicationResult(rctx, args["applicantId"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return nil
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return nil
-	}
-	return func() graphql.Marshaler {
-		res, ok := <-resTmp.(<-chan *types.Cdd)
-		if !ok {
-			return nil
-		}
-		return graphql.WriterFunc(func(w io.Writer) {
-			w.Write([]byte{'{'})
-			graphql.MarshalString(field.Alias).MarshalGQL(w)
-			w.Write([]byte{':'})
-			ec.marshalNCDD2ᚖmsᚗapiᚋtypesᚐCdd(ctx, field.Selections, res).MarshalGQL(w)
-			w.Write([]byte{'}'})
-		})
-	}
 }
 
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -5194,8 +5006,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec._Mutation_resetPassword(ctx, field)
 		case "confirmPasswordResetDetails":
 			out.Values[i] = ec._Mutation_confirmPasswordResetDetails(ctx, field)
-		case "submitKYCApplication":
-			out.Values[i] = ec._Mutation_submitKYCApplication(ctx, field)
 		case "updatePersonBiodata":
 			out.Values[i] = ec._Mutation_updatePersonBiodata(ctx, field)
 		case "addReasonsForUsingRoava":
@@ -5246,17 +5056,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
-		case "getApplicantSDKToken":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_getApplicantSDKToken(ctx, field)
-				return res
-			})
 		case "getCDDReportSummary":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -5313,26 +5112,6 @@ func (ec *executionContext) _Result(ctx context.Context, sel ast.SelectionSet, o
 		return graphql.Null
 	}
 	return out
-}
-
-var subscriptionImplementors = []string{"Subscription"}
-
-func (ec *executionContext) _Subscription(ctx context.Context, sel ast.SelectionSet) func() graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, subscriptionImplementors)
-	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
-		Object: "Subscription",
-	})
-	if len(fields) != 1 {
-		ec.Errorf(ctx, "must subscribe to exactly one stream")
-		return nil
-	}
-
-	switch fields[0].Name {
-	case "getKYCApplicationResult":
-		return ec._Subscription_getKYCApplicationResult(ctx, fields[0])
-	default:
-		panic("unknown field " + strconv.Quote(fields[0].Name))
-	}
 }
 
 var __DirectiveImplementors = []string{"__Directive"}
@@ -5608,20 +5387,6 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 		}
 	}
 	return res
-}
-
-func (ec *executionContext) marshalNCDD2msᚗapiᚋtypesᚐCdd(ctx context.Context, sel ast.SelectionSet, v types.Cdd) graphql.Marshaler {
-	return ec._CDD(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNCDD2ᚖmsᚗapiᚋtypesᚐCdd(ctx context.Context, sel ast.SelectionSet, v *types.Cdd) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._CDD(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNCDDSummaryDocument2ᚕᚖmsᚗapiᚋtypesᚐCDDSummaryDocumentᚄ(ctx context.Context, sel ast.SelectionSet, v []*types.CDDSummaryDocument) graphql.Marshaler {
@@ -5960,13 +5725,6 @@ func (ec *executionContext) marshalOActivateBioLoginResponse2ᚖmsᚗapiᚋtypes
 		return graphql.Null
 	}
 	return ec._ActivateBioLoginResponse(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOApplicantSDKTokenResponse2ᚖmsᚗapiᚋprotosᚋpbᚋonfidoServiceᚐApplicantSDKTokenResponse(ctx context.Context, sel ast.SelectionSet, v *onfidoService.ApplicantSDKTokenResponse) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._ApplicantSDKTokenResponse(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOAuthResult2ᚖmsᚗapiᚋtypesᚐAuthResult(ctx context.Context, sel ast.SelectionSet, v *types.AuthResult) graphql.Marshaler {

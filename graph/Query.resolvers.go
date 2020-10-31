@@ -5,29 +5,13 @@ package graph
 
 import (
 	"context"
-	rerrors "ms.api/libs/errors"
-	"ms.api/protos/pb/cddService"
 
 	"ms.api/graph/generated"
-	"ms.api/protos/pb/onfidoService"
+	rerrors "ms.api/libs/errors"
+	"ms.api/protos/pb/cddService"
 	"ms.api/server/http/middlewares"
 	"ms.api/types"
 )
-
-func (r *queryResolver) GetApplicantSDKToken(ctx context.Context) (*onfidoService.ApplicantSDKTokenResponse, error) {
-	_, err := middlewares.GetAuthenticatedUser(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	//applicant, err := r.kycClient.GetKycApplicantByPersonId(ctx, &kycService.PersonIdRequest{PersonId: personId})
-	//if err != nil {
-	//	return nil, err
-	//}
-	//return r.onfidoClient.GenerateApplicantSDKToken(ctx, &onfidoService.ApplicantSDKTokenRequest{ApplicantId: applicant.ApplicantId})
-
-	panic("Awaiting new implementation with new kyc/onfido codebase")
-}
 
 func (r *queryResolver) GetCDDReportSummary(ctx context.Context) (*types.CDDSummary, error) {
 	personId, err := middlewares.GetAuthenticatedUser(ctx)
