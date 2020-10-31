@@ -9,7 +9,6 @@ import (
 	"ms.api/config"
 	"ms.api/protos/pb/authService"
 	"ms.api/protos/pb/cddService"
-	"ms.api/protos/pb/kycService"
 	"ms.api/protos/pb/onboardingService"
 	"ms.api/protos/pb/onfidoService"
 	"ms.api/protos/pb/verifyService"
@@ -25,34 +24,31 @@ var (
 
 type ResolverOpts struct {
 	OnfidoClient      onfidoService.OnfidoServiceClient
-	kycClient         kycService.KycServiceClient
+	cddClient         cddService.CddServiceClient
 	onBoardingService onboardingService.OnBoardingServiceClient
 	verifyService     verifyService.VerifyServiceClient
 	AuthService       authService.AuthServiceClient
-	cddService        cddService.CddServiceClient
-	AuthMw  *middlewares.AuthMiddleware
+	AuthMw            *middlewares.AuthMiddleware
 }
 
 type Resolver struct {
-	kycClient         kycService.KycServiceClient
+	cddService        cddService.CddServiceClient
 	onBoardingService onboardingService.OnBoardingServiceClient
 	verifyService     verifyService.VerifyServiceClient
 	onfidoClient      onfidoService.OnfidoServiceClient
 	authService       authService.AuthServiceClient
-	cddService        cddService.CddServiceClient
-	authMw  *middlewares.AuthMiddleware
+	authMw            *middlewares.AuthMiddleware
 	logger            *logrus.Logger
 }
 
 func NewResolver(opt *ResolverOpts, logger *logrus.Logger) *Resolver {
 	return &Resolver{
-		kycClient:         opt.kycClient,
+		cddService:        opt.cddClient,
 		onBoardingService: opt.onBoardingService,
 		verifyService:     opt.verifyService,
 		onfidoClient:      opt.OnfidoClient,
 		authService:       opt.AuthService,
-		cddService:        opt.cddService,
-		authMw: opt.AuthMw,
+		authMw:            opt.AuthMw,
 		logger:            logger,
 	}
 }
@@ -79,7 +75,23 @@ func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) 
 	}
 	opts.OnfidoClient = onfidoService.NewOnfidoServiceClient(connection)
 
-	// Auth
+	// CDD
+	connection, err = dialRPC(ctx, secrets.CddServiceURL)
+	if err != nil {
+		return nil, errors.Wrap(err, secrets.CddServiceURL)
+	}
+	opts.cddClient = cddService.NewCddServiceClient(connection)
+
+	// Verify
+	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	connection, err = dialRPC(ctx, secrets.VerifyServiceURL)
+	if err != nil {
+		return nil, fmt.Errorf("%v: %s", err, secrets.VerifyServiceURL)
+	}
+	opts.verifyService = verifyService.NewVerifyServiceClient(connection)
+
+	//// Auth
 	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	connection, err = dialRPC(ctx, secrets.AuthServiceURL)

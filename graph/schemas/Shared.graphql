@@ -48,92 +48,32 @@ input InputAddress {
     postcode: String!
 }
 
+input CreatePasscodeInput {
+    token: String!,
+    passcode: String!
+}
+
+input BioLoginInput {
+    email: String!
+    biometricPasscode: String!
+    deviceId: String!
+}
+
+input DeactivateBioLoginInput {
+    email: String!
+    deviceId: String!
+}
+
 type CheckEmailExistenceResult {
     exists: Boolean!
     message: String!
 }
 
-type CddSummary {
-    status: String!
-    documents: [CddDocument]!
-}
-
-type CddDocument {
-    name: String!
-    status: String!
-    reason: String!
-}
-
-type CDD {
-    id: String!
-    owner: String!
-    details: String!
-    status: String!
-    kyc: KYC
-    aml: AML
-    roava: Roava
-    cra: CRA
-    createdAt: String!
-    updatedAt: String!
-}
-
-type KYC {
-    id: String!
-    applicant: Applicant!
-    vendor: String
-    status: String
-    createdAt: String!
-    updatedAt: String!
-}
-
-type AML {
-    createdAt: String!
-    updatedAt: String!
-    title: String!
-    personId: String!
-    firstName: String!,
-    lastName: String!
-    middleName: String!
-    dob: String!
-    email: String!
-    nationality: String!
-    status: String!
-    reports: [Any]!
-}
-
-type Roava {
-    empty: String!
-}
-
-type CRA {
-    empty: String!
-}
-
-type Applicant {
-    applicantId: String
-    firstName: String!
-    lastName: String!
-    email: String!
-    dob: String!
-    address: Address!
-    vendor: String
-}
-
-
-type Address {
-    flat_number: String
-    buildingNumber: String
-    buildingName: String
-    street: String!
-    subStreet: String
-    town : String
-    state : String!
-    postcode: String!
-    country: String!
+type ActivateBioLoginResponse {
+    message: String!
+    biometricPasscode: String!
 }
 
 type createApplicationResponse {
     token: String!
 }
-
-scalar Any

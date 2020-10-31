@@ -48,6 +48,12 @@ models:
       - github.com/99designs/gqlgen/graphql.Int64
   DateTime:
     model: ms.api/libs/DateTime.DateTime
+  #CDD:
+    #model: ms.api/protos/pb/kycService.Cdd
+  Address:
+      model: ms.api/protos/pb/cddService.Address
+  Applicant:
+    model: ms.api/protos/pb/cddService.Applicant
   ApplicantSDKTokenRequest:
     model: ms.api/protos/pb/onfidoService.ApplicantSDKTokenRequest
   ApplicantSDKTokenResponse:

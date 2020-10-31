@@ -6,12 +6,13 @@ package graph
 import (
 	"context"
 	"errors"
+
 	"ms.api/graph/generated"
 	rerrors "ms.api/libs/errors"
 	"ms.api/libs/validator/datevalidator"
 	emailvalidator "ms.api/libs/validator/email"
+	"ms.api/libs/validator/phonenumbervalidator"
 	"ms.api/protos/pb/authService"
-	"ms.api/protos/pb/kycService"
 	"ms.api/protos/pb/onboardingService"
 	"ms.api/server/http/middlewares"
 	"ms.api/types"
@@ -52,24 +53,6 @@ func (r *mutationResolver) ConfirmPasswordResetDetails(ctx context.Context, emai
 	return &types.Result{
 		Success: true,
 		Message: result.Message,
-	}, nil
-}
-
-func (r *mutationResolver) SubmitKYCApplication(ctx context.Context) (*types.Result, error) {
-	personId, err := middlewares.GetAuthenticatedUser(ctx)
-	if err != nil {
-		return nil, ErrUnAuthenticated
-	}
-
-	if _, err := r.kycClient.SubmitKycApplicationByPersonId(ctx, &kycService.PersonIdRequest{
-		PersonId: personId,
-	}); err != nil {
-		r.logger.Infof("kycService.SubmitKycApplicationByPersonId() failed: %v", err)
-		return nil, rerrors.NewFromGrpc(err)
-	}
-	return &types.Result{
-		Success: true,
-		Message: "Successfully started CDD check, you'll be notified once completed.",
 	}, nil
 }
 
@@ -125,8 +108,10 @@ func (r *mutationResolver) AddReasonsForUsingRoava(ctx context.Context, personID
 }
 
 func (r *mutationResolver) CreatePhone(ctx context.Context, input types.CreatePhoneInput) (*types.CreatePhoneResult, error) {
-	if input.Phone == "" || len(input.Phone) < 6 {
-		return nil, errors.New("invalid phone number")
+	if err := phonenumbervalidator.ValidatePhoneNumber(input.Phone); err != nil {
+		r.logger.WithField("phone", input.Phone).WithError(err).
+			Error("failed to validate phone number")
+		return nil, err
 	}
 	result, err := r.onBoardingService.CreatePhone(ctx,
 		&onboardingService.CreatePhoneRequest{PhoneNumber: input.Phone,
@@ -199,8 +184,10 @@ func (r *mutationResolver) RefreshToken(ctx context.Context, refreshToken string
 }
 
 func (r *mutationResolver) ResendOtp(ctx context.Context, phone string) (*types.Result, error) {
-	if phone == "" || len(phone) < 6 {
-		return nil, errors.New("invalid phone number")
+	if err := phonenumbervalidator.ValidatePhoneNumber(phone); err != nil {
+		r.logger.WithField("phone", phone).WithError(err).
+			Error("failed to validate phone number")
+		return nil, err
 	}
 	resp, err := r.onBoardingService.ResendOtp(ctx, &onboardingService.ResendOtpRequest{Phone: phone})
 	if err != nil {
@@ -220,6 +207,60 @@ func (r *mutationResolver) CheckEmailExistence(ctx context.Context, email string
 		return nil, rerrors.NewFromGrpc(err)
 	}
 	return &types.CheckEmailExistenceResult{Message: resp.Message, Exists: resp.Exists}, nil
+}
+
+func (r *mutationResolver) ActivateBioLogin(ctx context.Context, token string, deviceID string) (*types.ActivateBioLoginResponse, error) {
+	resp, err := r.authService.ActivateBioLogin(ctx, &authService.ActivateBioLoginRequest{
+		Token:    token,
+		DeviceId: deviceID,
+	})
+
+	if err != nil {
+		r.logger.WithError(err).Info("authService.ActivateBioLogin() failed")
+		return nil, rerrors.NewFromGrpc(err)
+	}
+
+	return &types.ActivateBioLoginResponse{BiometricPasscode: resp.BiometricPasscode, Message: resp.Message}, nil
+}
+
+func (r *mutationResolver) BioLoginRequest(ctx context.Context, input types.BioLoginInput) (*types.AuthResult, error) {
+	if err := emailvalidator.Validate(input.Email); err != nil {
+		return nil, err
+	}
+	resp, err := r.authService.BioLogin(ctx, &authService.BioLoginRequest{
+		Email:             input.Email,
+		BiometricPasscode: input.BiometricPasscode,
+		DeviceId:          input.DeviceID,
+	})
+
+	if err != nil {
+		r.logger.WithError(err).Info("authService.BioLogin() failed")
+		return nil, rerrors.NewFromGrpc(err)
+	}
+
+	return &types.AuthResult{
+		Token:                  resp.Token,
+		RefreshToken:           resp.RefreshToken,
+		RegistrationCheckpoint: resp.RegistrationCheckpoint,
+	}, nil
+}
+
+func (r *mutationResolver) DeactivateBioLogin(ctx context.Context, input types.DeactivateBioLoginInput) (*types.Result, error) {
+	if err := emailvalidator.Validate(input.Email); err != nil {
+		return nil, err
+	}
+	resp, err := r.authService.DeactivateBioLogin(ctx, &authService.DeactivateBioLoginRequest{
+		Email:    input.Email,
+		DeviceId: input.DeviceID,
+	})
+	if err != nil {
+		r.logger.WithError(err).Info("authService.DeactivateBioLogin() failed")
+		return nil, rerrors.NewFromGrpc(err)
+	}
+
+	return &types.Result{
+		Message: resp.Message,
+	}, nil
 }
 
 func (r *mutationResolver) SubmitApplication(ctx context.Context) (*types.Result, error) {

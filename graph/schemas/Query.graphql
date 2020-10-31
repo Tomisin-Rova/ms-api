@@ -1,5 +1,3 @@
 type Query {
-    getApplicantSDKToken: ApplicantSDKTokenResponse
-    getCddSummary: CddSummary
-    getCdd(id: String!): CDD
+    getCDDReportSummary: CDDSummary
 }

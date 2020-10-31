@@ -6,61 +6,39 @@ package graph
 import (
 	"context"
 
-	"github.com/jinzhu/copier"
 	"ms.api/graph/generated"
 	rerrors "ms.api/libs/errors"
 	"ms.api/protos/pb/cddService"
-	"ms.api/protos/pb/kycService"
-	"ms.api/protos/pb/onfidoService"
 	"ms.api/server/http/middlewares"
 	"ms.api/types"
 )
 
-func (r *queryResolver) GetApplicantSDKToken(ctx context.Context) (*onfidoService.ApplicantSDKTokenResponse, error) {
+func (r *queryResolver) GetCDDReportSummary(ctx context.Context) (*types.CDDSummary, error) {
 	personId, err := middlewares.GetAuthenticatedUser(ctx)
 	if err != nil {
-		return nil, err
+		return nil, ErrUnAuthenticated
 	}
-
-	applicant, err := r.kycClient.GetKycApplicantByPersonId(ctx, &kycService.PersonIdRequest{PersonId: personId})
+	resp, err := r.cddService.GetCDDSummaryReport(ctx, &cddService.PersonIdRequest{PersonId: personId})
 	if err != nil {
-		return nil, err
-	}
-	return r.onfidoClient.GenerateApplicantSDKToken(ctx, &onfidoService.ApplicantSDKTokenRequest{ApplicantId: applicant.ApplicantId})
-}
-
-func (r *queryResolver) GetCddSummary(ctx context.Context) (*types.CddSummary, error) {
-	personId, err := middlewares.GetAuthenticatedUser(ctx)
-	if err != nil {
-		return nil, err
-	}
-	summary, err := r.cddService.GetCDDSummaryReport(ctx, &cddService.PersonIdRequest{PersonId: personId})
-	if err != nil {
-		r.logger.WithError(err).Error("cdd.getSummary() failed")
 		return nil, rerrors.NewFromGrpc(err)
 	}
-	docs := make([]*types.CddDocument, 0, len(summary.Documents))
-	for _, next := range summary.Documents {
-		docs = append(docs, &types.CddDocument{Name: next.Name, Status: next.Status, Reason: next.Reason})
-	}
-	return &types.CddSummary{
-		Status:    summary.Status,
-		Documents: docs,
-	}, nil
-}
 
-func (r *queryResolver) GetCdd(ctx context.Context, id string) (*types.Cdd, error) {
-	cdd, err := r.cddService.GetCDDById(ctx, &cddService.CddIdRequest{Id: id})
-	if err != nil {
-		r.logger.WithError(err).Error("cdd.getCddById() failed")
-		return nil, rerrors.NewFromGrpc(err)
+	output := &types.CDDSummary{}
+
+	documents := make([]*types.CDDSummaryDocument, 0)
+
+	for _, document := range resp.Documents {
+		documents = append(documents, &types.CDDSummaryDocument{
+			Name:   document.Name,
+			Status: document.Status,
+			Reason: document.Reason,
+		})
 	}
-	value := &types.Cdd{}
-	if err := copier.Copy(value, cdd); err != nil {
-		r.logger.WithError(err).Error("failed to copy values")
-		return nil, err
-	}
-	return value, nil
+
+	output.Status = resp.Status
+	output.Documents = documents
+
+	return output, nil
 }
 
 // Query returns generated.QueryResolver implementation.

@@ -2,41 +2,9 @@
 
 package types
 
-type Aml struct {
-	CreatedAt   string        `json:"createdAt"`
-	UpdatedAt   string        `json:"updatedAt"`
-	Title       string        `json:"title"`
-	PersonID    string        `json:"personId"`
-	FirstName   string        `json:"firstName"`
-	LastName    string        `json:"lastName"`
-	MiddleName  string        `json:"middleName"`
-	Dob         string        `json:"dob"`
-	Email       string        `json:"email"`
-	Nationality string        `json:"nationality"`
-	Status      string        `json:"status"`
-	Reports     []interface{} `json:"reports"`
-}
-
-type Address struct {
-	FlatNumber     *string `json:"flat_number"`
-	BuildingNumber *string `json:"buildingNumber"`
-	BuildingName   *string `json:"buildingName"`
-	Street         string  `json:"street"`
-	SubStreet      *string `json:"subStreet"`
-	Town           *string `json:"town"`
-	State          string  `json:"state"`
-	Postcode       string  `json:"postcode"`
-	Country        string  `json:"country"`
-}
-
-type Applicant struct {
-	ApplicantID *string  `json:"applicantId"`
-	FirstName   string   `json:"firstName"`
-	LastName    string   `json:"lastName"`
-	Email       string   `json:"email"`
-	Dob         string   `json:"dob"`
-	Address     *Address `json:"address"`
-	Vendor      *string  `json:"vendor"`
+type ActivateBioLoginResponse struct {
+	Message           string `json:"message"`
+	BiometricPasscode string `json:"biometricPasscode"`
 }
 
 type AuthResult struct {
@@ -45,32 +13,30 @@ type AuthResult struct {
 	RegistrationCheckpoint string `json:"registrationCheckpoint"`
 }
 
+type BioLoginInput struct {
+	Email             string `json:"email"`
+	BiometricPasscode string `json:"biometricPasscode"`
+	DeviceID          string `json:"deviceId"`
+}
+
 type Cdd struct {
-	ID        string `json:"id"`
-	Owner     string `json:"owner"`
-	Details   string `json:"details"`
-	Status    string `json:"status"`
-	Kyc       *Kyc   `json:"kyc"`
-	Aml       *Aml   `json:"aml"`
-	Roava     *Roava `json:"roava"`
-	Cra       *Cra   `json:"cra"`
-	CreatedAt string `json:"createdAt"`
-	UpdatedAt string `json:"updatedAt"`
+	ID          string `json:"id"`
+	Owner       string `json:"owner"`
+	Details     string `json:"details"`
+	Status      string `json:"status"`
+	TimeCreated int64  `json:"time_created"`
+	TimeUpdated int64  `json:"time_updated"`
 }
 
-type Cra struct {
-	Empty string `json:"empty"`
+type CDDSummary struct {
+	Status    string                `json:"status"`
+	Documents []*CDDSummaryDocument `json:"documents"`
 }
 
-type CddDocument struct {
+type CDDSummaryDocument struct {
 	Name   string `json:"name"`
 	Status string `json:"status"`
 	Reason string `json:"reason"`
-}
-
-type CddSummary struct {
-	Status    string         `json:"status"`
-	Documents []*CddDocument `json:"documents"`
 }
 
 type CheckEmailExistenceResult struct {
@@ -84,6 +50,11 @@ type CreateEmailInput struct {
 	Passcode string `json:"passcode"`
 }
 
+type CreatePasscodeInput struct {
+	Token    string `json:"token"`
+	Passcode string `json:"passcode"`
+}
+
 type CreatePhoneInput struct {
 	Phone  string  `json:"phone"`
 	Device *Device `json:"device"`
@@ -93,6 +64,11 @@ type CreatePhoneResult struct {
 	Success bool   `json:"success"`
 	Message string `json:"message"`
 	Token   string `json:"token"`
+}
+
+type DeactivateBioLoginInput struct {
+	Email    string `json:"email"`
+	DeviceID string `json:"deviceId"`
 }
 
 type Device struct {
@@ -109,22 +85,9 @@ type InputAddress struct {
 	Postcode string `json:"postcode"`
 }
 
-type Kyc struct {
-	ID        string     `json:"id"`
-	Applicant *Applicant `json:"applicant"`
-	Vendor    *string    `json:"vendor"`
-	Status    *string    `json:"status"`
-	CreatedAt string     `json:"createdAt"`
-	UpdatedAt string     `json:"updatedAt"`
-}
-
 type Result struct {
 	Success bool   `json:"success"`
 	Message string `json:"message"`
-}
-
-type Roava struct {
-	Empty string `json:"empty"`
 }
 
 type UpdateBioDataInput struct {
