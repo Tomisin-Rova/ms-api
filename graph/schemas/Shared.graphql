@@ -73,3 +73,7 @@ type ActivateBioLoginResponse {
     message: String!
     biometricPasscode: String!
 }
+
+type createApplicationResponse {
+    token: String!
+}

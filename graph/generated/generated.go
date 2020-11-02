@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"io"
 	"strconv"
 	"sync"
 
@@ -38,6 +39,7 @@ type Config struct {
 type ResolverRoot interface {
 	Mutation() MutationResolver
 	Query() QueryResolver
+	Subscription() SubscriptionResolver
 }
 
 type DirectiveRoot struct {
@@ -100,9 +102,9 @@ type ComplexityRoot struct {
 	}
 
 	CDDSummaryDocument struct {
-		Name   func(childComplexity int) int
-		Reason func(childComplexity int) int
-		Status func(childComplexity int) int
+		Name    func(childComplexity int) int
+		Reasons func(childComplexity int) int
+		Status  func(childComplexity int) int
 	}
 
 	CheckEmailExistenceResult struct {
@@ -129,6 +131,7 @@ type ComplexityRoot struct {
 		RefreshToken                func(childComplexity int, refreshToken string) int
 		ResendOtp                   func(childComplexity int, phone string) int
 		ResetPassword               func(childComplexity int, email string, newPassword string, verificationToken string) int
+		SubmitApplication           func(childComplexity int) int
 		UpdatePersonBiodata         func(childComplexity int, input *types.UpdateBioDataInput) int
 		VerifyOtp                   func(childComplexity int, phone string, code string) int
 	}
@@ -140,6 +143,14 @@ type ComplexityRoot struct {
 	Result struct {
 		Message func(childComplexity int) int
 		Success func(childComplexity int) int
+	}
+
+	Subscription struct {
+		CreateApplication func(childComplexity int) int
+	}
+
+	CreateApplicationResponse struct {
+		Token func(childComplexity int) int
 	}
 }
 
@@ -158,9 +169,13 @@ type MutationResolver interface {
 	ActivateBioLogin(ctx context.Context, token string, deviceID string) (*types.ActivateBioLoginResponse, error)
 	BioLoginRequest(ctx context.Context, input types.BioLoginInput) (*types.AuthResult, error)
 	DeactivateBioLogin(ctx context.Context, input types.DeactivateBioLoginInput) (*types.Result, error)
+	SubmitApplication(ctx context.Context) (*types.Result, error)
 }
 type QueryResolver interface {
 	GetCDDReportSummary(ctx context.Context) (*types.CDDSummary, error)
+}
+type SubscriptionResolver interface {
+	CreateApplication(ctx context.Context) (<-chan *types.CreateApplicationResponse, error)
 }
 
 type executableSchema struct {
@@ -402,12 +417,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.CDDSummaryDocument.Name(childComplexity), true
 
-	case "CDDSummaryDocument.reason":
-		if e.complexity.CDDSummaryDocument.Reason == nil {
+	case "CDDSummaryDocument.reasons":
+		if e.complexity.CDDSummaryDocument.Reasons == nil {
 			break
 		}
 
-		return e.complexity.CDDSummaryDocument.Reason(childComplexity), true
+		return e.complexity.CDDSummaryDocument.Reasons(childComplexity), true
 
 	case "CDDSummaryDocument.status":
 		if e.complexity.CDDSummaryDocument.Status == nil {
@@ -595,6 +610,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.ResetPassword(childComplexity, args["email"].(string), args["newPassword"].(string), args["verificationToken"].(string)), true
 
+	case "Mutation.submitApplication":
+		if e.complexity.Mutation.SubmitApplication == nil {
+			break
+		}
+
+		return e.complexity.Mutation.SubmitApplication(childComplexity), true
+
 	case "Mutation.updatePersonBiodata":
 		if e.complexity.Mutation.UpdatePersonBiodata == nil {
 			break
@@ -640,6 +662,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Result.Success(childComplexity), true
 
+	case "Subscription.createApplication":
+		if e.complexity.Subscription.CreateApplication == nil {
+			break
+		}
+
+		return e.complexity.Subscription.CreateApplication(childComplexity), true
+
+	case "createApplicationResponse.token":
+		if e.complexity.CreateApplicationResponse.Token == nil {
+			break
+		}
+
+		return e.complexity.CreateApplicationResponse.Token(childComplexity), true
+
 	}
 	return 0, false
 }
@@ -672,6 +708,23 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			first = false
 			data := ec._Mutation(ctx, rc.Operation.SelectionSet)
 			var buf bytes.Buffer
+			data.MarshalGQL(&buf)
+
+			return &graphql.Response{
+				Data: buf.Bytes(),
+			}
+		}
+	case ast.Subscription:
+		next := ec._Subscription(ctx, rc.Operation.SelectionSet)
+
+		var buf bytes.Buffer
+		return func(ctx context.Context) *graphql.Response {
+			buf.Reset()
+			data := next()
+
+			if data == nil {
+				return nil
+			}
 			data.MarshalGQL(&buf)
 
 			return &graphql.Response{
@@ -745,8 +798,9 @@ type CDDSummary {
 type CDDSummaryDocument {
     name: String!
     status: String!
-    reason: String!
-}`, BuiltIn: false},
+    reasons: [String]
+}
+`, BuiltIn: false},
 	{Name: "graph/schemas/Mutation.graphql", Input: `type Mutation {
     resetPassword(
         email: String!
@@ -776,6 +830,7 @@ type CDDSummaryDocument {
     activateBioLogin(token: String!, deviceId: String!): ActivateBioLoginResponse
     bioLoginRequest(input: BioLoginInput!): AuthResult
     deactivateBioLogin(input: DeactivateBioLoginInput!): Result
+    submitApplication: Result
 }
 `, BuiltIn: false},
 	{Name: "graph/schemas/Onfido.graphql", Input: `type ApplicantSDKTokenRequest {
@@ -863,8 +918,16 @@ type CheckEmailExistenceResult {
 type ActivateBioLoginResponse {
     message: String!
     biometricPasscode: String!
-}`, BuiltIn: false},
-	{Name: "graph/schemas/Subscription.graphql", Input: ``, BuiltIn: false},
+}
+
+type createApplicationResponse {
+    token: String!
+}
+`, BuiltIn: false},
+	{Name: "graph/schemas/Subscription.graphql", Input: `type Subscription {
+    createApplication: createApplicationResponse
+}
+`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
@@ -2308,7 +2371,7 @@ func (ec *executionContext) _CDDSummaryDocument_status(ctx context.Context, fiel
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _CDDSummaryDocument_reason(ctx context.Context, field graphql.CollectedField, obj *types.CDDSummaryDocument) (ret graphql.Marshaler) {
+func (ec *executionContext) _CDDSummaryDocument_reasons(ctx context.Context, field graphql.CollectedField, obj *types.CDDSummaryDocument) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -2325,21 +2388,18 @@ func (ec *executionContext) _CDDSummaryDocument_reason(ctx context.Context, fiel
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Reason, nil
+		return obj.Reasons, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.([]*string)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalOString2ᚕᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _CheckEmailExistenceResult_exists(ctx context.Context, field graphql.CollectedField, obj *types.CheckEmailExistenceResult) (ret graphql.Marshaler) {
@@ -3044,6 +3104,37 @@ func (ec *executionContext) _Mutation_deactivateBioLogin(ctx context.Context, fi
 	return ec.marshalOResult2ᚖmsᚗapiᚋtypesᚐResult(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_submitApplication(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().SubmitApplication(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*types.Result)
+	fc.Result = res
+	return ec.marshalOResult2ᚖmsᚗapiᚋtypesᚐResult(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query_getCDDReportSummary(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -3210,6 +3301,47 @@ func (ec *executionContext) _Result_message(ctx context.Context, field graphql.C
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Subscription_createApplication(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = nil
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Subscription",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Subscription().CreateApplication(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	if resTmp == nil {
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-resTmp.(<-chan *types.CreateApplicationResponse)
+		if !ok {
+			return nil
+		}
+		return graphql.WriterFunc(func(w io.Writer) {
+			w.Write([]byte{'{'})
+			graphql.MarshalString(field.Alias).MarshalGQL(w)
+			w.Write([]byte{':'})
+			ec.marshalOcreateApplicationResponse2ᚖmsᚗapiᚋtypesᚐCreateApplicationResponse(ctx, field.Selections, res).MarshalGQL(w)
+			w.Write([]byte{'}'})
+		})
+	}
 }
 
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -4263,6 +4395,40 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 	return ec.marshalO__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _createApplicationResponse_token(ctx context.Context, field graphql.CollectedField, obj *types.CreateApplicationResponse) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "createApplicationResponse",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Token, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 // endregion **************************** field.gotpl *****************************
 
 // region    **************************** input.gotpl *****************************
@@ -4902,11 +5068,8 @@ func (ec *executionContext) _CDDSummaryDocument(ctx context.Context, sel ast.Sel
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "reason":
-			out.Values[i] = ec._CDDSummaryDocument_reason(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
+		case "reasons":
+			out.Values[i] = ec._CDDSummaryDocument_reasons(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -5030,6 +5193,8 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec._Mutation_bioLoginRequest(ctx, field)
 		case "deactivateBioLogin":
 			out.Values[i] = ec._Mutation_deactivateBioLogin(ctx, field)
+		case "submitApplication":
+			out.Values[i] = ec._Mutation_submitApplication(ctx, field)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -5112,6 +5277,26 @@ func (ec *executionContext) _Result(ctx context.Context, sel ast.SelectionSet, o
 		return graphql.Null
 	}
 	return out
+}
+
+var subscriptionImplementors = []string{"Subscription"}
+
+func (ec *executionContext) _Subscription(ctx context.Context, sel ast.SelectionSet) func() graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, subscriptionImplementors)
+	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
+		Object: "Subscription",
+	})
+	if len(fields) != 1 {
+		ec.Errorf(ctx, "must subscribe to exactly one stream")
+		return nil
+	}
+
+	switch fields[0].Name {
+	case "createApplication":
+		return ec._Subscription_createApplication(ctx, fields[0])
+	default:
+		panic("unknown field " + strconv.Quote(fields[0].Name))
+	}
 }
 
 var __DirectiveImplementors = []string{"__Directive"}
@@ -5344,6 +5529,33 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 			out.Values[i] = ec.___Type_inputFields(ctx, field, obj)
 		case "ofType":
 			out.Values[i] = ec.___Type_ofType(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var createApplicationResponseImplementors = []string{"createApplicationResponse"}
+
+func (ec *executionContext) _createApplicationResponse(ctx context.Context, sel ast.SelectionSet, obj *types.CreateApplicationResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, createApplicationResponseImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("createApplicationResponse")
+		case "token":
+			out.Values[i] = ec._createApplicationResponse_token(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -6034,6 +6246,13 @@ func (ec *executionContext) marshalO__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgen�
 		return graphql.Null
 	}
 	return ec.___Type(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOcreateApplicationResponse2ᚖmsᚗapiᚋtypesᚐCreateApplicationResponse(ctx context.Context, sel ast.SelectionSet, v *types.CreateApplicationResponse) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._createApplicationResponse(ctx, sel, v)
 }
 
 // endregion ***************************** type.gotpl *****************************

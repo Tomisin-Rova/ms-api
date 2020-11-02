@@ -27,4 +27,5 @@ type Mutation {
     activateBioLogin(token: String!, deviceId: String!): ActivateBioLoginResponse
     bioLoginRequest(input: BioLoginInput!): AuthResult
     deactivateBioLogin(input: DeactivateBioLoginInput!): Result
+    submitApplication: Result
 }

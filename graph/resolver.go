@@ -12,6 +12,7 @@ import (
 	"ms.api/protos/pb/onboardingService"
 	"ms.api/protos/pb/onfidoService"
 	"ms.api/protos/pb/verifyService"
+	"ms.api/server/http/middlewares"
 	"time"
 )
 
@@ -27,6 +28,7 @@ type ResolverOpts struct {
 	onBoardingService onboardingService.OnBoardingServiceClient
 	verifyService     verifyService.VerifyServiceClient
 	AuthService       authService.AuthServiceClient
+	AuthMw            *middlewares.AuthMiddleware
 }
 
 type Resolver struct {
@@ -35,6 +37,7 @@ type Resolver struct {
 	verifyService     verifyService.VerifyServiceClient
 	onfidoClient      onfidoService.OnfidoServiceClient
 	authService       authService.AuthServiceClient
+	authMw            *middlewares.AuthMiddleware
 	logger            *logrus.Logger
 }
 
@@ -45,6 +48,7 @@ func NewResolver(opt *ResolverOpts, logger *logrus.Logger) *Resolver {
 		verifyService:     opt.verifyService,
 		onfidoClient:      opt.OnfidoClient,
 		authService:       opt.AuthService,
+		authMw:            opt.AuthMw,
 		logger:            logger,
 	}
 }

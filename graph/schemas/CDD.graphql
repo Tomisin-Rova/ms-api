@@ -39,5 +39,5 @@ type CDDSummary {
 type CDDSummaryDocument {
     name: String!
     status: String!
-    reason: String!
+    reasons: [String]
 }

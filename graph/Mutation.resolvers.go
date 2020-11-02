@@ -6,12 +6,12 @@ package graph
 import (
 	"context"
 	"errors"
-	"ms.api/libs/validator/phonenumbervalidator"
 
 	"ms.api/graph/generated"
 	rerrors "ms.api/libs/errors"
 	"ms.api/libs/validator/datevalidator"
 	emailvalidator "ms.api/libs/validator/email"
+	"ms.api/libs/validator/phonenumbervalidator"
 	"ms.api/protos/pb/authService"
 	"ms.api/protos/pb/onboardingService"
 	"ms.api/server/http/middlewares"
@@ -64,6 +64,13 @@ func (r *mutationResolver) UpdatePersonBiodata(ctx context.Context, input *types
 	if err := datevalidator.ValidateDob(input.Dob); err != nil {
 		return nil, err
 	}
+	if err := r.validateAddress(input.Address); err != nil {
+		return nil, err
+	}
+	if input.Address.Postcode == "" {
+		input.Address.Postcode = "NA"
+	}
+
 	payload := onboardingService.UpdatePersonRequest{
 		PersonId: personId,
 		Address: &onboardingService.Address{
@@ -136,6 +143,10 @@ func (r *mutationResolver) VerifyOtp(ctx context.Context, phone string, code str
 }
 
 func (r *mutationResolver) CreateEmail(ctx context.Context, input *types.CreateEmailInput) (*types.AuthResult, error) {
+	if err := emailvalidator.Validate(input.Email); err != nil {
+		return nil, err
+	}
+
 	resp, err := r.onBoardingService.CreateEmail(ctx, &onboardingService.CreateEmailRequest{
 		Email:    input.Email,
 		Token:    input.Token,
@@ -259,7 +270,41 @@ func (r *mutationResolver) DeactivateBioLogin(ctx context.Context, input types.D
 	}, nil
 }
 
+func (r *mutationResolver) SubmitApplication(ctx context.Context) (*types.Result, error) {
+	personId, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+	resp, err := r.onBoardingService.SubmitCheck(ctx, &onboardingService.SubmitCheckRequest{
+		PersonId: personId,
+	})
+	if err != nil {
+		r.logger.WithError(err).Error("submitCheck() failed")
+		return nil, rerrors.NewFromGrpc(err)
+	}
+	return &types.Result{Message: resp.Message, Success: true}, nil
+}
+
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 
 type mutationResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//    it when you're done.
+//  - You have helper methods in this file. Move them out to keep these resolver files clean.
+func (r *mutationResolver) validateAddress(addr *types.InputAddress) error {
+	if addr.Country == "" {
+		return errors.New("country data is missing from address")
+	}
+	if addr.City == "" {
+		return errors.New("city data is missing from address")
+	}
+	if addr.Street == "" {
+		return errors.New("street data is missing from address")
+	}
+	return nil
+}
