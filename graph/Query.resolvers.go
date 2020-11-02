@@ -24,20 +24,21 @@ func (r *queryResolver) GetCDDReportSummary(ctx context.Context) (*types.CDDSumm
 	}
 
 	output := &types.CDDSummary{}
-
 	documents := make([]*types.CDDSummaryDocument, 0)
-
 	for _, document := range resp.Documents {
+		reasons := make([]*string, 0, len(document.Reasons))
+		for _, r := range document.Reasons {
+			reasons = append(reasons, &r)
+		}
 		documents = append(documents, &types.CDDSummaryDocument{
-			Name:   document.Name,
-			Status: document.Status,
-			Reason: document.Reason,
+			Name:    document.Name,
+			Status:  document.Status,
+			Reasons: reasons,
 		})
 	}
 
 	output.Status = resp.Status
 	output.Documents = documents
-
 	return output, nil
 }
 

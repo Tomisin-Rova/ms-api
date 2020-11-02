@@ -34,9 +34,9 @@ type CDDSummary struct {
 }
 
 type CDDSummaryDocument struct {
-	Name   string `json:"name"`
-	Status string `json:"status"`
-	Reason string `json:"reason"`
+	Name    string    `json:"name"`
+	Status  string    `json:"status"`
+	Reasons []*string `json:"reasons"`
 }
 
 type CheckEmailExistenceResult struct {

@@ -46,6 +46,17 @@ func (r *subscriptionResolver) CreateApplication(ctx context.Context) (<-chan *t
 	return respChan, nil
 }
 
+// Subscription returns generated.SubscriptionResolver implementation.
+func (r *Resolver) Subscription() generated.SubscriptionResolver { return &subscriptionResolver{r} }
+
+type subscriptionResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//    it when you're done.
+//  - You have helper methods in this file. Move them out to keep these resolver files clean.
 func (r *subscriptionResolver) validateToken(ctx context.Context) (string, error) {
 	bearerToken := handler.GetInitPayload(ctx).Authorization()
 	parts := strings.Split(bearerToken, " ")
@@ -61,8 +72,3 @@ func (r *subscriptionResolver) validateToken(ctx context.Context) (string, error
 	}
 	return personId, nil
 }
-
-// Subscription returns generated.SubscriptionResolver implementation.
-func (r *Resolver) Subscription() generated.SubscriptionResolver { return &subscriptionResolver{r} }
-
-type subscriptionResolver struct{ *Resolver }

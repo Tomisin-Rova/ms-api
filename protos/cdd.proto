@@ -49,7 +49,7 @@ message Cddsummary {
 message cdd_summary_document {
   string name = 1;
   string status = 2;
-  string reason = 3;
+  repeated string reasons = 3;
 }
 
 message kyc {

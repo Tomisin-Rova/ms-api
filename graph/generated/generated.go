@@ -102,9 +102,9 @@ type ComplexityRoot struct {
 	}
 
 	CDDSummaryDocument struct {
-		Name   func(childComplexity int) int
-		Reason func(childComplexity int) int
-		Status func(childComplexity int) int
+		Name    func(childComplexity int) int
+		Reasons func(childComplexity int) int
+		Status  func(childComplexity int) int
 	}
 
 	CheckEmailExistenceResult struct {
@@ -417,12 +417,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.CDDSummaryDocument.Name(childComplexity), true
 
-	case "CDDSummaryDocument.reason":
-		if e.complexity.CDDSummaryDocument.Reason == nil {
+	case "CDDSummaryDocument.reasons":
+		if e.complexity.CDDSummaryDocument.Reasons == nil {
 			break
 		}
 
-		return e.complexity.CDDSummaryDocument.Reason(childComplexity), true
+		return e.complexity.CDDSummaryDocument.Reasons(childComplexity), true
 
 	case "CDDSummaryDocument.status":
 		if e.complexity.CDDSummaryDocument.Status == nil {
@@ -798,8 +798,9 @@ type CDDSummary {
 type CDDSummaryDocument {
     name: String!
     status: String!
-    reason: String!
-}`, BuiltIn: false},
+    reasons: [String]
+}
+`, BuiltIn: false},
 	{Name: "graph/schemas/Mutation.graphql", Input: `type Mutation {
     resetPassword(
         email: String!
@@ -2370,7 +2371,7 @@ func (ec *executionContext) _CDDSummaryDocument_status(ctx context.Context, fiel
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _CDDSummaryDocument_reason(ctx context.Context, field graphql.CollectedField, obj *types.CDDSummaryDocument) (ret graphql.Marshaler) {
+func (ec *executionContext) _CDDSummaryDocument_reasons(ctx context.Context, field graphql.CollectedField, obj *types.CDDSummaryDocument) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -2387,21 +2388,18 @@ func (ec *executionContext) _CDDSummaryDocument_reason(ctx context.Context, fiel
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Reason, nil
+		return obj.Reasons, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.([]*string)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalOString2ᚕᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _CheckEmailExistenceResult_exists(ctx context.Context, field graphql.CollectedField, obj *types.CheckEmailExistenceResult) (ret graphql.Marshaler) {
@@ -5070,11 +5068,8 @@ func (ec *executionContext) _CDDSummaryDocument(ctx context.Context, sel ast.Sel
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "reason":
-			out.Values[i] = ec._CDDSummaryDocument_reason(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
+		case "reasons":
+			out.Values[i] = ec._CDDSummaryDocument_reasons(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

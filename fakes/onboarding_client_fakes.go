@@ -59,3 +59,14 @@ func (f *FakeOnBoardingClient) ResendOtp(ctx context.Context, req *onboardingSer
 	opts ...grpc.CallOption) (*onboardingService.SuccessResponse, error) {
 	return &onboardingService.SuccessResponse{Message: ""}, f.err
 }
+
+func (f *FakeOnBoardingClient) CreateApplication(ctx context.Context, req *onboardingService.CreateApplicationRequest,
+	opts ...grpc.CallOption) (onboardingService.OnBoardingService_CreateApplicationClient, error) {
+	return nil, f.err
+}
+
+func (f *FakeOnBoardingClient) SubmitCheck(ctx context.Context, req *onboardingService.SubmitCheckRequest,
+	opts ...grpc.CallOption) (*onboardingService.SuccessResponse, error) {
+	return &onboardingService.SuccessResponse{Message: "sucess"}, f.err
+}
+
