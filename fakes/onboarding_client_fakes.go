@@ -69,4 +69,3 @@ func (f *FakeOnBoardingClient) SubmitCheck(ctx context.Context, req *onboardingS
 	opts ...grpc.CallOption) (*onboardingService.SuccessResponse, error) {
 	return &onboardingService.SuccessResponse{Message: "sucess"}, f.err
 }
-
