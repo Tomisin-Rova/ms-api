@@ -24,8 +24,10 @@ type Mutation {
     refreshToken(refreshToken: String!): AuthResult
     resendOtp(phone: String!): Result
     checkEmailExistence(email: String!): CheckEmailExistenceResult
-    activateBioLogin(token: String!, deviceId: String!): ActivateBioLoginResponse
+    activateBioLogin(deviceId: String!): ActivateBioLoginResponse
     bioLoginRequest(input: BioLoginInput!): AuthResult
     deactivateBioLogin(input: DeactivateBioLoginInput!): Result
+    verifyEmailMagicLInk(email: String!, verificationToken: String!): Result
+    resendEmailMagicLInk(email: String!): Result
     submitApplication: Result
 }

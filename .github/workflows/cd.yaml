@@ -140,6 +140,7 @@ jobs:
           echo [github.sha]: ${{ github.sha }}
           echo [github.ref]: ${{ github.ref }}
           echo [github.actor]: trigered by $GITHUB_ACTOR
+
       - name: Checkout
         uses: actions/checkout@v2
 
@@ -168,6 +169,7 @@ jobs:
           -t "$REGISTRY_HOSTNAME"/"$CONTAINER":"$GITHUB_SHA" \
             --build-arg GITHUB_SHA="$GITHUB_SHA" \
             --build-arg GITHUB_REF="$GITHUB_REF" .
+
       # Push the Docker image to Google Container Registry
       # images name in format - [ORG]/[IMAGE] e.g. roava.io/myimage
       # docker push "$REGISTRY_HOSTNAME"/"$CONTAINER":"$GITHUB_SHA"

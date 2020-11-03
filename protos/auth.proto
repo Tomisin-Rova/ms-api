@@ -102,8 +102,8 @@ message AddressResponse {
 }
 
 message ActivateBioLoginRequest {
-  string token = 1;
-  string DeviceId = 2;
+  string personId = 1;
+  string deviceId = 2;
 }
 
 message Device {
@@ -121,10 +121,10 @@ message ActivateBioLoginResponse {
 message BioLoginRequest {
   string email = 1;
   string biometricPasscode = 2;
-  string DeviceId = 3;
+  string deviceId = 3;
 }
 
 message DeactivateBioLoginRequest {
   string email = 1;
-  string DeviceId = 2;
+  string deviceId = 2;
 }

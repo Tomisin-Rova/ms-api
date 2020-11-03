@@ -77,3 +77,8 @@ type ActivateBioLoginResponse {
 type createApplicationResponse {
     token: String!
 }
+
+input VerifyEmailMagicLInkInput {
+    email: String!
+    verificationToken: String!
+}

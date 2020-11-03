@@ -26,9 +26,9 @@ message CreatePhoneResponse {
 }
 
 message CreateEmailRequest {
-   string email = 1;
-   string passcode = 2;
-   string token = 3;
+    string email = 1;
+    string passcode = 2;
+    string token = 3;
 }
 
 message CreateEmailResponse {
@@ -97,6 +97,15 @@ message SubmitCheckRequest {
     string personId = 1;
 }
 
+message VerifyEmailMagicLInkRequest {
+    string email = 1;
+    string verificationToken= 2;
+}
+
+message ResendEmailMagicLInkRequest {
+    string email = 1;
+}
+
 service OnBoardingService {
     rpc CreatePhone(CreatePhoneRequest) returns (CreatePhoneResponse) {}
     rpc CreateEmail(CreateEmailRequest) returns (CreateEmailResponse) {}
@@ -108,4 +117,6 @@ service OnBoardingService {
     rpc ResendOtp(ResendOtpRequest) returns (SuccessResponse) {}
     rpc CreateApplication(CreateApplicationRequest) returns (stream CreateApplicationResponse) {}
     rpc SubmitCheck(SubmitCheckRequest) returns (SuccessResponse) {}
+    rpc VerifyEmailMagicLInk(VerifyEmailMagicLInkRequest) returns (SuccessResponse) {}
+    rpc ResendEmailMagicLInk(ResendEmailMagicLInkRequest) returns (SuccessResponse) {}
 }

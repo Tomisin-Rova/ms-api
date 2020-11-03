@@ -69,3 +69,13 @@ func (f *FakeOnBoardingClient) SubmitCheck(ctx context.Context, req *onboardingS
 	opts ...grpc.CallOption) (*onboardingService.SuccessResponse, error) {
 	return &onboardingService.SuccessResponse{Message: "sucess"}, f.err
 }
+
+func (f *FakeOnBoardingClient) VerifyEmailMagicLInk(ctx context.Context, req *onboardingService.VerifyEmailMagicLInkRequest,
+	opts ...grpc.CallOption) (*onboardingService.SuccessResponse, error) {
+	return &onboardingService.SuccessResponse{Message: "success"}, f.err
+}
+
+func (f *FakeOnBoardingClient) ResendEmailMagicLInk(ctx context.Context, req *onboardingService.ResendEmailMagicLInkRequest,
+	opts ...grpc.CallOption) (*onboardingService.SuccessResponse, error) {
+	return &onboardingService.SuccessResponse{Message: "success"}, f.err
+}
