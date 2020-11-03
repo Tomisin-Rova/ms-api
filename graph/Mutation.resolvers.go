@@ -273,20 +273,37 @@ func (r *mutationResolver) DeactivateBioLogin(ctx context.Context, input types.D
 	}, nil
 }
 
-func (r *mutationResolver) VerifyEmailMagicLInk(ctx context.Context, input *types.VerifyEmailMagicLInkInput) (*types.Result, error) {
-
+func (r *mutationResolver) VerifyEmailMagicLInk(ctx context.Context, email string, verificationToken string) (*types.Result, error) {
 	// Validate email
-	if err := emailvalidator.Validate(input.Email); err != nil {
+	if err := emailvalidator.Validate(email); err != nil {
 		return nil, err
 	}
 
 	resp, err := r.onBoardingService.VerifyEmailMagicLInk(ctx, &onboardingService.VerifyEmailMagicLInkRequest{
-		Email:             input.Email,
-		VerificationToken: input.VerificationToken, // The service will validate the token. ( it's an independent logic )
+		Email:             email,
+		VerificationToken: verificationToken, // The service will validate the token. ( it's an independent logic )
 	})
 
 	if err != nil {
 		r.logger.WithError(err).Info("onBoardingService.VerifyEmailMagicLInk() failed")
+		return nil, rerrors.NewFromGrpc(err)
+	}
+
+	return &types.Result{
+		Success: true,
+		Message: resp.Message,
+	}, nil
+}
+
+func (r *mutationResolver) ResendEmailMagicLInk(ctx context.Context, email string) (*types.Result, error) {
+	// Validate email
+	if err := emailvalidator.Validate(email); err != nil {
+		return nil, err
+	}
+
+	resp, err := r.onBoardingService.ResendEmailMagicLInk(ctx, &onboardingService.ResendEmailMagicLInkRequest{Email: email})
+	if err != nil {
+		r.logger.WithError(err).Info("onBoardingService.ResendEmailMagicLInk() failed")
 		return nil, rerrors.NewFromGrpc(err)
 	}
 
