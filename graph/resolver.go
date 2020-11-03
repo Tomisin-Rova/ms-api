@@ -13,6 +13,7 @@ import (
 	"ms.api/protos/pb/onfidoService"
 	"ms.api/protos/pb/verifyService"
 	"ms.api/server/http/middlewares"
+	"ms.api/types"
 	"time"
 )
 
@@ -21,6 +22,19 @@ var (
 	ErrUnAuthenticated = errors.New("user not authenticated")
 	ErrPayloadInvalid  = errors.New("payload is empty/invalid")
 )
+
+func (r *mutationResolver) validateAddress(addr *types.InputAddress) error {
+	if addr.Country == "" {
+		return errors.New("country data is missing from address")
+	}
+	if addr.City == "" {
+		return errors.New("city data is missing from address")
+	}
+	if addr.Street == "" {
+		return errors.New("street data is missing from address")
+	}
+	return nil
+}
 
 type ResolverOpts struct {
 	OnfidoClient      onfidoService.OnfidoServiceClient

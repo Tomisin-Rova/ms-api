@@ -119,7 +119,7 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		ActivateBioLogin            func(childComplexity int, token string, deviceID string) int
+		ActivateBioLogin            func(childComplexity int, deviceID string) int
 		AddReasonsForUsingRoava     func(childComplexity int, personID string, reasonValues []*string) int
 		AuthenticateCustomer        func(childComplexity int, email string, passcode string) int
 		BioLoginRequest             func(childComplexity int, input types.BioLoginInput) int
@@ -166,7 +166,7 @@ type MutationResolver interface {
 	RefreshToken(ctx context.Context, refreshToken string) (*types.AuthResult, error)
 	ResendOtp(ctx context.Context, phone string) (*types.Result, error)
 	CheckEmailExistence(ctx context.Context, email string) (*types.CheckEmailExistenceResult, error)
-	ActivateBioLogin(ctx context.Context, token string, deviceID string) (*types.ActivateBioLoginResponse, error)
+	ActivateBioLogin(ctx context.Context, deviceID string) (*types.ActivateBioLoginResponse, error)
 	BioLoginRequest(ctx context.Context, input types.BioLoginInput) (*types.AuthResult, error)
 	DeactivateBioLogin(ctx context.Context, input types.DeactivateBioLoginInput) (*types.Result, error)
 	SubmitApplication(ctx context.Context) (*types.Result, error)
@@ -476,7 +476,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.ActivateBioLogin(childComplexity, args["token"].(string), args["deviceId"].(string)), true
+		return e.complexity.Mutation.ActivateBioLogin(childComplexity, args["deviceId"].(string)), true
 
 	case "Mutation.addReasonsForUsingRoava":
 		if e.complexity.Mutation.AddReasonsForUsingRoava == nil {
@@ -827,7 +827,7 @@ type CDDSummaryDocument {
     refreshToken(refreshToken: String!): AuthResult
     resendOtp(phone: String!): Result
     checkEmailExistence(email: String!): CheckEmailExistenceResult
-    activateBioLogin(token: String!, deviceId: String!): ActivateBioLoginResponse
+    activateBioLogin(deviceId: String!): ActivateBioLoginResponse
     bioLoginRequest(input: BioLoginInput!): AuthResult
     deactivateBioLogin(input: DeactivateBioLoginInput!): Result
     submitApplication: Result
@@ -939,23 +939,14 @@ func (ec *executionContext) field_Mutation_activateBioLogin_args(ctx context.Con
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["token"]; ok {
-		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("token"))
+	if tmp, ok := rawArgs["deviceId"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("deviceId"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["token"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["deviceId"]; ok {
-		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("deviceId"))
-		arg1, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["deviceId"] = arg1
+	args["deviceId"] = arg0
 	return args, nil
 }
 
@@ -3014,7 +3005,7 @@ func (ec *executionContext) _Mutation_activateBioLogin(ctx context.Context, fiel
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().ActivateBioLogin(rctx, args["token"].(string), args["deviceId"].(string))
+		return ec.resolvers.Mutation().ActivateBioLogin(rctx, args["deviceId"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

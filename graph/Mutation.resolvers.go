@@ -216,9 +216,13 @@ func (r *mutationResolver) CheckEmailExistence(ctx context.Context, email string
 	return &types.CheckEmailExistenceResult{Message: resp.Message, Exists: resp.Exists}, nil
 }
 
-func (r *mutationResolver) ActivateBioLogin(ctx context.Context, token string, deviceID string) (*types.ActivateBioLoginResponse, error) {
+func (r *mutationResolver) ActivateBioLogin(ctx context.Context, deviceID string) (*types.ActivateBioLoginResponse, error) {
+	personId, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
 	resp, err := r.authService.ActivateBioLogin(ctx, &authService.ActivateBioLoginRequest{
-		Token:    token,
+		PersonId: personId,
 		DeviceId: deviceID,
 	})
 
@@ -289,22 +293,3 @@ func (r *mutationResolver) SubmitApplication(ctx context.Context) (*types.Result
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 
 type mutationResolver struct{ *Resolver }
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//    it when you're done.
-//  - You have helper methods in this file. Move them out to keep these resolver files clean.
-func (r *mutationResolver) validateAddress(addr *types.InputAddress) error {
-	if addr.Country == "" {
-		return errors.New("country data is missing from address")
-	}
-	if addr.City == "" {
-		return errors.New("city data is missing from address")
-	}
-	if addr.Street == "" {
-		return errors.New("street data is missing from address")
-	}
-	return nil
-}
