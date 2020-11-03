@@ -27,5 +27,6 @@ type Mutation {
     activateBioLogin(deviceId: String!): ActivateBioLoginResponse
     bioLoginRequest(input: BioLoginInput!): AuthResult
     deactivateBioLogin(input: DeactivateBioLoginInput!): Result
+    VerifyEmailMagicLInk(input: VerifyEmailMagicLInkInput): Result
     submitApplication: Result
 }

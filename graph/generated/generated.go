@@ -133,6 +133,7 @@ type ComplexityRoot struct {
 		ResetPassword               func(childComplexity int, email string, newPassword string, verificationToken string) int
 		SubmitApplication           func(childComplexity int) int
 		UpdatePersonBiodata         func(childComplexity int, input *types.UpdateBioDataInput) int
+		VerifyEmailMagicLInk        func(childComplexity int, input *types.VerifyEmailMagicLInkInput) int
 		VerifyOtp                   func(childComplexity int, phone string, code string) int
 	}
 
@@ -169,6 +170,7 @@ type MutationResolver interface {
 	ActivateBioLogin(ctx context.Context, deviceID string) (*types.ActivateBioLoginResponse, error)
 	BioLoginRequest(ctx context.Context, input types.BioLoginInput) (*types.AuthResult, error)
 	DeactivateBioLogin(ctx context.Context, input types.DeactivateBioLoginInput) (*types.Result, error)
+	VerifyEmailMagicLInk(ctx context.Context, input *types.VerifyEmailMagicLInkInput) (*types.Result, error)
 	SubmitApplication(ctx context.Context) (*types.Result, error)
 }
 type QueryResolver interface {
@@ -629,6 +631,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.UpdatePersonBiodata(childComplexity, args["input"].(*types.UpdateBioDataInput)), true
 
+	case "Mutation.VerifyEmailMagicLInk":
+		if e.complexity.Mutation.VerifyEmailMagicLInk == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_VerifyEmailMagicLInk_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.VerifyEmailMagicLInk(childComplexity, args["input"].(*types.VerifyEmailMagicLInkInput)), true
+
 	case "Mutation.verifyOtp":
 		if e.complexity.Mutation.VerifyOtp == nil {
 			break
@@ -830,6 +844,7 @@ type CDDSummaryDocument {
     activateBioLogin(deviceId: String!): ActivateBioLoginResponse
     bioLoginRequest(input: BioLoginInput!): AuthResult
     deactivateBioLogin(input: DeactivateBioLoginInput!): Result
+    VerifyEmailMagicLInk(input: VerifyEmailMagicLInkInput): Result
     submitApplication: Result
 }
 `, BuiltIn: false},
@@ -923,7 +938,11 @@ type ActivateBioLoginResponse {
 type createApplicationResponse {
     token: String!
 }
-`, BuiltIn: false},
+
+input VerifyEmailMagicLInkInput {
+    email: String!
+    verificationToken: String!
+}`, BuiltIn: false},
 	{Name: "graph/schemas/Subscription.graphql", Input: `type Subscription {
     createApplication: createApplicationResponse
 }
@@ -934,6 +953,21 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Mutation_VerifyEmailMagicLInk_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *types.VerifyEmailMagicLInkInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("input"))
+		arg0, err = ec.unmarshalOVerifyEmailMagicLInkInput2ᚖmsᚗapiᚋtypesᚐVerifyEmailMagicLInkInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
 
 func (ec *executionContext) field_Mutation_activateBioLogin_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -3095,6 +3129,44 @@ func (ec *executionContext) _Mutation_deactivateBioLogin(ctx context.Context, fi
 	return ec.marshalOResult2ᚖmsᚗapiᚋtypesᚐResult(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_VerifyEmailMagicLInk(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_VerifyEmailMagicLInk_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().VerifyEmailMagicLInk(rctx, args["input"].(*types.VerifyEmailMagicLInkInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*types.Result)
+	fc.Result = res
+	return ec.marshalOResult2ᚖmsᚗapiᚋtypesᚐResult(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Mutation_submitApplication(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -4720,6 +4792,34 @@ func (ec *executionContext) unmarshalInputUpdateBioDataInput(ctx context.Context
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputVerifyEmailMagicLInkInput(ctx context.Context, obj interface{}) (types.VerifyEmailMagicLInkInput, error) {
+	var it types.VerifyEmailMagicLInkInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "email":
+			var err error
+
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("email"))
+			it.Email, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "verificationToken":
+			var err error
+
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("verificationToken"))
+			it.VerificationToken, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -5184,6 +5284,8 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec._Mutation_bioLoginRequest(ctx, field)
 		case "deactivateBioLogin":
 			out.Values[i] = ec._Mutation_deactivateBioLogin(ctx, field)
+		case "VerifyEmailMagicLInk":
+			out.Values[i] = ec._Mutation_VerifyEmailMagicLInk(ctx, field)
 		case "submitApplication":
 			out.Values[i] = ec._Mutation_submitApplication(ctx, field)
 		default:
@@ -6062,6 +6164,14 @@ func (ec *executionContext) unmarshalOUpdateBioDataInput2ᚖmsᚗapiᚋtypesᚐU
 		return nil, nil
 	}
 	res, err := ec.unmarshalInputUpdateBioDataInput(ctx, v)
+	return &res, graphql.WrapErrorWithInputPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOVerifyEmailMagicLInkInput2ᚖmsᚗapiᚋtypesᚐVerifyEmailMagicLInkInput(ctx context.Context, v interface{}) (*types.VerifyEmailMagicLInkInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputVerifyEmailMagicLInkInput(ctx, v)
 	return &res, graphql.WrapErrorWithInputPath(ctx, err)
 }
 

@@ -6,7 +6,6 @@ package graph
 import (
 	"context"
 	"errors"
-
 	"ms.api/graph/generated"
 	rerrors "ms.api/libs/errors"
 	"ms.api/libs/validator/datevalidator"
@@ -270,6 +269,29 @@ func (r *mutationResolver) DeactivateBioLogin(ctx context.Context, input types.D
 	}
 
 	return &types.Result{
+		Message: resp.Message,
+	}, nil
+}
+
+func (r *mutationResolver) VerifyEmailMagicLInk(ctx context.Context, input *types.VerifyEmailMagicLInkInput) (*types.Result, error) {
+
+	// Validate email
+	if err := emailvalidator.Validate(input.Email); err != nil {
+		return nil, err
+	}
+
+	resp, err := r.onBoardingService.VerifyEmailMagicLInk(ctx, &onboardingService.VerifyEmailMagicLInkRequest{
+		Email:             input.Email,
+		VerificationToken: input.VerificationToken, // The service will validate the token. ( it's an independent logic )
+	})
+
+	if err != nil {
+		r.logger.WithError(err).Info("onBoardingService.VerifyEmailMagicLInk() failed")
+		return nil, rerrors.NewFromGrpc(err)
+	}
+
+	return &types.Result{
+		Success: true,
 		Message: resp.Message,
 	}, nil
 }

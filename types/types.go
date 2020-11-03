@@ -98,6 +98,11 @@ type UpdateBioDataInput struct {
 	Dob       string        `json:"dob"`
 }
 
+type VerifyEmailMagicLInkInput struct {
+	Email             string `json:"email"`
+	VerificationToken string `json:"verificationToken"`
+}
+
 type CreateApplicationResponse struct {
 	Token string `json:"token"`
 }
