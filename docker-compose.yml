@@ -145,7 +145,7 @@ services:
 
   ms.notify:
     container_name: ms.notify
-    image: gcr.io/labs-271617/roava.io/services/ms.notify
+    image: gcr.io/labs-271617/roava.io/services/ms.notify:0.1.0
     restart: on-failure
     environment:
       PORT: 2008
@@ -164,7 +164,7 @@ services:
 
   ms.messaging:
     container_name: ms.messaging
-    image: gcr.io/labs-271617/roava.io/services/ms.messaging
+    image: gcr.io/labs-271617/roava.io/services/ms.messaging:0.2.0
     restart: on-failure
     environment:
       PORT: 2009
