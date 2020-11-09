@@ -124,14 +124,14 @@ type ComplexityRoot struct {
 		AuthenticateCustomer        func(childComplexity int, email string, passcode string) int
 		BioLoginRequest             func(childComplexity int, input types.BioLoginInput) int
 		CheckEmailExistence         func(childComplexity int, email string) int
-		ConfirmPasswordResetDetails func(childComplexity int, email string, dob string, address types.InputAddress) int
+		ConfirmPasscodeResetDetails func(childComplexity int, email string, dob string, address types.InputAddress) int
 		CreateEmail                 func(childComplexity int, input *types.CreateEmailInput) int
 		CreatePhone                 func(childComplexity int, input types.CreatePhoneInput) int
 		DeactivateBioLogin          func(childComplexity int, input types.DeactivateBioLoginInput) int
 		RefreshToken                func(childComplexity int, refreshToken string) int
 		ResendEmailMagicLInk        func(childComplexity int, email string) int
 		ResendOtp                   func(childComplexity int, phone string) int
-		ResetPassword               func(childComplexity int, email string, newPassword string, verificationToken string) int
+		ResetPasscode               func(childComplexity int, email string, newPasscode string, verificationToken string) int
 		SubmitApplication           func(childComplexity int) int
 		UpdatePersonBiodata         func(childComplexity int, input *types.UpdateBioDataInput) int
 		VerifyEmailMagicLInk        func(childComplexity int, email string, verificationToken string) int
@@ -157,8 +157,8 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
-	ResetPassword(ctx context.Context, email string, newPassword string, verificationToken string) (*types.Result, error)
-	ConfirmPasswordResetDetails(ctx context.Context, email string, dob string, address types.InputAddress) (*types.Result, error)
+	ResetPasscode(ctx context.Context, email string, newPasscode string, verificationToken string) (*types.Result, error)
+	ConfirmPasscodeResetDetails(ctx context.Context, email string, dob string, address types.InputAddress) (*types.Result, error)
 	UpdatePersonBiodata(ctx context.Context, input *types.UpdateBioDataInput) (*types.Result, error)
 	AddReasonsForUsingRoava(ctx context.Context, personID string, reasonValues []*string) (*types.Result, error)
 	CreatePhone(ctx context.Context, input types.CreatePhoneInput) (*types.CreatePhoneResult, error)
@@ -530,17 +530,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CheckEmailExistence(childComplexity, args["email"].(string)), true
 
-	case "Mutation.confirmPasswordResetDetails":
-		if e.complexity.Mutation.ConfirmPasswordResetDetails == nil {
+	case "Mutation.confirmPasscodeResetDetails":
+		if e.complexity.Mutation.ConfirmPasscodeResetDetails == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_confirmPasswordResetDetails_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_confirmPasscodeResetDetails_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.ConfirmPasswordResetDetails(childComplexity, args["email"].(string), args["dob"].(string), args["address"].(types.InputAddress)), true
+		return e.complexity.Mutation.ConfirmPasscodeResetDetails(childComplexity, args["email"].(string), args["dob"].(string), args["address"].(types.InputAddress)), true
 
 	case "Mutation.createEmail":
 		if e.complexity.Mutation.CreateEmail == nil {
@@ -614,17 +614,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.ResendOtp(childComplexity, args["phone"].(string)), true
 
-	case "Mutation.resetPassword":
-		if e.complexity.Mutation.ResetPassword == nil {
+	case "Mutation.resetPasscode":
+		if e.complexity.Mutation.ResetPasscode == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_resetPassword_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_resetPasscode_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.ResetPassword(childComplexity, args["email"].(string), args["newPassword"].(string), args["verificationToken"].(string)), true
+		return e.complexity.Mutation.ResetPasscode(childComplexity, args["email"].(string), args["newPasscode"].(string), args["verificationToken"].(string)), true
 
 	case "Mutation.submitApplication":
 		if e.complexity.Mutation.SubmitApplication == nil {
@@ -830,12 +830,12 @@ type CDDSummaryDocument {
 }
 `, BuiltIn: false},
 	{Name: "graph/schemas/Mutation.graphql", Input: `type Mutation {
-    resetPassword(
+    resetPasscode(
         email: String!
-        newPassword: String!
+        newPasscode: String!
         verificationToken: String!
     ): Result
-    confirmPasswordResetDetails(
+    confirmPasscodeResetDetails(
         email: String!
         dob: String!
         address: InputAddress!
@@ -1062,7 +1062,7 @@ func (ec *executionContext) field_Mutation_checkEmailExistence_args(ctx context.
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_confirmPasswordResetDetails_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_confirmPasscodeResetDetails_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
@@ -1185,7 +1185,7 @@ func (ec *executionContext) field_Mutation_resendOtp_args(ctx context.Context, r
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_resetPassword_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_resetPasscode_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
@@ -1198,14 +1198,14 @@ func (ec *executionContext) field_Mutation_resetPassword_args(ctx context.Contex
 	}
 	args["email"] = arg0
 	var arg1 string
-	if tmp, ok := rawArgs["newPassword"]; ok {
-		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("newPassword"))
+	if tmp, ok := rawArgs["newPasscode"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("newPasscode"))
 		arg1, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["newPassword"] = arg1
+	args["newPasscode"] = arg1
 	var arg2 string
 	if tmp, ok := rawArgs["verificationToken"]; ok {
 		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("verificationToken"))
@@ -2636,7 +2636,7 @@ func (ec *executionContext) _CreatePhoneResult_token(ctx context.Context, field 
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Mutation_resetPassword(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Mutation_resetPasscode(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -2652,7 +2652,7 @@ func (ec *executionContext) _Mutation_resetPassword(ctx context.Context, field g
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_resetPassword_args(ctx, rawArgs)
+	args, err := ec.field_Mutation_resetPasscode_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -2660,7 +2660,7 @@ func (ec *executionContext) _Mutation_resetPassword(ctx context.Context, field g
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().ResetPassword(rctx, args["email"].(string), args["newPassword"].(string), args["verificationToken"].(string))
+		return ec.resolvers.Mutation().ResetPasscode(rctx, args["email"].(string), args["newPasscode"].(string), args["verificationToken"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2674,7 +2674,7 @@ func (ec *executionContext) _Mutation_resetPassword(ctx context.Context, field g
 	return ec.marshalOResult2ᚖmsᚗapiᚋtypesᚐResult(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Mutation_confirmPasswordResetDetails(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Mutation_confirmPasscodeResetDetails(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -2690,7 +2690,7 @@ func (ec *executionContext) _Mutation_confirmPasswordResetDetails(ctx context.Co
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_confirmPasswordResetDetails_args(ctx, rawArgs)
+	args, err := ec.field_Mutation_confirmPasscodeResetDetails_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -2698,7 +2698,7 @@ func (ec *executionContext) _Mutation_confirmPasswordResetDetails(ctx context.Co
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().ConfirmPasswordResetDetails(rctx, args["email"].(string), args["dob"].(string), args["address"].(types.InputAddress))
+		return ec.resolvers.Mutation().ConfirmPasscodeResetDetails(rctx, args["email"].(string), args["dob"].(string), args["address"].(types.InputAddress))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5333,10 +5333,10 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Mutation")
-		case "resetPassword":
-			out.Values[i] = ec._Mutation_resetPassword(ctx, field)
-		case "confirmPasswordResetDetails":
-			out.Values[i] = ec._Mutation_confirmPasswordResetDetails(ctx, field)
+		case "resetPasscode":
+			out.Values[i] = ec._Mutation_resetPasscode(ctx, field)
+		case "confirmPasscodeResetDetails":
+			out.Values[i] = ec._Mutation_confirmPasscodeResetDetails(ctx, field)
 		case "updatePersonBiodata":
 			out.Values[i] = ec._Mutation_updatePersonBiodata(ctx, field)
 		case "addReasonsForUsingRoava":

@@ -1,10 +1,10 @@
 type Mutation {
-    resetPassword(
+    resetPasscode(
         email: String!
-        newPassword: String!
+        newPasscode: String!
         verificationToken: String!
     ): Result
-    confirmPasswordResetDetails(
+    confirmPasscodeResetDetails(
         email: String!
         dob: String!
         address: InputAddress!
