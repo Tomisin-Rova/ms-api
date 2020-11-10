@@ -105,7 +105,7 @@ func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) 
 	}
 	opts.verifyService = verifyService.NewVerifyServiceClient(connection)
 
-	//// Auth
+	// Auth
 	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	connection, err = dialRPC(ctx, secrets.AuthServiceURL)
