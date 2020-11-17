@@ -129,11 +129,6 @@ jobs:
         id: vars
         run: echo "::set-output name=SHORT_COMMIT_ID::$(git rev-parse --short HEAD)"
 
-      - name: Get branches
-        id: get_branch
-        shell: bash
-        run: echo "::set-env name=BRANCH_NAME::$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//_/g')"
-
       - name: Print version
         run: |
           echo [github.tag]: ${{ steps.get_version.outputs.VERSION }}
