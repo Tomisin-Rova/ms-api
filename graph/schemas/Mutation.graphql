@@ -9,6 +9,10 @@ type Mutation {
         dob: String!
         address: InputAddress!
     ): Result
+    confirmPasscodeResetOtp(
+        email: String!
+        otp: String!
+    ): Result
 
     updatePersonBiodata(input: UpdateBioDataInput) : Result
 

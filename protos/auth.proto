@@ -7,6 +7,7 @@ service AuthService {
   rpc ValidateToken(ValidateTokenRequest) returns (ValidateTokenResponse) {}
   rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse) {}
   rpc ConfirmPasswordResetDetails(PasswordResetUserDetails) returns (SuccessResponse) {}
+  rpc ConfirmPasswordResetOtp(PasswordResetOtpRequest) returns (SuccessResponse) {}
   rpc ResetPassword(PasswordResetRequest) returns (SuccessResponse) {}
   rpc GenerateToken(GenerateTokenRequest) returns (LoginResponse) {}
   rpc GetPersonById(GetPersonByIdRequest) returns (GetPersonByIdResponse) {}
@@ -58,6 +59,11 @@ message PasswordResetUserDetails {
   string email  = 1;
   string  dob  = 2;
   Address  address = 3;
+}
+
+message PasswordResetOtpRequest {
+  string email = 1;
+  string code = 2;
 }
 
 message PasswordResetRequest {

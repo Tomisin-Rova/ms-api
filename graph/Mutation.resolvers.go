@@ -55,6 +55,22 @@ func (r *mutationResolver) ConfirmPasscodeResetDetails(ctx context.Context, emai
 	}, nil
 }
 
+func (r *mutationResolver) ConfirmPasscodeResetOtp(ctx context.Context, email string, otp string) (*types.Result, error) {
+	result, err := r.authService.ConfirmPasswordResetOtp(ctx, &authService.PasswordResetOtpRequest{
+		Email: email,
+		Code:  otp,
+	})
+	if err != nil {
+		r.logger.Infof("authService.ConfirmPasswordResetOtp() failed: %v", err)
+		return nil, rerrors.NewFromGrpc(err)
+	}
+
+	return &types.Result{
+		Success: true,
+		Message: result.Message,
+	}, nil
+}
+
 func (r *mutationResolver) UpdatePersonBiodata(ctx context.Context, input *types.UpdateBioDataInput) (*types.Result, error) {
 	personId, err := middlewares.GetAuthenticatedUser(ctx)
 	if err != nil {
