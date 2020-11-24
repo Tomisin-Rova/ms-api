@@ -54,6 +54,20 @@ type CheckEmailExistenceResult struct {
 	Message string `json:"message"`
 }
 
+type Country struct {
+	CountryID                     string `json:"CountryId"`
+	Capital                       string `json:"Capital"`
+	CountryName                   string `json:"CountryName"`
+	Continent                     string `json:"Continent"`
+	Dial                          string `json:"Dial"`
+	GeoNameID                     string `json:"GeoNameId"`
+	ISO4217CurrencyAlphabeticCode string `json:"ISO4217CurrencyAlphabeticCode"`
+	ISO4217CurrencyNumericCode    string `json:"ISO4217CurrencyNumericCode"`
+	IsIndependent                 string `json:"IsIndependent"`
+	Languages                     string `json:"Languages"`
+	OfficialNameEnglish           string `json:"officialNameEnglish"`
+}
+
 type CreatePasscodeInput struct {
 	Token    string `json:"token"`
 	Passcode string `json:"passcode"`
@@ -114,4 +128,8 @@ type VerifyEmailMagicLInkInput struct {
 
 type CreateApplicationResponse struct {
 	Token string `json:"token"`
+}
+
+type FetchCountriesResponse struct {
+	Countries []*Country `json:"Countries"`
 }

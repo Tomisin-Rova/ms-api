@@ -9,6 +9,7 @@ import (
 	"ms.api/graph/generated"
 	rerrors "ms.api/libs/errors"
 	"ms.api/protos/pb/cddService"
+	"ms.api/protos/pb/onboardingService"
 	"ms.api/server/http/middlewares"
 	"ms.api/types"
 )
@@ -37,6 +38,34 @@ func (r *queryResolver) GetCDDReportSummary(ctx context.Context) (*types.CDDSumm
 
 	output.Documents = documents
 	return output, nil
+}
+
+func (r *queryResolver) GetCountries(ctx context.Context) (*types.FetchCountriesResponse, error) {
+	resp, err := r.onBoardingService.FetchCountries(ctx, &onboardingService.FetchCountriesRequest{})
+	if err != nil {
+		return nil, rerrors.NewFromGrpc(err)
+	}
+
+	countriesRes := &types.FetchCountriesResponse{}
+	countries := make([]*types.Country, 0)
+	for _, c := range resp.Countries {
+		countries = append(countries, &types.Country{
+			CountryID:                     c.CountryId,
+			Capital:                       c.Capital,
+			CountryName:                   c.CountryName,
+			Continent:                     c.Continent,
+			Dial:                          c.Dial,
+			GeoNameID:                     c.GeoNameId,
+			ISO4217CurrencyAlphabeticCode: c.ISO4217CurrencyAlphabeticCode,
+			ISO4217CurrencyNumericCode:    c.ISO4217CurrencyNumericCode,
+			IsIndependent:                 c.IsIndependent,
+			Languages:                     c.Languages,
+			OfficialNameEnglish:           c.OfficialNameEnglish,
+		})
+	}
+
+	countriesRes.Countries = countries
+	return countriesRes, nil
 }
 
 // Query returns generated.QueryResolver implementation.
