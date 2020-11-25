@@ -91,3 +91,21 @@ input VerifyEmailMagicLInkInput {
     email: String!
     verificationToken: String!
 }
+
+type Country {
+    CountryId: String!
+    Capital: String!
+    CountryName: String!
+    Continent: String!
+    Dial: String!
+    GeoNameId: String!
+    ISO4217CurrencyAlphabeticCode: String!
+    ISO4217CurrencyNumericCode: String!
+    IsIndependent: String!
+    Languages: String!
+    officialNameEnglish: String!
+}
+
+type fetchCountriesResponse {
+    Countries: [Country]
+}

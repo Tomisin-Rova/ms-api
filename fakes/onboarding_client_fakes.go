@@ -79,3 +79,8 @@ func (f *FakeOnBoardingClient) ResendEmailMagicLInk(ctx context.Context, req *on
 	opts ...grpc.CallOption) (*onboardingService.SuccessResponse, error) {
 	return &onboardingService.SuccessResponse{Message: "success"}, f.err
 }
+
+func (f *FakeOnBoardingClient) FetchCountries(ctx context.Context, req *onboardingService.FetchCountriesRequest,
+	opts ...grpc.CallOption) (*onboardingService.FetchCountriesResponse, error) {
+	return &onboardingService.FetchCountriesResponse{}, f.err
+}

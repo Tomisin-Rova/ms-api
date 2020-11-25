@@ -106,6 +106,27 @@ message ResendEmailMagicLInkRequest {
     string email = 1;
 }
 
+message FetchCountriesRequest {}
+
+message Country {
+    string CountryId = 1;
+    string Capital = 2;
+    string CountryName = 3;
+    string Continent = 4;
+    string Dial = 5;
+    string GeoNameId = 6;
+    string ISO4217CurrencyAlphabeticCode = 7;
+    string ISO4217CurrencyNumericCode = 8;
+    string IsIndependent = 9;
+    string Languages = 10;
+    string OfficialNameEnglish = 11;
+    string deviceId = 12;
+}
+
+message FetchCountriesResponse {
+    repeated Country Countries = 2;
+}
+
 service OnBoardingService {
     rpc CreatePhone(CreatePhoneRequest) returns (CreatePhoneResponse) {}
     rpc CreateEmail(CreateEmailRequest) returns (CreateEmailResponse) {}
@@ -119,4 +140,5 @@ service OnBoardingService {
     rpc SubmitCheck(SubmitCheckRequest) returns (SuccessResponse) {}
     rpc VerifyEmailMagicLInk(VerifyEmailMagicLInkRequest) returns (SuccessResponse) {}
     rpc ResendEmailMagicLInk(ResendEmailMagicLInkRequest) returns (SuccessResponse) {}
+    rpc FetchCountries(FetchCountriesRequest) returns (FetchCountriesResponse) {}
 }

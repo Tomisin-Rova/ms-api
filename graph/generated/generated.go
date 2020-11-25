@@ -122,6 +122,20 @@ type ComplexityRoot struct {
 		Message func(childComplexity int) int
 	}
 
+	Country struct {
+		Capital                       func(childComplexity int) int
+		Continent                     func(childComplexity int) int
+		CountryID                     func(childComplexity int) int
+		CountryName                   func(childComplexity int) int
+		Dial                          func(childComplexity int) int
+		GeoNameID                     func(childComplexity int) int
+		ISO4217CurrencyAlphabeticCode func(childComplexity int) int
+		ISO4217CurrencyNumericCode    func(childComplexity int) int
+		IsIndependent                 func(childComplexity int) int
+		Languages                     func(childComplexity int) int
+		OfficialNameEnglish           func(childComplexity int) int
+	}
+
 	CreatePhoneResult struct {
 		Message func(childComplexity int) int
 		Success func(childComplexity int) int
@@ -151,6 +165,7 @@ type ComplexityRoot struct {
 
 	Query struct {
 		GetCDDReportSummary func(childComplexity int) int
+		GetCountries        func(childComplexity int) int
 	}
 
 	Result struct {
@@ -164,6 +179,10 @@ type ComplexityRoot struct {
 
 	CreateApplicationResponse struct {
 		Token func(childComplexity int) int
+	}
+
+	FetchCountriesResponse struct {
+		Countries func(childComplexity int) int
 	}
 }
 
@@ -189,6 +208,7 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	GetCDDReportSummary(ctx context.Context) (*types.CDDSummary, error)
+	GetCountries(ctx context.Context) (*types.FetchCountriesResponse, error)
 }
 type SubscriptionResolver interface {
 	CreateApplication(ctx context.Context) (<-chan *types.CreateApplicationResponse, error)
@@ -510,6 +530,83 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.CheckEmailExistenceResult.Message(childComplexity), true
 
+	case "Country.Capital":
+		if e.complexity.Country.Capital == nil {
+			break
+		}
+
+		return e.complexity.Country.Capital(childComplexity), true
+
+	case "Country.Continent":
+		if e.complexity.Country.Continent == nil {
+			break
+		}
+
+		return e.complexity.Country.Continent(childComplexity), true
+
+	case "Country.CountryId":
+		if e.complexity.Country.CountryID == nil {
+			break
+		}
+
+		return e.complexity.Country.CountryID(childComplexity), true
+
+	case "Country.CountryName":
+		if e.complexity.Country.CountryName == nil {
+			break
+		}
+
+		return e.complexity.Country.CountryName(childComplexity), true
+
+	case "Country.Dial":
+		if e.complexity.Country.Dial == nil {
+			break
+		}
+
+		return e.complexity.Country.Dial(childComplexity), true
+
+	case "Country.GeoNameId":
+		if e.complexity.Country.GeoNameID == nil {
+			break
+		}
+
+		return e.complexity.Country.GeoNameID(childComplexity), true
+
+	case "Country.ISO4217CurrencyAlphabeticCode":
+		if e.complexity.Country.ISO4217CurrencyAlphabeticCode == nil {
+			break
+		}
+
+		return e.complexity.Country.ISO4217CurrencyAlphabeticCode(childComplexity), true
+
+	case "Country.ISO4217CurrencyNumericCode":
+		if e.complexity.Country.ISO4217CurrencyNumericCode == nil {
+			break
+		}
+
+		return e.complexity.Country.ISO4217CurrencyNumericCode(childComplexity), true
+
+	case "Country.IsIndependent":
+		if e.complexity.Country.IsIndependent == nil {
+			break
+		}
+
+		return e.complexity.Country.IsIndependent(childComplexity), true
+
+	case "Country.Languages":
+		if e.complexity.Country.Languages == nil {
+			break
+		}
+
+		return e.complexity.Country.Languages(childComplexity), true
+
+	case "Country.officialNameEnglish":
+		if e.complexity.Country.OfficialNameEnglish == nil {
+			break
+		}
+
+		return e.complexity.Country.OfficialNameEnglish(childComplexity), true
+
 	case "CreatePhoneResult.message":
 		if e.complexity.CreatePhoneResult.Message == nil {
 			break
@@ -749,6 +846,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.GetCDDReportSummary(childComplexity), true
 
+	case "Query.getCountries":
+		if e.complexity.Query.GetCountries == nil {
+			break
+		}
+
+		return e.complexity.Query.GetCountries(childComplexity), true
+
 	case "Result.message":
 		if e.complexity.Result.Message == nil {
 			break
@@ -776,6 +880,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.CreateApplicationResponse.Token(childComplexity), true
+
+	case "fetchCountriesResponse.Countries":
+		if e.complexity.FetchCountriesResponse.Countries == nil {
+			break
+		}
+
+		return e.complexity.FetchCountriesResponse.Countries(childComplexity), true
 
 	}
 	return 0, false
@@ -949,6 +1060,7 @@ type ApplicantSDKTokenResponse {
 }`, BuiltIn: false},
 	{Name: "graph/schemas/Query.graphql", Input: `type Query {
     getCDDReportSummary: CDDSummary
+    getCountries: fetchCountriesResponse
 }
 `, BuiltIn: false},
 	{Name: "graph/schemas/Shared.graphql", Input: `type Result {
@@ -1043,6 +1155,24 @@ type createApplicationResponse {
 input VerifyEmailMagicLInkInput {
     email: String!
     verificationToken: String!
+}
+
+type Country {
+    CountryId: String!
+    Capital: String!
+    CountryName: String!
+    Continent: String!
+    Dial: String!
+    GeoNameId: String!
+    ISO4217CurrencyAlphabeticCode: String!
+    ISO4217CurrencyNumericCode: String!
+    IsIndependent: String!
+    Languages: String!
+    officialNameEnglish: String!
+}
+
+type fetchCountriesResponse {
+    Countries: [Country]
 }
 `, BuiltIn: false},
 	{Name: "graph/schemas/Subscription.graphql", Input: `type Subscription {
@@ -2883,6 +3013,380 @@ func (ec *executionContext) _CheckEmailExistenceResult_message(ctx context.Conte
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Country_CountryId(ctx context.Context, field graphql.CollectedField, obj *types.Country) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Country",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CountryID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Country_Capital(ctx context.Context, field graphql.CollectedField, obj *types.Country) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Country",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Capital, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Country_CountryName(ctx context.Context, field graphql.CollectedField, obj *types.Country) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Country",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CountryName, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Country_Continent(ctx context.Context, field graphql.CollectedField, obj *types.Country) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Country",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Continent, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Country_Dial(ctx context.Context, field graphql.CollectedField, obj *types.Country) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Country",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Dial, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Country_GeoNameId(ctx context.Context, field graphql.CollectedField, obj *types.Country) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Country",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.GeoNameID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Country_ISO4217CurrencyAlphabeticCode(ctx context.Context, field graphql.CollectedField, obj *types.Country) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Country",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ISO4217CurrencyAlphabeticCode, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Country_ISO4217CurrencyNumericCode(ctx context.Context, field graphql.CollectedField, obj *types.Country) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Country",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ISO4217CurrencyNumericCode, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Country_IsIndependent(ctx context.Context, field graphql.CollectedField, obj *types.Country) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Country",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsIndependent, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Country_Languages(ctx context.Context, field graphql.CollectedField, obj *types.Country) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Country",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Languages, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Country_officialNameEnglish(ctx context.Context, field graphql.CollectedField, obj *types.Country) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Country",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.OfficialNameEnglish, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _CreatePhoneResult_success(ctx context.Context, field graphql.CollectedField, obj *types.CreatePhoneResult) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -3691,6 +4195,37 @@ func (ec *executionContext) _Query_getCDDReportSummary(ctx context.Context, fiel
 	res := resTmp.(*types.CDDSummary)
 	fc.Result = res
 	return ec.marshalOCDDSummary2ᚖmsᚗapiᚋtypesᚐCDDSummary(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getCountries(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetCountries(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*types.FetchCountriesResponse)
+	fc.Result = res
+	return ec.marshalOfetchCountriesResponse2ᚖmsᚗapiᚋtypesᚐFetchCountriesResponse(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -4956,6 +5491,37 @@ func (ec *executionContext) _createApplicationResponse_token(ctx context.Context
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _fetchCountriesResponse_Countries(ctx context.Context, field graphql.CollectedField, obj *types.FetchCountriesResponse) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "fetchCountriesResponse",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Countries, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*types.Country)
+	fc.Result = res
+	return ec.marshalOCountry2ᚕᚖmsᚗapiᚋtypesᚐCountry(ctx, field.Selections, res)
+}
+
 // endregion **************************** field.gotpl *****************************
 
 // region    **************************** input.gotpl *****************************
@@ -5717,6 +6283,83 @@ func (ec *executionContext) _CheckEmailExistenceResult(ctx context.Context, sel 
 	return out
 }
 
+var countryImplementors = []string{"Country"}
+
+func (ec *executionContext) _Country(ctx context.Context, sel ast.SelectionSet, obj *types.Country) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, countryImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Country")
+		case "CountryId":
+			out.Values[i] = ec._Country_CountryId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "Capital":
+			out.Values[i] = ec._Country_Capital(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "CountryName":
+			out.Values[i] = ec._Country_CountryName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "Continent":
+			out.Values[i] = ec._Country_Continent(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "Dial":
+			out.Values[i] = ec._Country_Dial(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "GeoNameId":
+			out.Values[i] = ec._Country_GeoNameId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "ISO4217CurrencyAlphabeticCode":
+			out.Values[i] = ec._Country_ISO4217CurrencyAlphabeticCode(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "ISO4217CurrencyNumericCode":
+			out.Values[i] = ec._Country_ISO4217CurrencyNumericCode(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "IsIndependent":
+			out.Values[i] = ec._Country_IsIndependent(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "Languages":
+			out.Values[i] = ec._Country_Languages(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "officialNameEnglish":
+			out.Values[i] = ec._Country_officialNameEnglish(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var createPhoneResultImplementors = []string{"CreatePhoneResult"}
 
 func (ec *executionContext) _CreatePhoneResult(ctx context.Context, sel ast.SelectionSet, obj *types.CreatePhoneResult) graphql.Marshaler {
@@ -5840,6 +6483,17 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_getCDDReportSummary(ctx, field)
+				return res
+			})
+		case "getCountries":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getCountries(ctx, field)
 				return res
 			})
 		case "__type":
@@ -6166,6 +6820,30 @@ func (ec *executionContext) _createApplicationResponse(ctx context.Context, sel 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var fetchCountriesResponseImplementors = []string{"fetchCountriesResponse"}
+
+func (ec *executionContext) _fetchCountriesResponse(ctx context.Context, sel ast.SelectionSet, obj *types.FetchCountriesResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, fetchCountriesResponseImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("fetchCountriesResponse")
+		case "Countries":
+			out.Values[i] = ec._fetchCountriesResponse_Countries(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -6604,6 +7282,53 @@ func (ec *executionContext) marshalOCheckEmailExistenceResult2ᚖmsᚗapiᚋtype
 	return ec._CheckEmailExistenceResult(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalOCountry2ᚕᚖmsᚗapiᚋtypesᚐCountry(ctx context.Context, sel ast.SelectionSet, v []*types.Country) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOCountry2ᚖmsᚗapiᚋtypesᚐCountry(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalOCountry2ᚖmsᚗapiᚋtypesᚐCountry(ctx context.Context, sel ast.SelectionSet, v *types.Country) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Country(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalOCreatePersonInput2ᚖmsᚗapiᚋtypesᚐCreatePersonInput(ctx context.Context, v interface{}) (*types.CreatePersonInput, error) {
 	if v == nil {
 		return nil, nil
@@ -6909,6 +7634,13 @@ func (ec *executionContext) marshalOcreateApplicationResponse2ᚖmsᚗapiᚋtype
 		return graphql.Null
 	}
 	return ec._createApplicationResponse(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOfetchCountriesResponse2ᚖmsᚗapiᚋtypesᚐFetchCountriesResponse(ctx context.Context, sel ast.SelectionSet, v *types.FetchCountriesResponse) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._fetchCountriesResponse(ctx, sel, v)
 }
 
 // endregion ***************************** type.gotpl *****************************
