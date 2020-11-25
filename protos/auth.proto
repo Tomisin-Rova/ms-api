@@ -23,6 +23,7 @@ message SuccessResponse {
 message LoginRequest {
   string email  = 1;
   string  passcode  = 2;
+  Device device = 3;
 }
 
 message LoginResponse {
@@ -81,19 +82,20 @@ message GetPersonByIdRequest {
 }
 
 message GetPersonByIdResponse {
-  string personId = 1;
-  string phoneNumber=2;
-  string title  =3;
-  string firstName=4;
-  string lastName=5;
-  string middleName=6;
-  string email=7;
-  string nationality=8;
-  repeated AddressResponse addresses=9;
-  bool phoneVerified=10;
-  bool EmailVerified=11;
-  repeated string reason=12;
-  string DOB=13;
+    string personId = 1;
+    string phoneNumber= 2;
+    string title = 3;
+    string firstName = 4;
+    string lastName = 5;
+    string middleName = 6;
+    string email = 7;
+    string nationality = 8;
+    repeated AddressResponse addresses = 9;
+    bool isEmailActive = 10;
+    bool isBiometricLoginEnabled = 11;
+    bool isTransactionPinEnabled = 12;
+    string registrationCheckPoint = 13;
+    string DOB = 14;
 }
 
 message AddressResponse {
@@ -127,7 +129,7 @@ message ActivateBioLoginResponse {
 message BioLoginRequest {
   string email = 1;
   string biometricPasscode = 2;
-  string deviceId = 3;
+  Device device = 3;
 }
 
 message DeactivateBioLoginRequest {

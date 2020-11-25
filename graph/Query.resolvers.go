@@ -5,9 +5,12 @@ package graph
 
 import (
 	"context"
+	"errors"
 
+	"github.com/jinzhu/copier"
 	"ms.api/graph/generated"
 	rerrors "ms.api/libs/errors"
+	"ms.api/protos/pb/authService"
 	"ms.api/protos/pb/cddService"
 	"ms.api/protos/pb/onboardingService"
 	"ms.api/server/http/middlewares"
@@ -38,6 +41,25 @@ func (r *queryResolver) GetCDDReportSummary(ctx context.Context) (*types.CDDSumm
 
 	output.Documents = documents
 	return output, nil
+}
+
+func (r *queryResolver) Me(ctx context.Context) (*types.Person, error) {
+	personId, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+	person, err := r.authService.GetPersonById(ctx, &authService.GetPersonByIdRequest{PersonId: personId})
+	if err != nil {
+		r.logger.WithError(err).Error("failed to get person")
+		return nil, rerrors.NewFromGrpc(err)
+	}
+	p := &types.Person{}
+	if err := copier.Copy(p, person); err != nil {
+		r.logger.WithError(err).Error("copier failed")
+		return nil, errors.New("failed to read profile information. please retry")
+	}
+	p.Dob = person.DOB
+	return p, nil
 }
 
 func (r *queryResolver) GetCountries(ctx context.Context) (*types.FetchCountriesResponse, error) {

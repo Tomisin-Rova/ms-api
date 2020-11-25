@@ -181,7 +181,7 @@ func (r *mutationResolver) CreatePerson(ctx context.Context, input *types.Create
 	person := &types.APIPerson{
 		FirstName:               "",
 		LastName:                "",
-		Email:                   "",
+		Email:                   input.Email,
 		IsEmailActive:           false,
 		IsBiometricLoginEnabled: false,
 		IsTransactionPinEnabled: false,
@@ -191,12 +191,17 @@ func (r *mutationResolver) CreatePerson(ctx context.Context, input *types.Create
 		RefreshToken: tokens.RefreshToken, Person: person}, nil
 }
 
-func (r *mutationResolver) AuthenticateCustomer(ctx context.Context, email string, passcode string) (*types.AuthResult, error) {
-	if err := emailvalidator.Validate(email); err != nil {
-		r.logger.WithField("email", email).Info("invalid email supplied")
+func (r *mutationResolver) AuthenticateCustomer(ctx context.Context, input *types.AuthenticateCustomerInput) (*types.AuthResult, error) {
+	if err := emailvalidator.Validate(input.Email); err != nil {
+		r.logger.WithField("email", input.Email).Info("invalid email supplied")
 		return nil, errors.New("invalid email address")
 	}
-	req := &authService.LoginRequest{Email: email, Passcode: passcode}
+	req := &authService.LoginRequest{Email: input.Email, Passcode: input.Passcode, Device: &authService.Device{
+		Os:          input.Device.Os,
+		Brand:       input.Device.Brand,
+		DeviceToken: input.Device.DeviceToken,
+		DeviceId:    input.Device.DeviceID,
+	}}
 	resp, err := r.authService.Login(ctx, req)
 	if err != nil {
 		r.logger.Infof("authService.Login() failed: %v", err)
@@ -277,7 +282,12 @@ func (r *mutationResolver) BioLoginRequest(ctx context.Context, input types.BioL
 	resp, err := r.authService.BioLogin(ctx, &authService.BioLoginRequest{
 		Email:             input.Email,
 		BiometricPasscode: input.BiometricPasscode,
-		DeviceId:          input.DeviceID,
+		Device: &authService.Device{
+			Os:          input.Device.Os,
+			Brand:       input.Device.Brand,
+			DeviceToken: input.Device.DeviceToken,
+			DeviceId:    input.Device.DeviceID,
+		},
 	})
 
 	if err != nil {
@@ -340,7 +350,6 @@ func (r *mutationResolver) VerifyEmailMagicLInk(ctx context.Context, email strin
 }
 
 func (r *mutationResolver) ResendEmailMagicLInk(ctx context.Context, email string) (*types.Result, error) {
-	// Validate email
 	if err := emailvalidator.Validate(email); err != nil {
 		return nil, err
 	}

@@ -23,10 +23,16 @@ type AuthResult struct {
 	Person       *APIPerson `json:"person"`
 }
 
+type AuthenticateCustomerInput struct {
+	Email    string  `json:"email"`
+	Passcode string  `json:"passcode"`
+	Device   *Device `json:"device"`
+}
+
 type BioLoginInput struct {
-	Email             string `json:"email"`
-	BiometricPasscode string `json:"biometricPasscode"`
-	DeviceID          string `json:"deviceId"`
+	Email             string  `json:"email"`
+	BiometricPasscode string  `json:"biometricPasscode"`
+	Device            *Device `json:"device"`
 }
 
 type Cdd struct {
@@ -103,6 +109,28 @@ type Device struct {
 }
 
 type InputAddress struct {
+	Country  string `json:"country"`
+	Street   string `json:"street"`
+	City     string `json:"city"`
+	Postcode string `json:"postcode"`
+}
+
+type Person struct {
+	PhoneNumber             string           `json:"phoneNumber"`
+	FirstName               string           `json:"firstName"`
+	LastName                string           `json:"lastName"`
+	MiddleName              string           `json:"middleName"`
+	Email                   string           `json:"email"`
+	Nationality             string           `json:"nationality"`
+	Addresses               []*PersonAddress `json:"addresses"`
+	Dob                     string           `json:"dob"`
+	IsEmailActive           bool             `json:"isEmailActive"`
+	IsBiometricLoginEnabled bool             `json:"isBiometricLoginEnabled"`
+	IsTransactionPinEnabled bool             `json:"isTransactionPinEnabled"`
+	RegistrationCheckPoint  string           `json:"registrationCheckPoint"`
+}
+
+type PersonAddress struct {
 	Country  string `json:"country"`
 	Street   string `json:"street"`
 	City     string `json:"city"`
