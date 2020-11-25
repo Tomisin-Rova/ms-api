@@ -6,6 +6,7 @@ package graph
 import (
 	"context"
 	"errors"
+
 	"ms.api/graph/generated"
 	rerrors "ms.api/libs/errors"
 	"ms.api/libs/validator/datevalidator"
@@ -191,7 +192,16 @@ func (r *mutationResolver) AuthenticateCustomer(ctx context.Context, email strin
 		return nil, rerrors.NewFromGrpc(err)
 	}
 	return &types.AuthResult{
-		Token: resp.Token, RefreshToken: resp.RefreshToken, RegistrationCheckpoint: resp.RegistrationCheckpoint,
+		Token: resp.AccessToken, RefreshToken: resp.RefreshToken,
+		Person: &types.APIPerson{
+			FirstName:               resp.Person.FirstName,
+			LastName:                resp.Person.LastName,
+			Email:                   resp.Person.Email,
+			IsEmailActive:           resp.Person.IsEmailActive,
+			IsBiometricLoginEnabled: resp.Person.IsBiometricLoginEnabled,
+			IsTransactionPinEnabled: resp.Person.IsTransactionPinEnabled,
+			RegistrationCheckPoint:  resp.Person.RegistrationCheckPoint,
+		},
 	}, nil
 }
 
@@ -265,9 +275,17 @@ func (r *mutationResolver) BioLoginRequest(ctx context.Context, input types.BioL
 	}
 
 	return &types.AuthResult{
-		Token:                  resp.Token,
-		RefreshToken:           resp.RefreshToken,
-		RegistrationCheckpoint: resp.RegistrationCheckpoint,
+		Token:        resp.AccessToken,
+		RefreshToken: resp.RefreshToken,
+		Person: &types.APIPerson{
+			FirstName:               resp.Person.FirstName,
+			LastName:                resp.Person.LastName,
+			Email:                   resp.Person.Email,
+			IsEmailActive:           resp.Person.IsEmailActive,
+			IsBiometricLoginEnabled: resp.Person.IsBiometricLoginEnabled,
+			IsTransactionPinEnabled: resp.Person.IsTransactionPinEnabled,
+			RegistrationCheckPoint:  resp.Person.RegistrationCheckPoint,
+		},
 	}, nil
 }
 
@@ -290,7 +308,6 @@ func (r *mutationResolver) DeactivateBioLogin(ctx context.Context, input types.D
 }
 
 func (r *mutationResolver) VerifyEmailMagicLInk(ctx context.Context, email string, verificationToken string) (*types.Result, error) {
-	// Validate email
 	if err := emailvalidator.Validate(email); err != nil {
 		return nil, err
 	}

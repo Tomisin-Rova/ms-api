@@ -3,7 +3,7 @@ package auth;
 option go_package = "authService";
 
 service AuthService {
-  rpc Login(LoginRequest) returns (LoginResponse) {}
+  rpc Login(LoginRequest) returns (AuthResponse) {}
   rpc ValidateToken(ValidateTokenRequest) returns (ValidateTokenResponse) {}
   rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse) {}
   rpc ConfirmPasswordResetDetails(PasswordResetUserDetails) returns (SuccessResponse) {}
@@ -12,7 +12,7 @@ service AuthService {
   rpc GenerateToken(GenerateTokenRequest) returns (LoginResponse) {}
   rpc GetPersonById(GetPersonByIdRequest) returns (GetPersonByIdResponse) {}
   rpc ActivateBioLogin(ActivateBioLoginRequest) returns (ActivateBioLoginResponse) {}
-  rpc BioLogin(BioLoginRequest) returns (LoginResponse) {}
+  rpc BioLogin(BioLoginRequest) returns (AuthResponse) {}
   rpc DeactivateBioLogin(DeactivateBioLoginRequest) returns (SuccessResponse) {}
 }
 
@@ -134,3 +134,21 @@ message DeactivateBioLoginRequest {
   string email = 1;
   string deviceId = 2;
 }
+
+
+message AuthResponse {
+    string accessToken = 1;
+    string refreshToken = 2;
+    ApiPerson person = 3;
+}
+
+message ApiPerson {
+    string firstName = 1;
+    string lastName = 2;
+    string email = 3;
+    bool isEmailActive = 4;
+    bool isBiometricLoginEnabled = 5;
+    bool isTransactionPinEnabled = 6;
+    string registrationCheckPoint = 7;
+}
+

@@ -9,6 +9,16 @@ type CreatePhoneResult {
     token: String!
 }
 
+type ApiPerson {
+    firstName: String!
+    lastName: String!
+    email: String!
+    isEmailActive: Boolean!
+    isBiometricLoginEnabled: Boolean!
+    isTransactionPinEnabled: Boolean!
+    registrationCheckPoint: String!
+}
+
 input CreatePhoneInput {
     phone: String!
     device: Device!
@@ -38,7 +48,7 @@ input UpdateBioDataInput {
 type AuthResult {
     token: String!,
     refreshToken: String!
-    registrationCheckpoint: String!
+    person: ApiPerson!
 }
 
 input InputAddress {
