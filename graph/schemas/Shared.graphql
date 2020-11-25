@@ -24,7 +24,7 @@ input CreatePhoneInput {
     device: Device!
 }
 
-input CreateEmailInput {
+input CreatePersonInput {
     token: String!
     email: String!
     passcode: String!
@@ -38,7 +38,6 @@ input Device {
 }
 
 input UpdateBioDataInput {
-    personId: String!
     address: InputAddress!
     firstName: String!
     lastName: String!

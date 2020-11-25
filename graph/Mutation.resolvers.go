@@ -6,7 +6,6 @@ package graph
 import (
 	"context"
 	"errors"
-
 	"ms.api/graph/generated"
 	rerrors "ms.api/libs/errors"
 	"ms.api/libs/validator/datevalidator"
@@ -158,7 +157,7 @@ func (r *mutationResolver) VerifyOtp(ctx context.Context, phone string, code str
 	return &types.Result{Success: resp.Match, Message: resp.Message}, nil
 }
 
-func (r *mutationResolver) CreateEmail(ctx context.Context, input *types.CreateEmailInput) (*types.AuthResult, error) {
+func (r *mutationResolver) CreatePerson(ctx context.Context, input *types.CreatePersonInput) (*types.AuthResult, error) {
 	if err := emailvalidator.Validate(input.Email); err != nil {
 		return nil, err
 	}

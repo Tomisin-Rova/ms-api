@@ -136,7 +136,7 @@ type ComplexityRoot struct {
 		CheckEmailExistence         func(childComplexity int, email string) int
 		ConfirmPasscodeResetDetails func(childComplexity int, email string, dob string, address types.InputAddress) int
 		ConfirmPasscodeResetOtp     func(childComplexity int, email string, otp string) int
-		CreateEmail                 func(childComplexity int, input *types.CreateEmailInput) int
+		CreatePerson                func(childComplexity int, input *types.CreatePersonInput) int
 		CreatePhone                 func(childComplexity int, input types.CreatePhoneInput) int
 		DeactivateBioLogin          func(childComplexity int, input types.DeactivateBioLoginInput) int
 		RefreshToken                func(childComplexity int, refreshToken string) int
@@ -175,7 +175,7 @@ type MutationResolver interface {
 	AddReasonsForUsingRoava(ctx context.Context, personID string, reasonValues []*string) (*types.Result, error)
 	CreatePhone(ctx context.Context, input types.CreatePhoneInput) (*types.CreatePhoneResult, error)
 	VerifyOtp(ctx context.Context, phone string, code string) (*types.Result, error)
-	CreateEmail(ctx context.Context, input *types.CreateEmailInput) (*types.AuthResult, error)
+	CreatePerson(ctx context.Context, input *types.CreatePersonInput) (*types.AuthResult, error)
 	AuthenticateCustomer(ctx context.Context, email string, passcode string) (*types.AuthResult, error)
 	RefreshToken(ctx context.Context, refreshToken string) (*types.AuthResult, error)
 	ResendOtp(ctx context.Context, phone string) (*types.Result, error)
@@ -615,17 +615,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.ConfirmPasscodeResetOtp(childComplexity, args["email"].(string), args["otp"].(string)), true
 
-	case "Mutation.createEmail":
-		if e.complexity.Mutation.CreateEmail == nil {
+	case "Mutation.createPerson":
+		if e.complexity.Mutation.CreatePerson == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_createEmail_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_createPerson_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateEmail(childComplexity, args["input"].(*types.CreateEmailInput)), true
+		return e.complexity.Mutation.CreatePerson(childComplexity, args["input"].(*types.CreatePersonInput)), true
 
 	case "Mutation.createPhone":
 		if e.complexity.Mutation.CreatePhone == nil {
@@ -927,7 +927,7 @@ type CDDSummaryDocument {
 
     createPhone(input: CreatePhoneInput!): CreatePhoneResult
     verifyOtp(phone: String!, code: String!): Result
-    createEmail(input: CreateEmailInput): AuthResult
+    createPerson(input: CreatePersonInput): AuthResult
     authenticateCustomer(email: String!, passcode: String!): AuthResult
     refreshToken(refreshToken: String!): AuthResult
     resendOtp(phone: String!): Result
@@ -977,7 +977,7 @@ input CreatePhoneInput {
     device: Device!
 }
 
-input CreateEmailInput {
+input CreatePersonInput {
     token: String!
     email: String!
     passcode: String!
@@ -991,7 +991,6 @@ input Device {
 }
 
 input UpdateBioDataInput {
-    personId: String!
     address: InputAddress!
     firstName: String!
     lastName: String!
@@ -1207,13 +1206,13 @@ func (ec *executionContext) field_Mutation_confirmPasscodeResetOtp_args(ctx cont
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_createEmail_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_createPerson_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *types.CreateEmailInput
+	var arg0 *types.CreatePersonInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("input"))
-		arg0, err = ec.unmarshalOCreateEmailInput2ᚖmsᚗapiᚋtypesᚐCreateEmailInput(ctx, tmp)
+		arg0, err = ec.unmarshalOCreatePersonInput2ᚖmsᚗapiᚋtypesᚐCreatePersonInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -3252,7 +3251,7 @@ func (ec *executionContext) _Mutation_verifyOtp(ctx context.Context, field graph
 	return ec.marshalOResult2ᚖmsᚗapiᚋtypesᚐResult(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Mutation_createEmail(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Mutation_createPerson(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -3268,7 +3267,7 @@ func (ec *executionContext) _Mutation_createEmail(ctx context.Context, field gra
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_createEmail_args(ctx, rawArgs)
+	args, err := ec.field_Mutation_createPerson_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -3276,7 +3275,7 @@ func (ec *executionContext) _Mutation_createEmail(ctx context.Context, field gra
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateEmail(rctx, args["input"].(*types.CreateEmailInput))
+		return ec.resolvers.Mutation().CreatePerson(rctx, args["input"].(*types.CreatePersonInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4997,8 +4996,8 @@ func (ec *executionContext) unmarshalInputBioLoginInput(ctx context.Context, obj
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputCreateEmailInput(ctx context.Context, obj interface{}) (types.CreateEmailInput, error) {
-	var it types.CreateEmailInput
+func (ec *executionContext) unmarshalInputCreatePasscodeInput(ctx context.Context, obj interface{}) (types.CreatePasscodeInput, error) {
+	var it types.CreatePasscodeInput
 	var asMap = obj.(map[string]interface{})
 
 	for k, v := range asMap {
@@ -5008,14 +5007,6 @@ func (ec *executionContext) unmarshalInputCreateEmailInput(ctx context.Context, 
 
 			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("token"))
 			it.Token, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "email":
-			var err error
-
-			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("email"))
-			it.Email, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5033,8 +5024,8 @@ func (ec *executionContext) unmarshalInputCreateEmailInput(ctx context.Context, 
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputCreatePasscodeInput(ctx context.Context, obj interface{}) (types.CreatePasscodeInput, error) {
-	var it types.CreatePasscodeInput
+func (ec *executionContext) unmarshalInputCreatePersonInput(ctx context.Context, obj interface{}) (types.CreatePersonInput, error) {
+	var it types.CreatePersonInput
 	var asMap = obj.(map[string]interface{})
 
 	for k, v := range asMap {
@@ -5044,6 +5035,14 @@ func (ec *executionContext) unmarshalInputCreatePasscodeInput(ctx context.Contex
 
 			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("token"))
 			it.Token, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "email":
+			var err error
+
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("email"))
+			it.Email, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5211,14 +5210,6 @@ func (ec *executionContext) unmarshalInputUpdateBioDataInput(ctx context.Context
 
 	for k, v := range asMap {
 		switch k {
-		case "personId":
-			var err error
-
-			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("personId"))
-			it.PersonID, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
 		case "address":
 			var err error
 
@@ -5792,8 +5783,8 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec._Mutation_createPhone(ctx, field)
 		case "verifyOtp":
 			out.Values[i] = ec._Mutation_verifyOtp(ctx, field)
-		case "createEmail":
-			out.Values[i] = ec._Mutation_createEmail(ctx, field)
+		case "createPerson":
+			out.Values[i] = ec._Mutation_createPerson(ctx, field)
 		case "authenticateCustomer":
 			out.Values[i] = ec._Mutation_authenticateCustomer(ctx, field)
 		case "refreshToken":
@@ -6613,11 +6604,11 @@ func (ec *executionContext) marshalOCheckEmailExistenceResult2ᚖmsᚗapiᚋtype
 	return ec._CheckEmailExistenceResult(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOCreateEmailInput2ᚖmsᚗapiᚋtypesᚐCreateEmailInput(ctx context.Context, v interface{}) (*types.CreateEmailInput, error) {
+func (ec *executionContext) unmarshalOCreatePersonInput2ᚖmsᚗapiᚋtypesᚐCreatePersonInput(ctx context.Context, v interface{}) (*types.CreatePersonInput, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := ec.unmarshalInputCreateEmailInput(ctx, v)
+	res, err := ec.unmarshalInputCreatePersonInput(ctx, v)
 	return &res, graphql.WrapErrorWithInputPath(ctx, err)
 }
 

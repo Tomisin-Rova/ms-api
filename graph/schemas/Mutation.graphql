@@ -23,7 +23,7 @@ type Mutation {
 
     createPhone(input: CreatePhoneInput!): CreatePhoneResult
     verifyOtp(phone: String!, code: String!): Result
-    createEmail(input: CreateEmailInput): AuthResult
+    createPerson(input: CreatePersonInput): AuthResult
     authenticateCustomer(email: String!, passcode: String!): AuthResult
     refreshToken(refreshToken: String!): AuthResult
     resendOtp(phone: String!): Result

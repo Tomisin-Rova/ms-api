@@ -54,14 +54,14 @@ type CheckEmailExistenceResult struct {
 	Message string `json:"message"`
 }
 
-type CreateEmailInput struct {
+type CreatePasscodeInput struct {
 	Token    string `json:"token"`
-	Email    string `json:"email"`
 	Passcode string `json:"passcode"`
 }
 
-type CreatePasscodeInput struct {
+type CreatePersonInput struct {
 	Token    string `json:"token"`
+	Email    string `json:"email"`
 	Passcode string `json:"passcode"`
 }
 
@@ -101,7 +101,6 @@ type Result struct {
 }
 
 type UpdateBioDataInput struct {
-	PersonID  string        `json:"personId"`
 	Address   *InputAddress `json:"address"`
 	FirstName string        `json:"firstName"`
 	LastName  string        `json:"lastName"`
