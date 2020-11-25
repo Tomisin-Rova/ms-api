@@ -30,6 +30,12 @@ input CreatePersonInput {
     passcode: String!
 }
 
+input AuthenticateCustomerInput {
+    email: String!
+    passcode: String!
+    device: Device!
+}
+
 input Device {
     os: String!
     brand: String!
@@ -65,7 +71,7 @@ input CreatePasscodeInput {
 input BioLoginInput {
     email: String!
     biometricPasscode: String!
-    deviceId: String!
+    device: Device!
 }
 
 input DeactivateBioLoginInput {
@@ -90,4 +96,26 @@ type createApplicationResponse {
 input VerifyEmailMagicLInkInput {
     email: String!
     verificationToken: String!
+}
+
+type Person {
+    phoneNumber: String!
+    firstName: String!
+    lastName: String!
+    middleName: String!
+    email: String!
+    nationality: String!
+    addresses: [PersonAddress!]!
+    dob: String!
+    isEmailActive: Boolean!
+    isBiometricLoginEnabled: Boolean!
+    isTransactionPinEnabled: Boolean!
+    registrationCheckPoint: String!
+}
+
+type PersonAddress {
+    country: String!,
+    street: String!,
+    city: String!,
+    postcode: String!
 }

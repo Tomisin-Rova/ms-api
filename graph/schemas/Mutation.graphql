@@ -24,7 +24,7 @@ type Mutation {
     createPhone(input: CreatePhoneInput!): CreatePhoneResult
     verifyOtp(phone: String!, code: String!): Result
     createPerson(input: CreatePersonInput): AuthResult
-    authenticateCustomer(email: String!, passcode: String!): AuthResult
+    authenticateCustomer(input: AuthenticateCustomerInput): AuthResult
     refreshToken(refreshToken: String!): AuthResult
     resendOtp(phone: String!): Result
     checkEmailExistence(email: String!): CheckEmailExistenceResult
