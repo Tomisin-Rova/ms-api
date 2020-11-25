@@ -63,6 +63,16 @@ type ComplexityRoot struct {
 		Town           func(childComplexity int) int
 	}
 
+	APIPerson struct {
+		Email                   func(childComplexity int) int
+		FirstName               func(childComplexity int) int
+		IsBiometricLoginEnabled func(childComplexity int) int
+		IsEmailActive           func(childComplexity int) int
+		IsTransactionPinEnabled func(childComplexity int) int
+		LastName                func(childComplexity int) int
+		RegistrationCheckPoint  func(childComplexity int) int
+	}
+
 	Applicant struct {
 		Address     func(childComplexity int) int
 		ApplicantId func(childComplexity int) int
@@ -82,9 +92,9 @@ type ComplexityRoot struct {
 	}
 
 	AuthResult struct {
-		RefreshToken           func(childComplexity int) int
-		RegistrationCheckpoint func(childComplexity int) int
-		Token                  func(childComplexity int) int
+		Person       func(childComplexity int) int
+		RefreshToken func(childComplexity int) int
+		Token        func(childComplexity int) int
 	}
 
 	Cdd struct {
@@ -276,6 +286,55 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Address.Town(childComplexity), true
 
+	case "ApiPerson.email":
+		if e.complexity.APIPerson.Email == nil {
+			break
+		}
+
+		return e.complexity.APIPerson.Email(childComplexity), true
+
+	case "ApiPerson.firstName":
+		if e.complexity.APIPerson.FirstName == nil {
+			break
+		}
+
+		return e.complexity.APIPerson.FirstName(childComplexity), true
+
+	case "ApiPerson.isBiometricLoginEnabled":
+		if e.complexity.APIPerson.IsBiometricLoginEnabled == nil {
+			break
+		}
+
+		return e.complexity.APIPerson.IsBiometricLoginEnabled(childComplexity), true
+
+	case "ApiPerson.isEmailActive":
+		if e.complexity.APIPerson.IsEmailActive == nil {
+			break
+		}
+
+		return e.complexity.APIPerson.IsEmailActive(childComplexity), true
+
+	case "ApiPerson.isTransactionPinEnabled":
+		if e.complexity.APIPerson.IsTransactionPinEnabled == nil {
+			break
+		}
+
+		return e.complexity.APIPerson.IsTransactionPinEnabled(childComplexity), true
+
+	case "ApiPerson.lastName":
+		if e.complexity.APIPerson.LastName == nil {
+			break
+		}
+
+		return e.complexity.APIPerson.LastName(childComplexity), true
+
+	case "ApiPerson.registrationCheckPoint":
+		if e.complexity.APIPerson.RegistrationCheckPoint == nil {
+			break
+		}
+
+		return e.complexity.APIPerson.RegistrationCheckPoint(childComplexity), true
+
 	case "Applicant.address":
 		if e.complexity.Applicant.Address == nil {
 			break
@@ -339,19 +398,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ApplicantSDKTokenResponse.Token(childComplexity), true
 
+	case "AuthResult.person":
+		if e.complexity.AuthResult.Person == nil {
+			break
+		}
+
+		return e.complexity.AuthResult.Person(childComplexity), true
+
 	case "AuthResult.refreshToken":
 		if e.complexity.AuthResult.RefreshToken == nil {
 			break
 		}
 
 		return e.complexity.AuthResult.RefreshToken(childComplexity), true
-
-	case "AuthResult.registrationCheckpoint":
-		if e.complexity.AuthResult.RegistrationCheckpoint == nil {
-			break
-		}
-
-		return e.complexity.AuthResult.RegistrationCheckpoint(childComplexity), true
 
 	case "AuthResult.token":
 		if e.complexity.AuthResult.Token == nil {
@@ -903,6 +962,16 @@ type CreatePhoneResult {
     token: String!
 }
 
+type ApiPerson {
+    firstName: String!
+    lastName: String!
+    email: String!
+    isEmailActive: Boolean!
+    isBiometricLoginEnabled: Boolean!
+    isTransactionPinEnabled: Boolean!
+    registrationCheckPoint: String!
+}
+
 input CreatePhoneInput {
     phone: String!
     device: Device!
@@ -932,7 +1001,7 @@ input UpdateBioDataInput {
 type AuthResult {
     token: String!,
     refreshToken: String!
-    registrationCheckpoint: String!
+    person: ApiPerson!
 }
 
 input InputAddress {
@@ -975,7 +1044,8 @@ type createApplicationResponse {
 input VerifyEmailMagicLInkInput {
     email: String!
     verificationToken: String!
-}`, BuiltIn: false},
+}
+`, BuiltIn: false},
 	{Name: "graph/schemas/Subscription.graphql", Input: `type Subscription {
     createApplication: createApplicationResponse
 }
@@ -1735,6 +1805,244 @@ func (ec *executionContext) _Address_country(ctx context.Context, field graphql.
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _ApiPerson_firstName(ctx context.Context, field graphql.CollectedField, obj *types.APIPerson) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ApiPerson",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.FirstName, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ApiPerson_lastName(ctx context.Context, field graphql.CollectedField, obj *types.APIPerson) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ApiPerson",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.LastName, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ApiPerson_email(ctx context.Context, field graphql.CollectedField, obj *types.APIPerson) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ApiPerson",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Email, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ApiPerson_isEmailActive(ctx context.Context, field graphql.CollectedField, obj *types.APIPerson) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ApiPerson",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsEmailActive, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ApiPerson_isBiometricLoginEnabled(ctx context.Context, field graphql.CollectedField, obj *types.APIPerson) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ApiPerson",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsBiometricLoginEnabled, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ApiPerson_isTransactionPinEnabled(ctx context.Context, field graphql.CollectedField, obj *types.APIPerson) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ApiPerson",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsTransactionPinEnabled, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ApiPerson_registrationCheckPoint(ctx context.Context, field graphql.CollectedField, obj *types.APIPerson) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ApiPerson",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.RegistrationCheckPoint, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Applicant_applicant_id(ctx context.Context, field graphql.CollectedField, obj *cddService.Applicant) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -2103,7 +2411,7 @@ func (ec *executionContext) _AuthResult_refreshToken(ctx context.Context, field 
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _AuthResult_registrationCheckpoint(ctx context.Context, field graphql.CollectedField, obj *types.AuthResult) (ret graphql.Marshaler) {
+func (ec *executionContext) _AuthResult_person(ctx context.Context, field graphql.CollectedField, obj *types.AuthResult) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -2120,7 +2428,7 @@ func (ec *executionContext) _AuthResult_registrationCheckpoint(ctx context.Conte
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.RegistrationCheckpoint, nil
+		return obj.Person, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2132,9 +2440,9 @@ func (ec *executionContext) _AuthResult_registrationCheckpoint(ctx context.Conte
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*types.APIPerson)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNApiPerson2ᚖmsᚗapiᚋtypesᚐAPIPerson(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _CDD_id(ctx context.Context, field graphql.CollectedField, obj *types.Cdd) (ret graphql.Marshaler) {
@@ -5069,6 +5377,63 @@ func (ec *executionContext) _Address(ctx context.Context, sel ast.SelectionSet, 
 	return out
 }
 
+var apiPersonImplementors = []string{"ApiPerson"}
+
+func (ec *executionContext) _ApiPerson(ctx context.Context, sel ast.SelectionSet, obj *types.APIPerson) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, apiPersonImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ApiPerson")
+		case "firstName":
+			out.Values[i] = ec._ApiPerson_firstName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "lastName":
+			out.Values[i] = ec._ApiPerson_lastName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "email":
+			out.Values[i] = ec._ApiPerson_email(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "isEmailActive":
+			out.Values[i] = ec._ApiPerson_isEmailActive(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "isBiometricLoginEnabled":
+			out.Values[i] = ec._ApiPerson_isBiometricLoginEnabled(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "isTransactionPinEnabled":
+			out.Values[i] = ec._ApiPerson_isTransactionPinEnabled(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "registrationCheckPoint":
+			out.Values[i] = ec._ApiPerson_registrationCheckPoint(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var applicantImplementors = []string{"Applicant"}
 
 func (ec *executionContext) _Applicant(ctx context.Context, sel ast.SelectionSet, obj *cddService.Applicant) graphql.Marshaler {
@@ -5195,8 +5560,8 @@ func (ec *executionContext) _AuthResult(ctx context.Context, sel ast.SelectionSe
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "registrationCheckpoint":
-			out.Values[i] = ec._AuthResult_registrationCheckpoint(ctx, field, obj)
+		case "person":
+			out.Values[i] = ec._AuthResult_person(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -5833,6 +6198,16 @@ func (ec *executionContext) marshalNAddress2ᚖmsᚗapiᚋprotosᚋpbᚋcddServi
 		return graphql.Null
 	}
 	return ec._Address(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNApiPerson2ᚖmsᚗapiᚋtypesᚐAPIPerson(ctx context.Context, sel ast.SelectionSet, v *types.APIPerson) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._ApiPerson(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNBioLoginInput2msᚗapiᚋtypesᚐBioLoginInput(ctx context.Context, v interface{}) (types.BioLoginInput, error) {

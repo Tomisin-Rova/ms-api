@@ -7,10 +7,20 @@ type ActivateBioLoginResponse struct {
 	BiometricPasscode string `json:"biometricPasscode"`
 }
 
+type APIPerson struct {
+	FirstName               string `json:"firstName"`
+	LastName                string `json:"lastName"`
+	Email                   string `json:"email"`
+	IsEmailActive           bool   `json:"isEmailActive"`
+	IsBiometricLoginEnabled bool   `json:"isBiometricLoginEnabled"`
+	IsTransactionPinEnabled bool   `json:"isTransactionPinEnabled"`
+	RegistrationCheckPoint  string `json:"registrationCheckPoint"`
+}
+
 type AuthResult struct {
-	Token                  string `json:"token"`
-	RefreshToken           string `json:"refreshToken"`
-	RegistrationCheckpoint string `json:"registrationCheckpoint"`
+	Token        string     `json:"token"`
+	RefreshToken string     `json:"refreshToken"`
+	Person       *APIPerson `json:"person"`
 }
 
 type BioLoginInput struct {
