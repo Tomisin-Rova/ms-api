@@ -176,7 +176,18 @@ func (r *mutationResolver) CreatePerson(ctx context.Context, input *types.Create
 		r.logger.Infof("authService.generateToken() failed: %v", err)
 		return nil, rerrors.NewFromGrpc(err)
 	}
-	return &types.AuthResult{Token: tokens.Token, RefreshToken: tokens.RefreshToken}, nil
+
+	person := &types.APIPerson{
+		FirstName:               "",
+		LastName:                "",
+		Email:                   "",
+		IsEmailActive:           false,
+		IsBiometricLoginEnabled: false,
+		IsTransactionPinEnabled: false,
+		RegistrationCheckPoint:  "",
+	}
+	return &types.AuthResult{Token: tokens.Token,
+		RefreshToken: tokens.RefreshToken, Person: person}, nil
 }
 
 func (r *mutationResolver) AuthenticateCustomer(ctx context.Context, email string, passcode string) (*types.AuthResult, error) {
