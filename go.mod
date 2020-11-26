@@ -9,7 +9,7 @@ require (
 	github.com/go-redis/redis/v7 v7.4.0
 	github.com/golang/protobuf v1.4.2
 	github.com/hashicorp/vault/api v1.0.4 // indirect
-	github.com/jinzhu/copier v0.0.0-20201025035756-632e723a6687 // indirect
+	github.com/jinzhu/copier v0.0.0-20201025035756-632e723a6687
 	github.com/joho/godotenv v1.3.0
 	github.com/kr/pretty v0.2.1 // indirect
 	github.com/pkg/errors v0.9.1

@@ -13,12 +13,16 @@ type FakeAuthClient struct {
 	err       error
 }
 
+func (f *FakeAuthClient) ConfirmPasswordResetOtp(ctx context.Context, in *authService.PasswordResetOtpRequest, opts ...grpc.CallOption) (*authService.SuccessResponse, error) {
+	return &authService.SuccessResponse{}, f.err
+}
+
 func (f *FakeAuthClient) ConfirmPasswordResetDetails(ctx context.Context, in *authService.PasswordResetUserDetails, opts ...grpc.CallOption) (*authService.SuccessResponse, error) {
 	return &authService.SuccessResponse{}, nil
 }
 
 func (f *FakeAuthClient) ResetPassword(ctx context.Context, in *authService.PasswordResetRequest, opts ...grpc.CallOption) (*authService.SuccessResponse, error) {
-	panic("implement me")
+	return &authService.SuccessResponse{}, f.err
 }
 
 func NewFakeAuthClient(resp *authService.ValidateTokenResponse,
@@ -27,8 +31,8 @@ func NewFakeAuthClient(resp *authService.ValidateTokenResponse,
 }
 
 func (f *FakeAuthClient) Login(ctx context.Context, req *authService.LoginRequest,
-	opts ...grpc.CallOption) (*authService.LoginResponse, error) {
-	return f.loginResp, f.err
+	opts ...grpc.CallOption) (*authService.AuthResponse, error) {
+	return &authService.AuthResponse{}, f.err
 }
 
 func (f *FakeAuthClient) ValidateToken(ctx context.Context, req *authService.ValidateTokenRequest,
@@ -55,8 +59,8 @@ func (f *FakeAuthClient) ActivateBioLogin(ctx context.Context, req *authService.
 	return &authService.ActivateBioLoginResponse{}, f.err
 }
 
-func (f *FakeAuthClient) BioLogin(ctx context.Context, req *authService.BioLoginRequest, opts ...grpc.CallOption) (*authService.LoginResponse, error) {
-	return &authService.LoginResponse{}, f.err
+func (f *FakeAuthClient) BioLogin(ctx context.Context, req *authService.BioLoginRequest, opts ...grpc.CallOption) (*authService.AuthResponse, error) {
+	return &authService.AuthResponse{}, f.err
 }
 
 func (f *FakeAuthClient) DeactivateBioLogin(ctx context.Context, req *authService.DeactivateBioLoginRequest, opts ...grpc.CallOption) (*authService.SuccessResponse, error) {

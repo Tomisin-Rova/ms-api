@@ -1,3 +1,5 @@
 type Query {
     getCDDReportSummary: CDDSummary
+    me: Person
+    getCountries: fetchCountriesResponse
 }

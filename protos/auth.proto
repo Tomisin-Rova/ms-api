@@ -3,15 +3,16 @@ package auth;
 option go_package = "authService";
 
 service AuthService {
-  rpc Login(LoginRequest) returns (LoginResponse) {}
+  rpc Login(LoginRequest) returns (AuthResponse) {}
   rpc ValidateToken(ValidateTokenRequest) returns (ValidateTokenResponse) {}
   rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse) {}
   rpc ConfirmPasswordResetDetails(PasswordResetUserDetails) returns (SuccessResponse) {}
+  rpc ConfirmPasswordResetOtp(PasswordResetOtpRequest) returns (SuccessResponse) {}
   rpc ResetPassword(PasswordResetRequest) returns (SuccessResponse) {}
   rpc GenerateToken(GenerateTokenRequest) returns (LoginResponse) {}
   rpc GetPersonById(GetPersonByIdRequest) returns (GetPersonByIdResponse) {}
   rpc ActivateBioLogin(ActivateBioLoginRequest) returns (ActivateBioLoginResponse) {}
-  rpc BioLogin(BioLoginRequest) returns (LoginResponse) {}
+  rpc BioLogin(BioLoginRequest) returns (AuthResponse) {}
   rpc DeactivateBioLogin(DeactivateBioLoginRequest) returns (SuccessResponse) {}
 }
 
@@ -22,6 +23,7 @@ message SuccessResponse {
 message LoginRequest {
   string email  = 1;
   string  passcode  = 2;
+  Device device = 3;
 }
 
 message LoginResponse {
@@ -60,6 +62,11 @@ message PasswordResetUserDetails {
   Address  address = 3;
 }
 
+message PasswordResetOtpRequest {
+  string email = 1;
+  string code = 2;
+}
+
 message PasswordResetRequest {
   string email = 1;
   string newPassword = 2;
@@ -75,19 +82,20 @@ message GetPersonByIdRequest {
 }
 
 message GetPersonByIdResponse {
-  string personId = 1;
-  string phoneNumber=2;
-  string title  =3;
-  string firstName=4;
-  string lastName=5;
-  string middleName=6;
-  string email=7;
-  string nationality=8;
-  repeated AddressResponse addresses=9;
-  bool phoneVerified=10;
-  bool EmailVerified=11;
-  repeated string reason=12;
-  string DOB=13;
+    string personId = 1;
+    string phoneNumber= 2;
+    string title = 3;
+    string firstName = 4;
+    string lastName = 5;
+    string middleName = 6;
+    string email = 7;
+    string nationality = 8;
+    repeated AddressResponse addresses = 9;
+    bool isEmailActive = 10;
+    bool isBiometricLoginEnabled = 11;
+    bool isTransactionPinEnabled = 12;
+    string registrationCheckPoint = 13;
+    string DOB = 14;
 }
 
 message AddressResponse {
@@ -121,10 +129,28 @@ message ActivateBioLoginResponse {
 message BioLoginRequest {
   string email = 1;
   string biometricPasscode = 2;
-  string deviceId = 3;
+  Device device = 3;
 }
 
 message DeactivateBioLoginRequest {
   string email = 1;
   string deviceId = 2;
 }
+
+
+message AuthResponse {
+    string accessToken = 1;
+    string refreshToken = 2;
+    ApiPerson person = 3;
+}
+
+message ApiPerson {
+    string firstName = 1;
+    string lastName = 2;
+    string email = 3;
+    bool isEmailActive = 4;
+    bool isBiometricLoginEnabled = 5;
+    bool isTransactionPinEnabled = 6;
+    string registrationCheckPoint = 7;
+}
+

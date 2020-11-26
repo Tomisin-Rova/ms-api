@@ -9,15 +9,31 @@ type CreatePhoneResult {
     token: String!
 }
 
+type ApiPerson {
+    firstName: String!
+    lastName: String!
+    email: String!
+    isEmailActive: Boolean!
+    isBiometricLoginEnabled: Boolean!
+    isTransactionPinEnabled: Boolean!
+    registrationCheckPoint: String!
+}
+
 input CreatePhoneInput {
     phone: String!
     device: Device!
 }
 
-input CreateEmailInput {
+input CreatePersonInput {
     token: String!
     email: String!
     passcode: String!
+}
+
+input AuthenticateCustomerInput {
+    email: String!
+    passcode: String!
+    device: Device!
 }
 
 input Device {
@@ -28,7 +44,6 @@ input Device {
 }
 
 input UpdateBioDataInput {
-    personId: String!
     address: InputAddress!
     firstName: String!
     lastName: String!
@@ -38,7 +53,7 @@ input UpdateBioDataInput {
 type AuthResult {
     token: String!,
     refreshToken: String!
-    registrationCheckpoint: String!
+    person: ApiPerson!
 }
 
 input InputAddress {
@@ -56,7 +71,7 @@ input CreatePasscodeInput {
 input BioLoginInput {
     email: String!
     biometricPasscode: String!
-    deviceId: String!
+    device: Device!
 }
 
 input DeactivateBioLoginInput {
@@ -81,4 +96,44 @@ type createApplicationResponse {
 input VerifyEmailMagicLInkInput {
     email: String!
     verificationToken: String!
+}
+
+type Person {
+    phoneNumber: String!
+    firstName: String!
+    lastName: String!
+    middleName: String!
+    email: String!
+    nationality: String!
+    addresses: [PersonAddress!]!
+    dob: String!
+    isEmailActive: Boolean!
+    isBiometricLoginEnabled: Boolean!
+    isTransactionPinEnabled: Boolean!
+    registrationCheckPoint: String!
+}
+
+type PersonAddress {
+    country: String!,
+    street: String!,
+    city: String!,
+    postcode: String!
+}
+
+type Country {
+    CountryId: String!
+    Capital: String!
+    CountryName: String!
+    Continent: String!
+    Dial: String!
+    GeoNameId: String!
+    ISO4217CurrencyAlphabeticCode: String!
+    ISO4217CurrencyNumericCode: String!
+    IsIndependent: String!
+    Languages: String!
+    officialNameEnglish: String!
+}
+
+type fetchCountriesResponse {
+    Countries: [Country]
 }

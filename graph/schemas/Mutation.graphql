@@ -1,13 +1,17 @@
 type Mutation {
-    resetPassword(
+    resetPasscode(
         email: String!
-        newPassword: String!
+        newPasscode: String!
         verificationToken: String!
     ): Result
-    confirmPasswordResetDetails(
+    confirmPasscodeResetDetails(
         email: String!
         dob: String!
         address: InputAddress!
+    ): Result
+    confirmPasscodeResetOtp(
+        email: String!
+        otp: String!
     ): Result
 
     updatePersonBiodata(input: UpdateBioDataInput) : Result
@@ -19,8 +23,8 @@ type Mutation {
 
     createPhone(input: CreatePhoneInput!): CreatePhoneResult
     verifyOtp(phone: String!, code: String!): Result
-    createEmail(input: CreateEmailInput): AuthResult
-    authenticateCustomer(email: String!, passcode: String!): AuthResult
+    createPerson(input: CreatePersonInput): AuthResult
+    authenticateCustomer(input: AuthenticateCustomerInput): AuthResult
     refreshToken(refreshToken: String!): AuthResult
     resendOtp(phone: String!): Result
     checkEmailExistence(email: String!): CheckEmailExistenceResult

@@ -7,16 +7,32 @@ type ActivateBioLoginResponse struct {
 	BiometricPasscode string `json:"biometricPasscode"`
 }
 
+type APIPerson struct {
+	FirstName               string `json:"firstName"`
+	LastName                string `json:"lastName"`
+	Email                   string `json:"email"`
+	IsEmailActive           bool   `json:"isEmailActive"`
+	IsBiometricLoginEnabled bool   `json:"isBiometricLoginEnabled"`
+	IsTransactionPinEnabled bool   `json:"isTransactionPinEnabled"`
+	RegistrationCheckPoint  string `json:"registrationCheckPoint"`
+}
+
 type AuthResult struct {
-	Token                  string `json:"token"`
-	RefreshToken           string `json:"refreshToken"`
-	RegistrationCheckpoint string `json:"registrationCheckpoint"`
+	Token        string     `json:"token"`
+	RefreshToken string     `json:"refreshToken"`
+	Person       *APIPerson `json:"person"`
+}
+
+type AuthenticateCustomerInput struct {
+	Email    string  `json:"email"`
+	Passcode string  `json:"passcode"`
+	Device   *Device `json:"device"`
 }
 
 type BioLoginInput struct {
-	Email             string `json:"email"`
-	BiometricPasscode string `json:"biometricPasscode"`
-	DeviceID          string `json:"deviceId"`
+	Email             string  `json:"email"`
+	BiometricPasscode string  `json:"biometricPasscode"`
+	Device            *Device `json:"device"`
 }
 
 type Cdd struct {
@@ -34,9 +50,9 @@ type CDDSummary struct {
 }
 
 type CDDSummaryDocument struct {
-	Name    string    `json:"name"`
-	Status  string    `json:"status"`
-	Reasons []*string `json:"reasons"`
+	Name    string   `json:"name"`
+	Status  string   `json:"status"`
+	Reasons []string `json:"reasons"`
 }
 
 type CheckEmailExistenceResult struct {
@@ -44,14 +60,28 @@ type CheckEmailExistenceResult struct {
 	Message string `json:"message"`
 }
 
-type CreateEmailInput struct {
-	Token    string `json:"token"`
-	Email    string `json:"email"`
-	Passcode string `json:"passcode"`
+type Country struct {
+	CountryID                     string `json:"CountryId"`
+	Capital                       string `json:"Capital"`
+	CountryName                   string `json:"CountryName"`
+	Continent                     string `json:"Continent"`
+	Dial                          string `json:"Dial"`
+	GeoNameID                     string `json:"GeoNameId"`
+	ISO4217CurrencyAlphabeticCode string `json:"ISO4217CurrencyAlphabeticCode"`
+	ISO4217CurrencyNumericCode    string `json:"ISO4217CurrencyNumericCode"`
+	IsIndependent                 string `json:"IsIndependent"`
+	Languages                     string `json:"Languages"`
+	OfficialNameEnglish           string `json:"officialNameEnglish"`
 }
 
 type CreatePasscodeInput struct {
 	Token    string `json:"token"`
+	Passcode string `json:"passcode"`
+}
+
+type CreatePersonInput struct {
+	Token    string `json:"token"`
+	Email    string `json:"email"`
 	Passcode string `json:"passcode"`
 }
 
@@ -85,13 +115,34 @@ type InputAddress struct {
 	Postcode string `json:"postcode"`
 }
 
+type Person struct {
+	PhoneNumber             string           `json:"phoneNumber"`
+	FirstName               string           `json:"firstName"`
+	LastName                string           `json:"lastName"`
+	MiddleName              string           `json:"middleName"`
+	Email                   string           `json:"email"`
+	Nationality             string           `json:"nationality"`
+	Addresses               []*PersonAddress `json:"addresses"`
+	Dob                     string           `json:"dob"`
+	IsEmailActive           bool             `json:"isEmailActive"`
+	IsBiometricLoginEnabled bool             `json:"isBiometricLoginEnabled"`
+	IsTransactionPinEnabled bool             `json:"isTransactionPinEnabled"`
+	RegistrationCheckPoint  string           `json:"registrationCheckPoint"`
+}
+
+type PersonAddress struct {
+	Country  string `json:"country"`
+	Street   string `json:"street"`
+	City     string `json:"city"`
+	Postcode string `json:"postcode"`
+}
+
 type Result struct {
 	Success bool   `json:"success"`
 	Message string `json:"message"`
 }
 
 type UpdateBioDataInput struct {
-	PersonID  string        `json:"personId"`
 	Address   *InputAddress `json:"address"`
 	FirstName string        `json:"firstName"`
 	LastName  string        `json:"lastName"`
@@ -105,4 +156,8 @@ type VerifyEmailMagicLInkInput struct {
 
 type CreateApplicationResponse struct {
 	Token string `json:"token"`
+}
+
+type FetchCountriesResponse struct {
+	Countries []*Country `json:"Countries"`
 }

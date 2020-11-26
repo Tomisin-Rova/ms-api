@@ -75,7 +75,6 @@ func (mw *AuthMiddleware) Middeware(next http.Handler) http.Handler {
 			return
 		}
 
-		mw.logger.WithField("person_id", personId).Info("token validated")
 		ctx := context.WithValue(r.Context(), AuthenticatedUserContextKey, personId)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})

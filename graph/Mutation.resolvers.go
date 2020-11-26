@@ -6,6 +6,7 @@ package graph
 import (
 	"context"
 	"errors"
+
 	"ms.api/graph/generated"
 	rerrors "ms.api/libs/errors"
 	"ms.api/libs/validator/datevalidator"
@@ -17,10 +18,10 @@ import (
 	"ms.api/types"
 )
 
-func (r *mutationResolver) ResetPassword(ctx context.Context, email string, newPassword string, verificationToken string) (*types.Result, error) {
+func (r *mutationResolver) ResetPasscode(ctx context.Context, email string, newPasscode string, verificationToken string) (*types.Result, error) {
 	result, err := r.authService.ResetPassword(ctx, &authService.PasswordResetRequest{
 		Email:             email,
-		NewPassword:       newPassword,
+		NewPassword:       newPasscode,
 		VerificationToken: verificationToken,
 	})
 	if err != nil {
@@ -33,7 +34,7 @@ func (r *mutationResolver) ResetPassword(ctx context.Context, email string, newP
 	}, err
 }
 
-func (r *mutationResolver) ConfirmPasswordResetDetails(ctx context.Context, email string, dob string, address types.InputAddress) (*types.Result, error) {
+func (r *mutationResolver) ConfirmPasscodeResetDetails(ctx context.Context, email string, dob string, address types.InputAddress) (*types.Result, error) {
 	result, err := r.authService.ConfirmPasswordResetDetails(ctx, &authService.PasswordResetUserDetails{
 		Email: email,
 		Dob:   dob,
@@ -46,6 +47,22 @@ func (r *mutationResolver) ConfirmPasswordResetDetails(ctx context.Context, emai
 	})
 	if err != nil {
 		r.logger.Infof("authService.ConfirmPasswordResetDetails() failed: %v", err)
+		return nil, rerrors.NewFromGrpc(err)
+	}
+
+	return &types.Result{
+		Success: true,
+		Message: result.Message,
+	}, nil
+}
+
+func (r *mutationResolver) ConfirmPasscodeResetOtp(ctx context.Context, email string, otp string) (*types.Result, error) {
+	result, err := r.authService.ConfirmPasswordResetOtp(ctx, &authService.PasswordResetOtpRequest{
+		Email: email,
+		Code:  otp,
+	})
+	if err != nil {
+		r.logger.Infof("authService.ConfirmPasswordResetOtp() failed: %v", err)
 		return nil, rerrors.NewFromGrpc(err)
 	}
 
@@ -141,7 +158,7 @@ func (r *mutationResolver) VerifyOtp(ctx context.Context, phone string, code str
 	return &types.Result{Success: resp.Match, Message: resp.Message}, nil
 }
 
-func (r *mutationResolver) CreateEmail(ctx context.Context, input *types.CreateEmailInput) (*types.AuthResult, error) {
+func (r *mutationResolver) CreatePerson(ctx context.Context, input *types.CreatePersonInput) (*types.AuthResult, error) {
 	if err := emailvalidator.Validate(input.Email); err != nil {
 		return nil, err
 	}
@@ -160,22 +177,47 @@ func (r *mutationResolver) CreateEmail(ctx context.Context, input *types.CreateE
 		r.logger.Infof("authService.generateToken() failed: %v", err)
 		return nil, rerrors.NewFromGrpc(err)
 	}
-	return &types.AuthResult{Token: tokens.Token, RefreshToken: tokens.RefreshToken}, nil
+
+	person := &types.APIPerson{
+		FirstName:               "",
+		LastName:                "",
+		Email:                   input.Email,
+		IsEmailActive:           false,
+		IsBiometricLoginEnabled: false,
+		IsTransactionPinEnabled: false,
+		RegistrationCheckPoint:  "",
+	}
+	return &types.AuthResult{Token: tokens.Token,
+		RefreshToken: tokens.RefreshToken, Person: person}, nil
 }
 
-func (r *mutationResolver) AuthenticateCustomer(ctx context.Context, email string, passcode string) (*types.AuthResult, error) {
-	if err := emailvalidator.Validate(email); err != nil {
-		r.logger.WithField("email", email).Info("invalid email supplied")
+func (r *mutationResolver) AuthenticateCustomer(ctx context.Context, input *types.AuthenticateCustomerInput) (*types.AuthResult, error) {
+	if err := emailvalidator.Validate(input.Email); err != nil {
+		r.logger.WithField("email", input.Email).Info("invalid email supplied")
 		return nil, errors.New("invalid email address")
 	}
-	req := &authService.LoginRequest{Email: email, Passcode: passcode}
+	req := &authService.LoginRequest{Email: input.Email, Passcode: input.Passcode, Device: &authService.Device{
+		Os:          input.Device.Os,
+		Brand:       input.Device.Brand,
+		DeviceToken: input.Device.DeviceToken,
+		DeviceId:    input.Device.DeviceID,
+	}}
 	resp, err := r.authService.Login(ctx, req)
 	if err != nil {
 		r.logger.Infof("authService.Login() failed: %v", err)
 		return nil, rerrors.NewFromGrpc(err)
 	}
 	return &types.AuthResult{
-		Token: resp.Token, RefreshToken: resp.RefreshToken, RegistrationCheckpoint: resp.RegistrationCheckpoint,
+		Token: resp.AccessToken, RefreshToken: resp.RefreshToken,
+		Person: &types.APIPerson{
+			FirstName:               resp.Person.FirstName,
+			LastName:                resp.Person.LastName,
+			Email:                   resp.Person.Email,
+			IsEmailActive:           resp.Person.IsEmailActive,
+			IsBiometricLoginEnabled: resp.Person.IsBiometricLoginEnabled,
+			IsTransactionPinEnabled: resp.Person.IsTransactionPinEnabled,
+			RegistrationCheckPoint:  resp.Person.RegistrationCheckPoint,
+		},
 	}, nil
 }
 
@@ -240,7 +282,12 @@ func (r *mutationResolver) BioLoginRequest(ctx context.Context, input types.BioL
 	resp, err := r.authService.BioLogin(ctx, &authService.BioLoginRequest{
 		Email:             input.Email,
 		BiometricPasscode: input.BiometricPasscode,
-		DeviceId:          input.DeviceID,
+		Device: &authService.Device{
+			Os:          input.Device.Os,
+			Brand:       input.Device.Brand,
+			DeviceToken: input.Device.DeviceToken,
+			DeviceId:    input.Device.DeviceID,
+		},
 	})
 
 	if err != nil {
@@ -249,9 +296,17 @@ func (r *mutationResolver) BioLoginRequest(ctx context.Context, input types.BioL
 	}
 
 	return &types.AuthResult{
-		Token:                  resp.Token,
-		RefreshToken:           resp.RefreshToken,
-		RegistrationCheckpoint: resp.RegistrationCheckpoint,
+		Token:        resp.AccessToken,
+		RefreshToken: resp.RefreshToken,
+		Person: &types.APIPerson{
+			FirstName:               resp.Person.FirstName,
+			LastName:                resp.Person.LastName,
+			Email:                   resp.Person.Email,
+			IsEmailActive:           resp.Person.IsEmailActive,
+			IsBiometricLoginEnabled: resp.Person.IsBiometricLoginEnabled,
+			IsTransactionPinEnabled: resp.Person.IsTransactionPinEnabled,
+			RegistrationCheckPoint:  resp.Person.RegistrationCheckPoint,
+		},
 	}, nil
 }
 
@@ -274,7 +329,6 @@ func (r *mutationResolver) DeactivateBioLogin(ctx context.Context, input types.D
 }
 
 func (r *mutationResolver) VerifyEmailMagicLInk(ctx context.Context, email string, verificationToken string) (*types.Result, error) {
-	// Validate email
 	if err := emailvalidator.Validate(email); err != nil {
 		return nil, err
 	}
@@ -296,7 +350,6 @@ func (r *mutationResolver) VerifyEmailMagicLInk(ctx context.Context, email strin
 }
 
 func (r *mutationResolver) ResendEmailMagicLInk(ctx context.Context, email string) (*types.Result, error) {
-	// Validate email
 	if err := emailvalidator.Validate(email); err != nil {
 		return nil, err
 	}
