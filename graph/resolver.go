@@ -3,18 +3,19 @@ package graph
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"ms.api/config"
 	"ms.api/protos/pb/authService"
 	"ms.api/protos/pb/cddService"
-	"ms.api/protos/pb/onboardingService"
+	onboarding "ms.api/protos/pb/onboardingService"
 	"ms.api/protos/pb/onfidoService"
 	"ms.api/protos/pb/verifyService"
 	"ms.api/server/http/middlewares"
 	"ms.api/types"
-	"time"
 )
 
 // All error types here, so they don't get over-written in the mutation, query or subscription resolvers when generating schema
@@ -39,7 +40,7 @@ func (r *mutationResolver) validateAddress(addr *types.InputAddress) error {
 type ResolverOpts struct {
 	OnfidoClient      onfidoService.OnfidoServiceClient
 	cddClient         cddService.CddServiceClient
-	onBoardingService onboardingService.OnBoardingServiceClient
+	onBoardingService onboarding.OnBoardingServiceClient
 	verifyService     verifyService.VerifyServiceClient
 	AuthService       authService.AuthServiceClient
 	AuthMw            *middlewares.AuthMiddleware
@@ -47,7 +48,7 @@ type ResolverOpts struct {
 
 type Resolver struct {
 	cddService        cddService.CddServiceClient
-	onBoardingService onboardingService.OnBoardingServiceClient
+	onBoardingService onboarding.OnBoardingServiceClient
 	verifyService     verifyService.VerifyServiceClient
 	onfidoClient      onfidoService.OnfidoServiceClient
 	authService       authService.AuthServiceClient
@@ -80,7 +81,7 @@ func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) 
 	if err != nil {
 		return nil, fmt.Errorf("%v: %s", err, secrets.OnboardingServiceURL)
 	}
-	opts.onBoardingService = onboardingService.NewOnBoardingServiceClient(connection)
+	opts.onBoardingService = onboarding.NewOnBoardingServiceClient(connection)
 
 	// OnFido
 	connection, err = dialRPC(ctx, secrets.OnfidoServiceURL)

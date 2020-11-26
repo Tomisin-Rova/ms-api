@@ -1,139 +1,148 @@
 type Result {
-    success: Boolean!
-    message: String!
+  success: Boolean!
+  message: String!
 }
 
 type CreatePhoneResult {
-    success: Boolean!
-    message: String!
-    token: String!
+  success: Boolean!
+  message: String!
+  token: String!
 }
 
 type ApiPerson {
-    firstName: String!
-    lastName: String!
-    email: String!
-    isEmailActive: Boolean!
-    isBiometricLoginEnabled: Boolean!
-    isTransactionPinEnabled: Boolean!
-    registrationCheckPoint: String!
+  firstName: String!
+  lastName: String!
+  email: String!
+  isEmailActive: Boolean!
+  isBiometricLoginEnabled: Boolean!
+  isTransactionPinEnabled: Boolean!
+  registrationCheckPoint: String!
 }
 
 input CreatePhoneInput {
-    phone: String!
-    device: Device!
+  phone: String!
+  device: Device!
 }
 
 input CreatePersonInput {
-    token: String!
-    email: String!
-    passcode: String!
+  token: String!
+  email: String!
+  passcode: String!
 }
 
 input AuthenticateCustomerInput {
-    email: String!
-    passcode: String!
-    device: Device!
+  email: String!
+  passcode: String!
+  device: Device!
 }
 
 input Device {
-    os: String!
-    brand: String!
-    deviceId: String!
-    deviceToken: String!
+  os: String!
+  brand: String!
+  deviceId: String!
+  deviceToken: String!
 }
 
 input UpdateBioDataInput {
-    address: InputAddress!
-    firstName: String!
-    lastName: String!
-    dob: String!
+  address: InputAddress!
+  firstName: String!
+  lastName: String!
+  dob: String!
 }
 
 type AuthResult {
-    token: String!,
-    refreshToken: String!
-    person: ApiPerson!
+  token: String!
+  refreshToken: String!
+  person: ApiPerson!
 }
 
 input InputAddress {
-    country: String!,
-    street: String!,
-    city: String!,
-    postcode: String!
+  country: String!
+  street: String!
+  city: String!
+  postcode: String!
 }
 
 input CreatePasscodeInput {
-    token: String!,
-    passcode: String!
+  token: String!
+  passcode: String!
 }
 
 input BioLoginInput {
-    email: String!
-    biometricPasscode: String!
-    device: Device!
+  email: String!
+  biometricPasscode: String!
+  device: Device!
 }
 
 input DeactivateBioLoginInput {
-    email: String!
-    deviceId: String!
+  email: String!
+  deviceId: String!
 }
 
 type CheckEmailExistenceResult {
-    exists: Boolean!
-    message: String!
+  exists: Boolean!
+  message: String!
 }
 
 type ActivateBioLoginResponse {
-    message: String!
-    biometricPasscode: String!
+  message: String!
+  biometricPasscode: String!
 }
 
 type createApplicationResponse {
-    token: String!
+  token: String!
 }
 
 input VerifyEmailMagicLInkInput {
-    email: String!
-    verificationToken: String!
+  email: String!
+  verificationToken: String!
 }
 
 type Person {
-    phoneNumber: String!
-    firstName: String!
-    lastName: String!
-    middleName: String!
-    email: String!
-    nationality: String!
-    addresses: [PersonAddress!]!
-    dob: String!
-    isEmailActive: Boolean!
-    isBiometricLoginEnabled: Boolean!
-    isTransactionPinEnabled: Boolean!
-    registrationCheckPoint: String!
+  phoneNumber: String!
+  firstName: String!
+  lastName: String!
+  middleName: String!
+  email: String!
+  nationality: String!
+  addresses: [PersonAddress!]!
+  dob: String!
+  isEmailActive: Boolean!
+  isBiometricLoginEnabled: Boolean!
+  isTransactionPinEnabled: Boolean!
+  registrationCheckPoint: String!
 }
 
 type PersonAddress {
-    country: String!,
-    street: String!,
-    city: String!,
-    postcode: String!
+  country: String!
+  street: String!
+  city: String!
+  postcode: String!
 }
 
 type Country {
-    CountryId: String!
-    Capital: String!
-    CountryName: String!
-    Continent: String!
-    Dial: String!
-    GeoNameId: String!
-    ISO4217CurrencyAlphabeticCode: String!
-    ISO4217CurrencyNumericCode: String!
-    IsIndependent: String!
-    Languages: String!
-    officialNameEnglish: String!
+  CountryId: String!
+  Capital: String!
+  CountryName: String!
+  Continent: String!
+  Dial: String!
+  GeoNameId: String!
+  ISO4217CurrencyAlphabeticCode: String!
+  ISO4217CurrencyNumericCode: String!
+  IsIndependent: String!
+  Languages: String!
+  officialNameEnglish: String!
 }
 
 type fetchCountriesResponse {
-    Countries: [Country]
+  Countries: [Country]
+}
+
+type Reason {
+  Id: String!
+  Description: String!
+}
+
+type fetchReasonResponse {
+  reasons: [Reason!]!
 }
