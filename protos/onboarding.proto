@@ -127,6 +127,10 @@ message FetchCountriesResponse {
     repeated Country Countries = 2;
 }
 
+message TermsAndConditionsRequest {
+    string personId = 1;
+}
+
 service OnBoardingService {
     rpc CreatePhone(CreatePhoneRequest) returns (CreatePhoneResponse) {}
     rpc CreateEmail(CreateEmailRequest) returns (CreateEmailResponse) {}
@@ -141,4 +145,5 @@ service OnBoardingService {
     rpc VerifyEmailMagicLInk(VerifyEmailMagicLInkRequest) returns (SuccessResponse) {}
     rpc ResendEmailMagicLInk(ResendEmailMagicLInkRequest) returns (SuccessResponse) {}
     rpc FetchCountries(FetchCountriesRequest) returns (FetchCountriesResponse) {}
+    rpc AcceptTermsAndConditions(TermsAndConditionsRequest) returns (SuccessResponse) {}
 }
