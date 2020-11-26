@@ -228,7 +228,7 @@ func (r *mutationResolver) RefreshToken(ctx context.Context, refreshToken string
 		r.logger.Infof("authService.RefreshToken() failed: %v", err)
 		return nil, rerrors.NewFromGrpc(err)
 	}
-	return &types.AuthResult{Token: resp.Token, RefreshToken: resp.RefreshToken}, nil
+	return &types.AuthResult{Token: resp.Token, RefreshToken: resp.RefreshToken, Person: &types.APIPerson{}}, nil
 }
 
 func (r *mutationResolver) ResendOtp(ctx context.Context, phone string) (*types.Result, error) {
