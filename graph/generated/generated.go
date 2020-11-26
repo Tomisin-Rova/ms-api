@@ -143,6 +143,7 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
+		AcceptTermsAndConditions    func(childComplexity int) int
 		ActivateBioLogin            func(childComplexity int, deviceID string) int
 		AddReasonsForUsingRoava     func(childComplexity int, personID string, reasonValues []*string) int
 		AuthenticateCustomer        func(childComplexity int, input *types.AuthenticateCustomerInput) int
@@ -228,6 +229,7 @@ type MutationResolver interface {
 	VerifyEmailMagicLInk(ctx context.Context, email string, verificationToken string) (*types.Result, error)
 	ResendEmailMagicLInk(ctx context.Context, email string) (*types.Result, error)
 	SubmitApplication(ctx context.Context) (*types.Result, error)
+	AcceptTermsAndConditions(ctx context.Context) (*types.Result, error)
 }
 type QueryResolver interface {
 	GetCDDReportSummary(ctx context.Context) (*types.CDDSummary, error)
@@ -651,6 +653,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.CreatePhoneResult.Token(childComplexity), true
+
+	case "Mutation.acceptTermsAndConditions":
+		if e.complexity.Mutation.AcceptTermsAndConditions == nil {
+			break
+		}
+
+		return e.complexity.Mutation.AcceptTermsAndConditions(childComplexity), true
 
 	case "Mutation.activateBioLogin":
 		if e.complexity.Mutation.ActivateBioLogin == nil {
@@ -1192,6 +1201,7 @@ type CDDSummaryDocument {
     verifyEmailMagicLInk(email: String!, verificationToken: String!): Result
     resendEmailMagicLInk(email: String!): Result
     submitApplication: Result
+    acceptTermsAndConditions: Result
 }
 `, BuiltIn: false},
 	{Name: "graph/schemas/Onfido.graphql", Input: `type ApplicantSDKTokenRequest {
@@ -4329,6 +4339,37 @@ func (ec *executionContext) _Mutation_submitApplication(ctx context.Context, fie
 	return ec.marshalOResult2ᚖmsᚗapiᚋtypesᚐResult(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_acceptTermsAndConditions(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().AcceptTermsAndConditions(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*types.Result)
+	fc.Result = res
+	return ec.marshalOResult2ᚖmsᚗapiᚋtypesᚐResult(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Person_phoneNumber(ctx context.Context, field graphql.CollectedField, obj *types.Person) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -7222,6 +7263,8 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec._Mutation_resendEmailMagicLInk(ctx, field)
 		case "submitApplication":
 			out.Values[i] = ec._Mutation_submitApplication(ctx, field)
+		case "acceptTermsAndConditions":
+			out.Values[i] = ec._Mutation_acceptTermsAndConditions(ctx, field)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

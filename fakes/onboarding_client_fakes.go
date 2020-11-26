@@ -84,3 +84,8 @@ func (f *FakeOnBoardingClient) FetchCountries(ctx context.Context, req *onboardi
 	opts ...grpc.CallOption) (*onboardingService.FetchCountriesResponse, error) {
 	return &onboardingService.FetchCountriesResponse{}, f.err
 }
+
+func (f *FakeOnBoardingClient) AcceptTermsAndConditions(ctx context.Context, req *onboardingService.TermsAndConditionsRequest,
+	opts ...grpc.CallOption) (*onboardingService.SuccessResponse, error) {
+	return &onboardingService.SuccessResponse{}, f.err
+}
