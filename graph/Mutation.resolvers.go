@@ -6,6 +6,7 @@ package graph
 import (
 	"context"
 	"errors"
+
 	"ms.api/graph/generated"
 	rerrors "ms.api/libs/errors"
 	"ms.api/libs/validator/datevalidator"
@@ -106,7 +107,7 @@ func (r *mutationResolver) UpdatePersonBiodata(ctx context.Context, input *types
 	}, nil
 }
 
-func (r *mutationResolver) AddReasonsForUsingRoava(ctx context.Context, personID string, reasonValues []*string) (*types.Result, error) {
+func (r *mutationResolver) AddReasonsForUsingRoava(ctx context.Context, reasonValues []*string) (*types.Result, error) {
 	personId, err := middlewares.GetAuthenticatedUser(ctx)
 	if err != nil {
 		return nil, ErrUnAuthenticated

@@ -145,7 +145,7 @@ type ComplexityRoot struct {
 	Mutation struct {
 		AcceptTermsAndConditions    func(childComplexity int) int
 		ActivateBioLogin            func(childComplexity int, deviceID string) int
-		AddReasonsForUsingRoava     func(childComplexity int, personID string, reasonValues []*string) int
+		AddReasonsForUsingRoava     func(childComplexity int, reasonValues []*string) int
 		AuthenticateCustomer        func(childComplexity int, input *types.AuthenticateCustomerInput) int
 		BioLoginRequest             func(childComplexity int, input types.BioLoginInput) int
 		CheckEmailExistence         func(childComplexity int, email string) int
@@ -215,7 +215,7 @@ type MutationResolver interface {
 	ConfirmPasscodeResetDetails(ctx context.Context, email string, dob string, address types.InputAddress) (*types.Result, error)
 	ConfirmPasscodeResetOtp(ctx context.Context, email string, otp string) (*types.Result, error)
 	UpdatePersonBiodata(ctx context.Context, input *types.UpdateBioDataInput) (*types.Result, error)
-	AddReasonsForUsingRoava(ctx context.Context, personID string, reasonValues []*string) (*types.Result, error)
+	AddReasonsForUsingRoava(ctx context.Context, reasonValues []*string) (*types.Result, error)
 	CreatePhone(ctx context.Context, input types.CreatePhoneInput) (*types.CreatePhoneResult, error)
 	VerifyOtp(ctx context.Context, phone string, code string) (*types.Result, error)
 	CreatePerson(ctx context.Context, input *types.CreatePersonInput) (*types.AuthResult, error)
@@ -683,7 +683,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.AddReasonsForUsingRoava(childComplexity, args["personId"].(string), args["reasonValues"].([]*string)), true
+		return e.complexity.Mutation.AddReasonsForUsingRoava(childComplexity, args["reasonValues"].([]*string)), true
 
 	case "Mutation.authenticateCustomer":
 		if e.complexity.Mutation.AuthenticateCustomer == nil {
@@ -1184,7 +1184,6 @@ type CDDSummaryDocument {
     updatePersonBiodata(input: UpdateBioDataInput) : Result
 
     addReasonsForUsingRoava(
-        personId: String!,
         reasonValues: [String]
     ) : Result
 
@@ -1386,24 +1385,15 @@ func (ec *executionContext) field_Mutation_activateBioLogin_args(ctx context.Con
 func (ec *executionContext) field_Mutation_addReasonsForUsingRoava_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["personId"]; ok {
-		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("personId"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["personId"] = arg0
-	var arg1 []*string
+	var arg0 []*string
 	if tmp, ok := rawArgs["reasonValues"]; ok {
 		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("reasonValues"))
-		arg1, err = ec.unmarshalOString2ᚕᚖstring(ctx, tmp)
+		arg0, err = ec.unmarshalOString2ᚕᚖstring(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["reasonValues"] = arg1
+	args["reasonValues"] = arg0
 	return args, nil
 }
 
@@ -3838,7 +3828,7 @@ func (ec *executionContext) _Mutation_addReasonsForUsingRoava(ctx context.Contex
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().AddReasonsForUsingRoava(rctx, args["personId"].(string), args["reasonValues"].([]*string))
+		return ec.resolvers.Mutation().AddReasonsForUsingRoava(rctx, args["reasonValues"].([]*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

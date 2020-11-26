@@ -17,7 +17,6 @@ type Mutation {
     updatePersonBiodata(input: UpdateBioDataInput) : Result
 
     addReasonsForUsingRoava(
-        personId: String!,
         reasonValues: [String]
     ) : Result
 
