@@ -6,7 +6,6 @@ package graph
 import (
 	"context"
 	"errors"
-
 	"github.com/jinzhu/copier"
 	"ms.api/graph/generated"
 	rerrors "ms.api/libs/errors"
@@ -88,6 +87,25 @@ func (r *queryResolver) GetCountries(ctx context.Context) (*types.FetchCountries
 
 	countriesRes.Countries = countries
 	return countriesRes, nil
+}
+
+func (r *queryResolver) Reasons(ctx context.Context) (*types.FetchReasonResponse, error) {
+	resp, err := r.onBoardingService.FetchReasons(ctx, &onboardingService.EmptyRequest{})
+	if err != nil {
+		return nil, rerrors.NewFromGrpc(err)
+	}
+
+	response := &types.FetchReasonResponse{}
+	reasons := make([]*types.Reason, 0)
+	for _, r := range resp.Reasons {
+		reasons = append(reasons, &types.Reason{
+			ID:          r.Id,
+			Description: r.Description,
+		})
+	}
+
+	response.Reasons = reasons
+	return response, nil
 }
 
 // Query returns generated.QueryResolver implementation.

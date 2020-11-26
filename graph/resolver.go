@@ -11,7 +11,7 @@ import (
 	"ms.api/config"
 	"ms.api/protos/pb/authService"
 	"ms.api/protos/pb/cddService"
-	onboarding "ms.api/protos/pb/onboardingService"
+	"ms.api/protos/pb/onboardingService"
 	"ms.api/protos/pb/onfidoService"
 	"ms.api/protos/pb/verifyService"
 	"ms.api/server/http/middlewares"
@@ -40,7 +40,7 @@ func (r *mutationResolver) validateAddress(addr *types.InputAddress) error {
 type ResolverOpts struct {
 	OnfidoClient      onfidoService.OnfidoServiceClient
 	cddClient         cddService.CddServiceClient
-	onBoardingService onboarding.OnBoardingServiceClient
+	onBoardingService onboardingService.OnBoardingServiceClient
 	verifyService     verifyService.VerifyServiceClient
 	AuthService       authService.AuthServiceClient
 	AuthMw            *middlewares.AuthMiddleware
@@ -48,7 +48,7 @@ type ResolverOpts struct {
 
 type Resolver struct {
 	cddService        cddService.CddServiceClient
-	onBoardingService onboarding.OnBoardingServiceClient
+	onBoardingService onboardingService.OnBoardingServiceClient
 	verifyService     verifyService.VerifyServiceClient
 	onfidoClient      onfidoService.OnfidoServiceClient
 	authService       authService.AuthServiceClient
@@ -81,7 +81,7 @@ func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) 
 	if err != nil {
 		return nil, fmt.Errorf("%v: %s", err, secrets.OnboardingServiceURL)
 	}
-	opts.onBoardingService = onboarding.NewOnBoardingServiceClient(connection)
+	opts.onBoardingService = onboardingService.NewOnBoardingServiceClient(connection)
 
 	// OnFido
 	connection, err = dialRPC(ctx, secrets.OnfidoServiceURL)
