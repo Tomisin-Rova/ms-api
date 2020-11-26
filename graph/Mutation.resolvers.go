@@ -107,7 +107,7 @@ func (r *mutationResolver) UpdatePersonBiodata(ctx context.Context, input *types
 	}, nil
 }
 
-func (r *mutationResolver) AddReasonsForUsingRoava(ctx context.Context, personID string, reasonValues []*string) (*types.Result, error) {
+func (r *mutationResolver) AddReasonsForUsingRoava(ctx context.Context, reasonValues []*string) (*types.Result, error) {
 	personId, err := middlewares.GetAuthenticatedUser(ctx)
 	if err != nil {
 		return nil, ErrUnAuthenticated
@@ -228,7 +228,7 @@ func (r *mutationResolver) RefreshToken(ctx context.Context, refreshToken string
 		r.logger.Infof("authService.RefreshToken() failed: %v", err)
 		return nil, rerrors.NewFromGrpc(err)
 	}
-	return &types.AuthResult{Token: resp.Token, RefreshToken: resp.RefreshToken}, nil
+	return &types.AuthResult{Token: resp.Token, RefreshToken: resp.RefreshToken, Person: &types.APIPerson{}}, nil
 }
 
 func (r *mutationResolver) ResendOtp(ctx context.Context, phone string) (*types.Result, error) {
@@ -376,6 +376,21 @@ func (r *mutationResolver) SubmitApplication(ctx context.Context) (*types.Result
 	})
 	if err != nil {
 		r.logger.WithError(err).Error("submitCheck() failed")
+		return nil, rerrors.NewFromGrpc(err)
+	}
+	return &types.Result{Message: resp.Message, Success: true}, nil
+}
+
+func (r *mutationResolver) AcceptTermsAndConditions(ctx context.Context) (*types.Result, error) {
+	personId, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+	resp, err := r.onBoardingService.AcceptTermsAndConditions(ctx, &onboardingService.TermsAndConditionsRequest{
+		PersonId: personId,
+	})
+	if err != nil {
+		r.logger.WithError(err).Error("AcceptTermsAndConditions() failed")
 		return nil, rerrors.NewFromGrpc(err)
 	}
 	return &types.Result{Message: resp.Message, Success: true}, nil

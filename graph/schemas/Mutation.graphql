@@ -17,7 +17,6 @@ type Mutation {
     updatePersonBiodata(input: UpdateBioDataInput) : Result
 
     addReasonsForUsingRoava(
-        personId: String!,
         reasonValues: [String]
     ) : Result
 
@@ -34,4 +33,5 @@ type Mutation {
     verifyEmailMagicLInk(email: String!, verificationToken: String!): Result
     resendEmailMagicLInk(email: String!): Result
     submitApplication: Result
+    acceptTermsAndConditions: Result
 }
