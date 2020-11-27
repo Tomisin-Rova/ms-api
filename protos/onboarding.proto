@@ -26,9 +26,9 @@ message CreatePhoneResponse {
 }
 
 message CreateEmailRequest {
-    string email = 1;
-    string passcode = 2;
-    string token = 3;
+   string email = 1;
+   string passcode = 2;
+   string token = 3;
 }
 
 message CreateEmailResponse {
@@ -127,11 +127,21 @@ message FetchCountriesResponse {
     repeated Country Countries = 2;
 }
 
+message Reasons {
+    string Id =1;
+    string Description =2;
+}
+
+message ReasonResponse {
+    repeated Reasons reasons = 1;
+}
+
+message EmptyRequest{}
 message TermsAndConditionsRequest {
     string personId = 1;
 }
 
-service OnBoardingService {
+service OnBoardingService{
     rpc CreatePhone(CreatePhoneRequest) returns (CreatePhoneResponse) {}
     rpc CreateEmail(CreateEmailRequest) returns (CreateEmailResponse) {}
     rpc UpdatePersonBiodata(UpdatePersonRequest) returns (SuccessResponse) {}
@@ -145,5 +155,6 @@ service OnBoardingService {
     rpc VerifyEmailMagicLInk(VerifyEmailMagicLInkRequest) returns (SuccessResponse) {}
     rpc ResendEmailMagicLInk(ResendEmailMagicLInkRequest) returns (SuccessResponse) {}
     rpc FetchCountries(FetchCountriesRequest) returns (FetchCountriesResponse) {}
+    rpc FetchReasons(EmptyRequest) returns (ReasonResponse) {}
     rpc AcceptTermsAndConditions(TermsAndConditionsRequest) returns (SuccessResponse) {}
 }

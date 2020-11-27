@@ -137,6 +137,11 @@ type PersonAddress struct {
 	Postcode string `json:"postcode"`
 }
 
+type Reason struct {
+	ID          string `json:"Id"`
+	Description string `json:"Description"`
+}
+
 type Result struct {
 	Success bool   `json:"success"`
 	Message string `json:"message"`
@@ -160,4 +165,8 @@ type CreateApplicationResponse struct {
 
 type FetchCountriesResponse struct {
 	Countries []*Country `json:"Countries"`
+}
+
+type FetchReasonResponse struct {
+	Reasons []*Reason `json:"reasons"`
 }
