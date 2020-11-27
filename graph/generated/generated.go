@@ -190,6 +190,12 @@ type ComplexityRoot struct {
 		GetCDDReportSummary func(childComplexity int) int
 		GetCountries        func(childComplexity int) int
 		Me                  func(childComplexity int) int
+		Reasons             func(childComplexity int) int
+	}
+
+	Reason struct {
+		Description func(childComplexity int) int
+		ID          func(childComplexity int) int
 	}
 
 	Result struct {
@@ -207,6 +213,10 @@ type ComplexityRoot struct {
 
 	FetchCountriesResponse struct {
 		Countries func(childComplexity int) int
+	}
+
+	FetchReasonResponse struct {
+		Reasons func(childComplexity int) int
 	}
 }
 
@@ -235,6 +245,7 @@ type QueryResolver interface {
 	GetCDDReportSummary(ctx context.Context) (*types.CDDSummary, error)
 	Me(ctx context.Context) (*types.Person, error)
 	GetCountries(ctx context.Context) (*types.FetchCountriesResponse, error)
+	Reasons(ctx context.Context) (*types.FetchReasonResponse, error)
 }
 type SubscriptionResolver interface {
 	CreateApplication(ctx context.Context) (<-chan *types.CreateApplicationResponse, error)
@@ -1005,6 +1016,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Me(childComplexity), true
 
+	case "Query.reasons":
+		if e.complexity.Query.Reasons == nil {
+			break
+		}
+
+		return e.complexity.Query.Reasons(childComplexity), true
+
+	case "Reason.Description":
+		if e.complexity.Reason.Description == nil {
+			break
+		}
+
+		return e.complexity.Reason.Description(childComplexity), true
+
+	case "Reason.Id":
+		if e.complexity.Reason.ID == nil {
+			break
+		}
+
+		return e.complexity.Reason.ID(childComplexity), true
+
 	case "Result.message":
 		if e.complexity.Result.Message == nil {
 			break
@@ -1039,6 +1071,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.FetchCountriesResponse.Countries(childComplexity), true
+
+	case "fetchReasonResponse.reasons":
+		if e.complexity.FetchReasonResponse.Reasons == nil {
+			break
+		}
+
+		return e.complexity.FetchReasonResponse.Reasons(childComplexity), true
 
 	}
 	return 0, false
@@ -1211,149 +1250,159 @@ type ApplicantSDKTokenResponse {
     token: String!
 }`, BuiltIn: false},
 	{Name: "graph/schemas/Query.graphql", Input: `type Query {
-    getCDDReportSummary: CDDSummary
-    me: Person
-    getCountries: fetchCountriesResponse
+  getCDDReportSummary: CDDSummary
+  me: Person
+  getCountries: fetchCountriesResponse
+  reasons: fetchReasonResponse
 }
 `, BuiltIn: false},
 	{Name: "graph/schemas/Shared.graphql", Input: `type Result {
-    success: Boolean!
-    message: String!
+  success: Boolean!
+  message: String!
 }
 
 type CreatePhoneResult {
-    success: Boolean!
-    message: String!
-    token: String!
+  success: Boolean!
+  message: String!
+  token: String!
 }
 
 type ApiPerson {
-    firstName: String!
-    lastName: String!
-    email: String!
-    isEmailActive: Boolean!
-    isBiometricLoginEnabled: Boolean!
-    isTransactionPinEnabled: Boolean!
-    registrationCheckPoint: String!
+  firstName: String!
+  lastName: String!
+  email: String!
+  isEmailActive: Boolean!
+  isBiometricLoginEnabled: Boolean!
+  isTransactionPinEnabled: Boolean!
+  registrationCheckPoint: String!
 }
 
 input CreatePhoneInput {
-    phone: String!
-    device: Device!
+  phone: String!
+  device: Device!
 }
 
 input CreatePersonInput {
-    token: String!
-    email: String!
-    passcode: String!
+  token: String!
+  email: String!
+  passcode: String!
 }
 
 input AuthenticateCustomerInput {
-    email: String!
-    passcode: String!
-    device: Device!
+  email: String!
+  passcode: String!
+  device: Device!
 }
 
 input Device {
-    os: String!
-    brand: String!
-    deviceId: String!
-    deviceToken: String!
+  os: String!
+  brand: String!
+  deviceId: String!
+  deviceToken: String!
 }
 
 input UpdateBioDataInput {
-    address: InputAddress!
-    firstName: String!
-    lastName: String!
-    dob: String!
+  address: InputAddress!
+  firstName: String!
+  lastName: String!
+  dob: String!
 }
 
 type AuthResult {
-    token: String!,
-    refreshToken: String!
-    person: ApiPerson!
+  token: String!
+  refreshToken: String!
+  person: ApiPerson!
 }
 
 input InputAddress {
-    country: String!,
-    street: String!,
-    city: String!,
-    postcode: String!
+  country: String!
+  street: String!
+  city: String!
+  postcode: String!
 }
 
 input CreatePasscodeInput {
-    token: String!,
-    passcode: String!
+  token: String!
+  passcode: String!
 }
 
 input BioLoginInput {
-    email: String!
-    biometricPasscode: String!
-    device: Device!
+  email: String!
+  biometricPasscode: String!
+  device: Device!
 }
 
 input DeactivateBioLoginInput {
-    email: String!
-    deviceId: String!
+  email: String!
+  deviceId: String!
 }
 
 type CheckEmailExistenceResult {
-    exists: Boolean!
-    message: String!
+  exists: Boolean!
+  message: String!
 }
 
 type ActivateBioLoginResponse {
-    message: String!
-    biometricPasscode: String!
+  message: String!
+  biometricPasscode: String!
 }
 
 type createApplicationResponse {
-    token: String!
+  token: String!
 }
 
 input VerifyEmailMagicLInkInput {
-    email: String!
-    verificationToken: String!
+  email: String!
+  verificationToken: String!
 }
 
 type Person {
-    phoneNumber: String!
-    firstName: String!
-    lastName: String!
-    middleName: String!
-    email: String!
-    nationality: String!
-    addresses: [PersonAddress!]!
-    dob: String!
-    isEmailActive: Boolean!
-    isBiometricLoginEnabled: Boolean!
-    isTransactionPinEnabled: Boolean!
-    registrationCheckPoint: String!
+  phoneNumber: String!
+  firstName: String!
+  lastName: String!
+  middleName: String!
+  email: String!
+  nationality: String!
+  addresses: [PersonAddress!]!
+  dob: String!
+  isEmailActive: Boolean!
+  isBiometricLoginEnabled: Boolean!
+  isTransactionPinEnabled: Boolean!
+  registrationCheckPoint: String!
 }
 
 type PersonAddress {
-    country: String!,
-    street: String!,
-    city: String!,
-    postcode: String!
+  country: String!
+  street: String!
+  city: String!
+  postcode: String!
 }
 
 type Country {
-    CountryId: String!
-    Capital: String!
-    CountryName: String!
-    Continent: String!
-    Dial: String!
-    GeoNameId: String!
-    ISO4217CurrencyAlphabeticCode: String!
-    ISO4217CurrencyNumericCode: String!
-    IsIndependent: String!
-    Languages: String!
-    officialNameEnglish: String!
+  CountryId: String!
+  Capital: String!
+  CountryName: String!
+  Continent: String!
+  Dial: String!
+  GeoNameId: String!
+  ISO4217CurrencyAlphabeticCode: String!
+  ISO4217CurrencyNumericCode: String!
+  IsIndependent: String!
+  Languages: String!
+  officialNameEnglish: String!
 }
 
 type fetchCountriesResponse {
-    Countries: [Country]
+  Countries: [Country]
+}
+
+type Reason {
+  Id: String!
+  Description: String!
+}
+
+type fetchReasonResponse {
+  reasons: [Reason!]!
 }
 `, BuiltIn: false},
 	{Name: "graph/schemas/Subscription.graphql", Input: `type Subscription {
@@ -4997,6 +5046,37 @@ func (ec *executionContext) _Query_getCountries(ctx context.Context, field graph
 	return ec.marshalOfetchCountriesResponse2ᚖmsᚗapiᚋtypesᚐFetchCountriesResponse(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Query_reasons(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Reasons(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*types.FetchReasonResponse)
+	fc.Result = res
+	return ec.marshalOfetchReasonResponse2ᚖmsᚗapiᚋtypesᚐFetchReasonResponse(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -5064,6 +5144,74 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	res := resTmp.(*introspection.Schema)
 	fc.Result = res
 	return ec.marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Reason_Id(ctx context.Context, field graphql.CollectedField, obj *types.Reason) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Reason",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Reason_Description(ctx context.Context, field graphql.CollectedField, obj *types.Reason) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Reason",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Description, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Result_success(ctx context.Context, field graphql.CollectedField, obj *types.Result) (ret graphql.Marshaler) {
@@ -6291,6 +6439,40 @@ func (ec *executionContext) _fetchCountriesResponse_Countries(ctx context.Contex
 	return ec.marshalOCountry2ᚕᚖmsᚗapiᚋtypesᚐCountry(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _fetchReasonResponse_reasons(ctx context.Context, field graphql.CollectedField, obj *types.FetchReasonResponse) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "fetchReasonResponse",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Reasons, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*types.Reason)
+	fc.Result = res
+	return ec.marshalNReason2ᚕᚖmsᚗapiᚋtypesᚐReasonᚄ(ctx, field.Selections, res)
+}
+
 // endregion **************************** field.gotpl *****************************
 
 // region    **************************** input.gotpl *****************************
@@ -7438,10 +7620,53 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				res = ec._Query_getCountries(ctx, field)
 				return res
 			})
+		case "reasons":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_reasons(ctx, field)
+				return res
+			})
 		case "__type":
 			out.Values[i] = ec._Query___type(ctx, field)
 		case "__schema":
 			out.Values[i] = ec._Query___schema(ctx, field)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var reasonImplementors = []string{"Reason"}
+
+func (ec *executionContext) _Reason(ctx context.Context, sel ast.SelectionSet, obj *types.Reason) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, reasonImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Reason")
+		case "Id":
+			out.Values[i] = ec._Reason_Id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "Description":
+			out.Values[i] = ec._Reason_Description(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -7797,6 +8022,33 @@ func (ec *executionContext) _fetchCountriesResponse(ctx context.Context, sel ast
 	return out
 }
 
+var fetchReasonResponseImplementors = []string{"fetchReasonResponse"}
+
+func (ec *executionContext) _fetchReasonResponse(ctx context.Context, sel ast.SelectionSet, obj *types.FetchReasonResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, fetchReasonResponseImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("fetchReasonResponse")
+		case "reasons":
+			out.Values[i] = ec._fetchReasonResponse_reasons(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 // endregion **************************** object.gotpl ****************************
 
 // region    ***************************** type.gotpl *****************************
@@ -7973,6 +8225,53 @@ func (ec *executionContext) marshalNPersonAddress2ᚖmsᚗapiᚋtypesᚐPersonAd
 		return graphql.Null
 	}
 	return ec._PersonAddress(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNReason2ᚕᚖmsᚗapiᚋtypesᚐReasonᚄ(ctx context.Context, sel ast.SelectionSet, v []*types.Reason) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNReason2ᚖmsᚗapiᚋtypesᚐReason(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNReason2ᚖmsᚗapiᚋtypesᚐReason(ctx context.Context, sel ast.SelectionSet, v *types.Reason) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Reason(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
@@ -8645,6 +8944,13 @@ func (ec *executionContext) marshalOfetchCountriesResponse2ᚖmsᚗapiᚋtypes�
 		return graphql.Null
 	}
 	return ec._fetchCountriesResponse(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOfetchReasonResponse2ᚖmsᚗapiᚋtypesᚐFetchReasonResponse(ctx context.Context, sel ast.SelectionSet, v *types.FetchReasonResponse) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._fetchReasonResponse(ctx, sel, v)
 }
 
 // endregion ***************************** type.gotpl *****************************

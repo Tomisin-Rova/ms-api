@@ -3,6 +3,8 @@ package graph
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
@@ -14,7 +16,6 @@ import (
 	"ms.api/protos/pb/verifyService"
 	"ms.api/server/http/middlewares"
 	"ms.api/types"
-	"time"
 )
 
 // All error types here, so they don't get over-written in the mutation, query or subscription resolvers when generating schema
