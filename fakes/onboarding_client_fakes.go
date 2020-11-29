@@ -62,7 +62,7 @@ func (f *FakeOnBoardingClient) ResendOtp(ctx context.Context, req *onboardingSer
 }
 
 func (f *FakeOnBoardingClient) CreateApplication(ctx context.Context, req *onboardingService.CreateApplicationRequest,
-	opts ...grpc.CallOption) (onboardingService.OnBoardingService_CreateApplicationClient, error) {
+	opts ...grpc.CallOption) (*onboardingService.CreateApplicationResponse, error) {
 	return nil, f.err
 }
 

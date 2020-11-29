@@ -141,7 +141,7 @@ func (r *mutationResolver) CreatePhone(ctx context.Context, input types.CreatePh
 			Device: &onboardingService.Device{Os: input.Device.Os, Brand: input.Device.Brand,
 				DeviceId: input.Device.DeviceID, DeviceToken: input.Device.DeviceToken}})
 	if err != nil {
-		r.logger.Infof("onBoardingService.createPhone() failed: %v", err)
+		r.logger.Infof("OnBoardingService.createPhone() failed: %v", err)
 		return nil, rerrors.NewFromGrpc(err)
 	}
 	return &types.CreatePhoneResult{Message: result.Message, Success: true, Token: result.Token}, nil
@@ -169,7 +169,7 @@ func (r *mutationResolver) CreatePerson(ctx context.Context, input *types.Create
 		Passcode: input.Passcode,
 	})
 	if err != nil {
-		r.logger.Infof("onBoardingService.createEmail() failed: %v", err)
+		r.logger.Infof("OnBoardingService.createEmail() failed: %v", err)
 		return nil, rerrors.NewFromGrpc(err)
 	}
 	tokens, err := r.authService.GenerateToken(ctx, &authService.GenerateTokenRequest{PersonId: resp.PersonId})
@@ -339,7 +339,7 @@ func (r *mutationResolver) VerifyEmailMagicLInk(ctx context.Context, email strin
 	})
 
 	if err != nil {
-		r.logger.WithError(err).Info("onBoardingService.VerifyEmailMagicLInk() failed")
+		r.logger.WithError(err).Info("OnBoardingService.VerifyEmailMagicLInk() failed")
 		return nil, rerrors.NewFromGrpc(err)
 	}
 
@@ -356,7 +356,7 @@ func (r *mutationResolver) ResendEmailMagicLInk(ctx context.Context, email strin
 
 	resp, err := r.onBoardingService.ResendEmailMagicLInk(ctx, &onboardingService.ResendEmailMagicLInkRequest{Email: email})
 	if err != nil {
-		r.logger.WithError(err).Info("onBoardingService.ResendEmailMagicLInk() failed")
+		r.logger.WithError(err).Info("OnBoardingService.ResendEmailMagicLInk() failed")
 		return nil, rerrors.NewFromGrpc(err)
 	}
 
@@ -394,6 +394,20 @@ func (r *mutationResolver) AcceptTermsAndConditions(ctx context.Context) (*types
 		return nil, rerrors.NewFromGrpc(err)
 	}
 	return &types.Result{Message: resp.Message, Success: true}, nil
+}
+
+func (r *mutationResolver) CreateApplication(ctx context.Context) (*types.CreateApplicationResponse, error) {
+	personId, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+	resp, err := r.onBoardingService.CreateApplication(ctx,
+		&onboardingService.CreateApplicationRequest{PersonId: personId})
+	if err != nil {
+		r.logger.WithError(err).Error("onBoardingService.createApplication() failed")
+		return nil, rerrors.NewFromGrpc(err)
+	}
+	return &types.CreateApplicationResponse{Token: resp.Token}, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.
