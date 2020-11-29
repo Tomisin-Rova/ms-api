@@ -396,6 +396,20 @@ func (r *mutationResolver) AcceptTermsAndConditions(ctx context.Context) (*types
 	return &types.Result{Message: resp.Message, Success: true}, nil
 }
 
+func (r *mutationResolver) CreateApplication(ctx context.Context) (*types.CreateApplicationResponse, error) {
+	personId, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+	resp, err := r.onBoardingService.CreateApplication(ctx,
+		&onboardingService.CreateApplicationRequest{PersonId: personId})
+	if err != nil {
+		r.logger.WithError(err).Error("onBoardingService.createApplication() failed")
+		return nil, rerrors.NewFromGrpc(err)
+	}
+	return &types.CreateApplicationResponse{Token: resp.Token}, nil
+}
+
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 

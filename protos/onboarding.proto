@@ -150,7 +150,7 @@ service OnBoardingService{
     rpc VerifySmsOtp(OtpVerificationRequest) returns (OtpVerificationResponse) {}
     rpc VerifyEmailOtp(OtpVerificationByEmailRequest) returns (OtpVerificationResponse) {}
     rpc ResendOtp(ResendOtpRequest) returns (SuccessResponse) {}
-    rpc CreateApplication(CreateApplicationRequest) returns (stream CreateApplicationResponse) {}
+    rpc CreateApplication(CreateApplicationRequest) returns (CreateApplicationResponse) {}
     rpc SubmitCheck(SubmitCheckRequest) returns (SuccessResponse) {}
     rpc VerifyEmailMagicLInk(VerifyEmailMagicLInkRequest) returns (SuccessResponse) {}
     rpc ResendEmailMagicLInk(ResendEmailMagicLInkRequest) returns (SuccessResponse) {}
