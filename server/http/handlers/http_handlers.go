@@ -43,5 +43,7 @@ func (handler *HttpHandler) VerifyMagicLinkHandler(w http.ResponseWriter, r *htt
 
 func (handler *HttpHandler) respond(w http.ResponseWriter, code int, message string) {
 	w.WriteHeader(code)
-	w.Write([]byte(message))
+	if _, err := w.Write([]byte(message)); err != nil {
+		handler.logger.WithError(err).Error("error occurred while sending data to client")
+	}
 }
