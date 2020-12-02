@@ -90,6 +90,25 @@ func (r *queryResolver) GetCountries(ctx context.Context) (*types.FetchCountries
 	return countriesRes, nil
 }
 
+func (r *queryResolver) Reasons(ctx context.Context) (*types.FetchReasonResponse, error) {
+	resp, err := r.onBoardingService.FetchReasons(ctx, &onboardingService.EmptyRequest{})
+	if err != nil {
+		return nil, rerrors.NewFromGrpc(err)
+	}
+
+	response := &types.FetchReasonResponse{}
+	reasons := make([]*types.Reason, 0)
+	for _, r := range resp.Reasons {
+		reasons = append(reasons, &types.Reason{
+			ID:          r.Id,
+			Description: r.Description,
+		})
+	}
+
+	response.Reasons = reasons
+	return response, nil
+}
+
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 

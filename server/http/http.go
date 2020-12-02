@@ -10,6 +10,7 @@ import (
 	"ms.api/config"
 	"ms.api/graph"
 	"ms.api/graph/generated"
+	"ms.api/server/http/handlers"
 	"ms.api/server/http/middlewares"
 	"ms.api/server/http/webhooks"
 	"net/http"
@@ -45,10 +46,12 @@ func MountServer(secrets *config.Secrets, logger *logrus.Logger) *chi.Mux {
 	}
 
 	resolvers := graph.NewResolver(opts, logger)
+	httpHandlers := handlers.New(opts.OnBoardingService, logger)
 	// API Server
 	router.Handle("/graphql",
 		handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: resolvers})))
 	// Webhooks
 	router.Post("/webhooks/onfido", webhooks.HandleOnfidoWebhook(opts.OnfidoClient))
+	router.Get("/verify_email", httpHandlers.VerifyMagicLinkHandler)
 	return router
 }

@@ -34,4 +34,5 @@ type Mutation {
     resendEmailMagicLInk(email: String!): Result
     submitApplication: Result
     acceptTermsAndConditions: Result
+    createApplication: createApplicationResponse
 }

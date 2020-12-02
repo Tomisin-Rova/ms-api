@@ -2,6 +2,7 @@ package fakes
 
 import (
 	"context"
+
 	"google.golang.org/grpc"
 	"ms.api/protos/pb/onboardingService"
 )
@@ -61,7 +62,7 @@ func (f *FakeOnBoardingClient) ResendOtp(ctx context.Context, req *onboardingSer
 }
 
 func (f *FakeOnBoardingClient) CreateApplication(ctx context.Context, req *onboardingService.CreateApplicationRequest,
-	opts ...grpc.CallOption) (onboardingService.OnBoardingService_CreateApplicationClient, error) {
+	opts ...grpc.CallOption) (*onboardingService.CreateApplicationResponse, error) {
 	return nil, f.err
 }
 
@@ -88,4 +89,9 @@ func (f *FakeOnBoardingClient) FetchCountries(ctx context.Context, req *onboardi
 func (f *FakeOnBoardingClient) AcceptTermsAndConditions(ctx context.Context, req *onboardingService.TermsAndConditionsRequest,
 	opts ...grpc.CallOption) (*onboardingService.SuccessResponse, error) {
 	return &onboardingService.SuccessResponse{}, f.err
+}
+
+func (f *FakeOnBoardingClient) FetchReasons(ctx context.Context, req *onboardingService.EmptyRequest,
+	opts ...grpc.CallOption) (*onboardingService.ReasonResponse, error) {
+	return &onboardingService.ReasonResponse{}, f.err
 }

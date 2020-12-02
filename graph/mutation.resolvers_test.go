@@ -15,7 +15,7 @@ import (
 func TestMutationResolver_CreatePhone(t *testing.T) {
 	svc := fakes.NewFakeOnBoardingClient(&onboarding.SuccessResponse{Message: "phone added"},
 		&onboarding.CreatePhoneResponse{Message: "phone added", Token: "token"}, nil, nil)
-	r := NewResolver(&ResolverOpts{onBoardingService: svc}, logrus.StandardLogger())
+	r := NewResolver(&ResolverOpts{OnBoardingService: svc}, logrus.StandardLogger())
 	mu := &mutationResolver{r}
 	resp, err := mu.CreatePhone(context.Background(), types.CreatePhoneInput{
 		Phone: "09088776655", Device: &types.Device{},
@@ -27,7 +27,7 @@ func TestMutationResolver_CreatePhone(t *testing.T) {
 
 func TestMutationResolver_CreatePhone_Error(t *testing.T) {
 	svc := fakes.NewFakeOnBoardingClient(nil, nil, nil, errors.New("error occurred"))
-	r := NewResolver(&ResolverOpts{onBoardingService: svc}, logrus.StandardLogger())
+	r := NewResolver(&ResolverOpts{OnBoardingService: svc}, logrus.StandardLogger())
 	mu := &mutationResolver{r}
 	resp, err := mu.CreatePhone(context.Background(), types.CreatePhoneInput{
 		Phone: "09088776655", Device: &types.Device{},
@@ -40,7 +40,7 @@ func TestMutationResolver_VerifySmsOtp(t *testing.T) {
 	svc := fakes.NewFakeVerifyClient(&verify.OtpVerificationResponse{Message: "phone added", Match: true}, nil, nil)
 	onBoardingSvc := fakes.NewFakeOnBoardingClient(&onboarding.SuccessResponse{Message: ""},
 		&onboarding.CreatePhoneResponse{}, &onboarding.OtpVerificationResponse{Match: true}, nil)
-	r := NewResolver(&ResolverOpts{verifyService: svc, onBoardingService: onBoardingSvc}, logrus.StandardLogger())
+	r := NewResolver(&ResolverOpts{verifyService: svc, OnBoardingService: onBoardingSvc}, logrus.StandardLogger())
 	mu := &mutationResolver{r}
 	resp, err := mu.VerifyOtp(context.Background(), "09088776655", "009988")
 	assert.Nil(t, err)
@@ -52,7 +52,7 @@ func TestMutationResolver_VerifySmsOtp_Error(t *testing.T) {
 	svc := fakes.NewFakeVerifyClient(nil, nil, errors.New("failed to validate OTP"))
 	onBoardingSvc := fakes.NewFakeOnBoardingClient(&onboarding.SuccessResponse{Message: ""},
 		&onboarding.CreatePhoneResponse{}, nil, errors.New("failed to perform op"))
-	r := NewResolver(&ResolverOpts{verifyService: svc, onBoardingService: onBoardingSvc}, logrus.StandardLogger())
+	r := NewResolver(&ResolverOpts{verifyService: svc, OnBoardingService: onBoardingSvc}, logrus.StandardLogger())
 	mu := &mutationResolver{r}
 	resp, err := mu.VerifyOtp(context.Background(), "09088776655", "009988")
 	assert.NotNil(t, err)
