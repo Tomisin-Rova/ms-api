@@ -158,6 +158,7 @@ type ComplexityRoot struct {
 		ResendOtp                   func(childComplexity int, phone string) int
 		ResetPasscode               func(childComplexity int, email string, newPasscode string, verificationToken string) int
 		SubmitApplication           func(childComplexity int) int
+		UpdateFirebaseToken         func(childComplexity int, token string) int
 		UpdatePersonBiodata         func(childComplexity int, input *types.UpdateBioDataInput) int
 		VerifyEmailMagicLInk        func(childComplexity int, email string, verificationToken string) int
 		VerifyOtp                   func(childComplexity int, phone string, code string) int
@@ -236,6 +237,7 @@ type MutationResolver interface {
 	SubmitApplication(ctx context.Context) (*types.Result, error)
 	AcceptTermsAndConditions(ctx context.Context) (*types.Result, error)
 	CreateApplication(ctx context.Context) (*types.CreateApplicationResponse, error)
+	UpdateFirebaseToken(ctx context.Context, token string) (*types.Result, error)
 }
 type QueryResolver interface {
 	GetCDDReportSummary(ctx context.Context) (*types.CDDSummary, error)
@@ -847,6 +849,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.SubmitApplication(childComplexity), true
 
+	case "Mutation.updateFirebaseToken":
+		if e.complexity.Mutation.UpdateFirebaseToken == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateFirebaseToken_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateFirebaseToken(childComplexity, args["token"].(string)), true
+
 	case "Mutation.updatePersonBiodata":
 		if e.complexity.Mutation.UpdatePersonBiodata == nil {
 			break
@@ -1217,6 +1231,7 @@ type CDDSummaryDocument {
     submitApplication: Result
     acceptTermsAndConditions: Result
     createApplication: createApplicationResponse
+    updateFirebaseToken(token: String!): Result
 }
 `, BuiltIn: false},
 	{Name: "graph/schemas/Onfido.graphql", Input: `type ApplicantSDKTokenRequest {
@@ -1642,6 +1657,21 @@ func (ec *executionContext) field_Mutation_resetPasscode_args(ctx context.Contex
 		}
 	}
 	args["verificationToken"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateFirebaseToken_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["token"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("token"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["token"] = arg0
 	return args, nil
 }
 
@@ -4412,6 +4442,44 @@ func (ec *executionContext) _Mutation_createApplication(ctx context.Context, fie
 	res := resTmp.(*types.CreateApplicationResponse)
 	fc.Result = res
 	return ec.marshalOcreateApplicationResponse2ᚖmsᚗapiᚋtypesᚐCreateApplicationResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_updateFirebaseToken(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updateFirebaseToken_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateFirebaseToken(rctx, args["token"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*types.Result)
+	fc.Result = res
+	return ec.marshalOResult2ᚖmsᚗapiᚋtypesᚐResult(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Person_phoneNumber(ctx context.Context, field graphql.CollectedField, obj *types.Person) (ret graphql.Marshaler) {
@@ -7403,6 +7471,8 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec._Mutation_acceptTermsAndConditions(ctx, field)
 		case "createApplication":
 			out.Values[i] = ec._Mutation_createApplication(ctx, field)
+		case "updateFirebaseToken":
+			out.Values[i] = ec._Mutation_updateFirebaseToken(ctx, field)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
