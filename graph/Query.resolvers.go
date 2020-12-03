@@ -6,7 +6,6 @@ package graph
 import (
 	"context"
 	"errors"
-	"ms.api/protos/pb/productService"
 
 	"github.com/jinzhu/copier"
 	"ms.api/graph/generated"
@@ -14,6 +13,7 @@ import (
 	"ms.api/protos/pb/authService"
 	"ms.api/protos/pb/cddService"
 	"ms.api/protos/pb/onboardingService"
+	"ms.api/protos/pb/productService"
 	"ms.api/server/http/middlewares"
 	"ms.api/types"
 )

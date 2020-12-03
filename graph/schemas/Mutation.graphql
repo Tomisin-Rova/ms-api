@@ -36,4 +36,5 @@ type Mutation {
     acceptTermsAndConditions: Result
     createApplication: createApplicationResponse
     createCurrencyAccount(currencyCode: String!): Result
+    updateFirebaseToken(token: String!): Result
 }

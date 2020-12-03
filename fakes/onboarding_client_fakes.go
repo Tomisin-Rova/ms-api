@@ -95,3 +95,8 @@ func (f *FakeOnBoardingClient) FetchReasons(ctx context.Context, req *onboarding
 	opts ...grpc.CallOption) (*onboardingService.ReasonResponse, error) {
 	return &onboardingService.ReasonResponse{}, f.err
 }
+
+func (f *FakeOnBoardingClient) UpdateFirebaseToken(ctx context.Context, req *onboardingService.UpdateFirebaseTokenRequest,
+	opts ...grpc.CallOption) (*onboardingService.SuccessResponse, error) {
+	return &onboardingService.SuccessResponse{}, f.err
+}
