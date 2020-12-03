@@ -6,7 +6,6 @@ package graph
 import (
 	"context"
 	"errors"
-
 	"ms.api/graph/generated"
 	rerrors "ms.api/libs/errors"
 	"ms.api/libs/validator/datevalidator"
@@ -408,6 +407,20 @@ func (r *mutationResolver) CreateApplication(ctx context.Context) (*types.Create
 		return nil, rerrors.NewFromGrpc(err)
 	}
 	return &types.CreateApplicationResponse{Token: resp.Token}, nil
+}
+
+func (r *mutationResolver) UpdateFirebaseToken(ctx context.Context, token string) (*types.Result, error) {
+	personId, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+	resp, err := r.onBoardingService.UpdateFirebaseToken(ctx,
+		&onboardingService.UpdateFirebaseTokenRequest{PersonId: personId, Token: token})
+	if err != nil {
+		r.logger.WithError(err).Error("onBoardingService.UpdateFirebaseToken() failed")
+		return nil, rerrors.NewFromGrpc(err)
+	}
+	return &types.Result{Message: resp.Message}, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

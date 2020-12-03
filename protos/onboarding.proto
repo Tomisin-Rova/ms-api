@@ -141,6 +141,11 @@ message TermsAndConditionsRequest {
     string personId = 1;
 }
 
+message UpdateFirebaseTokenRequest {
+    string personId = 1;
+    string token = 2;
+}
+
 service OnBoardingService{
     rpc CreatePhone(CreatePhoneRequest) returns (CreatePhoneResponse) {}
     rpc CreateEmail(CreateEmailRequest) returns (CreateEmailResponse) {}
@@ -157,4 +162,5 @@ service OnBoardingService{
     rpc FetchCountries(FetchCountriesRequest) returns (FetchCountriesResponse) {}
     rpc FetchReasons(EmptyRequest) returns (ReasonResponse) {}
     rpc AcceptTermsAndConditions(TermsAndConditionsRequest) returns (SuccessResponse) {}
+    rpc UpdateFirebaseToken(UpdateFirebaseTokenRequest) returns (SuccessResponse) {}
 }
