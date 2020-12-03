@@ -3,6 +3,7 @@ package graph
 import (
 	"context"
 	"fmt"
+	"ms.api/protos/pb/productService"
 	"time"
 
 	"github.com/pkg/errors"
@@ -40,6 +41,7 @@ func (r *mutationResolver) validateAddress(addr *types.InputAddress) error {
 type ResolverOpts struct {
 	OnfidoClient      onfidoService.OnfidoServiceClient
 	cddClient         cddService.CddServiceClient
+	productService    productService.ProductServiceClient
 	OnBoardingService onboardingService.OnBoardingServiceClient
 	verifyService     verifyService.VerifyServiceClient
 	AuthService       authService.AuthServiceClient
@@ -49,6 +51,7 @@ type ResolverOpts struct {
 type Resolver struct {
 	cddService        cddService.CddServiceClient
 	onBoardingService onboardingService.OnBoardingServiceClient
+	productService    productService.ProductServiceClient
 	verifyService     verifyService.VerifyServiceClient
 	onfidoClient      onfidoService.OnfidoServiceClient
 	authService       authService.AuthServiceClient
@@ -64,6 +67,7 @@ func NewResolver(opt *ResolverOpts, logger *logrus.Logger) *Resolver {
 		onfidoClient:      opt.OnfidoClient,
 		authService:       opt.AuthService,
 		authMw:            opt.AuthMw,
+		productService:    opt.productService,
 		logger:            logger,
 	}
 }
@@ -114,6 +118,15 @@ func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) 
 		return nil, fmt.Errorf("%v: %s", err, secrets.VerifyServiceURL)
 	}
 	opts.AuthService = authService.NewAuthServiceClient(connection)
+
+	// Product
+	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	connection, err = dialRPC(ctx, secrets.ProductServiceURL)
+	if err != nil {
+		return nil, fmt.Errorf("%v: %s", err, secrets.ProductServiceURL)
+	}
+	opts.productService = productService.NewProductServiceClient(connection)
 	return opts, nil
 }
 

@@ -3,4 +3,5 @@ type Query {
   me: Person
   getCountries: fetchCountriesResponse
   reasons: fetchReasonResponse
+  accounts: AccountsResult!
 }

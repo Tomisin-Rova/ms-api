@@ -6,6 +6,7 @@ package graph
 import (
 	"context"
 	"errors"
+	"ms.api/protos/pb/productService"
 
 	"ms.api/graph/generated"
 	rerrors "ms.api/libs/errors"
@@ -408,6 +409,22 @@ func (r *mutationResolver) CreateApplication(ctx context.Context) (*types.Create
 		return nil, rerrors.NewFromGrpc(err)
 	}
 	return &types.CreateApplicationResponse{Token: resp.Token}, nil
+}
+
+func (r *mutationResolver) CreateCurrencyAccount(ctx context.Context, currencyCode string) (*types.Result, error) {
+	personId, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+	resp, err := r.productService.CreateAccount(ctx, &productService.CreateAccountRequest{
+		PersonId: personId,
+		Currency: currencyCode,
+	})
+	if err != nil {
+		r.logger.WithError(err).Error("productService.createAccount() failed")
+		return nil, rerrors.NewFromGrpc(err)
+	}
+	return &types.Result{Message: resp.Message, Success: true}, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

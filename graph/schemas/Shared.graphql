@@ -146,3 +146,16 @@ type Reason {
 type fetchReasonResponse {
   reasons: [Reason!]!
 }
+
+type AccountsResult {
+   primaryAccount: Account!
+   currencyAccounts: [Account!]!
+}
+
+type Account {
+   currency: String!
+   currencySymbol: String!
+   accountNumber: String!
+   accountName: String!
+   balance: String!
+}
