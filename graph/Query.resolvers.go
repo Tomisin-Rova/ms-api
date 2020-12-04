@@ -13,6 +13,7 @@ import (
 	"ms.api/protos/pb/authService"
 	"ms.api/protos/pb/cddService"
 	"ms.api/protos/pb/onboardingService"
+	"ms.api/protos/pb/productService"
 	"ms.api/server/http/middlewares"
 	"ms.api/types"
 )
@@ -107,6 +108,41 @@ func (r *queryResolver) Reasons(ctx context.Context) (*types.FetchReasonResponse
 
 	response.Reasons = reasons
 	return response, nil
+}
+
+func (r *queryResolver) Accounts(ctx context.Context) (*types.AccountsResult, error) {
+	personId, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+	resp, err := r.productService.GetAccounts(ctx, &productService.GetAccountRequest{
+		PersonId: personId,
+	})
+	if err != nil {
+		r.logger.WithError(err).Error("failed to get accounts from product service")
+		return nil, rerrors.NewFromGrpc(err)
+	}
+	primaryAccount := &types.Account{
+		Currency:       resp.PrimaryAccount.CurrencyCode,
+		CurrencySymbol: resp.PrimaryAccount.CurrencySymbol,
+		AccountNumber:  resp.PrimaryAccount.AccountNumber,
+		AccountName:    resp.PrimaryAccount.AccountName,
+		Balance:        resp.PrimaryAccount.Balance,
+	}
+	accounts := make([]*types.Account, 0)
+	for _, next := range resp.Accounts {
+		accounts = append(accounts, &types.Account{
+			Currency:       next.CurrencyCode,
+			CurrencySymbol: next.CurrencySymbol,
+			AccountNumber:  next.AccountNumber,
+			AccountName:    next.AccountName,
+			Balance:        next.Balance,
+		})
+	}
+	return &types.AccountsResult{
+		PrimaryAccount:   primaryAccount,
+		CurrencyAccounts: accounts,
+	}, nil
 }
 
 // Query returns generated.QueryResolver implementation.

@@ -2,6 +2,19 @@
 
 package types
 
+type Account struct {
+	Currency       string `json:"currency"`
+	CurrencySymbol string `json:"currencySymbol"`
+	AccountNumber  string `json:"accountNumber"`
+	AccountName    string `json:"accountName"`
+	Balance        string `json:"balance"`
+}
+
+type AccountsResult struct {
+	PrimaryAccount   *Account   `json:"primaryAccount"`
+	CurrencyAccounts []*Account `json:"currencyAccounts"`
+}
+
 type ActivateBioLoginResponse struct {
 	Message           string `json:"message"`
 	BiometricPasscode string `json:"biometricPasscode"`

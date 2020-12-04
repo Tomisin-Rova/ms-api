@@ -14,6 +14,7 @@ import (
 	"ms.api/libs/validator/phonenumbervalidator"
 	"ms.api/protos/pb/authService"
 	"ms.api/protos/pb/onboardingService"
+	"ms.api/protos/pb/productService"
 	"ms.api/server/http/middlewares"
 	"ms.api/types"
 )
@@ -408,6 +409,36 @@ func (r *mutationResolver) CreateApplication(ctx context.Context) (*types.Create
 		return nil, rerrors.NewFromGrpc(err)
 	}
 	return &types.CreateApplicationResponse{Token: resp.Token}, nil
+}
+
+func (r *mutationResolver) CreateCurrencyAccount(ctx context.Context, currencyCode string) (*types.Result, error) {
+	personId, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+	resp, err := r.productService.CreateAccount(ctx, &productService.CreateAccountRequest{
+		PersonId: personId,
+		Currency: currencyCode,
+	})
+	if err != nil {
+		r.logger.WithError(err).Error("productService.createAccount() failed")
+		return nil, rerrors.NewFromGrpc(err)
+	}
+	return &types.Result{Message: resp.Message, Success: true}, nil
+}
+
+func (r *mutationResolver) UpdateFirebaseToken(ctx context.Context, token string) (*types.Result, error) {
+	personId, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+	resp, err := r.onBoardingService.UpdateFirebaseToken(ctx,
+		&onboardingService.UpdateFirebaseTokenRequest{PersonId: personId, Token: token})
+	if err != nil {
+		r.logger.WithError(err).Error("onBoardingService.UpdateFirebaseToken() failed")
+		return nil, rerrors.NewFromGrpc(err)
+	}
+	return &types.Result{Message: resp.Message}, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.
