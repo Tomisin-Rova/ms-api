@@ -1,0 +1,16 @@
+syntax = "proto3";
+package payment;
+option go_package = "paymentService";
+
+message SuccessResponse {
+  string message = 1;
+}
+
+message CreateTransactionPinRequest {
+  string personId = 1;
+  string pin = 2;
+}
+
+service PaymentService{
+  rpc CreateTransactionPin(CreateTransactionPinRequest) returns (SuccessResponse) {}
+}

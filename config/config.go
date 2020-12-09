@@ -20,6 +20,7 @@ type Secrets struct {
 	VerifyServiceURL     string
 	AuthServiceURL       string
 	ProductServiceURL    string
+	PaymentServiceURL    string
 	VaultAddress         string        `json:"vault_address"`
 	VaultToken           string        `json:"vault_token"`
 	VaultSecretsPath     string        `json:"vault_secrets_path"`
