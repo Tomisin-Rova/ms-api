@@ -13,7 +13,7 @@ import (
 	"ms.api/libs/validator/phonenumbervalidator"
 	"ms.api/protos/pb/authService"
 	"ms.api/protos/pb/onboardingService"
-	"ms.api/protos/pb/paymentService"
+	"ms.api/protos/pb/personService"
 	"ms.api/protos/pb/productService"
 	"ms.api/server/http/middlewares"
 	"ms.api/types"
@@ -446,10 +446,14 @@ func (r *mutationResolver) CreateTransactionPin(ctx context.Context, pin string)
 	if err != nil {
 		return nil, ErrUnAuthenticated
 	}
-	resp, err := r.paymentService.CreateTransactionPin(ctx,
-		&paymentService.CreateTransactionPinRequest{PersonId: personId, Pin: pin})
+	if len(pin) != 4 {
+		r.logger.Error("invalid pin length")
+		return nil, errors.New("The transaction pin has to contain only 4 digits.")
+	}
+	resp, err := r.personService.CreateTransactionPin(ctx,
+		&personService.CreateTransactionPinRequest{PersonId: personId, Pin: pin})
 	if err != nil {
-		r.logger.WithError(err).Error("paymentService.CreateTransactionPin() failed")
+		r.logger.WithError(err).Error("personService.CreateTransactionPin() failed")
 		return nil, rerrors.NewFromGrpc(err)
 	}
 	return &types.Result{Message: resp.Message}, nil
