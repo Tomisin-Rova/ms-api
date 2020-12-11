@@ -159,3 +159,10 @@ type Account {
    accountName: String!
    balance: String!
 }
+
+input MakeTransferInput {
+    fromAccountNumber: String!
+    toAccountNumber: String!
+    amount: Int!
+    notes: String!
+}

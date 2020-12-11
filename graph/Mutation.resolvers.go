@@ -6,6 +6,7 @@ package graph
 import (
 	"context"
 	"errors"
+	"ms.api/protos/pb/paymentService"
 
 	"ms.api/graph/generated"
 	rerrors "ms.api/libs/errors"
@@ -439,6 +440,34 @@ func (r *mutationResolver) UpdateFirebaseToken(ctx context.Context, token string
 		return nil, rerrors.NewFromGrpc(err)
 	}
 	return &types.Result{Message: resp.Message}, nil
+}
+
+func (r *mutationResolver) MakeTransfer(ctx context.Context, input *types.MakeTransferInput) (*types.Result, error) {
+	personId, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+	if input.Amount <= 0 {
+		return nil, errors.New("invalid transaction amount")
+	}
+	if len(input.ToAccountNumber) < 10 || len(input.FromAccountNumber) < 10 {
+		return nil, errors.New("invalid account details")
+	}
+	if len(input.Notes) == 0 {
+		return nil, errors.New("a transaction note is required")
+	}
+	resp, err := r.paymentService.MakeTransfer(ctx, &paymentService.TransferRequest{
+		AccountNumber:            input.FromAccountNumber,
+		BeneficiaryAccountNumber: input.ToAccountNumber,
+		Amount:                   input.Amount,
+		Notes:                    input.Notes,
+		PersonId:                 personId,
+	})
+	if err != nil {
+		r.logger.WithError(err).Error("paymentService.MakeTransfer() failed")
+		return nil, rerrors.NewFromGrpc(err)
+	}
+	return &types.Result{Message: resp.Message, Success: true}, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

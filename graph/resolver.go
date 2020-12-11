@@ -3,6 +3,7 @@ package graph
 import (
 	"context"
 	"fmt"
+	"ms.api/protos/pb/paymentService"
 	"ms.api/protos/pb/productService"
 	"time"
 
@@ -45,6 +46,7 @@ type ResolverOpts struct {
 	OnBoardingService onboardingService.OnBoardingServiceClient
 	verifyService     verifyService.VerifyServiceClient
 	AuthService       authService.AuthServiceClient
+	paymentService    paymentService.PaymentServiceClient
 	AuthMw            *middlewares.AuthMiddleware
 }
 
@@ -55,6 +57,7 @@ type Resolver struct {
 	verifyService     verifyService.VerifyServiceClient
 	onfidoClient      onfidoService.OnfidoServiceClient
 	authService       authService.AuthServiceClient
+	paymentService    paymentService.PaymentServiceClient
 	authMw            *middlewares.AuthMiddleware
 	logger            *logrus.Logger
 }
@@ -67,6 +70,7 @@ func NewResolver(opt *ResolverOpts, logger *logrus.Logger) *Resolver {
 		onfidoClient:      opt.OnfidoClient,
 		authService:       opt.AuthService,
 		authMw:            opt.AuthMw,
+		paymentService:    opt.paymentService,
 		productService:    opt.productService,
 		logger:            logger,
 	}
@@ -127,6 +131,15 @@ func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) 
 		return nil, fmt.Errorf("%v: %s", err, secrets.ProductServiceURL)
 	}
 	opts.productService = productService.NewProductServiceClient(connection)
+
+	// Payment
+	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	connection, err = dialRPC(ctx, secrets.PaymentServiceURL)
+	if err != nil {
+		return nil, fmt.Errorf("%v: %s", err, secrets.PaymentServiceURL)
+	}
+	opts.paymentService = paymentService.NewPaymentServiceClient(connection)
 	return opts, nil
 }
 

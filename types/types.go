@@ -128,6 +128,13 @@ type InputAddress struct {
 	Postcode string `json:"postcode"`
 }
 
+type MakeTransferInput struct {
+	FromAccountNumber string `json:"fromAccountNumber"`
+	ToAccountNumber   string `json:"toAccountNumber"`
+	Amount            int64  `json:"amount"`
+	Notes             string `json:"notes"`
+}
+
 type Person struct {
 	PhoneNumber             string           `json:"phoneNumber"`
 	FirstName               string           `json:"firstName"`

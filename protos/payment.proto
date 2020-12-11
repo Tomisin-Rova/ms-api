@@ -1,0 +1,22 @@
+
+syntax = "proto3";
+
+package payment;
+option go_package = "paymentService";
+
+
+service PaymentService {
+    rpc MakeTransfer(TransferRequest) returns (SuccessResponse) {}
+}
+
+message SuccessResponse {
+  string message = 1;
+}
+
+message TransferRequest {
+    string accountNumber = 1;
+    string beneficiaryAccountNumber = 2;
+    int64 amount = 3;
+    string notes = 4;
+    string personId = 5;
+}
