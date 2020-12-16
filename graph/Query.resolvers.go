@@ -13,6 +13,7 @@ import (
 	"ms.api/protos/pb/authService"
 	"ms.api/protos/pb/cddService"
 	"ms.api/protos/pb/onboardingService"
+	"ms.api/protos/pb/payeeService"
 	"ms.api/protos/pb/productService"
 	"ms.api/server/http/middlewares"
 	"ms.api/types"
@@ -143,6 +144,27 @@ func (r *queryResolver) Accounts(ctx context.Context) (*types.AccountsResult, er
 		PrimaryAccount:   primaryAccount,
 		CurrencyAccounts: accounts,
 	}, nil
+}
+
+func (r *queryResolver) GetPayeesByPhoneNumbers(ctx context.Context, phone []string) (*types.GetPayeesByPhoneNumbers, error) {
+	resp, err := r.PayeeService.GetPayeesByPhoneNumbers(ctx, &payeeService.FetchPayeeByPhoneRequest{Phone: phone})
+	if err != nil {
+		return nil, rerrors.NewFromGrpc(err)
+	}
+
+	response := &types.GetPayeesByPhoneNumbers{}
+	payees := make([]*types.Payee, 0)
+	for _, r := range resp.Payees {
+		payees = append(payees, &types.Payee{
+			PersonID:    r.PersonId,
+			PhoneNumber: r.Phone,
+			FirstName:   r.FirstName,
+			LastName:    r.LastName,
+		})
+	}
+
+	response.Payees = payees
+	return response, nil
 }
 
 // Query returns generated.QueryResolver implementation.

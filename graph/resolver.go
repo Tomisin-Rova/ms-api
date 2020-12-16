@@ -3,7 +3,10 @@ package graph
 import (
 	"context"
 	"fmt"
+
+	"ms.api/protos/pb/payeeService"
 	"ms.api/protos/pb/productService"
+
 	"time"
 
 	"github.com/pkg/errors"
@@ -39,6 +42,7 @@ func (r *mutationResolver) validateAddress(addr *types.InputAddress) error {
 }
 
 type ResolverOpts struct {
+	PayeeService      payeeService.PayeeServiceClient
 	OnfidoClient      onfidoService.OnfidoServiceClient
 	cddClient         cddService.CddServiceClient
 	productService    productService.ProductServiceClient
@@ -49,6 +53,7 @@ type ResolverOpts struct {
 }
 
 type Resolver struct {
+	PayeeService      payeeService.PayeeServiceClient
 	cddService        cddService.CddServiceClient
 	onBoardingService onboardingService.OnBoardingServiceClient
 	productService    productService.ProductServiceClient
@@ -61,6 +66,7 @@ type Resolver struct {
 
 func NewResolver(opt *ResolverOpts, logger *logrus.Logger) *Resolver {
 	return &Resolver{
+		PayeeService:      opt.PayeeService,
 		cddService:        opt.cddClient,
 		onBoardingService: opt.OnBoardingService,
 		verifyService:     opt.verifyService,
@@ -127,6 +133,15 @@ func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) 
 		return nil, fmt.Errorf("%v: %s", err, secrets.ProductServiceURL)
 	}
 	opts.productService = productService.NewProductServiceClient(connection)
+
+	//Payee
+	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	connection, err = dialRPC(ctx, secrets.PayeeServiceURL)
+	if err != nil {
+		return nil, fmt.Errorf("%v: %s", err, secrets.PayeeServiceURL)
+	}
+	opts.PayeeService = payeeService.NewPayeeServiceClient(connection)
 	return opts, nil
 }
 

@@ -1,10 +1,11 @@
 package config
 
 import (
+	"os"
+
 	"github.com/go-redis/redis/v7"
 	"github.com/joho/godotenv"
 	"ms.api/log"
-	"os"
 )
 
 const (
@@ -20,6 +21,7 @@ type Secrets struct {
 	VerifyServiceURL     string
 	AuthServiceURL       string
 	ProductServiceURL    string
+	PayeeServiceURL      string
 	VaultAddress         string        `json:"vault_address"`
 	VaultToken           string        `json:"vault_token"`
 	VaultSecretsPath     string        `json:"vault_secrets_path"`
@@ -59,6 +61,7 @@ func LoadSecrets() (*Secrets, error) {
 	ss.AuthServiceURL = os.Getenv("AUTH_SERVICE_URL")
 	ss.CddServiceURL = os.Getenv("CDD_SERVICE_URL")
 	ss.ProductServiceURL = os.Getenv("PRODUCT_SERVICE_URL")
+	ss.PayeeServiceURL = os.Getenv("PAYEE_SERVICE_URL")
 	if err := ss.Environment.IsValid(); err != nil {
 		log.Error("Error in environment variables: %v", err)
 	}

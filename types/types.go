@@ -121,11 +121,22 @@ type Device struct {
 	DeviceToken string `json:"deviceToken"`
 }
 
+type GetPayeesByPhoneNumbers struct {
+	Payees []*Payee `json:"payees"`
+}
+
 type InputAddress struct {
 	Country  string `json:"country"`
 	Street   string `json:"street"`
 	City     string `json:"city"`
 	Postcode string `json:"postcode"`
+}
+
+type Payee struct {
+	FirstName   string `json:"firstName"`
+	LastName    string `json:"lastName"`
+	PhoneNumber string `json:"phoneNumber"`
+	PersonID    string `json:"personId"`
 }
 
 type Person struct {
