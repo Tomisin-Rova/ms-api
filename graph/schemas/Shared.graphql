@@ -170,3 +170,41 @@ type Payee {
   phoneNumber: String!
   personId: String!
 }
+
+input CreatePayeeInput {
+  name: String!
+  accountNumber: String!
+  sortCode: String
+  bankCode: String
+  RoutingNumber: String
+  BIC: String
+  IBAN: String
+  country: String!
+  bankName: String
+  routingType: String
+  transactionPin: String!
+}
+
+type Beneficiary {
+  payeeId: String!
+  owner: String!
+  name: String!
+  accounts: [PayeeAccount!]!
+}
+
+type PayeeAccount {
+  accountNumber: String!
+  sortCode: String
+  bankCode: String
+  routingNumber: String
+  BIC: String
+  IBAN: String
+  country: String!
+  bankName: String
+  routingType: String
+}
+
+type CreatePayeeResult {
+  message: String!
+  Beneficiary: Beneficiary!
+}

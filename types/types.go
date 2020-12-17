@@ -42,6 +42,13 @@ type AuthenticateCustomerInput struct {
 	Device   *Device `json:"device"`
 }
 
+type Beneficiary struct {
+	PayeeID  string          `json:"payeeId"`
+	Owner    string          `json:"owner"`
+	Name     string          `json:"name"`
+	Accounts []*PayeeAccount `json:"accounts"`
+}
+
 type BioLoginInput struct {
 	Email             string  `json:"email"`
 	BiometricPasscode string  `json:"biometricPasscode"`
@@ -92,6 +99,25 @@ type CreatePasscodeInput struct {
 	Passcode string `json:"passcode"`
 }
 
+type CreatePayeeInput struct {
+	Name           string  `json:"name"`
+	AccountNumber  string  `json:"accountNumber"`
+	SortCode       *string `json:"sortCode"`
+	BankCode       *string `json:"bankCode"`
+	RoutingNumber  *string `json:"RoutingNumber"`
+	Bic            *string `json:"BIC"`
+	Iban           *string `json:"IBAN"`
+	Country        string  `json:"country"`
+	BankName       *string `json:"bankName"`
+	RoutingType    *string `json:"routingType"`
+	TransactionPin string  `json:"transactionPin"`
+}
+
+type CreatePayeeResult struct {
+	Message     string       `json:"message"`
+	Beneficiary *Beneficiary `json:"Beneficiary"`
+}
+
 type CreatePersonInput struct {
 	Token    string `json:"token"`
 	Email    string `json:"email"`
@@ -137,6 +163,18 @@ type Payee struct {
 	LastName    string `json:"lastName"`
 	PhoneNumber string `json:"phoneNumber"`
 	PersonID    string `json:"personId"`
+}
+
+type PayeeAccount struct {
+	AccountNumber string  `json:"accountNumber"`
+	SortCode      *string `json:"sortCode"`
+	BankCode      *string `json:"bankCode"`
+	RoutingNumber *string `json:"routingNumber"`
+	Bic           *string `json:"BIC"`
+	Iban          *string `json:"IBAN"`
+	Country       string  `json:"country"`
+	BankName      *string `json:"bankName"`
+	RoutingType   *string `json:"routingType"`
 }
 
 type Person struct {
