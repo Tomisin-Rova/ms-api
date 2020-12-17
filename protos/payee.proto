@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package payee;
+
+option go_package = "payeeService";
+
+
+message FetchPayeeByPhoneRequest{
+    repeated string phone = 1;
+}
+
+message FetchPayeeByPhoneNumbersResponse {
+    repeated FetchPayeeByPhoneResponse payees =1;
+}
+
+message FetchPayeeByPhoneResponse {
+    string personId = 1;
+    string phone = 2;
+    string firstName =3;
+    string lastName =4;
+}
+
+service PayeeService{
+        rpc GetPayeesByPhoneNumbers(FetchPayeeByPhoneRequest) returns (FetchPayeeByPhoneNumbersResponse) {}
+}
