@@ -171,6 +171,7 @@ type ComplexityRoot struct {
 		CreateCurrencyAccount       func(childComplexity int, currencyCode string) int
 		CreatePerson                func(childComplexity int, input *types.CreatePersonInput) int
 		CreatePhone                 func(childComplexity int, input types.CreatePhoneInput) int
+		CreateTransactionPin        func(childComplexity int, pin string) int
 		DeactivateBioLogin          func(childComplexity int, input types.DeactivateBioLoginInput) int
 		RefreshToken                func(childComplexity int, refreshToken string) int
 		ResendEmailMagicLInk        func(childComplexity int, email string) int
@@ -267,6 +268,7 @@ type MutationResolver interface {
 	CreateApplication(ctx context.Context) (*types.CreateApplicationResponse, error)
 	CreateCurrencyAccount(ctx context.Context, currencyCode string) (*types.Result, error)
 	UpdateFirebaseToken(ctx context.Context, token string) (*types.Result, error)
+	CreateTransactionPin(ctx context.Context, pin string) (*types.Result, error)
 }
 type QueryResolver interface {
 	GetCDDReportSummary(ctx context.Context) (*types.CDDSummary, error)
@@ -881,6 +883,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreatePhone(childComplexity, args["input"].(types.CreatePhoneInput)), true
 
+	case "Mutation.createTransactionPin":
+		if e.complexity.Mutation.CreateTransactionPin == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createTransactionPin_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateTransactionPin(childComplexity, args["pin"].(string)), true
+
 	case "Mutation.deactivateBioLogin":
 		if e.complexity.Mutation.DeactivateBioLogin == nil {
 			break
@@ -1379,6 +1393,7 @@ type CDDSummaryDocument {
     createApplication: createApplicationResponse
     createCurrencyAccount(currencyCode: String!): Result
     updateFirebaseToken(token: String!): Result
+    createTransactionPin(pin: String!): Result
 }
 `, BuiltIn: false},
 	{Name: "graph/schemas/Onfido.graphql", Input: `type ApplicantSDKTokenRequest {
@@ -1752,6 +1767,21 @@ func (ec *executionContext) field_Mutation_createPhone_args(ctx context.Context,
 		}
 	}
 	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createTransactionPin_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["pin"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("pin"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["pin"] = arg0
 	return args, nil
 }
 
@@ -4982,6 +5012,44 @@ func (ec *executionContext) _Mutation_updateFirebaseToken(ctx context.Context, f
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().UpdateFirebaseToken(rctx, args["token"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*types.Result)
+	fc.Result = res
+	return ec.marshalOResult2ᚖmsᚗapiᚋtypesᚐResult(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_createTransactionPin(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createTransactionPin_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateTransactionPin(rctx, args["pin"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -8302,6 +8370,8 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec._Mutation_createCurrencyAccount(ctx, field)
 		case "updateFirebaseToken":
 			out.Values[i] = ec._Mutation_updateFirebaseToken(ctx, field)
+		case "createTransactionPin":
+			out.Values[i] = ec._Mutation_createTransactionPin(ctx, field)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
