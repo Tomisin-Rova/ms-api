@@ -6,7 +6,6 @@ package graph
 import (
 	"context"
 	"errors"
-
 	"ms.api/graph/generated"
 	rerrors "ms.api/libs/errors"
 	"ms.api/libs/validator/datevalidator"
@@ -14,6 +13,7 @@ import (
 	"ms.api/libs/validator/phonenumbervalidator"
 	"ms.api/protos/pb/authService"
 	"ms.api/protos/pb/onboardingService"
+	"ms.api/protos/pb/personService"
 	"ms.api/protos/pb/productService"
 	"ms.api/server/http/middlewares"
 	"ms.api/types"
@@ -436,6 +436,24 @@ func (r *mutationResolver) UpdateFirebaseToken(ctx context.Context, token string
 		&onboardingService.UpdateFirebaseTokenRequest{PersonId: personId, Token: token})
 	if err != nil {
 		r.logger.WithError(err).Error("onBoardingService.UpdateFirebaseToken() failed")
+		return nil, rerrors.NewFromGrpc(err)
+	}
+	return &types.Result{Message: resp.Message}, nil
+}
+
+func (r *mutationResolver) CreateTransactionPin(ctx context.Context, pin string) (*types.Result, error) {
+	personId, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+	if len(pin) != 4 {
+		r.logger.Error("invalid pin length")
+		return nil, errors.New("The transaction pin has to contain only 4 digits.")
+	}
+	resp, err := r.personService.CreateTransactionPin(ctx,
+		&personService.CreateTransactionPinRequest{PersonId: personId, Pin: pin})
+	if err != nil {
+		r.logger.WithError(err).Error("personService.CreateTransactionPin() failed")
 		return nil, rerrors.NewFromGrpc(err)
 	}
 	return &types.Result{Message: resp.Message}, nil

@@ -14,6 +14,7 @@ import (
 	"ms.api/protos/pb/cddService"
 	"ms.api/protos/pb/onboardingService"
 	"ms.api/protos/pb/onfidoService"
+	"ms.api/protos/pb/personService"
 	"ms.api/protos/pb/verifyService"
 	"ms.api/server/http/middlewares"
 	"ms.api/types"
@@ -46,12 +47,14 @@ type ResolverOpts struct {
 	verifyService     verifyService.VerifyServiceClient
 	AuthService       authService.AuthServiceClient
 	AuthMw            *middlewares.AuthMiddleware
+	personService     personService.PersonServiceClient
 }
 
 type Resolver struct {
 	cddService        cddService.CddServiceClient
 	onBoardingService onboardingService.OnBoardingServiceClient
 	productService    productService.ProductServiceClient
+	personService     personService.PersonServiceClient
 	verifyService     verifyService.VerifyServiceClient
 	onfidoClient      onfidoService.OnfidoServiceClient
 	authService       authService.AuthServiceClient
@@ -68,6 +71,7 @@ func NewResolver(opt *ResolverOpts, logger *logrus.Logger) *Resolver {
 		authService:       opt.AuthService,
 		authMw:            opt.AuthMw,
 		productService:    opt.productService,
+		personService:     opt.personService,
 		logger:            logger,
 	}
 }
@@ -127,6 +131,15 @@ func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) 
 		return nil, fmt.Errorf("%v: %s", err, secrets.ProductServiceURL)
 	}
 	opts.productService = productService.NewProductServiceClient(connection)
+
+	// Person
+	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	connection, err = dialRPC(ctx, secrets.PersonServiceURL)
+	if err != nil {
+		return nil, fmt.Errorf("%v: %s", err, secrets.PersonServiceURL)
+	}
+	opts.personService = personService.NewPersonServiceClient(connection)
 	return opts, nil
 }
 
