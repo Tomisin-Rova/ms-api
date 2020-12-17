@@ -37,4 +37,5 @@ type Mutation {
     createApplication: createApplicationResponse
     createCurrencyAccount(currencyCode: String!): Result
     updateFirebaseToken(token: String!): Result
+    createTransactionPin(pin: String!): Result
 }
