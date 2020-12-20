@@ -4,4 +4,5 @@ type Query {
   getCountries: fetchCountriesResponse
   reasons: fetchReasonResponse
   accounts: AccountsResult!
+  getPayeesByPhoneNumbers(phone: [String!]!): GetPayeesByPhoneNumbers
 }

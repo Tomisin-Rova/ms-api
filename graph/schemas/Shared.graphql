@@ -148,16 +148,27 @@ type fetchReasonResponse {
 }
 
 type AccountsResult {
-   primaryAccount: Account!
-   currencyAccounts: [Account!]!
+  primaryAccount: Account!
+  currencyAccounts: [Account!]!
 }
 
 type Account {
-   currency: String!
-   currencySymbol: String!
-   accountNumber: String!
-   accountName: String!
-   balance: String!
+  currency: String!
+  currencySymbol: String!
+  accountNumber: String!
+  accountName: String!
+  balance: String!
+}
+
+type GetPayeesByPhoneNumbers {
+  payees: [Payee!]!
+}
+
+type Payee {
+  firstName: String!
+  lastName: String!
+  phoneNumber: String!
+  personId: String!
 }
 
 input MakeTransferInput {

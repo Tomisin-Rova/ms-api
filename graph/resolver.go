@@ -3,8 +3,11 @@ package graph
 import (
 	"context"
 	"fmt"
+
+	"ms.api/protos/pb/payeeService"
 	"ms.api/protos/pb/paymentService"
 	"ms.api/protos/pb/productService"
+
 	"time"
 
 	"github.com/pkg/errors"
@@ -15,6 +18,7 @@ import (
 	"ms.api/protos/pb/cddService"
 	"ms.api/protos/pb/onboardingService"
 	"ms.api/protos/pb/onfidoService"
+	"ms.api/protos/pb/personService"
 	"ms.api/protos/pb/verifyService"
 	"ms.api/server/http/middlewares"
 	"ms.api/types"
@@ -40,6 +44,7 @@ func (r *mutationResolver) validateAddress(addr *types.InputAddress) error {
 }
 
 type ResolverOpts struct {
+	PayeeService      payeeService.PayeeServiceClient
 	OnfidoClient      onfidoService.OnfidoServiceClient
 	cddClient         cddService.CddServiceClient
 	productService    productService.ProductServiceClient
@@ -48,12 +53,15 @@ type ResolverOpts struct {
 	AuthService       authService.AuthServiceClient
 	paymentService    paymentService.PaymentServiceClient
 	AuthMw            *middlewares.AuthMiddleware
+	personService     personService.PersonServiceClient
 }
 
 type Resolver struct {
+	PayeeService      payeeService.PayeeServiceClient
 	cddService        cddService.CddServiceClient
 	onBoardingService onboardingService.OnBoardingServiceClient
 	productService    productService.ProductServiceClient
+	personService     personService.PersonServiceClient
 	verifyService     verifyService.VerifyServiceClient
 	onfidoClient      onfidoService.OnfidoServiceClient
 	authService       authService.AuthServiceClient
@@ -64,6 +72,7 @@ type Resolver struct {
 
 func NewResolver(opt *ResolverOpts, logger *logrus.Logger) *Resolver {
 	return &Resolver{
+		PayeeService:      opt.PayeeService,
 		cddService:        opt.cddClient,
 		onBoardingService: opt.OnBoardingService,
 		verifyService:     opt.verifyService,
@@ -72,6 +81,7 @@ func NewResolver(opt *ResolverOpts, logger *logrus.Logger) *Resolver {
 		authMw:            opt.AuthMw,
 		paymentService:    opt.paymentService,
 		productService:    opt.productService,
+		personService:     opt.personService,
 		logger:            logger,
 	}
 }
@@ -140,6 +150,23 @@ func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) 
 		return nil, fmt.Errorf("%v: %s", err, secrets.PaymentServiceURL)
 	}
 	opts.paymentService = paymentService.NewPaymentServiceClient(connection)
+
+	/*//Payee
+	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	connection, err = dialRPC(ctx, secrets.PayeeServiceURL)
+	if err != nil {
+		return nil, fmt.Errorf("%v: %s", err, secrets.PayeeServiceURL)
+	}
+	opts.PayeeService = payeeService.NewPayeeServiceClient(connection)
+	// Person
+	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	connection, err = dialRPC(ctx, secrets.PersonServiceURL)
+	if err != nil {
+		return nil, fmt.Errorf("%v: %s", err, secrets.PersonServiceURL)
+	}
+	opts.personService = personService.NewPersonServiceClient(connection)*/
 	return opts, nil
 }
 
