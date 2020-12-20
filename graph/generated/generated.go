@@ -1605,6 +1605,7 @@ input MakeTransferInput {
     toAccountNumber: String!
     amount: Int!
     notes: String!
+    transactionPin: String!
 }
 `, BuiltIn: false},
 	{Name: "graph/schemas/Subscription.graphql", Input: ``, BuiltIn: false},
@@ -7688,6 +7689,14 @@ func (ec *executionContext) unmarshalInputMakeTransferInput(ctx context.Context,
 
 			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("notes"))
 			it.Notes, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "transactionPin":
+			var err error
+
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("transactionPin"))
+			it.TransactionPin, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}

@@ -481,6 +481,7 @@ func (r *mutationResolver) MakeTransfer(ctx context.Context, input *types.MakeTr
 		Amount:                   input.Amount,
 		Notes:                    input.Notes,
 		PersonId:                 personId,
+		TransactionPin:           input.TransactionPin,
 	})
 	if err != nil {
 		r.logger.WithError(err).Error("paymentService.MakeTransfer() failed")

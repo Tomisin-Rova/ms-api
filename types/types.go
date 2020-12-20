@@ -137,6 +137,7 @@ type MakeTransferInput struct {
 	ToAccountNumber   string `json:"toAccountNumber"`
 	Amount            int64  `json:"amount"`
 	Notes             string `json:"notes"`
+	TransactionPin    string `json:"transactionPin"`
 }
 
 type Payee struct {

@@ -176,4 +176,5 @@ input MakeTransferInput {
     toAccountNumber: String!
     amount: Int!
     notes: String!
+    transactionPin: String!
 }

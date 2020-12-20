@@ -19,4 +19,5 @@ message TransferRequest {
     int64 amount = 3;
     string notes = 4;
     string personId = 5;
+    string transactionPin = 6;
 }
