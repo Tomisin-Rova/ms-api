@@ -128,7 +128,7 @@ type Country {
   Dial: String!
   GeoNameId: String!
   ISO4217CurrencyAlphabeticCode: String!
-  ISO4217CurrencyNumericCode: String!
+  ISO4217CurrencyNumericCode: Int!
   IsIndependent: String!
   Languages: String!
   officialNameEnglish: String!

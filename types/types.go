@@ -88,7 +88,7 @@ type Country struct {
 	Dial                          string `json:"Dial"`
 	GeoNameID                     string `json:"GeoNameId"`
 	ISO4217CurrencyAlphabeticCode string `json:"ISO4217CurrencyAlphabeticCode"`
-	ISO4217CurrencyNumericCode    string `json:"ISO4217CurrencyNumericCode"`
+	ISO4217CurrencyNumericCode    int64  `json:"ISO4217CurrencyNumericCode"`
 	IsIndependent                 string `json:"IsIndependent"`
 	Languages                     string `json:"Languages"`
 	OfficialNameEnglish           string `json:"officialNameEnglish"`

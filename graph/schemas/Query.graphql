@@ -5,4 +5,5 @@ type Query {
   reasons: fetchReasonResponse
   accounts: AccountsResult!
   getPayeesByPhoneNumbers(phone: [String!]!): GetPayeesByPhoneNumbers
+  supportedCurrencies: [Country!]!
 }
