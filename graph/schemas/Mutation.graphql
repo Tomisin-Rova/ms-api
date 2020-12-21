@@ -38,5 +38,6 @@ type Mutation {
     createCurrencyAccount(currencyCode: String!): Result
     updateFirebaseToken(token: String!): Result
     createTransactionPin(pin: String!): Result
+    makeTransfer(input: MakeTransferInput): Result
     createPayee(input: CreatePayeeInput!): CreatePayeeResult
 }

@@ -6,6 +6,7 @@ package graph
 import (
 	"context"
 	"errors"
+
 	"ms.api/graph/generated"
 	rerrors "ms.api/libs/errors"
 	"ms.api/libs/validator/datevalidator"
@@ -14,6 +15,7 @@ import (
 	"ms.api/protos/pb/authService"
 	"ms.api/protos/pb/onboardingService"
 	"ms.api/protos/pb/payeeService"
+	"ms.api/protos/pb/paymentService"
 	"ms.api/protos/pb/personService"
 	"ms.api/protos/pb/productService"
 	"ms.api/server/http/middlewares"
@@ -449,7 +451,7 @@ func (r *mutationResolver) CreateTransactionPin(ctx context.Context, pin string)
 	}
 	if len(pin) != 4 {
 		r.logger.Error("invalid pin length")
-		return nil, errors.New("The transaction pin has to contain only 4 digits.")
+		return nil, errors.New("he transaction pin has to contain only 4 digits")
 	}
 	resp, err := r.personService.CreateTransactionPin(ctx,
 		&personService.CreateTransactionPinRequest{PersonId: personId, Pin: pin})
@@ -458,6 +460,35 @@ func (r *mutationResolver) CreateTransactionPin(ctx context.Context, pin string)
 		return nil, rerrors.NewFromGrpc(err)
 	}
 	return &types.Result{Message: resp.Message}, nil
+}
+
+func (r *mutationResolver) MakeTransfer(ctx context.Context, input *types.MakeTransferInput) (*types.Result, error) {
+	personId, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+	if input.Amount <= 0 {
+		return nil, errors.New("invalid transaction amount")
+	}
+	if len(input.ToAccountNumber) < 10 || len(input.FromAccountNumber) < 10 {
+		return nil, errors.New("invalid account details")
+	}
+	if len(input.Notes) == 0 {
+		return nil, errors.New("a transaction note is required")
+	}
+	resp, err := r.paymentService.MakeTransfer(ctx, &paymentService.TransferRequest{
+		AccountNumber:            input.FromAccountNumber,
+		BeneficiaryAccountNumber: input.ToAccountNumber,
+		Amount:                   input.Amount,
+		Notes:                    input.Notes,
+		PersonId:                 personId,
+		TransactionPin:           input.TransactionPin,
+	})
+	if err != nil {
+		r.logger.WithError(err).Error("paymentService.MakeTransfer() failed")
+		return nil, rerrors.NewFromGrpc(err)
+	}
+	return &types.Result{Message: resp.Message, Success: true}, nil
 }
 
 func (r *mutationResolver) CreatePayee(ctx context.Context, input types.CreatePayeeInput) (*types.CreatePayeeResult, error) {

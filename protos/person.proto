@@ -3,7 +3,7 @@ package person;
 option go_package = "personService";
 
 message SuccessResponse {
-  string message = 1;
+    string message = 1;
 }
 
 message Empty{

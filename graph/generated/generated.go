@@ -186,6 +186,7 @@ type ComplexityRoot struct {
 		CreatePhone                 func(childComplexity int, input types.CreatePhoneInput) int
 		CreateTransactionPin        func(childComplexity int, pin string) int
 		DeactivateBioLogin          func(childComplexity int, input types.DeactivateBioLoginInput) int
+		MakeTransfer                func(childComplexity int, input *types.MakeTransferInput) int
 		RefreshToken                func(childComplexity int, refreshToken string) int
 		ResendEmailMagicLInk        func(childComplexity int, email string) int
 		ResendOtp                   func(childComplexity int, phone string) int
@@ -294,6 +295,7 @@ type MutationResolver interface {
 	CreateCurrencyAccount(ctx context.Context, currencyCode string) (*types.Result, error)
 	UpdateFirebaseToken(ctx context.Context, token string) (*types.Result, error)
 	CreateTransactionPin(ctx context.Context, pin string) (*types.Result, error)
+	MakeTransfer(ctx context.Context, input *types.MakeTransferInput) (*types.Result, error)
 	CreatePayee(ctx context.Context, input types.CreatePayeeInput) (*types.CreatePayeeResult, error)
 }
 type QueryResolver interface {
@@ -987,6 +989,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.DeactivateBioLogin(childComplexity, args["input"].(types.DeactivateBioLoginInput)), true
 
+	case "Mutation.makeTransfer":
+		if e.complexity.Mutation.MakeTransfer == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_makeTransfer_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.MakeTransfer(childComplexity, args["input"].(*types.MakeTransferInput)), true
+
 	case "Mutation.refreshToken":
 		if e.complexity.Mutation.RefreshToken == nil {
 			break
@@ -1537,6 +1551,7 @@ type CDDSummaryDocument {
     createCurrencyAccount(currencyCode: String!): Result
     updateFirebaseToken(token: String!): Result
     createTransactionPin(pin: String!): Result
+    makeTransfer(input: MakeTransferInput): Result
     createPayee(input: CreatePayeeInput!): CreatePayeeResult
 }
 `, BuiltIn: false},
@@ -1766,6 +1781,14 @@ type CreatePayeeResult {
   message: String!
   Beneficiary: Beneficiary!
 }
+
+input MakeTransferInput {
+    fromAccountNumber: String!
+    toAccountNumber: String!
+    amount: Int!
+    notes: String!
+    transactionPin: String!
+}
 `, BuiltIn: false},
 	{Name: "graph/schemas/Subscription.graphql", Input: ``, BuiltIn: false},
 }
@@ -1989,6 +2012,21 @@ func (ec *executionContext) field_Mutation_deactivateBioLogin_args(ctx context.C
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("input"))
 		arg0, err = ec.unmarshalNDeactivateBioLoginInput2msᚗapiᚋtypesᚐDeactivateBioLoginInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_makeTransfer_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *types.MakeTransferInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("input"))
+		arg0, err = ec.unmarshalOMakeTransferInput2ᚖmsᚗapiᚋtypesᚐMakeTransferInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -5464,6 +5502,44 @@ func (ec *executionContext) _Mutation_createTransactionPin(ctx context.Context, 
 	return ec.marshalOResult2ᚖmsᚗapiᚋtypesᚐResult(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_makeTransfer(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_makeTransfer_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().MakeTransfer(rctx, args["input"].(*types.MakeTransferInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*types.Result)
+	fc.Result = res
+	return ec.marshalOResult2ᚖmsᚗapiᚋtypesᚐResult(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Mutation_createPayee(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -8402,6 +8478,58 @@ func (ec *executionContext) unmarshalInputInputAddress(ctx context.Context, obj 
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputMakeTransferInput(ctx context.Context, obj interface{}) (types.MakeTransferInput, error) {
+	var it types.MakeTransferInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "fromAccountNumber":
+			var err error
+
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("fromAccountNumber"))
+			it.FromAccountNumber, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "toAccountNumber":
+			var err error
+
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("toAccountNumber"))
+			it.ToAccountNumber, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "amount":
+			var err error
+
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("amount"))
+			it.Amount, err = ec.unmarshalNInt2int64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "notes":
+			var err error
+
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("notes"))
+			it.Notes, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "transactionPin":
+			var err error
+
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("transactionPin"))
+			it.TransactionPin, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputUpdateBioDataInput(ctx context.Context, obj interface{}) (types.UpdateBioDataInput, error) {
 	var it types.UpdateBioDataInput
 	var asMap = obj.(map[string]interface{})
@@ -9270,6 +9398,8 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec._Mutation_updateFirebaseToken(ctx, field)
 		case "createTransactionPin":
 			out.Values[i] = ec._Mutation_createTransactionPin(ctx, field)
+		case "makeTransfer":
+			out.Values[i] = ec._Mutation_makeTransfer(ctx, field)
 		case "createPayee":
 			out.Values[i] = ec._Mutation_createPayee(ctx, field)
 		default:
@@ -10780,6 +10910,14 @@ func (ec *executionContext) marshalOGetPayeesByPhoneNumbers2ᚖmsᚗapiᚋtypes�
 		return graphql.Null
 	}
 	return ec._GetPayeesByPhoneNumbers(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOMakeTransferInput2ᚖmsᚗapiᚋtypesᚐMakeTransferInput(ctx context.Context, v interface{}) (*types.MakeTransferInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputMakeTransferInput(ctx, v)
+	return &res, graphql.WrapErrorWithInputPath(ctx, err)
 }
 
 func (ec *executionContext) marshalOPerson2ᚖmsᚗapiᚋtypesᚐPerson(ctx context.Context, sel ast.SelectionSet, v *types.Person) graphql.Marshaler {

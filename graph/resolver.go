@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"ms.api/protos/pb/payeeService"
+	"ms.api/protos/pb/paymentService"
 	"ms.api/protos/pb/productService"
 
 	"time"
@@ -50,6 +51,7 @@ type ResolverOpts struct {
 	OnBoardingService onboardingService.OnBoardingServiceClient
 	verifyService     verifyService.VerifyServiceClient
 	AuthService       authService.AuthServiceClient
+	paymentService    paymentService.PaymentServiceClient
 	AuthMw            *middlewares.AuthMiddleware
 	personService     personService.PersonServiceClient
 }
@@ -63,6 +65,7 @@ type Resolver struct {
 	verifyService     verifyService.VerifyServiceClient
 	onfidoClient      onfidoService.OnfidoServiceClient
 	authService       authService.AuthServiceClient
+	paymentService    paymentService.PaymentServiceClient
 	authMw            *middlewares.AuthMiddleware
 	logger            *logrus.Logger
 }
@@ -76,6 +79,7 @@ func NewResolver(opt *ResolverOpts, logger *logrus.Logger) *Resolver {
 		onfidoClient:      opt.OnfidoClient,
 		authService:       opt.AuthService,
 		authMw:            opt.AuthMw,
+		paymentService:    opt.paymentService,
 		productService:    opt.productService,
 		personService:     opt.personService,
 		logger:            logger,
@@ -138,7 +142,16 @@ func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) 
 	}
 	opts.productService = productService.NewProductServiceClient(connection)
 
-	//Payee
+	// Payment
+	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	connection, err = dialRPC(ctx, secrets.PaymentServiceURL)
+	if err != nil {
+		return nil, fmt.Errorf("%v: %s", err, secrets.PaymentServiceURL)
+	}
+	opts.paymentService = paymentService.NewPaymentServiceClient(connection)
+
+	/*//Payee
 	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	connection, err = dialRPC(ctx, secrets.PayeeServiceURL)
@@ -146,7 +159,7 @@ func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) 
 		return nil, fmt.Errorf("%v: %s", err, secrets.PayeeServiceURL)
 	}
 	opts.PayeeService = payeeService.NewPayeeServiceClient(connection)
-
+	*/
 	// Person
 	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

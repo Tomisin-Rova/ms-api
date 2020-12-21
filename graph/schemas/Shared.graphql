@@ -208,3 +208,11 @@ type CreatePayeeResult {
   message: String!
   Beneficiary: Beneficiary!
 }
+
+input MakeTransferInput {
+    fromAccountNumber: String!
+    toAccountNumber: String!
+    amount: Int!
+    notes: String!
+    transactionPin: String!
+}

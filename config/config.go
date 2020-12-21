@@ -23,6 +23,7 @@ type Secrets struct {
 	ProductServiceURL    string
 	PayeeServiceURL      string
 	PersonServiceURL     string
+	PaymentServiceURL    string
 	VaultAddress         string        `json:"vault_address"`
 	VaultToken           string        `json:"vault_token"`
 	VaultSecretsPath     string        `json:"vault_secrets_path"`
@@ -34,8 +35,6 @@ type Secrets struct {
 	RedisPassword        string        `json:"redis_password"`
 	RedisClient          *redis.Client `json:"redis_client"`
 }
-
-var _secrets Secrets
 
 // LoadSecrets loads up Secrets from the .env file once.
 // If an env file is present, Secrets will be loaded, else it'll be ignored.
@@ -63,14 +62,9 @@ func LoadSecrets() (*Secrets, error) {
 	ss.CddServiceURL = os.Getenv("CDD_SERVICE_URL")
 	ss.ProductServiceURL = os.Getenv("PRODUCT_SERVICE_URL")
 	ss.PersonServiceURL = os.Getenv("PERSON_SERVICE_URL")
-	ss.PayeeServiceURL = os.Getenv("PAYEE_SERVICE_URL")
+	ss.PaymentServiceURL = os.Getenv("PAYMENT_SERVICE_URL")
 	if err := ss.Environment.IsValid(); err != nil {
 		log.Error("Error in environment variables: %v", err)
 	}
 	return ss, nil
-}
-
-// Get Secrets is used to get value from the Secrets runtime.
-func GetSecrets() Secrets {
-	return _secrets
 }
