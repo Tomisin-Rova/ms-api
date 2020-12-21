@@ -6,7 +6,6 @@ package graph
 import (
 	"context"
 	"errors"
-
 	"ms.api/graph/generated"
 	rerrors "ms.api/libs/errors"
 	"ms.api/libs/validator/datevalidator"
@@ -14,6 +13,7 @@ import (
 	"ms.api/libs/validator/phonenumbervalidator"
 	"ms.api/protos/pb/authService"
 	"ms.api/protos/pb/onboardingService"
+	"ms.api/protos/pb/payeeService"
 	"ms.api/protos/pb/personService"
 	"ms.api/protos/pb/productService"
 	"ms.api/server/http/middlewares"
@@ -458,6 +458,70 @@ func (r *mutationResolver) CreateTransactionPin(ctx context.Context, pin string)
 		return nil, rerrors.NewFromGrpc(err)
 	}
 	return &types.Result{Message: resp.Message}, nil
+}
+
+func (r *mutationResolver) CreatePayee(ctx context.Context, input types.CreatePayeeInput) (*types.CreatePayeeResult, error) {
+	personId, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+	req := &payeeService.CreatePayeeRequest{
+		PersonId:       personId,
+		TransactionPin: input.TransactionPin,
+		Name:           input.Name,
+		Country:        input.Country,
+		AccountNumber:  input.AccountNumber,
+	}
+	switch input.Country {
+	case "UK":
+		if input.SortCode == nil {
+			return nil, errors.New("Sort code required for a UK account")
+		}
+		req.SortCode = *input.SortCode
+	case "Nigeria":
+		if input.BankCode == nil || input.BankName == nil {
+			return nil, errors.New("Bank code and name required for a Nigerian account")
+		}
+		req.BankCode = *input.BankCode
+		req.BankName = *input.BankName
+	case "US":
+		if input.RoutingNumber == nil || input.RoutingType == nil {
+			return nil, errors.New("Routing number / type required for a US account")
+		}
+		req.RoutingNumber = *input.RoutingNumber
+		req.RoutingType = *input.RoutingType
+	}
+	resp, err := r.PayeeService.CreatePayee(ctx, req)
+
+	if err != nil {
+		r.logger.WithError(err).Error("payeeService.CreateBeneficiary() failed")
+		return nil, rerrors.NewFromGrpc(err)
+	}
+	var account *types.PayeeAccount
+	if len(resp.Payee.Accounts) > 0 {
+		account = &types.PayeeAccount{
+			AccountNumber: resp.Payee.Accounts[0].AccountNumber,
+			RoutingNumber: &resp.Payee.Accounts[0].RoutingNumber,
+			Bic:           &resp.Payee.Accounts[0].BIC,
+			Iban:          &resp.Payee.Accounts[0].IBAN,
+			Country:       resp.Payee.Accounts[0].Country,
+			BankName:      &resp.Payee.Accounts[0].BankName,
+			BankCode:      &resp.Payee.Accounts[0].BankCode,
+			RoutingType:   &resp.Payee.Accounts[0].RoutingType,
+			SortCode:      &resp.Payee.Accounts[0].SortCode,
+		}
+	}
+	return &types.CreatePayeeResult{
+		Message: resp.Message,
+		Beneficiary: &types.Beneficiary{
+			PayeeID: resp.Payee.PayeeId,
+			Owner:   resp.Payee.Owner,
+			Name:    resp.Payee.Name,
+			Accounts: []*types.PayeeAccount{
+				account,
+			},
+		},
+	}, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.
