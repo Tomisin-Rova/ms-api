@@ -61,7 +61,6 @@ func LoadSecrets() (*Secrets, error) {
 	ss.AuthServiceURL = os.Getenv("AUTH_SERVICE_URL")
 	ss.CddServiceURL = os.Getenv("CDD_SERVICE_URL")
 	ss.ProductServiceURL = os.Getenv("PRODUCT_SERVICE_URL")
-	ss.PayeeServiceURL = os.Getenv("PAYEE_SERVICE_URL")
 	ss.PersonServiceURL = os.Getenv("PERSON_SERVICE_URL")
 	ss.PaymentServiceURL = os.Getenv("PAYMENT_SERVICE_URL")
 	if err := ss.Environment.IsValid(); err != nil {

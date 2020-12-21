@@ -39,4 +39,5 @@ type Mutation {
     updateFirebaseToken(token: String!): Result
     createTransactionPin(pin: String!): Result
     makeTransfer(input: MakeTransferInput): Result
+    createPayee(input: CreatePayeeInput!): CreatePayeeResult
 }

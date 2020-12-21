@@ -20,6 +20,47 @@ message FetchPayeeByPhoneResponse {
     string lastName =4;
 }
 
+message CreatePayeeRequest{
+    string personId = 1;
+    string name = 2;
+    string accountNumber = 5;
+    string sortCode = 6;
+    string bankCode = 7;
+    string bankName = 8;
+    string RoutingNumber = 9;
+    string RoutingType = 10;
+    string BIC = 11;
+    string IBAN = 12;
+    string country = 13;
+    string transactionPin = 14;
+}
+
+message CreatePayeeResponse {
+    string message = 1;
+    Payee payee = 12;
+}
+
+message Payee {
+    string payeeId = 1;
+    string name = 2;
+    string owner = 3;
+    repeated Account accounts = 4;
+    string phonenumber = 5;
+}
+
+message Account {
+    string accountNumber = 1;
+    string sortCode = 2;
+    string bankCode = 3;
+    string RoutingNumber = 4;
+    string BIC = 5;
+    string IBAN = 6;
+    string country = 7;
+    string bankName = 8;
+    string RoutingType = 9;
+}
+
 service PayeeService{
-        rpc GetPayeesByPhoneNumbers(FetchPayeeByPhoneRequest) returns (FetchPayeeByPhoneNumbersResponse) {}
+    rpc GetPayeesByPhoneNumbers(FetchPayeeByPhoneRequest) returns (FetchPayeeByPhoneNumbersResponse) {}
+    rpc CreatePayee(CreatePayeeRequest) returns (CreatePayeeResponse) {}
 }
