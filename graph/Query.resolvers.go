@@ -81,7 +81,7 @@ func (r *queryResolver) GetCountries(ctx context.Context) (*types.FetchCountries
 			Dial:                          c.Dial,
 			GeoNameID:                     c.GeoNameId,
 			ISO4217CurrencyAlphabeticCode: c.ISO4217CurrencyAlphabeticCode,
-			ISO4217CurrencyNumericCode:    c.ISO4217CurrencyNumericCode,
+			ISO4217CurrencyNumericCode:    int64(c.ISO4217CurrencyNumericCode),
 			IsIndependent:                 c.IsIndependent,
 			Languages:                     c.Languages,
 			OfficialNameEnglish:           c.OfficialNameEnglish,
@@ -165,6 +165,38 @@ func (r *queryResolver) GetPayeesByPhoneNumbers(ctx context.Context, phone []str
 
 	response.Payees = payees
 	return response, nil
+}
+
+func (r *queryResolver) SupportedCurrencies(ctx context.Context) ([]*types.Country, error) {
+	resp, err := r.onBoardingService.FetchCountries(ctx, &onboardingService.FetchCountriesRequest{})
+	if err != nil {
+		return nil, rerrors.NewFromGrpc(err)
+	}
+
+	countriesRes := &types.FetchCountriesResponse{}
+	countries := make([]*types.Country, 0)
+	for _, c := range resp.Countries {
+		if c.CountryName == "US" ||
+			c.CountryName == "UK" ||
+			c.CountryName == "Nigeria" {
+			countries = append(countries, &types.Country{
+				CountryID:                     c.CountryId,
+				Capital:                       c.Capital,
+				CountryName:                   c.CountryName,
+				Continent:                     c.Continent,
+				Dial:                          c.Dial,
+				GeoNameID:                     c.GeoNameId,
+				ISO4217CurrencyAlphabeticCode: c.ISO4217CurrencyAlphabeticCode,
+				ISO4217CurrencyNumericCode:    int64(c.ISO4217CurrencyNumericCode),
+				IsIndependent:                 c.IsIndependent,
+				Languages:                     c.Languages,
+				OfficialNameEnglish:           c.OfficialNameEnglish,
+			})
+		}
+	}
+
+	countriesRes.Countries = countries
+	return countries, nil
 }
 
 // Query returns generated.QueryResolver implementation.

@@ -116,7 +116,7 @@ message Country {
     string Dial = 5;
     string GeoNameId = 6;
     string ISO4217CurrencyAlphabeticCode = 7;
-    string ISO4217CurrencyNumericCode = 8;
+    int32 ISO4217CurrencyNumericCode = 8;
     string IsIndependent = 9;
     string Languages = 10;
     string OfficialNameEnglish = 11;

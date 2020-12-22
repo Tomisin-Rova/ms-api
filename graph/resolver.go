@@ -129,7 +129,7 @@ func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) 
 	defer cancel()
 	connection, err = dialRPC(ctx, secrets.AuthServiceURL)
 	if err != nil {
-		return nil, fmt.Errorf("%v: %s", err, secrets.VerifyServiceURL)
+		return nil, fmt.Errorf("%v: %s", err, secrets.AuthServiceURL)
 	}
 	opts.AuthService = authService.NewAuthServiceClient(connection)
 
@@ -151,7 +151,7 @@ func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) 
 	}
 	opts.paymentService = paymentService.NewPaymentServiceClient(connection)
 
-	/*//Payee
+	//Payee
 	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	connection, err = dialRPC(ctx, secrets.PayeeServiceURL)
@@ -159,7 +159,7 @@ func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) 
 		return nil, fmt.Errorf("%v: %s", err, secrets.PayeeServiceURL)
 	}
 	opts.PayeeService = payeeService.NewPayeeServiceClient(connection)
-	*/
+
 	// Person
 	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
