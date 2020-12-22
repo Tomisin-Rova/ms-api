@@ -114,6 +114,7 @@ type CreatePayeeInput struct {
 }
 
 type CreatePayeeResult struct {
+	Success     bool         `json:"success"`
 	Message     string       `json:"message"`
 	Beneficiary *Beneficiary `json:"Beneficiary"`
 }

@@ -158,6 +158,7 @@ type ComplexityRoot struct {
 	CreatePayeeResult struct {
 		Beneficiary func(childComplexity int) int
 		Message     func(childComplexity int) int
+		Success     func(childComplexity int) int
 	}
 
 	CreatePhoneResult struct {
@@ -792,6 +793,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.CreatePayeeResult.Message(childComplexity), true
+
+	case "CreatePayeeResult.success":
+		if e.complexity.CreatePayeeResult.Success == nil {
+			break
+		}
+
+		return e.complexity.CreatePayeeResult.Success(childComplexity), true
 
 	case "CreatePhoneResult.message":
 		if e.complexity.CreatePhoneResult.Message == nil {
@@ -1788,6 +1796,7 @@ type PayeeAccount {
 }
 
 type CreatePayeeResult {
+  success: Boolean!
   message: String!
   Beneficiary: Beneficiary!
 }
@@ -4453,6 +4462,40 @@ func (ec *executionContext) _Country_officialNameEnglish(ctx context.Context, fi
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _CreatePayeeResult_success(ctx context.Context, field graphql.CollectedField, obj *types.CreatePayeeResult) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "CreatePayeeResult",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Success, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _CreatePayeeResult_message(ctx context.Context, field graphql.CollectedField, obj *types.CreatePayeeResult) (ret graphql.Marshaler) {
@@ -9296,6 +9339,11 @@ func (ec *executionContext) _CreatePayeeResult(ctx context.Context, sel ast.Sele
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("CreatePayeeResult")
+		case "success":
+			out.Values[i] = ec._CreatePayeeResult_success(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "message":
 			out.Values[i] = ec._CreatePayeeResult_message(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
