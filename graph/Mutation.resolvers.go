@@ -459,7 +459,7 @@ func (r *mutationResolver) CreateTransactionPin(ctx context.Context, pin string)
 		r.logger.WithError(err).Error("personService.CreateTransactionPin() failed")
 		return nil, rerrors.NewFromGrpc(err)
 	}
-	return &types.Result{Message: resp.Message}, nil
+	return &types.Result{Message: resp.Message, Success: true}, nil
 }
 
 func (r *mutationResolver) MakeTransfer(ctx context.Context, input *types.MakeTransferInput) (*types.Result, error) {
@@ -543,6 +543,7 @@ func (r *mutationResolver) CreatePayee(ctx context.Context, input types.CreatePa
 		}
 	}
 	return &types.CreatePayeeResult{
+		Success: true,
 		Message: resp.Message,
 		Beneficiary: &types.Beneficiary{
 			PayeeID: resp.Payee.PayeeId,
