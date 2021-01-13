@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"github.com/sirupsen/logrus"
+	"github.com/roava/zebra/logger"
 	"github.com/stretchr/testify/assert"
 	"ms.api/fakes"
 	"ms.api/protos/pb/onboardingService"
@@ -15,7 +15,7 @@ func TestHttpHandler_VerifyMagicLinkHandler(t *testing.T) {
 	svc := fakes.NewFakeOnBoardingClient(&onboardingService.SuccessResponse{Message: "success"},
 		nil, nil, nil)
 
-	handler := New(svc, logrus.StandardLogger())
+	handler := New(svc, logger.New())
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("POST", "/", nil)
 	u, err := url.Parse("http://localhost.app/verify_email?email=foo@bar.io&verificationToken=token")
@@ -31,7 +31,7 @@ func TestHttpHandler_VerifyMagicLinkHandler_BadEmail(t *testing.T) {
 	svc := fakes.NewFakeOnBoardingClient(&onboardingService.SuccessResponse{Message: "success"},
 		nil, nil, nil)
 
-	handler := New(svc, logrus.StandardLogger())
+	handler := New(svc, logger.New())
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("POST", "/", nil)
 	u, err := url.Parse("http://localhost.app/verify_email?email=foo@bar&verificationToken=token")

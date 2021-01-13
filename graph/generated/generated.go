@@ -196,7 +196,7 @@ type ComplexityRoot struct {
 		UpdateFirebaseToken         func(childComplexity int, token string) int
 		UpdatePersonBiodata         func(childComplexity int, input *types.UpdateBioDataInput) int
 		VerifyEmailMagicLInk        func(childComplexity int, email string, verificationToken string) int
-		VerifyOtp                   func(childComplexity int, phone string, code string) int
+		VerifyOtp                   func(childComplexity int, token string, code string) int
 	}
 
 	Payee struct {
@@ -280,7 +280,7 @@ type MutationResolver interface {
 	UpdatePersonBiodata(ctx context.Context, input *types.UpdateBioDataInput) (*types.Result, error)
 	AddReasonsForUsingRoava(ctx context.Context, reasonValues []*string) (*types.Result, error)
 	CreatePhone(ctx context.Context, input types.CreatePhoneInput) (*types.CreatePhoneResult, error)
-	VerifyOtp(ctx context.Context, phone string, code string) (*types.Result, error)
+	VerifyOtp(ctx context.Context, token string, code string) (*types.Result, error)
 	CreatePerson(ctx context.Context, input *types.CreatePersonInput) (*types.AuthResult, error)
 	AuthenticateCustomer(ctx context.Context, input *types.AuthenticateCustomerInput) (*types.AuthResult, error)
 	RefreshToken(ctx context.Context, refreshToken string) (*types.AuthResult, error)
@@ -1112,7 +1112,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.VerifyOtp(childComplexity, args["phone"].(string), args["code"].(string)), true
+		return e.complexity.Mutation.VerifyOtp(childComplexity, args["token"].(string), args["code"].(string)), true
 
 	case "Payee.firstName":
 		if e.complexity.Payee.FirstName == nil {
@@ -1551,7 +1551,7 @@ type CDDSummaryDocument {
     ) : Result
 
     createPhone(input: CreatePhoneInput!): CreatePhoneResult
-    verifyOtp(phone: String!, code: String!): Result
+    verifyOtp(token: String!, code: String!): Result
     createPerson(input: CreatePersonInput): AuthResult
     authenticateCustomer(input: AuthenticateCustomerInput): AuthResult
     refreshToken(refreshToken: String!): AuthResult
@@ -1630,7 +1630,7 @@ input AuthenticateCustomerInput {
 input Device {
   os: String!
   brand: String!
-  deviceId: String!
+  id: String!
   deviceToken: String!
 }
 
@@ -2190,14 +2190,14 @@ func (ec *executionContext) field_Mutation_verifyOtp_args(ctx context.Context, r
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["phone"]; ok {
-		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("phone"))
+	if tmp, ok := rawArgs["token"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("token"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["phone"] = arg0
+	args["token"] = arg0
 	var arg1 string
 	if tmp, ok := rawArgs["code"]; ok {
 		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("code"))
@@ -4954,7 +4954,7 @@ func (ec *executionContext) _Mutation_verifyOtp(ctx context.Context, field graph
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().VerifyOtp(rctx, args["phone"].(string), args["code"].(string))
+		return ec.resolvers.Mutation().VerifyOtp(rctx, args["token"].(string), args["code"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -8499,11 +8499,11 @@ func (ec *executionContext) unmarshalInputDevice(ctx context.Context, obj interf
 			if err != nil {
 				return it, err
 			}
-		case "deviceId":
+		case "id":
 			var err error
 
-			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("deviceId"))
-			it.DeviceID, err = ec.unmarshalNString2string(ctx, v)
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("id"))
+			it.ID, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}

@@ -3,25 +3,24 @@ package graph
 import (
 	"context"
 	"fmt"
-
-	"ms.api/protos/pb/payeeService"
-	"ms.api/protos/pb/paymentService"
-	"ms.api/protos/pb/productService"
-
+	"go.uber.org/zap"
 	"time"
 
-	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
-	"google.golang.org/grpc"
 	"ms.api/config"
 	"ms.api/protos/pb/authService"
 	"ms.api/protos/pb/cddService"
 	"ms.api/protos/pb/onboardingService"
 	"ms.api/protos/pb/onfidoService"
+	"ms.api/protos/pb/payeeService"
+	"ms.api/protos/pb/paymentService"
 	"ms.api/protos/pb/personService"
+	"ms.api/protos/pb/productService"
 	"ms.api/protos/pb/verifyService"
 	"ms.api/server/http/middlewares"
 	"ms.api/types"
+
+	"github.com/pkg/errors"
+	"google.golang.org/grpc"
 )
 
 // All error types here, so they don't get over-written in the mutation, query or subscription resolvers when generating schema
@@ -67,10 +66,10 @@ type Resolver struct {
 	authService       authService.AuthServiceClient
 	paymentService    paymentService.PaymentServiceClient
 	authMw            *middlewares.AuthMiddleware
-	logger            *logrus.Logger
+	logger            *zap.Logger
 }
 
-func NewResolver(opt *ResolverOpts, logger *logrus.Logger) *Resolver {
+func NewResolver(opt *ResolverOpts, logger *zap.Logger) *Resolver {
 	return &Resolver{
 		PayeeService:      opt.PayeeService,
 		cddService:        opt.cddClient,
@@ -104,14 +103,14 @@ func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) 
 	// OnFido
 	connection, err = dialRPC(ctx, secrets.OnfidoServiceURL)
 	if err != nil {
-		return nil, errors.Wrap(err, secrets.OnfidoServiceURL)
+		return nil, fmt.Errorf("%v: %s", err, secrets.OnfidoServiceURL)
 	}
 	opts.OnfidoClient = onfidoService.NewOnfidoServiceClient(connection)
 
 	// CDD
 	connection, err = dialRPC(ctx, secrets.CddServiceURL)
 	if err != nil {
-		return nil, errors.Wrap(err, secrets.CddServiceURL)
+		return nil, fmt.Errorf("%v: %s", err, secrets.CddServiceURL)
 	}
 	opts.cddClient = cddService.NewCddServiceClient(connection)
 

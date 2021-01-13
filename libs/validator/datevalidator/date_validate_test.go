@@ -21,7 +21,7 @@ func TestValidateDob(t *testing.T) {
 		{dob: "40/10/1990", err: ErrInvalidFormat},
 		{dob: "01/15/1990", err: ErrInvalidFormat},
 		{dob: "01/11/19b0", err: ErrInvalidFormat},
-		{dob: "01/01/2005", err: ErrInvalidAge},
+		{dob: "01/01/2020", err: ErrInvalidAge},
 		{dob: "01/01/2004", err: nil},
 	}
 	for idx, c := range cases {

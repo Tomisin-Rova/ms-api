@@ -2,6 +2,10 @@ FROM golang:latest AS builder
 
 RUN mkdir -p /go/src/ms.api
 
+# Access private repository using token
+ARG ACCESS_TOKEN
+RUN git config --global url."https://${ACCESS_TOKEN}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
+
 WORKDIR /go/src/ms.api
 
 COPY . .

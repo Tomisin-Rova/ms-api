@@ -3,7 +3,8 @@ package middlewares
 import (
 	"context"
 	"errors"
-	"github.com/sirupsen/logrus"
+	"fmt"
+	"go.uber.org/zap"
 	"ms.api/protos/pb/authService"
 	"net/http"
 	"strings"
@@ -23,10 +24,10 @@ const (
 
 type AuthMiddleware struct {
 	authService authService.AuthServiceClient
-	logger      *logrus.Logger
+	logger      *zap.Logger
 }
 
-func NewAuthMiddleware(service authService.AuthServiceClient, logger *logrus.Logger) *AuthMiddleware {
+func NewAuthMiddleware(service authService.AuthServiceClient, logger *zap.Logger) *AuthMiddleware {
 	return &AuthMiddleware{authService: service, logger: logger}
 }
 
@@ -70,7 +71,9 @@ func (mw *AuthMiddleware) Middeware(next http.Handler) http.Handler {
 
 		personId, err := mw.ValidateToken(token)
 		if err != nil {
-			mw.logger.WithField("token", token).Infof("failed to validate token: %v", err)
+			mw.logger.Info(fmt.Sprintf("failed to validate token: %v", err),
+				zap.String("token", token),
+			)
 			next.ServeHTTP(w, r)
 			return
 		}

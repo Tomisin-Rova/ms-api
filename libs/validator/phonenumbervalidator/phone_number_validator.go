@@ -1,13 +1,19 @@
 package phonenumbervalidator
 
 import (
-	"errors"
 	"regexp"
+
+	coreError "github.com/roava/zebra/errors"
 )
 
 var (
 	phoneRegex            = regexp.MustCompile(`^\s*(?:\+?(\d{1,3}))?[-. (]*(\d{3})[-. )]*(\d{3})[-. ]*(\d{4})(?: *x(\d+))?\s*$`)
-	ErrInvalidPhoneNumber = errors.New("phone number is not valid")
+	ErrInvalidPhoneNumber = coreError.NewTerror(
+		7001,
+		"InvalidPhoneNumberException",
+		"phone number is not valid",
+		"",
+	)
 )
 
 func ValidatePhoneNumber(phoneNumber string) error {

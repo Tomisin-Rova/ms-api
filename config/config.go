@@ -3,9 +3,10 @@ package config
 import (
 	"os"
 
+	"ms.api/log"
+
 	"github.com/go-redis/redis/v7"
 	"github.com/joho/godotenv"
-	"ms.api/log"
 )
 
 const (
@@ -39,9 +40,12 @@ type Secrets struct {
 // LoadSecrets loads up Secrets from the .env file once.
 // If an env file is present, Secrets will be loaded, else it'll be ignored.
 func LoadSecrets() (*Secrets, error) {
+	// Load env vars from .env file
+	// TODO: Refactor to use zebra secrets library
 	if err := godotenv.Load(); err != nil {
 		return nil, err
 	}
+
 	ss := &Secrets{}
 	if ss.Port = os.Getenv("PORT"); ss.Port == "" {
 		ss.Port = "20002"
