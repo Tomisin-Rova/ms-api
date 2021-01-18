@@ -41,6 +41,8 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
 
+      - name: Setup credentials to access private repo
+        run: git config --global url."https://${{ secrets.PAT }}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
       # Install all the dependencies
       - name: Get and verify dependencies
         env:
@@ -84,6 +86,9 @@ jobs:
       #     restore-keys: ${{ runner.os }}-go-
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Setup credentials to access private repo
+        run: git config --global url."https://${{ secrets.PAT }}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
+
       - name: Check out code
         uses: actions/checkout@v2
 
@@ -111,6 +116,8 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
 
+      - name: Setup credentials to access private repo
+        run: git config --global url."https://${{ secrets.PAT }}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
         # Run build of the application
       - name: Run build
         run: go build .
@@ -135,6 +142,7 @@ jobs:
           echo [github.sha]: ${{ github.sha }}
           echo [github.ref]: ${{ github.ref }}
           echo [github.actor]: trigered by $GITHUB_ACTOR
+
       - name: Checkout
         uses: actions/checkout@v2
 
@@ -150,6 +158,7 @@ jobs:
           # Set up docker to authenticate
           # via gcloud command-line tool.
           gcloud auth configure-docker
+
       # Build the Docker image
       # images name in format - [ORG]/[IMAGE] e.g. roava.io/myimage
       - name: Build
@@ -161,7 +170,9 @@ jobs:
           -t "$REGISTRY_HOSTNAME"/"$CONTAINER":"${GITHUB_SHA::8}" \
           -t "$REGISTRY_HOSTNAME"/"$CONTAINER":"$GITHUB_SHA" \
             --build-arg GITHUB_SHA="$GITHUB_SHA" \
+            --build-arg ACCESS_TOKEN="${{ secrets.PAT }}" \
             --build-arg GITHUB_REF="$GITHUB_REF" .
+
       # Push the Docker image to Google Container Registry
       # images name in format - [ORG]/[IMAGE] e.g. roava.io/myimage
       # docker push "$REGISTRY_HOSTNAME"/"$CONTAINER":"$GITHUB_SHA"

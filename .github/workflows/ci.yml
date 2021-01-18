@@ -40,14 +40,6 @@ jobs:
 
       - name: Setup credentials to access private repo
         run: git config --global url."https://${{ secrets.PAT }}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
-
-      # Install all the dependencies
-      - name: Get and verify dependencies
-        env:
-          GOSUMDB: "off"
-          GOPROXY: "direct"
-        run: go mod download && go mod verify
-
       # Run fmt of code
       - name: check formatting
         run: make fmt-check
@@ -89,7 +81,6 @@ jobs:
 
       - name: Setup credentials to access private repo
         run: git config --global url."https://${{ secrets.PAT }}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
-
       # Run unit tests + coverage
       - name: Run unit tests
         run: make test
