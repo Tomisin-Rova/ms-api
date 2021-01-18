@@ -6,7 +6,9 @@ package graph
 import (
 	"context"
 	"errors"
+	"fmt"
 
+	"go.uber.org/zap"
 	"ms.api/graph/generated"
 	rerrors "ms.api/libs/errors"
 	"ms.api/libs/validator/datevalidator"
@@ -50,7 +52,7 @@ func (r *mutationResolver) ConfirmPasscodeResetDetails(ctx context.Context, emai
 		},
 	})
 	if err != nil {
-		r.logger.Infof("authService.ConfirmPasswordResetDetails() failed: %v", err)
+		r.logger.Info(fmt.Sprintf("authService.ConfirmPasswordResetDetails() failed: %v", err))
 		return nil, rerrors.NewFromGrpc(err)
 	}
 
@@ -66,7 +68,7 @@ func (r *mutationResolver) ConfirmPasscodeResetOtp(ctx context.Context, email st
 		Code:  otp,
 	})
 	if err != nil {
-		r.logger.Infof("authService.ConfirmPasswordResetOtp() failed: %v", err)
+		r.logger.Info(fmt.Sprintf("authService.ConfirmPasswordResetOtp() failed: %v", err))
 		return nil, rerrors.NewFromGrpc(err)
 	}
 
@@ -136,28 +138,30 @@ func (r *mutationResolver) AddReasonsForUsingRoava(ctx context.Context, reasonVa
 
 func (r *mutationResolver) CreatePhone(ctx context.Context, input types.CreatePhoneInput) (*types.CreatePhoneResult, error) {
 	if err := phonenumbervalidator.ValidatePhoneNumber(input.Phone); err != nil {
-		r.logger.WithField("phone", input.Phone).WithError(err).
-			Error("failed to validate phone number")
+		r.logger.Error("failed to validate phone number",
+			zap.Error(err),
+			zap.String("phone", input.Phone),
+		)
 		return nil, err
 	}
 	result, err := r.onBoardingService.CreatePhone(ctx,
 		&onboardingService.CreatePhoneRequest{PhoneNumber: input.Phone,
 			Device: &onboardingService.Device{Os: input.Device.Os, Brand: input.Device.Brand,
-				DeviceId: input.Device.DeviceID, DeviceToken: input.Device.DeviceToken}})
+				DeviceId: input.Device.ID, DeviceToken: input.Device.DeviceToken}})
 	if err != nil {
-		r.logger.Infof("OnBoardingService.createPhone() failed: %v", err)
-		return nil, rerrors.NewFromGrpc(err)
+		r.logger.Info(fmt.Sprintf("OnBoardingService.createPhone() failed: %v", err))
+		return nil, err
 	}
 	return &types.CreatePhoneResult{Message: result.Message, Success: true, Token: result.Token}, nil
 }
 
-func (r *mutationResolver) VerifyOtp(ctx context.Context, phone string, code string) (*types.Result, error) {
+func (r *mutationResolver) VerifyOtp(ctx context.Context, token string, code string) (*types.Result, error) {
 	resp, err := r.onBoardingService.VerifySmsOtp(context.Background(), &onboardingService.OtpVerificationRequest{
-		Phone: phone, Code: code,
+		Token: token, Code: code,
 	})
 	if err != nil {
-		r.logger.Infof("onboardingService.verifySmsOtp() failed: %v", err)
-		return nil, rerrors.NewFromGrpc(err)
+		r.logger.Info(fmt.Sprintf("onboardingService.verifySmsOtp() failed: %v", err))
+		return nil, err
 	}
 	return &types.Result{Success: resp.Match, Message: resp.Message}, nil
 }
@@ -173,12 +177,12 @@ func (r *mutationResolver) CreatePerson(ctx context.Context, input *types.Create
 		Passcode: input.Passcode,
 	})
 	if err != nil {
-		r.logger.Infof("OnBoardingService.createEmail() failed: %v", err)
+		r.logger.Info(fmt.Sprintf("OnBoardingService.createEmail() failed: %v", err))
 		return nil, rerrors.NewFromGrpc(err)
 	}
 	tokens, err := r.authService.GenerateToken(ctx, &authService.GenerateTokenRequest{PersonId: resp.PersonId})
 	if err != nil {
-		r.logger.Infof("authService.generateToken() failed: %v", err)
+		r.logger.Info(fmt.Sprintf("authService.generateToken() failed: %v", err))
 		return nil, rerrors.NewFromGrpc(err)
 	}
 
@@ -197,18 +201,18 @@ func (r *mutationResolver) CreatePerson(ctx context.Context, input *types.Create
 
 func (r *mutationResolver) AuthenticateCustomer(ctx context.Context, input *types.AuthenticateCustomerInput) (*types.AuthResult, error) {
 	if err := emailvalidator.Validate(input.Email); err != nil {
-		r.logger.WithField("email", input.Email).Info("invalid email supplied")
+		r.logger.Info("invalid email supplied", zap.String("email", input.Email))
 		return nil, errors.New("invalid email address")
 	}
 	req := &authService.LoginRequest{Email: input.Email, Passcode: input.Passcode, Device: &authService.Device{
 		Os:          input.Device.Os,
 		Brand:       input.Device.Brand,
 		DeviceToken: input.Device.DeviceToken,
-		DeviceId:    input.Device.DeviceID,
+		DeviceId:    input.Device.ID,
 	}}
 	resp, err := r.authService.Login(ctx, req)
 	if err != nil {
-		r.logger.Infof("authService.Login() failed: %v", err)
+		r.logger.Info(fmt.Sprintf("authService.Login() failed: %v", err))
 		return nil, rerrors.NewFromGrpc(err)
 	}
 	return &types.AuthResult{
@@ -229,7 +233,7 @@ func (r *mutationResolver) RefreshToken(ctx context.Context, refreshToken string
 	req := &authService.RefreshTokenRequest{RefreshToken: refreshToken}
 	resp, err := r.authService.RefreshToken(ctx, req)
 	if err != nil {
-		r.logger.Infof("authService.RefreshToken() failed: %v", err)
+		r.logger.Info(fmt.Sprintf("authService.RefreshToken() failed: %v", err))
 		return nil, rerrors.NewFromGrpc(err)
 	}
 	return &types.AuthResult{Token: resp.Token, RefreshToken: resp.RefreshToken, Person: &types.APIPerson{}}, nil
@@ -237,13 +241,12 @@ func (r *mutationResolver) RefreshToken(ctx context.Context, refreshToken string
 
 func (r *mutationResolver) ResendOtp(ctx context.Context, phone string) (*types.Result, error) {
 	if err := phonenumbervalidator.ValidatePhoneNumber(phone); err != nil {
-		r.logger.WithField("phone", phone).WithError(err).
-			Error("failed to validate phone number")
+		r.logger.Error("failed to validate phone number", zap.Error(err), zap.String("phone", phone))
 		return nil, err
 	}
 	resp, err := r.onBoardingService.ResendOtp(ctx, &onboardingService.ResendOtpRequest{Phone: phone})
 	if err != nil {
-		r.logger.Infof("onboardingService.ResendOtp() failed: %v", err)
+		r.logger.Info(fmt.Sprintf("onboardingService.ResendOtp() failed: %v", err))
 		return nil, rerrors.NewFromGrpc(err)
 	}
 	return &types.Result{Message: resp.Message, Success: true}, nil
@@ -255,7 +258,7 @@ func (r *mutationResolver) CheckEmailExistence(ctx context.Context, email string
 	}
 	resp, err := r.onBoardingService.CheckEmailExistence(ctx, &onboardingService.CheckEmailExistenceRequest{Email: email})
 	if err != nil {
-		r.logger.WithError(err).Info("onboardingService.checkEmailExistence() failed")
+		r.logger.Info("onboardingService.checkEmailExistence() failed", zap.Error(err))
 		return nil, rerrors.NewFromGrpc(err)
 	}
 	return &types.CheckEmailExistenceResult{Message: resp.Message, Exists: resp.Exists}, nil
@@ -272,7 +275,7 @@ func (r *mutationResolver) ActivateBioLogin(ctx context.Context, deviceID string
 	})
 
 	if err != nil {
-		r.logger.WithError(err).Info("authService.ActivateBioLogin() failed")
+		r.logger.Info("authService.ActivateBioLogin() failed", zap.Error(err))
 		return nil, rerrors.NewFromGrpc(err)
 	}
 
@@ -290,12 +293,12 @@ func (r *mutationResolver) BioLoginRequest(ctx context.Context, input types.BioL
 			Os:          input.Device.Os,
 			Brand:       input.Device.Brand,
 			DeviceToken: input.Device.DeviceToken,
-			DeviceId:    input.Device.DeviceID,
+			DeviceId:    input.Device.ID,
 		},
 	})
 
 	if err != nil {
-		r.logger.WithError(err).Info("authService.BioLogin() failed")
+		r.logger.Info("authService.BioLogin() failed", zap.Error(err))
 		return nil, rerrors.NewFromGrpc(err)
 	}
 
@@ -323,7 +326,7 @@ func (r *mutationResolver) DeactivateBioLogin(ctx context.Context, input types.D
 		DeviceId: input.DeviceID,
 	})
 	if err != nil {
-		r.logger.WithError(err).Info("authService.DeactivateBioLogin() failed")
+		r.logger.Info("authService.DeactivateBioLogin() failed", zap.Error(err))
 		return nil, rerrors.NewFromGrpc(err)
 	}
 
@@ -343,7 +346,7 @@ func (r *mutationResolver) VerifyEmailMagicLInk(ctx context.Context, email strin
 	})
 
 	if err != nil {
-		r.logger.WithError(err).Info("OnBoardingService.VerifyEmailMagicLInk() failed")
+		r.logger.Info("OnBoardingService.VerifyEmailMagicLInk() failed", zap.Error(err))
 		return nil, rerrors.NewFromGrpc(err)
 	}
 
@@ -360,7 +363,7 @@ func (r *mutationResolver) ResendEmailMagicLInk(ctx context.Context, email strin
 
 	resp, err := r.onBoardingService.ResendEmailMagicLInk(ctx, &onboardingService.ResendEmailMagicLInkRequest{Email: email})
 	if err != nil {
-		r.logger.WithError(err).Info("OnBoardingService.ResendEmailMagicLInk() failed")
+		r.logger.Info("OnBoardingService.ResendEmailMagicLInk() failed", zap.Error(err))
 		return nil, rerrors.NewFromGrpc(err)
 	}
 
@@ -379,7 +382,7 @@ func (r *mutationResolver) SubmitApplication(ctx context.Context) (*types.Result
 		PersonId: personId,
 	})
 	if err != nil {
-		r.logger.WithError(err).Error("submitCheck() failed")
+		r.logger.Error("submitCheck() failed", zap.Error(err))
 		return nil, rerrors.NewFromGrpc(err)
 	}
 	return &types.Result{Message: resp.Message, Success: true}, nil
@@ -394,7 +397,7 @@ func (r *mutationResolver) AcceptTermsAndConditions(ctx context.Context) (*types
 		PersonId: personId,
 	})
 	if err != nil {
-		r.logger.WithError(err).Error("AcceptTermsAndConditions() failed")
+		r.logger.Error("AcceptTermsAndConditions() failed", zap.Error(err))
 		return nil, rerrors.NewFromGrpc(err)
 	}
 	return &types.Result{Message: resp.Message, Success: true}, nil
@@ -408,7 +411,7 @@ func (r *mutationResolver) CreateApplication(ctx context.Context) (*types.Create
 	resp, err := r.onBoardingService.CreateApplication(ctx,
 		&onboardingService.CreateApplicationRequest{PersonId: personId})
 	if err != nil {
-		r.logger.WithError(err).Error("onBoardingService.createApplication() failed")
+		r.logger.Error("onBoardingService.createApplication() failed", zap.Error(err))
 		return nil, rerrors.NewFromGrpc(err)
 	}
 	return &types.CreateApplicationResponse{Token: resp.Token}, nil
@@ -424,7 +427,7 @@ func (r *mutationResolver) CreateCurrencyAccount(ctx context.Context, currencyCo
 		Currency: currencyCode,
 	})
 	if err != nil {
-		r.logger.WithError(err).Error("productService.createAccount() failed")
+		r.logger.Error("productService.createAccount() failed", zap.Error(err))
 		return nil, rerrors.NewFromGrpc(err)
 	}
 	return &types.Result{Message: resp.Message, Success: true}, nil
@@ -438,7 +441,7 @@ func (r *mutationResolver) UpdateFirebaseToken(ctx context.Context, token string
 	resp, err := r.onBoardingService.UpdateFirebaseToken(ctx,
 		&onboardingService.UpdateFirebaseTokenRequest{PersonId: personId, Token: token})
 	if err != nil {
-		r.logger.WithError(err).Error("onBoardingService.UpdateFirebaseToken() failed")
+		r.logger.Error("onBoardingService.UpdateFirebaseToken() failed", zap.Error(err))
 		return nil, rerrors.NewFromGrpc(err)
 	}
 	return &types.Result{Message: resp.Message}, nil
@@ -456,7 +459,7 @@ func (r *mutationResolver) CreateTransactionPin(ctx context.Context, pin string)
 	resp, err := r.personService.CreateTransactionPin(ctx,
 		&personService.CreateTransactionPinRequest{PersonId: personId, Pin: pin})
 	if err != nil {
-		r.logger.WithError(err).Error("personService.CreateTransactionPin() failed")
+		r.logger.Error("personService.CreateTransactionPin() failed", zap.Error(err))
 		return nil, rerrors.NewFromGrpc(err)
 	}
 	return &types.Result{Message: resp.Message, Success: true}, nil
@@ -485,7 +488,7 @@ func (r *mutationResolver) MakeTransfer(ctx context.Context, input *types.MakeTr
 		TransactionPin:           input.TransactionPin,
 	})
 	if err != nil {
-		r.logger.WithError(err).Error("paymentService.MakeTransfer() failed")
+		r.logger.Error("paymentService.MakeTransfer() failed", zap.Error(err))
 		return nil, rerrors.NewFromGrpc(err)
 	}
 	return &types.Result{Message: resp.Message, Success: true}, nil
@@ -525,7 +528,7 @@ func (r *mutationResolver) CreatePayee(ctx context.Context, input types.CreatePa
 	resp, err := r.PayeeService.CreatePayee(ctx, req)
 
 	if err != nil {
-		r.logger.WithError(err).Error("payeeService.CreateBeneficiary() failed")
+		r.logger.Error("payeeService.CreateBeneficiary() failed", zap.Error(err))
 		return nil, rerrors.NewFromGrpc(err)
 	}
 	var account *types.PayeeAccount

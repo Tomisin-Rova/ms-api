@@ -1,25 +1,61 @@
 package rerrors
 
-import "google.golang.org/grpc/status"
+import (
+	coreError "github.com/roava/zebra/errors"
+	"github.com/vektah/gqlparser/v2/gqlerror"
+	"google.golang.org/grpc/status"
+)
 
-type roavaError struct {
-	ErrorString string `json:"error"`
-	Message     string `json:"message"`
-	Detail      string `json:"detail"`
-	Help        string `json:"help"`
-}
-
+// NewFromGrpc returns a formatted Roava Terror
 func NewFromGrpc(err error) error {
 	st, ok := status.FromError(err)
 	if !ok {
 		if err == nil {
-			return &roavaError{Message: "unknown error"}
+			return coreError.NewTerror(
+				7000,
+				"InvalidException",
+				"unknown error",
+				"",
+			)
 		}
-		return &roavaError{Message: err.Error()}
+		return coreError.NewTerror(
+			7002,
+			"ConnectionError",
+			"error connecting to service",
+			err.Error(),
+		)
 	}
-	return &roavaError{Message: st.Message(), ErrorString: st.Code().String()}
+	return coreError.NewTerror(
+		7002,
+		"ConnectionError",
+		st.Code().String(),
+		"",
+	)
 }
 
-func (re *roavaError) Error() string {
-	return re.Message
+// FormatGqlTError formats the error given to a GQL error
+func FormatGqlTError(err error, gqlErr *gqlerror.Error) *gqlerror.Error {
+	st, ok := status.FromError(err)
+	var errString string
+	if ok {
+		errString = st.Message()
+	} else {
+		errString = err.Error()
+	}
+
+	// Get Terror instance
+	terror, err := coreError.NewTerrorFromJSONString(errString)
+	if err != nil {
+		gqlErr.Message = err.Error()
+		return gqlErr
+	}
+	gqlErr.Message = terror.Message()
+	gqlErr.Extensions = map[string]interface{}{
+		"code":      terror.Code(),
+		"errorType": terror.ErrorType(),
+		"status":    terror.Status(),
+		"help":      terror.Help(),
+	}
+
+	return gqlErr
 }

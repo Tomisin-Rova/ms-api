@@ -8,6 +8,7 @@ import (
 	"errors"
 
 	"github.com/jinzhu/copier"
+	"go.uber.org/zap"
 	"ms.api/graph/generated"
 	rerrors "ms.api/libs/errors"
 	"ms.api/protos/pb/authService"
@@ -52,12 +53,12 @@ func (r *queryResolver) Me(ctx context.Context) (*types.Person, error) {
 	}
 	person, err := r.authService.GetPersonById(ctx, &authService.GetPersonByIdRequest{PersonId: personId})
 	if err != nil {
-		r.logger.WithError(err).Error("failed to get person")
+		r.logger.Error("failed to get person", zap.Error(err))
 		return nil, rerrors.NewFromGrpc(err)
 	}
 	p := &types.Person{}
 	if err := copier.Copy(p, person); err != nil {
-		r.logger.WithError(err).Error("copier failed")
+		r.logger.Error("copier failed", zap.Error(err))
 		return nil, errors.New("failed to read profile information. please retry")
 	}
 	p.Dob = person.DOB
@@ -120,7 +121,7 @@ func (r *queryResolver) Accounts(ctx context.Context) (*types.AccountsResult, er
 		PersonId: personId,
 	})
 	if err != nil {
-		r.logger.WithError(err).Error("failed to get accounts from product service")
+		r.logger.Error("failed to get accounts from product service", zap.Error(err))
 		return nil, rerrors.NewFromGrpc(err)
 	}
 	primaryAccount := &types.Account{

@@ -144,7 +144,7 @@ type DeactivateBioLoginInput struct {
 type Device struct {
 	Os          string `json:"os"`
 	Brand       string `json:"brand"`
-	DeviceID    string `json:"deviceId"`
+	ID          string `json:"id"`
 	DeviceToken string `json:"deviceToken"`
 }
 

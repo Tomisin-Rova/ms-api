@@ -39,7 +39,7 @@ input AuthenticateCustomerInput {
 input Device {
   os: String!
   brand: String!
-  deviceId: String!
+  id: String!
   deviceToken: String!
 }
 

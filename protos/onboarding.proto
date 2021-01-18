@@ -5,162 +5,162 @@ option go_package = "onboardingService";
 
 
 message CreatePhoneRequest {
-    string phoneNumber = 1;
-    Device device = 2;
+  string phoneNumber = 1;
+  Device device = 2;
 }
 
 message Device {
-    string os = 1;
-    string brand = 2;
-    string deviceToken = 3;
-    string deviceId = 4;
+  string os = 1;
+  string brand = 2;
+  string deviceToken = 3;
+  string deviceId = 4;
 }
 
 message SuccessResponse {
-    string message = 1;
+  string message = 1;
 }
 
 message CreatePhoneResponse {
-    string message = 1;
-    string token = 2;
+  string message = 1;
+  string token = 2;
 }
 
 message CreateEmailRequest {
-   string email = 1;
-   string passcode = 2;
-   string token = 3;
+  string email = 1;
+  string passcode = 2;
+  string token = 3;
 }
 
 message CreateEmailResponse {
-    string personId = 1;
-    string message = 2;
+  string personId = 1;
+  string message = 2;
 }
 
 message UpdatePersonRequest {
-    string personId = 1;
-    Address address = 2;
-    string firstName =3;
-    string lastName =4;
-    string dob = 5;
+  string personId = 1;
+  Address address = 2;
+  string firstName =3;
+  string lastName =4;
+  string dob = 5;
 }
 
 message RoavaReasonsRequest {
-    string personId = 1;
-    repeated string reasons = 2;
+  string personId = 1;
+  repeated string reasons = 2;
 }
 
 message Address {
-    string country = 1;
-    string street = 2;
-    string city = 3;
-    string postcode = 4;
+  string country = 1;
+  string street = 2;
+  string city = 3;
+  string postcode = 4;
 }
 
 message CheckEmailExistenceRequest {
-    string email = 1;
+  string email = 1;
 }
 
 message CheckEmailExistenceResponse {
-    bool exists = 1;
-    string message = 2;
+  bool exists = 1;
+  string message = 2;
 }
 
 
 message OtpVerificationResponse {
-    bool match = 1;
-    string message = 2;
+  bool match = 1;
+  string message = 2;
 }
 
 message OtpVerificationRequest {
-    string phone = 1;
-    string code = 2;
+  string token = 1;
+  string code = 2;
 }
 
 message OtpVerificationByEmailRequest {
-    string email = 1;
-    string code = 2;
+  string email = 1;
+  string code = 2;
 }
 
 message ResendOtpRequest {
-    string phone = 1;
+  string phone = 1;
 }
 
 message CreateApplicationRequest {
-    string personId = 1;
+  string personId = 1;
 }
 
 message CreateApplicationResponse {
-    string token = 1;
+  string token = 1;
 }
 
 message SubmitCheckRequest {
-    string personId = 1;
+  string personId = 1;
 }
 
 message VerifyEmailMagicLInkRequest {
-    string email = 1;
-    string verificationToken= 2;
+  string email = 1;
+  string verificationToken= 2;
 }
 
 message ResendEmailMagicLInkRequest {
-    string email = 1;
+  string email = 1;
 }
 
 message FetchCountriesRequest {}
 
 message Country {
-    string CountryId = 1;
-    string Capital = 2;
-    string CountryName = 3;
-    string Continent = 4;
-    string Dial = 5;
-    string GeoNameId = 6;
-    string ISO4217CurrencyAlphabeticCode = 7;
-    int32 ISO4217CurrencyNumericCode = 8;
-    string IsIndependent = 9;
-    string Languages = 10;
-    string OfficialNameEnglish = 11;
-    string deviceId = 12;
+  string CountryId = 1;
+  string Capital = 2;
+  string CountryName = 3;
+  string Continent = 4;
+  string Dial = 5;
+  string GeoNameId = 6;
+  string ISO4217CurrencyAlphabeticCode = 7;
+  int32 ISO4217CurrencyNumericCode = 8;
+  string IsIndependent = 9;
+  string Languages = 10;
+  string OfficialNameEnglish = 11;
+  string deviceId = 12;
 }
 
 message FetchCountriesResponse {
-    repeated Country Countries = 2;
+  repeated Country Countries = 2;
 }
 
 message Reasons {
-    string Id =1;
-    string Description =2;
+  string Id =1;
+  string Description =2;
 }
 
 message ReasonResponse {
-    repeated Reasons reasons = 1;
+  repeated Reasons reasons = 1;
 }
 
 message EmptyRequest{}
 message TermsAndConditionsRequest {
-    string personId = 1;
+  string personId = 1;
 }
 
 message UpdateFirebaseTokenRequest {
-    string personId = 1;
-    string token = 2;
+  string personId = 1;
+  string token = 2;
 }
 
 service OnBoardingService{
-    rpc CreatePhone(CreatePhoneRequest) returns (CreatePhoneResponse) {}
-    rpc CreateEmail(CreateEmailRequest) returns (CreateEmailResponse) {}
-    rpc UpdatePersonBiodata(UpdatePersonRequest) returns (SuccessResponse) {}
-    rpc AddReasonsForUsingRoava(RoavaReasonsRequest) returns (SuccessResponse) {}
-    rpc CheckEmailExistence(CheckEmailExistenceRequest) returns (CheckEmailExistenceResponse) {}
-    rpc VerifySmsOtp(OtpVerificationRequest) returns (OtpVerificationResponse) {}
-    rpc VerifyEmailOtp(OtpVerificationByEmailRequest) returns (OtpVerificationResponse) {}
-    rpc ResendOtp(ResendOtpRequest) returns (SuccessResponse) {}
-    rpc CreateApplication(CreateApplicationRequest) returns (CreateApplicationResponse) {}
-    rpc SubmitCheck(SubmitCheckRequest) returns (SuccessResponse) {}
-    rpc VerifyEmailMagicLInk(VerifyEmailMagicLInkRequest) returns (SuccessResponse) {}
-    rpc ResendEmailMagicLInk(ResendEmailMagicLInkRequest) returns (SuccessResponse) {}
-    rpc FetchCountries(FetchCountriesRequest) returns (FetchCountriesResponse) {}
-    rpc FetchReasons(EmptyRequest) returns (ReasonResponse) {}
-    rpc AcceptTermsAndConditions(TermsAndConditionsRequest) returns (SuccessResponse) {}
-    rpc UpdateFirebaseToken(UpdateFirebaseTokenRequest) returns (SuccessResponse) {}
+  rpc CreatePhone(CreatePhoneRequest) returns (CreatePhoneResponse) {}
+  rpc CreateEmail(CreateEmailRequest) returns (CreateEmailResponse) {}
+  rpc UpdatePersonBiodata(UpdatePersonRequest) returns (SuccessResponse) {}
+  rpc AddReasonsForUsingRoava(RoavaReasonsRequest) returns (SuccessResponse) {}
+  rpc CheckEmailExistence(CheckEmailExistenceRequest) returns (CheckEmailExistenceResponse) {}
+  rpc VerifySmsOtp(OtpVerificationRequest) returns (OtpVerificationResponse) {}
+  rpc VerifyEmailOtp(OtpVerificationByEmailRequest) returns (OtpVerificationResponse) {}
+  rpc ResendOtp(ResendOtpRequest) returns (SuccessResponse) {}
+  rpc CreateApplication(CreateApplicationRequest) returns (CreateApplicationResponse) {}
+  rpc SubmitCheck(SubmitCheckRequest) returns (SuccessResponse) {}
+  rpc VerifyEmailMagicLInk(VerifyEmailMagicLInkRequest) returns (SuccessResponse) {}
+  rpc ResendEmailMagicLInk(ResendEmailMagicLInkRequest) returns (SuccessResponse) {}
+  rpc FetchCountries(FetchCountriesRequest) returns (FetchCountriesResponse) {}
+  rpc FetchReasons(EmptyRequest) returns (ReasonResponse) {}
+  rpc AcceptTermsAndConditions(TermsAndConditionsRequest) returns (SuccessResponse) {}
+  rpc UpdateFirebaseToken(UpdateFirebaseTokenRequest) returns (SuccessResponse) {}
 }
