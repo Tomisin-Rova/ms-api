@@ -2,11 +2,13 @@ package handlers
 
 import (
 	"context"
-	"go.uber.org/zap"
 	rerrors "ms.api/libs/errors"
+	"net/http"
+
 	emailvalidator "ms.api/libs/validator/email"
 	"ms.api/protos/pb/onboardingService"
-	"net/http"
+
+	"go.uber.org/zap"
 )
 
 type HttpHandler struct {

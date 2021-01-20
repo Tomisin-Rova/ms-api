@@ -10,7 +10,6 @@ import (
 	"github.com/jinzhu/copier"
 	"go.uber.org/zap"
 	"ms.api/graph/generated"
-	rerrors "ms.api/libs/errors"
 	"ms.api/protos/pb/authService"
 	"ms.api/protos/pb/cddService"
 	"ms.api/protos/pb/onboardingService"
@@ -27,7 +26,7 @@ func (r *queryResolver) GetCDDReportSummary(ctx context.Context) (*types.CDDSumm
 	}
 	resp, err := r.cddService.GetCDDSummaryReport(ctx, &cddService.PersonIdRequest{PersonId: personId})
 	if err != nil {
-		return nil, rerrors.NewFromGrpc(err)
+		return nil, err
 	}
 
 	output := &types.CDDSummary{
@@ -54,7 +53,7 @@ func (r *queryResolver) Me(ctx context.Context) (*types.Person, error) {
 	person, err := r.authService.GetPersonById(ctx, &authService.GetPersonByIdRequest{PersonId: personId})
 	if err != nil {
 		r.logger.Error("failed to get person", zap.Error(err))
-		return nil, rerrors.NewFromGrpc(err)
+		return nil, err
 	}
 	p := &types.Person{}
 	if err := copier.Copy(p, person); err != nil {
@@ -68,7 +67,7 @@ func (r *queryResolver) Me(ctx context.Context) (*types.Person, error) {
 func (r *queryResolver) GetCountries(ctx context.Context) (*types.FetchCountriesResponse, error) {
 	resp, err := r.onBoardingService.FetchCountries(ctx, &onboardingService.FetchCountriesRequest{})
 	if err != nil {
-		return nil, rerrors.NewFromGrpc(err)
+		return nil, err
 	}
 
 	countriesRes := &types.FetchCountriesResponse{}
@@ -96,7 +95,7 @@ func (r *queryResolver) GetCountries(ctx context.Context) (*types.FetchCountries
 func (r *queryResolver) Reasons(ctx context.Context) (*types.FetchReasonResponse, error) {
 	resp, err := r.onBoardingService.FetchReasons(ctx, &onboardingService.EmptyRequest{})
 	if err != nil {
-		return nil, rerrors.NewFromGrpc(err)
+		return nil, err
 	}
 
 	response := &types.FetchReasonResponse{}
@@ -122,7 +121,7 @@ func (r *queryResolver) Accounts(ctx context.Context) (*types.AccountsResult, er
 	})
 	if err != nil {
 		r.logger.Error("failed to get accounts from product service", zap.Error(err))
-		return nil, rerrors.NewFromGrpc(err)
+		return nil, err
 	}
 	primaryAccount := &types.Account{
 		Currency:       resp.PrimaryAccount.CurrencyCode,
@@ -150,7 +149,7 @@ func (r *queryResolver) Accounts(ctx context.Context) (*types.AccountsResult, er
 func (r *queryResolver) GetPayeesByPhoneNumbers(ctx context.Context, phone []string) (*types.GetPayeesByPhoneNumbers, error) {
 	resp, err := r.PayeeService.GetPayeesByPhoneNumbers(ctx, &payeeService.FetchPayeeByPhoneRequest{Phone: phone})
 	if err != nil {
-		return nil, rerrors.NewFromGrpc(err)
+		return nil, err
 	}
 
 	response := &types.GetPayeesByPhoneNumbers{}
@@ -171,7 +170,7 @@ func (r *queryResolver) GetPayeesByPhoneNumbers(ctx context.Context, phone []str
 func (r *queryResolver) SupportedCurrencies(ctx context.Context) ([]*types.Country, error) {
 	resp, err := r.onBoardingService.FetchCountries(ctx, &onboardingService.FetchCountriesRequest{})
 	if err != nil {
-		return nil, rerrors.NewFromGrpc(err)
+		return nil, err
 	}
 
 	countriesRes := &types.FetchCountriesResponse{}

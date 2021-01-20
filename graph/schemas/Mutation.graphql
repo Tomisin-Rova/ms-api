@@ -30,7 +30,7 @@ type Mutation {
     activateBioLogin(deviceId: String!): ActivateBioLoginResponse
     bioLoginRequest(input: BioLoginInput!): AuthResult
     deactivateBioLogin(input: DeactivateBioLoginInput!): Result
-    verifyEmailMagicLInk(email: String!, verificationToken: String!): Result
+    verifyEmail(email: String!, token: String!): Result
     resendEmailMagicLInk(email: String!): Result
     submitApplication: Result
     acceptTermsAndConditions: Result

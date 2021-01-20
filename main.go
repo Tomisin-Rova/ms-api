@@ -20,7 +20,7 @@ func main() {
 		logger.Fatal(fmt.Sprintf("failed to load config: %v", err))
 	}
 
-	address := fmt.Sprintf("0.0.0.0:%s", secrets.Port)
+	address := fmt.Sprintf("0.0.0.0:%s", secrets.Service.Port)
 	logger.Info(fmt.Sprintf("Connect to http://%s/ for GraphQL playground", address))
 	if err := http.ListenAndServe(address, httpServer.MountServer(secrets, logger)); err != nil {
 		logger.Fatal(fmt.Sprintf("Could not start server on %s. Got error: %s", address, err.Error()))

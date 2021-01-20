@@ -31,9 +31,12 @@ func (f *FakeOnBoardingClient) UpdatePersonBiodata(ctx context.Context,
 	return f.resp, f.err
 }
 
-func (f *FakeOnBoardingClient) CreateEmail(ctx context.Context, req *onboardingService.CreateEmailRequest,
-	opts ...grpc.CallOption) (*onboardingService.CreateEmailResponse, error) {
-	return &onboardingService.CreateEmailResponse{PersonId: "personId"}, f.err
+func (f *FakeOnBoardingClient) CreatePerson(ctx context.Context, req *onboardingService.CreatePersonRequest,
+	opts ...grpc.CallOption) (*onboardingService.CreatePersonResponse, error) {
+	return &onboardingService.CreatePersonResponse{
+		JwtToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+		Message:  "success",
+	}, f.err
 }
 
 func (f *FakeOnBoardingClient) AddReasonsForUsingRoava(ctx context.Context, req *onboardingService.RoavaReasonsRequest,

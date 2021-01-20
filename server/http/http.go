@@ -43,7 +43,7 @@ func MountServer(secrets *config.Secrets, logger *zap.Logger) *chi.Mux {
 	router.Use(mw.Middeware)
 	opts.AuthMw = mw
 
-	if secrets.Environment != config.Production {
+	if secrets.Service.Environment != string(config.Production) {
 		router.Handle("/", playground.Handler("GraphQL playground", "/graphql"))
 	} else {
 		router.Get("/", func(writer http.ResponseWriter, request *http.Request) {
