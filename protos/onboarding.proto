@@ -3,7 +3,6 @@ syntax = "proto3";
 package onboarding;
 option go_package = "onboardingService";
 
-
 message CreatePhoneRequest {
   string phoneNumber = 1;
   Device device = 2;
@@ -25,22 +24,23 @@ message CreatePhoneResponse {
   string token = 2;
 }
 
-message CreateEmailRequest {
+message CreatePersonRequest {
   string email = 1;
   string passcode = 2;
   string token = 3;
 }
 
-message CreateEmailResponse {
-  string personId = 1;
-  string message = 2;
+message CreatePersonResponse {
+  string jwtToken = 1;
+  string refreshToken = 2;
+  string message = 3;
 }
 
 message UpdatePersonRequest {
   string personId = 1;
   Address address = 2;
-  string firstName =3;
-  string lastName =4;
+  string firstName = 3;
+  string lastName = 4;
   string dob = 5;
 }
 
@@ -99,7 +99,7 @@ message SubmitCheckRequest {
 
 message VerifyEmailMagicLInkRequest {
   string email = 1;
-  string verificationToken= 2;
+  string verificationToken = 2;
 }
 
 message ResendEmailMagicLInkRequest {
@@ -128,8 +128,8 @@ message FetchCountriesResponse {
 }
 
 message Reasons {
-  string Id =1;
-  string Description =2;
+  string Id = 1;
+  string Description = 2;
 }
 
 message ReasonResponse {
@@ -148,7 +148,7 @@ message UpdateFirebaseTokenRequest {
 
 service OnBoardingService{
   rpc CreatePhone(CreatePhoneRequest) returns (CreatePhoneResponse) {}
-  rpc CreateEmail(CreateEmailRequest) returns (CreateEmailResponse) {}
+  rpc CreatePerson(CreatePersonRequest) returns (CreatePersonResponse) {}
   rpc UpdatePersonBiodata(UpdatePersonRequest) returns (SuccessResponse) {}
   rpc AddReasonsForUsingRoava(RoavaReasonsRequest) returns (SuccessResponse) {}
   rpc CheckEmailExistence(CheckEmailExistenceRequest) returns (CheckEmailExistenceResponse) {}
