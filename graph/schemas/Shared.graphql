@@ -217,3 +217,25 @@ input MakeTransferInput {
     notes: String!
     transactionPin: String!
 }
+
+type AddressResult {
+  addressline1 : String!
+  addressline2: String!
+  summaryline: String!
+  organisation: String!
+  buildingname: String!
+  premise: String!
+  street: String!
+  dependentlocality: String!
+  posttown: String!
+  county: String!
+  postcode: String!
+  latitude: String!
+  longitude: String!
+  grideasting: String!
+  gridnorthing: String!
+}
+
+type fetchAddressesResponse  {
+  addresses: [AddressResult!]!
+}

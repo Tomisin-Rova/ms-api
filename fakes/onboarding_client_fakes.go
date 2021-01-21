@@ -103,3 +103,8 @@ func (f *FakeOnBoardingClient) UpdateFirebaseToken(ctx context.Context, req *onb
 	opts ...grpc.CallOption) (*onboardingService.SuccessResponse, error) {
 	return &onboardingService.SuccessResponse{}, f.err
 }
+
+func (f *FakeOnBoardingClient) GetAddressesByText(ctx context.Context, req *onboardingService.GetAddressesRequest,
+	opts ...grpc.CallOption) (*onboardingService.GetAddressesResponse, error) {
+	return &onboardingService.GetAddressesResponse{}, f.err
+}

@@ -20,6 +20,24 @@ type ActivateBioLoginResponse struct {
 	BiometricPasscode string `json:"biometricPasscode"`
 }
 
+type AddressResult struct {
+	Addressline1      string `json:"addressline1"`
+	Addressline2      string `json:"addressline2"`
+	Summaryline       string `json:"summaryline"`
+	Organisation      string `json:"organisation"`
+	Buildingname      string `json:"buildingname"`
+	Premise           string `json:"premise"`
+	Street            string `json:"street"`
+	Dependentlocality string `json:"dependentlocality"`
+	Posttown          string `json:"posttown"`
+	County            string `json:"county"`
+	Postcode          string `json:"postcode"`
+	Latitude          string `json:"latitude"`
+	Longitude         string `json:"longitude"`
+	Grideasting       string `json:"grideasting"`
+	Gridnorthing      string `json:"gridnorthing"`
+}
+
 type APIPerson struct {
 	FirstName               string `json:"firstName"`
 	LastName                string `json:"lastName"`
@@ -232,6 +250,10 @@ type VerifyEmailMagicLInkInput struct {
 
 type CreateApplicationResponse struct {
 	Token string `json:"token"`
+}
+
+type FetchAddressesResponse struct {
+	Addresses []*AddressResult `json:"addresses"`
 }
 
 type FetchCountriesResponse struct {

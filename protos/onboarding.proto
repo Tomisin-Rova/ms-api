@@ -146,6 +146,32 @@ message UpdateFirebaseTokenRequest {
   string token = 2;
 }
 
+message GetAddressesRequest {
+  string text = 1;
+}
+
+message AddressResult {
+  string addressline1 = 1;
+  string addressline2 = 2;
+  string summaryline = 3;
+  string organisation = 4;
+  string buildingname = 5;
+  string premise = 6;
+  string street = 7;
+  string dependentlocality = 8;
+  string posttown = 9;
+  string county = 10;
+  string postcode = 11;
+  string latitude = 12;
+  string longitude = 13;
+  string grideasting = 14;
+  string gridnorthing = 15;
+}
+
+message GetAddressesResponse {
+   repeated AddressResult addresses = 1;
+}
+
 service OnBoardingService{
   rpc CreatePhone(CreatePhoneRequest) returns (CreatePhoneResponse) {}
   rpc CreatePerson(CreatePersonRequest) returns (CreatePersonResponse) {}
@@ -163,4 +189,5 @@ service OnBoardingService{
   rpc FetchReasons(EmptyRequest) returns (ReasonResponse) {}
   rpc AcceptTermsAndConditions(TermsAndConditionsRequest) returns (SuccessResponse) {}
   rpc UpdateFirebaseToken(UpdateFirebaseTokenRequest) returns (SuccessResponse) {}
+  rpc GetAddressesByText(GetAddressesRequest) returns (GetAddressesResponse) {}
 }

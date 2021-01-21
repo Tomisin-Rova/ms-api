@@ -1607,6 +1607,259 @@ func (x *UpdateFirebaseTokenRequest) GetToken() string {
 	return ""
 }
 
+type GetAddressesRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Text string `protobuf:"bytes,1,opt,name=text,proto3" json:"text,omitempty"`
+}
+
+func (x *GetAddressesRequest) Reset() {
+	*x = GetAddressesRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_onboarding_proto_msgTypes[28]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetAddressesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetAddressesRequest) ProtoMessage() {}
+
+func (x *GetAddressesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_onboarding_proto_msgTypes[28]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetAddressesRequest.ProtoReflect.Descriptor instead.
+func (*GetAddressesRequest) Descriptor() ([]byte, []int) {
+	return file_onboarding_proto_rawDescGZIP(), []int{28}
+}
+
+func (x *GetAddressesRequest) GetText() string {
+	if x != nil {
+		return x.Text
+	}
+	return ""
+}
+
+type AddressResult struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Addressline1      string `protobuf:"bytes,1,opt,name=addressline1,proto3" json:"addressline1,omitempty"`
+	Addressline2      string `protobuf:"bytes,2,opt,name=addressline2,proto3" json:"addressline2,omitempty"`
+	Summaryline       string `protobuf:"bytes,3,opt,name=summaryline,proto3" json:"summaryline,omitempty"`
+	Organisation      string `protobuf:"bytes,4,opt,name=organisation,proto3" json:"organisation,omitempty"`
+	Buildingname      string `protobuf:"bytes,5,opt,name=buildingname,proto3" json:"buildingname,omitempty"`
+	Premise           string `protobuf:"bytes,6,opt,name=premise,proto3" json:"premise,omitempty"`
+	Street            string `protobuf:"bytes,7,opt,name=street,proto3" json:"street,omitempty"`
+	Dependentlocality string `protobuf:"bytes,8,opt,name=dependentlocality,proto3" json:"dependentlocality,omitempty"`
+	Posttown          string `protobuf:"bytes,9,opt,name=posttown,proto3" json:"posttown,omitempty"`
+	County            string `protobuf:"bytes,10,opt,name=county,proto3" json:"county,omitempty"`
+	Postcode          string `protobuf:"bytes,11,opt,name=postcode,proto3" json:"postcode,omitempty"`
+	Latitude          string `protobuf:"bytes,12,opt,name=latitude,proto3" json:"latitude,omitempty"`
+	Longitude         string `protobuf:"bytes,13,opt,name=longitude,proto3" json:"longitude,omitempty"`
+	Grideasting       string `protobuf:"bytes,14,opt,name=grideasting,proto3" json:"grideasting,omitempty"`
+	Gridnorthing      string `protobuf:"bytes,15,opt,name=gridnorthing,proto3" json:"gridnorthing,omitempty"`
+}
+
+func (x *AddressResult) Reset() {
+	*x = AddressResult{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_onboarding_proto_msgTypes[29]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *AddressResult) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AddressResult) ProtoMessage() {}
+
+func (x *AddressResult) ProtoReflect() protoreflect.Message {
+	mi := &file_onboarding_proto_msgTypes[29]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AddressResult.ProtoReflect.Descriptor instead.
+func (*AddressResult) Descriptor() ([]byte, []int) {
+	return file_onboarding_proto_rawDescGZIP(), []int{29}
+}
+
+func (x *AddressResult) GetAddressline1() string {
+	if x != nil {
+		return x.Addressline1
+	}
+	return ""
+}
+
+func (x *AddressResult) GetAddressline2() string {
+	if x != nil {
+		return x.Addressline2
+	}
+	return ""
+}
+
+func (x *AddressResult) GetSummaryline() string {
+	if x != nil {
+		return x.Summaryline
+	}
+	return ""
+}
+
+func (x *AddressResult) GetOrganisation() string {
+	if x != nil {
+		return x.Organisation
+	}
+	return ""
+}
+
+func (x *AddressResult) GetBuildingname() string {
+	if x != nil {
+		return x.Buildingname
+	}
+	return ""
+}
+
+func (x *AddressResult) GetPremise() string {
+	if x != nil {
+		return x.Premise
+	}
+	return ""
+}
+
+func (x *AddressResult) GetStreet() string {
+	if x != nil {
+		return x.Street
+	}
+	return ""
+}
+
+func (x *AddressResult) GetDependentlocality() string {
+	if x != nil {
+		return x.Dependentlocality
+	}
+	return ""
+}
+
+func (x *AddressResult) GetPosttown() string {
+	if x != nil {
+		return x.Posttown
+	}
+	return ""
+}
+
+func (x *AddressResult) GetCounty() string {
+	if x != nil {
+		return x.County
+	}
+	return ""
+}
+
+func (x *AddressResult) GetPostcode() string {
+	if x != nil {
+		return x.Postcode
+	}
+	return ""
+}
+
+func (x *AddressResult) GetLatitude() string {
+	if x != nil {
+		return x.Latitude
+	}
+	return ""
+}
+
+func (x *AddressResult) GetLongitude() string {
+	if x != nil {
+		return x.Longitude
+	}
+	return ""
+}
+
+func (x *AddressResult) GetGrideasting() string {
+	if x != nil {
+		return x.Grideasting
+	}
+	return ""
+}
+
+func (x *AddressResult) GetGridnorthing() string {
+	if x != nil {
+		return x.Gridnorthing
+	}
+	return ""
+}
+
+type GetAddressesResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Addresses []*AddressResult `protobuf:"bytes,1,rep,name=addresses,proto3" json:"addresses,omitempty"`
+}
+
+func (x *GetAddressesResponse) Reset() {
+	*x = GetAddressesResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_onboarding_proto_msgTypes[30]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetAddressesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetAddressesResponse) ProtoMessage() {}
+
+func (x *GetAddressesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_onboarding_proto_msgTypes[30]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetAddressesResponse.ProtoReflect.Descriptor instead.
+func (*GetAddressesResponse) Descriptor() ([]byte, []int) {
+	return file_onboarding_proto_rawDescGZIP(), []int{30}
+}
+
+func (x *GetAddressesResponse) GetAddresses() []*AddressResult {
+	if x != nil {
+		return x.Addresses
+	}
+	return nil
+}
+
 var File_onboarding_proto protoreflect.FileDescriptor
 
 var file_onboarding_proto_rawDesc = []byte{
@@ -1764,7 +2017,46 @@ var file_onboarding_proto_rawDesc = []byte{
 	0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1a, 0x0a, 0x08, 0x70, 0x65, 0x72, 0x73, 0x6f, 0x6e, 0x49,
 	0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x70, 0x65, 0x72, 0x73, 0x6f, 0x6e, 0x49,
 	0x64, 0x12, 0x14, 0x0a, 0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09,
-	0x52, 0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x32, 0xb4, 0x0b, 0x0a, 0x11, 0x4f, 0x6e, 0x42, 0x6f,
+	0x52, 0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x22, 0x29, 0x0a, 0x13, 0x47, 0x65, 0x74, 0x41, 0x64,
+	0x64, 0x72, 0x65, 0x73, 0x73, 0x65, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x12,
+	0x0a, 0x04, 0x74, 0x65, 0x78, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x74, 0x65,
+	0x78, 0x74, 0x22, 0xf1, 0x03, 0x0a, 0x0d, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x52, 0x65,
+	0x73, 0x75, 0x6c, 0x74, 0x12, 0x22, 0x0a, 0x0c, 0x61, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x6c,
+	0x69, 0x6e, 0x65, 0x31, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0c, 0x61, 0x64, 0x64, 0x72,
+	0x65, 0x73, 0x73, 0x6c, 0x69, 0x6e, 0x65, 0x31, 0x12, 0x22, 0x0a, 0x0c, 0x61, 0x64, 0x64, 0x72,
+	0x65, 0x73, 0x73, 0x6c, 0x69, 0x6e, 0x65, 0x32, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0c,
+	0x61, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x6c, 0x69, 0x6e, 0x65, 0x32, 0x12, 0x20, 0x0a, 0x0b,
+	0x73, 0x75, 0x6d, 0x6d, 0x61, 0x72, 0x79, 0x6c, 0x69, 0x6e, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x0b, 0x73, 0x75, 0x6d, 0x6d, 0x61, 0x72, 0x79, 0x6c, 0x69, 0x6e, 0x65, 0x12, 0x22,
+	0x0a, 0x0c, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x73, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x04,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x0c, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x73, 0x61, 0x74, 0x69,
+	0x6f, 0x6e, 0x12, 0x22, 0x0a, 0x0c, 0x62, 0x75, 0x69, 0x6c, 0x64, 0x69, 0x6e, 0x67, 0x6e, 0x61,
+	0x6d, 0x65, 0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0c, 0x62, 0x75, 0x69, 0x6c, 0x64, 0x69,
+	0x6e, 0x67, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x70, 0x72, 0x65, 0x6d, 0x69, 0x73,
+	0x65, 0x18, 0x06, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x70, 0x72, 0x65, 0x6d, 0x69, 0x73, 0x65,
+	0x12, 0x16, 0x0a, 0x06, 0x73, 0x74, 0x72, 0x65, 0x65, 0x74, 0x18, 0x07, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x06, 0x73, 0x74, 0x72, 0x65, 0x65, 0x74, 0x12, 0x2c, 0x0a, 0x11, 0x64, 0x65, 0x70, 0x65,
+	0x6e, 0x64, 0x65, 0x6e, 0x74, 0x6c, 0x6f, 0x63, 0x61, 0x6c, 0x69, 0x74, 0x79, 0x18, 0x08, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x11, 0x64, 0x65, 0x70, 0x65, 0x6e, 0x64, 0x65, 0x6e, 0x74, 0x6c, 0x6f,
+	0x63, 0x61, 0x6c, 0x69, 0x74, 0x79, 0x12, 0x1a, 0x0a, 0x08, 0x70, 0x6f, 0x73, 0x74, 0x74, 0x6f,
+	0x77, 0x6e, 0x18, 0x09, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x70, 0x6f, 0x73, 0x74, 0x74, 0x6f,
+	0x77, 0x6e, 0x12, 0x16, 0x0a, 0x06, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x79, 0x18, 0x0a, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x06, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x79, 0x12, 0x1a, 0x0a, 0x08, 0x70, 0x6f,
+	0x73, 0x74, 0x63, 0x6f, 0x64, 0x65, 0x18, 0x0b, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x70, 0x6f,
+	0x73, 0x74, 0x63, 0x6f, 0x64, 0x65, 0x12, 0x1a, 0x0a, 0x08, 0x6c, 0x61, 0x74, 0x69, 0x74, 0x75,
+	0x64, 0x65, 0x18, 0x0c, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x6c, 0x61, 0x74, 0x69, 0x74, 0x75,
+	0x64, 0x65, 0x12, 0x1c, 0x0a, 0x09, 0x6c, 0x6f, 0x6e, 0x67, 0x69, 0x74, 0x75, 0x64, 0x65, 0x18,
+	0x0d, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x6c, 0x6f, 0x6e, 0x67, 0x69, 0x74, 0x75, 0x64, 0x65,
+	0x12, 0x20, 0x0a, 0x0b, 0x67, 0x72, 0x69, 0x64, 0x65, 0x61, 0x73, 0x74, 0x69, 0x6e, 0x67, 0x18,
+	0x0e, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x67, 0x72, 0x69, 0x64, 0x65, 0x61, 0x73, 0x74, 0x69,
+	0x6e, 0x67, 0x12, 0x22, 0x0a, 0x0c, 0x67, 0x72, 0x69, 0x64, 0x6e, 0x6f, 0x72, 0x74, 0x68, 0x69,
+	0x6e, 0x67, 0x18, 0x0f, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0c, 0x67, 0x72, 0x69, 0x64, 0x6e, 0x6f,
+	0x72, 0x74, 0x68, 0x69, 0x6e, 0x67, 0x22, 0x4f, 0x0a, 0x14, 0x47, 0x65, 0x74, 0x41, 0x64, 0x64,
+	0x72, 0x65, 0x73, 0x73, 0x65, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x37,
+	0x0a, 0x09, 0x61, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x65, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28,
+	0x0b, 0x32, 0x19, 0x2e, 0x6f, 0x6e, 0x62, 0x6f, 0x61, 0x72, 0x64, 0x69, 0x6e, 0x67, 0x2e, 0x41,
+	0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x52, 0x09, 0x61, 0x64,
+	0x64, 0x72, 0x65, 0x73, 0x73, 0x65, 0x73, 0x32, 0x8f, 0x0c, 0x0a, 0x11, 0x4f, 0x6e, 0x42, 0x6f,
 	0x61, 0x72, 0x64, 0x69, 0x6e, 0x67, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x50, 0x0a,
 	0x0b, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x50, 0x68, 0x6f, 0x6e, 0x65, 0x12, 0x1e, 0x2e, 0x6f,
 	0x6e, 0x62, 0x6f, 0x61, 0x72, 0x64, 0x69, 0x6e, 0x67, 0x2e, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65,
@@ -1855,9 +2147,15 @@ var file_onboarding_proto_rawDesc = []byte{
 	0x64, 0x69, 0x6e, 0x67, 0x2e, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x46, 0x69, 0x72, 0x65, 0x62,
 	0x61, 0x73, 0x65, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a,
 	0x1b, 0x2e, 0x6f, 0x6e, 0x62, 0x6f, 0x61, 0x72, 0x64, 0x69, 0x6e, 0x67, 0x2e, 0x53, 0x75, 0x63,
-	0x63, 0x65, 0x73, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x42, 0x13,
-	0x5a, 0x11, 0x6f, 0x6e, 0x62, 0x6f, 0x61, 0x72, 0x64, 0x69, 0x6e, 0x67, 0x53, 0x65, 0x72, 0x76,
-	0x69, 0x63, 0x65, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x63, 0x65, 0x73, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x59,
+	0x0a, 0x12, 0x47, 0x65, 0x74, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x65, 0x73, 0x42, 0x79,
+	0x54, 0x65, 0x78, 0x74, 0x12, 0x1f, 0x2e, 0x6f, 0x6e, 0x62, 0x6f, 0x61, 0x72, 0x64, 0x69, 0x6e,
+	0x67, 0x2e, 0x47, 0x65, 0x74, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x65, 0x73, 0x52, 0x65,
+	0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x20, 0x2e, 0x6f, 0x6e, 0x62, 0x6f, 0x61, 0x72, 0x64, 0x69,
+	0x6e, 0x67, 0x2e, 0x47, 0x65, 0x74, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x65, 0x73, 0x52,
+	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x42, 0x13, 0x5a, 0x11, 0x6f, 0x6e, 0x62,
+	0x6f, 0x61, 0x72, 0x64, 0x69, 0x6e, 0x67, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x62, 0x06,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -1872,7 +2170,7 @@ func file_onboarding_proto_rawDescGZIP() []byte {
 	return file_onboarding_proto_rawDescData
 }
 
-var file_onboarding_proto_msgTypes = make([]protoimpl.MessageInfo, 28)
+var file_onboarding_proto_msgTypes = make([]protoimpl.MessageInfo, 31)
 var file_onboarding_proto_goTypes = []interface{}{
 	(*CreatePhoneRequest)(nil),            // 0: onboarding.CreatePhoneRequest
 	(*Device)(nil),                        // 1: onboarding.Device
@@ -1902,49 +2200,55 @@ var file_onboarding_proto_goTypes = []interface{}{
 	(*EmptyRequest)(nil),                  // 25: onboarding.EmptyRequest
 	(*TermsAndConditionsRequest)(nil),     // 26: onboarding.TermsAndConditionsRequest
 	(*UpdateFirebaseTokenRequest)(nil),    // 27: onboarding.UpdateFirebaseTokenRequest
+	(*GetAddressesRequest)(nil),           // 28: onboarding.GetAddressesRequest
+	(*AddressResult)(nil),                 // 29: onboarding.AddressResult
+	(*GetAddressesResponse)(nil),          // 30: onboarding.GetAddressesResponse
 }
 var file_onboarding_proto_depIdxs = []int32{
 	1,  // 0: onboarding.CreatePhoneRequest.device:type_name -> onboarding.Device
 	8,  // 1: onboarding.UpdatePersonRequest.address:type_name -> onboarding.Address
 	21, // 2: onboarding.FetchCountriesResponse.Countries:type_name -> onboarding.Country
 	23, // 3: onboarding.ReasonResponse.reasons:type_name -> onboarding.Reasons
-	0,  // 4: onboarding.OnBoardingService.CreatePhone:input_type -> onboarding.CreatePhoneRequest
-	4,  // 5: onboarding.OnBoardingService.CreatePerson:input_type -> onboarding.CreatePersonRequest
-	6,  // 6: onboarding.OnBoardingService.UpdatePersonBiodata:input_type -> onboarding.UpdatePersonRequest
-	7,  // 7: onboarding.OnBoardingService.AddReasonsForUsingRoava:input_type -> onboarding.RoavaReasonsRequest
-	9,  // 8: onboarding.OnBoardingService.CheckEmailExistence:input_type -> onboarding.CheckEmailExistenceRequest
-	12, // 9: onboarding.OnBoardingService.VerifySmsOtp:input_type -> onboarding.OtpVerificationRequest
-	13, // 10: onboarding.OnBoardingService.VerifyEmailOtp:input_type -> onboarding.OtpVerificationByEmailRequest
-	14, // 11: onboarding.OnBoardingService.ResendOtp:input_type -> onboarding.ResendOtpRequest
-	15, // 12: onboarding.OnBoardingService.CreateApplication:input_type -> onboarding.CreateApplicationRequest
-	17, // 13: onboarding.OnBoardingService.SubmitCheck:input_type -> onboarding.SubmitCheckRequest
-	18, // 14: onboarding.OnBoardingService.VerifyEmailMagicLInk:input_type -> onboarding.VerifyEmailMagicLInkRequest
-	19, // 15: onboarding.OnBoardingService.ResendEmailMagicLInk:input_type -> onboarding.ResendEmailMagicLInkRequest
-	20, // 16: onboarding.OnBoardingService.FetchCountries:input_type -> onboarding.FetchCountriesRequest
-	25, // 17: onboarding.OnBoardingService.FetchReasons:input_type -> onboarding.EmptyRequest
-	26, // 18: onboarding.OnBoardingService.AcceptTermsAndConditions:input_type -> onboarding.TermsAndConditionsRequest
-	27, // 19: onboarding.OnBoardingService.UpdateFirebaseToken:input_type -> onboarding.UpdateFirebaseTokenRequest
-	3,  // 20: onboarding.OnBoardingService.CreatePhone:output_type -> onboarding.CreatePhoneResponse
-	5,  // 21: onboarding.OnBoardingService.CreatePerson:output_type -> onboarding.CreatePersonResponse
-	2,  // 22: onboarding.OnBoardingService.UpdatePersonBiodata:output_type -> onboarding.SuccessResponse
-	2,  // 23: onboarding.OnBoardingService.AddReasonsForUsingRoava:output_type -> onboarding.SuccessResponse
-	10, // 24: onboarding.OnBoardingService.CheckEmailExistence:output_type -> onboarding.CheckEmailExistenceResponse
-	11, // 25: onboarding.OnBoardingService.VerifySmsOtp:output_type -> onboarding.OtpVerificationResponse
-	11, // 26: onboarding.OnBoardingService.VerifyEmailOtp:output_type -> onboarding.OtpVerificationResponse
-	2,  // 27: onboarding.OnBoardingService.ResendOtp:output_type -> onboarding.SuccessResponse
-	16, // 28: onboarding.OnBoardingService.CreateApplication:output_type -> onboarding.CreateApplicationResponse
-	2,  // 29: onboarding.OnBoardingService.SubmitCheck:output_type -> onboarding.SuccessResponse
-	2,  // 30: onboarding.OnBoardingService.VerifyEmailMagicLInk:output_type -> onboarding.SuccessResponse
-	2,  // 31: onboarding.OnBoardingService.ResendEmailMagicLInk:output_type -> onboarding.SuccessResponse
-	22, // 32: onboarding.OnBoardingService.FetchCountries:output_type -> onboarding.FetchCountriesResponse
-	24, // 33: onboarding.OnBoardingService.FetchReasons:output_type -> onboarding.ReasonResponse
-	2,  // 34: onboarding.OnBoardingService.AcceptTermsAndConditions:output_type -> onboarding.SuccessResponse
-	2,  // 35: onboarding.OnBoardingService.UpdateFirebaseToken:output_type -> onboarding.SuccessResponse
-	20, // [20:36] is the sub-list for method output_type
-	4,  // [4:20] is the sub-list for method input_type
-	4,  // [4:4] is the sub-list for extension type_name
-	4,  // [4:4] is the sub-list for extension extendee
-	0,  // [0:4] is the sub-list for field type_name
+	29, // 4: onboarding.GetAddressesResponse.addresses:type_name -> onboarding.AddressResult
+	0,  // 5: onboarding.OnBoardingService.CreatePhone:input_type -> onboarding.CreatePhoneRequest
+	4,  // 6: onboarding.OnBoardingService.CreatePerson:input_type -> onboarding.CreatePersonRequest
+	6,  // 7: onboarding.OnBoardingService.UpdatePersonBiodata:input_type -> onboarding.UpdatePersonRequest
+	7,  // 8: onboarding.OnBoardingService.AddReasonsForUsingRoava:input_type -> onboarding.RoavaReasonsRequest
+	9,  // 9: onboarding.OnBoardingService.CheckEmailExistence:input_type -> onboarding.CheckEmailExistenceRequest
+	12, // 10: onboarding.OnBoardingService.VerifySmsOtp:input_type -> onboarding.OtpVerificationRequest
+	13, // 11: onboarding.OnBoardingService.VerifyEmailOtp:input_type -> onboarding.OtpVerificationByEmailRequest
+	14, // 12: onboarding.OnBoardingService.ResendOtp:input_type -> onboarding.ResendOtpRequest
+	15, // 13: onboarding.OnBoardingService.CreateApplication:input_type -> onboarding.CreateApplicationRequest
+	17, // 14: onboarding.OnBoardingService.SubmitCheck:input_type -> onboarding.SubmitCheckRequest
+	18, // 15: onboarding.OnBoardingService.VerifyEmailMagicLInk:input_type -> onboarding.VerifyEmailMagicLInkRequest
+	19, // 16: onboarding.OnBoardingService.ResendEmailMagicLInk:input_type -> onboarding.ResendEmailMagicLInkRequest
+	20, // 17: onboarding.OnBoardingService.FetchCountries:input_type -> onboarding.FetchCountriesRequest
+	25, // 18: onboarding.OnBoardingService.FetchReasons:input_type -> onboarding.EmptyRequest
+	26, // 19: onboarding.OnBoardingService.AcceptTermsAndConditions:input_type -> onboarding.TermsAndConditionsRequest
+	27, // 20: onboarding.OnBoardingService.UpdateFirebaseToken:input_type -> onboarding.UpdateFirebaseTokenRequest
+	28, // 21: onboarding.OnBoardingService.GetAddressesByText:input_type -> onboarding.GetAddressesRequest
+	3,  // 22: onboarding.OnBoardingService.CreatePhone:output_type -> onboarding.CreatePhoneResponse
+	5,  // 23: onboarding.OnBoardingService.CreatePerson:output_type -> onboarding.CreatePersonResponse
+	2,  // 24: onboarding.OnBoardingService.UpdatePersonBiodata:output_type -> onboarding.SuccessResponse
+	2,  // 25: onboarding.OnBoardingService.AddReasonsForUsingRoava:output_type -> onboarding.SuccessResponse
+	10, // 26: onboarding.OnBoardingService.CheckEmailExistence:output_type -> onboarding.CheckEmailExistenceResponse
+	11, // 27: onboarding.OnBoardingService.VerifySmsOtp:output_type -> onboarding.OtpVerificationResponse
+	11, // 28: onboarding.OnBoardingService.VerifyEmailOtp:output_type -> onboarding.OtpVerificationResponse
+	2,  // 29: onboarding.OnBoardingService.ResendOtp:output_type -> onboarding.SuccessResponse
+	16, // 30: onboarding.OnBoardingService.CreateApplication:output_type -> onboarding.CreateApplicationResponse
+	2,  // 31: onboarding.OnBoardingService.SubmitCheck:output_type -> onboarding.SuccessResponse
+	2,  // 32: onboarding.OnBoardingService.VerifyEmailMagicLInk:output_type -> onboarding.SuccessResponse
+	2,  // 33: onboarding.OnBoardingService.ResendEmailMagicLInk:output_type -> onboarding.SuccessResponse
+	22, // 34: onboarding.OnBoardingService.FetchCountries:output_type -> onboarding.FetchCountriesResponse
+	24, // 35: onboarding.OnBoardingService.FetchReasons:output_type -> onboarding.ReasonResponse
+	2,  // 36: onboarding.OnBoardingService.AcceptTermsAndConditions:output_type -> onboarding.SuccessResponse
+	2,  // 37: onboarding.OnBoardingService.UpdateFirebaseToken:output_type -> onboarding.SuccessResponse
+	30, // 38: onboarding.OnBoardingService.GetAddressesByText:output_type -> onboarding.GetAddressesResponse
+	22, // [22:39] is the sub-list for method output_type
+	5,  // [5:22] is the sub-list for method input_type
+	5,  // [5:5] is the sub-list for extension type_name
+	5,  // [5:5] is the sub-list for extension extendee
+	0,  // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_onboarding_proto_init() }
@@ -2289,6 +2593,42 @@ func file_onboarding_proto_init() {
 				return nil
 			}
 		}
+		file_onboarding_proto_msgTypes[28].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetAddressesRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_onboarding_proto_msgTypes[29].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*AddressResult); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_onboarding_proto_msgTypes[30].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetAddressesResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -2296,7 +2636,7 @@ func file_onboarding_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_onboarding_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   28,
+			NumMessages:   31,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
@@ -2338,6 +2678,7 @@ type OnBoardingServiceClient interface {
 	FetchReasons(ctx context.Context, in *EmptyRequest, opts ...grpc.CallOption) (*ReasonResponse, error)
 	AcceptTermsAndConditions(ctx context.Context, in *TermsAndConditionsRequest, opts ...grpc.CallOption) (*SuccessResponse, error)
 	UpdateFirebaseToken(ctx context.Context, in *UpdateFirebaseTokenRequest, opts ...grpc.CallOption) (*SuccessResponse, error)
+	GetAddressesByText(ctx context.Context, in *GetAddressesRequest, opts ...grpc.CallOption) (*GetAddressesResponse, error)
 }
 
 type onBoardingServiceClient struct {
@@ -2492,6 +2833,15 @@ func (c *onBoardingServiceClient) UpdateFirebaseToken(ctx context.Context, in *U
 	return out, nil
 }
 
+func (c *onBoardingServiceClient) GetAddressesByText(ctx context.Context, in *GetAddressesRequest, opts ...grpc.CallOption) (*GetAddressesResponse, error) {
+	out := new(GetAddressesResponse)
+	err := c.cc.Invoke(ctx, "/onboarding.OnBoardingService/GetAddressesByText", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // OnBoardingServiceServer is the server API for OnBoardingService service.
 type OnBoardingServiceServer interface {
 	CreatePhone(context.Context, *CreatePhoneRequest) (*CreatePhoneResponse, error)
@@ -2510,6 +2860,7 @@ type OnBoardingServiceServer interface {
 	FetchReasons(context.Context, *EmptyRequest) (*ReasonResponse, error)
 	AcceptTermsAndConditions(context.Context, *TermsAndConditionsRequest) (*SuccessResponse, error)
 	UpdateFirebaseToken(context.Context, *UpdateFirebaseTokenRequest) (*SuccessResponse, error)
+	GetAddressesByText(context.Context, *GetAddressesRequest) (*GetAddressesResponse, error)
 }
 
 // UnimplementedOnBoardingServiceServer can be embedded to have forward compatible implementations.
@@ -2563,6 +2914,9 @@ func (*UnimplementedOnBoardingServiceServer) AcceptTermsAndConditions(context.Co
 }
 func (*UnimplementedOnBoardingServiceServer) UpdateFirebaseToken(context.Context, *UpdateFirebaseTokenRequest) (*SuccessResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateFirebaseToken not implemented")
+}
+func (*UnimplementedOnBoardingServiceServer) GetAddressesByText(context.Context, *GetAddressesRequest) (*GetAddressesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAddressesByText not implemented")
 }
 
 func RegisterOnBoardingServiceServer(s *grpc.Server, srv OnBoardingServiceServer) {
@@ -2857,6 +3211,24 @@ func _OnBoardingService_UpdateFirebaseToken_Handler(srv interface{}, ctx context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _OnBoardingService_GetAddressesByText_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAddressesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OnBoardingServiceServer).GetAddressesByText(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/onboarding.OnBoardingService/GetAddressesByText",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OnBoardingServiceServer).GetAddressesByText(ctx, req.(*GetAddressesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _OnBoardingService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "onboarding.OnBoardingService",
 	HandlerType: (*OnBoardingServiceServer)(nil),
@@ -2924,6 +3296,10 @@ var _OnBoardingService_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateFirebaseToken",
 			Handler:    _OnBoardingService_UpdateFirebaseToken_Handler,
+		},
+		{
+			MethodName: "GetAddressesByText",
+			Handler:    _OnBoardingService_GetAddressesByText_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

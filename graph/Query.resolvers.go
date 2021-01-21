@@ -199,6 +199,39 @@ func (r *queryResolver) SupportedCurrencies(ctx context.Context) ([]*types.Count
 	return countries, nil
 }
 
+func (r *queryResolver) GetAddressesByText(ctx context.Context, text string) (*types.FetchAddressesResponse, error) {
+	resp, err := r.onBoardingService.GetAddressesByText(ctx, &onboardingService.GetAddressesRequest{Text: text})
+	if err != nil {
+		return nil, err
+	}
+
+	fetchAddressRes := &types.FetchAddressesResponse{}
+	addresses := make([]*types.AddressResult, 0)
+	for _, c := range resp.Addresses {
+		addresses = append(addresses, &types.AddressResult{
+			Addressline1:      c.Addressline1,
+			Addressline2:      c.Addressline2,
+			Summaryline:       c.Summaryline,
+			Organisation:      c.Organisation,
+			Buildingname:      c.Buildingname,
+			Premise:           c.Premise,
+			Street:            c.Street,
+			Dependentlocality: c.Dependentlocality,
+			Posttown:          c.Posttown,
+			County:            c.County,
+			Postcode:          c.Postcode,
+			Latitude:          c.Latitude,
+			Longitude:         c.Longitude,
+			Grideasting:       c.Grideasting,
+			Gridnorthing:      c.Gridnorthing,
+		})
+
+	}
+
+	fetchAddressRes.Addresses = addresses
+	return fetchAddressRes, nil
+}
+
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 

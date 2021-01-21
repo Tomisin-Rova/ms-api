@@ -6,4 +6,5 @@ type Query {
   accounts: AccountsResult!
   getPayeesByPhoneNumbers(phone: [String!]!): GetPayeesByPhoneNumbers
   supportedCurrencies: [Country!]!
+  getAddressesByText(text: String!): fetchAddressesResponse
 }
