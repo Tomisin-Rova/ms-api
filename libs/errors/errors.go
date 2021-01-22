@@ -35,11 +35,8 @@ func NewFromGrpc(err error) error {
 
 // FormatGqlTError formats the error given to a GQL error
 func FormatGqlTError(err error, gqlErr *gqlerror.Error) *gqlerror.Error {
-	st, ok := status.FromError(err)
-	var errString = err.Error()
-	if ok {
-		errString = st.Message()
-	}
+	st, _ := status.FromError(err)
+	errString := st.Message()
 
 	// Get Terror instance
 	terror, err := coreError.NewTerrorFromJSONString(errString)
