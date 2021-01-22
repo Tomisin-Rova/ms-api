@@ -4,6 +4,8 @@ import (
 	coreError "github.com/roava/zebra/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 	"google.golang.org/grpc/status"
+	"log"
+	"strings"
 )
 
 // NewFromGrpc returns a formatted Roava Terror
@@ -35,11 +37,15 @@ func NewFromGrpc(err error) error {
 
 // FormatGqlTError formats the error given to a GQL error
 func FormatGqlTError(err error, gqlErr *gqlerror.Error) *gqlerror.Error {
-	st, _ := status.FromError(err)
-	errString := st.Message()
+	errStr := err.Error()
+	idx := strings.Index(errStr, "{")
+	message := errStr
+	if idx != -1 {
+		message = strings.TrimSpace(errStr[idx:])
+	}
 
-	// Get Terror instance
-	terror, err := coreError.NewTerrorFromJSONString(errString)
+	log.Println("extracted message => ", message)
+	terror, err := coreError.NewTerrorFromJSONString(message)
 	if err != nil {
 		gqlErr.Message = err.Error()
 		return gqlErr
