@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/roava/zebra/models"
 	"go.uber.org/zap"
 	"ms.api/protos/pb/authService"
 	"net/http"
@@ -31,22 +32,22 @@ func NewAuthMiddleware(service authService.AuthServiceClient, logger *zap.Logger
 	return &AuthMiddleware{authService: service, logger: logger}
 }
 
-func (mw *AuthMiddleware) ValidateToken(token string) (string, error) {
+func (mw *AuthMiddleware) ValidateToken(token string) (*authService.ValidateTokenResponse, error) {
 	resp, err := mw.authService.ValidateToken(context.Background(),
 		&authService.ValidateTokenRequest{Token: token})
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return resp.PersonId, nil
+	return resp, nil
 }
 
 // TODO: here user should be the direct type of protos.Person from the auth or person service.
-func GetAuthenticatedUser(ctx context.Context) (string, error) {
-	personId, ok := ctx.Value(AuthenticatedUserContextKey).(string)
+func GetAuthenticatedUser(ctx context.Context) (*models.Claims, error) {
+	claims, ok := ctx.Value(AuthenticatedUserContextKey).(models.Claims)
 	if !ok {
-		return "", errors.New("unable to parse authenticated user")
+		return nil, errors.New("unable to parse authenticated user")
 	}
-	return personId, nil
+	return &claims, nil
 }
 
 func (mw *AuthMiddleware) Middeware(next http.Handler) http.Handler {
@@ -69,7 +70,7 @@ func (mw *AuthMiddleware) Middeware(next http.Handler) http.Handler {
 			return
 		}
 
-		personId, err := mw.ValidateToken(token)
+		resp, err := mw.ValidateToken(token)
 		if err != nil {
 			mw.logger.Info(fmt.Sprintf("failed to validate token: %v", err),
 				zap.String("token", token),
@@ -78,7 +79,11 @@ func (mw *AuthMiddleware) Middeware(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), AuthenticatedUserContextKey, personId)
+		ctx := context.WithValue(r.Context(), AuthenticatedUserContextKey, models.Claims{
+			PersonId:   resp.PersonId,
+			IdentityId: resp.IdentityId,
+			DeviceId:   resp.DeviceId,
+		})
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

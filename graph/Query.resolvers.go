@@ -10,6 +10,7 @@ import (
 	"github.com/jinzhu/copier"
 	"go.uber.org/zap"
 	"ms.api/graph/generated"
+	emailvalidator "ms.api/libs/validator/email"
 	"ms.api/protos/pb/authService"
 	"ms.api/protos/pb/cddService"
 	"ms.api/protos/pb/onboardingService"
@@ -20,11 +21,11 @@ import (
 )
 
 func (r *queryResolver) GetCDDReportSummary(ctx context.Context) (*types.CDDSummary, error) {
-	personId, err := middlewares.GetAuthenticatedUser(ctx)
+	claims, err := middlewares.GetAuthenticatedUser(ctx)
 	if err != nil {
 		return nil, ErrUnAuthenticated
 	}
-	resp, err := r.cddService.GetCDDSummaryReport(ctx, &cddService.PersonIdRequest{PersonId: personId})
+	resp, err := r.cddService.GetCDDSummaryReport(ctx, &cddService.PersonIdRequest{PersonId: claims.PersonId})
 	if err != nil {
 		return nil, err
 	}
@@ -46,11 +47,15 @@ func (r *queryResolver) GetCDDReportSummary(ctx context.Context) (*types.CDDSumm
 }
 
 func (r *queryResolver) Me(ctx context.Context) (*types.Person, error) {
-	personId, err := middlewares.GetAuthenticatedUser(ctx)
+	claims, err := middlewares.GetAuthenticatedUser(ctx)
 	if err != nil {
 		return nil, ErrUnAuthenticated
 	}
-	person, err := r.authService.GetPersonById(ctx, &authService.GetPersonByIdRequest{PersonId: personId})
+	person, err := r.authService.GetPerson(ctx, &authService.GetPersonRequest{
+		PersonId:   claims.PersonId,
+		IdentityId: claims.IdentityId,
+		DeviceId:   claims.DeviceId,
+	})
 	if err != nil {
 		r.logger.Error("failed to get person", zap.Error(err))
 		return nil, err
@@ -112,12 +117,12 @@ func (r *queryResolver) Reasons(ctx context.Context) (*types.FetchReasonResponse
 }
 
 func (r *queryResolver) Accounts(ctx context.Context) (*types.AccountsResult, error) {
-	personId, err := middlewares.GetAuthenticatedUser(ctx)
+	claims, err := middlewares.GetAuthenticatedUser(ctx)
 	if err != nil {
 		return nil, ErrUnAuthenticated
 	}
 	resp, err := r.productService.GetAccounts(ctx, &productService.GetAccountRequest{
-		PersonId: personId,
+		PersonId: claims.PersonId,
 	})
 	if err != nil {
 		r.logger.Error("failed to get accounts from product service", zap.Error(err))
@@ -230,6 +235,18 @@ func (r *queryResolver) GetAddressesByText(ctx context.Context, text string) (*t
 
 	fetchAddressRes.Addresses = addresses
 	return fetchAddressRes, nil
+}
+
+func (r *queryResolver) CheckEmail(ctx context.Context, email string) (*bool, error) {
+	if err := emailvalidator.Validate(email); err != nil {
+		return nil, err
+	}
+	resp, err := r.onBoardingService.CheckEmailExistence(ctx, &onboardingService.CheckEmailExistenceRequest{Email: email})
+	if err != nil {
+		r.logger.Info("onboardingService.checkEmailExistence() failed", zap.Error(err))
+		return nil, err
+	}
+	return &resp.Exists, nil
 }
 
 // Query returns generated.QueryResolver implementation.

@@ -29,14 +29,20 @@ func TestAuthMiddleware_Middeware_InvalidJWT(t *testing.T) {
 }
 
 func TestAuthMiddleware_Middeware_Success(t *testing.T) {
-	authClient := fakes.NewFakeAuthClient(&authService.ValidateTokenResponse{PersonId: "personId"},
+	authClient := fakes.NewFakeAuthClient(&authService.ValidateTokenResponse{
+		PersonId:   "personId",
+		IdentityId: "identityId",
+		DeviceId:   "deviceId",
+	},
 		nil, nil, nil)
 	mw := NewAuthMiddleware(authClient, logger.New())
 
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		personId, err := GetAuthenticatedUser(r.Context())
+		claims, err := GetAuthenticatedUser(r.Context())
 		assert.Nil(t, err)
-		assert.Equal(t, personId, "personId")
+		assert.Equal(t, "personId", claims.PersonId)
+		assert.Equal(t, "identityId", claims.IdentityId)
+		assert.Equal(t, "deviceId", claims.DeviceId)
 	}
 	handler := mw.Middeware(http.HandlerFunc(fn))
 	w := httptest.NewRecorder()

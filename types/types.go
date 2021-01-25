@@ -2,6 +2,10 @@
 
 package types
 
+type GraphQLResponse interface {
+	IsGraphQLResponse()
+}
+
 type Account struct {
 	Currency       string `json:"currency"`
 	CurrencySymbol string `json:"currencySymbol"`
@@ -39,19 +43,39 @@ type AddressResult struct {
 }
 
 type APIPerson struct {
-	FirstName               string `json:"firstName"`
-	LastName                string `json:"lastName"`
-	Email                   string `json:"email"`
-	IsEmailActive           bool   `json:"isEmailActive"`
-	IsBiometricLoginEnabled bool   `json:"isBiometricLoginEnabled"`
-	IsTransactionPinEnabled bool   `json:"isTransactionPinEnabled"`
-	RegistrationCheckPoint  string `json:"registrationCheckPoint"`
+	FirstName               string   `json:"firstName"`
+	LastName                string   `json:"lastName"`
+	Email                   []*Email `json:"email"`
+	IsEmailActive           bool     `json:"isEmailActive"`
+	IsBiometricLoginEnabled bool     `json:"isBiometricLoginEnabled"`
+	IsTransactionPinEnabled bool     `json:"isTransactionPinEnabled"`
+	RegistrationCheckPoint  string   `json:"registrationCheckPoint"`
 }
+
+type AuthInput struct {
+	Email    string       `json:"email"`
+	Passcode string       `json:"passcode"`
+	Device   *DeviceInput `json:"device"`
+}
+
+type AuthResponse struct {
+	Message string      `json:"message"`
+	Success bool        `json:"success"`
+	Code    *int64      `json:"code"`
+	Tokens  *AuthTokens `json:"tokens"`
+}
+
+func (AuthResponse) IsGraphQLResponse() {}
 
 type AuthResult struct {
 	Token        string     `json:"token"`
 	RefreshToken string     `json:"refreshToken"`
 	Person       *APIPerson `json:"person"`
+}
+
+type AuthTokens struct {
+	Jwt     string `json:"jwt"`
+	Refresh string `json:"refresh"`
 }
 
 type AuthenticateCustomerInput struct {
@@ -166,6 +190,22 @@ type Device struct {
 	DeviceToken string `json:"deviceToken"`
 }
 
+type DeviceInput struct {
+	Identifier string            `json:"identifier"`
+	Brand      string            `json:"brand"`
+	Os         string            `json:"os"`
+	Tokens     *DeviceTokenInput `json:"tokens"`
+}
+
+type DeviceTokenInput struct {
+	Firebase string `json:"firebase"`
+}
+
+type Email struct {
+	Value    string `json:"Value"`
+	Verified bool   `json:"Verified"`
+}
+
 type GetPayeesByPhoneNumbers struct {
 	Payees []*Payee `json:"payees"`
 }
@@ -230,6 +270,15 @@ type Reason struct {
 	ID          string `json:"Id"`
 	Description string `json:"Description"`
 }
+
+type Response struct {
+	Message string  `json:"message"`
+	Success bool    `json:"success"`
+	Code    *int64  `json:"code"`
+	Token   *string `json:"token"`
+}
+
+func (Response) IsGraphQLResponse() {}
 
 type Result struct {
 	Success bool   `json:"success"`

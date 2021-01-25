@@ -78,7 +78,7 @@ func (r *mutationResolver) ConfirmPasscodeResetOtp(ctx context.Context, email st
 }
 
 func (r *mutationResolver) UpdatePersonBiodata(ctx context.Context, input *types.UpdateBioDataInput) (*types.Result, error) {
-	personId, err := middlewares.GetAuthenticatedUser(ctx)
+	claims, err := middlewares.GetAuthenticatedUser(ctx)
 	if err != nil {
 		return nil, ErrUnAuthenticated
 	}
@@ -93,7 +93,7 @@ func (r *mutationResolver) UpdatePersonBiodata(ctx context.Context, input *types
 	}
 
 	payload := onboardingService.UpdatePersonRequest{
-		PersonId: personId,
+		PersonId: claims.PersonId,
 		Address: &onboardingService.Address{
 			Postcode: input.Address.Postcode, Street: input.Address.Street,
 			City: input.Address.City, Country: input.Address.Country,
@@ -113,7 +113,7 @@ func (r *mutationResolver) UpdatePersonBiodata(ctx context.Context, input *types
 }
 
 func (r *mutationResolver) AddReasonsForUsingRoava(ctx context.Context, reasonValues []*string) (*types.Result, error) {
-	personId, err := middlewares.GetAuthenticatedUser(ctx)
+	claims, err := middlewares.GetAuthenticatedUser(ctx)
 	if err != nil {
 		return nil, ErrUnAuthenticated
 	}
@@ -122,7 +122,7 @@ func (r *mutationResolver) AddReasonsForUsingRoava(ctx context.Context, reasonVa
 		reasons = append(reasons, *reason)
 	}
 	payload := onboardingService.RoavaReasonsRequest{
-		PersonId: personId,
+		PersonId: claims.PersonId,
 		Reasons:  reasons,
 	}
 	res, err := r.onBoardingService.AddReasonsForUsingRoava(context.Background(), &payload)
@@ -135,26 +135,26 @@ func (r *mutationResolver) AddReasonsForUsingRoava(ctx context.Context, reasonVa
 	}, nil
 }
 
-func (r *mutationResolver) CreatePhone(ctx context.Context, input types.CreatePhoneInput) (*types.CreatePhoneResult, error) {
-	if err := phonenumbervalidator.ValidatePhoneNumber(input.Phone); err != nil {
+func (r *mutationResolver) CreatePhone(ctx context.Context, phone string, device types.DeviceInput) (*types.Response, error) {
+	if err := phonenumbervalidator.ValidatePhoneNumber(phone); err != nil {
 		r.logger.Error("failed to validate phone number",
 			zap.Error(err),
-			zap.String("phone", input.Phone),
+			zap.String("phone", phone),
 		)
 		return nil, err
 	}
 	result, err := r.onBoardingService.CreatePhone(ctx,
-		&onboardingService.CreatePhoneRequest{PhoneNumber: input.Phone,
-			Device: &onboardingService.Device{Os: input.Device.Os, Brand: input.Device.Brand,
-				DeviceId: input.Device.ID, DeviceToken: input.Device.DeviceToken}})
+		&onboardingService.CreatePhoneRequest{PhoneNumber: phone,
+			Device: &onboardingService.Device{Os: device.Os, Brand: device.Brand,
+				DeviceId: device.Identifier, DeviceToken: device.Tokens.Firebase}})
 	if err != nil {
 		r.logger.Info(fmt.Sprintf("OnBoardingService.createPhone() failed: %v", err))
 		return nil, err
 	}
-	return &types.CreatePhoneResult{Message: result.Message, Success: true, Token: result.Token}, nil
+	return &types.Response{Message: result.Message, Success: true, Token: &result.Token}, nil
 }
 
-func (r *mutationResolver) VerifyOtp(ctx context.Context, token string, code string) (*types.Result, error) {
+func (r *mutationResolver) ConfirmPhone(ctx context.Context, token string, code string) (*types.Response, error) {
 	resp, err := r.onBoardingService.VerifySmsOtp(context.Background(), &onboardingService.OtpVerificationRequest{
 		Token: token, Code: code,
 	})
@@ -162,74 +162,109 @@ func (r *mutationResolver) VerifyOtp(ctx context.Context, token string, code str
 		r.logger.Info(fmt.Sprintf("onboardingService.verifySmsOtp() failed: %v", err))
 		return nil, err
 	}
-	return &types.Result{Success: resp.Match, Message: resp.Message}, nil
+	return &types.Response{Success: resp.Match, Message: resp.Message}, nil
 }
 
-func (r *mutationResolver) CreatePerson(ctx context.Context, input *types.CreatePersonInput) (*types.AuthResult, error) {
-	if err := emailvalidator.Validate(input.Email); err != nil {
+func (r *mutationResolver) Signup(ctx context.Context, token string, email string, passcode string) (*types.AuthResponse, error) {
+	if err := emailvalidator.Validate(email); err != nil {
 		return nil, err
 	}
 
 	result, err := r.onBoardingService.CreatePerson(ctx, &onboardingService.CreatePersonRequest{
-		Email:    input.Email,
-		Passcode: input.Passcode,
-		Token:    input.Token,
+		Email:    email,
+		Passcode: passcode,
+		Token:    token,
 	})
 	if err != nil {
 		r.logger.Error("error calling onboardingService.CreatePerson.", zap.Error(err))
 		return nil, err
 	}
 
-	return &types.AuthResult{
-		Token:        result.JwtToken,
-		RefreshToken: result.RefreshToken,
-		Person: &types.APIPerson{
-			Email:                   input.Email,
-			IsEmailActive:           false,
-			IsBiometricLoginEnabled: false,
-			IsTransactionPinEnabled: false,
+	return &types.AuthResponse{
+		Message: "successful",
+		Success: true,
+		Tokens: &types.AuthTokens{
+			Jwt:     result.JwtToken,
+			Refresh: result.RefreshToken,
 		},
 	}, nil
 }
 
-func (r *mutationResolver) AuthenticateCustomer(ctx context.Context, input *types.AuthenticateCustomerInput) (*types.AuthResult, error) {
-	if err := emailvalidator.Validate(input.Email); err != nil {
-		r.logger.Info("invalid email supplied", zap.String("email", input.Email))
+func (r *mutationResolver) Login(ctx context.Context, credentials types.AuthInput, biometric *bool) (*types.AuthResponse, error) {
+	if err := emailvalidator.Validate(credentials.Email); err != nil {
+		r.logger.Info("invalid email supplied", zap.String("email", credentials.Email))
 		return nil, err
 	}
-	req := &authService.LoginRequest{Email: input.Email, Passcode: input.Passcode, Device: &authService.Device{
-		Os:          input.Device.Os,
-		Brand:       input.Device.Brand,
-		DeviceToken: input.Device.DeviceToken,
-		DeviceId:    input.Device.ID,
-	}}
+	bio := biometric != nil && *biometric
+	req := &authService.LoginRequest{
+		Email:     credentials.Email,
+		Passcode:  credentials.Passcode,
+		Biometric: bio,
+		Device: &authService.Device{
+			Os:          credentials.Device.Os,
+			Brand:       credentials.Device.Brand,
+			DeviceToken: credentials.Device.Tokens.Firebase,
+			DeviceId:    credentials.Device.Identifier,
+		}}
 	resp, err := r.authService.Login(ctx, req)
 	if err != nil {
 		r.logger.Info(fmt.Sprintf("authService.Login() failed: %v", err))
 		return nil, err
 	}
-	return &types.AuthResult{
-		Token: resp.AccessToken, RefreshToken: resp.RefreshToken,
-		Person: &types.APIPerson{
-			FirstName:               resp.Person.FirstName,
-			LastName:                resp.Person.LastName,
-			Email:                   resp.Person.Email,
-			IsEmailActive:           resp.Person.IsEmailActive,
-			IsBiometricLoginEnabled: resp.Person.IsBiometricLoginEnabled,
-			IsTransactionPinEnabled: resp.Person.IsTransactionPinEnabled,
-			RegistrationCheckPoint:  resp.Person.RegistrationCheckPoint,
+	return &types.AuthResponse{
+		Message: "Successful!",
+		Success: true,
+		Tokens: &types.AuthTokens{
+			Jwt:     resp.AccessToken,
+			Refresh: resp.RefreshToken,
 		},
 	}, nil
 }
 
-func (r *mutationResolver) RefreshToken(ctx context.Context, refreshToken string) (*types.AuthResult, error) {
-	req := &authService.RefreshTokenRequest{RefreshToken: refreshToken}
+func (r *mutationResolver) RefreshToken(ctx context.Context, token string) (*types.AuthResponse, error) {
+	req := &authService.RefreshTokenRequest{RefreshToken: token}
 	resp, err := r.authService.RefreshToken(ctx, req)
 	if err != nil {
 		r.logger.Info(fmt.Sprintf("authService.RefreshToken() failed: %v", err))
 		return nil, err
 	}
-	return &types.AuthResult{Token: resp.Token, RefreshToken: resp.RefreshToken, Person: &types.APIPerson{}}, nil
+	return &types.AuthResponse{
+		Message: "Successful!",
+		Success: true,
+		Tokens: &types.AuthTokens{
+			Jwt:     resp.Token,
+			Refresh: resp.RefreshToken,
+		},
+	}, nil
+}
+
+func (r *mutationResolver) SetBiometricAuth(ctx context.Context, activate *bool) (*types.Response, error) {
+	claims, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+	setActive := activate != nil && *activate
+	if setActive {
+		resp, err := r.authService.ActivateBioLogin(ctx, &authService.ActivateBioLoginRequest{
+			IdentityId: claims.IdentityId,
+			DeviceId:   claims.DeviceId,
+		})
+		if err != nil {
+			r.logger.Info("authService.ActivateBioLogin() failed", zap.Error(err))
+			return nil, err
+		}
+		return &types.Response{Message: resp.Message, Success: true, Token: &resp.BiometricPasscode}, nil
+	} else {
+		resp, err := r.authService.ActivateBioLogin(ctx, &authService.ActivateBioLoginRequest{
+			IdentityId: claims.IdentityId,
+			DeviceId:   claims.DeviceId,
+		})
+		if err != nil {
+			r.logger.Info("authService.ActivateBioLogin() failed", zap.Error(err))
+			return nil, err
+		}
+		return &types.Response{Message: resp.Message, Success: true, Token: &resp.BiometricPasscode}, nil
+	}
 }
 
 func (r *mutationResolver) ResendOtp(ctx context.Context, phone string) (*types.Result, error) {
@@ -243,89 +278,6 @@ func (r *mutationResolver) ResendOtp(ctx context.Context, phone string) (*types.
 		return nil, err
 	}
 	return &types.Result{Message: resp.Message, Success: true}, nil
-}
-
-func (r *mutationResolver) CheckEmailExistence(ctx context.Context, email string) (*types.CheckEmailExistenceResult, error) {
-	if err := emailvalidator.Validate(email); err != nil {
-		return nil, err
-	}
-	resp, err := r.onBoardingService.CheckEmailExistence(ctx, &onboardingService.CheckEmailExistenceRequest{Email: email})
-	if err != nil {
-		r.logger.Info("onboardingService.checkEmailExistence() failed", zap.Error(err))
-		return nil, err
-	}
-	return &types.CheckEmailExistenceResult{Message: resp.Message, Exists: resp.Exists}, nil
-}
-
-func (r *mutationResolver) ActivateBioLogin(ctx context.Context, deviceID string) (*types.ActivateBioLoginResponse, error) {
-	personId, err := middlewares.GetAuthenticatedUser(ctx)
-	if err != nil {
-		return nil, ErrUnAuthenticated
-	}
-	resp, err := r.authService.ActivateBioLogin(ctx, &authService.ActivateBioLoginRequest{
-		PersonId: personId,
-		DeviceId: deviceID,
-	})
-
-	if err != nil {
-		r.logger.Info("authService.ActivateBioLogin() failed", zap.Error(err))
-		return nil, err
-	}
-
-	return &types.ActivateBioLoginResponse{BiometricPasscode: resp.BiometricPasscode, Message: resp.Message}, nil
-}
-
-func (r *mutationResolver) BioLoginRequest(ctx context.Context, input types.BioLoginInput) (*types.AuthResult, error) {
-	if err := emailvalidator.Validate(input.Email); err != nil {
-		return nil, err
-	}
-	resp, err := r.authService.BioLogin(ctx, &authService.BioLoginRequest{
-		Email:             input.Email,
-		BiometricPasscode: input.BiometricPasscode,
-		Device: &authService.Device{
-			Os:          input.Device.Os,
-			Brand:       input.Device.Brand,
-			DeviceToken: input.Device.DeviceToken,
-			DeviceId:    input.Device.ID,
-		},
-	})
-
-	if err != nil {
-		r.logger.Info("authService.BioLogin() failed", zap.Error(err))
-		return nil, err
-	}
-
-	return &types.AuthResult{
-		Token:        resp.AccessToken,
-		RefreshToken: resp.RefreshToken,
-		Person: &types.APIPerson{
-			FirstName:               resp.Person.FirstName,
-			LastName:                resp.Person.LastName,
-			Email:                   resp.Person.Email,
-			IsEmailActive:           resp.Person.IsEmailActive,
-			IsBiometricLoginEnabled: resp.Person.IsBiometricLoginEnabled,
-			IsTransactionPinEnabled: resp.Person.IsTransactionPinEnabled,
-			RegistrationCheckPoint:  resp.Person.RegistrationCheckPoint,
-		},
-	}, nil
-}
-
-func (r *mutationResolver) DeactivateBioLogin(ctx context.Context, input types.DeactivateBioLoginInput) (*types.Result, error) {
-	if err := emailvalidator.Validate(input.Email); err != nil {
-		return nil, err
-	}
-	resp, err := r.authService.DeactivateBioLogin(ctx, &authService.DeactivateBioLoginRequest{
-		Email:    input.Email,
-		DeviceId: input.DeviceID,
-	})
-	if err != nil {
-		r.logger.Info("authService.DeactivateBioLogin() failed", zap.Error(err))
-		return nil, err
-	}
-
-	return &types.Result{
-		Message: resp.Message,
-	}, nil
 }
 
 func (r *mutationResolver) VerifyEmail(ctx context.Context, email string, token string) (*types.Result, error) {
@@ -366,12 +318,12 @@ func (r *mutationResolver) ResendEmailMagicLInk(ctx context.Context, email strin
 }
 
 func (r *mutationResolver) SubmitApplication(ctx context.Context) (*types.Result, error) {
-	personId, err := middlewares.GetAuthenticatedUser(ctx)
+	claims, err := middlewares.GetAuthenticatedUser(ctx)
 	if err != nil {
 		return nil, ErrUnAuthenticated
 	}
 	resp, err := r.onBoardingService.SubmitCheck(ctx, &onboardingService.SubmitCheckRequest{
-		PersonId: personId,
+		PersonId: claims.PersonId,
 	})
 	if err != nil {
 		r.logger.Error("submitCheck() failed", zap.Error(err))
@@ -381,12 +333,12 @@ func (r *mutationResolver) SubmitApplication(ctx context.Context) (*types.Result
 }
 
 func (r *mutationResolver) AcceptTermsAndConditions(ctx context.Context) (*types.Result, error) {
-	personId, err := middlewares.GetAuthenticatedUser(ctx)
+	claims, err := middlewares.GetAuthenticatedUser(ctx)
 	if err != nil {
 		return nil, ErrUnAuthenticated
 	}
 	resp, err := r.onBoardingService.AcceptTermsAndConditions(ctx, &onboardingService.TermsAndConditionsRequest{
-		PersonId: personId,
+		PersonId: claims.PersonId,
 	})
 	if err != nil {
 		r.logger.Error("AcceptTermsAndConditions() failed", zap.Error(err))
@@ -396,12 +348,12 @@ func (r *mutationResolver) AcceptTermsAndConditions(ctx context.Context) (*types
 }
 
 func (r *mutationResolver) CreateApplication(ctx context.Context) (*types.CreateApplicationResponse, error) {
-	personId, err := middlewares.GetAuthenticatedUser(ctx)
+	claims, err := middlewares.GetAuthenticatedUser(ctx)
 	if err != nil {
 		return nil, ErrUnAuthenticated
 	}
 	resp, err := r.onBoardingService.CreateApplication(ctx,
-		&onboardingService.CreateApplicationRequest{PersonId: personId})
+		&onboardingService.CreateApplicationRequest{PersonId: claims.PersonId})
 	if err != nil {
 		r.logger.Error("onBoardingService.createApplication() failed", zap.Error(err))
 		return nil, err
@@ -410,12 +362,12 @@ func (r *mutationResolver) CreateApplication(ctx context.Context) (*types.Create
 }
 
 func (r *mutationResolver) CreateCurrencyAccount(ctx context.Context, currencyCode string) (*types.Result, error) {
-	personId, err := middlewares.GetAuthenticatedUser(ctx)
+	claims, err := middlewares.GetAuthenticatedUser(ctx)
 	if err != nil {
 		return nil, ErrUnAuthenticated
 	}
 	resp, err := r.productService.CreateAccount(ctx, &productService.CreateAccountRequest{
-		PersonId: personId,
+		PersonId: claims.PersonId,
 		Currency: currencyCode,
 	})
 	if err != nil {
@@ -426,12 +378,12 @@ func (r *mutationResolver) CreateCurrencyAccount(ctx context.Context, currencyCo
 }
 
 func (r *mutationResolver) UpdateFirebaseToken(ctx context.Context, token string) (*types.Result, error) {
-	personId, err := middlewares.GetAuthenticatedUser(ctx)
+	claims, err := middlewares.GetAuthenticatedUser(ctx)
 	if err != nil {
 		return nil, ErrUnAuthenticated
 	}
 	resp, err := r.onBoardingService.UpdateFirebaseToken(ctx,
-		&onboardingService.UpdateFirebaseTokenRequest{PersonId: personId, Token: token})
+		&onboardingService.UpdateFirebaseTokenRequest{PersonId: claims.PersonId, Token: token})
 	if err != nil {
 		r.logger.Error("onBoardingService.UpdateFirebaseToken() failed", zap.Error(err))
 		return nil, err
@@ -440,7 +392,7 @@ func (r *mutationResolver) UpdateFirebaseToken(ctx context.Context, token string
 }
 
 func (r *mutationResolver) CreateTransactionPin(ctx context.Context, pin string) (*types.Result, error) {
-	personId, err := middlewares.GetAuthenticatedUser(ctx)
+	claims, err := middlewares.GetAuthenticatedUser(ctx)
 	if err != nil {
 		return nil, ErrUnAuthenticated
 	}
@@ -449,7 +401,7 @@ func (r *mutationResolver) CreateTransactionPin(ctx context.Context, pin string)
 		return nil, errors.New("he transaction pin has to contain only 4 digits")
 	}
 	resp, err := r.personService.CreateTransactionPin(ctx,
-		&personService.CreateTransactionPinRequest{PersonId: personId, Pin: pin})
+		&personService.CreateTransactionPinRequest{PersonId: claims.PersonId, Pin: pin})
 	if err != nil {
 		r.logger.Error("personService.CreateTransactionPin() failed", zap.Error(err))
 		return nil, err
@@ -458,7 +410,7 @@ func (r *mutationResolver) CreateTransactionPin(ctx context.Context, pin string)
 }
 
 func (r *mutationResolver) MakeTransfer(ctx context.Context, input *types.MakeTransferInput) (*types.Result, error) {
-	personId, err := middlewares.GetAuthenticatedUser(ctx)
+	claims, err := middlewares.GetAuthenticatedUser(ctx)
 	if err != nil {
 		return nil, ErrUnAuthenticated
 	}
@@ -476,7 +428,7 @@ func (r *mutationResolver) MakeTransfer(ctx context.Context, input *types.MakeTr
 		BeneficiaryAccountNumber: input.ToAccountNumber,
 		Amount:                   input.Amount,
 		Notes:                    input.Notes,
-		PersonId:                 personId,
+		PersonId:                 claims.PersonId,
 		TransactionPin:           input.TransactionPin,
 	})
 	if err != nil {
@@ -487,12 +439,12 @@ func (r *mutationResolver) MakeTransfer(ctx context.Context, input *types.MakeTr
 }
 
 func (r *mutationResolver) CreatePayee(ctx context.Context, input types.CreatePayeeInput) (*types.CreatePayeeResult, error) {
-	personId, err := middlewares.GetAuthenticatedUser(ctx)
+	claims, err := middlewares.GetAuthenticatedUser(ctx)
 	if err != nil {
 		return nil, ErrUnAuthenticated
 	}
 	req := &payeeService.CreatePayeeRequest{
-		PersonId:       personId,
+		PersonId:       claims.PersonId,
 		TransactionPin: input.TransactionPin,
 		Name:           input.Name,
 		Country:        input.Country,

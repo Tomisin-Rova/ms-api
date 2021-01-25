@@ -20,16 +20,21 @@ type Mutation {
         reasonValues: [String]
     ) : Result
 
-    createPhone(input: CreatePhoneInput!): CreatePhoneResult
-    verifyOtp(token: String!, code: String!): Result
-    createPerson(input: CreatePersonInput): AuthResult
-    authenticateCustomer(input: AuthenticateCustomerInput): AuthResult
-    refreshToken(refreshToken: String!): AuthResult
+    # onboarding
+    createPhone(phone: String!, device: DeviceInput!): Response!
+    confirmPhone(token: String!, code: String!): Response!
+    """
+    Creates person's ROAVA login credentials (email, login)
+    """
+    signup(token: String!, email: String!, passcode: String!): AuthResponse!
+
+#    createPhone(input: CreatePhoneInput!): CreatePhoneResult
+#    verifyOtp(token: String!, code: String!): Result
+#    createPerson(input: CreatePersonInput): AuthResult
+    login(credentials: AuthInput!, biometric: Boolean): AuthResponse!
+    refreshToken(token: String!): AuthResponse!
+    setBiometricAuth(activate: Boolean): Response!
     resendOtp(phone: String!): Result
-    checkEmailExistence(email: String!): CheckEmailExistenceResult
-    activateBioLogin(deviceId: String!): ActivateBioLoginResponse
-    bioLoginRequest(input: BioLoginInput!): AuthResult
-    deactivateBioLogin(input: DeactivateBioLoginInput!): Result
     verifyEmail(email: String!, token: String!): Result
     resendEmailMagicLInk(email: String!): Result
     submitApplication: Result
@@ -40,4 +45,52 @@ type Mutation {
     createTransactionPin(pin: String!): Result
     makeTransfer(input: MakeTransferInput): Result
     createPayee(input: CreatePayeeInput!): CreatePayeeResult
+}
+
+
+# I N T E R F A C E S
+
+# API response interface
+interface GraphQLResponse {
+    message: String
+    success: Boolean
+    code: Int
+}
+
+# T Y P E S
+
+type Response implements GraphQLResponse {
+    message: String!
+    success: Boolean!
+    code: Int
+    token: String
+}
+
+input AuthInput {
+    email: String!
+    passcode: String!
+    device: DeviceInput
+}
+
+input DeviceInput {
+    identifier: String!
+    brand: String!
+    os: String!
+    tokens: DeviceTokenInput!
+}
+
+input DeviceTokenInput {
+    firebase: String!
+}
+
+type AuthResponse implements GraphQLResponse {
+    message: String!
+    success: Boolean!
+    code: Int
+    tokens: AuthTokens!
+}
+
+type AuthTokens {
+    jwt: String!
+    refresh: String!
 }

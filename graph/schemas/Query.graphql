@@ -7,4 +7,5 @@ type Query {
   getPayeesByPhoneNumbers(phone: [String!]!): GetPayeesByPhoneNumbers
   supportedCurrencies: [Country!]!
   getAddressesByText(text: String!): fetchAddressesResponse
+  checkEmail(email: String!): Boolean
 }
