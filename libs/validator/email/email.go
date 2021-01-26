@@ -1,12 +1,14 @@
 package emailvalidator
 
 import (
-	"errors"
+	errors2 "github.com/roava/zebra/errors"
 	"regexp"
 	"strings"
 )
 
-var ErrInvalidEmail = errors.New("invalid email address")
+var ErrInvalidEmail = errors2.NewTerror(
+	1100, "InvalidEmailError", "invalid email address", "invalid email address",
+	)
 var userRegexp = regexp.MustCompile("^[a-zA-Z0-9!#$%&'*+/=?^_`{|}~.-]+$")
 var hostRegexp = regexp.MustCompile(`^[^\s]+\.[^\s]+$`)
 

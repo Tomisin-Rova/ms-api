@@ -58,8 +58,7 @@ func MountServer(secrets *config.Secrets, logger *zap.Logger) *chi.Mux {
 	server := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: resolvers}))
 	server.SetErrorPresenter(func(ctx context.Context, e error) *gqlerror.Error {
 		err := graphql.DefaultErrorPresenter(ctx, e)
-		err = rerrors.FormatGqlTError(e, err)
-		return err
+		return rerrors.FormatGqlTError(e, err)
 	})
 	router.Handle("/graphql", server)
 	// Webhooks

@@ -195,7 +195,7 @@ func (r *mutationResolver) CreatePerson(ctx context.Context, input *types.Create
 func (r *mutationResolver) AuthenticateCustomer(ctx context.Context, input *types.AuthenticateCustomerInput) (*types.AuthResult, error) {
 	if err := emailvalidator.Validate(input.Email); err != nil {
 		r.logger.Info("invalid email supplied", zap.String("email", input.Email))
-		return nil, errors.New("invalid email address")
+		return nil, err
 	}
 	req := &authService.LoginRequest{Email: input.Email, Passcode: input.Passcode, Device: &authService.Device{
 		Os:          input.Device.Os,
