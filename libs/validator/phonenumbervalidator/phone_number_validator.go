@@ -9,7 +9,7 @@ import (
 var (
 	phoneRegex            = regexp.MustCompile(`^\s*(?:\+?(\d{1,3}))?[-. (]*(\d{3})[-. )]*(\d{3})[-. ]*(\d{4})(?: *x(\d+))?\s*$`)
 	ErrInvalidPhoneNumber = coreError.NewTerror(
-		7001,
+		7010,
 		"InvalidPhoneNumberException",
 		"phone number is not valid",
 		"",

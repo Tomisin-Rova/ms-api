@@ -8,7 +8,7 @@ import (
 
 var ErrInvalidEmail = errors2.NewTerror(
 	1100, "InvalidEmailError", "invalid email address", "invalid email address",
-	)
+)
 var userRegexp = regexp.MustCompile("^[a-zA-Z0-9!#$%&'*+/=?^_`{|}~.-]+$")
 var hostRegexp = regexp.MustCompile(`^[^\s]+\.[^\s]+$`)
 
