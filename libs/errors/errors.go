@@ -4,7 +4,6 @@ import (
 	coreError "github.com/roava/zebra/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 	"google.golang.org/grpc/status"
-	"log"
 	"strings"
 )
 
@@ -37,6 +36,17 @@ func NewFromGrpc(err error) error {
 
 // FormatGqlTError formats the error given to a GQL error
 func FormatGqlTError(err error, gqlErr *gqlerror.Error) *gqlerror.Error {
+	if terror, ok := err.(*coreError.Terror); ok {
+		gqlErr.Message = terror.Message()
+		gqlErr.Extensions = map[string]interface{}{
+			"code":      terror.Code(),
+			"errorType": terror.ErrorType(),
+			"status":    terror.Status(),
+			"help":      terror.Help(),
+		}
+		return gqlErr
+	}
+
 	errStr := err.Error()
 	idx := strings.Index(errStr, "{")
 	message := errStr
@@ -44,10 +54,9 @@ func FormatGqlTError(err error, gqlErr *gqlerror.Error) *gqlerror.Error {
 		message = strings.TrimSpace(errStr[idx:])
 	}
 
-	log.Println("extracted message => ", message)
 	terror, err := coreError.NewTerrorFromJSONString(message)
 	if err != nil {
-		gqlErr.Message = err.Error()
+		gqlErr.Message = message
 		return gqlErr
 	}
 	gqlErr.Message = terror.Message()

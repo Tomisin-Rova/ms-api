@@ -1,7 +1,7 @@
 package datevalidator
 
 import (
-	"errors"
+	coreError "github.com/roava/zebra/errors"
 	"regexp"
 	"strconv"
 	"strings"
@@ -9,11 +9,25 @@ import (
 )
 
 var (
-	dateRegex = regexp.MustCompile(`(0?[1-9]|[12][0-9]|3[01])/(0?[1-9]|1[012])/((19|20)\d\d)`)
-
-	ErrInvalidFormat = errors.New("invalid date format. Date format must be dd/mm/yyyy")
-	ErrInvalidType   = errors.New("not a valid date")
-	ErrInvalidAge    = errors.New("minimum age requirement for using Roava is 16years")
+	dateRegex        = regexp.MustCompile(`(0?[1-9]|[12][0-9]|3[01])/(0?[1-9]|1[012])/((19|20)\d\d)`)
+	ErrInvalidFormat = coreError.NewTerror(
+		7007,
+		"ErrInvalidDateFormat",
+		"invalid date format. Date format must be dd/mm/yyyy",
+		"",
+	)
+	ErrInvalidType = coreError.NewTerror(
+		7008,
+		"ErrInvalidType",
+		"not a valid date",
+		"",
+	)
+	ErrInvalidAge = coreError.NewTerror(
+		7009,
+		"ErrInvalidAge",
+		"minimum age requirement for using Roava is 16years",
+		"",
+	)
 )
 
 func ValidateDob(value string) error {

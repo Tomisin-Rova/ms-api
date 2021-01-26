@@ -151,7 +151,7 @@ func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) 
 	}
 	opts.paymentService = paymentService.NewPaymentServiceClient(connection)
 
-	//Payee
+	// Payee
 	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	connection, err = dialRPC(ctx, secrets.PayeeServiceURL)
