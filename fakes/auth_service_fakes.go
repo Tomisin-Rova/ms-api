@@ -45,22 +45,13 @@ func (f *FakeAuthClient) RefreshToken(ctx context.Context, req *authService.Refr
 	return f.rResp, f.err
 }
 
-func (f *FakeAuthClient) GenerateToken(ctx context.Context, req *authService.GenerateTokenRequest,
-	opts ...grpc.CallOption) (*authService.LoginResponse, error) {
-	return f.loginResp, f.err
-}
-
-func (f *FakeAuthClient) GetPersonById(ctx context.Context, req *authService.GetPersonByIdRequest,
-	opts ...grpc.CallOption) (*authService.GetPersonByIdResponse, error) {
-	return &authService.GetPersonByIdResponse{}, f.err
+func (f *FakeAuthClient) GetPerson(ctx context.Context, req *authService.GetPersonRequest,
+	opts ...grpc.CallOption) (*authService.GetPersonResponse, error) {
+	return &authService.GetPersonResponse{}, f.err
 }
 
 func (f *FakeAuthClient) ActivateBioLogin(ctx context.Context, req *authService.ActivateBioLoginRequest, opts ...grpc.CallOption) (*authService.ActivateBioLoginResponse, error) {
 	return &authService.ActivateBioLoginResponse{}, f.err
-}
-
-func (f *FakeAuthClient) BioLogin(ctx context.Context, req *authService.BioLoginRequest, opts ...grpc.CallOption) (*authService.AuthResponse, error) {
-	return &authService.AuthResponse{}, f.err
 }
 
 func (f *FakeAuthClient) DeactivateBioLogin(ctx context.Context, req *authService.DeactivateBioLoginRequest, opts ...grpc.CallOption) (*authService.SuccessResponse, error) {

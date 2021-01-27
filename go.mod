@@ -16,7 +16,7 @@ require (
 	github.com/mitchellh/mapstructure v1.4.1 // indirect
 	github.com/onsi/ginkgo v1.14.0 // indirect
 	github.com/pkg/errors v0.9.1
-	github.com/roava/zebra v0.0.0-20210120163626-c07bd3a17449
+	github.com/roava/zebra v0.0.0-20210125115819-dc42c5abee67
 	github.com/rs/cors v1.6.0
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sirupsen/logrus v1.4.2

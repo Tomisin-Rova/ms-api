@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -121,10 +122,22 @@ type ComplexityRoot struct {
 		Token func(childComplexity int) int
 	}
 
+	AuthResponse struct {
+		Code    func(childComplexity int) int
+		Message func(childComplexity int) int
+		Success func(childComplexity int) int
+		Tokens  func(childComplexity int) int
+	}
+
 	AuthResult struct {
 		Person       func(childComplexity int) int
 		RefreshToken func(childComplexity int) int
 		Token        func(childComplexity int) int
+	}
+
+	AuthTokens struct {
+		Jwt     func(childComplexity int) int
+		Refresh func(childComplexity int) int
 	}
 
 	Beneficiary struct {
@@ -185,36 +198,38 @@ type ComplexityRoot struct {
 		Token   func(childComplexity int) int
 	}
 
+	Email struct {
+		Value    func(childComplexity int) int
+		Verified func(childComplexity int) int
+	}
+
 	GetPayeesByPhoneNumbers struct {
 		Payees func(childComplexity int) int
 	}
 
 	Mutation struct {
 		AcceptTermsAndConditions    func(childComplexity int) int
-		ActivateBioLogin            func(childComplexity int, deviceID string) int
 		AddReasonsForUsingRoava     func(childComplexity int, reasonValues []*string) int
-		AuthenticateCustomer        func(childComplexity int, input *types.AuthenticateCustomerInput) int
-		BioLoginRequest             func(childComplexity int, input types.BioLoginInput) int
-		CheckEmailExistence         func(childComplexity int, email string) int
 		ConfirmPasscodeResetDetails func(childComplexity int, email string, dob string, address types.InputAddress) int
 		ConfirmPasscodeResetOtp     func(childComplexity int, email string, otp string) int
+		ConfirmPhone                func(childComplexity int, token string, code string) int
 		CreateApplication           func(childComplexity int) int
 		CreateCurrencyAccount       func(childComplexity int, currencyCode string) int
 		CreatePayee                 func(childComplexity int, input types.CreatePayeeInput) int
-		CreatePerson                func(childComplexity int, input *types.CreatePersonInput) int
-		CreatePhone                 func(childComplexity int, input types.CreatePhoneInput) int
+		CreatePhone                 func(childComplexity int, phone string, device types.DeviceInput) int
 		CreateTransactionPin        func(childComplexity int, pin string) int
-		DeactivateBioLogin          func(childComplexity int, input types.DeactivateBioLoginInput) int
+		Login                       func(childComplexity int, credentials types.AuthInput, biometric *bool) int
 		MakeTransfer                func(childComplexity int, input *types.MakeTransferInput) int
-		RefreshToken                func(childComplexity int, refreshToken string) int
+		RefreshToken                func(childComplexity int, token string) int
 		ResendEmailMagicLInk        func(childComplexity int, email string) int
 		ResendOtp                   func(childComplexity int, phone string) int
 		ResetPasscode               func(childComplexity int, email string, newPasscode string, verificationToken string) int
+		SetBiometricAuth            func(childComplexity int, activate *bool) int
+		Signup                      func(childComplexity int, token string, email string, passcode string) int
 		SubmitApplication           func(childComplexity int) int
 		UpdateFirebaseToken         func(childComplexity int, token string) int
 		UpdatePersonBiodata         func(childComplexity int, input *types.UpdateBioDataInput) int
 		VerifyEmail                 func(childComplexity int, email string, token string) int
-		VerifyOtp                   func(childComplexity int, token string, code string) int
 	}
 
 	Payee struct {
@@ -260,6 +275,7 @@ type ComplexityRoot struct {
 
 	Query struct {
 		Accounts                func(childComplexity int) int
+		CheckEmail              func(childComplexity int, email string) int
 		GetAddressesByText      func(childComplexity int, text string) int
 		GetCDDReportSummary     func(childComplexity int) int
 		GetCountries            func(childComplexity int) int
@@ -272,6 +288,13 @@ type ComplexityRoot struct {
 	Reason struct {
 		Description func(childComplexity int) int
 		ID          func(childComplexity int) int
+	}
+
+	Response struct {
+		Code    func(childComplexity int) int
+		Message func(childComplexity int) int
+		Success func(childComplexity int) int
+		Token   func(childComplexity int) int
 	}
 
 	Result struct {
@@ -302,16 +325,13 @@ type MutationResolver interface {
 	ConfirmPasscodeResetOtp(ctx context.Context, email string, otp string) (*types.Result, error)
 	UpdatePersonBiodata(ctx context.Context, input *types.UpdateBioDataInput) (*types.Result, error)
 	AddReasonsForUsingRoava(ctx context.Context, reasonValues []*string) (*types.Result, error)
-	CreatePhone(ctx context.Context, input types.CreatePhoneInput) (*types.CreatePhoneResult, error)
-	VerifyOtp(ctx context.Context, token string, code string) (*types.Result, error)
-	CreatePerson(ctx context.Context, input *types.CreatePersonInput) (*types.AuthResult, error)
-	AuthenticateCustomer(ctx context.Context, input *types.AuthenticateCustomerInput) (*types.AuthResult, error)
-	RefreshToken(ctx context.Context, refreshToken string) (*types.AuthResult, error)
+	CreatePhone(ctx context.Context, phone string, device types.DeviceInput) (*types.Response, error)
+	ConfirmPhone(ctx context.Context, token string, code string) (*types.Response, error)
+	Signup(ctx context.Context, token string, email string, passcode string) (*types.AuthResponse, error)
+	Login(ctx context.Context, credentials types.AuthInput, biometric *bool) (*types.AuthResponse, error)
+	RefreshToken(ctx context.Context, token string) (*types.AuthResponse, error)
+	SetBiometricAuth(ctx context.Context, activate *bool) (*types.Response, error)
 	ResendOtp(ctx context.Context, phone string) (*types.Result, error)
-	CheckEmailExistence(ctx context.Context, email string) (*types.CheckEmailExistenceResult, error)
-	ActivateBioLogin(ctx context.Context, deviceID string) (*types.ActivateBioLoginResponse, error)
-	BioLoginRequest(ctx context.Context, input types.BioLoginInput) (*types.AuthResult, error)
-	DeactivateBioLogin(ctx context.Context, input types.DeactivateBioLoginInput) (*types.Result, error)
 	VerifyEmail(ctx context.Context, email string, token string) (*types.Result, error)
 	ResendEmailMagicLInk(ctx context.Context, email string) (*types.Result, error)
 	SubmitApplication(ctx context.Context) (*types.Result, error)
@@ -332,6 +352,7 @@ type QueryResolver interface {
 	GetPayeesByPhoneNumbers(ctx context.Context, phone []string) (*types.GetPayeesByPhoneNumbers, error)
 	SupportedCurrencies(ctx context.Context) ([]*types.Country, error)
 	GetAddressesByText(ctx context.Context, text string) (*types.FetchAddressesResponse, error)
+	CheckEmail(ctx context.Context, email string) (*bool, error)
 }
 
 type executableSchema struct {
@@ -692,6 +713,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ApplicantSDKTokenResponse.Token(childComplexity), true
 
+	case "AuthResponse.code":
+		if e.complexity.AuthResponse.Code == nil {
+			break
+		}
+
+		return e.complexity.AuthResponse.Code(childComplexity), true
+
+	case "AuthResponse.message":
+		if e.complexity.AuthResponse.Message == nil {
+			break
+		}
+
+		return e.complexity.AuthResponse.Message(childComplexity), true
+
+	case "AuthResponse.success":
+		if e.complexity.AuthResponse.Success == nil {
+			break
+		}
+
+		return e.complexity.AuthResponse.Success(childComplexity), true
+
+	case "AuthResponse.tokens":
+		if e.complexity.AuthResponse.Tokens == nil {
+			break
+		}
+
+		return e.complexity.AuthResponse.Tokens(childComplexity), true
+
 	case "AuthResult.person":
 		if e.complexity.AuthResult.Person == nil {
 			break
@@ -712,6 +761,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.AuthResult.Token(childComplexity), true
+
+	case "AuthTokens.jwt":
+		if e.complexity.AuthTokens.Jwt == nil {
+			break
+		}
+
+		return e.complexity.AuthTokens.Jwt(childComplexity), true
+
+	case "AuthTokens.refresh":
+		if e.complexity.AuthTokens.Refresh == nil {
+			break
+		}
+
+		return e.complexity.AuthTokens.Refresh(childComplexity), true
 
 	case "Beneficiary.accounts":
 		if e.complexity.Beneficiary.Accounts == nil {
@@ -951,6 +1014,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.CreatePhoneResult.Token(childComplexity), true
 
+	case "Email.Value":
+		if e.complexity.Email.Value == nil {
+			break
+		}
+
+		return e.complexity.Email.Value(childComplexity), true
+
+	case "Email.Verified":
+		if e.complexity.Email.Verified == nil {
+			break
+		}
+
+		return e.complexity.Email.Verified(childComplexity), true
+
 	case "GetPayeesByPhoneNumbers.payees":
 		if e.complexity.GetPayeesByPhoneNumbers.Payees == nil {
 			break
@@ -965,18 +1042,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.AcceptTermsAndConditions(childComplexity), true
 
-	case "Mutation.activateBioLogin":
-		if e.complexity.Mutation.ActivateBioLogin == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_activateBioLogin_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.ActivateBioLogin(childComplexity, args["deviceId"].(string)), true
-
 	case "Mutation.addReasonsForUsingRoava":
 		if e.complexity.Mutation.AddReasonsForUsingRoava == nil {
 			break
@@ -988,42 +1053,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.AddReasonsForUsingRoava(childComplexity, args["reasonValues"].([]*string)), true
-
-	case "Mutation.authenticateCustomer":
-		if e.complexity.Mutation.AuthenticateCustomer == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_authenticateCustomer_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.AuthenticateCustomer(childComplexity, args["input"].(*types.AuthenticateCustomerInput)), true
-
-	case "Mutation.bioLoginRequest":
-		if e.complexity.Mutation.BioLoginRequest == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_bioLoginRequest_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.BioLoginRequest(childComplexity, args["input"].(types.BioLoginInput)), true
-
-	case "Mutation.checkEmailExistence":
-		if e.complexity.Mutation.CheckEmailExistence == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_checkEmailExistence_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.CheckEmailExistence(childComplexity, args["email"].(string)), true
 
 	case "Mutation.confirmPasscodeResetDetails":
 		if e.complexity.Mutation.ConfirmPasscodeResetDetails == nil {
@@ -1048,6 +1077,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.ConfirmPasscodeResetOtp(childComplexity, args["email"].(string), args["otp"].(string)), true
+
+	case "Mutation.confirmPhone":
+		if e.complexity.Mutation.ConfirmPhone == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_confirmPhone_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.ConfirmPhone(childComplexity, args["token"].(string), args["code"].(string)), true
 
 	case "Mutation.createApplication":
 		if e.complexity.Mutation.CreateApplication == nil {
@@ -1080,18 +1121,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreatePayee(childComplexity, args["input"].(types.CreatePayeeInput)), true
 
-	case "Mutation.createPerson":
-		if e.complexity.Mutation.CreatePerson == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_createPerson_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.CreatePerson(childComplexity, args["input"].(*types.CreatePersonInput)), true
-
 	case "Mutation.createPhone":
 		if e.complexity.Mutation.CreatePhone == nil {
 			break
@@ -1102,7 +1131,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreatePhone(childComplexity, args["input"].(types.CreatePhoneInput)), true
+		return e.complexity.Mutation.CreatePhone(childComplexity, args["phone"].(string), args["device"].(types.DeviceInput)), true
 
 	case "Mutation.createTransactionPin":
 		if e.complexity.Mutation.CreateTransactionPin == nil {
@@ -1116,17 +1145,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateTransactionPin(childComplexity, args["pin"].(string)), true
 
-	case "Mutation.deactivateBioLogin":
-		if e.complexity.Mutation.DeactivateBioLogin == nil {
+	case "Mutation.login":
+		if e.complexity.Mutation.Login == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_deactivateBioLogin_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_login_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeactivateBioLogin(childComplexity, args["input"].(types.DeactivateBioLoginInput)), true
+		return e.complexity.Mutation.Login(childComplexity, args["credentials"].(types.AuthInput), args["biometric"].(*bool)), true
 
 	case "Mutation.makeTransfer":
 		if e.complexity.Mutation.MakeTransfer == nil {
@@ -1150,7 +1179,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.RefreshToken(childComplexity, args["refreshToken"].(string)), true
+		return e.complexity.Mutation.RefreshToken(childComplexity, args["token"].(string)), true
 
 	case "Mutation.resendEmailMagicLInk":
 		if e.complexity.Mutation.ResendEmailMagicLInk == nil {
@@ -1187,6 +1216,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.ResetPasscode(childComplexity, args["email"].(string), args["newPasscode"].(string), args["verificationToken"].(string)), true
+
+	case "Mutation.setBiometricAuth":
+		if e.complexity.Mutation.SetBiometricAuth == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_setBiometricAuth_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.SetBiometricAuth(childComplexity, args["activate"].(*bool)), true
+
+	case "Mutation.signup":
+		if e.complexity.Mutation.Signup == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_signup_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.Signup(childComplexity, args["token"].(string), args["email"].(string), args["passcode"].(string)), true
 
 	case "Mutation.submitApplication":
 		if e.complexity.Mutation.SubmitApplication == nil {
@@ -1230,18 +1283,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.VerifyEmail(childComplexity, args["email"].(string), args["token"].(string)), true
-
-	case "Mutation.verifyOtp":
-		if e.complexity.Mutation.VerifyOtp == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_verifyOtp_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.VerifyOtp(childComplexity, args["token"].(string), args["code"].(string)), true
 
 	case "Payee.firstName":
 		if e.complexity.Payee.FirstName == nil {
@@ -1453,6 +1494,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Accounts(childComplexity), true
 
+	case "Query.checkEmail":
+		if e.complexity.Query.CheckEmail == nil {
+			break
+		}
+
+		args, err := ec.field_Query_checkEmail_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.CheckEmail(childComplexity, args["email"].(string)), true
+
 	case "Query.getAddressesByText":
 		if e.complexity.Query.GetAddressesByText == nil {
 			break
@@ -1525,6 +1578,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Reason.ID(childComplexity), true
+
+	case "Response.code":
+		if e.complexity.Response.Code == nil {
+			break
+		}
+
+		return e.complexity.Response.Code(childComplexity), true
+
+	case "Response.message":
+		if e.complexity.Response.Message == nil {
+			break
+		}
+
+		return e.complexity.Response.Message(childComplexity), true
+
+	case "Response.success":
+		if e.complexity.Response.Success == nil {
+			break
+		}
+
+		return e.complexity.Response.Success(childComplexity), true
+
+	case "Response.token":
+		if e.complexity.Response.Token == nil {
+			break
+		}
+
+		return e.complexity.Response.Token(childComplexity), true
 
 	case "Result.message":
 		if e.complexity.Result.Message == nil {
@@ -1698,16 +1779,21 @@ type CDDSummaryDocument {
         reasonValues: [String]
     ) : Result
 
-    createPhone(input: CreatePhoneInput!): CreatePhoneResult
-    verifyOtp(token: String!, code: String!): Result
-    createPerson(input: CreatePersonInput): AuthResult
-    authenticateCustomer(input: AuthenticateCustomerInput): AuthResult
-    refreshToken(refreshToken: String!): AuthResult
+    # onboarding
+    createPhone(phone: String!, device: DeviceInput!): Response!
+    confirmPhone(token: String!, code: String!): Response!
+    """
+    Creates person's ROAVA login credentials (email, login)
+    """
+    signup(token: String!, email: String!, passcode: String!): AuthResponse!
+
+#    createPhone(input: CreatePhoneInput!): CreatePhoneResult
+#    verifyOtp(token: String!, code: String!): Result
+#    createPerson(input: CreatePersonInput): AuthResult
+    login(credentials: AuthInput!, biometric: Boolean): AuthResponse!
+    refreshToken(token: String!): AuthResponse!
+    setBiometricAuth(activate: Boolean): Response!
     resendOtp(phone: String!): Result
-    checkEmailExistence(email: String!): CheckEmailExistenceResult
-    activateBioLogin(deviceId: String!): ActivateBioLoginResponse
-    bioLoginRequest(input: BioLoginInput!): AuthResult
-    deactivateBioLogin(input: DeactivateBioLoginInput!): Result
     verifyEmail(email: String!, token: String!): Result
     resendEmailMagicLInk(email: String!): Result
     submitApplication: Result
@@ -1718,6 +1804,54 @@ type CDDSummaryDocument {
     createTransactionPin(pin: String!): Result
     makeTransfer(input: MakeTransferInput): Result
     createPayee(input: CreatePayeeInput!): CreatePayeeResult
+}
+
+
+# I N T E R F A C E S
+
+# API response interface
+interface GraphQLResponse {
+    message: String
+    success: Boolean
+    code: Int
+}
+
+# T Y P E S
+
+type Response implements GraphQLResponse {
+    message: String!
+    success: Boolean!
+    code: Int
+    token: String
+}
+
+input AuthInput {
+    email: String!
+    passcode: String!
+    device: DeviceInput
+}
+
+input DeviceInput {
+    identifier: String!
+    brand: String!
+    os: String!
+    tokens: DeviceTokenInput!
+}
+
+input DeviceTokenInput {
+    firebase: String!
+}
+
+type AuthResponse implements GraphQLResponse {
+    message: String!
+    success: Boolean!
+    code: Int
+    tokens: AuthTokens!
+}
+
+type AuthTokens {
+    jwt: String!
+    refresh: String!
 }
 `, BuiltIn: false},
 	{Name: "graph/schemas/Onfido.graphql", Input: `type ApplicantSDKTokenRequest {
@@ -1736,6 +1870,7 @@ type ApplicantSDKTokenResponse {
   getPayeesByPhoneNumbers(phone: [String!]!): GetPayeesByPhoneNumbers
   supportedCurrencies: [Country!]!
   getAddressesByText(text: String!): fetchAddressesResponse
+  checkEmail(email: String!): Boolean
 }
 `, BuiltIn: false},
 	{Name: "graph/schemas/Shared.graphql", Input: `type Result {
@@ -1752,11 +1887,16 @@ type CreatePhoneResult {
 type ApiPerson {
   firstName: String!
   lastName: String!
-  email: String!
+  email: [Email]!
   isEmailActive: Boolean!
   isBiometricLoginEnabled: Boolean!
   isTransactionPinEnabled: Boolean!
   registrationCheckPoint: String!
+}
+
+type Email {
+  Value: String!
+  Verified: Boolean!
 }
 
 input CreatePhoneInput {
@@ -1988,21 +2128,6 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // region    ***************************** args.gotpl *****************************
 
-func (ec *executionContext) field_Mutation_activateBioLogin_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["deviceId"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("deviceId"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["deviceId"] = arg0
-	return args, nil
-}
-
 func (ec *executionContext) field_Mutation_addReasonsForUsingRoava_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -2015,51 +2140,6 @@ func (ec *executionContext) field_Mutation_addReasonsForUsingRoava_args(ctx cont
 		}
 	}
 	args["reasonValues"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_authenticateCustomer_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 *types.AuthenticateCustomerInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalOAuthenticateCustomerInput2ᚖmsᚗapiᚋtypesᚐAuthenticateCustomerInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_bioLoginRequest_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 types.BioLoginInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNBioLoginInput2msᚗapiᚋtypesᚐBioLoginInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_checkEmailExistence_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["email"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["email"] = arg0
 	return args, nil
 }
 
@@ -2120,6 +2200,30 @@ func (ec *executionContext) field_Mutation_confirmPasscodeResetOtp_args(ctx cont
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_confirmPhone_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["token"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("token"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["token"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["code"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("code"))
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["code"] = arg1
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_createCurrencyAccount_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -2150,33 +2254,27 @@ func (ec *executionContext) field_Mutation_createPayee_args(ctx context.Context,
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_createPerson_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 *types.CreatePersonInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalOCreatePersonInput2ᚖmsᚗapiᚋtypesᚐCreatePersonInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
 func (ec *executionContext) field_Mutation_createPhone_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 types.CreatePhoneInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNCreatePhoneInput2msᚗapiᚋtypesᚐCreatePhoneInput(ctx, tmp)
+	var arg0 string
+	if tmp, ok := rawArgs["phone"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("phone"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["input"] = arg0
+	args["phone"] = arg0
+	var arg1 types.DeviceInput
+	if tmp, ok := rawArgs["device"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("device"))
+		arg1, err = ec.unmarshalNDeviceInput2msᚗapiᚋtypesᚐDeviceInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["device"] = arg1
 	return args, nil
 }
 
@@ -2195,18 +2293,27 @@ func (ec *executionContext) field_Mutation_createTransactionPin_args(ctx context
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_deactivateBioLogin_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_login_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 types.DeactivateBioLoginInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNDeactivateBioLoginInput2msᚗapiᚋtypesᚐDeactivateBioLoginInput(ctx, tmp)
+	var arg0 types.AuthInput
+	if tmp, ok := rawArgs["credentials"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("credentials"))
+		arg0, err = ec.unmarshalNAuthInput2msᚗapiᚋtypesᚐAuthInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["input"] = arg0
+	args["credentials"] = arg0
+	var arg1 *bool
+	if tmp, ok := rawArgs["biometric"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("biometric"))
+		arg1, err = ec.unmarshalOBoolean2ᚖbool(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["biometric"] = arg1
 	return args, nil
 }
 
@@ -2229,14 +2336,14 @@ func (ec *executionContext) field_Mutation_refreshToken_args(ctx context.Context
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["refreshToken"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("refreshToken"))
+	if tmp, ok := rawArgs["token"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("token"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["refreshToken"] = arg0
+	args["token"] = arg0
 	return args, nil
 }
 
@@ -2303,6 +2410,54 @@ func (ec *executionContext) field_Mutation_resetPasscode_args(ctx context.Contex
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_setBiometricAuth_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *bool
+	if tmp, ok := rawArgs["activate"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("activate"))
+		arg0, err = ec.unmarshalOBoolean2ᚖbool(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["activate"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_signup_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["token"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("token"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["token"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["email"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["email"] = arg1
+	var arg2 string
+	if tmp, ok := rawArgs["passcode"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("passcode"))
+		arg2, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["passcode"] = arg2
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_updateFirebaseToken_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -2357,30 +2512,6 @@ func (ec *executionContext) field_Mutation_verifyEmail_args(ctx context.Context,
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_verifyOtp_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["token"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("token"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["token"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["code"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("code"))
-		arg1, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["code"] = arg1
-	return args, nil
-}
-
 func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -2393,6 +2524,21 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		}
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_checkEmail_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["email"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["email"] = arg0
 	return args, nil
 }
 
@@ -3704,9 +3850,9 @@ func (ec *executionContext) _ApiPerson_email(ctx context.Context, field graphql.
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.([]*types.Email)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNEmail2ᚕᚖmsᚗapiᚋtypesᚐEmail(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _ApiPerson_isEmailActive(ctx context.Context, field graphql.CollectedField, obj *types.APIPerson) (ret graphql.Marshaler) {
@@ -4158,6 +4304,143 @@ func (ec *executionContext) _ApplicantSDKTokenResponse_token(ctx context.Context
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _AuthResponse_message(ctx context.Context, field graphql.CollectedField, obj *types.AuthResponse) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "AuthResponse",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Message, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _AuthResponse_success(ctx context.Context, field graphql.CollectedField, obj *types.AuthResponse) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "AuthResponse",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Success, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _AuthResponse_code(ctx context.Context, field graphql.CollectedField, obj *types.AuthResponse) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "AuthResponse",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Code, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int64)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _AuthResponse_tokens(ctx context.Context, field graphql.CollectedField, obj *types.AuthResponse) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "AuthResponse",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Tokens, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.AuthTokens)
+	fc.Result = res
+	return ec.marshalNAuthTokens2ᚖmsᚗapiᚋtypesᚐAuthTokens(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _AuthResult_token(ctx context.Context, field graphql.CollectedField, obj *types.AuthResult) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -4261,6 +4544,76 @@ func (ec *executionContext) _AuthResult_person(ctx context.Context, field graphq
 	res := resTmp.(*types.APIPerson)
 	fc.Result = res
 	return ec.marshalNApiPerson2ᚖmsᚗapiᚋtypesᚐAPIPerson(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _AuthTokens_jwt(ctx context.Context, field graphql.CollectedField, obj *types.AuthTokens) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "AuthTokens",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Jwt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _AuthTokens_refresh(ctx context.Context, field graphql.CollectedField, obj *types.AuthTokens) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "AuthTokens",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Refresh, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Beneficiary_payeeId(ctx context.Context, field graphql.CollectedField, obj *types.Beneficiary) (ret graphql.Marshaler) {
@@ -5450,6 +5803,76 @@ func (ec *executionContext) _CreatePhoneResult_token(ctx context.Context, field 
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Email_Value(ctx context.Context, field graphql.CollectedField, obj *types.Email) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Email",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Value, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Email_Verified(ctx context.Context, field graphql.CollectedField, obj *types.Email) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Email",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Verified, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _GetPayeesByPhoneNumbers_payees(ctx context.Context, field graphql.CollectedField, obj *types.GetPayeesByPhoneNumbers) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -5705,21 +6128,24 @@ func (ec *executionContext) _Mutation_createPhone(ctx context.Context, field gra
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreatePhone(rctx, args["input"].(types.CreatePhoneInput))
+		return ec.resolvers.Mutation().CreatePhone(rctx, args["phone"].(string), args["device"].(types.DeviceInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*types.CreatePhoneResult)
+	res := resTmp.(*types.Response)
 	fc.Result = res
-	return ec.marshalOCreatePhoneResult2ᚖmsᚗapiᚋtypesᚐCreatePhoneResult(ctx, field.Selections, res)
+	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Mutation_verifyOtp(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Mutation_confirmPhone(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -5736,7 +6162,7 @@ func (ec *executionContext) _Mutation_verifyOtp(ctx context.Context, field graph
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_verifyOtp_args(ctx, rawArgs)
+	args, err := ec.field_Mutation_confirmPhone_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -5744,21 +6170,24 @@ func (ec *executionContext) _Mutation_verifyOtp(ctx context.Context, field graph
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().VerifyOtp(rctx, args["token"].(string), args["code"].(string))
+		return ec.resolvers.Mutation().ConfirmPhone(rctx, args["token"].(string), args["code"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*types.Result)
+	res := resTmp.(*types.Response)
 	fc.Result = res
-	return ec.marshalOResult2ᚖmsᚗapiᚋtypesᚐResult(ctx, field.Selections, res)
+	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Mutation_createPerson(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Mutation_signup(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -5775,7 +6204,7 @@ func (ec *executionContext) _Mutation_createPerson(ctx context.Context, field gr
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_createPerson_args(ctx, rawArgs)
+	args, err := ec.field_Mutation_signup_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -5783,21 +6212,24 @@ func (ec *executionContext) _Mutation_createPerson(ctx context.Context, field gr
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreatePerson(rctx, args["input"].(*types.CreatePersonInput))
+		return ec.resolvers.Mutation().Signup(rctx, args["token"].(string), args["email"].(string), args["passcode"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*types.AuthResult)
+	res := resTmp.(*types.AuthResponse)
 	fc.Result = res
-	return ec.marshalOAuthResult2ᚖmsᚗapiᚋtypesᚐAuthResult(ctx, field.Selections, res)
+	return ec.marshalNAuthResponse2ᚖmsᚗapiᚋtypesᚐAuthResponse(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Mutation_authenticateCustomer(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Mutation_login(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -5814,7 +6246,7 @@ func (ec *executionContext) _Mutation_authenticateCustomer(ctx context.Context, 
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_authenticateCustomer_args(ctx, rawArgs)
+	args, err := ec.field_Mutation_login_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -5822,18 +6254,21 @@ func (ec *executionContext) _Mutation_authenticateCustomer(ctx context.Context, 
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().AuthenticateCustomer(rctx, args["input"].(*types.AuthenticateCustomerInput))
+		return ec.resolvers.Mutation().Login(rctx, args["credentials"].(types.AuthInput), args["biometric"].(*bool))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*types.AuthResult)
+	res := resTmp.(*types.AuthResponse)
 	fc.Result = res
-	return ec.marshalOAuthResult2ᚖmsᚗapiᚋtypesᚐAuthResult(ctx, field.Selections, res)
+	return ec.marshalNAuthResponse2ᚖmsᚗapiᚋtypesᚐAuthResponse(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_refreshToken(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -5861,18 +6296,63 @@ func (ec *executionContext) _Mutation_refreshToken(ctx context.Context, field gr
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().RefreshToken(rctx, args["refreshToken"].(string))
+		return ec.resolvers.Mutation().RefreshToken(rctx, args["token"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*types.AuthResult)
+	res := resTmp.(*types.AuthResponse)
 	fc.Result = res
-	return ec.marshalOAuthResult2ᚖmsᚗapiᚋtypesᚐAuthResult(ctx, field.Selections, res)
+	return ec.marshalNAuthResponse2ᚖmsᚗapiᚋtypesᚐAuthResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_setBiometricAuth(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_setBiometricAuth_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().SetBiometricAuth(rctx, args["activate"].(*bool))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.Response)
+	fc.Result = res
+	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_resendOtp(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -5901,162 +6381,6 @@ func (ec *executionContext) _Mutation_resendOtp(ctx context.Context, field graph
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().ResendOtp(rctx, args["phone"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*types.Result)
-	fc.Result = res
-	return ec.marshalOResult2ᚖmsᚗapiᚋtypesᚐResult(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Mutation_checkEmailExistence(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_checkEmailExistence_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CheckEmailExistence(rctx, args["email"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*types.CheckEmailExistenceResult)
-	fc.Result = res
-	return ec.marshalOCheckEmailExistenceResult2ᚖmsᚗapiᚋtypesᚐCheckEmailExistenceResult(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Mutation_activateBioLogin(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_activateBioLogin_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().ActivateBioLogin(rctx, args["deviceId"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*types.ActivateBioLoginResponse)
-	fc.Result = res
-	return ec.marshalOActivateBioLoginResponse2ᚖmsᚗapiᚋtypesᚐActivateBioLoginResponse(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Mutation_bioLoginRequest(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_bioLoginRequest_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().BioLoginRequest(rctx, args["input"].(types.BioLoginInput))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*types.AuthResult)
-	fc.Result = res
-	return ec.marshalOAuthResult2ᚖmsᚗapiᚋtypesᚐAuthResult(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Mutation_deactivateBioLogin(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_deactivateBioLogin_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeactivateBioLogin(rctx, args["input"].(types.DeactivateBioLoginInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -7709,6 +8033,45 @@ func (ec *executionContext) _Query_getAddressesByText(ctx context.Context, field
 	return ec.marshalOfetchAddressesResponse2ᚖmsᚗapiᚋtypesᚐFetchAddressesResponse(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Query_checkEmail(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_checkEmail_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().CheckEmail(rctx, args["email"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*bool)
+	fc.Result = res
+	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -7848,6 +8211,140 @@ func (ec *executionContext) _Reason_Description(ctx context.Context, field graph
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Response_message(ctx context.Context, field graphql.CollectedField, obj *types.Response) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Response",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Message, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Response_success(ctx context.Context, field graphql.CollectedField, obj *types.Response) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Response",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Success, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Response_code(ctx context.Context, field graphql.CollectedField, obj *types.Response) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Response",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Code, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int64)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Response_token(ctx context.Context, field graphql.CollectedField, obj *types.Response) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Response",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Token, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Result_success(ctx context.Context, field graphql.CollectedField, obj *types.Result) (ret graphql.Marshaler) {
@@ -9144,6 +9641,42 @@ func (ec *executionContext) _fetchReasonResponse_reasons(ctx context.Context, fi
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputAuthInput(ctx context.Context, obj interface{}) (types.AuthInput, error) {
+	var it types.AuthInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "email":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+			it.Email, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "passcode":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("passcode"))
+			it.Passcode, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "device":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("device"))
+			it.Device, err = ec.unmarshalODeviceInput2ᚖmsᚗapiᚋtypesᚐDeviceInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputAuthenticateCustomerInput(ctx context.Context, obj interface{}) (types.AuthenticateCustomerInput, error) {
 	var it types.AuthenticateCustomerInput
 	var asMap = obj.(map[string]interface{})
@@ -9480,6 +10013,70 @@ func (ec *executionContext) unmarshalInputDevice(ctx context.Context, obj interf
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputDeviceInput(ctx context.Context, obj interface{}) (types.DeviceInput, error) {
+	var it types.DeviceInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "identifier":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("identifier"))
+			it.Identifier, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "brand":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("brand"))
+			it.Brand, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "os":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("os"))
+			it.Os, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "tokens":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tokens"))
+			it.Tokens, err = ec.unmarshalNDeviceTokenInput2ᚖmsᚗapiᚋtypesᚐDeviceTokenInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputDeviceTokenInput(ctx context.Context, obj interface{}) (types.DeviceTokenInput, error) {
+	var it types.DeviceTokenInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "firebase":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("firebase"))
+			it.Firebase, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputInputAddress(ctx context.Context, obj interface{}) (types.InputAddress, error) {
 	var it types.InputAddress
 	var asMap = obj.(map[string]interface{})
@@ -9651,6 +10248,29 @@ func (ec *executionContext) unmarshalInputVerifyEmailMagicLInkInput(ctx context.
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
+
+func (ec *executionContext) _GraphQLResponse(ctx context.Context, sel ast.SelectionSet, obj types.GraphQLResponse) graphql.Marshaler {
+	switch obj := (obj).(type) {
+	case nil:
+		return graphql.Null
+	case types.Response:
+		return ec._Response(ctx, sel, &obj)
+	case *types.Response:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Response(ctx, sel, obj)
+	case types.AuthResponse:
+		return ec._AuthResponse(ctx, sel, &obj)
+	case *types.AuthResponse:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._AuthResponse(ctx, sel, obj)
+	default:
+		panic(fmt.Errorf("unexpected type %T", obj))
+	}
+}
 
 // endregion ************************** interface.gotpl ***************************
 
@@ -10078,6 +10698,45 @@ func (ec *executionContext) _ApplicantSDKTokenResponse(ctx context.Context, sel 
 	return out
 }
 
+var authResponseImplementors = []string{"AuthResponse", "GraphQLResponse"}
+
+func (ec *executionContext) _AuthResponse(ctx context.Context, sel ast.SelectionSet, obj *types.AuthResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, authResponseImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("AuthResponse")
+		case "message":
+			out.Values[i] = ec._AuthResponse_message(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "success":
+			out.Values[i] = ec._AuthResponse_success(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "code":
+			out.Values[i] = ec._AuthResponse_code(ctx, field, obj)
+		case "tokens":
+			out.Values[i] = ec._AuthResponse_tokens(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var authResultImplementors = []string{"AuthResult"}
 
 func (ec *executionContext) _AuthResult(ctx context.Context, sel ast.SelectionSet, obj *types.AuthResult) graphql.Marshaler {
@@ -10101,6 +10760,38 @@ func (ec *executionContext) _AuthResult(ctx context.Context, sel ast.SelectionSe
 			}
 		case "person":
 			out.Values[i] = ec._AuthResult_person(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var authTokensImplementors = []string{"AuthTokens"}
+
+func (ec *executionContext) _AuthTokens(ctx context.Context, sel ast.SelectionSet, obj *types.AuthTokens) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, authTokensImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("AuthTokens")
+		case "jwt":
+			out.Values[i] = ec._AuthTokens_jwt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "refresh":
+			out.Values[i] = ec._AuthTokens_refresh(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -10458,6 +11149,38 @@ func (ec *executionContext) _CreatePhoneResult(ctx context.Context, sel ast.Sele
 	return out
 }
 
+var emailImplementors = []string{"Email"}
+
+func (ec *executionContext) _Email(ctx context.Context, sel ast.SelectionSet, obj *types.Email) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, emailImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Email")
+		case "Value":
+			out.Values[i] = ec._Email_Value(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "Verified":
+			out.Values[i] = ec._Email_Verified(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var getPayeesByPhoneNumbersImplementors = []string{"GetPayeesByPhoneNumbers"}
 
 func (ec *executionContext) _GetPayeesByPhoneNumbers(ctx context.Context, sel ast.SelectionSet, obj *types.GetPayeesByPhoneNumbers) graphql.Marshaler {
@@ -10512,24 +11235,36 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec._Mutation_addReasonsForUsingRoava(ctx, field)
 		case "createPhone":
 			out.Values[i] = ec._Mutation_createPhone(ctx, field)
-		case "verifyOtp":
-			out.Values[i] = ec._Mutation_verifyOtp(ctx, field)
-		case "createPerson":
-			out.Values[i] = ec._Mutation_createPerson(ctx, field)
-		case "authenticateCustomer":
-			out.Values[i] = ec._Mutation_authenticateCustomer(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "confirmPhone":
+			out.Values[i] = ec._Mutation_confirmPhone(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "signup":
+			out.Values[i] = ec._Mutation_signup(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "login":
+			out.Values[i] = ec._Mutation_login(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "refreshToken":
 			out.Values[i] = ec._Mutation_refreshToken(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "setBiometricAuth":
+			out.Values[i] = ec._Mutation_setBiometricAuth(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "resendOtp":
 			out.Values[i] = ec._Mutation_resendOtp(ctx, field)
-		case "checkEmailExistence":
-			out.Values[i] = ec._Mutation_checkEmailExistence(ctx, field)
-		case "activateBioLogin":
-			out.Values[i] = ec._Mutation_activateBioLogin(ctx, field)
-		case "bioLoginRequest":
-			out.Values[i] = ec._Mutation_bioLoginRequest(ctx, field)
-		case "deactivateBioLogin":
-			out.Values[i] = ec._Mutation_deactivateBioLogin(ctx, field)
 		case "verifyEmail":
 			out.Values[i] = ec._Mutation_verifyEmail(ctx, field)
 		case "resendEmailMagicLInk":
@@ -10882,6 +11617,17 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				res = ec._Query_getAddressesByText(ctx, field)
 				return res
 			})
+		case "checkEmail":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_checkEmail(ctx, field)
+				return res
+			})
 		case "__type":
 			out.Values[i] = ec._Query___type(ctx, field)
 		case "__schema":
@@ -10918,6 +11664,42 @@ func (ec *executionContext) _Reason(ctx context.Context, sel ast.SelectionSet, o
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var responseImplementors = []string{"Response", "GraphQLResponse"}
+
+func (ec *executionContext) _Response(ctx context.Context, sel ast.SelectionSet, obj *types.Response) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, responseImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Response")
+		case "message":
+			out.Values[i] = ec._Response_message(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "success":
+			out.Values[i] = ec._Response_success(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "code":
+			out.Values[i] = ec._Response_code(ctx, field, obj)
+		case "token":
+			out.Values[i] = ec._Response_token(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -11439,6 +12221,35 @@ func (ec *executionContext) marshalNApiPerson2ᚖmsᚗapiᚋtypesᚐAPIPerson(ct
 	return ec._ApiPerson(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNAuthInput2msᚗapiᚋtypesᚐAuthInput(ctx context.Context, v interface{}) (types.AuthInput, error) {
+	res, err := ec.unmarshalInputAuthInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNAuthResponse2msᚗapiᚋtypesᚐAuthResponse(ctx context.Context, sel ast.SelectionSet, v types.AuthResponse) graphql.Marshaler {
+	return ec._AuthResponse(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNAuthResponse2ᚖmsᚗapiᚋtypesᚐAuthResponse(ctx context.Context, sel ast.SelectionSet, v *types.AuthResponse) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._AuthResponse(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNAuthTokens2ᚖmsᚗapiᚋtypesᚐAuthTokens(ctx context.Context, sel ast.SelectionSet, v *types.AuthTokens) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._AuthTokens(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNBeneficiary2ᚖmsᚗapiᚋtypesᚐBeneficiary(ctx context.Context, sel ast.SelectionSet, v *types.Beneficiary) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -11447,11 +12258,6 @@ func (ec *executionContext) marshalNBeneficiary2ᚖmsᚗapiᚋtypesᚐBeneficiar
 		return graphql.Null
 	}
 	return ec._Beneficiary(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalNBioLoginInput2msᚗapiᚋtypesᚐBioLoginInput(ctx context.Context, v interface{}) (types.BioLoginInput, error) {
-	res, err := ec.unmarshalInputBioLoginInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
@@ -11568,19 +12374,56 @@ func (ec *executionContext) unmarshalNCreatePayeeInput2msᚗapiᚋtypesᚐCreate
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNCreatePhoneInput2msᚗapiᚋtypesᚐCreatePhoneInput(ctx context.Context, v interface{}) (types.CreatePhoneInput, error) {
-	res, err := ec.unmarshalInputCreatePhoneInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalNDeactivateBioLoginInput2msᚗapiᚋtypesᚐDeactivateBioLoginInput(ctx context.Context, v interface{}) (types.DeactivateBioLoginInput, error) {
-	res, err := ec.unmarshalInputDeactivateBioLoginInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
 func (ec *executionContext) unmarshalNDevice2ᚖmsᚗapiᚋtypesᚐDevice(ctx context.Context, v interface{}) (*types.Device, error) {
 	res, err := ec.unmarshalInputDevice(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNDeviceInput2msᚗapiᚋtypesᚐDeviceInput(ctx context.Context, v interface{}) (types.DeviceInput, error) {
+	res, err := ec.unmarshalInputDeviceInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNDeviceTokenInput2ᚖmsᚗapiᚋtypesᚐDeviceTokenInput(ctx context.Context, v interface{}) (*types.DeviceTokenInput, error) {
+	res, err := ec.unmarshalInputDeviceTokenInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNEmail2ᚕᚖmsᚗapiᚋtypesᚐEmail(ctx context.Context, sel ast.SelectionSet, v []*types.Email) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOEmail2ᚖmsᚗapiᚋtypesᚐEmail(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
 }
 
 func (ec *executionContext) unmarshalNInputAddress2msᚗapiᚋtypesᚐInputAddress(ctx context.Context, v interface{}) (types.InputAddress, error) {
@@ -11794,6 +12637,20 @@ func (ec *executionContext) marshalNReason2ᚖmsᚗapiᚋtypesᚐReason(ctx cont
 		return graphql.Null
 	}
 	return ec._Reason(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNResponse2msᚗapiᚋtypesᚐResponse(ctx context.Context, sel ast.SelectionSet, v types.Response) graphql.Marshaler {
+	return ec._Response(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx context.Context, sel ast.SelectionSet, v *types.Response) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Response(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
@@ -12070,28 +12927,6 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	return res
 }
 
-func (ec *executionContext) marshalOActivateBioLoginResponse2ᚖmsᚗapiᚋtypesᚐActivateBioLoginResponse(ctx context.Context, sel ast.SelectionSet, v *types.ActivateBioLoginResponse) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._ActivateBioLoginResponse(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOAuthResult2ᚖmsᚗapiᚋtypesᚐAuthResult(ctx context.Context, sel ast.SelectionSet, v *types.AuthResult) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._AuthResult(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalOAuthenticateCustomerInput2ᚖmsᚗapiᚋtypesᚐAuthenticateCustomerInput(ctx context.Context, v interface{}) (*types.AuthenticateCustomerInput, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputAuthenticateCustomerInput(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
 func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
 	res, err := graphql.UnmarshalBoolean(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -12121,13 +12956,6 @@ func (ec *executionContext) marshalOCDDSummary2ᚖmsᚗapiᚋtypesᚐCDDSummary(
 		return graphql.Null
 	}
 	return ec._CDDSummary(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOCheckEmailExistenceResult2ᚖmsᚗapiᚋtypesᚐCheckEmailExistenceResult(ctx context.Context, sel ast.SelectionSet, v *types.CheckEmailExistenceResult) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._CheckEmailExistenceResult(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOCountry2ᚕᚖmsᚗapiᚋtypesᚐCountry(ctx context.Context, sel ast.SelectionSet, v []*types.Country) graphql.Marshaler {
@@ -12184,19 +13012,19 @@ func (ec *executionContext) marshalOCreatePayeeResult2ᚖmsᚗapiᚋtypesᚐCrea
 	return ec._CreatePayeeResult(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOCreatePersonInput2ᚖmsᚗapiᚋtypesᚐCreatePersonInput(ctx context.Context, v interface{}) (*types.CreatePersonInput, error) {
+func (ec *executionContext) unmarshalODeviceInput2ᚖmsᚗapiᚋtypesᚐDeviceInput(ctx context.Context, v interface{}) (*types.DeviceInput, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := ec.unmarshalInputCreatePersonInput(ctx, v)
+	res, err := ec.unmarshalInputDeviceInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOCreatePhoneResult2ᚖmsᚗapiᚋtypesᚐCreatePhoneResult(ctx context.Context, sel ast.SelectionSet, v *types.CreatePhoneResult) graphql.Marshaler {
+func (ec *executionContext) marshalOEmail2ᚖmsᚗapiᚋtypesᚐEmail(ctx context.Context, sel ast.SelectionSet, v *types.Email) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
-	return ec._CreatePhoneResult(ctx, sel, v)
+	return ec._Email(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOGetPayeesByPhoneNumbers2ᚖmsᚗapiᚋtypesᚐGetPayeesByPhoneNumbers(ctx context.Context, sel ast.SelectionSet, v *types.GetPayeesByPhoneNumbers) graphql.Marshaler {
@@ -12204,6 +13032,21 @@ func (ec *executionContext) marshalOGetPayeesByPhoneNumbers2ᚖmsᚗapiᚋtypes�
 		return graphql.Null
 	}
 	return ec._GetPayeesByPhoneNumbers(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOInt2ᚖint64(ctx context.Context, v interface{}) (*int64, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalInt64(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOInt2ᚖint64(ctx context.Context, sel ast.SelectionSet, v *int64) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalInt64(*v)
 }
 
 func (ec *executionContext) unmarshalOMakeTransferInput2ᚖmsᚗapiᚋtypesᚐMakeTransferInput(ctx context.Context, v interface{}) (*types.MakeTransferInput, error) {

@@ -12,11 +12,16 @@ type CreatePhoneResult {
 type ApiPerson {
   firstName: String!
   lastName: String!
-  email: String!
+  email: [Email]!
   isEmailActive: Boolean!
   isBiometricLoginEnabled: Boolean!
   isTransactionPinEnabled: Boolean!
   registrationCheckPoint: String!
+}
+
+type Email {
+  Value: String!
+  Verified: Boolean!
 }
 
 input CreatePhoneInput {

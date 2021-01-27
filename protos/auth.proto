@@ -9,10 +9,8 @@ service AuthService {
   rpc ConfirmPasswordResetDetails(PasswordResetUserDetails) returns (SuccessResponse) {}
   rpc ConfirmPasswordResetOtp(PasswordResetOtpRequest) returns (SuccessResponse) {}
   rpc ResetPassword(PasswordResetRequest) returns (SuccessResponse) {}
-  rpc GenerateToken(GenerateTokenRequest) returns (LoginResponse) {}
-  rpc GetPersonById(GetPersonByIdRequest) returns (GetPersonByIdResponse) {}
+  rpc GetPerson(GetPersonRequest) returns (GetPersonResponse) {}
   rpc ActivateBioLogin(ActivateBioLoginRequest) returns (ActivateBioLoginResponse) {}
-  rpc BioLogin(BioLoginRequest) returns (AuthResponse) {}
   rpc DeactivateBioLogin(DeactivateBioLoginRequest) returns (SuccessResponse) {}
 }
 
@@ -24,6 +22,7 @@ message LoginRequest {
   string email  = 1;
   string  passcode  = 2;
   Device device = 3;
+  bool biometric = 4;
 }
 
 message LoginResponse {
@@ -38,10 +37,15 @@ message ValidateTokenRequest {
 
 message ValidateTokenResponse {
   string personId = 1;
+  string identityId = 2;
+  string deviceId = 3;
 }
 
 message RefreshTokenRequest {
   string refreshToken = 1;
+  string identityId = 2;
+  string deviceId = 3;
+  string personId = 4;
 }
 
 message RefreshTokenResponse {
@@ -62,56 +66,52 @@ message PasswordResetUserDetails {
   Address  address = 3;
 }
 
-message PasswordResetOtpRequest {
-  string email = 1;
-  string code = 2;
-}
-
 message PasswordResetRequest {
   string email = 1;
   string newPassword = 2;
   string verificationToken = 3;
 }
 
-message GenerateTokenRequest {
-  string personId = 1;
+message PasswordResetOtpRequest {
+  string email = 1;
+  string code = 2;
 }
 
-message GetPersonByIdRequest {
+message GetPersonRequest {
   string personId = 1;
+  string deviceId = 2;
+  string identityId = 3;
 }
 
-message GetPersonByIdResponse {
-    string personId = 1;
-    string phoneNumber= 2;
-    string title = 3;
-    string firstName = 4;
-    string lastName = 5;
-    string middleName = 6;
-    string email = 7;
-    string nationality = 8;
-    repeated AddressResponse addresses = 9;
-    bool isEmailActive = 10;
-    bool isBiometricLoginEnabled = 11;
-    bool isTransactionPinEnabled = 12;
-    string registrationCheckPoint = 13;
-    string DOB = 14;
+message GetPersonResponse {
+  string personId = 1;
+  repeated PhoneNumber PhoneNumber = 2;
+  string title = 3;
+  string firstName = 4;
+  string lastName = 5;
+  string middleName = 6;
+  repeated Email email = 7;
+  repeated string nationality = 8;
+  repeated AddressResponse addresses = 9;
+  bool isBiometricLoginEnabled = 11;
+  bool isTransactionPinEnabled = 12;
+  string registrationCheckPoint = 13;
+  string DOB = 14;
 }
 
 message AddressResponse {
-  string addressId = 1;
-  string street=2;
-  string city=3;
-  string country=4;
-  string postcode=5;
-  string addressType=6;
-  string nickname=7;
-  repeated double coordinate=8;
+  bool primary = 1;
+  string street = 2;
+  string city = 3;
+  string postCode = 4;
+  string country = 5;
+  string addressType = 6;
+  repeated double coordinate = 7;
 }
 
 message ActivateBioLoginRequest {
-  string personId = 1;
   string deviceId = 2;
+  string identityId = 3;
 }
 
 message Device {
@@ -126,31 +126,33 @@ message ActivateBioLoginResponse {
   string biometricPasscode = 2;
 }
 
-message BioLoginRequest {
-  string email = 1;
-  string biometricPasscode = 2;
-  Device device = 3;
-}
-
 message DeactivateBioLoginRequest {
-  string email = 1;
   string deviceId = 2;
+  string identityId = 3;
 }
-
 
 message AuthResponse {
-    string accessToken = 1;
-    string refreshToken = 2;
-    ApiPerson person = 3;
+  string accessToken = 1;
+  string refreshToken = 2;
+  ApiPerson person = 3;
 }
 
 message ApiPerson {
-    string firstName = 1;
-    string lastName = 2;
-    string email = 3;
-    bool isEmailActive = 4;
-    bool isBiometricLoginEnabled = 5;
-    bool isTransactionPinEnabled = 6;
-    string registrationCheckPoint = 7;
+  string firstName = 1;
+  string lastName = 2;
+  repeated Email email = 3;
+  bool isEmailActive = 4;
+  bool isBiometricLoginEnabled = 5;
+  bool isTransactionPinEnabled = 6;
+  string registrationCheckPoint = 7;
 }
 
+message Email {
+  string Value = 1;
+  bool Verified = 2;
+}
+
+message PhoneNumber {
+  string Number = 1;
+  bool Verified = 2;
+}

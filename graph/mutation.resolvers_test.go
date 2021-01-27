@@ -23,9 +23,18 @@ func TestMutationResolver_CreatePhone(t *testing.T) {
 		&onboarding.CreatePhoneResponse{Message: "phone added", Token: "token"}, nil, nil)
 	r := NewResolver(&ResolverOpts{OnBoardingService: svc}, logger.New())
 	mu := &mutationResolver{r}
-	resp, err := mu.CreatePhone(context.Background(), types.CreatePhoneInput{
-		Phone: "09088776655", Device: &types.Device{},
-	})
+	resp, err := mu.CreatePhone(
+		context.Background(),
+		"09088776655",
+		types.DeviceInput{
+			Os:         "OS",
+			Identifier: "identifier",
+			Brand:      "brand",
+			Tokens: &types.DeviceTokenInput{
+				Firebase: "firebase",
+			},
+		},
+	)
 	assert.Nil(t, err)
 	assert.NotNil(t, resp)
 	assert.True(t, resp.Success)
@@ -35,9 +44,18 @@ func TestMutationResolver_CreatePhone_Error(t *testing.T) {
 	svc := fakes.NewFakeOnBoardingClient(nil, nil, nil, errors.New("error occurred"))
 	r := NewResolver(&ResolverOpts{OnBoardingService: svc}, logger.New())
 	mu := &mutationResolver{r}
-	resp, err := mu.CreatePhone(context.Background(), types.CreatePhoneInput{
-		Phone: "09088776655", Device: &types.Device{},
-	})
+	resp, err := mu.CreatePhone(
+		context.Background(),
+		"09088776655",
+		types.DeviceInput{
+			Os:         "OS",
+			Identifier: "identifier",
+			Brand:      "brand",
+			Tokens: &types.DeviceTokenInput{
+				Firebase: "firebase",
+			},
+		},
+	)
 	assert.NotNil(t, err)
 	assert.Nil(t, resp)
 }
@@ -48,7 +66,7 @@ func TestMutationResolver_VerifySmsOtp(t *testing.T) {
 		&onboarding.CreatePhoneResponse{}, &onboarding.OtpVerificationResponse{Match: true}, nil)
 	r := NewResolver(&ResolverOpts{verifyService: svc, OnBoardingService: onBoardingSvc}, logger.New())
 	mu := &mutationResolver{r}
-	resp, err := mu.VerifyOtp(context.Background(), "09088776655", "009988")
+	resp, err := mu.ConfirmPhone(context.Background(), "09088776655", "009988")
 	assert.Nil(t, err)
 	assert.NotNil(t, resp)
 	assert.True(t, resp.Success)
@@ -60,7 +78,7 @@ func TestMutationResolver_VerifySmsOtp_Error(t *testing.T) {
 		&onboarding.CreatePhoneResponse{}, nil, errors.New("failed to perform op"))
 	r := NewResolver(&ResolverOpts{verifyService: svc, OnBoardingService: onBoardingSvc}, logger.New())
 	mu := &mutationResolver{r}
-	resp, err := mu.VerifyOtp(context.Background(), "09088776655", "009988")
+	resp, err := mu.ConfirmPhone(context.Background(), "09088776655", "009988")
 	assert.NotNil(t, err)
 	assert.Nil(t, resp)
 }
