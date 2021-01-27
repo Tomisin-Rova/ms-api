@@ -255,7 +255,7 @@ func (r *mutationResolver) SetBiometricAuth(ctx context.Context, activate *bool)
 		}
 		return &types.Response{Message: resp.Message, Success: true, Token: &resp.BiometricPasscode}, nil
 	} else {
-		resp, err := r.authService.ActivateBioLogin(ctx, &authService.ActivateBioLoginRequest{
+		resp, err := r.authService.DeactivateBioLogin(ctx, &authService.DeactivateBioLoginRequest{
 			IdentityId: claims.IdentityId,
 			DeviceId:   claims.DeviceId,
 		})
@@ -263,7 +263,7 @@ func (r *mutationResolver) SetBiometricAuth(ctx context.Context, activate *bool)
 			r.logger.Info("authService.ActivateBioLogin() failed", zap.Error(err))
 			return nil, err
 		}
-		return &types.Response{Message: resp.Message, Success: true, Token: &resp.BiometricPasscode}, nil
+		return &types.Response{Message: resp.Message, Success: true}, nil
 	}
 }
 

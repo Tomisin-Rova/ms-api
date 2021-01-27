@@ -102,27 +102,27 @@ func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) 
 	opts.OnBoardingService = onboardingService.NewOnBoardingServiceClient(connection)
 
 	//OnFido
-	//connection, err = dialRPC(ctx, secrets.OnfidoServiceURL)
-	//if err != nil {
-	//	return nil, fmt.Errorf("%v: %s", err, secrets.OnfidoServiceURL)
-	//}
-	//opts.OnfidoClient = onfidoService.NewOnfidoServiceClient(connection)
-	//
-	//// CDD
-	//connection, err = dialRPC(ctx, secrets.CddServiceURL)
-	//if err != nil {
-	//	return nil, fmt.Errorf("%v: %s", err, secrets.CddServiceURL)
-	//}
-	//opts.cddClient = cddService.NewCddServiceClient(connection)
-	//
-	//// Verify
-	//ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
-	//defer cancel()
-	//connection, err = dialRPC(ctx, secrets.VerifyServiceURL)
-	//if err != nil {
-	//	return nil, fmt.Errorf("%v: %s", err, secrets.VerifyServiceURL)
-	//}
-	//opts.verifyService = verifyService.NewVerifyServiceClient(connection)
+	connection, err = dialRPC(ctx, secrets.OnfidoServiceURL)
+	if err != nil {
+		return nil, fmt.Errorf("%v: %s", err, secrets.OnfidoServiceURL)
+	}
+	opts.OnfidoClient = onfidoService.NewOnfidoServiceClient(connection)
+
+	// CDD
+	connection, err = dialRPC(ctx, secrets.CddServiceURL)
+	if err != nil {
+		return nil, fmt.Errorf("%v: %s", err, secrets.CddServiceURL)
+	}
+	opts.cddClient = cddService.NewCddServiceClient(connection)
+
+	// Verify
+	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	connection, err = dialRPC(ctx, secrets.VerifyServiceURL)
+	if err != nil {
+		return nil, fmt.Errorf("%v: %s", err, secrets.VerifyServiceURL)
+	}
+	opts.verifyService = verifyService.NewVerifyServiceClient(connection)
 
 	// Auth
 	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
@@ -134,40 +134,40 @@ func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) 
 	opts.AuthService = authService.NewAuthServiceClient(connection)
 
 	// Product
-	//ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
-	//defer cancel()
-	//connection, err = dialRPC(ctx, secrets.ProductServiceURL)
-	//if err != nil {
-	//	return nil, fmt.Errorf("%v: %s", err, secrets.ProductServiceURL)
-	//}
-	//opts.productService = productService.NewProductServiceClient(connection)
-	//
-	//// Payment
-	//ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
-	//defer cancel()
-	//connection, err = dialRPC(ctx, secrets.PaymentServiceURL)
-	//if err != nil {
-	//	return nil, fmt.Errorf("%v: %s", err, secrets.PaymentServiceURL)
-	//}
-	//opts.paymentService = paymentService.NewPaymentServiceClient(connection)
-	//
-	//// Payee
-	//ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
-	//defer cancel()
-	//connection, err = dialRPC(ctx, secrets.PayeeServiceURL)
-	//if err != nil {
-	//	return nil, fmt.Errorf("%v: %s", err, secrets.PayeeServiceURL)
-	//}
-	//opts.PayeeService = payeeService.NewPayeeServiceClient(connection)
-	//
-	//// Person
-	//ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
-	//defer cancel()
-	//connection, err = dialRPC(ctx, secrets.PersonServiceURL)
-	//if err != nil {
-	//	return nil, fmt.Errorf("%v: %s", err, secrets.PersonServiceURL)
-	//}
-	//opts.personService = personService.NewPersonServiceClient(connection)
+	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	connection, err = dialRPC(ctx, secrets.ProductServiceURL)
+	if err != nil {
+		return nil, fmt.Errorf("%v: %s", err, secrets.ProductServiceURL)
+	}
+	opts.productService = productService.NewProductServiceClient(connection)
+
+	// Payment
+	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	connection, err = dialRPC(ctx, secrets.PaymentServiceURL)
+	if err != nil {
+		return nil, fmt.Errorf("%v: %s", err, secrets.PaymentServiceURL)
+	}
+	opts.paymentService = paymentService.NewPaymentServiceClient(connection)
+
+	// Payee
+	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	connection, err = dialRPC(ctx, secrets.PayeeServiceURL)
+	if err != nil {
+		return nil, fmt.Errorf("%v: %s", err, secrets.PayeeServiceURL)
+	}
+	opts.PayeeService = payeeService.NewPayeeServiceClient(connection)
+
+	// Person
+	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	connection, err = dialRPC(ctx, secrets.PersonServiceURL)
+	if err != nil {
+		return nil, fmt.Errorf("%v: %s", err, secrets.PersonServiceURL)
+	}
+	opts.personService = personService.NewPersonServiceClient(connection)
 
 	return opts, nil
 }
