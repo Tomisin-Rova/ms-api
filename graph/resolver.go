@@ -3,11 +3,9 @@ package graph
 import (
 	"context"
 	"fmt"
-	terror "github.com/roava/zebra/errors"
-	"time"
-
+	"github.com/roava/zebra/errors"
 	"go.uber.org/zap"
-
+	"google.golang.org/grpc"
 	"ms.api/config"
 	"ms.api/protos/pb/authService"
 	"ms.api/protos/pb/cddService"
@@ -20,25 +18,28 @@ import (
 	"ms.api/protos/pb/verifyService"
 	"ms.api/server/http/middlewares"
 	"ms.api/types"
-
-	"google.golang.org/grpc"
+	"time"
 )
 
-// All error types here, so they don't get over-written in the mutation, query or subscription resolvers when generating schema
+// This file will not be regenerated automatically.
+//
+// It serves as dependency injection for your app, add any dependencies you require here.
+
 var (
-	ErrUnAuthenticated = terror.NewTerror(
+	ErrUnAuthenticated = errors.NewTerror(
 		7012, "InvalidOrExpiredTokenError", "user not authenticated", "user not authenticated")
 )
 
-func (r *mutationResolver) validateAddress(addr *types.InputAddress) error {
-	if addr.Country == "" {
-		return terror.NewTerror(7013, "InvalidCountryData", "country data is missing from address", "")
+//nolint
+func (r *mutationResolver) validateAddress(addr *types.AddressInput) error {
+	if *addr.Country == "" {
+		return errors.NewTerror(7013, "InvalidCountryData", "country data is missing from address", "")
 	}
-	if addr.City == "" {
-		return terror.NewTerror(7014, "InvalidCityData", "city data is missing from address", "")
+	if *addr.City == "" {
+		return errors.NewTerror(7014, "InvalidCityData", "city data is missing from address", "")
 	}
-	if addr.Street == "" {
-		return terror.NewTerror(7015, "InvalidStreetData", "street data is missing from address", "")
+	if *addr.Street == "" {
+		return errors.NewTerror(7015, "InvalidStreetData", "street data is missing from address", "")
 	}
 	return nil
 }
@@ -87,21 +88,20 @@ func NewResolver(opt *ResolverOpts, logger *zap.Logger) *Resolver {
 }
 
 func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) {
-	// TODO: Ensure it is secure when connecting.
-	// TODO: Find a way to watch the service outage and handle response to client.
-	// TODO: Read heartbeat from these services, if a heartbeat is out, buzz the admin.
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
 	opts := &ResolverOpts{}
 
 	// OnBoarding
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 	connection, err := dialRPC(ctx, secrets.OnboardingServiceURL)
 	if err != nil {
 		return nil, fmt.Errorf("%v: %s", err, secrets.OnboardingServiceURL)
 	}
 	opts.OnBoardingService = onboardingService.NewOnBoardingServiceClient(connection)
 
-	//OnFido
+	// OnFido
+	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 	connection, err = dialRPC(ctx, secrets.OnfidoServiceURL)
 	if err != nil {
 		return nil, fmt.Errorf("%v: %s", err, secrets.OnfidoServiceURL)
@@ -109,6 +109,8 @@ func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) 
 	opts.OnfidoClient = onfidoService.NewOnfidoServiceClient(connection)
 
 	// CDD
+	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 	connection, err = dialRPC(ctx, secrets.CddServiceURL)
 	if err != nil {
 		return nil, fmt.Errorf("%v: %s", err, secrets.CddServiceURL)
@@ -151,15 +153,6 @@ func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) 
 	}
 	opts.paymentService = paymentService.NewPaymentServiceClient(connection)
 
-	// Payee
-	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	connection, err = dialRPC(ctx, secrets.PayeeServiceURL)
-	if err != nil {
-		return nil, fmt.Errorf("%v: %s", err, secrets.PayeeServiceURL)
-	}
-	opts.PayeeService = payeeService.NewPayeeServiceClient(connection)
-
 	// Person
 	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -173,8 +166,6 @@ func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) 
 }
 
 func dialRPC(ctx context.Context, address string) (*grpc.ClientConn, error) {
-	//cred := new(tls.Config) // TODO: Find a way to read this from the right source.
-	//connection, err := grpc.Dial(address, grpc.WithTransportCredentials(credentials.NewTLS(cred)))
 	connection, err := grpc.DialContext(ctx, address, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		return nil, err
