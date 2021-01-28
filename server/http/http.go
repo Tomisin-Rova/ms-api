@@ -5,14 +5,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"ms.api/config"
-	"ms.api/graph"
-	"ms.api/graph/generated"
-	rerrors "ms.api/libs/errors"
-	"ms.api/server/http/handlers"
-	"ms.api/server/http/middlewares"
-	"ms.api/server/http/webhooks"
-
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
@@ -21,6 +13,12 @@ import (
 	"github.com/rs/cors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 	"go.uber.org/zap"
+	"ms.api/config"
+	"ms.api/graph"
+	"ms.api/graph/generated"
+	rerrors "ms.api/libs/errors"
+	"ms.api/server/http/handlers"
+	"ms.api/server/http/middlewares"
 )
 
 func MountServer(secrets *config.Secrets, logger *zap.Logger) *chi.Mux {
@@ -60,9 +58,8 @@ func MountServer(secrets *config.Secrets, logger *zap.Logger) *chi.Mux {
 		err := graphql.DefaultErrorPresenter(ctx, e)
 		return rerrors.FormatGqlTError(e, err)
 	})
+
 	router.Handle("/graphql", server)
-	// Webhooks
-	router.Post("/webhooks/onfido", webhooks.HandleOnfidoWebhook(opts.OnfidoClient))
 	router.Get("/verify_email", httpHandlers.VerifyMagicLinkHandler)
 	return router
 }
