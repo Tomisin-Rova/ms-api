@@ -100,3 +100,7 @@ docker-mongo:
 	  --env MONGO_INITDB_DATABASE=roava \
 	  mongo:4.2.9
 
+build-local:
+	docker build -t ms.api --build-arg ACCESS_TOKEN=${GITHUB_TOKEN} .
+	docker tag ms.api localhost:15000/ms.api
+	docker push localhost:15000/ms.api

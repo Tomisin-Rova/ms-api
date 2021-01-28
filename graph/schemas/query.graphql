@@ -1,0 +1,60 @@
+type Query {
+  node(id: ID!): Node
+  me: Person # fetch person using JWT claims
+  person(id: ID!): Person
+  people(first: Int, after: String, last: Int, before: String): PersonConnection
+  identity(id: ID!): Identity
+  identities: [Identity]
+  checkEmail(email: String!): Boolean
+  address(id: ID!): Address
+  addresses: [Address]
+  device(identifier: String!): Device
+  devices(first: Int, after: String, last: Int, before: String): DeviceConnection
+  auths: [Auth]
+  organisation(id: ID!): Organisation
+  organisations(first: Int, after: String, last: Int, before: String): OrganisationConnection
+  verification(code: String!): Verification
+  verifications(first: Int, after: String, last: Int, before: String): VerificationConnection
+  country(code: String!): Country
+  countries(first: Int, after: String, last: Int, before: String): CountryConnection
+  currency(code: String!): Currency
+  currencies(supported: Boolean, first: Int, after: String, last: Int, before: String): CurrencyConnection
+  industry(code: String!): Industry
+  industries(first: Int, after: String, last: Int, before: String): IndustryConnection
+  activity(id: ID!): Activity
+  activities(first: Int, after: String, last: Int, before: String): ActivityConnection
+  message(id: ID!): Message
+  messages(first: Int, after: String, last: Int, before: String): MessageConnection
+
+  # fx pricing
+  quote(id: ID!): Quote
+  quotes(first: Int, after: String, last: Int, before: String): QuoteConnection
+  price(pair: String, ts: Int): Fx
+  prices(first: Int, after: String, last: Int, before: String): FxConnection
+  # tags and labels
+  tag(id: ID!): Task
+  tags(first: Int, after: String, last: Int, before: String): TagConnection
+  # enhance due diligence, cdd, kyc, aml
+  cdd(id: ID!): CDD
+  cdds(keywords: String, first: Int, after: String, last: Int, before: String): CDDConnection
+  check(id: ID!): Check
+  checks(first: Int, after: String, last: Int, before: String): CheckConnection
+  screen(id: ID!): Screen
+  screens(first: Int, after: String, last: Int, before: String): ScreenConnection
+  onfidoReport(id: ID!): OnfidoReport
+  complyAdvReport(id: ID!): ComplyAdvantageReport
+  task(id: ID!): Task
+  tasks(first: Int, after: String, last: Int, before: String): TaskConnection
+  comment(id: ID!): Comment
+  comments(first: Int, after: String, last: Int, before: String): CommentConnection
+  # products, accounts, transactions
+  product(id: ID!): Product
+  products(first: Int, after: String, last: Int, before: String): ProductConnection
+  account(id: ID!): Account
+  accounts(first: Int, after: String, last: Int, before: String): AccountConnection
+  transaction(id: ID!): Transaction
+  transactions(first: Int, after: String, last: Int, before: String): TransactionConnection
+  # terms conditions accepted
+  acceptance(id: ID!): Acceptance
+  acceptances(first: Int, after: String, last: Int, before: String): AcceptanceConnection
+}

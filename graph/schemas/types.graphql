@@ -1,0 +1,1126 @@
+interface Node {
+  id: ID!
+}
+# API response interface
+interface GraphQLResponse {
+  message: String!
+  success: Boolean!
+  code: Int
+}
+# something verified via OTP e.g. email | phone
+interface Verifiable {
+  name: String
+  primary: Boolean
+  type: VerifiableType!
+}
+# authors - can be person or organisation
+interface Entity {
+  id: ID!
+  identities: [Identity]
+}
+# E N U M S
+# list of items that can be verified
+enum VerifiableType { EMAIL PHONE DEVICE }
+# message delivery modes supported
+enum DeliveryMode { EMAIL SMS PUSH }
+# list of content types
+enum ContentType {
+  ARTICLE
+  POST
+  COMMENT
+  TERMS_GENERAL
+  TERMS_ACCOUNT
+  TERMS_FEE
+  PRIVACY
+}
+# list of data states
+enum State {
+  ACTIVE
+  INACTIVE
+  BLOCKED
+  EXITED
+  # writings, applications
+  DRAFT
+  PENDING
+  COMPLETED
+  # workflows
+  APPROVED
+  REJECTED
+}
+# onboarding checkpoints - a frontend concern
+enum OnboardingCheckPoint {
+  SIGNUP        # enter personal info
+  VERIFICATION  # provide ID, Video
+  ACTIVITIES    # provide reasons for using ROAVA
+  TERMS         # accept terms
+  COMPLETE      # submit application
+}
+# S C A L A R S
+# raw JSON value
+scalar JSON
+# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1001193868/roava+screen#Schema
+# represents the vendor AML screen payload
+scalar ComplyAdvantageReport
+# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1014956259/roava+report#Schema
+# represents the vendor kyc report
+scalar OnfidoReport
+# T Y P E S
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+  endCursor: String
+}
+type Response implements GraphQLResponse {
+  message: String!
+  success: Boolean!
+  code: Int
+  token: String
+}
+# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/983105548/roava+person
+type Person implements Node & Entity {
+  id: ID!
+  title: String
+  first_name: String!
+  last_name: String!
+  middle_name: String
+  dob: String!
+  employer: Organisation
+  bvn: String
+  ts: Int!
+  country_residence: String
+  nationality: [String]!
+  emails: [Email]!
+  phones: [Phone]!
+  identities: [Identity]!
+  addresses: [Address]!
+  activities: [Activity]!
+  cdds: [CDD]!
+}
+type PersonConnection {
+  edges: [PersonEdge!]!
+  nodes: [Person!]!
+  pageInfo: PageInfo
+  totalCount: Int
+}
+type PersonEdge {
+  node: Person!
+  cursor: PageInfo
+}
+input PersonInput {
+  first_name: String!
+  last_name: String!
+  dob: String!
+  country_residence: String!
+  bvn: String
+}
+input ApplicantInput {
+    applicant_id: String
+    first_name: String!
+    last_name: String!
+    email: String!
+    dob: String!
+    address: AddressInput!
+    vendor: String
+}
+type Email implements Verifiable {
+  name: String
+  primary: Boolean
+  type: VerifiableType!
+  value: String!
+  verified: Boolean!
+  alias: String
+}
+type Phone implements Verifiable {
+  name: String
+  primary: Boolean
+  type: VerifiableType!
+  value: String!
+  verified: Boolean!
+  carrier: String
+}
+# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/983236644/roava+identity
+"""
+Identity is how ROAVA represents a customer relationship and can be for a person or organisation
+"""
+type Identity {
+  id: ID!
+  owner: String!
+  nickname: String
+  organisation: String
+  active: Boolean
+  authentication: Boolean
+  devices: [Device]!
+  ts: Int!
+  credentials: Credentials!
+}
+"""
+Credentials object in a person identity; excludes passwords and pins
+"""
+type Credentials {
+  identifier: String!
+  refresh_token: String
+}
+# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1014956383/roava+device
+type Device implements Verifiable {
+  id: ID!
+  name: String
+  primary: Boolean
+  type: VerifiableType!
+  identifier: String!
+  owner: Person!
+  brand: String!
+  os: String!
+  active: Boolean
+  verified: Boolean
+  tokens: [DeviceToken]!
+  ts: Int
+}
+type DeviceConnection {
+  edges: [DeviceEdge!]!
+  nodes: [Device!]!
+  pageInfo: PageInfo
+  totalCount: Int
+}
+type DeviceEdge {
+  node: Device!
+  cursor: PageInfo
+}
+type DeviceToken {
+  firebase: String
+}
+input DeviceInput {
+  identifier: String!
+  brand: String!
+  os: String!
+  tokens: [DeviceTokenInput]!
+}
+input DeviceTokenInput {
+  firebase: String!
+}
+# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1103757335/roava+address
+type Address {
+  id: ID!
+  owner: String
+  name: String
+  primary: Boolean
+  street: String
+  city: String
+  county: String
+  state: String
+  postcode: String
+  country: Country
+  ts: Int
+  location: Location
+}
+type Location {
+  longitude: Float
+  latitude: Float
+}
+input AddressInput {
+  street: String
+  city: String
+  county: String
+  state: String
+  postcode: String
+  """
+  3 Char ISO standard for the country
+  """
+  country: String
+  """
+  Optional 2 Char ISO codes for country e.g "GB"
+  Used in the AML screen with vendor
+  """
+  country_2: String
+}
+# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1001193682/roava+country
+type Country {
+  Capital: String!
+  Continent: String!
+  Country_Name: String!
+  DS: String!
+  Dial: String!
+  EDGAR: String!
+  FIFA: String!
+  FIPS: String!
+  GAUL: String!
+  Geo_Name_ID: String!
+  IOC: String!
+  ISO3166_1_Alpha_2: String!
+  ISO3166_1_Alpha_3: String!
+  ISO4217_Currency_Alphabetic_Code: String!
+  ISO4217_Currency_Country_Name: String!
+  ISO4217_Currency_Minor_Unit: Int!
+  ISO4217_Currency_Name: String!
+  ISO4217_Currency_Numeric_Code: Int!
+  ITU: String!
+  Is_Independent: String!
+  Languages: String!
+  M49: Int!
+  MARC: String!
+  Official_Name_English: String!
+  TLD: String!
+  WMO: String!
+}
+type CountryConnection {
+  edges: [CountryEdge!]!
+  nodes: [Country!]!
+  pageInfo: PageInfo
+  totalCount: Int
+}
+type CountryEdge {
+  node: Country!
+  cursor: PageInfo
+}
+# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1001193706/roava+currency
+type Currency {
+  symbol: String!
+  name: String!
+  symbol_native: String!
+  decimal_digits: Int!
+  rounding: Int!
+  code: String!
+  name_plural: String!
+}
+type CurrencyConnection {
+  edges: [CurrencyEdge!]!
+  nodes: [Currency!]!
+  pageInfo: PageInfo
+  totalCount: Int
+}
+type CurrencyEdge {
+  node: Currency!
+  cursor: PageInfo
+}
+# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1084588117/roava+organisation
+"""
+Organisations (companies) in the ROAVA universe
+"""
+type Organisation implements Entity {
+  id: ID!
+  name: String
+  keywords: String
+  description: String
+  domain: String
+  banner: String
+  revenue: Float
+  language: String
+  raised: Float
+  employees: String
+  email: String
+  ts: Int
+  addresses: [Address]!
+  location: OrgLocation
+  industries: [Industry]!
+  social: Social
+  image_assets: [ImageAssets]!
+  identities: [Identity]!
+}
+
+type OrganisationConnection {
+  edges: [OrganisationEdge!]!
+  nodes: [Organisation!]!
+  pageInfo: PageInfo
+  totalCount: Int
+}
+
+type OrganisationEdge {
+  node: Organisation!
+  cursor: PageInfo
+}
+
+type Social {
+  youtube: String
+  github: String
+  facebook: String
+  pinterest: String
+  instagram: String
+  linkedin: String
+  medium: String
+  crunchbase: String
+  twitter: String
+}
+
+type ImageAssets {
+  safe: Boolean
+  type: String
+  image: String
+  svg: String
+}
+
+type OrgLocation {
+  continent: String
+  country: String
+  state: String
+  city: String
+  country_code: String
+}
+
+# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1014923419/roava+industry
+
+type Industry {
+  id: ID!
+  code: Int!
+  score: Float
+  section: String
+  description: String
+  source: String
+}
+
+type IndustryConnection {
+  edges: [IndustryEdge!]!
+  nodes: [Industry!]!
+  pageInfo: PageInfo
+  totalCount: Int
+}
+
+type IndustryEdge {
+  node: Industry!
+  cursor: PageInfo
+}
+
+
+# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/998572196/roava+auth
+
+type Auth {
+  id: ID!
+  session: String
+  identity: [Identity]!
+  success: Boolean
+  attempts: Int
+  ts: Int
+}
+
+input AuthInput {
+  email: String!
+  passcode: String!
+  device: DeviceInput!
+}
+
+type AuthResponse implements GraphQLResponse {
+  message: String!
+  success: Boolean!
+  code: Int
+  tokens: AuthTokens
+}
+
+type AuthTokens {
+  auth: String!
+  refresh: String!
+}
+
+# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1014956358/roava+verifications
+
+
+type Verification {
+  id: ID!
+  code: String
+  target: Verifiable!
+  type: String
+  validated: Boolean
+  ts: Int
+}
+
+type VerificationConnection {
+  edges: [VerificationEdge!]!
+  nodes: [Verification!]!
+  pageInfo: PageInfo
+  totalCount: Int
+}
+
+type VerificationEdge {
+  node: Verification!
+  cursor: PageInfo
+}
+
+
+# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1017839830/roava+activity
+
+type Activity {
+  id: ID!
+  description: String!
+  risk_weighting: Int!
+  supported: Boolean
+  archived: Int
+  ts: Int
+}
+
+type ActivityConnection {
+  edges: [ActivityEdge!]!
+  nodes: [Activity!]!
+  pageInfo: PageInfo
+  totalCount: Int
+}
+
+type ActivityEdge {
+  node: Activity!
+  cursor: PageInfo
+}
+
+input ActivityInput {
+  description: String!
+  risk_weighting: Int!
+  supported: Boolean
+  archived: Int
+}
+
+# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1001193923/roava%3A+message
+
+type Message {
+  id: ID!
+  owner: Entity!
+  title: String
+  body: String
+  status: String
+  has_read: Boolean
+  delivery_mode: DeliveryMode!
+  sender: String
+  target: Verifiable!
+  sent: Int
+  ts: Int
+}
+
+type MessageConnection {
+  edges: [MessageEdge!]!
+  nodes: [Message!]!
+  pageInfo: PageInfo
+  totalCount: Int
+}
+
+type MessageEdge {
+  node: Message!
+  cursor: PageInfo
+}
+
+
+# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1103856061/roava+tag
+
+type Tag {
+  id: String
+  name: String
+  ts: Int
+}
+
+type TagConnection {
+  edges: [TagEdge!]!
+  nodes: [Tag!]!
+  pageInfo: PageInfo
+  totalCount: Int
+}
+
+type TagEdge {
+  node: Tag!
+  cursor: PageInfo
+}
+
+
+# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1001193885/roava+cdd
+
+type CDD {
+  id: ID!
+  owner: String
+  watchlist: Boolean
+  details: String
+  status: String
+  onboard: Boolean
+  version: Int
+  active: Boolean
+  ts: Int
+  kyc: [Kyc!]!
+  aml: [Aml!]!
+}
+
+type CDDConnection {
+  edges: [CDDEdge!]!
+  nodes: [CDD!]!
+  pageInfo: PageInfo
+  totalCount: Int
+}
+
+type CDDEdge {
+  node: CDD!
+  cursor: PageInfo
+}
+
+
+type Kyc {
+  source: Organisation!
+  check: [Check]!
+  result: String
+  approved: Boolean
+  ts: Int
+}
+
+type Aml {
+  source: Organisation!
+  screen: [Screen]!
+  result: String
+  total_hits: Int
+  risk_level: String
+  score: Float
+  approved: Boolean
+  ts: Int
+}
+
+# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/990871725/roava+check
+
+type Check {
+  id: ID!
+  source: String
+  ts: Int
+  data: CheckData!
+  reports: [OnfidoReport]!
+}
+
+type CheckConnection {
+  edges: [CheckEdge!]!
+  nodes: [Check!]!
+  pageInfo: PageInfo
+  totalCount: Int
+}
+
+type CheckEdge {
+  node: Check!
+  cursor: PageInfo
+}
+
+type CheckData {
+  id: String
+  created_at: String
+  status: String
+  redirect_uri: String
+  result: String
+  sandbox: Boolean
+  results_uri: String
+  form_uri: String
+  paused: Boolean
+  version: String
+  href: String
+  applicant_id: String
+  applicant_provides_data: Boolean
+  report_ids: [String]!
+  tags(first: Int, after: String, last: Int, before: String): TagConnection
+}
+
+# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1001193868/roava+screen
+
+type Screen {
+  id: String
+  data: ComplyAdvantageReport!
+  organisation: String
+  ts: Int
+}
+
+type ScreenConnection {
+  edges: [ScreenEdge!]!
+  nodes: [Screen!]!
+  pageInfo: PageInfo
+  totalCount: Int
+}
+
+type ScreenEdge {
+  node: Screen!
+  cursor: PageInfo
+}
+
+# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1103855717/roava+task
+
+type Task {
+  id: String
+  reporter: Person!
+  assignee: Person!
+  approver: Person
+  notes: String
+  stage: String
+  approved: Boolean
+  version: Int
+  ts: Int
+  comments(first: Int, after: String, last: Int, before: String): CommentConnection
+  tags(first: Int, after: String, last: Int, before: String): TagConnection
+}
+
+type TaskConnection {
+  edges: [TaskEdge!]!
+  nodes: [Task!]!
+  pageInfo: PageInfo
+  totalCount: Int
+}
+
+type TaskEdge {
+  node: Task!
+  cursor: PageInfo
+}
+
+# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1097400336/roava+content
+
+type Content {
+  id: String
+  source: Entity!
+  type: String
+  title: String
+  abstract: String
+  body: String
+  url: String
+  current: Boolean
+  version: Int
+  ts: Int
+  comments(first: Int, after: String, last: Int, before: String): CommentConnection
+  tags(first: Int, after: String, last: Int, before: String): TagConnection
+  keywords: [String]!
+}
+
+
+# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1103790208/roava+comment
+
+type Comment {
+  id: String
+  author: Person!
+  type: String
+  body: String
+  ts: Int
+  tags: [Tag]!
+}
+
+type CommentConnection {
+  edges: [CommentEdge!]!
+  nodes: [Comment!]!
+  pageInfo: PageInfo
+  totalCount: Int
+}
+
+type CommentEdge {
+  node: Comment!
+  cursor: PageInfo
+}
+
+
+# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1099202579/roava+acceptance
+
+type Acceptance {
+  id: String
+  identity: Identity!
+  content: Content!
+  ts: Int
+}
+
+type AcceptanceConnection {
+  edges: [AcceptanceEdge!]!
+  nodes: [Acceptance!]!
+  pageInfo: PageInfo
+  totalCount: Int
+}
+
+type AcceptanceEdge {
+  node: Acceptance!
+  cursor: PageInfo
+}
+
+
+
+# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1001193652/roava+fx
+
+type Fx {
+  pair: String
+  open: Int
+  high: Int
+  low: Int
+  close: Int
+  ts: Int
+  source: String
+}
+
+type FxConnection {
+  edges: [FxEdge!]!
+  nodes: [Fx!]!
+  pageInfo: PageInfo
+  totalCount: Int
+}
+
+type FxEdge {
+  node: Fx!
+  cursor: PageInfo
+}
+
+# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/983400449/roava+quote
+
+type Quote {
+  id: String
+  has_expiry: Boolean
+  expires: Int
+  ts: Int
+  fee: Fee!
+  fx: Fx
+}
+
+type QuoteConnection {
+  edges: [QuoteEdge!]!
+  nodes: [Quote!]!
+  pageInfo: PageInfo
+  totalCount: Int
+}
+
+type QuoteEdge {
+  node: Quote!
+  cursor: PageInfo
+}
+
+type Fee {
+  fixed_fee: Int
+  variable_fee: VariableFee!
+}
+
+type VariableFee {
+  base_rate: Float
+  discount: Float
+  applied_rate: Float
+  partner: Int
+}
+
+# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1014956164/roava+product
+
+type Product {
+  id: String
+  identification: String
+  scheme: String
+  ts: Int
+  details: ProductDetails!
+}
+
+type ProductConnection {
+  edges: [ProductEdge!]!
+  nodes: [Product!]!
+  pageInfo: PageInfo
+  totalCount: Int
+}
+
+type ProductEdge {
+  node: Product!
+  cursor: PageInfo
+}
+
+type ProductDetails {
+  category: String
+  type: String
+  name: String
+  state: String
+  currency: String
+  notes: String
+  credit_requirement: String
+  withholding_tax_enabled: Boolean
+  allow_offset: Boolean
+  product_templates: [ProductTemplates]!
+  product_fees: [ProductFees]!
+  product_control: ProductControl
+  product_maturity: ProductMaturity
+  overdraft_setting: OverdraftSetting
+  interest_setting: InterestSetting
+  product_setting: ProductSetting
+}
+
+type AccountingRules {
+  encoded_key: String
+  financial_resource: String
+  gl_key: String
+}
+
+
+type OpeningBalance {
+  default_value: Int
+  max: Int
+  min: Int
+}
+
+type ProductControl {
+  dormancy_period_days: Int
+  max_withdrawal_amount: Int
+  recommended_deposit_amount: Int
+  opening_balance: OpeningBalance
+}
+
+type ProductMaturity {
+  unit: String
+  default_value: Int
+  max: Int
+  min: Int
+}
+
+type InterestRate {
+  defaultValue: Int
+  maxValue: Int
+  minValue: Int
+}
+
+type InterestSettings {
+  days_in_year: String
+  interest_calculation_balance: String
+  index_source_key: String
+  charge_frequency: String
+  charge_frequency_count: Int
+  rate_review_count: Int
+  interestRateReviewUnit: String
+  rate_source: String
+  rate_terms: String
+  rate_tiers: [RateTiers]!
+  interest_rate: InterestRate
+  interestRateSettings: InterestRateSettings
+  interestPaymentSettings: InterestPaymentSettings
+}
+
+type OverdraftSetting {
+  allow_overdraft: Boolean
+  allow_technical_overdraft: Boolean
+  max_limit: Int
+  interest_settings: InterestSettings
+}
+
+type RateTiers {
+  encoded_key: String
+  ending_balance: Int
+  ending_day: Int
+  interest_rate: Int
+}
+
+type RateSetting {
+  accrue_after_maturity: Boolean
+  index_source_key: String
+  charge_frequency: String
+  charge_frequency_count: Int
+  rate_source: String
+  rate_terms: String
+  rate_tiers: [RateTiers]!
+  interest_rate: InterestRate
+}
+
+type InterestPaymentDates {
+  day: Int
+  month: Int
+}
+
+type InterestSetting {
+  collect_interest_when_locked: Boolean
+  days_in_year: String
+  interest_calculation_balance: String
+  interest_paid_into_account: Boolean
+  interest_payment_point: String
+  maximumBalance: Int
+  rate_setting: RateSetting
+  interestPaymentDates: [InterestPaymentDates]!
+}
+
+type ProductSetting {
+  accounting_method: String
+  interest_accounting: String
+  accounting_rules: [AccountingRules]!
+}
+
+type ProductFees {
+  amount: Int
+  calculation_method: String
+  apply_date_method: String
+  creation_date: String
+  encoded_key: String
+  fee_application: String
+  last_modified: String
+  name: String
+  state: String
+  trigger: String
+  accounting_rules: [AccountingRules]!
+}
+
+type ProductTemplates {
+  creationDate: String
+  encodedKey: String
+  lastModifiedDate: String
+  name: String
+  type: String
+}
+
+# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1103790225/roava+account
+
+type Account {
+  id: String
+  owner: String
+  product: String
+  name: String
+  active: Boolean
+  status: String
+  image: String
+  organisation: String
+  ts: Int
+  tags(first: Int, after: String, last: Int, before: String): TagConnection
+  transactions(first: Int, after: String, last: Int, before: String): TransactionConnection
+  account_data: AccountData
+}
+
+type AccountConnection {
+  edges: [AccountEdge!]!
+  nodes: [Account!]!
+  pageInfo: PageInfo
+  totalCount: Int
+}
+
+type AccountEdge {
+  node: Account!
+  cursor: PageInfo
+}
+
+type AccountData {
+  accountHolderKey: String
+  accountHolderType: String
+  accountState: String
+  accountType: String
+  activationDate: String
+  approvedDate: String
+  assignedBranchKey: String
+  assignedCentreKey: String
+  assignedUserKey: String
+  closedDate: String
+  creationDate: String
+  creditArrangementKey: String
+  currencyCode: String
+  encodedKey: String
+  id: String
+  lastAccountAppraisalDate: String
+  lastInterestCalculationDate: String
+  lastInterestStoredDate: String
+  lastModifiedDate: String
+  lastOverdraftInterestReviewDate: String
+  lastSetToArrearsDate: String
+  lockedDate: String
+  maturityDate: String
+  migrationEventKey: String
+  name: String
+  notes: String
+  productTypeKey: String
+  withholdingTaxSourceKey: String
+  overdraftSettings: OverdraftSettings
+  overdraftInterestSettings: OverdraftInterestSettings
+  linkedSettlementAccountKeys: [String]
+  internalControls: InternalControls
+  interestSettings: InterestSettings
+  balances: Balances
+  accruedAmounts: AccruedAmounts
+}
+
+type OverdraftSettings {
+  allowOverdraft: Boolean
+  overdraftExpiryDate: String
+  overdraftLimit: Int
+}
+
+type InterestRateTiers {
+  encodedKey: String
+  endingBalance: Int
+  endingDay: Int
+  interestRate: Int
+}
+
+type InterestRateSettings {
+  encodedKey: String
+  interestChargeFrequency: String
+  interestChargeFrequencyCount: Int
+  interestRate: Int
+  interestRateReviewCount: Int
+  interestRateReviewUnit: String
+  interestRateSource: String
+  interestRateTerms: String
+  interestSpread: Int
+  interestRateTiers: [InterestRateTiers]
+}
+
+type OverdraftInterestSettings {
+  interestRateSettings: InterestRateSettings
+}
+
+type InternalControls {
+  maxWithdrawalAmount: Int
+  recommendedDepositAmount: Int
+  targetAmount: Int
+}
+
+type InterestPaymentSettings {
+  interestPaymentPoint: String
+  interestPaymentDates: [InterestPaymentDates]
+}
+
+type Balances {
+  availableBalance: Int
+  blockedBalance: Int
+  feesDue: Int
+  forwardAvailableBalance: Int
+  holdBalance: Int
+  lockedBalance: Int
+  overdraftAmount: Int
+  overdraftInterestDue: Int
+  technicalOverdraftAmount: Int
+  technicalOverdraftInterestDue: Int
+  totalBalance: Int
+}
+
+type AccruedAmounts {
+  interestAccrued: Int
+  overdraftInterestAccrued: Int
+  technicalOverdraftInterestAccrued: Int
+}
+
+
+# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/977600522/roava+transaction
+
+type Transaction {
+  id: String
+  account: String
+  ts: Int
+  transaction_data: TransactionData
+}
+
+type TransactionConnection {
+  edges: [TransactionEdge!]!
+  nodes: [Transaction!]!
+  pageInfo: PageInfo
+  totalCount: Int
+}
+
+type TransactionEdge {
+  node: Transaction!
+  cursor: PageInfo
+}
+
+type TransactionData {
+  amount: Int
+  bookingDate: String
+  creationDate: String
+  currencyCode: String
+  encodedKey: String
+  externalId: String
+  id: String
+  notes: String
+  parentAccountKey: String
+  paymentOrderId: String
+  type: String
+  userKey: String
+  valueDate: String
+  transferDetails: TransferDetails
+  fees: [String]
+  affectedAmounts: AffectedAmounts
+  accountBalances: AccountBalances
+}
+
+type AccountBalances {
+  totalBalance: Int
+}
+
+type AffectedAmounts {
+  feesAmount: Int
+  fractionAmount: Int
+  fundsAmount: Int
+  interestAmount: Int
+  overdraftAmount: Int
+  overdraftFeesAmount: Int
+  overdraftInterestAmount: Int
+  technicalOverdraftAmount: Int
+  technicalOverdraftInterestAmount: Int
+}
+
+type TransferDetails {
+  linkedLoanTransactionKey: String
+}
