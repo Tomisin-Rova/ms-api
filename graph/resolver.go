@@ -29,6 +29,7 @@ var (
 	ErrUnAuthenticated = errors.NewTerror(
 		7012, "InvalidOrExpiredTokenError", "user not authenticated", "user not authenticated")
 )
+
 //nolint
 func (r *mutationResolver) validateAddress(addr *types.AddressInput) error {
 	if *addr.Country == "" {
