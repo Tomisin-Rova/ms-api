@@ -1,41 +1,38 @@
- syntax = "proto3";
+syntax = "proto3";
+package verify;
+option go_package = "ms.api/protos/pb/verifyService";
 
- package verify;
+// Import types
+import "types.proto";
 
- option go_package = "verifyService";
+message ValidateEmailRequest {
+  string name = 1;
+  string email = 2;
+  string password = 3;
+}
 
- message ValidateEmailRequest {
-     string name = 1;
-     string email = 2;
-     string password = 3;
- }
+message OtpVerificationResponse {
+  bool match = 1;
+  string message = 2;
+}
 
- message SuccessResponse {
-     string message = 1;
- }
+message OtpVerificationRequest {
+  string phone = 1;
+  string code = 2;
+}
 
- message OtpVerificationResponse {
-     bool match = 1;
-     string message = 2;
- }
-
- message OtpVerificationRequest {
-     string phone = 1;
-     string code = 2;
- }
-
- message OtpVerificationByEmailRequest {
-     string email = 1;
-     string code = 2;
- }
+message OtpVerificationByEmailRequest {
+  string email = 1;
+  string code = 2;
+}
 
 message ResendOtpRequest {
-    string phone = 1;
+  string phone = 1;
 }
 
 service VerifyService {
-    rpc ValidateEmail(ValidateEmailRequest) returns (SuccessResponse) {}
-    rpc VerifySmsOtp(OtpVerificationRequest) returns (OtpVerificationResponse) {}
-    rpc VerifyEmailOtp(OtpVerificationByEmailRequest) returns (OtpVerificationResponse) {}
-    rpc ResendOtp(ResendOtpRequest) returns (SuccessResponse) {}
+  rpc ValidateEmail(ValidateEmailRequest) returns (types.Response) {}
+  rpc VerifySmsOtp(OtpVerificationRequest) returns (OtpVerificationResponse) {}
+  rpc VerifyEmailOtp(OtpVerificationByEmailRequest) returns (OtpVerificationResponse) {}
+  rpc ResendOtp(ResendOtpRequest) returns (types.Response) {}
 }

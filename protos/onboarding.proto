@@ -1,11 +1,13 @@
 syntax = "proto3";
-
 package onboarding;
-option go_package = "onboardingService";
+option go_package = "ms.api/protos/pb/onboardingService";
+
+// Import types
+import "types.proto";
 
 message CreatePhoneRequest {
   string phoneNumber = 1;
-  Device device = 2;
+  types.Device device = 2;
 }
 
 message Device {
@@ -38,7 +40,7 @@ message CreatePersonResponse {
 
 message UpdatePersonRequest {
   string personId = 1;
-  Address address = 2;
+  types.Address address = 2;
   string firstName = 3;
   string lastName = 4;
   string dob = 5;
@@ -47,13 +49,6 @@ message UpdatePersonRequest {
 message RoavaReasonsRequest {
   string personId = 1;
   repeated string reasons = 2;
-}
-
-message Address {
-  string country = 1;
-  string street = 2;
-  string city = 3;
-  string postcode = 4;
 }
 
 message CheckEmailExistenceRequest {
@@ -108,23 +103,9 @@ message ResendEmailMagicLInkRequest {
 
 message FetchCountriesRequest {}
 
-message Country {
-  string CountryId = 1;
-  string Capital = 2;
-  string CountryName = 3;
-  string Continent = 4;
-  string Dial = 5;
-  string GeoNameId = 6;
-  string ISO4217CurrencyAlphabeticCode = 7;
-  int32 ISO4217CurrencyNumericCode = 8;
-  string IsIndependent = 9;
-  string Languages = 10;
-  string OfficialNameEnglish = 11;
-  string deviceId = 12;
-}
 
 message FetchCountriesResponse {
-  repeated Country Countries = 2;
+  repeated types.Country Countries = 2;
 }
 
 message Reasons {
@@ -169,25 +150,25 @@ message AddressResult {
 }
 
 message GetAddressesResponse {
-   repeated AddressResult addresses = 1;
+  repeated AddressResult addresses = 1;
 }
 
 service OnBoardingService{
   rpc CreatePhone(CreatePhoneRequest) returns (CreatePhoneResponse) {}
   rpc CreatePerson(CreatePersonRequest) returns (CreatePersonResponse) {}
-  rpc UpdatePersonBiodata(UpdatePersonRequest) returns (SuccessResponse) {}
-  rpc AddReasonsForUsingRoava(RoavaReasonsRequest) returns (SuccessResponse) {}
+  rpc UpdatePersonBiodata(UpdatePersonRequest) returns (types.Response) {}
+  rpc AddReasonsForUsingRoava(RoavaReasonsRequest) returns (types.Response) {}
   rpc CheckEmailExistence(CheckEmailExistenceRequest) returns (CheckEmailExistenceResponse) {}
   rpc VerifySmsOtp(OtpVerificationRequest) returns (OtpVerificationResponse) {}
   rpc VerifyEmailOtp(OtpVerificationByEmailRequest) returns (OtpVerificationResponse) {}
-  rpc ResendOtp(ResendOtpRequest) returns (SuccessResponse) {}
+  rpc ResendOtp(ResendOtpRequest) returns (types.Response) {}
   rpc CreateApplication(CreateApplicationRequest) returns (CreateApplicationResponse) {}
-  rpc SubmitCheck(SubmitCheckRequest) returns (SuccessResponse) {}
-  rpc VerifyEmailMagicLInk(VerifyEmailMagicLInkRequest) returns (SuccessResponse) {}
-  rpc ResendEmailMagicLInk(ResendEmailMagicLInkRequest) returns (SuccessResponse) {}
+  rpc SubmitCheck(SubmitCheckRequest) returns (types.Response) {}
+  rpc VerifyEmailMagicLInk(VerifyEmailMagicLInkRequest) returns (types.Response) {}
+  rpc ResendEmailMagicLInk(ResendEmailMagicLInkRequest) returns (types.Response) {}
   rpc FetchCountries(FetchCountriesRequest) returns (FetchCountriesResponse) {}
   rpc FetchReasons(EmptyRequest) returns (ReasonResponse) {}
-  rpc AcceptTermsAndConditions(TermsAndConditionsRequest) returns (SuccessResponse) {}
-  rpc UpdateFirebaseToken(UpdateFirebaseTokenRequest) returns (SuccessResponse) {}
+  rpc AcceptTermsAndConditions(TermsAndConditionsRequest) returns (types.Response) {}
+  rpc UpdateFirebaseToken(UpdateFirebaseTokenRequest) returns (types.Response) {}
   rpc GetAddressesByText(GetAddressesRequest) returns (GetAddressesResponse) {}
 }

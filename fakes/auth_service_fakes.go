@@ -4,6 +4,7 @@ import (
 	"context"
 	"google.golang.org/grpc"
 	"ms.api/protos/pb/authService"
+	"ms.api/protos/pb/types"
 )
 
 type FakeAuthClient struct {
@@ -13,16 +14,16 @@ type FakeAuthClient struct {
 	err       error
 }
 
-func (f *FakeAuthClient) ConfirmPasswordResetOtp(ctx context.Context, in *authService.PasswordResetOtpRequest, opts ...grpc.CallOption) (*authService.SuccessResponse, error) {
-	return &authService.SuccessResponse{}, f.err
+func (f *FakeAuthClient) ConfirmPasswordResetOtp(ctx context.Context, in *authService.PasswordResetOtpRequest, opts ...grpc.CallOption) (*types.Response, error) {
+	return &types.Response{}, f.err
 }
 
-func (f *FakeAuthClient) ConfirmPasswordResetDetails(ctx context.Context, in *authService.PasswordResetUserDetails, opts ...grpc.CallOption) (*authService.SuccessResponse, error) {
-	return &authService.SuccessResponse{}, nil
+func (f *FakeAuthClient) ConfirmPasswordResetDetails(ctx context.Context, in *authService.PasswordResetUserDetails, opts ...grpc.CallOption) (*types.Response, error) {
+	return &types.Response{}, nil
 }
 
-func (f *FakeAuthClient) ResetPassword(ctx context.Context, in *authService.PasswordResetRequest, opts ...grpc.CallOption) (*authService.SuccessResponse, error) {
-	return &authService.SuccessResponse{}, f.err
+func (f *FakeAuthClient) ResetPassword(ctx context.Context, in *authService.PasswordResetRequest, opts ...grpc.CallOption) (*types.Response, error) {
+	return &types.Response{}, f.err
 }
 
 func NewFakeAuthClient(resp *authService.ValidateTokenResponse,
@@ -54,6 +55,6 @@ func (f *FakeAuthClient) ActivateBioLogin(ctx context.Context, req *authService.
 	return &authService.ActivateBioLoginResponse{}, f.err
 }
 
-func (f *FakeAuthClient) DeactivateBioLogin(ctx context.Context, req *authService.DeactivateBioLoginRequest, opts ...grpc.CallOption) (*authService.SuccessResponse, error) {
-	return &authService.SuccessResponse{}, f.err
+func (f *FakeAuthClient) DeactivateBioLogin(ctx context.Context, req *authService.DeactivateBioLoginRequest, opts ...grpc.CallOption) (*types.Response, error) {
+	return &types.Response{}, f.err
 }

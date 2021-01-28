@@ -4,7 +4,7 @@ import (
 	"github.com/roava/zebra/logger"
 	"github.com/stretchr/testify/assert"
 	"ms.api/fakes"
-	"ms.api/protos/pb/onboardingService"
+	"ms.api/protos/pb/types"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -12,7 +12,7 @@ import (
 )
 
 func TestHttpHandler_VerifyMagicLinkHandler(t *testing.T) {
-	svc := fakes.NewFakeOnBoardingClient(&onboardingService.SuccessResponse{Message: "success"},
+	svc := fakes.NewFakeOnBoardingClient(&types.Response{Message: "success"},
 		nil, nil, nil)
 
 	handler := New(svc, logger.New())
@@ -28,7 +28,7 @@ func TestHttpHandler_VerifyMagicLinkHandler(t *testing.T) {
 }
 
 func TestHttpHandler_VerifyMagicLinkHandler_BadEmail(t *testing.T) {
-	svc := fakes.NewFakeOnBoardingClient(&onboardingService.SuccessResponse{Message: "success"},
+	svc := fakes.NewFakeOnBoardingClient(&types.Response{Message: "success"},
 		nil, nil, nil)
 
 	handler := New(svc, logger.New())

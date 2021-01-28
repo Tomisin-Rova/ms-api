@@ -1,19 +1,33 @@
 syntax = "proto3";
 package person;
-option go_package = "personService";
+option go_package = "ms.api/protos/pb/personService";
 
-message SuccessResponse {
-    string message = 1;
+// Import types
+import "types.proto";
+import "google/protobuf/empty.proto";
+
+// Request type for person by ID
+message PersonRequest {
+  string id = 1;
 }
 
-message Empty{
+// Request type for endpoint requiring JWT token
+message TokenRequest{
+  string token = 1;
 }
 
-message CreateTransactionPinRequest {
-  string personId = 1;
+// Request type for person by ID
+message TransactionPinRequest {
+  string identity = 1;
   string pin = 2;
 }
+
 service PersonService{
-  rpc CreateTransactionPin(CreateTransactionPinRequest) returns (SuccessResponse) {}
-  rpc ValidateEmail(Empty) returns (SuccessResponse) {}
+  // Q U E R I E S
+  rpc Me(TokenRequest) returns (types.Response) {}
+  rpc Person(PersonRequest) returns (types.Person) {}
+  rpc People(google.protobuf.Empty) returns (types.Persons) {}
+
+  // M U T A T I O N S
+  rpc SetTransactionPin(TransactionPinRequest) returns (types.Response) {}
 }

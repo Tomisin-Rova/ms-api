@@ -2,19 +2,22 @@ package fakes
 
 import (
 	"context"
+	"ms.api/protos/pb/types"
 
 	"google.golang.org/grpc"
 	"ms.api/protos/pb/onboardingService"
 )
 
+var _ onboardingService.OnBoardingServiceClient = &FakeOnBoardingClient{}
+
 type FakeOnBoardingClient struct {
-	resp            *onboardingService.SuccessResponse
+	resp            *types.Response
 	createPhoneResp *onboardingService.CreatePhoneResponse
 	otpResp         *onboardingService.OtpVerificationResponse
 	err             error
 }
 
-func NewFakeOnBoardingClient(resp *onboardingService.SuccessResponse,
+func NewFakeOnBoardingClient(resp *types.Response,
 	cResp *onboardingService.CreatePhoneResponse,
 	otpResp *onboardingService.OtpVerificationResponse,
 	err error) *FakeOnBoardingClient {
@@ -26,8 +29,7 @@ func (f *FakeOnBoardingClient) CreatePhone(ctx context.Context,
 	return f.createPhoneResp, f.err
 }
 
-func (f *FakeOnBoardingClient) UpdatePersonBiodata(ctx context.Context,
-	req *onboardingService.UpdatePersonRequest, opts ...grpc.CallOption) (*onboardingService.SuccessResponse, error) {
+func (f *FakeOnBoardingClient) UpdatePersonBiodata(ctx context.Context, in *onboardingService.UpdatePersonRequest, opts ...grpc.CallOption) (*types.Response, error) {
 	return f.resp, f.err
 }
 
@@ -40,7 +42,7 @@ func (f *FakeOnBoardingClient) CreatePerson(ctx context.Context, req *onboarding
 }
 
 func (f *FakeOnBoardingClient) AddReasonsForUsingRoava(ctx context.Context, req *onboardingService.RoavaReasonsRequest,
-	opts ...grpc.CallOption) (*onboardingService.SuccessResponse, error) {
+	opts ...grpc.CallOption) (*types.Response, error) {
 	return f.resp, f.err
 }
 
@@ -60,8 +62,8 @@ func (f *FakeOnBoardingClient) VerifyEmailOtp(ctx context.Context, req *onboardi
 }
 
 func (f *FakeOnBoardingClient) ResendOtp(ctx context.Context, req *onboardingService.ResendOtpRequest,
-	opts ...grpc.CallOption) (*onboardingService.SuccessResponse, error) {
-	return &onboardingService.SuccessResponse{Message: ""}, f.err
+	opts ...grpc.CallOption) (*types.Response, error) {
+	return &types.Response{Message: ""}, f.err
 }
 
 func (f *FakeOnBoardingClient) CreateApplication(ctx context.Context, req *onboardingService.CreateApplicationRequest,
@@ -70,18 +72,18 @@ func (f *FakeOnBoardingClient) CreateApplication(ctx context.Context, req *onboa
 }
 
 func (f *FakeOnBoardingClient) SubmitCheck(ctx context.Context, req *onboardingService.SubmitCheckRequest,
-	opts ...grpc.CallOption) (*onboardingService.SuccessResponse, error) {
-	return &onboardingService.SuccessResponse{Message: "sucess"}, f.err
+	opts ...grpc.CallOption) (*types.Response, error) {
+	return &types.Response{Message: "sucess"}, f.err
 }
 
 func (f *FakeOnBoardingClient) VerifyEmailMagicLInk(ctx context.Context, req *onboardingService.VerifyEmailMagicLInkRequest,
-	opts ...grpc.CallOption) (*onboardingService.SuccessResponse, error) {
-	return &onboardingService.SuccessResponse{Message: "success"}, f.err
+	opts ...grpc.CallOption) (*types.Response, error) {
+	return &types.Response{Message: "success"}, f.err
 }
 
 func (f *FakeOnBoardingClient) ResendEmailMagicLInk(ctx context.Context, req *onboardingService.ResendEmailMagicLInkRequest,
-	opts ...grpc.CallOption) (*onboardingService.SuccessResponse, error) {
-	return &onboardingService.SuccessResponse{Message: "success"}, f.err
+	opts ...grpc.CallOption) (*types.Response, error) {
+	return &types.Response{Message: "success"}, f.err
 }
 
 func (f *FakeOnBoardingClient) FetchCountries(ctx context.Context, req *onboardingService.FetchCountriesRequest,
@@ -90,8 +92,8 @@ func (f *FakeOnBoardingClient) FetchCountries(ctx context.Context, req *onboardi
 }
 
 func (f *FakeOnBoardingClient) AcceptTermsAndConditions(ctx context.Context, req *onboardingService.TermsAndConditionsRequest,
-	opts ...grpc.CallOption) (*onboardingService.SuccessResponse, error) {
-	return &onboardingService.SuccessResponse{}, f.err
+	opts ...grpc.CallOption) (*types.Response, error) {
+	return &types.Response{}, f.err
 }
 
 func (f *FakeOnBoardingClient) FetchReasons(ctx context.Context, req *onboardingService.EmptyRequest,
@@ -100,8 +102,8 @@ func (f *FakeOnBoardingClient) FetchReasons(ctx context.Context, req *onboarding
 }
 
 func (f *FakeOnBoardingClient) UpdateFirebaseToken(ctx context.Context, req *onboardingService.UpdateFirebaseTokenRequest,
-	opts ...grpc.CallOption) (*onboardingService.SuccessResponse, error) {
-	return &onboardingService.SuccessResponse{}, f.err
+	opts ...grpc.CallOption) (*types.Response, error) {
+	return &types.Response{}, f.err
 }
 
 func (f *FakeOnBoardingClient) GetAddressesByText(ctx context.Context, req *onboardingService.GetAddressesRequest,

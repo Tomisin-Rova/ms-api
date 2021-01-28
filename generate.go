@@ -29,8 +29,7 @@ func GenProto() error {
 
 		shards := strings.Split(filePath, "/")
 		fileName := shards[len(shards)-1]
-		service := strings.Split(fileName, ".")[0]
-		folder := fmt.Sprintf("%s/pb/%sService", p, service)
+		folder := fmt.Sprintf("%s/..", wd)
 
 		if _, err := os.Stat(folder); os.IsNotExist(err) {
 			_ = os.MkdirAll(folder, os.ModePerm|os.ModeDir)
