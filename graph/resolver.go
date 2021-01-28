@@ -3,6 +3,7 @@ package graph
 import (
 	"context"
 	"fmt"
+	terror "github.com/roava/zebra/errors"
 	"time"
 
 	"go.uber.org/zap"
@@ -20,25 +21,24 @@ import (
 	"ms.api/server/http/middlewares"
 	"ms.api/types"
 
-	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 )
 
 // All error types here, so they don't get over-written in the mutation, query or subscription resolvers when generating schema
 var (
-	ErrUnAuthenticated = errors.New("user not authenticated")
-	ErrPayloadInvalid  = errors.New("payload is empty/invalid")
+	ErrUnAuthenticated = terror.NewTerror(
+		7012, "InvalidOrExpiredTokenError", "user not authenticated", "user not authenticated")
 )
 
 func (r *mutationResolver) validateAddress(addr *types.InputAddress) error {
 	if addr.Country == "" {
-		return errors.New("country data is missing from address")
+		return terror.NewTerror(7013, "InvalidCountryData", "country data is missing from address", "")
 	}
 	if addr.City == "" {
-		return errors.New("city data is missing from address")
+		return terror.NewTerror(7014, "InvalidCityData", "city data is missing from address", "")
 	}
 	if addr.Street == "" {
-		return errors.New("street data is missing from address")
+		return terror.NewTerror(7015, "InvalidStreetData", "street data is missing from address", "")
 	}
 	return nil
 }
