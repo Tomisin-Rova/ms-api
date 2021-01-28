@@ -1,24 +1,10 @@
 syntax = "proto3";
 
 package cdd;
-option go_package = "cddService";
-import "google/protobuf/any.proto";
+option go_package = "ms.api/protos/pb/cddService";
 
-message SuccessResponse {
-  string message = 1;
-}
-
-message Empty{
-}
-
-service CddService{
-  rpc GetCDDSummaryReport(PersonIdRequest) returns(Cddsummary){}
-  rpc GetCDDById(CddIdRequest) returns(Cdd){}
-}
-
-
-message void {}
-
+// Import types
+import "types.proto";
 
 message PersonIdRequest {
   string person_id = 1;
@@ -26,19 +12,6 @@ message PersonIdRequest {
 
 message CddIdRequest {
   string id = 1;
-}
-
-message Cdd {
-  string id = 1;
-  string owner = 2;
-  string details = 3;
-  string status = 4;
-  kyc kyc = 5;
-  aml aml = 6;
-  roava roava = 7;
-  cra cra = 8;
-  string created_at = 9;
-  string updated_at = 10;
 }
 
 message Cddsummary {
@@ -52,53 +25,7 @@ message cdd_summary_document {
   repeated string reasons = 3;
 }
 
-message kyc {
-  string id = 1;
-  applicant applicant = 2;
-  string status = 3;
-  string vendor = 4;
-  string created_at = 5;
-  string updated_at = 6;
-}
-
-message aml {
-  string created_at = 1;
-  string updated_at = 2;
-  string title = 3;
-  string person_id = 4;
-  string first_name = 5;
-  string last_name = 6;
-  string middle_name = 7;
-  string date_of_birth = 8;
-  string email = 9;
-  string nationality = 10;
-  google.protobuf.Any reports = 11; // Excluded from customers on the public graph.
-  string status = 12;
-}
-
-message roava {}
-
-message cra {}
-
-message address {
-  string flat_number = 1;
-  string building_number = 2;
-  string building_name = 3;
-  string street = 4;
-  string sub_street = 5;
-  string town = 6;
-  string state = 7;
-  string postcode = 8;
-  string country = 9;
-}
-
-message applicant {
-  string application_id = 1;
-  string applicant_id = 2;
-  string first_name = 3;
-  string last_name = 4;
-  string email = 5;
-  string dob = 6;
-  address address = 7;
-  string vendor = 8;
+service CddService{
+  rpc GetCDDSummaryReport(PersonIdRequest) returns(Cddsummary){}
+  rpc GetCDDById(CddIdRequest) returns(types.Cdd){}
 }

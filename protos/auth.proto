@@ -1,27 +1,14 @@
 syntax = "proto3";
 package auth;
-option go_package = "authService";
+option go_package = "ms.api/protos/pb/authService";
 
-service AuthService {
-  rpc Login(LoginRequest) returns (AuthResponse) {}
-  rpc ValidateToken(ValidateTokenRequest) returns (ValidateTokenResponse) {}
-  rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse) {}
-  rpc ConfirmPasswordResetDetails(PasswordResetUserDetails) returns (SuccessResponse) {}
-  rpc ConfirmPasswordResetOtp(PasswordResetOtpRequest) returns (SuccessResponse) {}
-  rpc ResetPassword(PasswordResetRequest) returns (SuccessResponse) {}
-  rpc GetPerson(GetPersonRequest) returns (GetPersonResponse) {}
-  rpc ActivateBioLogin(ActivateBioLoginRequest) returns (ActivateBioLoginResponse) {}
-  rpc DeactivateBioLogin(DeactivateBioLoginRequest) returns (SuccessResponse) {}
-}
-
-message SuccessResponse {
-  string message = 1;
-}
+// Import types
+import "types.proto";
 
 message LoginRequest {
-  string email  = 1;
-  string  passcode  = 2;
-  Device device = 3;
+  string email = 1;
+  string  passcode = 2;
+  types.Device device = 3;
   bool biometric = 4;
 }
 
@@ -53,17 +40,10 @@ message RefreshTokenResponse {
   string refreshToken = 2;
 }
 
-message Address {
-  string country = 1;
-  string street = 2;
-  string city = 3;
-  string postcode = 4;
-}
-
 message PasswordResetUserDetails {
-  string email  = 1;
-  string  dob  = 2;
-  Address  address = 3;
+  string email = 1;
+  string  dob = 2;
+  types.Address  address = 3;
 }
 
 message PasswordResetRequest {
@@ -85,12 +65,12 @@ message GetPersonRequest {
 
 message GetPersonResponse {
   string personId = 1;
-  repeated PhoneNumber PhoneNumber = 2;
+  repeated types.PhoneNumber PhoneNumber = 2;
   string title = 3;
   string firstName = 4;
   string lastName = 5;
   string middleName = 6;
-  repeated Email email = 7;
+  repeated types.Email email = 7;
   repeated string nationality = 8;
   repeated AddressResponse addresses = 9;
   bool isBiometricLoginEnabled = 11;
@@ -114,13 +94,6 @@ message ActivateBioLoginRequest {
   string identityId = 3;
 }
 
-message Device {
-  string os = 1;
-  string brand = 2;
-  string deviceToken = 3;
-  string deviceId = 4;
-}
-
 message ActivateBioLoginResponse {
   string message = 1;
   string biometricPasscode = 2;
@@ -140,19 +113,21 @@ message AuthResponse {
 message ApiPerson {
   string firstName = 1;
   string lastName = 2;
-  repeated Email email = 3;
+  repeated types.Email emails = 3;
   bool isEmailActive = 4;
   bool isBiometricLoginEnabled = 5;
   bool isTransactionPinEnabled = 6;
   string registrationCheckPoint = 7;
 }
 
-message Email {
-  string Value = 1;
-  bool Verified = 2;
-}
-
-message PhoneNumber {
-  string Number = 1;
-  bool Verified = 2;
+service AuthService {
+  rpc Login(LoginRequest) returns (AuthResponse) {}
+  rpc ValidateToken(ValidateTokenRequest) returns (ValidateTokenResponse) {}
+  rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse) {}
+  rpc ConfirmPasswordResetDetails(PasswordResetUserDetails) returns (types.Response) {}
+  rpc ConfirmPasswordResetOtp(PasswordResetOtpRequest) returns (types.Response) {}
+  rpc ResetPassword(PasswordResetRequest) returns (types.Response) {}
+  rpc GetPerson(GetPersonRequest) returns (GetPersonResponse) {}
+  rpc ActivateBioLogin(ActivateBioLoginRequest) returns (ActivateBioLoginResponse) {}
+  rpc DeactivateBioLogin(DeactivateBioLoginRequest) returns (types.Response) {}
 }

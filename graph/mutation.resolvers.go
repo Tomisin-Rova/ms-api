@@ -6,14 +6,15 @@ package graph
 import (
 	"context"
 	"fmt"
+
 	"go.uber.org/zap"
+	"ms.api/graph/generated"
 	emailvalidator "ms.api/libs/validator/email"
 	"ms.api/libs/validator/phonenumbervalidator"
 	"ms.api/protos/pb/authService"
 	"ms.api/protos/pb/onboardingService"
+	protoTypes "ms.api/protos/pb/types"
 	"ms.api/server/http/middlewares"
-
-	"ms.api/graph/generated"
 	"ms.api/types"
 )
 
@@ -28,7 +29,7 @@ func (r *mutationResolver) CreatePhone(ctx context.Context, phone string, device
 	// TODO: change onboardingService.CreatePhoneRequest{}.Tokens to slice datatype
 	result, err := r.onBoardingService.CreatePhone(ctx,
 		&onboardingService.CreatePhoneRequest{PhoneNumber: phone,
-			Device: &onboardingService.Device{Os: device.Os, Brand: device.Brand,
+			Device: &protoTypes.Device{Os: device.Os, Brand: device.Brand,
 				DeviceId: device.Identifier, DeviceToken: ""}})
 	if err != nil {
 		r.logger.Info(fmt.Sprintf("OnBoardingService.createPhone() failed: %v", err))
@@ -108,7 +109,7 @@ func (r *mutationResolver) Login(ctx context.Context, credentials types.AuthInpu
 		Email:     credentials.Email,
 		Passcode:  credentials.Passcode,
 		Biometric: bio,
-		Device: &authService.Device{
+		Device: &protoTypes.Device{
 			Os:       credentials.Device.Os,
 			Brand:    credentials.Device.Brand,
 			DeviceId: credentials.Device.Identifier,

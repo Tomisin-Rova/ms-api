@@ -3,22 +3,23 @@ package fakes
 import (
 	"context"
 	"google.golang.org/grpc"
+	"ms.api/protos/pb/types"
 	"ms.api/protos/pb/verifyService"
 )
 
 type FakeVerifyClient struct {
 	resp        *verifyService.OtpVerificationResponse
-	successResp *verifyService.SuccessResponse
+	successResp *types.Response
 	err         error
 }
 
 func NewFakeVerifyClient(res *verifyService.OtpVerificationResponse,
-	successResp *verifyService.SuccessResponse, err error) *FakeVerifyClient {
+	successResp *types.Response, err error) *FakeVerifyClient {
 	return &FakeVerifyClient{resp: res, err: err}
 }
 
 func (f *FakeVerifyClient) ValidateEmail(ctx context.Context, req *verifyService.ValidateEmailRequest,
-	opts ...grpc.CallOption) (*verifyService.SuccessResponse, error) {
+	opts ...grpc.CallOption) (*types.Response, error) {
 	return f.successResp, f.err
 }
 
@@ -33,6 +34,6 @@ func (f *FakeVerifyClient) VerifyEmailOtp(ctx context.Context, req *verifyServic
 }
 
 func (f *FakeVerifyClient) ResendOtp(ctx context.Context, req *verifyService.ResendOtpRequest,
-	opt ...grpc.CallOption) (*verifyService.SuccessResponse, error) {
+	opt ...grpc.CallOption) (*types.Response, error) {
 	return f.successResp, f.err
 }

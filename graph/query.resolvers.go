@@ -7,12 +7,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/jinzhu/copier"
 	"go.uber.org/zap"
+	"ms.api/graph/generated"
 	"ms.api/protos/pb/authService"
 	"ms.api/server/http/middlewares"
-
-	"ms.api/graph/generated"
 	"ms.api/types"
 )
 

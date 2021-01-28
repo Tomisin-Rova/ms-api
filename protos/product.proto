@@ -1,36 +1,29 @@
 syntax = "proto3";
 package product;
-option go_package = "productService";
+option go_package = "ms.api/protos/pb/productService";
+
+// Import types
+import "types.proto";
 
 message SuccessResponse {
-    string message = 1;
+  string message = 1;
 }
 
 message CreateAccountRequest {
-    string personId = 1;
-    string currency = 2;
+  string personId = 1;
+  string currency = 2;
 }
 
 message GetAccountRequest {
-    string personId = 1;
+  string personId = 1;
 }
 
 message GetAccountResponse {
-    Account primaryAccount = 1;
-    repeated Account accounts = 2;
-}
-
-message Account {
-    string accountName = 1;
-    string accountNumber = 2;
-    string currencyCode = 3;
-    string currencySymbol = 4;
-    string IBAN = 5;
-    string shortCode = 6;
-    string balance = 7;
+  types.Account primaryAccount = 1;
+  repeated types.Account accounts = 2;
 }
 
 service ProductService{
-    rpc CreateAccount(CreateAccountRequest) returns (SuccessResponse) {}
-    rpc GetAccounts(GetAccountRequest) returns (GetAccountResponse) {}
+  rpc CreateAccount(CreateAccountRequest) returns (types.Response) {}
+  rpc GetAccounts(GetAccountRequest) returns (GetAccountResponse) {}
 }
