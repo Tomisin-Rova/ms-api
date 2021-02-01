@@ -17,6 +17,13 @@ message Device {
   string deviceId = 4;
 }
 
+message InputAddress {
+  string country = 1;
+  string street = 2;
+  string city = 3;
+  string postcode = 4;
+}
+
 message SuccessResponse {
   string message = 1;
 }
@@ -40,7 +47,7 @@ message CreatePersonResponse {
 
 message UpdatePersonRequest {
   string personId = 1;
-  types.Address address = 2;
+  InputAddress address = 2;
   string firstName = 3;
   string lastName = 4;
   string dob = 5;
@@ -156,7 +163,7 @@ message GetAddressesResponse {
 service OnBoardingService{
   rpc CreatePhone(CreatePhoneRequest) returns (CreatePhoneResponse) {}
   rpc CreatePerson(CreatePersonRequest) returns (CreatePersonResponse) {}
-  rpc UpdatePersonBiodata(UpdatePersonRequest) returns (types.Response) {}
+  rpc UpdatePersonBiodata(UpdatePersonRequest) returns (types.Person) {}
   rpc AddReasonsForUsingRoava(RoavaReasonsRequest) returns (types.Response) {}
   rpc CheckEmailExistence(CheckEmailExistenceRequest) returns (CheckEmailExistenceResponse) {}
   rpc VerifySmsOtp(OtpVerificationRequest) returns (OtpVerificationResponse) {}

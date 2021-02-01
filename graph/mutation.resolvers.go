@@ -6,6 +6,7 @@ package graph
 import (
 	"context"
 	"fmt"
+	"ms.api/libs/validator/datevalidator"
 
 	"go.uber.org/zap"
 	"ms.api/graph/generated"
@@ -75,7 +76,86 @@ func (r *mutationResolver) Signup(ctx context.Context, token string, email strin
 }
 
 func (r *mutationResolver) Registration(ctx context.Context, personid string, person types.PersonInput, address types.AddressInput) (*types.Person, error) {
-	panic(fmt.Errorf("not implemented"))
+	personId, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+	if err := datevalidator.ValidateDob(person.Dob); err != nil {
+		return nil, err
+	}
+	if err := r.validateAddress(address); err != nil {
+		return nil, err
+	}
+	if *address.Postcode == "" {
+		*address.Postcode = "NA"
+	}
+
+	payload := onboardingService.UpdatePersonRequest{
+		PersonId: personId.PersonId,
+		Address: &onboardingService.InputAddress{
+			Postcode: *address.Postcode, Street: *address.Street,
+			City: *address.City, Country: *address.Country,
+		},
+		FirstName: person.FirstName,
+		LastName:  person.LastName,
+		Dob:       person.Dob,
+	}
+	res, err := r.onBoardingService.UpdatePersonBiodata(context.Background(), &payload)
+	if err != nil {
+		return nil, err
+	}
+	identities := make([]*types.Identity, 0)
+	emails := make([]*types.Email, 0)
+	phones := make([]*types.Phone, 0)
+	addresses := make([]*types.Address, 0)
+	for _, id := range res.Identities {
+		identities = append(identities, &types.Identity{
+			ID:             id.Id,
+			Owner:          id.Owner,
+			Nickname:       &id.Nickname,
+			Active:         &id.Active,
+			Authentication: &id.Authentication,
+		})
+	}
+	for _, email := range res.Emails {
+		emails = append(emails, &types.Email{
+			Value:    email.Value,
+			Verified: email.Verified,
+		})
+	}
+	for _, phone := range res.Phones {
+		phones = append(phones, &types.Phone{
+			Value:   phone.Number,
+			Verified: phone.Verified,
+		})
+	}
+	for _, addr := range res.Addresses {
+		addresses = append(addresses, &types.Address{
+			Street:         &addr.Street,
+			State:          &addr.State,
+			Postcode:       &addr.Postcode,
+			Country:        &types.Country{CountryName: addr.Country},
+		})
+	}
+	nationality := make([]*string, 0)
+	for _, next := range res.Nationality {
+		nationality = append(nationality, &next)
+	}
+	return &types.Person{
+		ID:               res.Id,
+		Title:            &res.Title,
+		FirstName:        res.FirstName,
+		LastName:         res.LastName,
+		MiddleName:       &res.MiddleName,
+		Phones:           phones,
+		Emails:           emails,
+		Dob:              res.Dob,
+		CountryResidence: &res.CountryResidence,
+		Nationality:      nationality,
+		Addresses:        addresses,
+		Identities:       identities,
+		Ts:               int64(res.Ts),
+	}, nil
 }
 
 func (r *mutationResolver) IntendedActivities(ctx context.Context, activities []string) (*types.Response, error) {
