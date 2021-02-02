@@ -95,7 +95,7 @@ func (r *mutationResolver) IntendedActivities(ctx context.Context, activities []
 		return nil, fmt.Errorf("an error ocurred saving the reasons of use, pls try again")
 	}
 
-	r.logger.Error("Adding reasons for using roava succeed")
+	r.logger.Info("Adding reasons for using roava succeed")
 
 	return &types.Response{Message: resp.Message, Success: true}, nil
 }
