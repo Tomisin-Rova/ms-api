@@ -79,7 +79,25 @@ func (r *mutationResolver) Registration(ctx context.Context, personid string, pe
 }
 
 func (r *mutationResolver) IntendedActivities(ctx context.Context, activities []string) (*types.Response, error) {
-	panic(fmt.Errorf("not implemented"))
+	claims, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+
+	req := &onboardingService.RoavaReasonsRequest{
+		PersonId: claims.PersonId,
+		Reasons:  activities,
+	}
+
+	resp, err := r.onBoardingService.AddReasonsForUsingRoava(ctx,req)
+	if err != nil {
+		r.logger.Error("Adding reasons for using roava failed", zap.Error(err))
+		return nil, fmt.Errorf("an error ocurred saving the reasons of use, pls try again")
+	}
+
+	r.logger.Error("Adding reasons for using roava succeed")
+
+	return &types.Response{Message: resp.Message, Success: true}, nil
 }
 
 func (r *mutationResolver) CreateApplication(ctx context.Context, applicant types.ApplicantInput) (*types.Response, error) {
