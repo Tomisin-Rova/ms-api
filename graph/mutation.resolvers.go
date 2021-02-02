@@ -6,10 +6,10 @@ package graph
 import (
 	"context"
 	"fmt"
-	"ms.api/libs/validator/datevalidator"
 
 	"go.uber.org/zap"
 	"ms.api/graph/generated"
+	"ms.api/libs/validator/datevalidator"
 	emailvalidator "ms.api/libs/validator/email"
 	"ms.api/libs/validator/phonenumbervalidator"
 	"ms.api/protos/pb/authService"
@@ -27,13 +27,19 @@ func (r *mutationResolver) CreatePhone(ctx context.Context, phone string, device
 		)
 		return nil, err
 	}
-	// TODO: change onboardingService.CreatePhoneRequest{}.Tokens to slice datatype
+
 	result, err := r.onBoardingService.CreatePhone(ctx,
-		&onboardingService.CreatePhoneRequest{PhoneNumber: phone,
-			Device: &protoTypes.Device{Os: device.Os, Brand: device.Brand,
-				DeviceId: device.Identifier, DeviceToken: ""}})
+		&onboardingService.CreatePhoneRequest{
+			PhoneNumber: phone,
+			Device: &protoTypes.Device{
+				Identifier: device.Identifier,
+				Brand:      device.Brand,
+				Os:         device.Os,
+			},
+		},
+	)
 	if err != nil {
-		r.logger.Info(fmt.Sprintf("OnBoardingService.createPhone() failed: %v", err))
+		r.logger.Error("error calling onBoardingService.CreatePhone()", zap.Error(err))
 		return nil, err
 	}
 	return &types.Response{Message: result.Message, Success: true, Token: &result.Token}, nil
@@ -44,7 +50,7 @@ func (r *mutationResolver) ConfirmPhone(ctx context.Context, token string, code 
 		Token: token, Code: code,
 	})
 	if err != nil {
-		r.logger.Info(fmt.Sprintf("onboardingService.verifySmsOtp() failed: %v", err))
+		r.logger.Error("error calling onBoardingService.ConfirmPhone()", zap.Error(err))
 		return nil, err
 	}
 	return &types.Response{Success: resp.Match, Message: resp.Message}, nil
@@ -190,9 +196,9 @@ func (r *mutationResolver) Login(ctx context.Context, credentials types.AuthInpu
 		Passcode:  credentials.Passcode,
 		Biometric: bio,
 		Device: &protoTypes.Device{
-			Os:       credentials.Device.Os,
-			Brand:    credentials.Device.Brand,
-			DeviceId: credentials.Device.Identifier,
+			Os:         credentials.Device.Os,
+			Brand:      credentials.Device.Brand,
+			Identifier: credentials.Device.Identifier,
 		}}
 	resp, err := r.authService.Login(ctx, req)
 	if err != nil {

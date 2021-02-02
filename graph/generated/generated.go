@@ -6603,6 +6603,8 @@ enum OnboardingCheckPoint {
   TERMS         # accept terms
   COMPLETE      # submit application
 }
+# enum of possible device tokens
+enum DeviceTokenType { FIREBASE BIOMETRIC }
 # S C A L A R S
 # raw JSON value
 scalar JSON
@@ -6744,7 +6746,8 @@ input DeviceInput {
   tokens: [DeviceTokenInput]!
 }
 input DeviceTokenInput {
-  firebase: String!
+  type: DeviceTokenType!
+  value: String!
 }
 # https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1103757335/roava+address
 type Address {
@@ -34398,11 +34401,19 @@ func (ec *executionContext) unmarshalInputDeviceTokenInput(ctx context.Context, 
 
 	for k, v := range asMap {
 		switch k {
-		case "firebase":
+		case "type":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("firebase"))
-			it.Firebase, err = ec.unmarshalNString2string(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
+			it.Type, err = ec.unmarshalNDeviceTokenType2msᚗapiᚋtypesᚐDeviceTokenType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "value":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("value"))
+			it.Value, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -41069,6 +41080,16 @@ func (ec *executionContext) unmarshalNDeviceTokenInput2ᚕᚖmsᚗapiᚋtypesᚐ
 		}
 	}
 	return res, nil
+}
+
+func (ec *executionContext) unmarshalNDeviceTokenType2msᚗapiᚋtypesᚐDeviceTokenType(ctx context.Context, v interface{}) (types.DeviceTokenType, error) {
+	var res types.DeviceTokenType
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNDeviceTokenType2msᚗapiᚋtypesᚐDeviceTokenType(ctx context.Context, sel ast.SelectionSet, v types.DeviceTokenType) graphql.Marshaler {
+	return v
 }
 
 func (ec *executionContext) marshalNEmail2ᚕᚖmsᚗapiᚋtypesᚐEmail(ctx context.Context, sel ast.SelectionSet, v []*types.Email) graphql.Marshaler {

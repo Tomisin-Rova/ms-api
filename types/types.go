@@ -467,7 +467,8 @@ type DeviceToken struct {
 }
 
 type DeviceTokenInput struct {
-	Firebase string `json:"firebase"`
+	Type  DeviceTokenType `json:"type"`
+	Value string          `json:"value"`
 }
 
 type Email struct {
@@ -1151,6 +1152,47 @@ func (e *DeliveryMode) UnmarshalGQL(v interface{}) error {
 }
 
 func (e DeliveryMode) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type DeviceTokenType string
+
+const (
+	DeviceTokenTypeFirebase  DeviceTokenType = "FIREBASE"
+	DeviceTokenTypeBiometric DeviceTokenType = "BIOMETRIC"
+)
+
+var AllDeviceTokenType = []DeviceTokenType{
+	DeviceTokenTypeFirebase,
+	DeviceTokenTypeBiometric,
+}
+
+func (e DeviceTokenType) IsValid() bool {
+	switch e {
+	case DeviceTokenTypeFirebase, DeviceTokenTypeBiometric:
+		return true
+	}
+	return false
+}
+
+func (e DeviceTokenType) String() string {
+	return string(e)
+}
+
+func (e *DeviceTokenType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = DeviceTokenType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid DeviceTokenType", str)
+	}
+	return nil
+}
+
+func (e DeviceTokenType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
