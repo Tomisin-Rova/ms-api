@@ -125,16 +125,16 @@ func (r *mutationResolver) Registration(ctx context.Context, personid string, pe
 	}
 	for _, phone := range res.Phones {
 		phones = append(phones, &types.Phone{
-			Value:   phone.Number,
+			Value:    phone.Number,
 			Verified: phone.Verified,
 		})
 	}
 	for _, addr := range res.Addresses {
 		addresses = append(addresses, &types.Address{
-			Street:         &addr.Street,
-			State:          &addr.State,
-			Postcode:       &addr.Postcode,
-			Country:        &types.Country{CountryName: addr.Country},
+			Street:   &addr.Street,
+			State:    &addr.State,
+			Postcode: &addr.Postcode,
+			Country:  &types.Country{CountryName: addr.Country},
 		})
 	}
 	nationality := make([]*string, 0)
