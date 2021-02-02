@@ -31,7 +31,7 @@ var (
 )
 
 //nolint
-func (r *mutationResolver) validateAddress(addr *types.AddressInput) error {
+func (r *mutationResolver) validateAddress(addr types.AddressInput) error {
 	if *addr.Country == "" {
 		return errors.NewTerror(7013, "InvalidCountryData", "country data is missing from address", "")
 	}
