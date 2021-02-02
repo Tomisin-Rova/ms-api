@@ -10,22 +10,11 @@ message CreatePhoneRequest {
   types.Device device = 2;
 }
 
-message Device {
-  string os = 1;
-  string brand = 2;
-  string deviceToken = 3;
-  string deviceId = 4;
-}
-
 message InputAddress {
   string country = 1;
   string street = 2;
   string city = 3;
   string postcode = 4;
-}
-
-message SuccessResponse {
-  string message = 1;
 }
 
 message CreatePhoneResponse {

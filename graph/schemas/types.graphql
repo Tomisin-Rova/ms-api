@@ -55,6 +55,8 @@ enum OnboardingCheckPoint {
   TERMS         # accept terms
   COMPLETE      # submit application
 }
+# enum of possible device tokens
+enum DeviceTokenType { FIREBASE BIOMETRIC }
 # S C A L A R S
 # raw JSON value
 scalar JSON
@@ -196,7 +198,8 @@ input DeviceInput {
   tokens: [DeviceTokenInput]!
 }
 input DeviceTokenInput {
-  firebase: String!
+  type: DeviceTokenType!
+  value: String!
 }
 # https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1103757335/roava+address
 type Address {
