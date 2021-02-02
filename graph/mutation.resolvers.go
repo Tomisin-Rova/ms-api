@@ -89,7 +89,7 @@ func (r *mutationResolver) IntendedActivities(ctx context.Context, activities []
 		Reasons:  activities,
 	}
 
-	resp, err := r.onBoardingService.AddReasonsForUsingRoava(ctx,req)
+	resp, err := r.onBoardingService.AddReasonsForUsingRoava(ctx, req)
 	if err != nil {
 		r.logger.Error("Adding reasons for using roava failed", zap.Error(err))
 		return nil, fmt.Errorf("an error ocurred saving the reasons of use, pls try again")
