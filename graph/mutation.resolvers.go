@@ -56,14 +56,14 @@ func (r *mutationResolver) ConfirmPhone(ctx context.Context, token string, code 
 	return &types.Response{Success: resp.Match, Message: resp.Message}, nil
 }
 
-func (r *mutationResolver) Signup(ctx context.Context, token string, email string, passcode *string) (*types.AuthResponse, error) {
+func (r *mutationResolver) Signup(ctx context.Context, token string, email string, passcode string) (*types.AuthResponse, error) {
 	if err := emailvalidator.Validate(email); err != nil {
 		return nil, err
 	}
 
 	result, err := r.onBoardingService.CreatePerson(ctx, &onboardingService.CreatePersonRequest{
 		Email:    email,
-		Passcode: *passcode,
+		Passcode: passcode,
 		Token:    token,
 	})
 	if err != nil {
@@ -190,7 +190,7 @@ func (r *mutationResolver) CreateApplication(ctx context.Context, applicant type
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *mutationResolver) VerifyEmail(ctx context.Context, email string, token string) (*types.Response, error) {
+func (r *mutationResolver) VerifyEmail(ctx context.Context, email string, code string) (*types.Response, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 

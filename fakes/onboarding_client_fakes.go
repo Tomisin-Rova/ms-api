@@ -56,11 +56,6 @@ func (f *FakeOnBoardingClient) VerifySmsOtp(ctx context.Context, req *onboarding
 	return f.otpResp, f.err
 }
 
-func (f *FakeOnBoardingClient) VerifyEmailOtp(ctx context.Context, req *onboardingService.OtpVerificationByEmailRequest,
-	opts ...grpc.CallOption) (*onboardingService.OtpVerificationResponse, error) {
-	return f.otpResp, f.err
-}
-
 func (f *FakeOnBoardingClient) ResendOtp(ctx context.Context, req *onboardingService.ResendOtpRequest,
 	opts ...grpc.CallOption) (*types.Response, error) {
 	return &types.Response{Message: ""}, f.err
