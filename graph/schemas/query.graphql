@@ -8,6 +8,7 @@ type Query {
   checkEmail(email: String!): Boolean
   address(id: ID!): Address
   addresses: [Address]
+  addressLookup(text: String, first: Int, after: String, last: Int, before: String): AddressConnection
   device(identifier: String!): Device
   devices(first: Int, after: String, last: Int, before: String): DeviceConnection
   auths: [Auth]

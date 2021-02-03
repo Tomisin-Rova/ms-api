@@ -2,6 +2,7 @@ package fakes
 
 import (
 	"context"
+
 	"ms.api/protos/pb/types"
 
 	"google.golang.org/grpc"
@@ -101,7 +102,7 @@ func (f *FakeOnBoardingClient) UpdateFirebaseToken(ctx context.Context, req *onb
 	return &types.Response{}, f.err
 }
 
-func (f *FakeOnBoardingClient) GetAddressesByText(ctx context.Context, req *onboardingService.GetAddressesRequest,
-	opts ...grpc.CallOption) (*onboardingService.GetAddressesResponse, error) {
-	return &onboardingService.GetAddressesResponse{}, f.err
+func (f *FakeOnBoardingClient) AddressLookup(ctx context.Context, req *onboardingService.AddressLookupRequest,
+	opts ...grpc.CallOption) (*onboardingService.AddressLookupResponse, error) {
+	return &onboardingService.AddressLookupResponse{}, f.err
 }

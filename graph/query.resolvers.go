@@ -10,8 +10,11 @@ import (
 
 	"github.com/jinzhu/copier"
 	"go.uber.org/zap"
+	"ms.api/graph/connections"
 	"ms.api/graph/generated"
+	"ms.api/graph/models"
 	"ms.api/protos/pb/authService"
+	"ms.api/protos/pb/onboardingService"
 	"ms.api/server/http/middlewares"
 	"ms.api/types"
 )
@@ -69,6 +72,63 @@ func (r *queryResolver) Address(ctx context.Context, id string) (*types.Address,
 
 func (r *queryResolver) Addresses(ctx context.Context) ([]*types.Address, error) {
 	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *queryResolver) AddressLookup(ctx context.Context, text *string, first *int64, after *string, last *int64, before *string) (*types.AddressConnection, error) {
+	_, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+	addresses, err := r.onBoardingService.AddressLookup(ctx, &onboardingService.AddressLookupRequest{
+		Text: *text,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	input := models.ConnectionInput{
+		Before: before,
+		After:  after,
+		First:  first,
+		Last:   last,
+	}
+
+	edger := func(address *types.Address, offset int) connections.Edge {
+		return types.AddressEdge{
+			Node:   address,
+			Cursor: connections.OffsetToCursor(offset),
+		}
+	}
+
+	conn := func(edges []*types.AddressEdge, nodes []*types.Address, info *types.PageInfo, totalCount int) (*types.AddressConnection, error) {
+		var addressNodes []*types.Address
+		addressNodes = append(addressNodes, nodes...)
+
+		return &types.AddressConnection{
+			Edges:      edges,
+			Nodes:      addressNodes,
+			PageInfo:   info,
+			TotalCount: int64(totalCount),
+		}, nil
+	}
+
+	var addressRes []*types.Address
+	for _, c := range addresses.Addresses {
+		address := &types.Address{
+			Street:   &c.Street,
+			City:     &c.Town,
+			State:    &c.State,
+			Postcode: &c.Postcode,
+			Country: &types.Country{
+				CountryName: c.Country,
+			},
+		}
+
+		addressRes = append(addressRes, address)
+	}
+
+	return connections.AddressLookupCon(addressRes, edger, conn, input)
 }
 
 func (r *queryResolver) Device(ctx context.Context, identifier string) (*types.Device, error) {

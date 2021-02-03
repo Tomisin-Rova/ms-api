@@ -216,6 +216,19 @@ type Address {
   ts: Int
   location: Location
 }
+
+type AddressConnection {
+  edges: [AddressEdge!]!
+  nodes: [Address!]!
+  pageInfo: PageInfo
+  totalCount: Int!
+}
+
+type AddressEdge {
+  node: Address!
+  cursor: String!
+}
+
 type Location {
   longitude: Float
   latitude: Float

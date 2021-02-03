@@ -167,6 +167,18 @@ type Address struct {
 	Location *Location `json:"location"`
 }
 
+type AddressConnection struct {
+	Edges      []*AddressEdge `json:"edges"`
+	Nodes      []*Address     `json:"nodes"`
+	PageInfo   *PageInfo      `json:"pageInfo"`
+	TotalCount int64          `json:"totalCount"`
+}
+
+type AddressEdge struct {
+	Node   *Address `json:"node"`
+	Cursor string   `json:"cursor"`
+}
+
 type AddressInput struct {
 	Street   *string `json:"street"`
 	City     *string `json:"city"`

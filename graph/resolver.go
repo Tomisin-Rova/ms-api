@@ -3,6 +3,8 @@ package graph
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/roava/zebra/errors"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -18,7 +20,6 @@ import (
 	"ms.api/protos/pb/verifyService"
 	"ms.api/server/http/middlewares"
 	"ms.api/types"
-	"time"
 )
 
 // This file will not be regenerated automatically.
