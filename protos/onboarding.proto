@@ -56,7 +56,6 @@ message CheckEmailExistenceResponse {
   string message = 2;
 }
 
-
 message OtpVerificationResponse {
   bool match = 1;
   string message = 2;
@@ -64,11 +63,6 @@ message OtpVerificationResponse {
 
 message OtpVerificationRequest {
   string token = 1;
-  string code = 2;
-}
-
-message OtpVerificationByEmailRequest {
-  string email = 1;
   string code = 2;
 }
 
@@ -156,7 +150,6 @@ service OnBoardingService{
   rpc AddReasonsForUsingRoava(RoavaReasonsRequest) returns (types.Response) {}
   rpc CheckEmailExistence(CheckEmailExistenceRequest) returns (CheckEmailExistenceResponse) {}
   rpc VerifySmsOtp(OtpVerificationRequest) returns (OtpVerificationResponse) {}
-  rpc VerifyEmailOtp(OtpVerificationByEmailRequest) returns (OtpVerificationResponse) {}
   rpc ResendOtp(ResendOtpRequest) returns (types.Response) {}
   rpc CreateApplication(CreateApplicationRequest) returns (CreateApplicationResponse) {}
   rpc SubmitCheck(SubmitCheckRequest) returns (types.Response) {}

@@ -634,10 +634,10 @@ type ComplexityRoot struct {
 		ResendOtp            func(childComplexity int, phone string) int
 		ResetPasscode        func(childComplexity int, credentials *types.AuthInput, token string) int
 		SetBiometricAuth     func(childComplexity int, activate *bool) int
-		Signup               func(childComplexity int, token string, email string, passcode *string) int
+		Signup               func(childComplexity int, token string, email string, passcode string) int
 		SubmitApplication    func(childComplexity int) int
 		UpdateDeviceToken    func(childComplexity int, token string) int
-		VerifyEmail          func(childComplexity int, email string, token string) int
+		VerifyEmail          func(childComplexity int, email string, code string) int
 	}
 
 	OpeningBalance struct {
@@ -1084,11 +1084,11 @@ type ComplexityRoot struct {
 type MutationResolver interface {
 	CreatePhone(ctx context.Context, phone string, device types.DeviceInput) (*types.Response, error)
 	ConfirmPhone(ctx context.Context, token string, code string) (*types.Response, error)
-	Signup(ctx context.Context, token string, email string, passcode *string) (*types.AuthResponse, error)
+	Signup(ctx context.Context, token string, email string, passcode string) (*types.AuthResponse, error)
 	Registration(ctx context.Context, personid string, person types.PersonInput, address types.AddressInput) (*types.Person, error)
 	IntendedActivities(ctx context.Context, activities []string) (*types.Response, error)
 	CreateApplication(ctx context.Context, applicant types.ApplicantInput) (*types.Response, error)
-	VerifyEmail(ctx context.Context, email string, token string) (*types.Response, error)
+	VerifyEmail(ctx context.Context, email string, code string) (*types.Response, error)
 	ResendOtp(ctx context.Context, phone string) (*types.Response, error)
 	ResendEmailMagicLInk(ctx context.Context, email string) (*types.Response, error)
 	Login(ctx context.Context, credentials types.AuthInput, biometric *bool) (*types.AuthResponse, error)
@@ -4029,7 +4029,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.Signup(childComplexity, args["token"].(string), args["email"].(string), args["passcode"].(*string)), true
+		return e.complexity.Mutation.Signup(childComplexity, args["token"].(string), args["email"].(string), args["passcode"].(string)), true
 
 	case "Mutation.submitApplication":
 		if e.complexity.Mutation.SubmitApplication == nil {
@@ -4060,7 +4060,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.VerifyEmail(childComplexity, args["email"].(string), args["token"].(string)), true
+		return e.complexity.Mutation.VerifyEmail(childComplexity, args["email"].(string), args["code"].(string)), true
 
 	case "OpeningBalance.default_value":
 		if e.complexity.OpeningBalance.DefaultValue == nil {
@@ -6449,39 +6449,39 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 
 var sources = []*ast.Source{
 	{Name: "graph/schemas/mutation.graphql", Input: `type Mutation {
-  # onboarding
-  createPhone(phone: String!, device: DeviceInput!): Response!
-  confirmPhone(token: String!, code: String!): Response!
-  """
-  Creates person's ROAVA login credentials (email, login)
-  """
-  signup(token: String!, email: String!, passcode: String): AuthResponse!
-  """
-  Creates person's ROAVA profile - capturing name, dob, address etc
-  """
-  registration(personid: ID!, person: PersonInput!, address: AddressInput!): Person
-  intendedActivities(activities: [ID!]): Response!
-  createApplication(applicant: ApplicantInput!): Response!
-  # verifications
-  verifyEmail(email: String!, token: String!): Response!
-  resendOTP(phone: String!): Response!
-  resendEmailMagicLInk(email: String!): Response!
-  # auth
-  login(credentials: AuthInput!, biometric: Boolean): AuthResponse!
-  refreshToken(token: String!): AuthResponse!
-  updateDeviceToken(token: String!): Response!
-  setBiometricAuth(activate: Boolean): Response!
-  resetPasscode(credentials: AuthInput, token: String!): Response!
-  # confirmPasscodeResetDetails(email: String!, dob: String!, address: InputAddress!): Result
-  # confirmPasscodeResetOtp(email: String!, otp: String!): Result
-  """
-  Submit a KYC and AML check for a given customer who has accepted terms & conditions
-  """
-  submitApplication: Response!
-  """
-  Customer accepts an array of documents displayed to them during onboarding
-  """
-  acceptTerms(documents: [ID]!): Response!
+    # onboarding
+    createPhone(phone: String!, device: DeviceInput!): Response!
+    confirmPhone(token: String!, code: String!): Response!
+    """
+    Creates person's ROAVA login credentials (email, login)
+    """
+    signup(token: String!, email: String!, passcode: String!): AuthResponse!
+    """
+    Creates person's ROAVA profile - capturing name, dob, address etc
+    """
+    registration(personid: ID!, person: PersonInput!, address: AddressInput!): Person
+    intendedActivities(activities: [ID!]): Response!
+    createApplication(applicant: ApplicantInput!): Response!
+    # verifications
+    verifyEmail(email: String!, code: String!): Response!
+    resendOTP(phone: String!): Response!
+    resendEmailMagicLInk(email: String!): Response!
+    # auth
+    login(credentials: AuthInput!, biometric: Boolean): AuthResponse!
+    refreshToken(token: String!): AuthResponse!
+    updateDeviceToken(token: String!): Response!
+    setBiometricAuth(activate: Boolean): Response!
+    resetPasscode(credentials: AuthInput, token: String!): Response!
+    # confirmPasscodeResetDetails(email: String!, dob: String!, address: InputAddress!): Result
+    # confirmPasscodeResetOtp(email: String!, otp: String!): Result
+    """
+    Submit a KYC and AML check for a given customer who has accepted terms & conditions
+    """
+    submitApplication: Response!
+    """
+    Customer accepts an array of documents displayed to them during onboarding
+    """
+    acceptTerms(documents: [ID]!): Response!
 }
 `, BuiltIn: false},
 	{Name: "graph/schemas/query.graphql", Input: `type Query {
@@ -8148,10 +8148,10 @@ func (ec *executionContext) field_Mutation_signup_args(ctx context.Context, rawA
 		}
 	}
 	args["email"] = arg1
-	var arg2 *string
+	var arg2 string
 	if tmp, ok := rawArgs["passcode"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("passcode"))
-		arg2, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		arg2, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -8188,14 +8188,14 @@ func (ec *executionContext) field_Mutation_verifyEmail_args(ctx context.Context,
 	}
 	args["email"] = arg0
 	var arg1 string
-	if tmp, ok := rawArgs["token"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("token"))
+	if tmp, ok := rawArgs["code"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("code"))
 		arg1, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["token"] = arg1
+	args["code"] = arg1
 	return args, nil
 }
 
@@ -22413,7 +22413,7 @@ func (ec *executionContext) _Mutation_signup(ctx context.Context, field graphql.
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().Signup(rctx, args["token"].(string), args["email"].(string), args["passcode"].(*string))
+		return ec.resolvers.Mutation().Signup(rctx, args["token"].(string), args["email"].(string), args["passcode"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -22578,7 +22578,7 @@ func (ec *executionContext) _Mutation_verifyEmail(ctx context.Context, field gra
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().VerifyEmail(rctx, args["email"].(string), args["token"].(string))
+		return ec.resolvers.Mutation().VerifyEmail(rctx, args["email"].(string), args["code"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

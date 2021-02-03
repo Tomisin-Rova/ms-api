@@ -1,35 +1,35 @@
 type Mutation {
-  # onboarding
-  createPhone(phone: String!, device: DeviceInput!): Response!
-  confirmPhone(token: String!, code: String!): Response!
-  """
-  Creates person's ROAVA login credentials (email, login)
-  """
-  signup(token: String!, email: String!, passcode: String): AuthResponse!
-  """
-  Creates person's ROAVA profile - capturing name, dob, address etc
-  """
-  registration(personid: ID!, person: PersonInput!, address: AddressInput!): Person
-  intendedActivities(activities: [ID!]): Response!
-  createApplication(applicant: ApplicantInput!): Response!
-  # verifications
-  verifyEmail(email: String!, token: String!): Response!
-  resendOTP(phone: String!): Response!
-  resendEmailMagicLInk(email: String!): Response!
-  # auth
-  login(credentials: AuthInput!, biometric: Boolean): AuthResponse!
-  refreshToken(token: String!): AuthResponse!
-  updateDeviceToken(token: String!): Response!
-  setBiometricAuth(activate: Boolean): Response!
-  resetPasscode(credentials: AuthInput, token: String!): Response!
-  # confirmPasscodeResetDetails(email: String!, dob: String!, address: InputAddress!): Result
-  # confirmPasscodeResetOtp(email: String!, otp: String!): Result
-  """
-  Submit a KYC and AML check for a given customer who has accepted terms & conditions
-  """
-  submitApplication: Response!
-  """
-  Customer accepts an array of documents displayed to them during onboarding
-  """
-  acceptTerms(documents: [ID]!): Response!
+    # onboarding
+    createPhone(phone: String!, device: DeviceInput!): Response!
+    confirmPhone(token: String!, code: String!): Response!
+    """
+    Creates person's ROAVA login credentials (email, login)
+    """
+    signup(token: String!, email: String!, passcode: String!): AuthResponse!
+    """
+    Creates person's ROAVA profile - capturing name, dob, address etc
+    """
+    registration(personid: ID!, person: PersonInput!, address: AddressInput!): Person
+    intendedActivities(activities: [ID!]): Response!
+    createApplication(applicant: ApplicantInput!): Response!
+    # verifications
+    verifyEmail(email: String!, code: String!): Response!
+    resendOTP(phone: String!): Response!
+    resendEmailMagicLInk(email: String!): Response!
+    # auth
+    login(credentials: AuthInput!, biometric: Boolean): AuthResponse!
+    refreshToken(token: String!): AuthResponse!
+    updateDeviceToken(token: String!): Response!
+    setBiometricAuth(activate: Boolean): Response!
+    resetPasscode(credentials: AuthInput, token: String!): Response!
+    # confirmPasscodeResetDetails(email: String!, dob: String!, address: InputAddress!): Result
+    # confirmPasscodeResetOtp(email: String!, otp: String!): Result
+    """
+    Submit a KYC and AML check for a given customer who has accepted terms & conditions
+    """
+    submitApplication: Response!
+    """
+    Customer accepts an array of documents displayed to them during onboarding
+    """
+    acceptTerms(documents: [ID]!): Response!
 }

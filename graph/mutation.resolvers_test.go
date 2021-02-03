@@ -156,7 +156,7 @@ func TestMutationResolver_ConfirmPhone(t *testing.T) {
 			testType: success,
 		},
 		{
-			name: "Test confirm phone correctly",
+			name: "Test error calling OnboardingService..VerifySmsOtp()",
 			args: struct {
 				token string
 				code  string
@@ -199,6 +199,109 @@ func TestMutationResolver_ConfirmPhone(t *testing.T) {
 			}
 
 			onBoardingServiceClient.AssertExpectations(t)
+		})
+	}
+}
+
+func TestMutationResolver_Signup(t *testing.T) {
+	const (
+		success = iota
+		errorInvalidEmail
+		errorOnboardingSvcCreatePerson
+	)
+
+	var tests = []struct {
+		name string
+		args struct {
+			token    string
+			email    string
+			passcode string
+		}
+		testType int
+	}{
+		{
+			name: "Test sign up successfully",
+			args: struct {
+				token    string
+				email    string
+				passcode string
+			}{
+				token:    "123456",
+				email:    "test@email.com",
+				passcode: "123456",
+			},
+			testType: success,
+		},
+		{
+			name: "Test error invalid email",
+			args: struct {
+				token    string
+				email    string
+				passcode string
+			}{
+				token:    "123456",
+				email:    "invalidEmail",
+				passcode: "123456",
+			},
+			testType: errorInvalidEmail,
+		},
+		{
+			name: "Test error calling OnboardingService.CreatePerson()",
+			args: struct {
+				token    string
+				email    string
+				passcode string
+			}{
+				token:    "123456",
+				email:    "test@email.com",
+				passcode: "123456",
+			},
+			testType: errorOnboardingSvcCreatePerson,
+		},
+	}
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			// Mocks
+			onboardingServiceClient := new(mocks.OnBoardingServiceClient)
+
+			resolver := NewResolver(&ResolverOpts{
+				OnBoardingService: onboardingServiceClient,
+			}, zaptest.NewLogger(t))
+			mutationResolver := resolver.Mutation()
+
+			switch testCase.testType {
+			case success:
+				onboardingServiceClient.On("CreatePerson", context.Background(), &onboardingService.CreatePersonRequest{
+					Email:    testCase.args.email,
+					Passcode: testCase.args.passcode,
+					Token:    testCase.args.token,
+				}).Return(&onboardingService.CreatePersonResponse{}, nil)
+				response, err := mutationResolver.Signup(context.Background(), testCase.args.token, testCase.args.email,
+					testCase.args.passcode)
+
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+			case errorInvalidEmail:
+				response, err := mutationResolver.Signup(context.Background(), testCase.args.token, testCase.args.email,
+					testCase.args.passcode)
+
+				assert.Error(t, err)
+				assert.Equal(t, 1100, err.(*coreErrors.Terror).Code())
+				assert.Nil(t, response)
+			case errorOnboardingSvcCreatePerson:
+				onboardingServiceClient.On("CreatePerson", context.Background(), &onboardingService.CreatePersonRequest{
+					Email:    testCase.args.email,
+					Passcode: testCase.args.passcode,
+					Token:    testCase.args.token,
+				}).Return(nil, errors.New(""))
+				response, err := mutationResolver.Signup(context.Background(), testCase.args.token, testCase.args.email,
+					testCase.args.passcode)
+
+				assert.Error(t, err)
+				assert.Nil(t, response)
+			}
+
+			onboardingServiceClient.AssertExpectations(t)
 		})
 	}
 }
