@@ -13,6 +13,7 @@ import (
 	emailvalidator "ms.api/libs/validator/email"
 	"ms.api/libs/validator/phonenumbervalidator"
 	"ms.api/protos/pb/authService"
+	"ms.api/protos/pb/identityService"
 	"ms.api/protos/pb/onboardingService"
 	protoTypes "ms.api/protos/pb/types"
 	"ms.api/server/http/middlewares"
@@ -250,8 +251,35 @@ func (r *mutationResolver) RefreshToken(ctx context.Context, token string) (*typ
 	}, nil
 }
 
-func (r *mutationResolver) UpdateDeviceToken(ctx context.Context, token string) (*types.Response, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *mutationResolver) UpdateDeviceToken(ctx context.Context, token []*types.DeviceTokenInput) (*types.Response, error) {
+	claims, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+
+	// Get tokens
+	var requestTokens []*identityService.DeviceTokens
+	for _, token := range token {
+		if token != nil {
+			requestTokens = append(requestTokens, &identityService.DeviceTokens{
+				Type:  string(token.Type),
+				Value: token.Value,
+			})
+		}
+	}
+	response, err := r.identityService.UpdateDeviceTokens(ctx, &identityService.UpdateDeviceTokensRequest{
+		DeviceId:   claims.DeviceId,
+		IdentityId: claims.IdentityId,
+		Tokens:     requestTokens,
+	})
+	if err != nil {
+		r.logger.Error("error calling identityService.UpdateDeviceTokens()", zap.Error(err))
+		return nil, err
+	}
+	return &types.Response{
+		Message: "successful",
+		Success: response.Success,
+	}, nil
 }
 
 func (r *mutationResolver) SetBiometricAuth(ctx context.Context, activate *bool) (*types.Response, error) {

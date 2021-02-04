@@ -19,7 +19,7 @@ type Mutation {
     # auth
     login(credentials: AuthInput!, biometric: Boolean): AuthResponse!
     refreshToken(token: String!): AuthResponse!
-    updateDeviceToken(token: String!): Response!
+    updateDeviceToken(token: [DeviceTokenInput]!): Response!
     setBiometricAuth(activate: Boolean): Response!
     resetPasscode(credentials: AuthInput, token: String!): Response!
     # confirmPasscodeResetDetails(email: String!, dob: String!, address: InputAddress!): Result
