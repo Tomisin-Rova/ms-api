@@ -7,15 +7,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"ms.api/protos/pb/personService"
 
 	"github.com/jinzhu/copier"
 	"go.uber.org/zap"
 	"ms.api/graph/connections"
 	"ms.api/graph/generated"
 	"ms.api/graph/models"
+	emailvalidator "ms.api/libs/validator/email"
 	"ms.api/protos/pb/authService"
 	"ms.api/protos/pb/onboardingService"
+	"ms.api/protos/pb/personService"
 	"ms.api/server/http/middlewares"
 	"ms.api/types"
 )
@@ -185,7 +186,15 @@ func (r *queryResolver) Identities(ctx context.Context) ([]*types.Identity, erro
 }
 
 func (r *queryResolver) CheckEmail(ctx context.Context, email string) (*bool, error) {
-	panic(fmt.Errorf("not implemented"))
+	if err := emailvalidator.Validate(email); err != nil {
+		return nil, err
+	}
+	resp, err := r.onBoardingService.CheckEmailExistence(ctx, &onboardingService.CheckEmailExistenceRequest{Email: email})
+	if err != nil {
+		r.logger.Error("error calling onboardingService.checkEmailExistence()", zap.Error(err))
+		return nil, err
+	}
+	return &resp.Exists, nil
 }
 
 func (r *queryResolver) Address(ctx context.Context, id string) (*types.Address, error) {
