@@ -74,7 +74,7 @@ func (r *queryResolver) Person(ctx context.Context, id string) (*types.Person, e
 	}
 	for _, phone := range person.Phones {
 		phones = append(phones, &types.Phone{
-			Value:   phone.Number,
+			Value:    phone.Number,
 			Verified: phone.Verified,
 		})
 	}
@@ -109,7 +109,7 @@ func (r *queryResolver) Person(ctx context.Context, id string) (*types.Person, e
 
 func (r *queryResolver) People(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.PersonConnection, error) {
 	res, err := r.personService.People(ctx, &personService.PeopleRequest{
-		Page: 1,
+		Page:    1,
 		PerPage: 50,
 	})
 	if err != nil {
@@ -140,7 +140,7 @@ func (r *queryResolver) People(ctx context.Context, first *int64, after *string,
 		}
 		for _, phone := range person.Phones {
 			phones = append(phones, &types.Phone{
-				Value:   phone.Number,
+				Value:    phone.Number,
 				Verified: phone.Verified,
 			})
 		}
