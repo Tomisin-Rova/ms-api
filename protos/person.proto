@@ -11,6 +11,11 @@ message PersonRequest {
   string id = 1;
 }
 
+message PeopleRequest {
+  int64 page = 1;
+  int64 perPage = 2;
+}
+
 // Request type for endpoint requiring JWT token
 message TokenRequest{
   string token = 1;
@@ -26,7 +31,7 @@ service PersonService{
   // Q U E R I E S
   rpc Me(TokenRequest) returns (types.Response) {}
   rpc Person(PersonRequest) returns (types.Person) {}
-  rpc People(google.protobuf.Empty) returns (types.Persons) {}
+  rpc People(PeopleRequest) returns (types.Persons) {}
 
   // M U T A T I O N S
   rpc SetTransactionPin(TransactionPinRequest) returns (types.Response) {}

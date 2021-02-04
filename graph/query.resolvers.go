@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"ms.api/protos/pb/personService"
 
 	"github.com/jinzhu/copier"
 	"go.uber.org/zap"
@@ -47,11 +48,132 @@ func (r *queryResolver) Me(ctx context.Context) (*types.Person, error) {
 }
 
 func (r *queryResolver) Person(ctx context.Context, id string) (*types.Person, error) {
-	panic(fmt.Errorf("not implemented"))
+	person, err := r.personService.Person(ctx, &personService.PersonRequest{Id: id})
+	if err != nil {
+		return nil, err
+	}
+	identities := make([]*types.Identity, 0)
+	emails := make([]*types.Email, 0)
+	phones := make([]*types.Phone, 0)
+	addresses := make([]*types.Address, 0)
+
+	for _, id := range person.Identities {
+		identities = append(identities, &types.Identity{
+			ID:             id.Id,
+			Owner:          id.Owner,
+			Nickname:       &id.Nickname,
+			Active:         &id.Active,
+			Authentication: &id.Authentication,
+		})
+	}
+	for _, email := range person.Emails {
+		emails = append(emails, &types.Email{
+			Value:    email.Value,
+			Verified: email.Verified,
+		})
+	}
+	for _, phone := range person.Phones {
+		phones = append(phones, &types.Phone{
+			Value:   phone.Number,
+			Verified: phone.Verified,
+		})
+	}
+	for _, addr := range person.Addresses {
+		addresses = append(addresses, &types.Address{
+			Street:   &addr.Street,
+			Postcode: &addr.Postcode,
+			Country:  &types.Country{CountryName: addr.Country},
+			City:     &addr.Town,
+		})
+	}
+	nationalities := make([]*string, 0)
+	for _, next := range person.Nationality {
+		nationalities = append(nationalities, &next)
+	}
+	return &types.Person{
+		ID:               person.Id,
+		Title:            &person.Title,
+		FirstName:        person.FirstName,
+		LastName:         person.LastName,
+		MiddleName:       &person.MiddleName,
+		Phones:           phones,
+		Emails:           emails,
+		Dob:              person.Dob,
+		CountryResidence: &person.CountryResidence,
+		Nationality:      nationalities,
+		Addresses:        addresses,
+		Identities:       identities,
+		Ts:               int64(person.Ts),
+	}, nil
 }
 
 func (r *queryResolver) People(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.PersonConnection, error) {
-	panic(fmt.Errorf("not implemented"))
+	res, err := r.personService.People(ctx, &personService.PeopleRequest{
+		Page: 1,
+		PerPage: 50,
+	})
+	if err != nil {
+		return nil, err
+	}
+	data := make([]*types.Person, 0)
+	for _, next := range res.Persons {
+		person := next
+		identities := make([]*types.Identity, 0)
+		emails := make([]*types.Email, 0)
+		phones := make([]*types.Phone, 0)
+		addresses := make([]*types.Address, 0)
+
+		for _, id := range person.Identities {
+			identities = append(identities, &types.Identity{
+				ID:             id.Id,
+				Owner:          id.Owner,
+				Nickname:       &id.Nickname,
+				Active:         &id.Active,
+				Authentication: &id.Authentication,
+			})
+		}
+		for _, email := range person.Emails {
+			emails = append(emails, &types.Email{
+				Value:    email.Value,
+				Verified: email.Verified,
+			})
+		}
+		for _, phone := range person.Phones {
+			phones = append(phones, &types.Phone{
+				Value:   phone.Number,
+				Verified: phone.Verified,
+			})
+		}
+		for _, addr := range person.Addresses {
+			addresses = append(addresses, &types.Address{
+				Street:   &addr.Street,
+				Postcode: &addr.Postcode,
+				Country:  &types.Country{CountryName: addr.Country},
+				City:     &addr.Town,
+			})
+		}
+		nationalities := make([]*string, 0)
+		for _, next := range person.Nationality {
+			nationalities = append(nationalities, &next)
+		}
+		p := &types.Person{
+			ID:               person.Id,
+			Title:            &person.Title,
+			FirstName:        person.FirstName,
+			LastName:         person.LastName,
+			MiddleName:       &person.MiddleName,
+			Phones:           phones,
+			Emails:           emails,
+			Dob:              person.Dob,
+			CountryResidence: &person.CountryResidence,
+			Nationality:      nationalities,
+			Addresses:        addresses,
+			Identities:       identities,
+			Ts:               int64(person.Ts),
+		}
+		data = append(data, p)
+	}
+	return &types.PersonConnection{Nodes: data}, nil
 }
 
 func (r *queryResolver) Identity(ctx context.Context, id string) (*types.Identity, error) {
