@@ -648,7 +648,7 @@ type ComplexityRoot struct {
 		SetBiometricAuth     func(childComplexity int, activate *bool) int
 		Signup               func(childComplexity int, token string, email string, passcode string) int
 		SubmitApplication    func(childComplexity int) int
-		UpdateDeviceToken    func(childComplexity int, token string) int
+		UpdateDeviceToken    func(childComplexity int, token []*types.DeviceTokenInput) int
 		VerifyEmail          func(childComplexity int, email string, code string) int
 	}
 
@@ -1106,7 +1106,7 @@ type MutationResolver interface {
 	ResendEmailMagicLInk(ctx context.Context, email string) (*types.Response, error)
 	Login(ctx context.Context, credentials types.AuthInput, biometric *bool) (*types.AuthResponse, error)
 	RefreshToken(ctx context.Context, token string) (*types.AuthResponse, error)
-	UpdateDeviceToken(ctx context.Context, token string) (*types.Response, error)
+	UpdateDeviceToken(ctx context.Context, token []*types.DeviceTokenInput) (*types.Response, error)
 	SetBiometricAuth(ctx context.Context, activate *bool) (*types.Response, error)
 	ResetPasscode(ctx context.Context, credentials *types.AuthInput, token string) (*types.Response, error)
 	SubmitApplication(ctx context.Context) (*types.Response, error)
@@ -4104,7 +4104,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateDeviceToken(childComplexity, args["token"].(string)), true
+		return e.complexity.Mutation.UpdateDeviceToken(childComplexity, args["token"].([]*types.DeviceTokenInput)), true
 
 	case "Mutation.verifyEmail":
 		if e.complexity.Mutation.VerifyEmail == nil {
@@ -6537,7 +6537,7 @@ var sources = []*ast.Source{
     # auth
     login(credentials: AuthInput!, biometric: Boolean): AuthResponse!
     refreshToken(token: String!): AuthResponse!
-    updateDeviceToken(token: String!): Response!
+    updateDeviceToken(token: [DeviceTokenInput]!): Response!
     setBiometricAuth(activate: Boolean): Response!
     resetPasscode(credentials: AuthInput, token: String!): Response!
     # confirmPasscodeResetDetails(email: String!, dob: String!, address: InputAddress!): Result
@@ -8245,10 +8245,10 @@ func (ec *executionContext) field_Mutation_signup_args(ctx context.Context, rawA
 func (ec *executionContext) field_Mutation_updateDeviceToken_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
+	var arg0 []*types.DeviceTokenInput
 	if tmp, ok := rawArgs["token"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("token"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		arg0, err = ec.unmarshalNDeviceTokenInput2ᚕᚖmsᚗapiᚋtypesᚐDeviceTokenInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -23128,7 +23128,7 @@ func (ec *executionContext) _Mutation_updateDeviceToken(ctx context.Context, fie
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateDeviceToken(rctx, args["token"].(string))
+		return ec.resolvers.Mutation().UpdateDeviceToken(rctx, args["token"].([]*types.DeviceTokenInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
