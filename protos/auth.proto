@@ -9,7 +9,6 @@ message LoginRequest {
   string email = 1;
   string  passcode = 2;
   types.Device device = 3;
-  bool biometric = 4;
 }
 
 message LoginResponse {
@@ -128,6 +127,4 @@ service AuthService {
   rpc ConfirmPasswordResetOtp(PasswordResetOtpRequest) returns (types.Response) {}
   rpc ResetPassword(PasswordResetRequest) returns (types.Response) {}
   rpc GetPerson(GetPersonRequest) returns (GetPersonResponse) {}
-  rpc ActivateBioLogin(ActivateBioLoginRequest) returns (ActivateBioLoginResponse) {}
-  rpc DeactivateBioLogin(DeactivateBioLoginRequest) returns (types.Response) {}
 }
