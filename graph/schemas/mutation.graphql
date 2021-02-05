@@ -17,10 +17,9 @@ type Mutation {
     resendOTP(phone: String!): Response!
     resendEmailMagicLInk(email: String!): Response!
     # auth
-    login(credentials: AuthInput!, biometric: Boolean): AuthResponse!
+    login(credentials: AuthInput!): AuthResponse!
     refreshToken(token: String!): AuthResponse!
     updateDeviceToken(token: [DeviceTokenInput]!): Response!
-    setBiometricAuth(activate: Boolean): Response!
     resetPasscode(credentials: AuthInput, token: String!): Response!
     # confirmPasscodeResetDetails(email: String!, dob: String!, address: InputAddress!): Result
     # confirmPasscodeResetOtp(email: String!, otp: String!): Result

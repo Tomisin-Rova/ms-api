@@ -203,17 +203,15 @@ func (r *mutationResolver) ResendEmailMagicLInk(ctx context.Context, email strin
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *mutationResolver) Login(ctx context.Context, credentials types.AuthInput, biometric *bool) (*types.AuthResponse, error) {
+func (r *mutationResolver) Login(ctx context.Context, credentials types.AuthInput) (*types.AuthResponse, error) {
 	if err := emailvalidator.Validate(credentials.Email); err != nil {
 		r.logger.Info("invalid email supplied", zap.String("email", credentials.Email))
 		return nil, err
 	}
 	// TODO: change authService.LoginRequest{}.Tokens to slice datatype
-	bio := biometric != nil && *biometric
 	req := &authService.LoginRequest{
-		Email:     credentials.Email,
-		Passcode:  credentials.Passcode,
-		Biometric: bio,
+		Email:    credentials.Email,
+		Passcode: credentials.Passcode,
 		Device: &protoTypes.Device{
 			Os:         credentials.Device.Os,
 			Brand:      credentials.Device.Brand,
@@ -280,35 +278,6 @@ func (r *mutationResolver) UpdateDeviceToken(ctx context.Context, token []*types
 		Message: "successful",
 		Success: response.Success,
 	}, nil
-}
-
-func (r *mutationResolver) SetBiometricAuth(ctx context.Context, activate *bool) (*types.Response, error) {
-	claims, err := middlewares.GetAuthenticatedUser(ctx)
-	if err != nil {
-		return nil, ErrUnAuthenticated
-	}
-	setActive := activate != nil && *activate
-	if setActive {
-		resp, err := r.authService.ActivateBioLogin(ctx, &authService.ActivateBioLoginRequest{
-			IdentityId: claims.IdentityId,
-			DeviceId:   claims.DeviceId,
-		})
-		if err != nil {
-			r.logger.Info("authService.ActivateBioLogin() failed", zap.Error(err))
-			return nil, err
-		}
-		return &types.Response{Message: resp.Message, Success: true, Token: &resp.BiometricPasscode}, nil
-	} else {
-		resp, err := r.authService.DeactivateBioLogin(ctx, &authService.DeactivateBioLoginRequest{
-			IdentityId: claims.IdentityId,
-			DeviceId:   claims.DeviceId,
-		})
-		if err != nil {
-			r.logger.Info("authService.DeactivateBioLogin() failed", zap.Error(err))
-			return nil, err
-		}
-		return &types.Response{Message: resp.Message, Success: true}, nil
-	}
 }
 
 func (r *mutationResolver) ResetPasscode(ctx context.Context, credentials *types.AuthInput, token string) (*types.Response, error) {

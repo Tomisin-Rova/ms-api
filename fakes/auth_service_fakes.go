@@ -2,6 +2,7 @@ package fakes
 
 import (
 	"context"
+
 	"google.golang.org/grpc"
 	"ms.api/protos/pb/authService"
 	"ms.api/protos/pb/types"
@@ -49,12 +50,4 @@ func (f *FakeAuthClient) RefreshToken(ctx context.Context, req *authService.Refr
 func (f *FakeAuthClient) GetPerson(ctx context.Context, req *authService.GetPersonRequest,
 	opts ...grpc.CallOption) (*authService.GetPersonResponse, error) {
 	return &authService.GetPersonResponse{}, f.err
-}
-
-func (f *FakeAuthClient) ActivateBioLogin(ctx context.Context, req *authService.ActivateBioLoginRequest, opts ...grpc.CallOption) (*authService.ActivateBioLoginResponse, error) {
-	return &authService.ActivateBioLoginResponse{}, f.err
-}
-
-func (f *FakeAuthClient) DeactivateBioLogin(ctx context.Context, req *authService.DeactivateBioLoginRequest, opts ...grpc.CallOption) (*types.Response, error) {
-	return &types.Response{}, f.err
 }
