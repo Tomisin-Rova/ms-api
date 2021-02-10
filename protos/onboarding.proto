@@ -70,11 +70,19 @@ message ResendOtpRequest {
   string phone = 1;
 }
 
-message CreateApplicationRequest {
+message CreateOnfidoApplicantRequest {
   string personId = 1;
 }
 
-message CreateApplicationResponse {
+message CreateOnfidoApplicantResponse {
+  string token = 1;
+}
+
+message GetOnfidoSDKTokenRequest {
+  string personId = 1;
+}
+
+message GetOnfidoSDKTokenResponse {
   string token = 1;
 }
 
@@ -133,7 +141,8 @@ service OnBoardingService{
   rpc CheckEmailExistence(CheckEmailExistenceRequest) returns (CheckEmailExistenceResponse) {}
   rpc VerifySmsOtp(OtpVerificationRequest) returns (OtpVerificationResponse) {}
   rpc ResendOtp(ResendOtpRequest) returns (types.Response) {}
-  rpc CreateApplication(CreateApplicationRequest) returns (CreateApplicationResponse) {}
+  rpc CreateOnfidoApplicant(CreateOnfidoApplicantRequest) returns (CreateOnfidoApplicantResponse) {}
+  rpc GetOnfidoSDKToken(GetOnfidoSDKTokenRequest) returns (GetOnfidoSDKTokenResponse) {}
   rpc SubmitCheck(SubmitCheckRequest) returns (types.Response) {}
   rpc VerifyEmailMagicLInk(VerifyEmailMagicLInkRequest) returns (types.Response) {}
   rpc ResendEmailMagicLInk(ResendEmailMagicLInkRequest) returns (types.Response) {}
