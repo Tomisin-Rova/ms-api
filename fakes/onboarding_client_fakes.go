@@ -62,8 +62,12 @@ func (f *FakeOnBoardingClient) ResendOtp(ctx context.Context, req *onboardingSer
 	return &types.Response{Message: ""}, f.err
 }
 
-func (f *FakeOnBoardingClient) CreateApplication(ctx context.Context, req *onboardingService.CreateApplicationRequest,
-	opts ...grpc.CallOption) (*onboardingService.CreateApplicationResponse, error) {
+func (f *FakeOnBoardingClient) CreateOnfidoApplicant(ctx context.Context, req *onboardingService.CreateOnfidoApplicantRequest,
+	opts ...grpc.CallOption) (*onboardingService.CreateOnfidoApplicantResponse, error) {
+	return nil, f.err
+}
+
+func (f *FakeOnBoardingClient) GetOnfidoSDKToken(ctx context.Context, in *onboardingService.GetOnfidoSDKTokenRequest, opts ...grpc.CallOption) (*onboardingService.GetOnfidoSDKTokenResponse, error) {
 	return nil, f.err
 }
 

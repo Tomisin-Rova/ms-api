@@ -188,7 +188,23 @@ func (r *mutationResolver) IntendedActivities(ctx context.Context, activities []
 }
 
 func (r *mutationResolver) CreateApplication(ctx context.Context, applicant types.ApplicantInput) (*types.Response, error) {
-	panic(fmt.Errorf("not implemented"))
+	claims, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+	req := &onboardingService.CreateOnfidoApplicantRequest{
+		PersonId: claims.PersonId,
+	}
+	resp, err := r.onBoardingService.CreateOnfidoApplicant(ctx, req)
+	if err != nil {
+		r.logger.Error("create applicant request failed", zap.Error(err))
+		return nil, err
+	}
+	return &types.Response{
+		Message: "successful",
+		Success: true,
+		Token:   &resp.Token,
+	}, nil
 }
 
 func (r *mutationResolver) VerifyEmail(ctx context.Context, email string, code string) (*types.Response, error) {
