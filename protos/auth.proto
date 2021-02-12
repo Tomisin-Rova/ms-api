@@ -41,8 +41,7 @@ message RefreshTokenResponse {
 
 message PasswordResetUserDetails {
   string email = 1;
-  string  dob = 2;
-  types.Address  address = 3;
+  types.Device device = 2;
 }
 
 message PasswordResetRequest {
