@@ -5,11 +5,14 @@ import (
 	"testing"
 
 	"ms.api/mocks"
+	identitySvc "ms.api/protos/pb/identityService"
 	"ms.api/protos/pb/onboardingService"
 	protoTypes "ms.api/protos/pb/types"
+	"ms.api/server/http/middlewares"
 	"ms.api/types"
 
 	coreErrors "github.com/roava/zebra/errors"
+	"github.com/roava/zebra/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"go.uber.org/zap/zaptest"
@@ -302,6 +305,153 @@ func TestMutationResolver_Signup(t *testing.T) {
 			}
 
 			onboardingServiceClient.AssertExpectations(t)
+		})
+	}
+}
+
+func TestMutationResolver_UpdateDeviceToken(t *testing.T) {
+	const (
+		success = iota
+		errorInvalidUser
+		errorIdentitySvcUpdateDeviceTokens
+	)
+
+	var (
+		personId     = "p123456"
+		identityId   = "i123456"
+		deviceId     = "d123456"
+		validUserCtx = context.WithValue(
+			context.Background(), middlewares.AuthenticatedUserContextKey, models.Claims{
+				PersonId:   personId,
+				IdentityId: identityId,
+				DeviceId:   deviceId,
+			})
+	)
+
+	var tests = []struct {
+		name                 string
+		args                 []*types.DeviceTokenInput
+		expectedDeviceTokens []*identitySvc.DeviceTokens
+		testType             int
+	}{
+		{
+			name: "Test update device successfully",
+			args: []*types.DeviceTokenInput{
+				{
+					Type:  types.DeviceTokenTypeFirebase,
+					Value: "123456",
+				},
+				{
+					Type:  types.DeviceTokenTypeBiometric,
+					Value: "123456",
+				},
+			},
+			expectedDeviceTokens: []*identitySvc.DeviceTokens{
+				{
+					Type:  string(types.DeviceTokenTypeFirebase),
+					Value: "123456",
+				},
+				{
+					Type:  string(types.DeviceTokenTypeBiometric),
+					Value: "123456",
+				},
+			},
+			testType: success,
+		},
+		{
+			name: "Test error invalid user provided on jwtToken",
+			args: []*types.DeviceTokenInput{
+				{
+					Type:  types.DeviceTokenTypeFirebase,
+					Value: "123456",
+				},
+				{
+					Type:  types.DeviceTokenTypeBiometric,
+					Value: "123456",
+				},
+			},
+			expectedDeviceTokens: []*identitySvc.DeviceTokens{
+				{
+					Type:  string(types.DeviceTokenTypeFirebase),
+					Value: "123456",
+				},
+				{
+					Type:  string(types.DeviceTokenTypeBiometric),
+					Value: "123456",
+				},
+			},
+			testType: errorInvalidUser,
+		},
+		{
+			name: "Test error calling identityService.UpdateDeviceTokens()",
+			args: []*types.DeviceTokenInput{
+				{
+					Type:  types.DeviceTokenTypeFirebase,
+					Value: "123456",
+				},
+				{
+					Type:  types.DeviceTokenTypeBiometric,
+					Value: "123456",
+				},
+			},
+			expectedDeviceTokens: []*identitySvc.DeviceTokens{
+				{
+					Type:  string(types.DeviceTokenTypeFirebase),
+					Value: "123456",
+				},
+				{
+					Type:  string(types.DeviceTokenTypeBiometric),
+					Value: "123456",
+				},
+			},
+			testType: errorIdentitySvcUpdateDeviceTokens,
+		},
+	}
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			// Mocks
+			identityService := new(mocks.IdentityServiceClient)
+
+			resolver := NewResolver(&ResolverOpts{
+				identityService: identityService,
+			}, zaptest.NewLogger(t))
+			mutationResolver := resolver.Mutation()
+
+			switch testCase.testType {
+			case success:
+				identityService.On("UpdateDeviceTokens", validUserCtx, &identitySvc.UpdateDeviceTokensRequest{
+					DeviceId:   deviceId,
+					IdentityId: identityId,
+					Tokens:     testCase.expectedDeviceTokens,
+				}).Return(&protoTypes.Response{
+					Success: true,
+				}, nil)
+
+				response, err := mutationResolver.UpdateDeviceToken(validUserCtx, testCase.args)
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+				assert.Equal(t, &types.Response{
+					Message: "successful",
+					Success: true,
+				}, response)
+			case errorInvalidUser:
+				response, err := mutationResolver.UpdateDeviceToken(context.Background(), testCase.args)
+				assert.Error(t, err)
+				assert.Nil(t, response)
+				assert.Equal(t, 7012, err.(*coreErrors.Terror).Code())
+			case errorIdentitySvcUpdateDeviceTokens:
+				identityService.On("UpdateDeviceTokens", validUserCtx, &identitySvc.UpdateDeviceTokensRequest{
+					DeviceId:   deviceId,
+					IdentityId: identityId,
+					Tokens:     testCase.expectedDeviceTokens,
+				}).Return(nil, errors.New(""))
+
+				response, err := mutationResolver.UpdateDeviceToken(validUserCtx, testCase.args)
+				assert.Error(t, err)
+				assert.Nil(t, response)
+			}
+
+			identityService.AssertExpectations(t)
 		})
 	}
 }

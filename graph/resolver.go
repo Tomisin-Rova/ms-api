@@ -5,12 +5,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/roava/zebra/errors"
-	"go.uber.org/zap"
-	"google.golang.org/grpc"
 	"ms.api/config"
 	"ms.api/protos/pb/authService"
 	"ms.api/protos/pb/cddService"
+	"ms.api/protos/pb/identityService"
 	"ms.api/protos/pb/onboardingService"
 	"ms.api/protos/pb/onfidoService"
 	"ms.api/protos/pb/payeeService"
@@ -20,6 +18,10 @@ import (
 	"ms.api/protos/pb/verifyService"
 	"ms.api/server/http/middlewares"
 	"ms.api/types"
+
+	"github.com/roava/zebra/errors"
+	"go.uber.org/zap"
+	"google.golang.org/grpc"
 )
 
 // This file will not be regenerated automatically.
@@ -56,6 +58,7 @@ type ResolverOpts struct {
 	paymentService    paymentService.PaymentServiceClient
 	AuthMw            *middlewares.AuthMiddleware
 	personService     personService.PersonServiceClient
+	identityService   identityService.IdentityServiceClient
 }
 
 type Resolver struct {
@@ -68,6 +71,7 @@ type Resolver struct {
 	onfidoClient      onfidoService.OnfidoServiceClient
 	authService       authService.AuthServiceClient
 	paymentService    paymentService.PaymentServiceClient
+	identityService   identityService.IdentityServiceClient
 	authMw            *middlewares.AuthMiddleware
 	logger            *zap.Logger
 }
@@ -77,13 +81,14 @@ func NewResolver(opt *ResolverOpts, logger *zap.Logger) *Resolver {
 		PayeeService:      opt.PayeeService,
 		cddService:        opt.cddClient,
 		onBoardingService: opt.OnBoardingService,
+		productService:    opt.productService,
+		personService:     opt.personService,
 		verifyService:     opt.verifyService,
 		onfidoClient:      opt.OnfidoClient,
 		authService:       opt.AuthService,
-		authMw:            opt.AuthMw,
 		paymentService:    opt.paymentService,
-		productService:    opt.productService,
-		personService:     opt.personService,
+		identityService:   opt.identityService,
+		authMw:            opt.AuthMw,
 		logger:            logger,
 	}
 }
@@ -162,6 +167,15 @@ func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) 
 		return nil, fmt.Errorf("%v: %s", err, secrets.PersonServiceURL)
 	}
 	opts.personService = personService.NewPersonServiceClient(connection)
+
+	// Identity
+	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	connection, err = dialRPC(ctx, secrets.IdentityServiceURL)
+	if err != nil {
+		return nil, fmt.Errorf("%v: %s", err, secrets.IdentityServiceURL)
+	}
+	opts.identityService = identityService.NewIdentityServiceClient(connection)
 
 	return opts, nil
 }

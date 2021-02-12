@@ -6,14 +6,16 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/roava/zebra/models"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
-	"go.uber.org/zap/zaptest"
 	"ms.api/mocks"
 	"ms.api/protos/pb/onboardingService"
 	protoTypes "ms.api/protos/pb/types"
 	"ms.api/server/http/middlewares"
+
+	coreErrors "github.com/roava/zebra/errors"
+	"github.com/roava/zebra/models"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"go.uber.org/zap/zaptest"
 )
 
 const (
@@ -238,6 +240,74 @@ func Test_queryResolver_AddressLookup(t *testing.T) {
 				assert.NotNil(t, err)
 			}
 
+		})
+	}
+}
+
+func TestQueryResolver_CheckEmail(t *testing.T) {
+	const (
+		success = iota
+		invalidEmail
+		errorOnBoardingSvcCheckEmailExistence
+	)
+
+	var tests = []struct {
+		name     string
+		email    string
+		testType int
+	}{
+		{
+			name:     "Test check email successfully",
+			email:    "valid@mail.com",
+			testType: success,
+		},
+		{
+			name:     "Test invalid email",
+			email:    "invalidEmail",
+			testType: invalidEmail,
+		},
+		{
+			name:     "Test error calling onBoardingService.CheckEmailExistence()",
+			email:    "valid@mail.com",
+			testType: errorOnBoardingSvcCheckEmailExistence,
+		},
+	}
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			onboardingServiceClient := new(mocks.OnBoardingServiceClient)
+
+			resolver := NewResolver(&ResolverOpts{
+				OnBoardingService: onboardingServiceClient,
+			}, zaptest.NewLogger(t)).Query()
+
+			switch testCase.testType {
+			case success:
+				onboardingServiceClient.On("CheckEmailExistence", context.Background(), &onboardingService.CheckEmailExistenceRequest{
+					Email: testCase.email,
+				}).Return(&onboardingService.CheckEmailExistenceResponse{
+					Exists: true,
+				}, nil)
+
+				response, err := resolver.CheckEmail(context.Background(), testCase.email)
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+				assert.Equal(t, true, *response)
+			case invalidEmail:
+				response, err := resolver.CheckEmail(context.Background(), testCase.email)
+				assert.Error(t, err)
+				assert.Nil(t, response)
+				assert.Equal(t, 1100, err.(*coreErrors.Terror).Code())
+			case errorOnBoardingSvcCheckEmailExistence:
+				onboardingServiceClient.On("CheckEmailExistence", context.Background(), &onboardingService.CheckEmailExistenceRequest{
+					Email: testCase.email,
+				}).Return(nil, errors.New(""))
+
+				response, err := resolver.CheckEmail(context.Background(), testCase.email)
+				assert.Error(t, err)
+				assert.Nil(t, response)
+			}
+
+			onboardingServiceClient.AssertExpectations(t)
 		})
 	}
 }

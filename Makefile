@@ -31,6 +31,8 @@ docker: proto gen-mocks
 	docker build . -t ms.notify:alpine
 
 gen-mocks:
+	mockery --name=IdentityServiceClient --recursive
+	mockery --name=OnBoardingServiceClient --recursive
 	go generate ./...
 
 local: proto gen-mocks

@@ -105,10 +105,12 @@ type PersonConnection {
   pageInfo: PageInfo
   totalCount: Int
 }
+
 type PersonEdge {
   node: Person!
-  cursor: PageInfo
+  cursor: String!
 }
+
 input PersonInput {
   first_name: String!
   last_name: String!

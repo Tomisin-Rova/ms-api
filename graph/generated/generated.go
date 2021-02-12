@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"strconv"
 	"sync"
+	"sync/atomic"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
@@ -639,16 +640,15 @@ type ComplexityRoot struct {
 		CreateApplication    func(childComplexity int, applicant types.ApplicantInput) int
 		CreatePhone          func(childComplexity int, phone string, device types.DeviceInput) int
 		IntendedActivities   func(childComplexity int, activities []string) int
-		Login                func(childComplexity int, credentials types.AuthInput, biometric *bool) int
+		Login                func(childComplexity int, credentials types.AuthInput) int
 		RefreshToken         func(childComplexity int, token string) int
 		Registration         func(childComplexity int, personid string, person types.PersonInput, address types.AddressInput) int
 		ResendEmailMagicLInk func(childComplexity int, email string) int
 		ResendOtp            func(childComplexity int, phone string) int
 		ResetPasscode        func(childComplexity int, credentials *types.AuthInput, token string) int
-		SetBiometricAuth     func(childComplexity int, activate *bool) int
 		Signup               func(childComplexity int, token string, email string, passcode string) int
 		SubmitApplication    func(childComplexity int) int
-		UpdateDeviceToken    func(childComplexity int, token string) int
+		UpdateDeviceToken    func(childComplexity int, token []*types.DeviceTokenInput) int
 		VerifyEmail          func(childComplexity int, email string, code string) int
 	}
 
@@ -870,6 +870,7 @@ type ComplexityRoot struct {
 		Currency        func(childComplexity int, code string) int
 		Device          func(childComplexity int, identifier string) int
 		Devices         func(childComplexity int, first *int64, after *string, last *int64, before *string) int
+		GetSDKToken     func(childComplexity int) int
 		Identities      func(childComplexity int) int
 		Identity        func(childComplexity int, id string) int
 		Industries      func(childComplexity int, first *int64, after *string, last *int64, before *string) int
@@ -1104,10 +1105,9 @@ type MutationResolver interface {
 	VerifyEmail(ctx context.Context, email string, code string) (*types.Response, error)
 	ResendOtp(ctx context.Context, phone string) (*types.Response, error)
 	ResendEmailMagicLInk(ctx context.Context, email string) (*types.Response, error)
-	Login(ctx context.Context, credentials types.AuthInput, biometric *bool) (*types.AuthResponse, error)
+	Login(ctx context.Context, credentials types.AuthInput) (*types.AuthResponse, error)
 	RefreshToken(ctx context.Context, token string) (*types.AuthResponse, error)
-	UpdateDeviceToken(ctx context.Context, token string) (*types.Response, error)
-	SetBiometricAuth(ctx context.Context, activate *bool) (*types.Response, error)
+	UpdateDeviceToken(ctx context.Context, token []*types.DeviceTokenInput) (*types.Response, error)
 	ResetPasscode(ctx context.Context, credentials *types.AuthInput, token string) (*types.Response, error)
 	SubmitApplication(ctx context.Context) (*types.Response, error)
 	AcceptTerms(ctx context.Context, documents []*string) (*types.Response, error)
@@ -1154,6 +1154,7 @@ type QueryResolver interface {
 	Screens(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.ScreenConnection, error)
 	OnfidoReport(ctx context.Context, id string) (*string, error)
 	ComplyAdvReport(ctx context.Context, id string) (*string, error)
+	GetSDKToken(ctx context.Context) (*types.Response, error)
 	Task(ctx context.Context, id string) (*types.Task, error)
 	Tasks(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.TaskConnection, error)
 	Comment(ctx context.Context, id string) (*types.Comment, error)
@@ -4001,7 +4002,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.Login(childComplexity, args["credentials"].(types.AuthInput), args["biometric"].(*bool)), true
+		return e.complexity.Mutation.Login(childComplexity, args["credentials"].(types.AuthInput)), true
 
 	case "Mutation.refreshToken":
 		if e.complexity.Mutation.RefreshToken == nil {
@@ -4063,18 +4064,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.ResetPasscode(childComplexity, args["credentials"].(*types.AuthInput), args["token"].(string)), true
 
-	case "Mutation.setBiometricAuth":
-		if e.complexity.Mutation.SetBiometricAuth == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_setBiometricAuth_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.SetBiometricAuth(childComplexity, args["activate"].(*bool)), true
-
 	case "Mutation.signup":
 		if e.complexity.Mutation.Signup == nil {
 			break
@@ -4104,7 +4093,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateDeviceToken(childComplexity, args["token"].(string)), true
+		return e.complexity.Mutation.UpdateDeviceToken(childComplexity, args["token"].([]*types.DeviceTokenInput)), true
 
 	case "Mutation.verifyEmail":
 		if e.complexity.Mutation.VerifyEmail == nil {
@@ -5284,6 +5273,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Devices(childComplexity, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string)), true
+
+	case "Query.getSDKToken":
+		if e.complexity.Query.GetSDKToken == nil {
+			break
+		}
+
+		return e.complexity.Query.GetSDKToken(childComplexity), true
 
 	case "Query.identities":
 		if e.complexity.Query.Identities == nil {
@@ -6535,10 +6531,9 @@ var sources = []*ast.Source{
     resendOTP(phone: String!): Response!
     resendEmailMagicLInk(email: String!): Response!
     # auth
-    login(credentials: AuthInput!, biometric: Boolean): AuthResponse!
+    login(credentials: AuthInput!): AuthResponse!
     refreshToken(token: String!): AuthResponse!
-    updateDeviceToken(token: String!): Response!
-    setBiometricAuth(activate: Boolean): Response!
+    updateDeviceToken(token: [DeviceTokenInput]!): Response!
     resetPasscode(credentials: AuthInput, token: String!): Response!
     # confirmPasscodeResetDetails(email: String!, dob: String!, address: InputAddress!): Result
     # confirmPasscodeResetOtp(email: String!, otp: String!): Result
@@ -6598,6 +6593,8 @@ var sources = []*ast.Source{
   screens(first: Int, after: String, last: Int, before: String): ScreenConnection
   onfidoReport(id: ID!): OnfidoReport
   complyAdvReport(id: ID!): ComplyAdvantageReport
+  # allows customer to confirm their phone number via OTP
+  getSDKToken: Response!
   task(id: ID!): Task
   tasks(first: Int, after: String, last: Int, before: String): TaskConnection
   comment(id: ID!): Comment
@@ -6722,10 +6719,12 @@ type PersonConnection {
   pageInfo: PageInfo
   totalCount: Int
 }
+
 type PersonEdge {
   node: Person!
-  cursor: PageInfo
+  cursor: String!
 }
+
 input PersonInput {
   first_name: String!
   last_name: String!
@@ -8080,15 +8079,6 @@ func (ec *executionContext) field_Mutation_login_args(ctx context.Context, rawAr
 		}
 	}
 	args["credentials"] = arg0
-	var arg1 *bool
-	if tmp, ok := rawArgs["biometric"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("biometric"))
-		arg1, err = ec.unmarshalOBoolean2ᚖbool(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["biometric"] = arg1
 	return args, nil
 }
 
@@ -8194,21 +8184,6 @@ func (ec *executionContext) field_Mutation_resetPasscode_args(ctx context.Contex
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_setBiometricAuth_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 *bool
-	if tmp, ok := rawArgs["activate"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("activate"))
-		arg0, err = ec.unmarshalOBoolean2ᚖbool(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["activate"] = arg0
-	return args, nil
-}
-
 func (ec *executionContext) field_Mutation_signup_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -8245,10 +8220,10 @@ func (ec *executionContext) field_Mutation_signup_args(ctx context.Context, rawA
 func (ec *executionContext) field_Mutation_updateDeviceToken_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
+	var arg0 []*types.DeviceTokenInput
 	if tmp, ok := rawArgs["token"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("token"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		arg0, err = ec.unmarshalNDeviceTokenInput2ᚕᚖmsᚗapiᚋtypesᚐDeviceTokenInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -23044,7 +23019,7 @@ func (ec *executionContext) _Mutation_login(ctx context.Context, field graphql.C
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().Login(rctx, args["credentials"].(types.AuthInput), args["biometric"].(*bool))
+		return ec.resolvers.Mutation().Login(rctx, args["credentials"].(types.AuthInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -23128,49 +23103,7 @@ func (ec *executionContext) _Mutation_updateDeviceToken(ctx context.Context, fie
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateDeviceToken(rctx, args["token"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*types.Response)
-	fc.Result = res
-	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Mutation_setBiometricAuth(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_setBiometricAuth_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().SetBiometricAuth(rctx, args["activate"].(*bool))
+		return ec.resolvers.Mutation().UpdateDeviceToken(rctx, args["token"].([]*types.DeviceTokenInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -25518,11 +25451,14 @@ func (ec *executionContext) _PersonEdge_cursor(ctx context.Context, field graphq
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*types.PageInfo)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalOPageInfo2ᚖmsᚗapiᚋtypesᚐPageInfo(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Phone_name(ctx context.Context, field graphql.CollectedField, obj *types.Phone) (ret graphql.Marshaler) {
@@ -29047,6 +28983,41 @@ func (ec *executionContext) _Query_complyAdvReport(ctx context.Context, field gr
 	res := resTmp.(*string)
 	fc.Result = res
 	return ec.marshalOComplyAdvantageReport2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getSDKToken(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetSDKToken(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.Response)
+	fc.Result = res
+	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_task(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -37656,11 +37627,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "setBiometricAuth":
-			out.Values[i] = ec._Mutation_setBiometricAuth(ctx, field)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "resetPasscode":
 			out.Values[i] = ec._Mutation_resetPasscode(ctx, field)
 			if out.Values[i] == graphql.Null {
@@ -38149,6 +38115,9 @@ func (ec *executionContext) _PersonEdge(ctx context.Context, sel ast.SelectionSe
 			}
 		case "cursor":
 			out.Values[i] = ec._PersonEdge_cursor(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -38997,6 +38966,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_complyAdvReport(ctx, field)
+				return res
+			})
+		case "getSDKToken":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getSDKToken(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
 				return res
 			})
 		case "task":

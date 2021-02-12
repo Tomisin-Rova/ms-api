@@ -7,16 +7,17 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"ms.api/protos/pb/personService"
-	types2 "ms.api/protos/pb/types"
 
 	"github.com/jinzhu/copier"
 	"go.uber.org/zap"
 	"ms.api/graph/connections"
 	"ms.api/graph/generated"
 	"ms.api/graph/models"
+	emailvalidator "ms.api/libs/validator/email"
 	"ms.api/protos/pb/authService"
 	"ms.api/protos/pb/onboardingService"
+	"ms.api/protos/pb/personService"
+	types2 "ms.api/protos/pb/types"
 	"ms.api/server/http/middlewares"
 	"ms.api/types"
 )
@@ -182,7 +183,33 @@ func (r *queryResolver) People(ctx context.Context, first *int64, after *string,
 		}
 		data = append(data, p)
 	}
-	return &types.PersonConnection{Nodes: data}, nil
+
+	input := models.ConnectionInput{
+		Before: before,
+		After:  after,
+		First:  first,
+		Last:   last,
+	}
+
+	edger := func(person *types.Person, offset int) connections.Edge {
+		return types.PersonEdge{
+			Node:   person,
+			Cursor: connections.OffsetToCursor(offset),
+		}
+	}
+
+	conn := func(edges []*types.PersonEdge, nodes []*types.Person, info *types.PageInfo, totalCount int) (*types.PersonConnection, error) {
+		var personNodes []*types.Person
+		personNodes = append(personNodes, nodes...)
+		count := int64(totalCount)
+		return &types.PersonConnection{
+			Edges:      edges,
+			Nodes:      personNodes,
+			PageInfo:   info,
+			TotalCount: &count,
+		}, nil
+	}
+	return connections.PeopleLookupCon(data, edger, conn, input)
 }
 
 func (r *queryResolver) Identity(ctx context.Context, id string) (*types.Identity, error) {
@@ -194,7 +221,15 @@ func (r *queryResolver) Identities(ctx context.Context) ([]*types.Identity, erro
 }
 
 func (r *queryResolver) CheckEmail(ctx context.Context, email string) (*bool, error) {
-	panic(fmt.Errorf("not implemented"))
+	if err := emailvalidator.Validate(email); err != nil {
+		return nil, err
+	}
+	resp, err := r.onBoardingService.CheckEmailExistence(ctx, &onboardingService.CheckEmailExistenceRequest{Email: email})
+	if err != nil {
+		r.logger.Error("error calling onboardingService.checkEmailExistence()", zap.Error(err))
+		return nil, err
+	}
+	return &resp.Exists, nil
 }
 
 func (r *queryResolver) Address(ctx context.Context, id string) (*types.Address, error) {
@@ -384,6 +419,26 @@ func (r *queryResolver) OnfidoReport(ctx context.Context, id string) (*string, e
 
 func (r *queryResolver) ComplyAdvReport(ctx context.Context, id string) (*string, error) {
 	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *queryResolver) GetSDKToken(ctx context.Context) (*types.Response, error) {
+	claims, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+	req := &onboardingService.GetOnfidoSDKTokenRequest{
+		PersonId: claims.PersonId,
+	}
+	resp, err := r.onBoardingService.GetOnfidoSDKToken(ctx, req)
+	if err != nil {
+		r.logger.Error("Get sdk token request failed", zap.Error(err))
+		return nil, err
+	}
+	return &types.Response{
+		Message: "successful",
+		Success: true,
+		Token:   &resp.Token,
+	}, nil
 }
 
 func (r *queryResolver) Task(ctx context.Context, id string) (*types.Task, error) {

@@ -775,8 +775,8 @@ type PersonConnection struct {
 }
 
 type PersonEdge struct {
-	Node   *Person   `json:"node"`
-	Cursor *PageInfo `json:"cursor"`
+	Node   *Person `json:"node"`
+	Cursor string  `json:"cursor"`
 }
 
 type PersonInput struct {

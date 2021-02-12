@@ -13,6 +13,7 @@ import (
 	emailvalidator "ms.api/libs/validator/email"
 	"ms.api/libs/validator/phonenumbervalidator"
 	"ms.api/protos/pb/authService"
+	"ms.api/protos/pb/identityService"
 	"ms.api/protos/pb/onboardingService"
 	protoTypes "ms.api/protos/pb/types"
 	"ms.api/server/http/middlewares"
@@ -187,7 +188,23 @@ func (r *mutationResolver) IntendedActivities(ctx context.Context, activities []
 }
 
 func (r *mutationResolver) CreateApplication(ctx context.Context, applicant types.ApplicantInput) (*types.Response, error) {
-	panic(fmt.Errorf("not implemented"))
+	claims, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+	req := &onboardingService.CreateOnfidoApplicantRequest{
+		PersonId: claims.PersonId,
+	}
+	resp, err := r.onBoardingService.CreateOnfidoApplicant(ctx, req)
+	if err != nil {
+		r.logger.Error("create applicant request failed", zap.Error(err))
+		return nil, err
+	}
+	return &types.Response{
+		Message: "successful",
+		Success: true,
+		Token:   &resp.Token,
+	}, nil
 }
 
 func (r *mutationResolver) VerifyEmail(ctx context.Context, email string, code string) (*types.Response, error) {
@@ -202,17 +219,15 @@ func (r *mutationResolver) ResendEmailMagicLInk(ctx context.Context, email strin
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *mutationResolver) Login(ctx context.Context, credentials types.AuthInput, biometric *bool) (*types.AuthResponse, error) {
+func (r *mutationResolver) Login(ctx context.Context, credentials types.AuthInput) (*types.AuthResponse, error) {
 	if err := emailvalidator.Validate(credentials.Email); err != nil {
 		r.logger.Info("invalid email supplied", zap.String("email", credentials.Email))
 		return nil, err
 	}
 	// TODO: change authService.LoginRequest{}.Tokens to slice datatype
-	bio := biometric != nil && *biometric
 	req := &authService.LoginRequest{
-		Email:     credentials.Email,
-		Passcode:  credentials.Passcode,
-		Biometric: bio,
+		Email:    credentials.Email,
+		Passcode: credentials.Passcode,
 		Device: &protoTypes.Device{
 			Os:         credentials.Device.Os,
 			Brand:      credentials.Device.Brand,
@@ -250,37 +265,35 @@ func (r *mutationResolver) RefreshToken(ctx context.Context, token string) (*typ
 	}, nil
 }
 
-func (r *mutationResolver) UpdateDeviceToken(ctx context.Context, token string) (*types.Response, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
-func (r *mutationResolver) SetBiometricAuth(ctx context.Context, activate *bool) (*types.Response, error) {
+func (r *mutationResolver) UpdateDeviceToken(ctx context.Context, token []*types.DeviceTokenInput) (*types.Response, error) {
 	claims, err := middlewares.GetAuthenticatedUser(ctx)
 	if err != nil {
 		return nil, ErrUnAuthenticated
 	}
-	setActive := activate != nil && *activate
-	if setActive {
-		resp, err := r.authService.ActivateBioLogin(ctx, &authService.ActivateBioLoginRequest{
-			IdentityId: claims.IdentityId,
-			DeviceId:   claims.DeviceId,
-		})
-		if err != nil {
-			r.logger.Info("authService.ActivateBioLogin() failed", zap.Error(err))
-			return nil, err
+
+	// Get tokens
+	var requestTokens []*identityService.DeviceTokens
+	for _, token := range token {
+		if token != nil {
+			requestTokens = append(requestTokens, &identityService.DeviceTokens{
+				Type:  string(token.Type),
+				Value: token.Value,
+			})
 		}
-		return &types.Response{Message: resp.Message, Success: true, Token: &resp.BiometricPasscode}, nil
-	} else {
-		resp, err := r.authService.DeactivateBioLogin(ctx, &authService.DeactivateBioLoginRequest{
-			IdentityId: claims.IdentityId,
-			DeviceId:   claims.DeviceId,
-		})
-		if err != nil {
-			r.logger.Info("authService.DeactivateBioLogin() failed", zap.Error(err))
-			return nil, err
-		}
-		return &types.Response{Message: resp.Message, Success: true}, nil
 	}
+	response, err := r.identityService.UpdateDeviceTokens(ctx, &identityService.UpdateDeviceTokensRequest{
+		DeviceId:   claims.DeviceId,
+		IdentityId: claims.IdentityId,
+		Tokens:     requestTokens,
+	})
+	if err != nil {
+		r.logger.Error("error calling identityService.UpdateDeviceTokens()", zap.Error(err))
+		return nil, err
+	}
+	return &types.Response{
+		Message: "successful",
+		Success: response.Success,
+	}, nil
 }
 
 func (r *mutationResolver) ResetPasscode(ctx context.Context, credentials *types.AuthInput, token string) (*types.Response, error) {
