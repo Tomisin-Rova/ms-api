@@ -300,6 +300,31 @@ func (r *mutationResolver) ResetPasscode(ctx context.Context, credentials *types
 	panic(fmt.Errorf("not implemented"))
 }
 
+func (r *mutationResolver) ConfirmPasscodeResetDetails(ctx context.Context, email string, device types.DeviceInput) (*types.Response, error) {
+	if err := emailvalidator.Validate(email); err != nil {
+		r.logger.Info("invalid email supplied", zap.String("email", email))
+		return nil, err
+	}
+	// TODO: change authService.LoginRequest{}.Tokens to slice datatype
+	req := &authService.PasswordResetUserDetails{
+		Email: email,
+		Device: &protoTypes.Device{
+			Os:         device.Os,
+			Brand:      device.Brand,
+			Identifier: device.Identifier,
+		}}
+	fmt.Printf("Here: %v, %v", req.Email, req.Device)
+	resp, err := r.authService.ConfirmPasswordResetDetails(ctx, req)
+	if err != nil {
+		r.logger.Info(fmt.Sprintf("authService.Login() failed: %v", err))
+		return nil, err
+	}
+	return &types.Response{
+		Message: resp.Message,
+		Success: true,
+	}, nil
+}
+
 func (r *mutationResolver) SubmitApplication(ctx context.Context) (*types.Response, error) {
 	panic(fmt.Errorf("not implemented"))
 }
