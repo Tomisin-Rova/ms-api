@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"ms.api/protos/pb/personService"
+	types2 "ms.api/protos/pb/types"
 
 	"github.com/jinzhu/copier"
 	"go.uber.org/zap"
@@ -124,12 +125,20 @@ func (r *queryResolver) People(ctx context.Context, first *int64, after *string,
 		addresses := make([]*types.Address, 0)
 
 		for _, id := range person.Identities {
+			cred := id.Credentials
+			if cred == nil {
+				cred = &types2.Credentials{}
+			}
 			identities = append(identities, &types.Identity{
 				ID:             id.Id,
 				Owner:          id.Owner,
 				Nickname:       &id.Nickname,
 				Active:         &id.Active,
 				Authentication: &id.Authentication,
+				Credentials: &types.Credentials{
+					Identifier:   cred.Identifier,
+					RefreshToken: &cred.RefreshToken,
+				},
 			})
 		}
 		for _, email := range person.Emails {
