@@ -386,6 +386,26 @@ func (r *queryResolver) ComplyAdvReport(ctx context.Context, id string) (*string
 	panic(fmt.Errorf("not implemented"))
 }
 
+func (r *queryResolver) GetSDKToken(ctx context.Context) (*types.Response, error) {
+	claims, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+	req := &onboardingService.GetOnfidoSDKTokenRequest{
+		PersonId: claims.PersonId,
+	}
+	resp, err := r.onBoardingService.GetOnfidoSDKToken(ctx, req)
+	if err != nil {
+		r.logger.Error("Get sdk token request failed", zap.Error(err))
+		return nil, err
+	}
+	return &types.Response{
+		Message: "successful",
+		Success: true,
+		Token:   &resp.Token,
+	}, nil
+}
+
 func (r *queryResolver) Task(ctx context.Context, id string) (*types.Task, error) {
 	panic(fmt.Errorf("not implemented"))
 }

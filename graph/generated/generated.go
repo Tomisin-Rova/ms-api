@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"strconv"
 	"sync"
+	"sync/atomic"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
@@ -870,6 +871,7 @@ type ComplexityRoot struct {
 		Currency        func(childComplexity int, code string) int
 		Device          func(childComplexity int, identifier string) int
 		Devices         func(childComplexity int, first *int64, after *string, last *int64, before *string) int
+		GetSDKToken     func(childComplexity int) int
 		Identities      func(childComplexity int) int
 		Identity        func(childComplexity int, id string) int
 		Industries      func(childComplexity int, first *int64, after *string, last *int64, before *string) int
@@ -1154,6 +1156,7 @@ type QueryResolver interface {
 	Screens(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.ScreenConnection, error)
 	OnfidoReport(ctx context.Context, id string) (*string, error)
 	ComplyAdvReport(ctx context.Context, id string) (*string, error)
+	GetSDKToken(ctx context.Context) (*types.Response, error)
 	Task(ctx context.Context, id string) (*types.Task, error)
 	Tasks(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.TaskConnection, error)
 	Comment(ctx context.Context, id string) (*types.Comment, error)
@@ -5285,6 +5288,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Devices(childComplexity, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string)), true
 
+	case "Query.getSDKToken":
+		if e.complexity.Query.GetSDKToken == nil {
+			break
+		}
+
+		return e.complexity.Query.GetSDKToken(childComplexity), true
+
 	case "Query.identities":
 		if e.complexity.Query.Identities == nil {
 			break
@@ -6597,6 +6607,8 @@ var sources = []*ast.Source{
   screens(first: Int, after: String, last: Int, before: String): ScreenConnection
   onfidoReport(id: ID!): OnfidoReport
   complyAdvReport(id: ID!): ComplyAdvantageReport
+  # allows customer to confirm their phone number via OTP
+  getSDKToken: Response!
   task(id: ID!): Task
   tasks(first: Int, after: String, last: Int, before: String): TaskConnection
   comment(id: ID!): Comment
@@ -29048,6 +29060,41 @@ func (ec *executionContext) _Query_complyAdvReport(ctx context.Context, field gr
 	return ec.marshalOComplyAdvantageReport2ᚖstring(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Query_getSDKToken(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetSDKToken(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.Response)
+	fc.Result = res
+	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query_task(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -38996,6 +39043,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_complyAdvReport(ctx, field)
+				return res
+			})
+		case "getSDKToken":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getSDKToken(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
 				return res
 			})
 		case "task":
