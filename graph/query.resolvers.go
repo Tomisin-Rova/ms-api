@@ -17,6 +17,7 @@ import (
 	"ms.api/protos/pb/authService"
 	"ms.api/protos/pb/onboardingService"
 	"ms.api/protos/pb/personService"
+	types2 "ms.api/protos/pb/types"
 	"ms.api/server/http/middlewares"
 	"ms.api/types"
 )
@@ -59,12 +60,20 @@ func (r *queryResolver) Person(ctx context.Context, id string) (*types.Person, e
 	addresses := make([]*types.Address, 0)
 
 	for _, id := range person.Identities {
+		cred := id.Credentials
+		if cred == nil {
+			cred = &types2.Credentials{}
+		}
 		identities = append(identities, &types.Identity{
 			ID:             id.Id,
 			Owner:          id.Owner,
 			Nickname:       &id.Nickname,
 			Active:         &id.Active,
 			Authentication: &id.Authentication,
+			Credentials: &types.Credentials{
+				Identifier:   cred.Identifier,
+				RefreshToken: &cred.RefreshToken,
+			},
 		})
 	}
 	for _, email := range person.Emails {
@@ -111,7 +120,7 @@ func (r *queryResolver) Person(ctx context.Context, id string) (*types.Person, e
 func (r *queryResolver) People(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.PersonConnection, error) {
 	res, err := r.personService.People(ctx, &personService.PeopleRequest{
 		Page:    1,
-		PerPage: 50,
+		PerPage: 100,
 	})
 	if err != nil {
 		return nil, err
@@ -125,12 +134,20 @@ func (r *queryResolver) People(ctx context.Context, first *int64, after *string,
 		addresses := make([]*types.Address, 0)
 
 		for _, id := range person.Identities {
+			cred := id.Credentials
+			if cred == nil {
+				cred = &types2.Credentials{}
+			}
 			identities = append(identities, &types.Identity{
 				ID:             id.Id,
 				Owner:          id.Owner,
 				Nickname:       &id.Nickname,
 				Active:         &id.Active,
 				Authentication: &id.Authentication,
+				Credentials: &types.Credentials{
+					Identifier:   cred.Identifier,
+					RefreshToken: &cred.RefreshToken,
+				},
 			})
 		}
 		for _, email := range person.Emails {
@@ -174,7 +191,33 @@ func (r *queryResolver) People(ctx context.Context, first *int64, after *string,
 		}
 		data = append(data, p)
 	}
-	return &types.PersonConnection{Nodes: data}, nil
+
+	input := models.ConnectionInput{
+		Before: before,
+		After:  after,
+		First:  first,
+		Last:   last,
+	}
+
+	edger := func(person *types.Person, offset int) connections.Edge {
+		return types.PersonEdge{
+			Node:   person,
+			Cursor: connections.OffsetToCursor(offset),
+		}
+	}
+
+	conn := func(edges []*types.PersonEdge, nodes []*types.Person, info *types.PageInfo, totalCount int) (*types.PersonConnection, error) {
+		var personNodes []*types.Person
+		personNodes = append(personNodes, nodes...)
+		count := int64(totalCount)
+		return &types.PersonConnection{
+			Edges:      edges,
+			Nodes:      personNodes,
+			PageInfo:   info,
+			TotalCount: &count,
+		}, nil
+	}
+	return connections.PeopleLookupCon(data, edger, conn, input)
 }
 
 func (r *queryResolver) Identity(ctx context.Context, id string) (*types.Identity, error) {
