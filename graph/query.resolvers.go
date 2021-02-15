@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
 
 	"github.com/jinzhu/copier"
 	"go.uber.org/zap"
@@ -246,16 +247,26 @@ func (r *queryResolver) AddressLookup(ctx context.Context, text *string, first *
 
 	var addressRes []*types.Address
 	for _, c := range addresses.Addresses {
+		lon, err := strconv.ParseFloat(c.Longitude, 64)
+		if err != nil {
+			r.logger.Error("error converting longitude value", zap.Error(err))
+			return nil, err
+		}
+		lat, err := strconv.ParseFloat(c.Latitude, 64)
+		if err != nil {
+			r.logger.Error("error converting latitude value", zap.Error(err))
+			return nil, err
+		}
 		address := &types.Address{
-			Street:   &c.Street,
-			City:     &c.Town,
-			State:    &c.State,
+			Street:   &c.Summaryline,
+			City:     &c.Posttown,
+			State:    &c.County,
 			Postcode: &c.Postcode,
-			Country: &types.Country{
-				CountryName: c.Country,
+			Location: &types.Location{
+				Longitude: &lon,
+				Latitude:  &lat,
 			},
 		}
-
 		addressRes = append(addressRes, address)
 	}
 

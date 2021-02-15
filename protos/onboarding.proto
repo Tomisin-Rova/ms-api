@@ -130,7 +130,7 @@ message AddressLookupRequest {
 }
 
 message AddressLookupResponse {
-  repeated types.Address addresses = 1;
+  repeated types.AddressLookup addresses = 1;
 }
 
 service OnBoardingService{
