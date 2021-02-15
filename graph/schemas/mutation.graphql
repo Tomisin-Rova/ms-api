@@ -11,7 +11,7 @@ type Mutation {
     """
     registration(personid: ID!, person: PersonInput!, address: AddressInput!): Person
     intendedActivities(activities: [ID!]): Response!
-    createApplication(applicant: ApplicantInput!): Response!
+    createApplication: Response!
     # verifications
     verifyEmail(email: String!, code: String!): Response!
     resendOTP(phone: String!): Response!

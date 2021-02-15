@@ -187,7 +187,7 @@ func (r *mutationResolver) IntendedActivities(ctx context.Context, activities []
 	return &types.Response{Message: resp.Message, Success: true}, nil
 }
 
-func (r *mutationResolver) CreateApplication(ctx context.Context, applicant types.ApplicantInput) (*types.Response, error) {
+func (r *mutationResolver) CreateApplication(ctx context.Context) (*types.Response, error) {
 	claims, err := middlewares.GetAuthenticatedUser(ctx)
 	if err != nil {
 		return nil, ErrUnAuthenticated

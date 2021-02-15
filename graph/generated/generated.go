@@ -638,7 +638,7 @@ type ComplexityRoot struct {
 		AcceptTerms             func(childComplexity int, documents []*string) int
 		ConfirmPasscodeResetOtp func(childComplexity int, email string, otp string) int
 		ConfirmPhone            func(childComplexity int, token string, code string) int
-		CreateApplication       func(childComplexity int, applicant types.ApplicantInput) int
+		CreateApplication       func(childComplexity int) int
 		CreatePhone             func(childComplexity int, phone string, device types.DeviceInput) int
 		IntendedActivities      func(childComplexity int, activities []string) int
 		Login                   func(childComplexity int, credentials types.AuthInput) int
@@ -848,60 +848,60 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Acceptance      func(childComplexity int, id string) int
-		Acceptances     func(childComplexity int, first *int64, after *string, last *int64, before *string) int
-		Account         func(childComplexity int, id string) int
-		Accounts        func(childComplexity int, first *int64, after *string, last *int64, before *string) int
-		Activities      func(childComplexity int, first *int64, after *string, last *int64, before *string) int
-		Activity        func(childComplexity int, id string) int
-		Address         func(childComplexity int, id string) int
-		AddressLookup   func(childComplexity int, text *string, first *int64, after *string, last *int64, before *string) int
-		Addresses       func(childComplexity int) int
-		Auths           func(childComplexity int) int
-		Cdd             func(childComplexity int, id string) int
-		Cdds            func(childComplexity int, keywords *string, first *int64, after *string, last *int64, before *string) int
-		Check           func(childComplexity int, id string) int
-		CheckEmail      func(childComplexity int, email string) int
-		Checks          func(childComplexity int, first *int64, after *string, last *int64, before *string) int
-		Comment         func(childComplexity int, id string) int
-		Comments        func(childComplexity int, first *int64, after *string, last *int64, before *string) int
-		ComplyAdvReport func(childComplexity int, id string) int
-		Countries       func(childComplexity int, first *int64, after *string, last *int64, before *string) int
-		Country         func(childComplexity int, code string) int
-		Currencies      func(childComplexity int, supported *bool, first *int64, after *string, last *int64, before *string) int
-		Currency        func(childComplexity int, code string) int
-		Device          func(childComplexity int, identifier string) int
-		Devices         func(childComplexity int, first *int64, after *string, last *int64, before *string) int
-		GetSDKToken     func(childComplexity int) int
-		Identities      func(childComplexity int) int
-		Identity        func(childComplexity int, id string) int
-		Industries      func(childComplexity int, first *int64, after *string, last *int64, before *string) int
-		Industry        func(childComplexity int, code string) int
-		Me              func(childComplexity int) int
-		Message         func(childComplexity int, id string) int
-		Messages        func(childComplexity int, first *int64, after *string, last *int64, before *string) int
-		Node            func(childComplexity int, id string) int
-		OnfidoReport    func(childComplexity int, id string) int
-		Organisation    func(childComplexity int, id string) int
-		Organisations   func(childComplexity int, first *int64, after *string, last *int64, before *string) int
-		People          func(childComplexity int, first *int64, after *string, last *int64, before *string) int
-		Person          func(childComplexity int, id string) int
-		Price           func(childComplexity int, pair *string, ts *int64) int
-		Prices          func(childComplexity int, first *int64, after *string, last *int64, before *string) int
-		Product         func(childComplexity int, id string) int
-		Products        func(childComplexity int, first *int64, after *string, last *int64, before *string) int
-		Quote           func(childComplexity int, id string) int
-		Quotes          func(childComplexity int, first *int64, after *string, last *int64, before *string) int
-		Screen          func(childComplexity int, id string) int
-		Screens         func(childComplexity int, first *int64, after *string, last *int64, before *string) int
-		Tag             func(childComplexity int, id string) int
-		Tags            func(childComplexity int, first *int64, after *string, last *int64, before *string) int
-		Task            func(childComplexity int, id string) int
-		Tasks           func(childComplexity int, first *int64, after *string, last *int64, before *string) int
-		Transaction     func(childComplexity int, id string) int
-		Transactions    func(childComplexity int, first *int64, after *string, last *int64, before *string) int
-		Verification    func(childComplexity int, code string) int
-		Verifications   func(childComplexity int, first *int64, after *string, last *int64, before *string) int
+		Acceptance        func(childComplexity int, id string) int
+		Acceptances       func(childComplexity int, first *int64, after *string, last *int64, before *string) int
+		Account           func(childComplexity int, id string) int
+		Accounts          func(childComplexity int, first *int64, after *string, last *int64, before *string) int
+		Activities        func(childComplexity int, first *int64, after *string, last *int64, before *string) int
+		Activity          func(childComplexity int, id string) int
+		Address           func(childComplexity int, id string) int
+		AddressLookup     func(childComplexity int, text *string, first *int64, after *string, last *int64, before *string) int
+		Addresses         func(childComplexity int) int
+		Auths             func(childComplexity int) int
+		Cdd               func(childComplexity int, id string) int
+		Cdds              func(childComplexity int, keywords *string, first *int64, after *string, last *int64, before *string) int
+		Check             func(childComplexity int, id string) int
+		CheckEmail        func(childComplexity int, email string) int
+		Checks            func(childComplexity int, first *int64, after *string, last *int64, before *string) int
+		Comment           func(childComplexity int, id string) int
+		Comments          func(childComplexity int, first *int64, after *string, last *int64, before *string) int
+		ComplyAdvReport   func(childComplexity int, id string) int
+		Countries         func(childComplexity int, first *int64, after *string, last *int64, before *string) int
+		Country           func(childComplexity int, code string) int
+		Currencies        func(childComplexity int, supported *bool, first *int64, after *string, last *int64, before *string) int
+		Currency          func(childComplexity int, code string) int
+		Device            func(childComplexity int, identifier string) int
+		Devices           func(childComplexity int, first *int64, after *string, last *int64, before *string) int
+		GetOnfidoSDKToken func(childComplexity int) int
+		Identities        func(childComplexity int) int
+		Identity          func(childComplexity int, id string) int
+		Industries        func(childComplexity int, first *int64, after *string, last *int64, before *string) int
+		Industry          func(childComplexity int, code string) int
+		Me                func(childComplexity int) int
+		Message           func(childComplexity int, id string) int
+		Messages          func(childComplexity int, first *int64, after *string, last *int64, before *string) int
+		Node              func(childComplexity int, id string) int
+		OnfidoReport      func(childComplexity int, id string) int
+		Organisation      func(childComplexity int, id string) int
+		Organisations     func(childComplexity int, first *int64, after *string, last *int64, before *string) int
+		People            func(childComplexity int, first *int64, after *string, last *int64, before *string) int
+		Person            func(childComplexity int, id string) int
+		Price             func(childComplexity int, pair *string, ts *int64) int
+		Prices            func(childComplexity int, first *int64, after *string, last *int64, before *string) int
+		Product           func(childComplexity int, id string) int
+		Products          func(childComplexity int, first *int64, after *string, last *int64, before *string) int
+		Quote             func(childComplexity int, id string) int
+		Quotes            func(childComplexity int, first *int64, after *string, last *int64, before *string) int
+		Screen            func(childComplexity int, id string) int
+		Screens           func(childComplexity int, first *int64, after *string, last *int64, before *string) int
+		Tag               func(childComplexity int, id string) int
+		Tags              func(childComplexity int, first *int64, after *string, last *int64, before *string) int
+		Task              func(childComplexity int, id string) int
+		Tasks             func(childComplexity int, first *int64, after *string, last *int64, before *string) int
+		Transaction       func(childComplexity int, id string) int
+		Transactions      func(childComplexity int, first *int64, after *string, last *int64, before *string) int
+		Verification      func(childComplexity int, code string) int
+		Verifications     func(childComplexity int, first *int64, after *string, last *int64, before *string) int
 	}
 
 	Quote struct {
@@ -1103,7 +1103,7 @@ type MutationResolver interface {
 	Signup(ctx context.Context, token string, email string, passcode string) (*types.AuthResponse, error)
 	Registration(ctx context.Context, personid string, person types.PersonInput, address types.AddressInput) (*types.Person, error)
 	IntendedActivities(ctx context.Context, activities []string) (*types.Response, error)
-	CreateApplication(ctx context.Context, applicant types.ApplicantInput) (*types.Response, error)
+	CreateApplication(ctx context.Context) (*types.Response, error)
 	VerifyEmail(ctx context.Context, email string, code string) (*types.Response, error)
 	ResendOtp(ctx context.Context, phone string) (*types.Response, error)
 	ResendEmailMagicLInk(ctx context.Context, email string) (*types.Response, error)
@@ -1158,7 +1158,7 @@ type QueryResolver interface {
 	Screens(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.ScreenConnection, error)
 	OnfidoReport(ctx context.Context, id string) (*string, error)
 	ComplyAdvReport(ctx context.Context, id string) (*string, error)
-	GetSDKToken(ctx context.Context) (*types.Response, error)
+	GetOnfidoSDKToken(ctx context.Context) (*types.Response, error)
 	Task(ctx context.Context, id string) (*types.Task, error)
 	Tasks(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.TaskConnection, error)
 	Comment(ctx context.Context, id string) (*types.Comment, error)
@@ -3977,12 +3977,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_createApplication_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.CreateApplication(childComplexity, args["applicant"].(types.ApplicantInput)), true
+		return e.complexity.Mutation.CreateApplication(childComplexity), true
 
 	case "Mutation.createPhone":
 		if e.complexity.Mutation.CreatePhone == nil {
@@ -5302,12 +5297,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Devices(childComplexity, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string)), true
 
-	case "Query.getSDKToken":
-		if e.complexity.Query.GetSDKToken == nil {
+	case "Query.getOnfidoSDKToken":
+		if e.complexity.Query.GetOnfidoSDKToken == nil {
 			break
 		}
 
-		return e.complexity.Query.GetSDKToken(childComplexity), true
+		return e.complexity.Query.GetOnfidoSDKToken(childComplexity), true
 
 	case "Query.identities":
 		if e.complexity.Query.Identities == nil {
@@ -6553,7 +6548,7 @@ var sources = []*ast.Source{
     """
     registration(personid: ID!, person: PersonInput!, address: AddressInput!): Person
     intendedActivities(activities: [ID!]): Response!
-    createApplication(applicant: ApplicantInput!): Response!
+    createApplication: Response!
     # verifications
     verifyEmail(email: String!, code: String!): Response!
     resendOTP(phone: String!): Response!
@@ -6622,7 +6617,7 @@ var sources = []*ast.Source{
   onfidoReport(id: ID!): OnfidoReport
   complyAdvReport(id: ID!): ComplyAdvantageReport
   # allows customer to confirm their phone number via OTP
-  getSDKToken: Response!
+  getOnfidoSDKToken: Response!
   task(id: ID!): Task
   tasks(first: Int, after: String, last: Int, before: String): TaskConnection
   comment(id: ID!): Comment
@@ -8062,21 +8057,6 @@ func (ec *executionContext) field_Mutation_confirmPhone_args(ctx context.Context
 		}
 	}
 	args["code"] = arg1
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_createApplication_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 types.ApplicantInput
-	if tmp, ok := rawArgs["applicant"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("applicant"))
-		arg0, err = ec.unmarshalNApplicantInput2msᚗapiᚋtypesᚐApplicantInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["applicant"] = arg0
 	return args, nil
 }
 
@@ -22918,16 +22898,9 @@ func (ec *executionContext) _Mutation_createApplication(ctx context.Context, fie
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_createApplication_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateApplication(rctx, args["applicant"].(types.ApplicantInput))
+		return ec.resolvers.Mutation().CreateApplication(rctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -29145,7 +29118,7 @@ func (ec *executionContext) _Query_complyAdvReport(ctx context.Context, field gr
 	return ec.marshalOComplyAdvantageReport2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_getSDKToken(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_getOnfidoSDKToken(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -29163,7 +29136,7 @@ func (ec *executionContext) _Query_getSDKToken(ctx context.Context, field graphq
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetSDKToken(rctx)
+		return ec.resolvers.Query().GetOnfidoSDKToken(rctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -39138,7 +39111,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				res = ec._Query_complyAdvReport(ctx, field)
 				return res
 			})
-		case "getSDKToken":
+		case "getOnfidoSDKToken":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -39146,7 +39119,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_getSDKToken(ctx, field)
+				res = ec._Query_getOnfidoSDKToken(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -40951,11 +40924,6 @@ func (ec *executionContext) marshalNAml2ᚖmsᚗapiᚋtypesᚐAml(ctx context.Co
 		return graphql.Null
 	}
 	return ec._Aml(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalNApplicantInput2msᚗapiᚋtypesᚐApplicantInput(ctx context.Context, v interface{}) (types.ApplicantInput, error) {
-	res, err := ec.unmarshalInputApplicantInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNAuthInput2msᚗapiᚋtypesᚐAuthInput(ctx context.Context, v interface{}) (types.AuthInput, error) {
