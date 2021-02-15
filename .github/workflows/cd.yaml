@@ -181,4 +181,4 @@ jobs:
         run: |
           export TAG=`echo ${{ steps.get_version.outputs.VERSION }}`
           export CONTAINER=`echo $ORG/$IMAGE`
-          docker push "$REGISTRY_HOSTNAME"/"$CONTAINER"
+          docker push "$REGISTRY_HOSTNAME"/"$CONTAINER":"$TAG"

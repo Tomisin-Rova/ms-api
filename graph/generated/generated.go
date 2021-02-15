@@ -6733,10 +6733,12 @@ type PersonConnection {
   pageInfo: PageInfo
   totalCount: Int
 }
+
 type PersonEdge {
   node: Person!
-  cursor: PageInfo
+  cursor: String!
 }
+
 input PersonInput {
   first_name: String!
   last_name: String!
@@ -25529,11 +25531,14 @@ func (ec *executionContext) _PersonEdge_cursor(ctx context.Context, field graphq
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*types.PageInfo)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalOPageInfo2ᚖmsᚗapiᚋtypesᚐPageInfo(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Phone_name(ctx context.Context, field graphql.CollectedField, obj *types.Phone) (ret graphql.Marshaler) {
@@ -38195,6 +38200,9 @@ func (ec *executionContext) _PersonEdge(ctx context.Context, sel ast.SelectionSe
 			}
 		case "cursor":
 			out.Values[i] = ec._PersonEdge_cursor(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
