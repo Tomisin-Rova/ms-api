@@ -60,12 +60,20 @@ func (r *queryResolver) Person(ctx context.Context, id string) (*types.Person, e
 	addresses := make([]*types.Address, 0)
 
 	for _, id := range person.Identities {
+		cred := id.Credentials
+		if cred == nil {
+			cred = &types2.Credentials{}
+		}
 		identities = append(identities, &types.Identity{
 			ID:             id.Id,
 			Owner:          id.Owner,
 			Nickname:       &id.Nickname,
 			Active:         &id.Active,
 			Authentication: &id.Authentication,
+			Credentials: &types.Credentials{
+				Identifier:   cred.Identifier,
+				RefreshToken: &cred.RefreshToken,
+			},
 		})
 	}
 	for _, email := range person.Emails {
@@ -112,7 +120,7 @@ func (r *queryResolver) Person(ctx context.Context, id string) (*types.Person, e
 func (r *queryResolver) People(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.PersonConnection, error) {
 	res, err := r.personService.People(ctx, &personService.PeopleRequest{
 		Page:    1,
-		PerPage: 50,
+		PerPage: 100,
 	})
 	if err != nil {
 		return nil, err
