@@ -297,7 +297,6 @@ func (r *mutationResolver) UpdateDeviceToken(ctx context.Context, token []*types
 }
 
 func (r *mutationResolver) ResetPasscode(ctx context.Context, token string, email string, passcode string) (*types.Response, error) {
-
 	if err := emailvalidator.Validate(email); err != nil {
 		r.logger.Info("invalid email supplied", zap.String("email", email))
 		return nil, err
@@ -316,7 +315,6 @@ func (r *mutationResolver) ResetPasscode(ctx context.Context, token string, emai
 		Message: resp.Message,
 		Success: true,
 	}, nil
-
 }
 
 func (r *mutationResolver) RequestPasscodeReset(ctx context.Context, email string, device types.DeviceInput) (*types.Response, error) {

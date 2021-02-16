@@ -292,13 +292,11 @@ func (r *queryResolver) AddressLookup(ctx context.Context, text *string, first *
 	for _, c := range addresses.Addresses {
 		lon, err := strconv.ParseFloat(c.Longitude, 64)
 		if err != nil {
-			r.logger.Error("error converting longitude value", zap.Error(err))
-			return nil, err
+			r.logger.Info("can't convert longitude value", zap.Error(err))
 		}
 		lat, err := strconv.ParseFloat(c.Latitude, 64)
 		if err != nil {
-			r.logger.Error("error converting latitude value", zap.Error(err))
-			return nil, err
+			r.logger.Info("can't convert latitude value", zap.Error(err))
 		}
 		address := &types.Address{
 			Street:   &c.Summaryline,
