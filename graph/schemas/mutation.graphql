@@ -20,7 +20,7 @@ type Mutation {
     login(credentials: AuthInput!): AuthResponse!
     refreshToken(token: String!): AuthResponse!
     updateDeviceToken(token: [DeviceTokenInput]!): Response!
-    resetPasscode(credentials: AuthInput, token: String!): Response!
+    resetPasscode(token: String!, email: String!, passcode: String!): Response!
     requestPasscodeReset(email: String!, device: DeviceInput!):  Response!
     confirmPasscodeResetOtp(email: String!, otp: String!): Response!
     """
