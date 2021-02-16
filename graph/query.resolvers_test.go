@@ -22,11 +22,15 @@ const (
 	maxAddresses = 100
 )
 
-func genMockAddresses() []*protoTypes.Address {
-	var addressRes []*protoTypes.Address
+func genMockAddresses() []*protoTypes.AddressLookup {
+	var addressRes []*protoTypes.AddressLookup
 	for i := 0; i < maxAddresses; i++ {
 		gs := fmt.Sprintf("Street # {%d}", i)
-		addressRes = append(addressRes, &protoTypes.Address{Street: gs})
+		addressRes = append(addressRes, &protoTypes.AddressLookup{
+			Street:    gs,
+			Latitude:  "52.5859730797",
+			Longitude: "1.3491603533",
+		})
 	}
 	return addressRes
 }
