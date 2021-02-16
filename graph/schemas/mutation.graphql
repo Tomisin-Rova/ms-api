@@ -21,8 +21,8 @@ type Mutation {
     refreshToken(token: String!): AuthResponse!
     updateDeviceToken(token: [DeviceTokenInput]!): Response!
     resetPasscode(credentials: AuthInput, token: String!): Response!
-    confirmPasscodeResetDetails(email: String!, device: DeviceInput!):  Response!
-    # confirmPasscodeResetOtp(email: String!, otp: String!): Result
+    requestPasscodeReset(email: String!, device: DeviceInput!):  Response!
+    confirmPasscodeResetOtp(email: String!, otp: String!): Response!
     """
     Submit a KYC and AML check for a given customer who has accepted terms & conditions
     """
