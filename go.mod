@@ -24,7 +24,6 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/urfave/cli/v2 v2.3.0 // indirect
 	github.com/vektah/gqlparser/v2 v2.1.0
-	github.com/vektra/mockery/v2 v2.6.0 // indirect
 	go.uber.org/zap v1.16.0
 	golang.org/x/mod v0.4.1 // indirect
 	golang.org/x/net v0.0.0-20201024042810-be3efd7ff127
