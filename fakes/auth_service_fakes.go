@@ -15,8 +15,8 @@ type FakeAuthClient struct {
 	err       error
 }
 
-func (f *FakeAuthClient) ConfirmPasswordResetOtp(ctx context.Context, in *authService.PasswordResetOtpRequest, opts ...grpc.CallOption) (*types.Response, error) {
-	return &types.Response{}, f.err
+func (f *FakeAuthClient) ConfirmPasswordResetOtp(ctx context.Context, in *authService.PasswordResetOtpRequest, opts ...grpc.CallOption) (*authService.PasswordResetOtpResponse, error) {
+	return &authService.PasswordResetOtpResponse{}, f.err
 }
 
 func (f *FakeAuthClient) ConfirmPasswordResetDetails(ctx context.Context, in *authService.PasswordResetUserDetails, opts ...grpc.CallOption) (*types.Response, error) {
