@@ -45,7 +45,7 @@ type Query {
   onfidoReport(id: ID!): OnfidoReport
   complyAdvReport(id: ID!): ComplyAdvantageReport
   # allows customer to confirm their phone number via OTP
-  getSDKToken: Response!
+  getOnfidoSDKToken: Response!
   task(id: ID!): Task
   tasks(first: Int, after: String, last: Int, before: String): TaskConnection
   comment(id: ID!): Comment

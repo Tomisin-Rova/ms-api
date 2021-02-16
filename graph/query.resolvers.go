@@ -440,7 +440,7 @@ func (r *queryResolver) ComplyAdvReport(ctx context.Context, id string) (*string
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *queryResolver) GetSDKToken(ctx context.Context) (*types.Response, error) {
+func (r *queryResolver) GetOnfidoSDKToken(ctx context.Context) (*types.Response, error) {
 	claims, err := middlewares.GetAuthenticatedUser(ctx)
 	if err != nil {
 		return nil, ErrUnAuthenticated
