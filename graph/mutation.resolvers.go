@@ -300,12 +300,11 @@ func (r *mutationResolver) ResetPasscode(ctx context.Context, credentials *types
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *mutationResolver) ConfirmPasscodeResetDetails(ctx context.Context, email string, device types.DeviceInput) (*types.Response, error) {
+func (r *mutationResolver) RequestPasscodeReset(ctx context.Context, email string, device types.DeviceInput) (*types.Response, error) {
 	if err := emailvalidator.Validate(email); err != nil {
 		r.logger.Info("invalid email supplied", zap.String("email", email))
 		return nil, err
 	}
-	// TODO: change authService.LoginRequest{}.Tokens to slice datatype
 	req := &authService.PasswordResetUserDetails{
 		Email: email,
 		Device: &protoTypes.Device{
@@ -313,13 +312,33 @@ func (r *mutationResolver) ConfirmPasscodeResetDetails(ctx context.Context, emai
 			Brand:      device.Brand,
 			Identifier: device.Identifier,
 		}}
-	fmt.Printf("Here: %v, %v", req.Email, req.Device)
 	resp, err := r.authService.ConfirmPasswordResetDetails(ctx, req)
 	if err != nil {
-		r.logger.Info(fmt.Sprintf("authService.Login() failed: %v", err))
+		r.logger.Info(fmt.Sprintf("authService.RequestPasscodeReset() failed: %v", err))
 		return nil, err
 	}
 	return &types.Response{
+		Message: resp.Message,
+		Success: true,
+	}, nil
+}
+
+func (r *mutationResolver) ConfirmPasscodeResetOtp(ctx context.Context, email string, otp string) (*types.Response, error) {
+	if err := emailvalidator.Validate(email); err != nil {
+		r.logger.Info("invalid email supplied", zap.String("email", email))
+		return nil, err
+	}
+	req := &authService.PasswordResetOtpRequest{
+		Email: email,
+		Code:  otp,
+	}
+	resp, err := r.authService.ConfirmPasswordResetOtp(ctx, req)
+	if err != nil {
+		r.logger.Info(fmt.Sprintf("authService.ConfirmPasscodeResetOtp() failed: %v", err))
+		return nil, err
+	}
+	return &types.Response{
+		Token:   &resp.VerificationToken,
 		Message: resp.Message,
 		Success: true,
 	}, nil

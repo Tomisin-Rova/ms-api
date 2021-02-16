@@ -55,6 +55,11 @@ message PasswordResetOtpRequest {
   string code = 2;
 }
 
+message PasswordResetOtpResponse {
+  string message = 1;
+  string verificationToken =2;
+}
+
 message GetPersonRequest {
   string personId = 1;
   string deviceId = 2;
@@ -123,7 +128,7 @@ service AuthService {
   rpc ValidateToken(ValidateTokenRequest) returns (ValidateTokenResponse) {}
   rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse) {}
   rpc ConfirmPasswordResetDetails(PasswordResetUserDetails) returns (types.Response) {}
-  rpc ConfirmPasswordResetOtp(PasswordResetOtpRequest) returns (types.Response) {}
+  rpc ConfirmPasswordResetOtp(PasswordResetOtpRequest) returns (PasswordResetOtpResponse) {}
   rpc ResetPassword(PasswordResetRequest) returns (types.Response) {}
   rpc GetPerson(GetPersonRequest) returns (GetPersonResponse) {}
 }
