@@ -647,7 +647,7 @@ type ComplexityRoot struct {
 		RequestPasscodeReset    func(childComplexity int, email string, device types.DeviceInput) int
 		ResendEmailMagicLInk    func(childComplexity int, email string) int
 		ResendOtp               func(childComplexity int, phone string) int
-		ResetPasscode           func(childComplexity int, credentials *types.AuthInput, token string) int
+		ResetPasscode           func(childComplexity int, token string, email string, passcode string) int
 		Signup                  func(childComplexity int, token string, email string, passcode string) int
 		SubmitApplication       func(childComplexity int) int
 		UpdateDeviceToken       func(childComplexity int, token []*types.DeviceTokenInput) int
@@ -1110,7 +1110,7 @@ type MutationResolver interface {
 	Login(ctx context.Context, credentials types.AuthInput) (*types.AuthResponse, error)
 	RefreshToken(ctx context.Context, token string) (*types.AuthResponse, error)
 	UpdateDeviceToken(ctx context.Context, token []*types.DeviceTokenInput) (*types.Response, error)
-	ResetPasscode(ctx context.Context, credentials *types.AuthInput, token string) (*types.Response, error)
+	ResetPasscode(ctx context.Context, token string, email string, passcode string) (*types.Response, error)
 	RequestPasscodeReset(ctx context.Context, email string, device types.DeviceInput) (*types.Response, error)
 	ConfirmPasscodeResetOtp(ctx context.Context, email string, otp string) (*types.Response, error)
 	SubmitApplication(ctx context.Context) (*types.Response, error)
@@ -4085,7 +4085,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.ResetPasscode(childComplexity, args["credentials"].(*types.AuthInput), args["token"].(string)), true
+		return e.complexity.Mutation.ResetPasscode(childComplexity, args["token"].(string), args["email"].(string), args["passcode"].(string)), true
 
 	case "Mutation.signup":
 		if e.complexity.Mutation.Signup == nil {
@@ -6557,7 +6557,7 @@ var sources = []*ast.Source{
     login(credentials: AuthInput!): AuthResponse!
     refreshToken(token: String!): AuthResponse!
     updateDeviceToken(token: [DeviceTokenInput]!): Response!
-    resetPasscode(credentials: AuthInput, token: String!): Response!
+    resetPasscode(token: String!, email: String!, passcode: String!): Response!
     requestPasscodeReset(email: String!, device: DeviceInput!):  Response!
     confirmPasscodeResetOtp(email: String!, otp: String!): Response!
     """
@@ -8219,24 +8219,33 @@ func (ec *executionContext) field_Mutation_resendOTP_args(ctx context.Context, r
 func (ec *executionContext) field_Mutation_resetPasscode_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *types.AuthInput
-	if tmp, ok := rawArgs["credentials"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("credentials"))
-		arg0, err = ec.unmarshalOAuthInput2ᚖmsᚗapiᚋtypesᚐAuthInput(ctx, tmp)
+	var arg0 string
+	if tmp, ok := rawArgs["token"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("token"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["credentials"] = arg0
+	args["token"] = arg0
 	var arg1 string
-	if tmp, ok := rawArgs["token"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("token"))
+	if tmp, ok := rawArgs["email"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
 		arg1, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["token"] = arg1
+	args["email"] = arg1
+	var arg2 string
+	if tmp, ok := rawArgs["passcode"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("passcode"))
+		arg2, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["passcode"] = arg2
 	return args, nil
 }
 
@@ -23194,7 +23203,7 @@ func (ec *executionContext) _Mutation_resetPasscode(ctx context.Context, field g
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().ResetPasscode(rctx, args["credentials"].(*types.AuthInput), args["token"].(string))
+		return ec.resolvers.Mutation().ResetPasscode(rctx, args["token"].(string), args["email"].(string), args["passcode"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -43979,14 +43988,6 @@ func (ec *executionContext) marshalOAuth2ᚖmsᚗapiᚋtypesᚐAuth(ctx context.
 		return graphql.Null
 	}
 	return ec._Auth(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalOAuthInput2ᚖmsᚗapiᚋtypesᚐAuthInput(ctx context.Context, v interface{}) (*types.AuthInput, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputAuthInput(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalOAuthTokens2ᚖmsᚗapiᚋtypesᚐAuthTokens(ctx context.Context, sel ast.SelectionSet, v *types.AuthTokens) graphql.Marshaler {

@@ -296,8 +296,25 @@ func (r *mutationResolver) UpdateDeviceToken(ctx context.Context, token []*types
 	}, nil
 }
 
-func (r *mutationResolver) ResetPasscode(ctx context.Context, credentials *types.AuthInput, token string) (*types.Response, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *mutationResolver) ResetPasscode(ctx context.Context, token string, email string, passcode string) (*types.Response, error) {
+	if err := emailvalidator.Validate(email); err != nil {
+		r.logger.Info("invalid email supplied", zap.String("email", email))
+		return nil, err
+	}
+	req := &authService.PasswordResetRequest{
+		Email:             email,
+		NewPassword:       passcode,
+		VerificationToken: token,
+	}
+	resp, err := r.authService.ResetPassword(ctx, req)
+	if err != nil {
+		r.logger.Info(fmt.Sprintf("authService.ResetPasscode() failed: %v", err))
+		return nil, err
+	}
+	return &types.Response{
+		Message: resp.Message,
+		Success: true,
+	}, nil
 }
 
 func (r *mutationResolver) RequestPasscodeReset(ctx context.Context, email string, device types.DeviceInput) (*types.Response, error) {
