@@ -9,13 +9,6 @@
 <!-- If fixing a bug, there should be an issue describing it with steps to reproduce -->
 <!-- Please link to the issue here -->
 
-## Motivation and Context
-<!-- Why is this change required? What problem does it solve? -->
-
-## Test Coverage For This Change
-<!-- Please describe in detail how you manually tested your changes, and where any automated test coverage was added/updated -->
-<!-- Include details of your testing environment, and the tests you ran to see how your change affects other areas of the code, etc. -->
-
 ## Screencasts
 
 <!-- Please download Recordit or a similar screencast and upload it here or provide a link to that-->
@@ -30,13 +23,11 @@
 ## Checklist
 <!-- Go over all the following points, and put an `x` in all the boxes that apply -->
 <!-- If you're unsure about any of these, don't hesitate to ask; we're here to help! -->
-- [ ] Make sure you are requesting to **pull a topic/feature/bugfix branch** (right side). If PRing from your fork, don't come from your `master`!
-- [ ] Make sure you are making a pull request against our **`master` branch** (left side). Also, it would be best if you started *your change* off *our latest `master`*.
-- [ ] My change requires a change to the documentation.
-  - [ ] If you've changed APIs, describe what needs to be updated in the documentation.
-- [ ] Modules dependencies have been updated; run `go mod tidy`.
-- [ ] I have added tests to cover my changes.
-- [ ] All new and existing tests passed.
-- [ ] Check your code additions will not fail linting checks:
-  - [ ] `gofmt -s -w .`
-  - [ ] `go vet ./...`
+- [ ] Documentation:
+  - [ ] Events (add event definition to README *Github* +/- Confluence)
+  - [ ] Error codes
+  - [ ] Sequence diagram on feature
+- [ ] Testing
+  - [ ] Unit tests: added tests to cover changes
+  - [ ] Integration: for immediate dependecies (Pulsar, DB)
+  - [ ] Regression: All new and existing tests passed
