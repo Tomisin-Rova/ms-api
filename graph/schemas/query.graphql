@@ -23,7 +23,7 @@ type Query {
   industry(code: String!): Industry
   industries(first: Int, after: String, last: Int, before: String): IndustryConnection
   activity(id: ID!): Activity
-  activities(first: Int, after: String, last: Int, before: String): ActivityConnection
+  activities(supported: Boolean!): [Activity!]!
   message(id: ID!): Message
   messages(first: Int, after: String, last: Int, before: String): MessageConnection
 

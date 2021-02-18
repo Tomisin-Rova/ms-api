@@ -96,7 +96,7 @@ func (f *FakeOnBoardingClient) AcceptTermsAndConditions(ctx context.Context, req
 	return &types.Response{}, f.err
 }
 
-func (f *FakeOnBoardingClient) FetchReasons(ctx context.Context, req *onboardingService.EmptyRequest,
+func (f *FakeOnBoardingClient) FetchReasons(ctx context.Context, req *onboardingService.FetchReasonsRequest,
 	opts ...grpc.CallOption) (*onboardingService.ReasonResponse, error) {
 	return &onboardingService.ReasonResponse{}, f.err
 }
