@@ -370,8 +370,24 @@ func (r *queryResolver) Activity(ctx context.Context, id string) (*types.Activit
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *queryResolver) Activities(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.ActivityConnection, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *queryResolver) Activities(ctx context.Context, supported bool) ([]*types.Activity, error) {
+	reason, err := r.onBoardingService.FetchReasons(ctx, &onboardingService.FetchReasonsRequest{
+		Supported: supported,
+	})
+	if err != nil {
+		r.logger.Error("failed to get person", zap.Error(err))
+		return nil, err
+	}
+	p := make([]*types.Activity, 0)
+
+	for _, v := range reason.Reasons {
+		p = append(p, &types.Activity{
+			ID:          v.Id,
+			Description: v.Description,
+		})
+	}
+
+	return p, nil
 }
 
 func (r *queryResolver) Message(ctx context.Context, id string) (*types.Message, error) {

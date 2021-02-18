@@ -852,7 +852,7 @@ type ComplexityRoot struct {
 		Acceptances       func(childComplexity int, first *int64, after *string, last *int64, before *string) int
 		Account           func(childComplexity int, id string) int
 		Accounts          func(childComplexity int, first *int64, after *string, last *int64, before *string) int
-		Activities        func(childComplexity int, first *int64, after *string, last *int64, before *string) int
+		Activities        func(childComplexity int, supported bool) int
 		Activity          func(childComplexity int, id string) int
 		Address           func(childComplexity int, id string) int
 		AddressLookup     func(childComplexity int, text *string, first *int64, after *string, last *int64, before *string) int
@@ -1141,7 +1141,7 @@ type QueryResolver interface {
 	Industry(ctx context.Context, code string) (*types.Industry, error)
 	Industries(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.IndustryConnection, error)
 	Activity(ctx context.Context, id string) (*types.Activity, error)
-	Activities(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.ActivityConnection, error)
+	Activities(ctx context.Context, supported bool) ([]*types.Activity, error)
 	Message(ctx context.Context, id string) (*types.Message, error)
 	Messages(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.MessageConnection, error)
 	Quote(ctx context.Context, id string) (*types.Quote, error)
@@ -5077,7 +5077,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Activities(childComplexity, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string)), true
+		return e.complexity.Query.Activities(childComplexity, args["supported"].(bool)), true
 
 	case "Query.activity":
 		if e.complexity.Query.Activity == nil {
@@ -6595,7 +6595,7 @@ var sources = []*ast.Source{
   industry(code: String!): Industry
   industries(first: Int, after: String, last: Int, before: String): IndustryConnection
   activity(id: ID!): Activity
-  activities(first: Int, after: String, last: Int, before: String): ActivityConnection
+  activities(supported: Boolean!): [Activity!]!
   message(id: ID!): Message
   messages(first: Int, after: String, last: Int, before: String): MessageConnection
 
@@ -8453,42 +8453,15 @@ func (ec *executionContext) field_Query_accounts_args(ctx context.Context, rawAr
 func (ec *executionContext) field_Query_activities_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *int64
-	if tmp, ok := rawArgs["first"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
-		arg0, err = ec.unmarshalOInt2ᚖint64(ctx, tmp)
+	var arg0 bool
+	if tmp, ok := rawArgs["supported"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("supported"))
+		arg0, err = ec.unmarshalNBoolean2bool(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["first"] = arg0
-	var arg1 *string
-	if tmp, ok := rawArgs["after"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
-		arg1, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["after"] = arg1
-	var arg2 *int64
-	if tmp, ok := rawArgs["last"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("last"))
-		arg2, err = ec.unmarshalOInt2ᚖint64(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["last"] = arg2
-	var arg3 *string
-	if tmp, ok := rawArgs["before"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("before"))
-		arg3, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["before"] = arg3
+	args["supported"] = arg0
 	return args, nil
 }
 
@@ -28489,18 +28462,21 @@ func (ec *executionContext) _Query_activities(ctx context.Context, field graphql
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Activities(rctx, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string))
+		return ec.resolvers.Query().Activities(rctx, args["supported"].(bool))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*types.ActivityConnection)
+	res := resTmp.([]*types.Activity)
 	fc.Result = res
-	return ec.marshalOActivityConnection2ᚖmsᚗapiᚋtypesᚐActivityConnection(ctx, field.Selections, res)
+	return ec.marshalNActivity2ᚕᚖmsᚗapiᚋtypesᚐActivityᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_message(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -38942,6 +38918,9 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_activities(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
 				return res
 			})
 		case "message":
@@ -43873,13 +43852,6 @@ func (ec *executionContext) marshalOActivity2ᚖmsᚗapiᚋtypesᚐActivity(ctx 
 		return graphql.Null
 	}
 	return ec._Activity(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOActivityConnection2ᚖmsᚗapiᚋtypesᚐActivityConnection(ctx context.Context, sel ast.SelectionSet, v *types.ActivityConnection) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._ActivityConnection(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOAddress2ᚕᚖmsᚗapiᚋtypesᚐAddress(ctx context.Context, sel ast.SelectionSet, v []*types.Address) graphql.Marshaler {
