@@ -643,7 +643,7 @@ type ComplexityRoot struct {
 		IntendedActivities      func(childComplexity int, activities []string) int
 		Login                   func(childComplexity int, credentials types.AuthInput) int
 		RefreshToken            func(childComplexity int, token string) int
-		Registration            func(childComplexity int, personid string, person types.PersonInput, address types.AddressInput) int
+		Registration            func(childComplexity int, person types.PersonInput, address types.AddressInput) int
 		RequestPasscodeReset    func(childComplexity int, email string, device types.DeviceInput) int
 		ResendEmailMagicLInk    func(childComplexity int, email string) int
 		ResendOtp               func(childComplexity int, phone string) int
@@ -1101,7 +1101,7 @@ type MutationResolver interface {
 	CreatePhone(ctx context.Context, phone string, device types.DeviceInput) (*types.Response, error)
 	ConfirmPhone(ctx context.Context, token string, code string) (*types.Response, error)
 	Signup(ctx context.Context, token string, email string, passcode string) (*types.AuthResponse, error)
-	Registration(ctx context.Context, personid string, person types.PersonInput, address types.AddressInput) (*types.Person, error)
+	Registration(ctx context.Context, person types.PersonInput, address types.AddressInput) (*types.Person, error)
 	IntendedActivities(ctx context.Context, activities []string) (*types.Response, error)
 	CreateApplication(ctx context.Context) (*types.Response, error)
 	VerifyEmail(ctx context.Context, email string, code string) (*types.Response, error)
@@ -4037,7 +4037,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.Registration(childComplexity, args["personid"].(string), args["person"].(types.PersonInput), args["address"].(types.AddressInput)), true
+		return e.complexity.Mutation.Registration(childComplexity, args["person"].(types.PersonInput), args["address"].(types.AddressInput)), true
 
 	case "Mutation.requestPasscodeReset":
 		if e.complexity.Mutation.RequestPasscodeReset == nil {
@@ -6546,7 +6546,7 @@ var sources = []*ast.Source{
     """
     Creates person's ROAVA profile - capturing name, dob, address etc
     """
-    registration(personid: ID!, person: PersonInput!, address: AddressInput!): Person
+    registration(person: PersonInput!, address: AddressInput!): Person
     intendedActivities(activities: [ID!]): Response!
     createApplication: Response!
     # verifications
@@ -8132,33 +8132,24 @@ func (ec *executionContext) field_Mutation_refreshToken_args(ctx context.Context
 func (ec *executionContext) field_Mutation_registration_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["personid"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("personid"))
-		arg0, err = ec.unmarshalNID2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["personid"] = arg0
-	var arg1 types.PersonInput
+	var arg0 types.PersonInput
 	if tmp, ok := rawArgs["person"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("person"))
-		arg1, err = ec.unmarshalNPersonInput2msᚗapiᚋtypesᚐPersonInput(ctx, tmp)
+		arg0, err = ec.unmarshalNPersonInput2msᚗapiᚋtypesᚐPersonInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["person"] = arg1
-	var arg2 types.AddressInput
+	args["person"] = arg0
+	var arg1 types.AddressInput
 	if tmp, ok := rawArgs["address"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("address"))
-		arg2, err = ec.unmarshalNAddressInput2msᚗapiᚋtypesᚐAddressInput(ctx, tmp)
+		arg1, err = ec.unmarshalNAddressInput2msᚗapiᚋtypesᚐAddressInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["address"] = arg2
+	args["address"] = arg1
 	return args, nil
 }
 
@@ -22808,7 +22799,7 @@ func (ec *executionContext) _Mutation_registration(ctx context.Context, field gr
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().Registration(rctx, args["personid"].(string), args["person"].(types.PersonInput), args["address"].(types.AddressInput))
+		return ec.resolvers.Mutation().Registration(rctx, args["person"].(types.PersonInput), args["address"].(types.AddressInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

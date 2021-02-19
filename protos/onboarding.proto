@@ -40,6 +40,8 @@ message UpdatePersonRequest {
   string firstName = 3;
   string lastName = 4;
   string dob = 5;
+  string countryResidence = 6;
+  string bvn = 7;
 }
 
 message RoavaReasonsRequest {
