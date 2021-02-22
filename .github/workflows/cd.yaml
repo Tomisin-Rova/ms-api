@@ -12,6 +12,8 @@ env:
   ORG: roava.io/services
   IMAGE: ms.api
   REGISTRY_HOSTNAME: eu.gcr.io/${{ secrets.PROJECT_EU }}
+  DEPLOY_TYPE: "internal"
+  PORT: "8080"
 
 jobs:
   # The "lint" workflow
@@ -182,3 +184,12 @@ jobs:
           export TAG=`echo ${{ steps.get_version.outputs.VERSION }}`
           export CONTAINER=`echo $ORG/$IMAGE`
           docker push "$REGISTRY_HOSTNAME"/"$CONTAINER":"$TAG"
+
+  deploy-kubernetes:
+    name: Deploy to kubernetes cluster
+    runs-on: [self-hosted, linux, x64, dev]
+    needs: [deploy]
+
+    steps:
+      - name: Deploy service
+        run: deploy "$DEPLOY_TYPE" "$PORT"
