@@ -15,6 +15,9 @@ message InputAddress {
   string street = 2;
   string city = 3;
   string postcode = 4;
+  string country2 = 5;
+  string state = 6;
+  string county = 7;
 }
 
 message CreatePhoneResponse {
@@ -40,6 +43,8 @@ message UpdatePersonRequest {
   string firstName = 3;
   string lastName = 4;
   string dob = 5;
+  string countryResidence = 6;
+  string bvn = 7;
 }
 
 message RoavaReasonsRequest {

@@ -6,7 +6,6 @@ package graph
 import (
 	"context"
 	"fmt"
-
 	"go.uber.org/zap"
 	"ms.api/graph/generated"
 	"ms.api/libs/validator/datevalidator"
@@ -82,7 +81,7 @@ func (r *mutationResolver) Signup(ctx context.Context, token string, email strin
 	}, nil
 }
 
-func (r *mutationResolver) Registration(ctx context.Context, personid string, person types.PersonInput, address types.AddressInput) (*types.Person, error) {
+func (r *mutationResolver) Registration(ctx context.Context, person types.PersonInput, address types.AddressInput) (*types.Person, error) {
 	personId, err := middlewares.GetAuthenticatedUser(ctx)
 	if err != nil {
 		return nil, ErrUnAuthenticated
@@ -103,9 +102,11 @@ func (r *mutationResolver) Registration(ctx context.Context, personid string, pe
 			Postcode: *address.Postcode, Street: *address.Street,
 			City: *address.City, Country: *address.Country,
 		},
-		FirstName: person.FirstName,
-		LastName:  person.LastName,
-		Dob:       person.Dob,
+		FirstName:        person.FirstName,
+		LastName:         person.LastName,
+		Dob:              person.Dob,
+		CountryResidence: person.CountryResidence,
+		Bvn:              *person.Bvn,
 	}
 	res, err := r.onBoardingService.UpdatePersonBiodata(context.Background(), &payload)
 	if err != nil {

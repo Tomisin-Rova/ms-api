@@ -9,7 +9,7 @@ type Mutation {
     """
     Creates person's ROAVA profile - capturing name, dob, address etc
     """
-    registration(personid: ID!, person: PersonInput!, address: AddressInput!): Person
+    registration(person: PersonInput!, address: AddressInput!): Person
     intendedActivities(activities: [ID!]): Response!
     createApplication: Response!
     # verifications
