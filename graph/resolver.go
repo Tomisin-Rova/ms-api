@@ -35,13 +35,13 @@ var (
 
 //nolint
 func (r *mutationResolver) validateAddress(addr types.AddressInput) error {
-	if *addr.Country == "" {
+	if addr.Country == nil || *addr.Country == "" {
 		return errors.NewTerror(7013, "InvalidCountryData", "country data is missing from address", "")
 	}
-	if *addr.City == "" {
+	if addr.City == nil || *addr.City == "" {
 		return errors.NewTerror(7014, "InvalidCityData", "city data is missing from address", "")
 	}
-	if *addr.Street == "" {
+	if addr.Street == nil || *addr.Street == "" {
 		return errors.NewTerror(7015, "InvalidStreetData", "street data is missing from address", "")
 	}
 	return nil
