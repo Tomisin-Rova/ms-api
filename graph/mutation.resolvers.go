@@ -92,21 +92,25 @@ func (r *mutationResolver) Registration(ctx context.Context, person types.Person
 	if err := r.validateAddress(address); err != nil {
 		return nil, err
 	}
-	if *address.Postcode == "" {
-		*address.Postcode = "NA"
+	postCode, bvn := "", ""
+	if address.Postcode != nil {
+		postCode = *address.Postcode
+	}
+	if person.Bvn != nil {
+		bvn = *person.Bvn
 	}
 
 	payload := onboardingService.UpdatePersonRequest{
 		PersonId: personId.PersonId,
 		Address: &onboardingService.InputAddress{
-			Postcode: *address.Postcode, Street: *address.Street,
+			Postcode: postCode, Street: *address.Street,
 			City: *address.City, Country: *address.Country,
 		},
 		FirstName:        person.FirstName,
 		LastName:         person.LastName,
 		Dob:              person.Dob,
 		CountryResidence: person.CountryResidence,
-		Bvn:              *person.Bvn,
+		Bvn:              bvn,
 	}
 	res, err := r.onBoardingService.UpdatePersonBiodata(context.Background(), &payload)
 	if err != nil {
