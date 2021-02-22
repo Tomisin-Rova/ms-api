@@ -35,7 +35,9 @@ gen-mocks:
 	mockery --name=OnBoardingServiceClient --recursive
 	go generate ./...
 
-local: proto gen-mocks
+local: schema proto gen-mocks lint test
+	go fmt ./...
+	go mod tidy
 	go run main.go
 
 tools:

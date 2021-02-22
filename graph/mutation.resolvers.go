@@ -6,8 +6,10 @@ package graph
 import (
 	"context"
 	"fmt"
+
 	"go.uber.org/zap"
 	"ms.api/graph/generated"
+	"ms.api/libs/validator"
 	"ms.api/libs/validator/datevalidator"
 	emailvalidator "ms.api/libs/validator/email"
 	"ms.api/libs/validator/phonenumbervalidator"
@@ -60,6 +62,10 @@ func (r *mutationResolver) Signup(ctx context.Context, token string, email strin
 	if err := emailvalidator.Validate(email); err != nil {
 		return nil, err
 	}
+	// Validate passCode
+	if err := validator.IsValidPassCode(passcode); err != nil {
+		return nil, err
+	}
 
 	result, err := r.onBoardingService.CreatePerson(ctx, &onboardingService.CreatePersonRequest{
 		Email:    email,
@@ -81,7 +87,7 @@ func (r *mutationResolver) Signup(ctx context.Context, token string, email strin
 	}, nil
 }
 
-func (r *mutationResolver) Registration(ctx context.Context, person types.PersonInput, address types.AddressInput) (*types.Person, error) {
+func (r *mutationResolver) Register(ctx context.Context, person types.PersonInput, address types.AddressInput) (*types.Person, error) {
 	personId, err := middlewares.GetAuthenticatedUser(ctx)
 	if err != nil {
 		return nil, ErrUnAuthenticated
@@ -306,6 +312,11 @@ func (r *mutationResolver) ResetPasscode(ctx context.Context, token string, emai
 		r.logger.Info("invalid email supplied", zap.String("email", email))
 		return nil, err
 	}
+	// Validate passCode
+	if err := validator.IsValidPassCode(passcode); err != nil {
+		return nil, err
+	}
+
 	req := &authService.PasswordResetRequest{
 		Email:             email,
 		NewPassword:       passcode,
