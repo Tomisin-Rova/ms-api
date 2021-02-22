@@ -1,15 +1,12 @@
 type Mutation {
-    # onboarding
+    # captures the customer phone number to start onboarding
     createPhone(phone: String!, device: DeviceInput!): Response!
+    # allows customer to confirm their phone number via OTP
     confirmPhone(token: String!, code: String!): Response!
-    """
-    Creates person's ROAVA login credentials (email, login)
-    """
+    # Creates person's ROAVA login credentials (email, login)
     signup(token: String!, email: String!, passcode: String!): AuthResponse!
-    """
-    Creates person's ROAVA profile - capturing name, dob, address etc
-    """
-    registration(person: PersonInput!, address: AddressInput!): Person
+    # Creates person's ROAVA profile - capturing name, dob, address etc
+    register(person: PersonInput!, address: AddressInput!): Person
     intendedActivities(activities: [ID!]): Response!
     createApplication: Response!
     # verifications
