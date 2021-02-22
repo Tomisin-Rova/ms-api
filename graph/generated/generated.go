@@ -6872,6 +6872,7 @@ type Location {
   longitude: Float
   latitude: Float
 }
+
 input AddressInput {
   street: String
   city: String
