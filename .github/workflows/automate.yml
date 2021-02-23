@@ -153,7 +153,7 @@ jobs:
       - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
         with:
           version: "290.0.1"
-          service_account_key: ${{ SA_SHARED }}
+          service_account_key: ${{ secrets.SA_SHARED }}
           project_id: ${{ secrets.PROJECT_SHARED }}
 
       # Configure docker to use the gcloud command-line tool as a credential helper
