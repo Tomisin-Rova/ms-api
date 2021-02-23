@@ -1,9 +1,9 @@
 name: Build, deploy to GCR
 on:
   push:
-    branches: [ automate ]
-    # tags:
-    #   - "*"
+    # branches: [ automate ]
+    tags:
+      - "*"
 
 env:
   PROJECT_ID: ${{ secrets.PROJECT_SHARED }}
@@ -14,7 +14,6 @@ env:
   REGISTRY_HOSTNAME: eu.gcr.io/${{ secrets.PROJECT_SHARED }}
   DEPLOY_TYPE: "external"
   PORT: "9000"
-  TEMP_SA: ""
 
 jobs:
   # The "lint" workflow
