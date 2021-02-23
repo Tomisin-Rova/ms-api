@@ -6,7 +6,7 @@ on:
     #   - "*"
 
 env:
-  PROJECT_ID: "admin-roava-io"
+  PROJECT_ID: ${{ secrets.PROJECT_SHARED }}
   GITHUB_SHA: ${{ github.sha }}
   GITHUB_REF: ${{ github.ref }}
   ORG: roava.io/services
@@ -145,8 +145,6 @@ jobs:
           echo [github.sha]: ${{ github.sha }}
           echo [github.ref]: ${{ github.ref }}
           echo [github.actor]: trigered by $GITHUB_ACTOR
-          echo [SA_SHARED]: ${{ secrets.SA_SHARED }}
-          echo [PROJECT_SHARED]: ${{ secrets.PROJECT_SHARED }}
 
       - name: Checkout
         uses: actions/checkout@v2
