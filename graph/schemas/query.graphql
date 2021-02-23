@@ -2,7 +2,7 @@ type Query {
   node(id: ID!): Node
   me: Person # fetch person using JWT claims
   person(id: ID!): Person
-  people(first: Int, after: String, last: Int, before: String): PersonConnection
+  people(keywords: String, first: Int, after: String, last: Int, before: String): PersonConnection
   identity(id: ID!): Identity
   identities: [Identity]
   checkEmail(email: String!): Boolean

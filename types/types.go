@@ -523,15 +523,16 @@ type FxEdge struct {
 
 // Identity is how ROAVA represents a customer relationship and can be for a person or organisation
 type Identity struct {
-	ID             string       `json:"id"`
-	Owner          string       `json:"owner"`
-	Nickname       *string      `json:"nickname"`
-	Organisation   *string      `json:"organisation"`
-	Active         *bool        `json:"active"`
-	Authentication *bool        `json:"authentication"`
-	Devices        []*Device    `json:"devices"`
-	Ts             int64        `json:"ts"`
-	Credentials    *Credentials `json:"credentials"`
+	ID             string          `json:"id"`
+	Owner          string          `json:"owner"`
+	Nickname       *string         `json:"nickname"`
+	Organisation   *Organisation   `json:"organisation"`
+	Status         *IdentityStatus `json:"status"`
+	Active         *bool           `json:"active"`
+	Authentication *bool           `json:"authentication"`
+	Devices        []*Device       `json:"devices"`
+	Ts             int64           `json:"ts"`
+	Credentials    *Credentials    `json:"credentials"`
 }
 
 type ImageAssets struct {
@@ -761,7 +762,7 @@ type Person struct {
 	Identities       []*Identity   `json:"identities"`
 	Addresses        []*Address    `json:"addresses"`
 	Activities       []*Activity   `json:"activities"`
-	Cdds             []*Cdd        `json:"cdds"`
+	Cdd              *Cdd          `json:"cdd"`
 }
 
 func (Person) IsNode()   {}
@@ -1205,6 +1206,49 @@ func (e *DeviceTokenType) UnmarshalGQL(v interface{}) error {
 }
 
 func (e DeviceTokenType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type IdentityStatus string
+
+const (
+	IdentityStatusActive   IdentityStatus = "ACTIVE"
+	IdentityStatusInactive IdentityStatus = "INACTIVE"
+	IdentityStatusFrozen   IdentityStatus = "FROZEN"
+)
+
+var AllIdentityStatus = []IdentityStatus{
+	IdentityStatusActive,
+	IdentityStatusInactive,
+	IdentityStatusFrozen,
+}
+
+func (e IdentityStatus) IsValid() bool {
+	switch e {
+	case IdentityStatusActive, IdentityStatusInactive, IdentityStatusFrozen:
+		return true
+	}
+	return false
+}
+
+func (e IdentityStatus) String() string {
+	return string(e)
+}
+
+func (e *IdentityStatus) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = IdentityStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid IdentityStatus", str)
+	}
+	return nil
+}
+
+func (e IdentityStatus) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

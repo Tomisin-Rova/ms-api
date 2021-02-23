@@ -6,16 +6,16 @@ import (
 	"fmt"
 	"testing"
 
-	"ms.api/mocks"
-	"ms.api/protos/pb/onboardingService"
-	protoTypes "ms.api/protos/pb/types"
-	"ms.api/server/http/middlewares"
-
 	coreErrors "github.com/roava/zebra/errors"
 	"github.com/roava/zebra/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"go.uber.org/zap/zaptest"
+	"ms.api/mocks"
+	"ms.api/protos/pb/onboardingService"
+	"ms.api/protos/pb/personService"
+	protoTypes "ms.api/protos/pb/types"
+	"ms.api/server/http/middlewares"
 )
 
 const (
@@ -312,6 +312,113 @@ func TestQueryResolver_CheckEmail(t *testing.T) {
 			}
 
 			onboardingServiceClient.AssertExpectations(t)
+		})
+	}
+}
+
+func Test_queryResolver_Person(t *testing.T) {
+	const (
+		personNotFound = iota
+		personFound
+	)
+
+	tests := []struct {
+		name     string
+		testType int
+	}{
+		{
+			name:     "Test person not found",
+			testType: personNotFound,
+		},
+		{
+			name:     "Test person  found",
+			testType: personFound,
+		},
+	}
+
+	personServiceClient := new(mocks.PersonServiceClient)
+
+	resolver := NewResolver(&ResolverOpts{
+		personService: personServiceClient,
+	}, zaptest.NewLogger(t)).Query()
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			switch tt.testType {
+			case personNotFound:
+				personServiceClient.On("Person", context.Background(), &personService.PersonRequest{
+					Id: "01eyx7ew2gt0en7e613tkyt1x4",
+				}).Return(nil, errors.New(""))
+
+				response, err := resolver.Person(context.Background(), "01eyx7ew2gt0en7e613tkyt1x4")
+				assert.Error(t, err)
+				assert.Nil(t, response)
+			case personFound:
+				personServiceClient.On("Person", context.Background(), &personService.PersonRequest{
+					Id: "01eyx7ew2gt0en7e613tkyt1xc",
+				}).Return(&protoTypes.Person{}, nil)
+
+				response, err := resolver.Person(context.Background(), "01eyx7ew2gt0en7e613tkyt1xc")
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+			}
+
+		})
+	}
+}
+
+func Test_queryResolver_People(t *testing.T) {
+	const (
+		peopleNotFound = iota
+		peopleFound
+	)
+
+	tests := []struct {
+		name     string
+		testType int
+	}{
+		{
+			name:     "Test people not found",
+			testType: peopleNotFound,
+		},
+		{
+			name:     "Test person  found",
+			testType: peopleFound,
+		},
+	}
+
+	personServiceClient := new(mocks.PersonServiceClient)
+
+	resolver := NewResolver(&ResolverOpts{
+		personService: personServiceClient,
+	}, zaptest.NewLogger(t)).Query()
+
+	var first *int64
+	var after *string
+	var last *int64
+	var before *string
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			switch tt.testType {
+			case peopleNotFound:
+				personServiceClient.On("People", context.Background(), &personService.PeopleRequest{
+					Page: 1, PerPage: 100, Keywords: "John Smith",
+				}).Return(nil, errors.New(""))
+				kw := "John Smith"
+				response, err := resolver.People(context.Background(), &kw, first, after, last, before)
+				assert.NotNil(t, err)
+				assert.Nil(t, response)
+			case peopleFound:
+				personServiceClient.On("People", context.Background(), &personService.PeopleRequest{
+					Page: 1, PerPage: 100, Keywords: "Luke",
+				}).Return(&protoTypes.Persons{}, nil)
+				kw := "Luke"
+				response, err := resolver.People(context.Background(), &kw, first, after, last, before)
+				assert.Nil(t, err)
+				assert.NotNil(t, response)
+			}
+
 		})
 	}
 }

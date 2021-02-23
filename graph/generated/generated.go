@@ -495,6 +495,7 @@ type ComplexityRoot struct {
 		Nickname       func(childComplexity int) int
 		Organisation   func(childComplexity int) int
 		Owner          func(childComplexity int) int
+		Status         func(childComplexity int) int
 		Ts             func(childComplexity int) int
 	}
 
@@ -729,7 +730,7 @@ type ComplexityRoot struct {
 		Activities       func(childComplexity int) int
 		Addresses        func(childComplexity int) int
 		Bvn              func(childComplexity int) int
-		Cdds             func(childComplexity int) int
+		Cdd              func(childComplexity int) int
 		CountryResidence func(childComplexity int) int
 		Dob              func(childComplexity int) int
 		Emails           func(childComplexity int) int
@@ -884,7 +885,7 @@ type ComplexityRoot struct {
 		OnfidoReport      func(childComplexity int, id string) int
 		Organisation      func(childComplexity int, id string) int
 		Organisations     func(childComplexity int, first *int64, after *string, last *int64, before *string) int
-		People            func(childComplexity int, first *int64, after *string, last *int64, before *string) int
+		People            func(childComplexity int, keywords *string, first *int64, after *string, last *int64, before *string) int
 		Person            func(childComplexity int, id string) int
 		Price             func(childComplexity int, pair *string, ts *int64) int
 		Prices            func(childComplexity int, first *int64, after *string, last *int64, before *string) int
@@ -1120,7 +1121,7 @@ type QueryResolver interface {
 	Node(ctx context.Context, id string) (types.Node, error)
 	Me(ctx context.Context) (*types.Person, error)
 	Person(ctx context.Context, id string) (*types.Person, error)
-	People(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.PersonConnection, error)
+	People(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string) (*types.PersonConnection, error)
 	Identity(ctx context.Context, id string) (*types.Identity, error)
 	Identities(ctx context.Context) ([]*types.Identity, error)
 	CheckEmail(ctx context.Context, email string) (*bool, error)
@@ -3334,6 +3335,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Identity.Owner(childComplexity), true
 
+	case "Identity.status":
+		if e.complexity.Identity.Status == nil {
+			break
+		}
+
+		return e.complexity.Identity.Status(childComplexity), true
+
 	case "Identity.ts":
 		if e.complexity.Identity.Ts == nil {
 			break
@@ -4459,12 +4467,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Person.Bvn(childComplexity), true
 
-	case "Person.cdds":
-		if e.complexity.Person.Cdds == nil {
+	case "Person.cdd":
+		if e.complexity.Person.Cdd == nil {
 			break
 		}
 
-		return e.complexity.Person.Cdds(childComplexity), true
+		return e.complexity.Person.Cdd(childComplexity), true
 
 	case "Person.country_residence":
 		if e.complexity.Person.CountryResidence == nil {
@@ -5436,7 +5444,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.People(childComplexity, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string)), true
+		return e.complexity.Query.People(childComplexity, args["keywords"].(*string), args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string)), true
 
 	case "Query.person":
 		if e.complexity.Query.Person == nil {
@@ -6571,7 +6579,7 @@ var sources = []*ast.Source{
   node(id: ID!): Node
   me: Person # fetch person using JWT claims
   person(id: ID!): Person
-  people(first: Int, after: String, last: Int, before: String): PersonConnection
+  people(keywords: String, first: Int, after: String, last: Int, before: String): PersonConnection
   identity(id: ID!): Identity
   identities: [Identity]
   checkEmail(email: String!): Boolean
@@ -6657,6 +6665,8 @@ interface Entity {
 enum VerifiableType { EMAIL PHONE DEVICE }
 # message delivery modes supported
 enum DeliveryMode { EMAIL SMS PUSH }
+# list of customer identity states
+enum IdentityStatus { ACTIVE INACTIVE FROZEN }
 # list of content types
 enum ContentType {
   ARTICLE
@@ -6731,7 +6741,7 @@ type Person implements Node & Entity {
   identities: [Identity]!
   addresses: [Address]!
   activities: [Activity]!
-  cdds: [CDD]!
+  cdd: CDD
 }
 type PersonConnection {
   edges: [PersonEdge!]!
@@ -6785,7 +6795,8 @@ type Identity {
   id: ID!
   owner: String!
   nickname: String
-  organisation: String
+  organisation: Organisation!
+  status: IdentityStatus
   active: Boolean
   authentication: Boolean
   devices: [Device]!
@@ -9144,42 +9155,51 @@ func (ec *executionContext) field_Query_organisations_args(ctx context.Context, 
 func (ec *executionContext) field_Query_people_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *int64
+	var arg0 *string
+	if tmp, ok := rawArgs["keywords"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("keywords"))
+		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["keywords"] = arg0
+	var arg1 *int64
 	if tmp, ok := rawArgs["first"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
-		arg0, err = ec.unmarshalOInt2ᚖint64(ctx, tmp)
+		arg1, err = ec.unmarshalOInt2ᚖint64(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["first"] = arg0
-	var arg1 *string
+	args["first"] = arg1
+	var arg2 *string
 	if tmp, ok := rawArgs["after"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
-		arg1, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		arg2, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["after"] = arg1
-	var arg2 *int64
+	args["after"] = arg2
+	var arg3 *int64
 	if tmp, ok := rawArgs["last"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("last"))
-		arg2, err = ec.unmarshalOInt2ᚖint64(ctx, tmp)
+		arg3, err = ec.unmarshalOInt2ᚖint64(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["last"] = arg2
-	var arg3 *string
+	args["last"] = arg3
+	var arg4 *string
 	if tmp, ok := rawArgs["before"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("before"))
-		arg3, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		arg4, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["before"] = arg3
+	args["before"] = arg4
 	return args, nil
 }
 
@@ -19702,11 +19722,46 @@ func (ec *executionContext) _Identity_organisation(ctx context.Context, field gr
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(*types.Organisation)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalNOrganisation2ᚖmsᚗapiᚋtypesᚐOrganisation(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Identity_status(ctx context.Context, field graphql.CollectedField, obj *types.Identity) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Identity",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Status, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*types.IdentityStatus)
+	fc.Result = res
+	return ec.marshalOIdentityStatus2ᚖmsᚗapiᚋtypesᚐIdentityStatus(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Identity_active(ctx context.Context, field graphql.CollectedField, obj *types.Identity) (ret graphql.Marshaler) {
@@ -25326,7 +25381,7 @@ func (ec *executionContext) _Person_activities(ctx context.Context, field graphq
 	return ec.marshalNActivity2ᚕᚖmsᚗapiᚋtypesᚐActivity(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Person_cdds(ctx context.Context, field graphql.CollectedField, obj *types.Person) (ret graphql.Marshaler) {
+func (ec *executionContext) _Person_cdd(ctx context.Context, field graphql.CollectedField, obj *types.Person) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -25344,21 +25399,18 @@ func (ec *executionContext) _Person_cdds(ctx context.Context, field graphql.Coll
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Cdds, nil
+		return obj.Cdd, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.([]*types.Cdd)
+	res := resTmp.(*types.Cdd)
 	fc.Result = res
-	return ec.marshalNCDD2ᚕᚖmsᚗapiᚋtypesᚐCdd(ctx, field.Selections, res)
+	return ec.marshalOCDD2ᚖmsᚗapiᚋtypesᚐCdd(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _PersonConnection_edges(ctx context.Context, field graphql.CollectedField, obj *types.PersonConnection) (ret graphql.Marshaler) {
@@ -27653,7 +27705,7 @@ func (ec *executionContext) _Query_people(ctx context.Context, field graphql.Col
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().People(rctx, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string))
+		return ec.resolvers.Query().People(rctx, args["keywords"].(*string), args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -37040,6 +37092,11 @@ func (ec *executionContext) _Identity(ctx context.Context, sel ast.SelectionSet,
 			out.Values[i] = ec._Identity_nickname(ctx, field, obj)
 		case "organisation":
 			out.Values[i] = ec._Identity_organisation(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "status":
+			out.Values[i] = ec._Identity_status(ctx, field, obj)
 		case "active":
 			out.Values[i] = ec._Identity_active(ctx, field, obj)
 		case "authentication":
@@ -38162,11 +38219,8 @@ func (ec *executionContext) _Person(ctx context.Context, sel ast.SelectionSet, o
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "cdds":
-			out.Values[i] = ec._Person_cdds(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
+		case "cdd":
+			out.Values[i] = ec._Person_cdd(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -40935,43 +40989,6 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 		}
 	}
 	return res
-}
-
-func (ec *executionContext) marshalNCDD2ᚕᚖmsᚗapiᚋtypesᚐCdd(ctx context.Context, sel ast.SelectionSet, v []*types.Cdd) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalOCDD2ᚖmsᚗapiᚋtypesᚐCdd(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-	return ret
 }
 
 func (ec *executionContext) marshalNCDD2ᚕᚖmsᚗapiᚋtypesᚐCddᚄ(ctx context.Context, sel ast.SelectionSet, v []*types.Cdd) graphql.Marshaler {
@@ -44235,6 +44252,22 @@ func (ec *executionContext) marshalOIdentity2ᚖmsᚗapiᚋtypesᚐIdentity(ctx 
 		return graphql.Null
 	}
 	return ec._Identity(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOIdentityStatus2ᚖmsᚗapiᚋtypesᚐIdentityStatus(ctx context.Context, v interface{}) (*types.IdentityStatus, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(types.IdentityStatus)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOIdentityStatus2ᚖmsᚗapiᚋtypesᚐIdentityStatus(ctx context.Context, sel ast.SelectionSet, v *types.IdentityStatus) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
 }
 
 func (ec *executionContext) marshalOImageAssets2ᚖmsᚗapiᚋtypesᚐImageAssets(ctx context.Context, sel ast.SelectionSet, v *types.ImageAssets) graphql.Marshaler {

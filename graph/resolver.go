@@ -15,10 +15,12 @@ import (
 	"ms.api/protos/pb/paymentService"
 	"ms.api/protos/pb/personService"
 	"ms.api/protos/pb/productService"
+	pb "ms.api/protos/pb/types"
 	"ms.api/protos/pb/verifyService"
 	"ms.api/server/http/middlewares"
 	"ms.api/types"
 
+	"github.com/jinzhu/copier"
 	"github.com/roava/zebra/errors"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -186,4 +188,25 @@ func dialRPC(ctx context.Context, address string) (*grpc.ClientConn, error) {
 		return nil, err
 	}
 	return connection, nil
+}
+
+func getPerson(from *pb.Person) (*types.Person, error) {
+	var pto types.Person
+	err := copier.CopyWithOption(&pto, &from, copier.Option{IgnoreEmpty: true, DeepCopy: true})
+	if err != nil {
+		return nil, err
+	}
+	addresses := make([]*types.Address, 0)
+	for _, addr := range from.Addresses {
+		addresses = append(addresses, &types.Address{
+			Street:   &addr.Street,
+			Postcode: &addr.Postcode,
+			Country: &types.Country{
+				CountryName: addr.Country,
+			},
+			City: &addr.City,
+		})
+	}
+	pto.Addresses = addresses
+	return &pto, nil
 }

@@ -28,6 +28,8 @@ message Person {
   string employer = 12;
   repeated Identity identities = 13;
   int32 ts = 14;
+  Cdd cdd = 15;
+  repeated Activity activities = 16;
 }
 
 // Persons type
@@ -42,7 +44,7 @@ message Address {
   string building_name = 3;
   string street = 4;
   string sub_street = 5;
-  string town = 6;
+  string city = 6;
   string state = 7;
   string postcode = 8;
   string country = 9;
@@ -71,14 +73,19 @@ message PhoneNumber {
 message Cdd {
   string id = 1;
   string owner = 2;
-  string details = 3;
-  string status = 4;
-  Kyc kyc = 5;
-  Aml aml = 6;
-  Roava roava = 7;
-  Cra cra = 8;
-  string created_at = 9;
-  string updated_at = 10;
+  bool watchlist = 3;
+  string details = 4;
+  string status = 5;
+  Kyc kyc = 6;
+  Aml aml = 7;
+  Roava roava = 8;
+  Cra cra = 9;
+  string created_at = 10;
+  string updated_at = 11;
+  bool onboard = 12;
+  int64 ts = 13;  
+  int64 version = 14;
+  bool active = 15;
 }
 
 // Kyc type
@@ -173,10 +180,11 @@ message Identity {
   string owner = 2;
   string nickname = 3;
   Organisation organisation = 4;
-  bool active = 5;
-  bool authentication = 6;
-  repeated Device devices = 7;
-  Credentials credentials = 8;
+  string status = 5;
+  bool active = 6;
+  bool authentication = 7;
+  repeated Device devices = 8;
+  Credentials credentials = 9;
 }
 
 // Credentials type
@@ -263,4 +271,14 @@ message AddressLookup {
   string longitude = 13;
   string grideasting = 14;
   string gridnorthing = 15;
+}
+
+// Activity type
+message Activity {
+	string id = 1;
+	string description = 2;   
+	int64 risk_weighting = 3;  
+	bool supported = 4;
+	int64 archived = 5;
+	int64 ts = 6;
 }

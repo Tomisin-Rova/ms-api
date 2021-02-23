@@ -18,7 +18,6 @@ import (
 	"ms.api/protos/pb/authService"
 	"ms.api/protos/pb/onboardingService"
 	"ms.api/protos/pb/personService"
-	types2 "ms.api/protos/pb/types"
 	"ms.api/server/http/middlewares"
 	"ms.api/types"
 )
@@ -42,7 +41,7 @@ func (r *queryResolver) Me(ctx context.Context) (*types.Person, error) {
 		return nil, err
 	}
 	p := &types.Person{}
-	if err := copier.Copy(p, person); err != nil {
+	if err := copier.Copy(p, &person); err != nil {
 		r.logger.Error("copier failed", zap.Error(err))
 		return nil, errors.New("failed to read profile information. please retry")
 	}
@@ -55,142 +54,42 @@ func (r *queryResolver) Person(ctx context.Context, id string) (*types.Person, e
 	if err != nil {
 		return nil, err
 	}
-	identities := make([]*types.Identity, 0)
-	emails := make([]*types.Email, 0)
-	phones := make([]*types.Phone, 0)
-	addresses := make([]*types.Address, 0)
 
-	for _, id := range person.Identities {
-		cred := id.Credentials
-		if cred == nil {
-			cred = &types2.Credentials{}
-		}
-		identities = append(identities, &types.Identity{
-			ID:             id.Id,
-			Owner:          id.Owner,
-			Nickname:       &id.Nickname,
-			Active:         &id.Active,
-			Authentication: &id.Authentication,
-			Credentials: &types.Credentials{
-				Identifier:   cred.Identifier,
-				RefreshToken: &cred.RefreshToken,
-			},
-		})
+	p, err := getPerson(person)
+	if err != nil {
+		return nil, err
 	}
-	for _, email := range person.Emails {
-		emails = append(emails, &types.Email{
-			Value:    email.Value,
-			Verified: email.Verified,
-		})
-	}
-	for _, phone := range person.Phones {
-		phones = append(phones, &types.Phone{
-			Value:    phone.Number,
-			Verified: phone.Verified,
-		})
-	}
-	for _, addr := range person.Addresses {
-		addresses = append(addresses, &types.Address{
-			Street:   &addr.Street,
-			Postcode: &addr.Postcode,
-			Country:  &types.Country{CountryName: addr.Country},
-			City:     &addr.Town,
-		})
-	}
-	nationalities := make([]*string, 0)
-	for _, next := range person.Nationality {
-		nationalities = append(nationalities, &next)
-	}
-	return &types.Person{
-		ID:               person.Id,
-		Title:            &person.Title,
-		FirstName:        person.FirstName,
-		LastName:         person.LastName,
-		MiddleName:       &person.MiddleName,
-		Phones:           phones,
-		Emails:           emails,
-		Dob:              person.Dob,
-		CountryResidence: &person.CountryResidence,
-		Nationality:      nationalities,
-		Addresses:        addresses,
-		Identities:       identities,
-		Ts:               int64(person.Ts),
-	}, nil
+
+	return p, nil
 }
 
-func (r *queryResolver) People(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.PersonConnection, error) {
+func (r *queryResolver) People(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string) (*types.PersonConnection, error) {
+	var kw string
+	if keywords != nil {
+		kw = *keywords
+	}
+
 	res, err := r.personService.People(ctx, &personService.PeopleRequest{
-		Page:    1,
-		PerPage: 100,
+		Page:     1,
+		PerPage:  100,
+		Keywords: kw,
 	})
 	if err != nil {
 		return nil, err
 	}
 	data := make([]*types.Person, 0)
-	for _, next := range res.Persons {
-		person := next
-		identities := make([]*types.Identity, 0)
-		emails := make([]*types.Email, 0)
-		phones := make([]*types.Phone, 0)
-		addresses := make([]*types.Address, 0)
 
-		for _, id := range person.Identities {
-			cred := id.Credentials
-			if cred == nil {
-				cred = &types2.Credentials{}
-			}
-			identities = append(identities, &types.Identity{
-				ID:             id.Id,
-				Owner:          id.Owner,
-				Nickname:       &id.Nickname,
-				Active:         &id.Active,
-				Authentication: &id.Authentication,
-				Credentials: &types.Credentials{
-					Identifier:   cred.Identifier,
-					RefreshToken: &cred.RefreshToken,
-				},
-			})
+	for _, person := range res.Persons {
+		pto, err := getPerson(person)
+		if err != nil {
+			r.logger.Error("copier failed", zap.Error(err))
+			return nil, errors.New("failed to read people information. please retry")
 		}
-		for _, email := range person.Emails {
-			emails = append(emails, &types.Email{
-				Value:    email.Value,
-				Verified: email.Verified,
-			})
-		}
-		for _, phone := range person.Phones {
-			phones = append(phones, &types.Phone{
-				Value:    phone.Number,
-				Verified: phone.Verified,
-			})
-		}
-		for _, addr := range person.Addresses {
-			addresses = append(addresses, &types.Address{
-				Street:   &addr.Street,
-				Postcode: &addr.Postcode,
-				Country:  &types.Country{CountryName: addr.Country},
-				City:     &addr.Town,
-			})
-		}
-		nationalities := make([]*string, 0)
-		for _, next := range person.Nationality {
-			nationalities = append(nationalities, &next)
-		}
-		p := &types.Person{
-			ID:               person.Id,
-			Title:            &person.Title,
-			FirstName:        person.FirstName,
-			LastName:         person.LastName,
-			MiddleName:       &person.MiddleName,
-			Phones:           phones,
-			Emails:           emails,
-			Dob:              person.Dob,
-			CountryResidence: &person.CountryResidence,
-			Nationality:      nationalities,
-			Addresses:        addresses,
-			Identities:       identities,
-			Ts:               int64(person.Ts),
-		}
-		data = append(data, p)
+		data = append(data, pto)
+	}
+
+	if err != nil {
+		return nil, err
 	}
 
 	input := models.ConnectionInput{

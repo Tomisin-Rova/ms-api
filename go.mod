@@ -11,7 +11,7 @@ require (
 	github.com/go-redis/redis/v7 v7.4.0
 	github.com/golang/protobuf v1.4.3
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
-	github.com/jinzhu/copier v0.0.0-20201025035756-632e723a6687
+	github.com/jinzhu/copier v0.2.4
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/kr/pretty v0.2.1 // indirect
 	github.com/mitchellh/mapstructure v1.4.1 // indirect

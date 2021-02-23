@@ -23,6 +23,8 @@ interface Entity {
 enum VerifiableType { EMAIL PHONE DEVICE }
 # message delivery modes supported
 enum DeliveryMode { EMAIL SMS PUSH }
+# list of customer identity states
+enum IdentityStatus { ACTIVE INACTIVE FROZEN }
 # list of content types
 enum ContentType {
   ARTICLE
@@ -97,7 +99,7 @@ type Person implements Node & Entity {
   identities: [Identity]!
   addresses: [Address]!
   activities: [Activity]!
-  cdds: [CDD]!
+  cdd: CDD
 }
 type PersonConnection {
   edges: [PersonEdge!]!
@@ -151,7 +153,8 @@ type Identity {
   id: ID!
   owner: String!
   nickname: String
-  organisation: String
+  organisation: Organisation!
+  status: IdentityStatus
   active: Boolean
   authentication: Boolean
   devices: [Device]!

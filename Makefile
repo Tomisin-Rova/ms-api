@@ -33,6 +33,7 @@ docker: proto gen-mocks
 gen-mocks:
 	mockery --name=IdentityServiceClient --recursive
 	mockery --name=OnBoardingServiceClient --recursive
+	mockery --name=PersonServiceClient --recursive
 	go generate ./...
 
 local: schema proto gen-mocks lint test
