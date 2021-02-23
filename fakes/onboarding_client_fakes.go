@@ -110,3 +110,8 @@ func (f *FakeOnBoardingClient) AddressLookup(ctx context.Context, req *onboardin
 	opts ...grpc.CallOption) (*onboardingService.AddressLookupResponse, error) {
 	return &onboardingService.AddressLookupResponse{}, f.err
 }
+
+func (f *FakeOnBoardingClient) SubmitApplication(ctx context.Context, in *onboardingService.SubmitApplicationRequest,
+	opts ...grpc.CallOption) (*types.Response, error) {
+	return &types.Response{}, f.err
+}
