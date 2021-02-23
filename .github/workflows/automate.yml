@@ -17,7 +17,7 @@ env:
   TEMP_SA: ""
 
 jobs:
-  The "lint" workflow
+  # The "lint" workflow
   lint:
     name: Lint
 
