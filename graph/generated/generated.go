@@ -6565,9 +6565,7 @@ var sources = []*ast.Source{
     resetPasscode(token: String!, email: String!, passcode: String!): Response!
     requestPasscodeReset(email: String!, device: DeviceInput!):  Response!
     confirmPasscodeResetOtp(email: String!, otp: String!): Response!
-    """
-    Submit a KYC and AML check for a given customer who has accepted terms & conditions
-    """
+    # Submit a KYC and AML check for a given customer who has accepted terms & conditions
     submitApplication: Response!
     """
     Customer accepts an array of documents displayed to them during onboarding

@@ -378,7 +378,23 @@ func (r *mutationResolver) ConfirmPasscodeResetOtp(ctx context.Context, email st
 }
 
 func (r *mutationResolver) SubmitApplication(ctx context.Context) (*types.Response, error) {
-	panic(fmt.Errorf("not implemented"))
+	claims, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+
+	// Get tokens
+	response, err := r.onBoardingService.SubmitApplication(ctx, &onboardingService.SubmitApplicationRequest{
+		PersonId: claims.PersonId,
+	})
+	if err != nil {
+		r.logger.Error("onBoardingService.SubmitApplication()", zap.Error(err))
+		return nil, err
+	}
+	return &types.Response{
+		Message: response.Message,
+		Success: response.Success,
+	}, nil
 }
 
 func (r *mutationResolver) AcceptTerms(ctx context.Context, documents []*string) (*types.Response, error) {

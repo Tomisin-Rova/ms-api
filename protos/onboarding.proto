@@ -143,6 +143,10 @@ message AddressLookupResponse {
   repeated types.AddressLookup addresses = 1;
 }
 
+message SubmitApplicationRequest {
+  string personId = 1;
+}
+
 service OnBoardingService{
   rpc CreatePhone(CreatePhoneRequest) returns (CreatePhoneResponse) {}
   rpc CreatePerson(CreatePersonRequest) returns (CreatePersonResponse) {}
@@ -161,4 +165,5 @@ service OnBoardingService{
   rpc AcceptTermsAndConditions(TermsAndConditionsRequest) returns (types.Response) {}
   rpc UpdateFirebaseToken(UpdateFirebaseTokenRequest) returns (types.Response) {}
   rpc AddressLookup(AddressLookupRequest) returns (AddressLookupResponse) {}
+  rpc SubmitApplication(SubmitApplicationRequest) returns (types.Response) {}
 }

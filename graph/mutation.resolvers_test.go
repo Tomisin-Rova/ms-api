@@ -19,6 +19,18 @@ import (
 	"golang.org/x/net/context"
 )
 
+var (
+	personId     = "p123456"
+	identityId   = "i123456"
+	deviceId     = "d123456"
+	validUserCtx = context.WithValue(
+		context.Background(), middlewares.AuthenticatedUserContextKey, models.Claims{
+			PersonId:   personId,
+			IdentityId: identityId,
+			DeviceId:   deviceId,
+		})
+)
+
 func TestMutationResolver_CreatePhone(t *testing.T) {
 	const (
 		success = iota
@@ -316,18 +328,6 @@ func TestMutationResolver_UpdateDeviceToken(t *testing.T) {
 		errorIdentitySvcUpdateDeviceTokens
 	)
 
-	var (
-		personId     = "p123456"
-		identityId   = "i123456"
-		deviceId     = "d123456"
-		validUserCtx = context.WithValue(
-			context.Background(), middlewares.AuthenticatedUserContextKey, models.Claims{
-				PersonId:   personId,
-				IdentityId: identityId,
-				DeviceId:   deviceId,
-			})
-	)
-
 	var tests = []struct {
 		name                 string
 		args                 []*types.DeviceTokenInput
@@ -452,6 +452,78 @@ func TestMutationResolver_UpdateDeviceToken(t *testing.T) {
 			}
 
 			identityService.AssertExpectations(t)
+		})
+	}
+}
+
+func TestMutationResolver_SubmitApplication(t *testing.T) {
+	const (
+		success = iota
+		errorInvalidUser
+		errorOnboardingSvcSubmitApplication
+	)
+
+	var tests = []struct {
+		name     string
+		testType int
+	}{
+		{
+			name:     "Test submit application successfully",
+			testType: success,
+		},
+		{
+			name:     "Test error invalid user context",
+			testType: errorInvalidUser,
+		},
+		{
+			name:     "Test error calling onBoardingService.SubmitApplication",
+			testType: errorOnboardingSvcSubmitApplication,
+		},
+	}
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			// Mocks
+			onboardingServiceMock := new(mocks.OnBoardingServiceClient)
+
+			resolver := NewResolver(&ResolverOpts{
+				OnBoardingService: onboardingServiceMock,
+			}, zaptest.NewLogger(t))
+			mutationResolver := resolver.Mutation()
+
+			switch testCase.testType {
+			case success:
+				onboardingServiceMock.On("SubmitApplication", validUserCtx, &onboardingService.SubmitApplicationRequest{
+					PersonId: personId,
+				}).Return(&protoTypes.Response{
+					Message: "success",
+					Success: true,
+				}, nil)
+
+				response, err := mutationResolver.SubmitApplication(validUserCtx)
+
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+				assert.NotEmpty(t, response)
+			case errorInvalidUser:
+				response, err := mutationResolver.SubmitApplication(context.Background())
+
+				assert.Error(t, err)
+				assert.Equal(t, 7012, err.(*coreErrors.Terror).Code())
+				assert.Nil(t, response)
+				assert.Empty(t, response)
+			case errorOnboardingSvcSubmitApplication:
+				onboardingServiceMock.On("SubmitApplication", validUserCtx, &onboardingService.SubmitApplicationRequest{
+					PersonId: personId,
+				}).Return(nil, errors.New(""))
+
+				response, err := mutationResolver.SubmitApplication(validUserCtx)
+
+				assert.Error(t, err)
+				assert.Nil(t, response)
+				assert.Empty(t, response)
+			}
+
+			onboardingServiceMock.AssertExpectations(t)
 		})
 	}
 }
