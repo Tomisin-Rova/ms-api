@@ -128,7 +128,7 @@ jobs:
   deploy:
     name: Setup, Build, and Deploy
     runs-on: ubuntu-latest
-    # needs: [build] # Only run this workflow when "build" workflow succeeds
+    needs: [build] # Only run this workflow when "build" workflow succeeds
 
     steps:
       - name: Get the version
