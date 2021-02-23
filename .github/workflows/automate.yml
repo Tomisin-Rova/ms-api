@@ -6,14 +6,15 @@ on:
     #   - "*"
 
 env:
-  PROJECT_ID: "${{ secrets.PROJECT_EU }}"
+  PROJECT_ID: "admin-roava-io"
   GITHUB_SHA: ${{ github.sha }}
   GITHUB_REF: ${{ github.ref }}
   ORG: roava.io/services
   IMAGE: ms.api
-  REGISTRY_HOSTNAME: eu.gcr.io/${{ secrets.PROJECT_EU }}
+  REGISTRY_HOSTNAME: eu.gcr.io/${{ secrets.PROJECT_SHARED }}
   DEPLOY_TYPE: "external"
   PORT: "9000"
+  TEMP_SA: ""
 
 jobs:
   # The "lint" workflow
@@ -152,8 +153,8 @@ jobs:
       - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
         with:
           version: "290.0.1"
-          service_account_key: ${{ secrets.SA_EU }}
-          project_id: ${{ secrets.PROJECT_EU }}
+          service_account_key: ${{ SA_SHARED }}
+          project_id: ${{ secrets.PROJECT_SHARED }}
 
       # Configure docker to use the gcloud command-line tool as a credential helper
       - run: |
