@@ -7201,7 +7201,7 @@ type CDDConnection {
 
 type CDDEdge {
   node: CDD!
-  cursor: PageInfo
+  cursor: String!
 }
 
 
@@ -14936,11 +14936,14 @@ func (ec *executionContext) _CDDEdge_cursor(ctx context.Context, field graphql.C
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*types.PageInfo)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalOPageInfo2ᚖmsᚗapiᚋtypesᚐPageInfo(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Check_id(ctx context.Context, field graphql.CollectedField, obj *types.Check) (ret graphql.Marshaler) {
@@ -36037,6 +36040,9 @@ func (ec *executionContext) _CDDEdge(ctx context.Context, sel ast.SelectionSet, 
 			}
 		case "cursor":
 			out.Values[i] = ec._CDDEdge_cursor(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

@@ -3,6 +3,7 @@ package httpServer
 import (
 	"context"
 	"fmt"
+	"ms.api/libs/db/mongo"
 	"net/http"
 
 	"github.com/99designs/gqlgen/graphql"
@@ -37,9 +38,21 @@ func MountServer(secrets *config.Secrets, logger *zap.Logger) *chi.Mux {
 		logger.Fatal(fmt.Sprintf("failed to setup service dependencies: %v", err))
 	}
 
+	store, mongoClient, err := mongo.New(secrets.Database.URL, secrets.Database.Name, logger)
+	if err != nil {
+		logger.Fatal("failed to open database", zap.Error(err))
+	}
+
+	defer func() {
+		if err := mongoClient.Disconnect(context.Background()); err != nil {
+			logger.Error("failed to close database", zap.Error(err))
+		}
+	}()
+
 	mw := middlewares.NewAuthMiddleware(opts.AuthService, logger)
 	router.Use(mw.Middeware)
 	opts.AuthMw = mw
+	opts.DataStore = store
 
 	if secrets.Service.Environment != string(config.Production) {
 		router.Handle("/", playground.Handler("GraphQL playground", "/graphql"))

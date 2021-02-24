@@ -17,13 +17,14 @@ require (
 	github.com/mitchellh/mapstructure v1.4.1 // indirect
 	github.com/onsi/ginkgo v1.14.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/roava/zebra v0.0.0-20210203155227-86982d5d0e34
+	github.com/roava/zebra v0.0.0-20210222115245-5bfa91ac11f0
 	github.com/rs/cors v1.6.0
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sirupsen/logrus v1.4.2
 	github.com/stretchr/testify v1.7.0
 	github.com/urfave/cli/v2 v2.3.0 // indirect
 	github.com/vektah/gqlparser/v2 v2.1.0
+	go.mongodb.org/mongo-driver v1.4.6
 	go.uber.org/zap v1.16.0
 	golang.org/x/mod v0.4.1 // indirect
 	golang.org/x/net v0.0.0-20201024042810-be3efd7ff127

@@ -290,8 +290,8 @@ type CDDConnection struct {
 }
 
 type CDDEdge struct {
-	Node   *Cdd      `json:"node"`
-	Cursor *PageInfo `json:"cursor"`
+	Node   *Cdd   `json:"node"`
+	Cursor string `json:"cursor"`
 }
 
 type Check struct {

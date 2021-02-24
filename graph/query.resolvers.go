@@ -10,6 +10,8 @@ import (
 	"strconv"
 
 	"github.com/jinzhu/copier"
+	errors2 "github.com/roava/zebra/errors"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.uber.org/zap"
 	"ms.api/graph/connections"
 	"ms.api/graph/generated"
@@ -326,7 +328,46 @@ func (r *queryResolver) Cdd(ctx context.Context, id string) (*types.Cdd, error) 
 }
 
 func (r *queryResolver) Cdds(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string) (*types.CDDConnection, error) {
-	panic(fmt.Errorf("not implemented"))
+	cdds, err := r.dataStore.GetCDDs(1, 100)
+	if err == mongo.ErrNoDocuments {
+		return nil, errors2.NewTerror(7012, "CddsNotFound", "no CDDs data in the database", "no CDDs data in the database")
+	}
+	if err != nil {
+		r.logger.With(zap.Error(err)).Error("failed to fetch cdds")
+		return nil, errors2.NewTerror(7013, "InternalError", "failed to load CDDs data. Internal system error", "internal system error")
+	}
+
+	cddsValues := make([]*types.Cdd, 0)
+	if err := copier.Copy(&cddsValues, &cdds); err != nil {
+		r.logger.With(zap.Error(err)).Error("failed to fetch cdds. copier error")
+		return nil, errors2.NewTerror(1, "CddsNotFound", "no CDDs data in the database", "")
+	}
+	input := models.ConnectionInput{
+		Before: before,
+		After:  after,
+		First:  first,
+		Last:   last,
+	}
+
+	edger := func(cdd *types.Cdd, offset int) connections.Edge {
+		return types.CDDEdge{
+			Node:   cdd,
+			Cursor: connections.OffsetToCursor(offset),
+		}
+	}
+
+	conn := func(edges []*types.CDDEdge, nodes []*types.Cdd, info *types.PageInfo, totalCount int) (*types.CDDConnection, error) {
+		var cddNodes []*types.Cdd
+		cddNodes = append(cddNodes, nodes...)
+		count := int64(totalCount)
+		return &types.CDDConnection{
+			Edges:      edges,
+			Nodes:      cddNodes,
+			PageInfo:   info,
+			TotalCount: &count,
+		}, nil
+	}
+	return connections.CddLookupCon(cddsValues, edger, conn, input)
 }
 
 func (r *queryResolver) Check(ctx context.Context, id string) (*types.Check, error) {

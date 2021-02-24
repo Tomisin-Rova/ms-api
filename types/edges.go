@@ -8,3 +8,7 @@ func (a AddressEdge) GetCursor() string {
 func (p PersonEdge) GetCursor() string {
 	return p.Cursor
 }
+
+func (c CDDEdge) GetCursor() string {
+	return c.Cursor
+}

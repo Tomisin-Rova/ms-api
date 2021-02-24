@@ -3,6 +3,7 @@ package graph
 import (
 	"context"
 	"fmt"
+	"ms.api/libs/db"
 	"time"
 
 	"ms.api/config"
@@ -61,6 +62,7 @@ type ResolverOpts struct {
 	AuthMw            *middlewares.AuthMiddleware
 	personService     personService.PersonServiceClient
 	identityService   identityService.IdentityServiceClient
+	DataStore         db.DataStore
 }
 
 type Resolver struct {
@@ -76,6 +78,7 @@ type Resolver struct {
 	identityService   identityService.IdentityServiceClient
 	authMw            *middlewares.AuthMiddleware
 	logger            *zap.Logger
+	dataStore         db.DataStore
 }
 
 func NewResolver(opt *ResolverOpts, logger *zap.Logger) *Resolver {
@@ -91,6 +94,7 @@ func NewResolver(opt *ResolverOpts, logger *zap.Logger) *Resolver {
 		paymentService:    opt.paymentService,
 		identityService:   opt.identityService,
 		authMw:            opt.AuthMw,
+		dataStore:         opt.DataStore,
 		logger:            logger,
 	}
 }

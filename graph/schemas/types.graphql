@@ -561,7 +561,7 @@ type CDDConnection {
 
 type CDDEdge {
   node: CDD!
-  cursor: PageInfo
+  cursor: String!
 }
 
 
