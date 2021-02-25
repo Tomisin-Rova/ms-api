@@ -214,3 +214,19 @@ func getPerson(from *pb.Person) (*types.Person, error) {
 	pto.Addresses = addresses
 	return &pto, nil
 }
+
+func String(s string) *string {
+	return &s
+}
+
+func Int64(i int64) *int64 {
+	return &i
+}
+
+func Bool(b bool) *bool {
+	return &b
+}
+
+func Int(i int) *int {
+	return &i
+}

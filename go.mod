@@ -9,6 +9,7 @@ require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
 	github.com/go-chi/chi v3.3.2+incompatible
 	github.com/go-redis/redis/v7 v7.4.0
+	github.com/golang/mock v1.3.1
 	github.com/golang/protobuf v1.4.3
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/jinzhu/copier v0.2.4

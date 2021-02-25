@@ -10,7 +10,7 @@ import (
 	"strconv"
 
 	"github.com/jinzhu/copier"
-	errors2 "github.com/roava/zebra/errors"
+	terror "github.com/roava/zebra/errors"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.uber.org/zap"
 	"ms.api/graph/connections"
@@ -23,10 +23,6 @@ import (
 	"ms.api/server/http/middlewares"
 	"ms.api/types"
 )
-
-func (r *queryResolver) Node(ctx context.Context, id string) (types.Node, error) {
-	panic(fmt.Errorf("not implemented"))
-}
 
 func (r *queryResolver) Me(ctx context.Context) (*types.Person, error) {
 	claims, err := middlewares.GetAuthenticatedUser(ctx)
@@ -146,7 +142,7 @@ func (r *queryResolver) Address(ctx context.Context, id string) (*types.Address,
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *queryResolver) Addresses(ctx context.Context) ([]*types.Address, error) {
+func (r *queryResolver) Addresses(ctx context.Context) (*types.AddressConnection, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
@@ -185,7 +181,7 @@ func (r *queryResolver) AddressLookup(ctx context.Context, text *string, first *
 			Edges:      edges,
 			Nodes:      addressNodes,
 			PageInfo:   info,
-			TotalCount: int64(totalCount),
+			TotalCount: Int64(int64(totalCount)),
 		}, nil
 	}
 
@@ -271,9 +267,9 @@ func (r *queryResolver) Activity(ctx context.Context, id string) (*types.Activit
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *queryResolver) Activities(ctx context.Context, supported bool) ([]*types.Activity, error) {
+func (r *queryResolver) Activities(ctx context.Context, supported *bool) ([]*types.Activity, error) {
 	reason, err := r.onBoardingService.FetchReasons(ctx, &onboardingService.FetchReasonsRequest{
-		Supported: supported,
+		Supported: supported != nil && *supported,
 	})
 	if err != nil {
 		r.logger.Error("failed to get person", zap.Error(err))
@@ -330,18 +326,44 @@ func (r *queryResolver) Cdd(ctx context.Context, id string) (*types.Cdd, error) 
 func (r *queryResolver) Cdds(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string) (*types.CDDConnection, error) {
 	cdds, err := r.dataStore.GetCDDs(1, 100)
 	if err == mongo.ErrNoDocuments {
-		return nil, errors2.NewTerror(7012, "CddsNotFound", "no CDDs data in the database", "no CDDs data in the database")
+		return nil, terror.NewTerror(7012, "CddsNotFound", "no CDDs data in the database", "no CDDs data in the database")
 	}
 	if err != nil {
 		r.logger.With(zap.Error(err)).Error("failed to fetch cdds")
-		return nil, errors2.NewTerror(7013, "InternalError", "failed to load CDDs data. Internal system error", "internal system error")
+		return nil, terror.NewTerror(7013, "InternalError", "failed to load CDDs data. Internal system error", "internal system error")
 	}
 
+	dataResolver := NewDataResolver(r.dataStore)
 	cddsValues := make([]*types.Cdd, 0)
-	if err := copier.Copy(&cddsValues, &cdds); err != nil {
-		r.logger.With(zap.Error(err)).Error("failed to fetch cdds. copier error")
-		return nil, errors2.NewTerror(1, "CddsNotFound", "no CDDs data in the database", "")
+	for _, next := range cdds {
+		validations := make([]*types.Validation, 0)
+		for _, validation := range next.Validations {
+			nextValidation, err := dataResolver.ResolveValidation(validation)
+			if err != nil {
+				r.logger.With(zap.Error(err)).Error("cannot resolve validation data")
+				continue
+			}
+			validations = append(validations, nextValidation)
+		}
+		owner, err := dataResolver.ResolvePerson(next.Owner, nil)
+		if err != nil {
+			return nil, err
+		}
+		cddValue := &types.Cdd{
+			ID:          next.ID,
+			Owner:       owner,
+			Watchlist:   &next.Watchlist,
+			Details:     &next.Details,
+			Status:      types.State(next.Status),
+			Onboard:     &next.Onboard,
+			Version:     Int64(int64(next.Version)),
+			Validations: validations,
+			Active:      &next.Active,
+			Ts:          Int64(next.Timestamp.UnixNano()),
+		}
+		cddsValues = append(cddsValues, cddValue)
 	}
+
 	input := models.ConnectionInput{
 		Before: before,
 		After:  after,
@@ -370,6 +392,14 @@ func (r *queryResolver) Cdds(ctx context.Context, keywords *string, first *int64
 	return connections.CddLookupCon(cddsValues, edger, conn, input)
 }
 
+func (r *queryResolver) Validation(ctx context.Context, id string) (*types.Validation, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *queryResolver) Validations(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.ValidationConnection, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
 func (r *queryResolver) Check(ctx context.Context, id string) (*types.Check, error) {
 	panic(fmt.Errorf("not implemented"))
 }
@@ -386,32 +416,20 @@ func (r *queryResolver) Screens(ctx context.Context, first *int64, after *string
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *queryResolver) OnfidoReport(ctx context.Context, id string) (*string, error) {
+func (r *queryResolver) Report(ctx context.Context, id string) (*types.Report, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *queryResolver) ComplyAdvReport(ctx context.Context, id string) (*string, error) {
+func (r *queryResolver) Reports(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.ReportConnection, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *queryResolver) GetOnfidoSDKToken(ctx context.Context) (*types.Response, error) {
-	claims, err := middlewares.GetAuthenticatedUser(ctx)
-	if err != nil {
-		return nil, ErrUnAuthenticated
-	}
-	req := &onboardingService.GetOnfidoSDKTokenRequest{
-		PersonId: claims.PersonId,
-	}
-	resp, err := r.onBoardingService.GetOnfidoSDKToken(ctx, req)
-	if err != nil {
-		r.logger.Error("Get sdk token request failed", zap.Error(err))
-		return nil, err
-	}
-	return &types.Response{
-		Message: "successful",
-		Success: true,
-		Token:   &resp.Token,
-	}, nil
+func (r *queryResolver) Proof(ctx context.Context, id string) (*types.Proof, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *queryResolver) Proofs(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.ProofConnection, error) {
+	panic(fmt.Errorf("not implemented"))
 }
 
 func (r *queryResolver) Task(ctx context.Context, id string) (*types.Task, error) {
@@ -462,7 +480,44 @@ func (r *queryResolver) Acceptances(ctx context.Context, first *int64, after *st
 	panic(fmt.Errorf("not implemented"))
 }
 
+func (r *queryResolver) Node(ctx context.Context, id string) (types.Node, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *queryResolver) GetOnfidoSDKToken(ctx context.Context) (*types.Response, error) {
+	claims, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+	req := &onboardingService.GetOnfidoSDKTokenRequest{
+		PersonId: claims.PersonId,
+	}
+	resp, err := r.onBoardingService.GetOnfidoSDKToken(ctx, req)
+	if err != nil {
+		r.logger.Error("Get sdk token request failed", zap.Error(err))
+		return nil, err
+	}
+	return &types.Response{
+		Message: "successful",
+		Success: true,
+		Token:   &resp.Token,
+	}, nil
+}
+
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
 type queryResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//    it when you're done.
+//  - You have helper methods in this file. Move them out to keep these resolver files clean.
+func (r *queryResolver) OnfidoReport(ctx context.Context, id string) (*string, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+func (r *queryResolver) ComplyAdvReport(ctx context.Context, id string) (*string, error) {
+	panic(fmt.Errorf("not implemented"))
+}

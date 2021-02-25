@@ -4,8 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"testing"
-
 	coreErrors "github.com/roava/zebra/errors"
 	"github.com/roava/zebra/models"
 	"github.com/stretchr/testify/assert"
@@ -16,6 +14,7 @@ import (
 	"ms.api/protos/pb/personService"
 	protoTypes "ms.api/protos/pb/types"
 	"ms.api/server/http/middlewares"
+	"testing"
 )
 
 const (
@@ -33,14 +32,6 @@ func genMockAddresses() []*protoTypes.AddressLookup {
 		})
 	}
 	return addressRes
-}
-
-func str(str string) *string {
-	return &str
-}
-
-func i64(i int64) *int64 {
-	return &i
 }
 
 func Test_queryResolver_AddressLookup(t *testing.T) {
@@ -70,64 +61,64 @@ func Test_queryResolver_AddressLookup(t *testing.T) {
 		{
 			name: "Test first param (10 elements)",
 			args: args{
-				text:  str("Baker"),
-				first: i64(10),
+				text:  String("Baker"),
+				first: Int64(10),
 			},
 			testCaseType: testFirstParam,
 		},
 		{
 			name: "Test last param (4 elements)",
 			args: args{
-				text: str("Baker"),
-				last: i64(4),
+				text: String("Baker"),
+				last: Int64(4),
 			},
 			testCaseType: testLastParam,
 		},
 		{
 			name: "Test after param (2 elements)",
 			args: args{
-				text:  str("Baker"),
-				first: i64(2),
-				after: str("Y3Vyc29yOjI="),
+				text:  String("Baker"),
+				first: Int64(2),
+				after: String("Y3Vyc29yOjI="),
 			},
 			testCaseType: testAfterParam,
 		},
 		{
 			name: "Test before param (2 elements)",
 			args: args{
-				text:   str("Baker"),
-				first:  i64(2),
-				before: str("Y3Vyc29yOjI="),
+				text:   String("Baker"),
+				first:  Int64(2),
+				before: String("Y3Vyc29yOjI="),
 			},
 			testCaseType: testBeforeParam,
 		},
 		{
 			name: "Test hasNextPage",
 			args: args{
-				text:  str("Baker"),
-				first: i64(2),
+				text:  String("Baker"),
+				first: Int64(2),
 			},
 			testCaseType: testHasNextPage,
 		},
 		{
 			name: "Test hasNextPage false",
 			args: args{
-				text:  str("Baker"),
-				first: i64(maxAddresses + 1),
+				text:  String("Baker"),
+				first: Int64(maxAddresses + 1),
 			},
 			testCaseType: testHasNextPageFalse,
 		},
 		{
 			name: "Test without pagination params",
 			args: args{
-				text: str("Baker"),
+				text: String("Baker"),
 			},
 			testCaseType: testWithoutPaginationParams,
 		},
 		{
 			name: "Test unexpected error",
 			args: args{
-				text: str("Baker"),
+				text: String("Baker"),
 			},
 			testCaseType: testUnexpectedError,
 		},
@@ -154,7 +145,7 @@ func Test_queryResolver_AddressLookup(t *testing.T) {
 				assert.NotNil(t, res)
 				assert.Nil(t, err)
 				assert.Equal(t, len(res.Edges), 10)
-				assert.Equal(t, res.TotalCount, int64(maxAddresses))
+				assert.Equal(t, *res.TotalCount, int64(maxAddresses))
 			case testLastParam:
 				response := &onboardingService.AddressLookupResponse{Addresses: genMockAddresses()}
 				queryResolver := resolver.Query()
@@ -167,7 +158,7 @@ func Test_queryResolver_AddressLookup(t *testing.T) {
 				assert.NotNil(t, res)
 				assert.Nil(t, err)
 				assert.Equal(t, len(res.Edges), 4)
-				assert.Equal(t, res.TotalCount, int64(maxAddresses))
+				assert.Equal(t, *res.TotalCount, int64(maxAddresses))
 			case testAfterParam:
 				response := &onboardingService.AddressLookupResponse{Addresses: genMockAddresses()}
 				queryResolver := resolver.Query()
@@ -180,7 +171,7 @@ func Test_queryResolver_AddressLookup(t *testing.T) {
 				assert.NotNil(t, res)
 				assert.Nil(t, err)
 				assert.Equal(t, len(res.Edges), 2)
-				assert.Equal(t, res.TotalCount, int64(maxAddresses))
+				assert.Equal(t, *res.TotalCount, int64(maxAddresses))
 				assert.Equal(t, res.Edges[0].Cursor, "Y3Vyc29yOjM=")
 				assert.Equal(t, res.Edges[1].Cursor, "Y3Vyc29yOjQ=")
 			case testBeforeParam:
@@ -195,7 +186,7 @@ func Test_queryResolver_AddressLookup(t *testing.T) {
 				assert.NotNil(t, res)
 				assert.Nil(t, err)
 				assert.Equal(t, len(res.Edges), 2)
-				assert.Equal(t, res.TotalCount, int64(maxAddresses))
+				assert.Equal(t, *res.TotalCount, int64(maxAddresses))
 				assert.Equal(t, res.Edges[0].Cursor, "Y3Vyc29yOjA=")
 				assert.Equal(t, res.Edges[1].Cursor, "Y3Vyc29yOjE=")
 			case testHasNextPage:
