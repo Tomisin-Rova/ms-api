@@ -1146,3 +1146,19 @@ type AffectedAmounts {
 type TransferDetails {
   linkedLoanTransactionKey: String
 }
+
+input SubmitProofInput {
+  type: ProofType!
+  data: JSON!
+  organisation: String!
+  status: String!
+  review: ReportReviewStatusInput!
+}
+
+input ReportReviewStatusInput {
+  resubmit: Boolean
+  message: String
+}
+
+# enum representing types of document proofs
+enum ProofType { ADDRESS }

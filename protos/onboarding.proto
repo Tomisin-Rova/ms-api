@@ -147,6 +147,20 @@ message SubmitApplicationRequest {
   string personId = 1;
 }
 
+message SubmitProofRequest {
+  string owner = 1;
+  string type = 2;
+  string data = 3;
+  Review review = 4;
+  string organisation = 5;
+  string status = 6;
+}
+
+message Review {
+  bool resubmit = 1;
+  string message = 2;
+}
+
 service OnBoardingService{
   rpc CreatePhone(CreatePhoneRequest) returns (CreatePhoneResponse) {}
   rpc CreatePerson(CreatePersonRequest) returns (CreatePersonResponse) {}
@@ -166,4 +180,5 @@ service OnBoardingService{
   rpc UpdateFirebaseToken(UpdateFirebaseTokenRequest) returns (types.Response) {}
   rpc AddressLookup(AddressLookupRequest) returns (AddressLookupResponse) {}
   rpc SubmitApplication(SubmitApplicationRequest) returns (types.Response) {}
+  rpc SubmitProof(SubmitProofRequest) returns (types.Response) {}
 }

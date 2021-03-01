@@ -651,6 +651,7 @@ type ComplexityRoot struct {
 		ResetPasscode           func(childComplexity int, token string, email string, passcode string) int
 		Signup                  func(childComplexity int, token string, email string, passcode string) int
 		SubmitApplication       func(childComplexity int) int
+		SubmitProof             func(childComplexity int, proof types.SubmitProofInput) int
 		UpdateDeviceToken       func(childComplexity int, token []*types.DeviceTokenInput) int
 		VerifyEmail             func(childComplexity int, email string, code string) int
 	}
@@ -1116,6 +1117,7 @@ type MutationResolver interface {
 	ConfirmPasscodeResetOtp(ctx context.Context, email string, otp string) (*types.Response, error)
 	SubmitApplication(ctx context.Context) (*types.Response, error)
 	AcceptTerms(ctx context.Context, documents []*string) (*types.Response, error)
+	SubmitProof(ctx context.Context, proof types.SubmitProofInput) (*types.Response, error)
 }
 type QueryResolver interface {
 	Node(ctx context.Context, id string) (types.Node, error)
@@ -4114,6 +4116,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.SubmitApplication(childComplexity), true
 
+	case "Mutation.submitProof":
+		if e.complexity.Mutation.SubmitProof == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_submitProof_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.SubmitProof(childComplexity, args["proof"].(types.SubmitProofInput)), true
+
 	case "Mutation.updateDeviceToken":
 		if e.complexity.Mutation.UpdateDeviceToken == nil {
 			break
@@ -6571,6 +6585,7 @@ var sources = []*ast.Source{
     Customer accepts an array of documents displayed to them during onboarding
     """
     acceptTerms(documents: [ID]!): Response!
+    submitProof(proof: SubmitProofInput!): Response!
 }
 `, BuiltIn: false},
 	{Name: "graph/schemas/query.graphql", Input: `type Query {
@@ -7786,6 +7801,22 @@ type AffectedAmounts {
 type TransferDetails {
   linkedLoanTransactionKey: String
 }
+
+input SubmitProofInput {
+  type: ProofType!
+  data: JSON!
+  organisation: String!
+  status: String!
+  review: ReportReviewStatusInput!
+}
+
+input ReportReviewStatusInput {
+  resubmit: Boolean
+  message: String
+}
+
+# enum representing types of document proofs
+enum ProofType { ADDRESS }
 `, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
@@ -8277,6 +8308,21 @@ func (ec *executionContext) field_Mutation_signup_args(ctx context.Context, rawA
 		}
 	}
 	args["passcode"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_submitProof_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 types.SubmitProofInput
+	if tmp, ok := rawArgs["proof"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("proof"))
+		arg0, err = ec.unmarshalNSubmitProofInput2msᚗapiᚋtypesᚐSubmitProofInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["proof"] = arg0
 	return args, nil
 }
 
@@ -23396,6 +23442,48 @@ func (ec *executionContext) _Mutation_acceptTerms(ctx context.Context, field gra
 	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_submitProof(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_submitProof_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().SubmitProof(rctx, args["proof"].(types.SubmitProofInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.Response)
+	fc.Result = res
+	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _OpeningBalance_default_value(ctx context.Context, field graphql.CollectedField, obj *types.OpeningBalance) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -34982,6 +35070,86 @@ func (ec *executionContext) unmarshalInputPersonInput(ctx context.Context, obj i
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputReportReviewStatusInput(ctx context.Context, obj interface{}) (types.ReportReviewStatusInput, error) {
+	var it types.ReportReviewStatusInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "resubmit":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("resubmit"))
+			it.Resubmit, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "message":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("message"))
+			it.Message, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputSubmitProofInput(ctx context.Context, obj interface{}) (types.SubmitProofInput, error) {
+	var it types.SubmitProofInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "type":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
+			it.Type, err = ec.unmarshalNProofType2msᚗapiᚋtypesᚐProofType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "data":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("data"))
+			it.Data, err = ec.unmarshalNJSON2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "organisation":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("organisation"))
+			it.Organisation, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "status":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
+			it.Status, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "review":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("review"))
+			it.Review, err = ec.unmarshalNReportReviewStatusInput2ᚖmsᚗapiᚋtypesᚐReportReviewStatusInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -37811,6 +37979,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "acceptTerms":
 			out.Values[i] = ec._Mutation_acceptTerms(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "submitProof":
+			out.Values[i] = ec._Mutation_submitProof(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -42223,6 +42396,21 @@ func (ec *executionContext) marshalNInterestPaymentDates2ᚕᚖmsᚗapiᚋtypes�
 	return ret
 }
 
+func (ec *executionContext) unmarshalNJSON2string(ctx context.Context, v interface{}) (string, error) {
+	res, err := graphql.UnmarshalString(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNJSON2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	res := graphql.MarshalString(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
+}
+
 func (ec *executionContext) marshalNKyc2ᚕᚖmsᚗapiᚋtypesᚐKycᚄ(ctx context.Context, sel ast.SelectionSet, v []*types.Kyc) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
@@ -42802,6 +42990,16 @@ func (ec *executionContext) marshalNProductTemplates2ᚕᚖmsᚗapiᚋtypesᚐPr
 	return ret
 }
 
+func (ec *executionContext) unmarshalNProofType2msᚗapiᚋtypesᚐProofType(ctx context.Context, v interface{}) (types.ProofType, error) {
+	var res types.ProofType
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNProofType2msᚗapiᚋtypesᚐProofType(ctx context.Context, sel ast.SelectionSet, v types.ProofType) graphql.Marshaler {
+	return v
+}
+
 func (ec *executionContext) marshalNQuote2ᚕᚖmsᚗapiᚋtypesᚐQuoteᚄ(ctx context.Context, sel ast.SelectionSet, v []*types.Quote) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
@@ -42931,6 +43129,11 @@ func (ec *executionContext) marshalNRateTiers2ᚕᚖmsᚗapiᚋtypesᚐRateTiers
 	}
 	wg.Wait()
 	return ret
+}
+
+func (ec *executionContext) unmarshalNReportReviewStatusInput2ᚖmsᚗapiᚋtypesᚐReportReviewStatusInput(ctx context.Context, v interface{}) (*types.ReportReviewStatusInput, error) {
+	res, err := ec.unmarshalInputReportReviewStatusInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNResponse2msᚗapiᚋtypesᚐResponse(ctx context.Context, sel ast.SelectionSet, v types.Response) graphql.Marshaler {
@@ -43121,6 +43324,11 @@ func (ec *executionContext) marshalNString2ᚕᚖstring(ctx context.Context, sel
 	}
 
 	return ret
+}
+
+func (ec *executionContext) unmarshalNSubmitProofInput2msᚗapiᚋtypesᚐSubmitProofInput(ctx context.Context, v interface{}) (types.SubmitProofInput, error) {
+	res, err := ec.unmarshalInputSubmitProofInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNTag2ᚕᚖmsᚗapiᚋtypesᚐTag(ctx context.Context, sel ast.SelectionSet, v []*types.Tag) graphql.Marshaler {

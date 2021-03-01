@@ -919,6 +919,11 @@ type RateTiers struct {
 	InterestRate  *int64  `json:"interest_rate"`
 }
 
+type ReportReviewStatusInput struct {
+	Resubmit *bool   `json:"resubmit"`
+	Message  *string `json:"message"`
+}
+
 type Response struct {
 	Message string  `json:"message"`
 	Success bool    `json:"success"`
@@ -957,6 +962,14 @@ type Social struct {
 	Medium     *string `json:"medium"`
 	Crunchbase *string `json:"crunchbase"`
 	Twitter    *string `json:"twitter"`
+}
+
+type SubmitProofInput struct {
+	Type         ProofType                `json:"type"`
+	Data         string                   `json:"data"`
+	Organisation string                   `json:"organisation"`
+	Status       string                   `json:"status"`
+	Review       *ReportReviewStatusInput `json:"review"`
 }
 
 type Tag struct {
@@ -1296,6 +1309,45 @@ func (e *OnboardingCheckPoint) UnmarshalGQL(v interface{}) error {
 }
 
 func (e OnboardingCheckPoint) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type ProofType string
+
+const (
+	ProofTypeAddress ProofType = "ADDRESS"
+)
+
+var AllProofType = []ProofType{
+	ProofTypeAddress,
+}
+
+func (e ProofType) IsValid() bool {
+	switch e {
+	case ProofTypeAddress:
+		return true
+	}
+	return false
+}
+
+func (e ProofType) String() string {
+	return string(e)
+}
+
+func (e *ProofType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ProofType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ProofType", str)
+	}
+	return nil
+}
+
+func (e ProofType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
