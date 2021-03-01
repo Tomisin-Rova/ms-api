@@ -400,6 +400,63 @@ func (r *mutationResolver) AcceptTerms(ctx context.Context, documents []*string)
 	panic(fmt.Errorf("not implemented"))
 }
 
+func (r *mutationResolver) SubmitProof(ctx context.Context, proof types.SubmitProofInput) (*types.Response, error) {
+	claims, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+
+	review := &onboardingService.Review{}
+
+	// Check review
+	if proof.Review.Resubmit != nil {
+		review.Resubmit = *proof.Review.Resubmit
+	}
+
+	if proof.Review.Message != nil {
+		review.Message = *proof.Review.Message
+	}
+
+	response, err := r.onBoardingService.SubmitProof(ctx, &onboardingService.SubmitProofRequest{
+		Owner:  claims.PersonId,
+		Type:   proof.Type.String(),
+		Data:   proof.Data,
+		Status: proof.Status.String(),
+		Review: review,
+	})
+	if err != nil {
+		r.logger.Error("onBoardingService.SubmitProof()", zap.Error(err))
+		return nil, err
+	}
+	return &types.Response{
+		Message: response.Message,
+		Success: response.Success,
+	}, nil
+}
+
+func (r *mutationResolver) CreateTransactionPassword(ctx context.Context, password string) (*types.Response, error) {
+	claims, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+	if err := validator.ValidateTransactionPassword(password); err != nil {
+		r.logger.Error("error validating password", zap.Error(err))
+		return nil, err
+	}
+	response, err := r.identityService.CreateTransactionPassword(ctx, &identityService.CreateTransactionPasswordRequest{
+		PersonId: claims.PersonId,
+		Pin:      password,
+	})
+	if err != nil {
+		r.logger.Error("error calling identityService.createTransactionPin()", zap.Error(err))
+		return nil, err
+	}
+	return &types.Response{
+		Message: response.Message,
+		Success: response.Success,
+	}, nil
+}
+
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 

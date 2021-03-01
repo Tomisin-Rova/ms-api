@@ -115,3 +115,8 @@ func (f *FakeOnBoardingClient) SubmitApplication(ctx context.Context, in *onboar
 	opts ...grpc.CallOption) (*types.Response, error) {
 	return &types.Response{}, f.err
 }
+
+func (f *FakeOnBoardingClient) SubmitProof(ctx context.Context, in *onboardingService.SubmitProofRequest,
+	opts ...grpc.CallOption) (*types.Response, error) {
+	return &types.Response{}, f.err
+}

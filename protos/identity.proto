@@ -19,6 +19,16 @@ message DeviceTokens {
   string Value = 2;
 }
 
+message SuccessResponse {
+  string message = 1;
+}
+
+message CreateTransactionPasswordRequest {
+  string personId = 1;
+  string pin = 2;
+}
+
 service identityService {
   rpc updateDeviceTokens(updateDeviceTokensRequest) returns (types.Response) {}
+  rpc CreateTransactionPassword(CreateTransactionPasswordRequest) returns (types.Response) {}
 }

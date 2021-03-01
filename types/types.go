@@ -966,6 +966,11 @@ type ReportReviewStatus struct {
 	Message  *string `json:"message"`
 }
 
+type ReportReviewStatusInput struct {
+	Resubmit *bool   `json:"resubmit"`
+	Message  *string `json:"message"`
+}
+
 type Response struct {
 	Message string  `json:"message"`
 	Success bool    `json:"success"`
@@ -1007,6 +1012,14 @@ type Social struct {
 	Medium     *string `json:"medium"`
 	Crunchbase *string `json:"crunchbase"`
 	Twitter    *string `json:"twitter"`
+}
+
+type SubmitProofInput struct {
+	Type         ProofType                `json:"type"`
+	Data         string                   `json:"data"`
+	Organisation string                   `json:"organisation"`
+	Status       State                    `json:"status"`
+	Review       *ReportReviewStatusInput `json:"review"`
 }
 
 type Tag struct {

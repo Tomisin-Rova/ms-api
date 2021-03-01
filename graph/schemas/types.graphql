@@ -2165,3 +2165,16 @@ type TransferDetails {
   # Reference the loan linked to the transfer
   linked_loan_transaction_key: String
 }
+
+input SubmitProofInput {
+  type: ProofType!
+  data: JSON!
+  organisation: String!
+  status: State!
+  review: ReportReviewStatusInput!
+}
+
+input ReportReviewStatusInput {
+  resubmit: Boolean
+  message: String
+}
