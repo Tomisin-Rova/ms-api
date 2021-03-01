@@ -17,7 +17,8 @@ require (
 	github.com/kr/pretty v0.2.1 // indirect
 	github.com/mitchellh/mapstructure v1.4.1 // indirect
 	github.com/onsi/ginkgo v1.14.0 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
+	github.com/ory/dockertest/v3 v3.6.3
+	github.com/pkg/errors v0.9.1
 	github.com/roava/zebra v0.0.0-20210222115245-5bfa91ac11f0
 	github.com/rs/cors v1.6.0
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect

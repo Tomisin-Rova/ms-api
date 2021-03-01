@@ -2,6 +2,7 @@ package mongo
 
 import (
 	"context"
+	"github.com/pkg/errors"
 	"github.com/roava/zebra/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -80,15 +81,15 @@ func (s *mongoStore) GetCDDs(page, perPage int64) ([]*models.CDD, error) {
 	opts.SetSkip((page - 1) * perPage)
 	opts.SetLimit(perPage)
 
-	cursor, err := s.col(cddsCollection).Find(context.Background(), nil, opts)
+	cursor, err := s.col(cddsCollection).Find(context.Background(), bson.M{}, opts)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to query CDDs")
 	}
 	cdds := make([]*models.CDD, 0)
 	for cursor.Next(context.Background()) {
 		cdd := &models.CDD{}
 		if err := cursor.Decode(cdd); err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "failed to decode a single CDD")
 		}
 		cdds = append(cdds, cdd)
 	}

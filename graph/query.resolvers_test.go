@@ -2,6 +2,7 @@ package graph
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	coreErrors "github.com/roava/zebra/errors"
@@ -412,4 +413,10 @@ func Test_queryResolver_People(t *testing.T) {
 
 		})
 	}
+}
+
+func TestQueryResolver_Cdds(t *testing.T) {
+	data, err := json.Marshal(&models.Screen{Data: json.RawMessage(`{"foo": "bar"}`)}, )
+	assert.Nil(t, err)
+	t.Log(string(data))
 }
