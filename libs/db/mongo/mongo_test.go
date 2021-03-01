@@ -12,7 +12,6 @@ import (
 	"testing"
 )
 
-
 var mongoDbPort = ""
 
 func TestMain(m *testing.M) {
@@ -58,11 +57,11 @@ func TestMongoStore_GetCDDs(t *testing.T) {
 	assert.NotNil(t, repo)
 
 	cdd := &models.CDD{
-		ID:          "id",
-		Owner:       "owner",
-		Watchlist:   false,
+		ID:        "id",
+		Owner:     "owner",
+		Watchlist: false,
 		Validations: []models.Validation{{
-			Applicant:      models.Person{ID: "personId"},
+			Applicant: models.Person{ID: "personId"},
 		}},
 	}
 	newId, err := client.Database("roava").Collection("cdds").InsertOne(context.Background(), cdd)

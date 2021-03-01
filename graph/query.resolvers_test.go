@@ -2,13 +2,14 @@ package graph
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/golang/mock/gomock"
 	coreErrors "github.com/roava/zebra/errors"
 	"github.com/roava/zebra/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.uber.org/zap/zaptest"
 	"ms.api/mocks"
 	"ms.api/protos/pb/onboardingService"
@@ -416,7 +417,50 @@ func Test_queryResolver_People(t *testing.T) {
 }
 
 func TestQueryResolver_Cdds(t *testing.T) {
-	data, err := json.Marshal(&models.Screen{Data: json.RawMessage(`{"foo": "bar"}`)}, )
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockOwner := "personId"
+	mockCdds := []*models.CDD{
+		{ID: "id1", Owner: mockOwner, Validations: []models.Validation{
+			{ValidationType: "CHECK", Data: "checkId", Organisation: "orgId", Applicant: models.Person{ID: mockOwner}},
+			{ValidationType: "SCREEN", Data: "screenId", Organisation: "orgId", Applicant: models.Person{ID: mockOwner}},
+		}},
+		{ID: "id2", Owner: mockOwner, Validations: []models.Validation{
+			{ValidationType: "CHECK", Data: "checkId", Organisation: "orgId", Applicant: models.Person{ID: mockOwner}},
+			{ValidationType: "SCREEN", Data: "screenId", Organisation: "orgId", Applicant: models.Person{ID: mockOwner}},
+		}},
+	}
+	mockPerson, mockCheck, mockScreen, mockOrg := &models.Person{ID: mockOwner, Employer: "orgId"}, &models.Check{Organisation: "orgId"}, &models.Screen{Organisation: "orgId"}, &models.Organization{}
+
+	mockStore := mocks.NewMockDataStore(ctrl)
+	mockStore.EXPECT().GetCDDs(int64(1), int64(100)).Return(mockCdds, nil).Times(1)
+	mockStore.EXPECT().GetPerson(mockOwner).Return(mockPerson, nil).MinTimes(1)
+	mockStore.EXPECT().GetCheck("checkId").Return(mockCheck, nil).MinTimes(1)
+	mockStore.EXPECT().GetScreen("screenId").Return(mockScreen, nil).MinTimes(1)
+	mockStore.EXPECT().GetOrganization("orgId").Return(mockOrg, nil).MinTimes(1)
+	resolver := NewResolver(&ResolverOpts{DataStore: mockStore}, zaptest.NewLogger(t)).Query()
+
+	data, err := resolver.Cdds(context.Background(), nil, nil, nil, nil, nil)
 	assert.Nil(t, err)
-	t.Log(string(data))
+	assert.NotNil(t, data)
+	assert.Equal(t, 2, len(data.Nodes))
+}
+
+func TestQueryResolver_Cdds_NoData(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockStore := mocks.NewMockDataStore(ctrl)
+	mockStore.EXPECT().GetCDDs(int64(1), int64(100)).Return(nil, mongo.ErrNoDocuments).Times(1)
+	resolver := NewResolver(&ResolverOpts{DataStore: mockStore}, zaptest.NewLogger(t)).Query()
+
+	data, err := resolver.Cdds(context.Background(), nil, nil, nil, nil, nil)
+	assert.NotNil(t, err)
+	assert.Nil(t, data)
+	terror, ok := err.(*coreErrors.Terror)
+	if !ok {
+		t.Fail()
+	}
+	assert.Equal(t, terror.ErrorType(), "CddsNotFound")
 }

@@ -43,7 +43,6 @@ func (r *DataResolver) ResolveValidation(v models.Validation) (*types.Validation
 			return nil, errors.Wrap(err, "failed to resolve check's organisation")
 		}
 		reports := make([]*types.Report, 0)
-		tags := make([]*types.Tag, 0)
 		for _, r := range check.Data.Reports {
 			reports = append(reports, &types.Report{
 				ID:           r.ID,
@@ -51,17 +50,10 @@ func (r *DataResolver) ResolveValidation(v models.Validation) (*types.Validation
 				Status:       types.State(r.Status),
 				Organisation: checkOrg,
 				Ts:           Int64(r.Timestamp.UnixNano()),
-				Review:       &types.ReportReviewStatus{
+				Review: &types.ReportReviewStatus{
 					Resubmit: &r.Review.Resubmit,
 					Message:  &r.Review.Message,
 				},
-			})
-		}
-		for _, tag := range check.Data.Tags {
-			tags = append(tags, &types.Tag{
-				ID:   tag.ID,
-				Name: &tag.Name,
-				Ts:   Int64(tag.TimeStamp.UnixNano()),
 			})
 		}
 		validation.Data = types.Check{
@@ -83,7 +75,7 @@ func (r *DataResolver) ResolveValidation(v models.Validation) (*types.Validation
 				Href:                  &check.Data.HREF,
 				ApplicantID:           &check.Data.ApplicantID,
 				ApplicantProvidesData: &check.Data.ApplicantProvidesData,
-				Reports: reports,
+				Reports:               reports,
 			},
 		}
 	}

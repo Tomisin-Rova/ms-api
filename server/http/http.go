@@ -43,7 +43,6 @@ func MountServer(secrets *config.Secrets, logger *zap.Logger) *chi.Mux {
 		logger.Fatal("failed to open database", zap.Error(err))
 	}
 
-
 	mw := middlewares.NewAuthMiddleware(opts.AuthService, logger)
 	router.Use(mw.Middeware)
 	opts.AuthMw = mw
