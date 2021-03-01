@@ -20,12 +20,16 @@ type Node interface {
 	IsNode()
 }
 
+type ValidationData interface {
+	IsValidationData()
+}
+
 type Verifiable interface {
 	IsVerifiable()
 }
 
 type Acceptance struct {
-	ID       *string   `json:"id"`
+	ID       string    `json:"id"`
 	Identity *Identity `json:"identity"`
 	Content  *Content  `json:"content"`
 	Ts       *int64    `json:"ts"`
@@ -40,13 +44,13 @@ type AcceptanceConnection struct {
 
 type AcceptanceEdge struct {
 	Node   *Acceptance `json:"node"`
-	Cursor *PageInfo   `json:"cursor"`
+	Cursor string      `json:"cursor"`
 }
 
 type Account struct {
-	ID           *string                `json:"id"`
-	Owner        *string                `json:"owner"`
-	Product      *string                `json:"product"`
+	ID           string                 `json:"id"`
+	Owner        Entity                 `json:"owner"`
+	Product      *Product               `json:"product"`
 	Name         *string                `json:"name"`
 	Active       *bool                  `json:"active"`
 	Status       *string                `json:"status"`
@@ -59,7 +63,7 @@ type Account struct {
 }
 
 type AccountBalances struct {
-	TotalBalance *int64 `json:"totalBalance"`
+	TotalBalance *int64 `json:"total_balance"`
 }
 
 type AccountConnection struct {
@@ -70,46 +74,46 @@ type AccountConnection struct {
 }
 
 type AccountData struct {
-	AccountHolderKey                *string                    `json:"accountHolderKey"`
-	AccountHolderType               *string                    `json:"accountHolderType"`
-	AccountState                    *string                    `json:"accountState"`
-	AccountType                     *string                    `json:"accountType"`
-	ActivationDate                  *string                    `json:"activationDate"`
-	ApprovedDate                    *string                    `json:"approvedDate"`
-	AssignedBranchKey               *string                    `json:"assignedBranchKey"`
-	AssignedCentreKey               *string                    `json:"assignedCentreKey"`
-	AssignedUserKey                 *string                    `json:"assignedUserKey"`
-	ClosedDate                      *string                    `json:"closedDate"`
-	CreationDate                    *string                    `json:"creationDate"`
-	CreditArrangementKey            *string                    `json:"creditArrangementKey"`
-	CurrencyCode                    *string                    `json:"currencyCode"`
-	EncodedKey                      *string                    `json:"encodedKey"`
-	ID                              *string                    `json:"id"`
-	LastAccountAppraisalDate        *string                    `json:"lastAccountAppraisalDate"`
-	LastInterestCalculationDate     *string                    `json:"lastInterestCalculationDate"`
-	LastInterestStoredDate          *string                    `json:"lastInterestStoredDate"`
-	LastModifiedDate                *string                    `json:"lastModifiedDate"`
-	LastOverdraftInterestReviewDate *string                    `json:"lastOverdraftInterestReviewDate"`
-	LastSetToArrearsDate            *string                    `json:"lastSetToArrearsDate"`
-	LockedDate                      *string                    `json:"lockedDate"`
-	MaturityDate                    *string                    `json:"maturityDate"`
-	MigrationEventKey               *string                    `json:"migrationEventKey"`
+	ID                              string                     `json:"id"`
+	AccountHolderKey                *string                    `json:"account_holder_key"`
+	AccountHolderType               *string                    `json:"account_holder_type"`
+	AccountState                    *string                    `json:"account_state"`
+	AccountType                     *string                    `json:"account_type"`
+	ActivationDate                  *string                    `json:"activation_date"`
+	ApprovedDate                    *string                    `json:"approved_date"`
+	AssignedBranchKey               *string                    `json:"assigned_branch_key"`
+	AssignedCentreKey               *string                    `json:"assigned_centre_key"`
+	AssignedUserKey                 *string                    `json:"assigned_user_key"`
+	ClosedDate                      *string                    `json:"closed_date"`
+	CreationDate                    *string                    `json:"creation_date"`
+	CreditArrangementKey            *string                    `json:"credit_arrangement_key"`
+	CurrencyCode                    *string                    `json:"currency_code"`
+	EncodedKey                      *string                    `json:"encoded_key"`
+	LastAccountAppraisalDate        *string                    `json:"last_account_appraisal_date"`
+	LastInterestCalculationDate     *string                    `json:"last_interest_calculation_date"`
+	LastInterestStoredDate          *string                    `json:"last_interest_stored_date"`
+	LastModifiedDate                *string                    `json:"last_modified_date"`
+	LastOverdraftInterestReviewDate *string                    `json:"last_overdraft_interest_review_date"`
+	LastSetToArrearsDate            *string                    `json:"last_set_to_arrears_date"`
+	LockedDate                      *string                    `json:"locked_date"`
+	MaturityDate                    *string                    `json:"maturity_date"`
+	MigrationEventKey               *string                    `json:"migration_event_key"`
 	Name                            *string                    `json:"name"`
 	Notes                           *string                    `json:"notes"`
-	ProductTypeKey                  *string                    `json:"productTypeKey"`
-	WithholdingTaxSourceKey         *string                    `json:"withholdingTaxSourceKey"`
-	OverdraftSettings               *OverdraftSettings         `json:"overdraftSettings"`
-	OverdraftInterestSettings       *OverdraftInterestSettings `json:"overdraftInterestSettings"`
-	LinkedSettlementAccountKeys     []*string                  `json:"linkedSettlementAccountKeys"`
-	InternalControls                *InternalControls          `json:"internalControls"`
-	InterestSettings                *InterestSettings          `json:"interestSettings"`
+	ProductTypeKey                  *string                    `json:"product_type_key"`
+	WithholdingTaxSourceKey         *string                    `json:"withholding_tax_source_key"`
+	OverdraftSettings               *OverdraftSettings         `json:"overdraft_settings"`
+	OverdraftInterestSettings       *OverdraftInterestSettings `json:"overdraft_interest_settings"`
+	LinkedSettlementAccountKeys     []*string                  `json:"linked_settlement_account_keys"`
+	InternalControls                *InternalControls          `json:"internal_controls"`
+	InterestSettings                *InterestSettings          `json:"interest_settings"`
 	Balances                        *Balances                  `json:"balances"`
-	AccruedAmounts                  *AccruedAmounts            `json:"accruedAmounts"`
+	AccruedAmounts                  *AccruedAmounts            `json:"accrued_amounts"`
 }
 
 type AccountEdge struct {
-	Node   *Account  `json:"node"`
-	Cursor *PageInfo `json:"cursor"`
+	Node   *Account `json:"node"`
+	Cursor string   `json:"cursor"`
 }
 
 type AccountingRules struct {
@@ -119,9 +123,9 @@ type AccountingRules struct {
 }
 
 type AccruedAmounts struct {
-	InterestAccrued                   *int64 `json:"interestAccrued"`
-	OverdraftInterestAccrued          *int64 `json:"overdraftInterestAccrued"`
-	TechnicalOverdraftInterestAccrued *int64 `json:"technicalOverdraftInterestAccrued"`
+	InterestAccrued                   *int64 `json:"interest_accrued"`
+	OverdraftInterestAccrued          *int64 `json:"overdraft_interest_accrued"`
+	TechnicalOverdraftInterestAccrued *int64 `json:"technical_overdraft_interest_accrued"`
 }
 
 type Activity struct {
@@ -133,18 +137,6 @@ type Activity struct {
 	Ts            *int64 `json:"ts"`
 }
 
-type ActivityConnection struct {
-	Edges      []*ActivityEdge `json:"edges"`
-	Nodes      []*Activity     `json:"nodes"`
-	PageInfo   *PageInfo       `json:"pageInfo"`
-	TotalCount *int64          `json:"totalCount"`
-}
-
-type ActivityEdge struct {
-	Node   *Activity `json:"node"`
-	Cursor *PageInfo `json:"cursor"`
-}
-
 type ActivityInput struct {
 	Description   string `json:"description"`
 	RiskWeighting int64  `json:"risk_weighting"`
@@ -154,7 +146,7 @@ type ActivityInput struct {
 
 type Address struct {
 	ID       string    `json:"id"`
-	Owner    *string   `json:"owner"`
+	Owner    Entity    `json:"owner"`
 	Name     *string   `json:"name"`
 	Primary  *bool     `json:"primary"`
 	Street   *string   `json:"street"`
@@ -171,7 +163,7 @@ type AddressConnection struct {
 	Edges      []*AddressEdge `json:"edges"`
 	Nodes      []*Address     `json:"nodes"`
 	PageInfo   *PageInfo      `json:"pageInfo"`
-	TotalCount int64          `json:"totalCount"`
+	TotalCount *int64         `json:"totalCount"`
 }
 
 type AddressEdge struct {
@@ -185,34 +177,20 @@ type AddressInput struct {
 	County   *string `json:"county"`
 	State    *string `json:"state"`
 	Postcode *string `json:"postcode"`
-	// 3 Char ISO standard for the country
-	Country *string `json:"country"`
-	// Optional 2 Char ISO codes for country e.g "GB"
-	// Used in the AML screen with vendor
+	Country  *string `json:"country"`
 	Country2 *string `json:"country_2"`
 }
 
 type AffectedAmounts struct {
-	FeesAmount                       *int64 `json:"feesAmount"`
-	FractionAmount                   *int64 `json:"fractionAmount"`
-	FundsAmount                      *int64 `json:"fundsAmount"`
-	InterestAmount                   *int64 `json:"interestAmount"`
-	OverdraftAmount                  *int64 `json:"overdraftAmount"`
-	OverdraftFeesAmount              *int64 `json:"overdraftFeesAmount"`
-	OverdraftInterestAmount          *int64 `json:"overdraftInterestAmount"`
-	TechnicalOverdraftAmount         *int64 `json:"technicalOverdraftAmount"`
-	TechnicalOverdraftInterestAmount *int64 `json:"technicalOverdraftInterestAmount"`
-}
-
-type Aml struct {
-	Source    *Organisation `json:"source"`
-	Screen    []*Screen     `json:"screen"`
-	Result    *string       `json:"result"`
-	TotalHits *int64        `json:"total_hits"`
-	RiskLevel *string       `json:"risk_level"`
-	Score     *float64      `json:"score"`
-	Approved  *bool         `json:"approved"`
-	Ts        *int64        `json:"ts"`
+	FeesAmount                       *int64 `json:"fees_amount"`
+	FractionAmount                   *int64 `json:"fraction_amount"`
+	FundsAmount                      *int64 `json:"funds_amount"`
+	InterestAmount                   *int64 `json:"interest_amount"`
+	OverdraftAmount                  *int64 `json:"overdraft_amount"`
+	OverdraftFeesAmount              *int64 `json:"overdraft_fees_amount"`
+	OverdraftInterestAmount          *int64 `json:"overdraft_interest_amount"`
+	TechnicalOverdraftAmount         *int64 `json:"technical_overdraft_amount"`
+	TechnicalOverdraftInterestAmount *int64 `json:"technical_overdraft_interest_amount"`
 }
 
 type ApplicantInput struct {
@@ -255,31 +233,30 @@ type AuthTokens struct {
 }
 
 type Balances struct {
-	AvailableBalance              *int64 `json:"availableBalance"`
-	BlockedBalance                *int64 `json:"blockedBalance"`
-	FeesDue                       *int64 `json:"feesDue"`
-	ForwardAvailableBalance       *int64 `json:"forwardAvailableBalance"`
-	HoldBalance                   *int64 `json:"holdBalance"`
-	LockedBalance                 *int64 `json:"lockedBalance"`
-	OverdraftAmount               *int64 `json:"overdraftAmount"`
-	OverdraftInterestDue          *int64 `json:"overdraftInterestDue"`
-	TechnicalOverdraftAmount      *int64 `json:"technicalOverdraftAmount"`
-	TechnicalOverdraftInterestDue *int64 `json:"technicalOverdraftInterestDue"`
-	TotalBalance                  *int64 `json:"totalBalance"`
+	AvailableBalance              *int64 `json:"available_balance"`
+	BlockedBalance                *int64 `json:"blocked_balance"`
+	FeesDue                       *int64 `json:"fees_due"`
+	ForwardAvailableBalance       *int64 `json:"forward_available_balance"`
+	HoldBalance                   *int64 `json:"hold_balance"`
+	LockedBalance                 *int64 `json:"locked_balance"`
+	OverdraftAmount               *int64 `json:"overdraft_amount"`
+	OverdraftInterestDue          *int64 `json:"overdraft_interest_due"`
+	TechnicalOverdraftAmount      *int64 `json:"technical_overdraft_amount"`
+	TechnicalOverdraftInterestDue *int64 `json:"technical_overdraft_interest_due"`
+	TotalBalance                  *int64 `json:"total_balance"`
 }
 
 type Cdd struct {
-	ID        string  `json:"id"`
-	Owner     *string `json:"owner"`
-	Watchlist *bool   `json:"watchlist"`
-	Details   *string `json:"details"`
-	Status    *string `json:"status"`
-	Onboard   *bool   `json:"onboard"`
-	Version   *int64  `json:"version"`
-	Active    *bool   `json:"active"`
-	Ts        *int64  `json:"ts"`
-	Kyc       []*Kyc  `json:"kyc"`
-	Aml       []*Aml  `json:"aml"`
+	ID          string        `json:"id"`
+	Owner       *Person       `json:"owner"`
+	Watchlist   *bool         `json:"watchlist"`
+	Details     *string       `json:"details"`
+	Status      State         `json:"status"`
+	Onboard     *bool         `json:"onboard"`
+	Version     *int64        `json:"version"`
+	Validations []*Validation `json:"validations"`
+	Active      *bool         `json:"active"`
+	Ts          *int64        `json:"ts"`
 }
 
 type CDDConnection struct {
@@ -290,17 +267,19 @@ type CDDConnection struct {
 }
 
 type CDDEdge struct {
-	Node   *Cdd      `json:"node"`
-	Cursor *PageInfo `json:"cursor"`
+	Node   *Cdd   `json:"node"`
+	Cursor string `json:"cursor"`
 }
 
 type Check struct {
-	ID      string     `json:"id"`
-	Source  *string    `json:"source"`
-	Ts      *int64     `json:"ts"`
-	Data    *CheckData `json:"data"`
-	Reports []*string  `json:"reports"`
+	ID           string        `json:"id"`
+	Organisation *Organisation `json:"organisation"`
+	Status       State         `json:"status"`
+	Ts           *int64        `json:"ts"`
+	Data         *CheckData    `json:"data"`
 }
+
+func (Check) IsValidationData() {}
 
 type CheckConnection struct {
 	Edges      []*CheckEdge `json:"edges"`
@@ -310,9 +289,9 @@ type CheckConnection struct {
 }
 
 type CheckData struct {
-	ID                    *string        `json:"id"`
+	ID                    string         `json:"id"`
 	CreatedAt             *string        `json:"created_at"`
-	Status                *string        `json:"status"`
+	Status                State          `json:"status"`
 	RedirectURI           *string        `json:"redirect_uri"`
 	Result                *string        `json:"result"`
 	Sandbox               *bool          `json:"sandbox"`
@@ -323,17 +302,17 @@ type CheckData struct {
 	Href                  *string        `json:"href"`
 	ApplicantID           *string        `json:"applicant_id"`
 	ApplicantProvidesData *bool          `json:"applicant_provides_data"`
-	ReportIds             []*string      `json:"report_ids"`
+	Reports               []*Report      `json:"reports"`
 	Tags                  *TagConnection `json:"tags"`
 }
 
 type CheckEdge struct {
-	Node   *Check    `json:"node"`
-	Cursor *PageInfo `json:"cursor"`
+	Node   *Check `json:"node"`
+	Cursor string `json:"cursor"`
 }
 
 type Comment struct {
-	ID     *string `json:"id"`
+	ID     string  `json:"id"`
 	Author *Person `json:"author"`
 	Type   *string `json:"type"`
 	Body   *string `json:"body"`
@@ -349,12 +328,12 @@ type CommentConnection struct {
 }
 
 type CommentEdge struct {
-	Node   *Comment  `json:"node"`
-	Cursor *PageInfo `json:"cursor"`
+	Node   *Comment `json:"node"`
+	Cursor string   `json:"cursor"`
 }
 
 type Content struct {
-	ID       *string            `json:"id"`
+	ID       string             `json:"id"`
 	Source   Entity             `json:"source"`
 	Type     *string            `json:"type"`
 	Title    *string            `json:"title"`
@@ -406,11 +385,10 @@ type CountryConnection struct {
 }
 
 type CountryEdge struct {
-	Node   *Country  `json:"node"`
-	Cursor *PageInfo `json:"cursor"`
+	Node   *Country `json:"node"`
+	Cursor string   `json:"cursor"`
 }
 
-// Credentials object in a person identity; excludes passwords and pins
 type Credentials struct {
 	Identifier   string  `json:"identifier"`
 	RefreshToken *string `json:"refresh_token"`
@@ -435,7 +413,7 @@ type CurrencyConnection struct {
 
 type CurrencyEdge struct {
 	Node   *Currency `json:"node"`
-	Cursor *PageInfo `json:"cursor"`
+	Cursor string    `json:"cursor"`
 }
 
 type Device struct {
@@ -463,8 +441,8 @@ type DeviceConnection struct {
 }
 
 type DeviceEdge struct {
-	Node   *Device   `json:"node"`
-	Cursor *PageInfo `json:"cursor"`
+	Node   *Device `json:"node"`
+	Cursor string  `json:"cursor"`
 }
 
 type DeviceInput struct {
@@ -475,7 +453,9 @@ type DeviceInput struct {
 }
 
 type DeviceToken struct {
-	Firebase *string `json:"firebase"`
+	Type  *DeviceTokenType `json:"type"`
+	Value *string          `json:"value"`
+	Ts    *int64           `json:"ts"`
 }
 
 type DeviceTokenInput struct {
@@ -517,14 +497,13 @@ type FxConnection struct {
 }
 
 type FxEdge struct {
-	Node   *Fx       `json:"node"`
-	Cursor *PageInfo `json:"cursor"`
+	Node   *Fx    `json:"node"`
+	Cursor string `json:"cursor"`
 }
 
-// Identity is how ROAVA represents a customer relationship and can be for a person or organisation
 type Identity struct {
 	ID             string          `json:"id"`
-	Owner          string          `json:"owner"`
+	Owner          Entity          `json:"owner"`
 	Nickname       *string         `json:"nickname"`
 	Organisation   *Organisation   `json:"organisation"`
 	Status         *IdentityStatus `json:"status"`
@@ -560,7 +539,7 @@ type IndustryConnection struct {
 
 type IndustryEdge struct {
 	Node   *Industry `json:"node"`
-	Cursor *PageInfo `json:"cursor"`
+	Cursor string    `json:"cursor"`
 }
 
 type InterestPaymentDates struct {
@@ -569,34 +548,34 @@ type InterestPaymentDates struct {
 }
 
 type InterestPaymentSettings struct {
-	InterestPaymentPoint *string                 `json:"interestPaymentPoint"`
-	InterestPaymentDates []*InterestPaymentDates `json:"interestPaymentDates"`
+	InterestPaymentPoint *string                 `json:"interest_payment_point"`
+	InterestPaymentDates []*InterestPaymentDates `json:"interest_payment_dates"`
 }
 
 type InterestRate struct {
-	DefaultValue *int64 `json:"defaultValue"`
-	MaxValue     *int64 `json:"maxValue"`
-	MinValue     *int64 `json:"minValue"`
+	DefaultValue *int64 `json:"default_value"`
+	MaxValue     *int64 `json:"max_value"`
+	MinValue     *int64 `json:"min_value"`
 }
 
 type InterestRateSettings struct {
-	EncodedKey                   *string              `json:"encodedKey"`
-	InterestChargeFrequency      *string              `json:"interestChargeFrequency"`
-	InterestChargeFrequencyCount *int64               `json:"interestChargeFrequencyCount"`
-	InterestRate                 *int64               `json:"interestRate"`
-	InterestRateReviewCount      *int64               `json:"interestRateReviewCount"`
-	InterestRateReviewUnit       *string              `json:"interestRateReviewUnit"`
-	InterestRateSource           *string              `json:"interestRateSource"`
-	InterestRateTerms            *string              `json:"interestRateTerms"`
-	InterestSpread               *int64               `json:"interestSpread"`
-	InterestRateTiers            []*InterestRateTiers `json:"interestRateTiers"`
+	EncodedKey                   *string              `json:"encoded_key"`
+	InterestChargeFrequency      *string              `json:"interest_charge_frequency"`
+	InterestChargeFrequencyCount *int64               `json:"interest_charge_frequency_count"`
+	InterestRate                 *int64               `json:"interest_rate"`
+	InterestRateReviewCount      *int64               `json:"interest_rate_review_count"`
+	InterestRateReviewUnit       *string              `json:"interest_rate_review_unit"`
+	InterestRateSource           *string              `json:"interest_rate_source"`
+	InterestRateTerms            *string              `json:"interest_rate_terms"`
+	InterestSpread               *int64               `json:"interest_spread"`
+	InterestRateTiers            []*InterestRateTiers `json:"interest_rate_tiers"`
 }
 
 type InterestRateTiers struct {
-	EncodedKey    *string `json:"encodedKey"`
-	EndingBalance *int64  `json:"endingBalance"`
-	EndingDay     *int64  `json:"endingDay"`
-	InterestRate  *int64  `json:"interestRate"`
+	EncodedKey    *string `json:"encoded_key"`
+	EndingBalance *int64  `json:"ending_balance"`
+	EndingDay     *int64  `json:"ending_day"`
+	InterestRate  *int64  `json:"interest_rate"`
 }
 
 type InterestSetting struct {
@@ -605,9 +584,9 @@ type InterestSetting struct {
 	InterestCalculationBalance *string                 `json:"interest_calculation_balance"`
 	InterestPaidIntoAccount    *bool                   `json:"interest_paid_into_account"`
 	InterestPaymentPoint       *string                 `json:"interest_payment_point"`
-	MaximumBalance             *int64                  `json:"maximumBalance"`
+	MaximumBalance             *int64                  `json:"maximum_balance"`
 	RateSetting                *RateSetting            `json:"rate_setting"`
-	InterestPaymentDates       []*InterestPaymentDates `json:"interestPaymentDates"`
+	InterestPaymentDates       []*InterestPaymentDates `json:"interest_payment_dates"`
 }
 
 type InterestSettings struct {
@@ -617,27 +596,19 @@ type InterestSettings struct {
 	ChargeFrequency            *string                  `json:"charge_frequency"`
 	ChargeFrequencyCount       *int64                   `json:"charge_frequency_count"`
 	RateReviewCount            *int64                   `json:"rate_review_count"`
-	InterestRateReviewUnit     *string                  `json:"interestRateReviewUnit"`
+	InterestRateReviewUnit     *string                  `json:"interest_rate_review_unit"`
 	RateSource                 *string                  `json:"rate_source"`
 	RateTerms                  *string                  `json:"rate_terms"`
 	RateTiers                  []*RateTiers             `json:"rate_tiers"`
 	InterestRate               *InterestRate            `json:"interest_rate"`
-	InterestRateSettings       *InterestRateSettings    `json:"interestRateSettings"`
-	InterestPaymentSettings    *InterestPaymentSettings `json:"interestPaymentSettings"`
+	InterestRateSettings       *InterestRateSettings    `json:"interest_rate_settings"`
+	InterestPaymentSettings    *InterestPaymentSettings `json:"interest_payment_settings"`
 }
 
 type InternalControls struct {
-	MaxWithdrawalAmount      *int64 `json:"maxWithdrawalAmount"`
-	RecommendedDepositAmount *int64 `json:"recommendedDepositAmount"`
-	TargetAmount             *int64 `json:"targetAmount"`
-}
-
-type Kyc struct {
-	Source   *Organisation `json:"source"`
-	Check    []*Check      `json:"check"`
-	Result   *string       `json:"result"`
-	Approved *bool         `json:"approved"`
-	Ts       *int64        `json:"ts"`
+	MaxWithdrawalAmount      *int64 `json:"max_withdrawal_amount"`
+	RecommendedDepositAmount *int64 `json:"recommended_deposit_amount"`
+	TargetAmount             *int64 `json:"target_amount"`
 }
 
 type Location struct {
@@ -646,17 +617,43 @@ type Location struct {
 }
 
 type Message struct {
-	ID           string       `json:"id"`
-	Owner        Entity       `json:"owner"`
-	Title        *string      `json:"title"`
+	ID    string `json:"id"`
+	Owner Entity `json:"owner"`
+	// This is the message title which varies by delivery mode / type of message
+	//
+	// - Email - the full HTML template populated to be sent
+	//
+	// - Push - the  content of message card to be displayed in feed
+	//
+	// - SMS - the sms content
+	Title *string `json:"title"`
+	// Message body which varies by delivery mode / type of message
+	//
+	// - email - the full HTML template populated to be sent
+	//
+	// - push - the  content of message card to be displayed in feed
+	//
+	// - SMS - the sms content
 	Body         *string      `json:"body"`
 	Status       *string      `json:"status"`
 	HasRead      *bool        `json:"has_read"`
 	DeliveryMode DeliveryMode `json:"delivery_mode"`
-	Sender       *string      `json:"sender"`
-	Target       Verifiable   `json:"target"`
-	Sent         *int64       `json:"sent"`
-	Ts           *int64       `json:"ts"`
+	// The information for the sender based on message type
+	//
+	// - email - sender’s email address
+	//
+	// - sms | push - not required
+	Sender *string `json:"sender"`
+	// The information for the intended recipient of the message based on  type
+	//
+	// - email - target's email address
+	//
+	// - sms - phone number
+	//
+	// - push - device or phone number
+	Target Verifiable `json:"target"`
+	Sent   *int64     `json:"sent"`
+	Ts     *int64     `json:"ts"`
 }
 
 type MessageConnection struct {
@@ -667,8 +664,8 @@ type MessageConnection struct {
 }
 
 type MessageEdge struct {
-	Node   *Message  `json:"node"`
-	Cursor *PageInfo `json:"cursor"`
+	Node   *Message `json:"node"`
+	Cursor string   `json:"cursor"`
 }
 
 type OpeningBalance struct {
@@ -685,7 +682,6 @@ type OrgLocation struct {
 	CountryCode *string `json:"country_code"`
 }
 
-// Organisations (companies) in the ROAVA universe
 type Organisation struct {
 	ID          string         `json:"id"`
 	Name        *string        `json:"name"`
@@ -718,11 +714,11 @@ type OrganisationConnection struct {
 
 type OrganisationEdge struct {
 	Node   *Organisation `json:"node"`
-	Cursor *PageInfo     `json:"cursor"`
+	Cursor string        `json:"cursor"`
 }
 
 type OverdraftInterestSettings struct {
-	InterestRateSettings *InterestRateSettings `json:"interestRateSettings"`
+	InterestRateSettings *InterestRateSettings `json:"interest_rate_settings"`
 }
 
 type OverdraftSetting struct {
@@ -733,9 +729,9 @@ type OverdraftSetting struct {
 }
 
 type OverdraftSettings struct {
-	AllowOverdraft      *bool   `json:"allowOverdraft"`
-	OverdraftExpiryDate *string `json:"overdraftExpiryDate"`
-	OverdraftLimit      *int64  `json:"overdraftLimit"`
+	AllowOverdraft      *bool   `json:"allow_overdraft"`
+	OverdraftExpiryDate *string `json:"overdraft_expiry_date"`
+	OverdraftLimit      *int64  `json:"overdraft_limit"`
 }
 
 type PageInfo struct {
@@ -746,26 +742,27 @@ type PageInfo struct {
 }
 
 type Person struct {
-	ID               string        `json:"id"`
-	Title            *string       `json:"title"`
-	FirstName        string        `json:"first_name"`
-	LastName         string        `json:"last_name"`
-	MiddleName       *string       `json:"middle_name"`
-	Dob              string        `json:"dob"`
-	Employer         *Organisation `json:"employer"`
-	Bvn              *string       `json:"bvn"`
-	Ts               int64         `json:"ts"`
-	CountryResidence *string       `json:"country_residence"`
-	Nationality      []*string     `json:"nationality"`
-	Emails           []*Email      `json:"emails"`
-	Phones           []*Phone      `json:"phones"`
-	Identities       []*Identity   `json:"identities"`
-	Addresses        []*Address    `json:"addresses"`
-	Activities       []*Activity   `json:"activities"`
-	Cdd              *Cdd          `json:"cdd"`
+	ID               string                `json:"id"`
+	Title            *string               `json:"title"`
+	FirstName        string                `json:"first_name"`
+	LastName         string                `json:"last_name"`
+	MiddleName       *string               `json:"middle_name"`
+	Dob              string                `json:"dob"`
+	Status           *PersonStatus         `json:"status"`
+	Employer         *Organisation         `json:"employer"`
+	Bvn              *string               `json:"bvn"`
+	Ts               int64                 `json:"ts"`
+	CountryResidence *string               `json:"country_residence"`
+	Nationality      []*string             `json:"nationality"`
+	Emails           []*Email              `json:"emails"`
+	Phones           []*Phone              `json:"phones"`
+	Identities       []*Identity           `json:"identities"`
+	Addresses        []*Address            `json:"addresses"`
+	Activities       []*Activity           `json:"activities"`
+	Cdd              *Cdd                  `json:"cdd"`
+	OnboardingStatus *OnboardingCheckPoint `json:"onboarding_status"`
 }
 
-func (Person) IsNode()   {}
 func (Person) IsEntity() {}
 
 type PersonConnection struct {
@@ -800,7 +797,7 @@ type Phone struct {
 func (Phone) IsVerifiable() {}
 
 type Product struct {
-	ID             *string         `json:"id"`
+	ID             string          `json:"id"`
 	Identification *string         `json:"identification"`
 	Scheme         *string         `json:"scheme"`
 	Ts             *int64          `json:"ts"`
@@ -841,8 +838,8 @@ type ProductDetails struct {
 }
 
 type ProductEdge struct {
-	Node   *Product  `json:"node"`
-	Cursor *PageInfo `json:"cursor"`
+	Node   *Product `json:"node"`
+	Cursor string   `json:"cursor"`
 }
 
 type ProductFees struct {
@@ -873,20 +870,44 @@ type ProductSetting struct {
 }
 
 type ProductTemplates struct {
-	CreationDate     *string `json:"creationDate"`
-	EncodedKey       *string `json:"encodedKey"`
-	LastModifiedDate *string `json:"lastModifiedDate"`
+	CreationDate     *string `json:"creation_date"`
+	EncodedKey       *string `json:"encoded_key"`
+	LastModifiedDate *string `json:"last_modified_date"`
 	Name             *string `json:"name"`
 	Type             *string `json:"type"`
 }
 
+type Proof struct {
+	ID           string              `json:"id"`
+	Type         ProofType           `json:"type"`
+	Data         string              `json:"data"`
+	Review       *ReportReviewStatus `json:"review"`
+	Organisation *Organisation       `json:"organisation"`
+	Status       State               `json:"status"`
+	Ts           *int64              `json:"ts"`
+}
+
+func (Proof) IsValidationData() {}
+
+type ProofConnection struct {
+	Edges      []*ProofEdge `json:"edges"`
+	Nodes      []*Proof     `json:"nodes"`
+	PageInfo   *PageInfo    `json:"pageInfo"`
+	TotalCount *int64       `json:"totalCount"`
+}
+
+type ProofEdge struct {
+	Node   *Proof `json:"node"`
+	Cursor string `json:"cursor"`
+}
+
 type Quote struct {
-	ID        *string `json:"id"`
-	HasExpiry *bool   `json:"has_expiry"`
-	Expires   *int64  `json:"expires"`
-	Ts        *int64  `json:"ts"`
-	Fee       *Fee    `json:"fee"`
-	Fx        *Fx     `json:"fx"`
+	ID        string `json:"id"`
+	HasExpiry *bool  `json:"has_expiry"`
+	Expires   *int64 `json:"expires"`
+	Ts        *int64 `json:"ts"`
+	Fee       *Fee   `json:"fee"`
+	Fx        *Fx    `json:"fx"`
 }
 
 type QuoteConnection struct {
@@ -897,8 +918,8 @@ type QuoteConnection struct {
 }
 
 type QuoteEdge struct {
-	Node   *Quote    `json:"node"`
-	Cursor *PageInfo `json:"cursor"`
+	Node   *Quote `json:"node"`
+	Cursor string `json:"cursor"`
 }
 
 type RateSetting struct {
@@ -919,6 +940,32 @@ type RateTiers struct {
 	InterestRate  *int64  `json:"interest_rate"`
 }
 
+type Report struct {
+	ID           string              `json:"id"`
+	Data         string              `json:"data"`
+	Status       State               `json:"status"`
+	Organisation *Organisation       `json:"organisation"`
+	Ts           *int64              `json:"ts"`
+	Review       *ReportReviewStatus `json:"review"`
+}
+
+type ReportConnection struct {
+	Edges      []*ReportEdge `json:"edges"`
+	Nodes      []*Report     `json:"nodes"`
+	PageInfo   *PageInfo     `json:"pageInfo"`
+	TotalCount *int64        `json:"totalCount"`
+}
+
+type ReportEdge struct {
+	Node   *Report `json:"node"`
+	Cursor string  `json:"cursor"`
+}
+
+type ReportReviewStatus struct {
+	Resubmit *bool   `json:"resubmit"`
+	Message  *string `json:"message"`
+}
+
 type ReportReviewStatusInput struct {
 	Resubmit *bool   `json:"resubmit"`
 	Message  *string `json:"message"`
@@ -934,11 +981,14 @@ type Response struct {
 func (Response) IsGraphQLResponse() {}
 
 type Screen struct {
-	ID           *string `json:"id"`
-	Data         string  `json:"data"`
-	Organisation *string `json:"organisation"`
-	Ts           *int64  `json:"ts"`
+	ID           string        `json:"id"`
+	Data         string        `json:"data"`
+	Organisation *Organisation `json:"organisation"`
+	Status       State         `json:"status"`
+	Ts           *int64        `json:"ts"`
 }
+
+func (Screen) IsValidationData() {}
 
 type ScreenConnection struct {
 	Edges      []*ScreenEdge `json:"edges"`
@@ -948,8 +998,8 @@ type ScreenConnection struct {
 }
 
 type ScreenEdge struct {
-	Node   *Screen   `json:"node"`
-	Cursor *PageInfo `json:"cursor"`
+	Node   *Screen `json:"node"`
+	Cursor string  `json:"cursor"`
 }
 
 type Social struct {
@@ -973,7 +1023,7 @@ type SubmitProofInput struct {
 }
 
 type Tag struct {
-	ID   *string `json:"id"`
+	ID   string  `json:"id"`
 	Name *string `json:"name"`
 	Ts   *int64  `json:"ts"`
 }
@@ -986,12 +1036,12 @@ type TagConnection struct {
 }
 
 type TagEdge struct {
-	Node   *Tag      `json:"node"`
-	Cursor *PageInfo `json:"cursor"`
+	Node   *Tag   `json:"node"`
+	Cursor string `json:"cursor"`
 }
 
 type Task struct {
-	ID       *string            `json:"id"`
+	ID       string             `json:"id"`
 	Reporter *Person            `json:"reporter"`
 	Assignee *Person            `json:"assignee"`
 	Approver *Person            `json:"approver"`
@@ -1012,12 +1062,12 @@ type TaskConnection struct {
 }
 
 type TaskEdge struct {
-	Node   *Task     `json:"node"`
-	Cursor *PageInfo `json:"cursor"`
+	Node   *Task  `json:"node"`
+	Cursor string `json:"cursor"`
 }
 
 type Transaction struct {
-	ID              *string          `json:"id"`
+	ID              string           `json:"id"`
 	Account         *string          `json:"account"`
 	Ts              *int64           `json:"ts"`
 	TransactionData *TransactionData `json:"transaction_data"`
@@ -1031,32 +1081,55 @@ type TransactionConnection struct {
 }
 
 type TransactionData struct {
+	ID               string           `json:"id"`
 	Amount           *int64           `json:"amount"`
-	BookingDate      *string          `json:"bookingDate"`
-	CreationDate     *string          `json:"creationDate"`
-	CurrencyCode     *string          `json:"currencyCode"`
-	EncodedKey       *string          `json:"encodedKey"`
-	ExternalID       *string          `json:"externalId"`
-	ID               *string          `json:"id"`
+	BookingDate      *string          `json:"booking_date"`
+	CreationDate     *string          `json:"creation_date"`
+	CurrencyCode     *string          `json:"currency_code"`
+	EncodedKey       *string          `json:"encoded_key"`
+	ExternalID       *string          `json:"external_id"`
 	Notes            *string          `json:"notes"`
-	ParentAccountKey *string          `json:"parentAccountKey"`
-	PaymentOrderID   *string          `json:"paymentOrderId"`
+	ParentAccountKey *string          `json:"parent_account_key"`
+	PaymentOrderID   *string          `json:"payment_order_id"`
 	Type             *string          `json:"type"`
-	UserKey          *string          `json:"userKey"`
-	ValueDate        *string          `json:"valueDate"`
-	TransferDetails  *TransferDetails `json:"transferDetails"`
+	UserKey          *string          `json:"user_key"`
+	ValueDate        *string          `json:"value_date"`
+	TransferDetails  *TransferDetails `json:"transfer_details"`
 	Fees             []*string        `json:"fees"`
-	AffectedAmounts  *AffectedAmounts `json:"affectedAmounts"`
-	AccountBalances  *AccountBalances `json:"accountBalances"`
+	AffectedAmounts  *AffectedAmounts `json:"affected_amounts"`
+	AccountBalances  *AccountBalances `json:"account_balances"`
 }
 
 type TransactionEdge struct {
 	Node   *Transaction `json:"node"`
-	Cursor *PageInfo    `json:"cursor"`
+	Cursor string       `json:"cursor"`
 }
 
 type TransferDetails struct {
-	LinkedLoanTransactionKey *string `json:"linkedLoanTransactionKey"`
+	LinkedLoanTransactionKey *string `json:"linked_loan_transaction_key"`
+}
+
+type Validation struct {
+	ID             string         `json:"id"`
+	ValidationType ValidationType `json:"validation_type"`
+	Applicant      Entity         `json:"applicant"`
+	Data           ValidationData `json:"data"`
+	Organisation   *Organisation  `json:"organisation"`
+	Status         State          `json:"status"`
+	Approved       *bool          `json:"approved"`
+	Ts             *int64         `json:"ts"`
+}
+
+type ValidationConnection struct {
+	Edges      []*ValidationEdge `json:"edges"`
+	Nodes      []*Validation     `json:"nodes"`
+	PageInfo   *PageInfo         `json:"pageInfo"`
+	TotalCount *int64            `json:"totalCount"`
+}
+
+type ValidationEdge struct {
+	Node   *Validation `json:"node"`
+	Cursor string      `json:"cursor"`
 }
 
 type VariableFee struct {
@@ -1084,7 +1157,7 @@ type VerificationConnection struct {
 
 type VerificationEdge struct {
 	Node   *Verification `json:"node"`
-	Cursor *PageInfo     `json:"cursor"`
+	Cursor string        `json:"cursor"`
 }
 
 type ContentType string
@@ -1093,6 +1166,9 @@ const (
 	ContentTypeArticle      ContentType = "ARTICLE"
 	ContentTypePost         ContentType = "POST"
 	ContentTypeComment      ContentType = "COMMENT"
+	ContentTypeDocument     ContentType = "DOCUMENT"
+	ContentTypeVideo        ContentType = "VIDEO"
+	ContentTypePhoto        ContentType = "PHOTO"
 	ContentTypeTermsGeneral ContentType = "TERMS_GENERAL"
 	ContentTypeTermsAccount ContentType = "TERMS_ACCOUNT"
 	ContentTypeTermsFee     ContentType = "TERMS_FEE"
@@ -1103,6 +1179,9 @@ var AllContentType = []ContentType{
 	ContentTypeArticle,
 	ContentTypePost,
 	ContentTypeComment,
+	ContentTypeDocument,
+	ContentTypeVideo,
+	ContentTypePhoto,
 	ContentTypeTermsGeneral,
 	ContentTypeTermsAccount,
 	ContentTypeTermsFee,
@@ -1111,7 +1190,7 @@ var AllContentType = []ContentType{
 
 func (e ContentType) IsValid() bool {
 	switch e {
-	case ContentTypeArticle, ContentTypePost, ContentTypeComment, ContentTypeTermsGeneral, ContentTypeTermsAccount, ContentTypeTermsFee, ContentTypePrivacy:
+	case ContentTypeArticle, ContentTypePost, ContentTypeComment, ContentTypeDocument, ContentTypeVideo, ContentTypePhoto, ContentTypeTermsGeneral, ContentTypeTermsAccount, ContentTypeTermsFee, ContentTypePrivacy:
 		return true
 	}
 	return false
@@ -1312,6 +1391,53 @@ func (e OnboardingCheckPoint) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+type PersonStatus string
+
+const (
+	PersonStatusActive    PersonStatus = "ACTIVE"
+	PersonStatusInactive  PersonStatus = "INACTIVE"
+	PersonStatusExited    PersonStatus = "EXITED"
+	PersonStatusBlacklist PersonStatus = "BLACKLIST"
+	PersonStatusRejected  PersonStatus = "REJECTED"
+)
+
+var AllPersonStatus = []PersonStatus{
+	PersonStatusActive,
+	PersonStatusInactive,
+	PersonStatusExited,
+	PersonStatusBlacklist,
+	PersonStatusRejected,
+}
+
+func (e PersonStatus) IsValid() bool {
+	switch e {
+	case PersonStatusActive, PersonStatusInactive, PersonStatusExited, PersonStatusBlacklist, PersonStatusRejected:
+		return true
+	}
+	return false
+}
+
+func (e PersonStatus) String() string {
+	return string(e)
+}
+
+func (e *PersonStatus) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = PersonStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid PersonStatus", str)
+	}
+	return nil
+}
+
+func (e PersonStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 type ProofType string
 
 const (
@@ -1403,6 +1529,49 @@ func (e *State) UnmarshalGQL(v interface{}) error {
 }
 
 func (e State) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type ValidationType string
+
+const (
+	ValidationTypeCheck  ValidationType = "CHECK"
+	ValidationTypeScreen ValidationType = "SCREEN"
+	ValidationTypeProof  ValidationType = "PROOF"
+)
+
+var AllValidationType = []ValidationType{
+	ValidationTypeCheck,
+	ValidationTypeScreen,
+	ValidationTypeProof,
+}
+
+func (e ValidationType) IsValid() bool {
+	switch e {
+	case ValidationTypeCheck, ValidationTypeScreen, ValidationTypeProof:
+		return true
+	}
+	return false
+}
+
+func (e ValidationType) String() string {
+	return string(e)
+}
+
+func (e *ValidationType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ValidationType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ValidationType", str)
+	}
+	return nil
+}
+
+func (e ValidationType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

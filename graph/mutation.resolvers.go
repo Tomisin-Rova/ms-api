@@ -129,7 +129,6 @@ func (r *mutationResolver) Register(ctx context.Context, person types.PersonInpu
 	for _, id := range res.Identities {
 		identities = append(identities, &types.Identity{
 			ID:             id.Id,
-			Owner:          id.Owner,
 			Nickname:       &id.Nickname,
 			Active:         &id.Active,
 			Authentication: &id.Authentication,
