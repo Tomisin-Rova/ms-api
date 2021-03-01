@@ -26,4 +26,5 @@ type Mutation {
     Customer accepts an array of documents displayed to them during onboarding
     """
     acceptTerms(documents: [ID]!): Response!
+    createTransactionPassword(password: String!): Response!
 }
