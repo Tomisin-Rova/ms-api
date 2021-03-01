@@ -409,9 +409,10 @@ func (r *mutationResolver) SubmitProof(ctx context.Context, proof types.SubmitPr
 
 	// Get tokens
 	response, err := r.onBoardingService.SubmitProof(ctx, &onboardingService.SubmitProofRequest{
-		Owner: claims.PersonId,
-		Type:  string(proof.Type),
-		Data:  proof.Data,
+		Owner:  claims.PersonId,
+		Type:   proof.Type.String(),
+		Data:   proof.Data,
+		Status: proof.Status.String(),
 		Review: &onboardingService.Review{
 			Resubmit: *proof.Review.Resubmit,
 			Message:  *proof.Review.Message,

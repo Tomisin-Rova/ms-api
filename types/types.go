@@ -968,7 +968,7 @@ type SubmitProofInput struct {
 	Type         ProofType                `json:"type"`
 	Data         string                   `json:"data"`
 	Organisation string                   `json:"organisation"`
-	Status       string                   `json:"status"`
+	Status       State                    `json:"status"`
 	Review       *ReportReviewStatusInput `json:"review"`
 }
 

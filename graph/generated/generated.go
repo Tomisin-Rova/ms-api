@@ -7806,7 +7806,7 @@ input SubmitProofInput {
   type: ProofType!
   data: JSON!
   organisation: String!
-  status: String!
+  status: State!
   review: ReportReviewStatusInput!
 }
 
@@ -35132,7 +35132,7 @@ func (ec *executionContext) unmarshalInputSubmitProofInput(ctx context.Context, 
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
-			it.Status, err = ec.unmarshalNString2string(ctx, v)
+			it.Status, err = ec.unmarshalNState2msᚗapiᚋtypesᚐState(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -43279,6 +43279,16 @@ func (ec *executionContext) marshalNScreenEdge2ᚖmsᚗapiᚋtypesᚐScreenEdge(
 		return graphql.Null
 	}
 	return ec._ScreenEdge(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNState2msᚗapiᚋtypesᚐState(ctx context.Context, v interface{}) (types.State, error) {
+	var res types.State
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNState2msᚗapiᚋtypesᚐState(ctx context.Context, sel ast.SelectionSet, v types.State) graphql.Marshaler {
+	return v
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {

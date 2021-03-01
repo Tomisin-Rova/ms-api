@@ -1151,7 +1151,7 @@ input SubmitProofInput {
   type: ProofType!
   data: JSON!
   organisation: String!
-  status: String!
+  status: State!
   review: ReportReviewStatusInput!
 }
 
