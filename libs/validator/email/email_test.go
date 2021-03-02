@@ -1,8 +1,9 @@
 package emailvalidator
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestValidateEmail(t *testing.T) {
@@ -16,7 +17,7 @@ func TestValidateEmail(t *testing.T) {
 		{email: "@bar.com", err: ErrInvalidEmail},
 	}
 	for _, c := range cases {
-		err := Validate(c.email)
+		_, err := Validate(c.email)
 		assert.Equal(t, c.err, err)
 	}
 }

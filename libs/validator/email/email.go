@@ -1,9 +1,10 @@
 package emailvalidator
 
 import (
-	errors2 "github.com/roava/zebra/errors"
 	"regexp"
 	"strings"
+
+	errors2 "github.com/roava/zebra/errors"
 )
 
 var ErrInvalidEmail = errors2.NewTerror(
@@ -12,26 +13,26 @@ var ErrInvalidEmail = errors2.NewTerror(
 var userRegexp = regexp.MustCompile("^[a-zA-Z0-9!#$%&'*+/=?^_`{|}~.-]+$")
 var hostRegexp = regexp.MustCompile(`^[^\s]+\.[^\s]+$`)
 
-func Validate(email string) error {
+func Validate(email string) (string, error) {
 	email = strings.TrimSpace(email)
 	if len(email) < 6 || len(email) > 254 {
-		return ErrInvalidEmail
+		return "", ErrInvalidEmail
 	}
 
 	at := strings.LastIndex(email, "@")
 	if at <= 0 || at > len(email)-3 {
-		return ErrInvalidEmail
+		return "", ErrInvalidEmail
 	}
 
 	user := email[:at]
 	host := email[at+1:]
 
 	if len(user) > 64 {
-		return ErrInvalidEmail
+		return "", ErrInvalidEmail
 	}
 
 	if !userRegexp.MatchString(user) || !hostRegexp.MatchString(host) {
-		return ErrInvalidEmail
+		return "", ErrInvalidEmail
 	}
-	return nil
+	return strings.ToLower(email), nil
 }
