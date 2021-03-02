@@ -6,6 +6,7 @@ package graph
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"go.uber.org/zap"
 	"ms.api/graph/generated"
@@ -68,7 +69,7 @@ func (r *mutationResolver) Signup(ctx context.Context, token string, email strin
 	}
 
 	result, err := r.onBoardingService.CreatePerson(ctx, &onboardingService.CreatePersonRequest{
-		Email:    email,
+		Email:    strings.ToLower(email),
 		Passcode: passcode,
 		Token:    token,
 	})
