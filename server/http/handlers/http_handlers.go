@@ -2,8 +2,9 @@ package handlers
 
 import (
 	"context"
-	rerrors "ms.api/libs/errors"
 	"net/http"
+
+	rerrors "ms.api/libs/errors"
 
 	emailvalidator "ms.api/libs/validator/email"
 	"ms.api/protos/pb/onboardingService"
@@ -23,7 +24,8 @@ func New(svc onboardingService.OnBoardingServiceClient, logger *zap.Logger) *Htt
 func (handler *HttpHandler) VerifyMagicLinkHandler(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 	email, verificationToken := q.Get("email"), q.Get("verificationToken")
-	if err := emailvalidator.Validate(email); err != nil {
+	_, err := emailvalidator.Validate(email)
+	if err != nil {
 		handler.logger.Error("invalid email supplied",
 			zap.Error(err),
 			zap.String("email", email),

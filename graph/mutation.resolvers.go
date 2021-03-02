@@ -59,7 +59,8 @@ func (r *mutationResolver) ConfirmPhone(ctx context.Context, token string, code 
 }
 
 func (r *mutationResolver) Signup(ctx context.Context, token string, email string, passcode string) (*types.AuthResponse, error) {
-	if err := emailvalidator.Validate(email); err != nil {
+	newEmail, err := emailvalidator.Validate(email)
+	if err != nil {
 		return nil, err
 	}
 	// Validate passCode
@@ -68,7 +69,7 @@ func (r *mutationResolver) Signup(ctx context.Context, token string, email strin
 	}
 
 	result, err := r.onBoardingService.CreatePerson(ctx, &onboardingService.CreatePersonRequest{
-		Email:    email,
+		Email:    newEmail,
 		Passcode: passcode,
 		Token:    token,
 	})
@@ -230,13 +231,14 @@ func (r *mutationResolver) ResendEmailMagicLInk(ctx context.Context, email strin
 }
 
 func (r *mutationResolver) Login(ctx context.Context, credentials types.AuthInput) (*types.AuthResponse, error) {
-	if err := emailvalidator.Validate(credentials.Email); err != nil {
+	newEmail, err := emailvalidator.Validate(credentials.Email)
+	if err != nil {
 		r.logger.Info("invalid email supplied", zap.String("email", credentials.Email))
 		return nil, err
 	}
 	// TODO: change authService.LoginRequest{}.Tokens to slice datatype
 	req := &authService.LoginRequest{
-		Email:    credentials.Email,
+		Email:    newEmail,
 		Passcode: credentials.Passcode,
 		Device: &protoTypes.Device{
 			Os:         credentials.Device.Os,
@@ -307,7 +309,8 @@ func (r *mutationResolver) UpdateDeviceToken(ctx context.Context, token []*types
 }
 
 func (r *mutationResolver) ResetPasscode(ctx context.Context, token string, email string, passcode string) (*types.Response, error) {
-	if err := emailvalidator.Validate(email); err != nil {
+	newEmail, err := emailvalidator.Validate(email)
+	if err != nil {
 		r.logger.Info("invalid email supplied", zap.String("email", email))
 		return nil, err
 	}
@@ -317,7 +320,7 @@ func (r *mutationResolver) ResetPasscode(ctx context.Context, token string, emai
 	}
 
 	req := &authService.PasswordResetRequest{
-		Email:             email,
+		Email:             newEmail,
 		NewPassword:       passcode,
 		VerificationToken: token,
 	}
@@ -333,12 +336,13 @@ func (r *mutationResolver) ResetPasscode(ctx context.Context, token string, emai
 }
 
 func (r *mutationResolver) RequestPasscodeReset(ctx context.Context, email string, device types.DeviceInput) (*types.Response, error) {
-	if err := emailvalidator.Validate(email); err != nil {
+	newEmail, err := emailvalidator.Validate(email)
+	if err != nil {
 		r.logger.Info("invalid email supplied", zap.String("email", email))
 		return nil, err
 	}
 	req := &authService.PasswordResetUserDetails{
-		Email: email,
+		Email: newEmail,
 		Device: &protoTypes.Device{
 			Os:         device.Os,
 			Brand:      device.Brand,
@@ -356,12 +360,13 @@ func (r *mutationResolver) RequestPasscodeReset(ctx context.Context, email strin
 }
 
 func (r *mutationResolver) ConfirmPasscodeResetOtp(ctx context.Context, email string, otp string) (*types.Response, error) {
-	if err := emailvalidator.Validate(email); err != nil {
+	newEmail, err := emailvalidator.Validate(email)
+	if err != nil {
 		r.logger.Info("invalid email supplied", zap.String("email", email))
 		return nil, err
 	}
 	req := &authService.PasswordResetOtpRequest{
-		Email: email,
+		Email: newEmail,
 		Code:  otp,
 	}
 	resp, err := r.authService.ConfirmPasswordResetOtp(ctx, req)

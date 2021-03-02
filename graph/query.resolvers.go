@@ -127,10 +127,12 @@ func (r *queryResolver) Identities(ctx context.Context) ([]*types.Identity, erro
 }
 
 func (r *queryResolver) CheckEmail(ctx context.Context, email string) (*bool, error) {
-	if err := emailvalidator.Validate(email); err != nil {
+	newEmail, err := emailvalidator.Validate(email)
+	if err != nil {
+		r.logger.Info("invalid email supplied", zap.String("email", email))
 		return nil, err
 	}
-	resp, err := r.onBoardingService.CheckEmailExistence(ctx, &onboardingService.CheckEmailExistenceRequest{Email: email})
+	resp, err := r.onBoardingService.CheckEmailExistence(ctx, &onboardingService.CheckEmailExistenceRequest{Email: newEmail})
 	if err != nil {
 		r.logger.Error("error calling onboardingService.checkEmailExistence()", zap.Error(err))
 		return nil, err
