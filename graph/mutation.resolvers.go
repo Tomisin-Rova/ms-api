@@ -223,7 +223,24 @@ func (r *mutationResolver) VerifyEmail(ctx context.Context, email string, code s
 }
 
 func (r *mutationResolver) ResendOtp(ctx context.Context, phone string) (*types.Response, error) {
-	panic(fmt.Errorf("not implemented"))
+	if err := phonenumbervalidator.ValidatePhoneNumber(phone); err != nil {
+		r.logger.Error("failed to validate phone number",
+			zap.Error(err),
+			zap.String("phone", phone),
+		)
+		return nil, err
+	}
+
+	result, err := r.onBoardingService.ResendOtp(ctx,
+		&onboardingService.ResendOtpRequest{
+			Phone: phone,
+		},
+	)
+	if err != nil {
+		r.logger.Error("error calling onBoardingService.ResendOtp()", zap.Error(err))
+		return nil, err
+	}
+	return &types.Response{Message: result.Message, Success: true, Token: &result.Token}, nil
 }
 
 func (r *mutationResolver) ResendEmailMagicLInk(ctx context.Context, email string) (*types.Response, error) {
