@@ -2168,13 +2168,9 @@ type TransferDetails {
 
 input SubmitProofInput {
   type: ProofType!
-  data: JSON!
-  organisation: String!
-  status: State!
-  review: ReportReviewStatusInput!
+  # base64 string of the image captured
+  data: String!
+  # status = PENDING as default and is optional
+  status: State
 }
 
-input ReportReviewStatusInput {
-  resubmit: Boolean
-  message: String
-}
