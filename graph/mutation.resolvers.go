@@ -428,23 +428,11 @@ func (r *mutationResolver) SubmitProof(ctx context.Context, proof types.SubmitPr
 		return nil, ErrUnAuthenticated
 	}
 
-	review := &onboardingService.Review{}
-
-	// Check review
-	if proof.Review.Resubmit != nil {
-		review.Resubmit = *proof.Review.Resubmit
-	}
-
-	if proof.Review.Message != nil {
-		review.Message = *proof.Review.Message
-	}
-
 	response, err := r.onBoardingService.SubmitProof(ctx, &onboardingService.SubmitProofRequest{
 		Owner:  claims.PersonId,
 		Type:   proof.Type.String(),
 		Data:   proof.Data,
 		Status: proof.Status.String(),
-		Review: review,
 	})
 	if err != nil {
 		r.logger.Error("onBoardingService.SubmitProof()", zap.Error(err))

@@ -9490,16 +9490,12 @@ type TransferDetails {
 
 input SubmitProofInput {
   type: ProofType!
-  data: JSON!
-  organisation: String!
-  status: State!
-  review: ReportReviewStatusInput!
+  # base64 string of the image captured
+  data: String!
+  # status = PENDING as default and is optional
+  status: State
 }
 
-input ReportReviewStatusInput {
-  resubmit: Boolean
-  message: String
-}
 `, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
@@ -38195,34 +38191,6 @@ func (ec *executionContext) unmarshalInputPersonInput(ctx context.Context, obj i
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputReportReviewStatusInput(ctx context.Context, obj interface{}) (types.ReportReviewStatusInput, error) {
-	var it types.ReportReviewStatusInput
-	var asMap = obj.(map[string]interface{})
-
-	for k, v := range asMap {
-		switch k {
-		case "resubmit":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("resubmit"))
-			it.Resubmit, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "message":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("message"))
-			it.Message, err = ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		}
-	}
-
-	return it, nil
-}
-
 func (ec *executionContext) unmarshalInputSubmitProofInput(ctx context.Context, obj interface{}) (types.SubmitProofInput, error) {
 	var it types.SubmitProofInput
 	var asMap = obj.(map[string]interface{})
@@ -38241,15 +38209,7 @@ func (ec *executionContext) unmarshalInputSubmitProofInput(ctx context.Context, 
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("data"))
-			it.Data, err = ec.unmarshalNJSON2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "organisation":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("organisation"))
-			it.Organisation, err = ec.unmarshalNString2string(ctx, v)
+			it.Data, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -38257,15 +38217,7 @@ func (ec *executionContext) unmarshalInputSubmitProofInput(ctx context.Context, 
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
-			it.Status, err = ec.unmarshalNState2msᚗapiᚋtypesᚐState(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "review":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("review"))
-			it.Review, err = ec.unmarshalNReportReviewStatusInput2ᚖmsᚗapiᚋtypesᚐReportReviewStatusInput(ctx, v)
+			it.Status, err = ec.unmarshalOState2ᚖmsᚗapiᚋtypesᚐState(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -46758,11 +46710,6 @@ func (ec *executionContext) marshalNReportEdge2ᚖmsᚗapiᚋtypesᚐReportEdge(
 	return ec._ReportEdge(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNReportReviewStatusInput2ᚖmsᚗapiᚋtypesᚐReportReviewStatusInput(ctx context.Context, v interface{}) (*types.ReportReviewStatusInput, error) {
-	res, err := ec.unmarshalInputReportReviewStatusInput(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
 func (ec *executionContext) marshalNResponse2msᚗapiᚋtypesᚐResponse(ctx context.Context, sel ast.SelectionSet, v types.Response) graphql.Marshaler {
 	return ec._Response(ctx, sel, &v)
 }
@@ -48591,6 +48538,22 @@ func (ec *executionContext) marshalOSocial2ᚖmsᚗapiᚋtypesᚐSocial(ctx cont
 		return graphql.Null
 	}
 	return ec._Social(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOState2ᚖmsᚗapiᚋtypesᚐState(ctx context.Context, v interface{}) (*types.State, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(types.State)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOState2ᚖmsᚗapiᚋtypesᚐState(ctx context.Context, sel ast.SelectionSet, v *types.State) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {

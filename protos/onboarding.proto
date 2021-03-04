@@ -151,14 +151,7 @@ message SubmitProofRequest {
   string owner = 1;
   string type = 2;
   string data = 3;
-  Review review = 4;
-  string organisation = 5;
   string status = 6;
-}
-
-message Review {
-  bool resubmit = 1;
-  string message = 2;
 }
 
 service OnBoardingService{
