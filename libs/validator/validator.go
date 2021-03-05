@@ -19,7 +19,7 @@ func ValidateTransactionPassword(password string) error {
 	if ok := alphaNumericRegex.MatchString(password); !ok {
 		return ErrInvalidTransactionPassword
 	}
-	if len(password) != 8 {
+	if len(password) < 8 {
 		return ErrInvalidTransactionPassword
 	}
 	return nil
