@@ -16,6 +16,7 @@ func TestValidateTransactionPassword(t *testing.T) {
 		{password: "abcdabc1", err: nil},
 		{password: "a1234567", err: nil},
 		{password: "1234567a", err: nil},
+		{password: "1111111111A", err: nil},
 		{password: "abcd123", err: ErrInvalidTransactionPassword},
 		{password: "abcd", err: ErrInvalidTransactionPassword},
 		{password: "abcdefgh", err: ErrInvalidTransactionPassword},
