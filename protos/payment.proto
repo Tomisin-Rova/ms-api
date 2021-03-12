@@ -1,0 +1,19 @@
+syntax = "proto3";
+package payment;
+option go_package = "ms.api/protos/pb/paymentService";
+
+// Import types
+import "types.proto";
+
+message TransferRequest {
+  string accountNumber = 1;
+  string beneficiaryAccountNumber = 2;
+  int64 amount = 3;
+  string notes = 4;
+  string personId = 5;
+  string transactionPin = 6;
+}
+
+service PaymentService {
+  rpc MakeTransfer(TransferRequest) returns (types.Response) {}
+}

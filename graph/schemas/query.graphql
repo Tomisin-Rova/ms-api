@@ -1,0 +1,428 @@
+type Query {
+  # fetch person using JWT claims
+  me: Person
+  # fetch person by given ID
+  person(
+    # Unique roava ulid for the data record
+    id: ID!
+  ): Person
+  # fetch a list of people
+  people(
+    # Keywords used to filter the persons
+    keywords: String,
+    # Returns the first n elements from the list.
+    first: Int,
+    # Returns the elements in the list that come after the specified cursor.
+    after: String,
+    # Returns the last n elements from the list.
+    last: Int,
+    # Returns the elements in the list that come before the specified cursor.
+    before: String
+  ): PersonConnection
+  # fetch an identity by ID
+  identity(
+    # The Ulid field for the identity
+    id: ID!
+  ): Identity
+  # fetch a list of identities
+  identities: [Identity]
+  # query to check if an email already exists in the database
+  checkEmail(
+    # Email to be checked
+    email: String!
+  ): Boolean
+  # fetch an address by ID
+  address(
+    # The Ulid field for the address
+    id: ID!
+  ): Address
+  # fetch a list of addresses
+  addresses: AddressConnection
+  # fetch an address by text in lookup services
+  addressLookup(
+    # Text to be used in the address lookup
+    text: String,
+    # Returns the first n elements from the list.
+    first: Int,
+    # Returns the elements in the list that come after the specified cursor.
+    after: String,
+    # Returns the last n elements from the list.
+    last: Int,
+    # Returns the elements in the list that come before the specified cursor.
+    before: String
+  ): AddressConnection
+  # fetch a device by its unique identifier
+  device(
+    # Unique id captured from the device itself e.g. the device_id
+    identifier: String!
+  ): Device
+  # fetch a list of devices
+  devices(
+    # Returns the first n elements from the list.
+    first: Int,
+    # Returns the elements in the list that come after the specified cursor.
+    after: String,
+    # Returns the last n elements from the list.
+    last: Int,
+    # Returns the elements in the list that come before the specified cursor.
+    before: String
+  ): DeviceConnection
+  # fetch a list of session authentications
+  auths: [Auth]
+  # fetch an organisation by ID
+  organisation(
+    # The Ulid field for the organisation
+    id: ID!
+  ): Organisation
+  # fetch a list of organisations
+  organisations(
+    # Returns the first n elements from the list.
+    first: Int,
+    # Returns the elements in the list that come after the specified cursor.
+    after: String,
+    # Returns the last n elements from the list.
+    last: Int,
+    # Returns the elements in the list that come before the specified cursor.
+    before: String
+  ): OrganisationConnection
+  # fetch a verification record by ID
+  verification(
+    # OTP code or email magic link
+    code: String!
+  ): Verification
+  # fetch a list of verifications and their state
+  verifications(
+    # Returns the first n elements from the list.
+    first: Int,
+    # Returns the elements in the list that come after the specified cursor.
+    after: String,
+    # Returns the last n elements from the list.
+    last: Int,
+    # Returns the elements in the list that come before the specified cursor.
+    before: String
+  ): VerificationConnection
+  # fetch a country by it's unique ISO 3 alpha country code
+  country(
+    # Refers to Alpha-3 (three letter) codes from ISO 3166-1. These codes are synonymous with World Bank Codes.
+    code: String!
+  ): Country
+  # fetch a list of countries
+  countries(
+    # Returns the first n elements from the list.
+    first: Int,
+    # Returns the elements in the list that come after the specified cursor.
+    after: String,
+    # Returns the last n elements from the list.
+    last: Int,
+    # Returns the elements in the list that come before the specified cursor.
+    before: String
+  ): CountryConnection
+  # fetch a country by it's unique ISO 3 character currency code
+  currency(
+    # 3 letter ISO code for currency
+    code: String!
+  ): Currency
+  # fetch a list of currencies in the ROAVA system including optional argument for supported currencies only
+  currencies(
+    # Boolean to define to filter for supported currencies or not
+    supported: Boolean,
+    # Returns the first n elements from the list.
+    first: Int,
+    # Returns the elements in the list that come after the specified cursor.
+    after: String,
+    # Returns the last n elements from the list.
+    last: Int,
+    # Returns the elements in the list that come before the specified cursor.
+    before: String
+  ): CurrencyConnection
+  # fetch an industry by it's ID
+  industry(
+    # SIC code for an industry or sector
+    code: String!
+  ): Industry
+  # fetch a list of industry sectors an organisation can belong to
+  industries(
+    # Returns the first n elements from the list.
+    first: Int,
+    # Returns the elements in the list that come after the specified cursor.
+    after: String,
+    # Returns the last n elements from the list.
+    last: Int,
+    # Returns the elements in the list that come before the specified cursor.
+    before: String
+  ): IndustryConnection
+  # fetch an activity by it's ID
+  activity(
+    # The Ulid field for the activity
+    id: ID!
+  ): Activity
+  # fetch a list activites (intended reasons for using ROAVA)
+  activities(
+    # Boolean to filter by supported activities or not
+    supported: Boolean
+  ): [Activity!]!
+  # fetch a message by it's ID
+  message(
+    # The Ulid field for the message
+    id: ID!
+  ): Message
+  # fetch a list of messages in the platform
+  messages(
+    # Returns the first n elements from the list.
+    first: Int,
+    # Returns the elements in the list that come after the specified cursor.
+    after: String,
+    # Returns the last n elements from the list.
+    last: Int,
+    # Returns the elements in the list that come before the specified cursor.
+    before: String
+  ): MessageConnection
+  # get an FX/cross-border payment quotes by id
+  quote(
+    # The Ulid field for the quote
+    id: ID!
+  ): Quote
+  # get a list of quotes
+  quotes(
+    # Returns the first n elements from the list.
+    first: Int,
+    # Returns the elements in the list that come after the specified cursor.
+    after: String,
+    # Returns the last n elements from the list.
+    last: Int,
+    # Returns the elements in the list that come before the specified cursor.
+    before: String
+  ): QuoteConnection
+  # fetch price for a currency pair at given time
+  price(pair: String, ts: Int): Fx
+  # fetch list of prices for a currency pair by date descending (newest first)
+  prices(
+    # Returns the first n elements from the list.
+    first: Int,
+    # Returns the elements in the list that come after the specified cursor.
+    after: String,
+    # Returns the last n elements from the list.
+    last: Int,
+    # Returns the elements in the list that come before the specified cursor.
+    before: String
+  ): FxConnection
+  # get a particular tag by it's ID
+  tag(
+    # The Ulid field for the tag
+    id: ID!
+  ): Task
+  # fet a list of tags
+  tags(
+    # Returns the first n elements from the list.
+    first: Int,
+    # Returns the elements in the list that come after the specified cursor.
+    after: String,
+    # Returns the last n elements from the list.
+    last: Int,
+    # Returns the elements in the list that come before the specified cursor.
+    before: String
+  ): TagConnection
+  # fetch a customer's cdd record by id
+  cdd(
+    # The Ulid field for the cdd
+    id: ID!
+  ): CDD
+  # fetch multiple customer cdd records by optional keywords
+  cdds(
+    # Keywords used to filter the cdds
+    keywords: String,
+    # Returns the first n elements from the list.
+    first: Int,
+    # Returns the elements in the list that come after the specified cursor.
+    after: String,
+    # Returns the last n elements from the list.
+    last: Int,
+    # Returns the elements in the list that come before the specified cursor.
+    before: String
+  ): CDDConnection
+  # fetch a validation by validation ID
+  validation(
+    # The Ulid field for the check
+    id: ID!
+  ): Validation
+  # fetch multiple KYC records
+  validations(
+    # Returns the first n elements from the list.
+    first: Int,
+    # Returns the elements in the list that come after the specified cursor.
+    after: String,
+    # Returns the last n elements from the list.
+    last: Int,
+    # Returns the elements in the list that come before the specified cursor.
+    before: String
+  ): ValidationConnection
+  # fetch a customer's KYC check by ID
+  check(
+    # The Ulid field for the check
+    id: ID!
+  ): Check
+  # fetch multiple KYC records
+  checks(
+    # Returns the first n elements from the list.
+    first: Int,
+    # Returns the elements in the list that come after the specified cursor.
+    after: String,
+    # Returns the last n elements from the list.
+    last: Int,
+    # Returns the elements in the list that come before the specified cursor.
+    before: String
+  ): CheckConnection
+  # fetch an AML screening record by ID
+  screen(
+    # The Ulid field for the screen
+    id: ID!
+  ): Screen
+  # fetch multiple AML screening records
+  screens(
+    # Returns the first n elements from the list.
+    first: Int,
+    # Returns the elements in the list that come after the specified cursor.
+    after: String,
+    # Returns the last n elements from the list.
+    last: Int,
+    # Returns the elements in the list that come before the specified cursor.
+    before: String
+  ): ScreenConnection
+  # fetch an onfido document report by ID
+  report(
+    # The Ulid field for the onfido check report
+    id: ID!
+  ): Report
+  # fetch multiple onfido document reports
+  reports(
+    # Returns the first n elements from the list.
+    first: Int,
+    # Returns the elements in the list that come after the specified cursor.
+    after: String,
+    # Returns the last n elements from the list.
+    last: Int,
+    # Returns the elements in the list that come before the specified cursor.
+    before: String
+  ): ReportConnection
+  # fetch an document proof by ID
+  proof(
+    # The Ulid field for the document proof
+    id: ID!
+  ): Proof
+  # fetch multiple document proofs
+  proofs(
+    # Returns the first n elements from the list.
+    first: Int,
+    # Returns the elements in the list that come after the specified cursor.
+    after: String,
+    # Returns the last n elements from the list.
+    last: Int,
+    # Returns the elements in the list that come before the specified cursor.
+    before: String
+  ): ProofConnection
+  # fetch a task representing an onboarding review process workflow
+  task(
+    # The Ulid field for the task
+    id: ID!
+  ): Task
+  # fetch a list of task of onboarding reviews processes & workflows
+  tasks(
+    # Returns the first n elements from the list.
+    first: Int,
+    # Returns the elements in the list that come after the specified cursor.
+    after: String,
+    # Returns the last n elements from the list.
+    last: Int,
+    # Returns the elements in the list that come before the specified cursor.
+    before: String
+  ): TaskConnection
+  # fetch a comment by ID
+  comment(
+    # The Ulid field for the comment
+    id: ID!
+  ): Comment
+  # fetch a list of commments
+  comments(
+    # Returns the first n elements from the list.
+    first: Int,
+    # Returns the elements in the list that come after the specified cursor.
+    after: String,
+    # Returns the last n elements from the list.
+    last: Int,
+    # Returns the elements in the list that come before the specified cursor.
+    before: String
+  ): CommentConnection
+  # fetch a financial product by ID
+  product(
+    # The Ulid field for the product
+    id: ID!
+  ): Product
+  # fetch a list of financial products available to ROAVA customers
+  products(
+    # Returns the first n elements from the list.
+    first: Int,
+    # Returns the elements in the list that come after the specified cursor.
+    after: String,
+    # Returns the last n elements from the list.
+    last: Int,
+    # Returns the elements in the list that come before the specified cursor.
+    before: String
+  ): ProductConnection
+  # fetch a deposit account product by ID
+  account(
+    # The Ulid field for the account
+    id: ID!
+  ): Account
+  # fetch a list of deposit account products
+  accounts(
+    # Returns the first n elements from the list.
+    first: Int,
+    # Returns the elements in the list that come after the specified cursor.
+    after: String,
+    # Returns the last n elements from the list.
+    last: Int,
+    # Returns the elements in the list that come before the specified cursor.
+    before: String
+  ): AccountConnection
+  # fetch an individual transaction by unique ID
+  transaction(
+    # The Ulid field for the transaction
+    id: ID!
+  ): Transaction
+  # fetch a list of account transactions
+  transactions(
+    # Returns the first n elements from the list.
+    first: Int,
+    # Returns the elements in the list that come after the specified cursor.
+    after: String,
+    # Returns the last n elements from the list.
+    last: Int,
+    # Returns the elements in the list that come before the specified cursor.
+    before: String
+  ): TransactionConnection
+  # get an record of an accepted document term by an individual by ID
+  acceptance(
+    # The Ulid field for the acceptance document
+    id: ID!
+  ): Acceptance
+  # get all document acceptances for all customers by ID
+  acceptances(
+    # Returns the first n elements from the list.
+    first: Int,
+    # Returns the elements in the list that come after the specified cursor.
+    after: String,
+    # Returns the last n elements from the list.
+    last: Int,
+    # Returns the elements in the list that come before the specified cursor.
+    before: String
+  ): AcceptanceConnection
+
+  # graphql query root node
+  node(
+    # The unique id of the node
+    id: ID!
+  ): Node
+
+  # Get an Onfido SDK token to capture photo, selfie
+  getOnfidoSDKToken: Response!
+}

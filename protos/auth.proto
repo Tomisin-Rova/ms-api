@@ -1,0 +1,134 @@
+syntax = "proto3";
+package auth;
+option go_package = "ms.api/protos/pb/authService";
+
+// Import types
+import "types.proto";
+
+message LoginRequest {
+  string email = 1;
+  string  passcode = 2;
+  types.Device device = 3;
+}
+
+message LoginResponse {
+  string token = 1;
+  string refreshToken = 2;
+  string registrationCheckpoint = 3;
+}
+
+message ValidateTokenRequest {
+  string token = 1;
+}
+
+message ValidateTokenResponse {
+  string personId = 1;
+  string identityId = 2;
+  string deviceId = 3;
+}
+
+message RefreshTokenRequest {
+  string refreshToken = 1;
+  string identityId = 2;
+  string deviceId = 3;
+  string personId = 4;
+}
+
+message RefreshTokenResponse {
+  string token = 1;
+  string refreshToken = 2;
+}
+
+message PasswordResetUserDetails {
+  string email = 1;
+  types.Device device = 2;
+}
+
+message PasswordResetRequest {
+  string email = 1;
+  string newPassword = 2;
+  string verificationToken = 3;
+}
+
+message PasswordResetOtpRequest {
+  string email = 1;
+  string code = 2;
+}
+
+message PasswordResetOtpResponse {
+  string message = 1;
+  string verificationToken =2;
+}
+
+message GetPersonRequest {
+  string personId = 1;
+  string deviceId = 2;
+  string identityId = 3;
+}
+
+message GetPersonResponse {
+  string personId = 1;
+  repeated types.PhoneNumber PhoneNumber = 2;
+  string title = 3;
+  string firstName = 4;
+  string lastName = 5;
+  string middleName = 6;
+  repeated types.Email email = 7;
+  repeated string nationality = 8;
+  repeated AddressResponse addresses = 9;
+  bool isBiometricLoginEnabled = 11;
+  bool isTransactionPinEnabled = 12;
+  string registrationCheckPoint = 13;
+  string DOB = 14;
+}
+
+message AddressResponse {
+  bool primary = 1;
+  string street = 2;
+  string city = 3;
+  string postCode = 4;
+  string country = 5;
+  string addressType = 6;
+  repeated double coordinate = 7;
+}
+
+message ActivateBioLoginRequest {
+  string deviceId = 2;
+  string identityId = 3;
+}
+
+message ActivateBioLoginResponse {
+  string message = 1;
+  string biometricPasscode = 2;
+}
+
+message DeactivateBioLoginRequest {
+  string deviceId = 2;
+  string identityId = 3;
+}
+
+message AuthResponse {
+  string accessToken = 1;
+  string refreshToken = 2;
+  ApiPerson person = 3;
+}
+
+message ApiPerson {
+  string firstName = 1;
+  string lastName = 2;
+  repeated types.Email emails = 3;
+  bool isEmailActive = 4;
+  bool isBiometricLoginEnabled = 5;
+  bool isTransactionPinEnabled = 6;
+  string registrationCheckPoint = 7;
+}
+
+service AuthService {
+  rpc Login(LoginRequest) returns (AuthResponse) {}
+  rpc ValidateToken(ValidateTokenRequest) returns (ValidateTokenResponse) {}
+  rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse) {}
+  rpc ConfirmPasswordResetDetails(PasswordResetUserDetails) returns (types.Response) {}
+  rpc ConfirmPasswordResetOtp(PasswordResetOtpRequest) returns (PasswordResetOtpResponse) {}
+  rpc ResetPassword(PasswordResetRequest) returns (types.Response) {}
+  rpc GetPerson(GetPersonRequest) returns (GetPersonResponse) {}
+}

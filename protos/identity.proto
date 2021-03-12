@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package identity;
+option go_package = "ms.api/protos/pb/identityService";
+
+// Import types
+import "types.proto";
+
+message void {}
+
+message updateDeviceTokensRequest {
+  string deviceId = 1;
+  string identityId = 2;
+  repeated DeviceTokens tokens = 3;
+}
+
+message DeviceTokens {
+  string type = 1;
+  string Value = 2;
+}
+
+message SuccessResponse {
+  string message = 1;
+}
+
+message CreateTransactionPasswordRequest {
+  string personId = 1;
+  string pin = 2;
+}
+
+service identityService {
+  rpc updateDeviceTokens(updateDeviceTokensRequest) returns (types.Response) {}
+  rpc CreateTransactionPassword(CreateTransactionPasswordRequest) returns (types.Response) {}
+}

@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package cdd;
+option go_package = "ms.api/protos/pb/cddService";
+
+// Import types
+import "types.proto";
+
+message PersonIdRequest {
+  string person_id = 1;
+}
+
+message CddIdRequest {
+  string id = 1;
+}
+
+message Cddsummary {
+  string status = 1;
+  repeated cdd_summary_document documents = 2;
+}
+
+message cdd_summary_document {
+  string name = 1;
+  string status = 2;
+  repeated string reasons = 3;
+}
+
+service CddService{
+  rpc GetCDDSummaryReport(PersonIdRequest) returns(Cddsummary){}
+  rpc GetCDDById(CddIdRequest) returns(types.Cdd){}
+}

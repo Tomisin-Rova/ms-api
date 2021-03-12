@@ -1,0 +1,24 @@
+syntax = "proto3";
+package onfido;
+option go_package = "ms.api/protos/pb/onfidoService";
+
+message void {}
+
+message ApplicantSDKTokenRequest {
+  string applicantId = 1;
+}
+
+message ApplicantSDKTokenResponse {
+  string token = 1;
+}
+
+message OnfidoCheckWebhookRequest {
+  string id = 1;
+  string status = 2;
+  string completed_at = 3;
+}
+
+service OnfidoService {
+  rpc GenerateApplicantSDKToken(ApplicantSDKTokenRequest) returns(ApplicantSDKTokenResponse){}
+  rpc WebhookPush(OnfidoCheckWebhookRequest) returns(void) {}
+}
