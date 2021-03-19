@@ -856,6 +856,12 @@ type ProductFees struct {
 	AccountingRules   []*AccountingRules `json:"accounting_rules"`
 }
 
+type ProductInput struct {
+	ID             string  `json:"id"`
+	Identification *string `json:"identification"`
+	Scheme         *string `json:"scheme"`
+}
+
 type ProductMaturity struct {
 	Unit         *string `json:"unit"`
 	DefaultValue *int64  `json:"default_value"`

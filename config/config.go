@@ -22,7 +22,7 @@ type Secrets struct {
 	OnboardingServiceURL     string        `mapstructure:"ONBOARDING_SERVICE_URL"`
 	VerifyServiceURL         string        `mapstructure:"VERIFY_SERVICE_URL"`
 	AuthServiceURL           string        `mapstructure:"AUTH_SERVICE_URL"`
-	ProductServiceURL        string        `mapstructure:"PRODUCT_SERVICE_URL"`
+	AccountServiceURL        string        `mapstructure:"ACCOUNT_SERVICE_URL"`
 	PayeeServiceURL          string        `mapstructure:"PAYEE_SERVICE_URL"`
 	PersonServiceURL         string        `mapstructure:"PERSON_SERVICE_URL"`
 	PaymentServiceURL        string        `mapstructure:"PAYMENT_SERVICE_URL"`

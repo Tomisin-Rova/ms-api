@@ -12,3 +12,7 @@ func (p PersonEdge) GetCursor() string {
 func (c CDDEdge) GetCursor() string {
 	return c.Cursor
 }
+
+func (ac AccountEdge) GetCursor() string {
+	return ac.Cursor
+}

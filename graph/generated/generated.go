@@ -609,6 +609,7 @@ type ComplexityRoot struct {
 		AcceptTerms               func(childComplexity int, documents []*string) int
 		ConfirmPasscodeResetOtp   func(childComplexity int, email string, otp string) int
 		ConfirmPhone              func(childComplexity int, token string, code string) int
+		CreateAccount             func(childComplexity int, product types.ProductInput) int
 		CreateApplication         func(childComplexity int) int
 		CreatePhone               func(childComplexity int, phone string, device types.DeviceInput) int
 		CreateTransactionPassword func(childComplexity int, password string) int
@@ -1168,6 +1169,7 @@ type MutationResolver interface {
 	AcceptTerms(ctx context.Context, documents []*string) (*types.Response, error)
 	SubmitProof(ctx context.Context, proof types.SubmitProofInput) (*types.Response, error)
 	CreateTransactionPassword(ctx context.Context, password string) (*types.Response, error)
+	CreateAccount(ctx context.Context, product types.ProductInput) (*types.Response, error)
 }
 type QueryResolver interface {
 	Me(ctx context.Context) (*types.Person, error)
@@ -3914,6 +3916,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.ConfirmPhone(childComplexity, args["token"].(string), args["code"].(string)), true
+
+	case "Mutation.createAccount":
+		if e.complexity.Mutation.CreateAccount == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createAccount_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateAccount(childComplexity, args["product"].(types.ProductInput)), true
 
 	case "Mutation.createApplication":
 		if e.complexity.Mutation.CreateApplication == nil {
@@ -6859,35 +6873,37 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 
 var sources = []*ast.Source{
 	{Name: "graph/schemas/mutation.graphql", Input: `type Mutation {
-    # captures the customer phone number to start onboarding
-    createPhone(phone: String!, device: DeviceInput!): Response!
-    # allows customer to confirm their phone number via OTP
-    confirmPhone(token: String!, code: String!): Response!
-    # Creates person's ROAVA login credentials (email, login)
-    signup(token: String!, email: String!, passcode: String!): AuthResponse!
-    # Creates person's ROAVA profile - capturing name, dob, address etc
-    register(person: PersonInput!, address: AddressInput!): Person
-    intendedActivities(activities: [ID!]): Response!
-    createApplication: Response!
-    # verifications
-    verifyEmail(email: String!, code: String!): Response!
-    resendOTP(phone: String!): Response!
-    resendEmailMagicLInk(email: String!): Response!
-    # auth
-    login(credentials: AuthInput!): AuthResponse!
-    refreshToken(token: String!): AuthResponse!
-    updateDeviceToken(token: [DeviceTokenInput]!): Response!
-    resetPasscode(token: String!, email: String!, passcode: String!): Response!
-    requestPasscodeReset(email: String!, device: DeviceInput!):  Response!
-    confirmPasscodeResetOtp(email: String!, otp: String!): Response!
-    # Submit a KYC and AML check for a given customer who has accepted terms & conditions
-    submitApplication: Response!
-    """
-    Customer accepts an array of documents displayed to them during onboarding
-    """
-    acceptTerms(documents: [ID]!): Response!
-    submitProof(proof: SubmitProofInput!): Response!
-    createTransactionPassword(password: String!): Response!
+  # captures the customer phone number to start onboarding
+  createPhone(phone: String!, device: DeviceInput!): Response!
+  # allows customer to confirm their phone number via OTP
+  confirmPhone(token: String!, code: String!): Response!
+  # Creates person's ROAVA login credentials (email, login)
+  signup(token: String!, email: String!, passcode: String!): AuthResponse!
+  # Creates person's ROAVA profile - capturing name, dob, address etc
+  register(person: PersonInput!, address: AddressInput!): Person
+  intendedActivities(activities: [ID!]): Response!
+  createApplication: Response!
+  # verifications
+  verifyEmail(email: String!, code: String!): Response!
+  resendOTP(phone: String!): Response!
+  resendEmailMagicLInk(email: String!): Response!
+  # auth
+  login(credentials: AuthInput!): AuthResponse!
+  refreshToken(token: String!): AuthResponse!
+  updateDeviceToken(token: [DeviceTokenInput]!): Response!
+  resetPasscode(token: String!, email: String!, passcode: String!): Response!
+  requestPasscodeReset(email: String!, device: DeviceInput!): Response!
+  confirmPasscodeResetOtp(email: String!, otp: String!): Response!
+  # Submit a KYC and AML check for a given customer who has accepted terms & conditions
+  submitApplication: Response!
+  """
+  Customer accepts an array of documents displayed to them during onboarding
+  """
+  acceptTerms(documents: [ID]!): Response!
+  submitProof(proof: SubmitProofInput!): Response!
+  createTransactionPassword(password: String!): Response!
+  # create new deposit account
+  createAccount(product: ProductInput!): Response!
 }
 `, BuiltIn: false},
 	{Name: "graph/schemas/query.graphql", Input: `type Query {
@@ -7356,16 +7372,34 @@ interface Entity {
 # E N U M S
 
 # list of items that can be verified
-enum VerifiableType { EMAIL PHONE DEVICE }
+enum VerifiableType {
+  EMAIL
+  PHONE
+  DEVICE
+}
 
 # message delivery modes supported
-enum DeliveryMode { EMAIL SMS PUSH }
+enum DeliveryMode {
+  EMAIL
+  SMS
+  PUSH
+}
 
 # list of person states
-enum PersonStatus { ACTIVE INACTIVE EXITED BLACKLIST REJECTED }
+enum PersonStatus {
+  ACTIVE
+  INACTIVE
+  EXITED
+  BLACKLIST
+  REJECTED
+}
 
 # list of customer identity states
-enum IdentityStatus { ACTIVE INACTIVE FROZEN }
+enum IdentityStatus {
+  ACTIVE
+  INACTIVE
+  FROZEN
+}
 
 # list of content types
 enum ContentType {
@@ -7397,19 +7431,26 @@ enum State {
 }
 
 # enum of possible device tokens
-enum DeviceTokenType { FIREBASE BIOMETRIC }
+enum DeviceTokenType {
+  FIREBASE
+  BIOMETRIC
+}
 
 # onboarding checkpoints - a frontend concern
 enum OnboardingCheckPoint {
-  SIGNUP        # enter personal info
-  VERIFICATION  # provide ID, Video
-  ACTIVITIES    # provide reasons for using ROAVA
-  TERMS         # accept terms
-  COMPLETE      # submit application
+  SIGNUP # enter personal info
+  VERIFICATION # provide ID, Video
+  ACTIVITIES # provide reasons for using ROAVA
+  TERMS # accept terms
+  COMPLETE # submit application
 }
 
 # enum to represent the validation type
-enum ValidationType { CHECK SCREEN PROOF }
+enum ValidationType {
+  CHECK
+  SCREEN
+  PROOF
+}
 
 # S C A L A R S
 
@@ -8437,11 +8478,11 @@ type CheckData {
   # Array of Tags related to this check
   tags(
     # Returns the first n elements from the list.
-    first: Int,
+    first: Int
     # Returns the elements in the list that come after the specified cursor.
-    after: String,
+    after: String
     # Returns the last n elements from the list.
-    last: Int,
+    last: Int
     # Returns the elements in the list that come before the specified cursor.
     before: String
   ): TagConnection
@@ -8548,7 +8589,9 @@ type Proof {
 }
 
 # enum representing types of document proofs
-enum ProofType { ADDRESS }
+enum ProofType {
+  ADDRESS
+}
 
 # The connection type for Proof
 type ProofConnection {
@@ -8595,22 +8638,22 @@ type Task {
   # Array of comments associated to this task
   comments(
     # Returns the first n elements from the list.
-    first: Int,
+    first: Int
     # Returns the elements in the list that come after the specified cursor.
-    after: String,
+    after: String
     # Returns the last n elements from the list.
-    last: Int,
+    last: Int
     # Returns the elements in the list that come before the specified cursor.
     before: String
   ): CommentConnection
   # Array of tags associated to this task
   tags(
     # Returns the first n elements from the list.
-    first: Int,
+    first: Int
     # Returns the elements in the list that come after the specified cursor.
-    after: String,
+    after: String
     # Returns the last n elements from the list.
-    last: Int,
+    last: Int
     # Returns the elements in the list that come before the specified cursor.
     before: String
   ): TagConnection
@@ -8663,22 +8706,22 @@ type Content {
   # Array of Comments made in the Content
   comments(
     # Returns the first n elements from the list.
-    first: Int,
+    first: Int
     # Returns the elements in the list that come after the specified cursor.
-    after: String,
+    after: String
     # Returns the last n elements from the list.
-    last: Int,
+    last: Int
     # Returns the elements in the list that come before the specified cursor.
     before: String
   ): CommentConnection
   # Array of Tags assiciated to the content
   tags(
     # Returns the first n elements from the list.
-    first: Int,
+    first: Int
     # Returns the elements in the list that come after the specified cursor.
-    after: String,
+    after: String
     # Returns the last n elements from the list.
-    last: Int,
+    last: Int
     # Returns the elements in the list that come before the specified cursor.
     before: String
   ): TagConnection
@@ -9159,22 +9202,22 @@ type Account {
   # Array of tags
   tags(
     # Returns the first n elements from the list.
-    first: Int,
+    first: Int
     # Returns the elements in the list that come after the specified cursor.
-    after: String,
+    after: String
     # Returns the last n elements from the list.
-    last: Int,
+    last: Int
     # Returns the elements in the list that come before the specified cursor.
     before: String
   ): TagConnection
   # Account can have array of 0..n transactions
   transactions(
     # Returns the first n elements from the list.
-    first: Int,
+    first: Int
     # Returns the elements in the list that come after the specified cursor.
-    after: String,
+    after: String
     # Returns the last n elements from the list.
-    last: Int,
+    last: Int
     # Returns the elements in the list that come before the specified cursor.
     before: String
   ): TransactionConnection
@@ -9496,6 +9539,15 @@ input SubmitProofInput {
   status: State
 }
 
+# Product input required for opening accounts
+input ProductInput {
+  # Unique roava ulid for the data record
+  id: ID!
+  # Udentification assigned by an institution
+  identification: String
+  # Name of the identification scheme
+  scheme: String
+}
 `, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
@@ -9789,6 +9841,21 @@ func (ec *executionContext) field_Mutation_confirmPhone_args(ctx context.Context
 		}
 	}
 	args["code"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createAccount_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 types.ProductInput
+	if tmp, ok := rawArgs["product"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("product"))
+		arg0, err = ec.unmarshalNProductInput2msᚗapiᚋtypesᚐProductInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["product"] = arg0
 	return args, nil
 }
 
@@ -24882,6 +24949,48 @@ func (ec *executionContext) _Mutation_createTransactionPassword(ctx context.Cont
 	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_createAccount(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createAccount_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateAccount(rctx, args["product"].(types.ProductInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.Response)
+	fc.Result = res
+	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _OpeningBalance_default_value(ctx context.Context, field graphql.CollectedField, obj *types.OpeningBalance) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -38191,6 +38300,42 @@ func (ec *executionContext) unmarshalInputPersonInput(ctx context.Context, obj i
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputProductInput(ctx context.Context, obj interface{}) (types.ProductInput, error) {
+	var it types.ProductInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			it.ID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "identification":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("identification"))
+			it.Identification, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "scheme":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scheme"))
+			it.Scheme, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputSubmitProofInput(ctx context.Context, obj interface{}) (types.SubmitProofInput, error) {
 	var it types.SubmitProofInput
 	var asMap = obj.(map[string]interface{})
@@ -41040,6 +41185,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "createTransactionPassword":
 			out.Values[i] = ec._Mutation_createTransactionPassword(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "createAccount":
+			out.Values[i] = ec._Mutation_createAccount(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -46305,6 +46455,11 @@ func (ec *executionContext) marshalNProductFees2ᚕᚖmsᚗapiᚋtypesᚐProduct
 	}
 	wg.Wait()
 	return ret
+}
+
+func (ec *executionContext) unmarshalNProductInput2msᚗapiᚋtypesᚐProductInput(ctx context.Context, v interface{}) (types.ProductInput, error) {
+	res, err := ec.unmarshalInputProductInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNProductTemplates2ᚕᚖmsᚗapiᚋtypesᚐProductTemplates(ctx context.Context, sel ast.SelectionSet, v []*types.ProductTemplates) graphql.Marshaler {

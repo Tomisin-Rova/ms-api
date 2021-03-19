@@ -17,6 +17,7 @@ import (
 	"ms.api/graph/generated"
 	"ms.api/graph/models"
 	emailvalidator "ms.api/libs/validator/email"
+	"ms.api/protos/pb/accountService"
 	"ms.api/protos/pb/authService"
 	"ms.api/protos/pb/onboardingService"
 	"ms.api/protos/pb/personService"
@@ -459,11 +460,76 @@ func (r *queryResolver) Products(ctx context.Context, first *int64, after *strin
 }
 
 func (r *queryResolver) Account(ctx context.Context, id string) (*types.Account, error) {
-	panic(fmt.Errorf("not implemented"))
+	_, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+	account, err := r.accountService.GetAccount(ctx, &accountService.GetAccountRequest{
+		Id: id,
+	})
+	if err != nil {
+		r.logger.Error("failed to get account", zap.Error(err))
+		return nil, err
+	}
+	p := &types.Account{}
+	if err := copier.Copy(p, &account); err != nil {
+		r.logger.Error("copier failed", zap.Error(err))
+		return nil, errors.New("failed to read account information. please retry")
+	}
+
+	return p, nil
 }
 
 func (r *queryResolver) Accounts(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.AccountConnection, error) {
-	panic(fmt.Errorf("not implemented"))
+	claims, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+	accounts, err := r.accountService.GetAccounts(ctx, &accountService.GetAccountsRequest{
+		IdentityId: claims.IdentityId,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	input := models.ConnectionInput{
+		Before: before,
+		After:  after,
+		First:  first,
+		Last:   last,
+	}
+
+	edger := func(account *types.Account, offset int) connections.Edge {
+		return types.AccountEdge{
+			Node:   account,
+			Cursor: connections.OffsetToCursor(offset),
+		}
+	}
+
+	conn := func(edges []*types.AccountEdge, nodes []*types.Account, info *types.PageInfo, totalCount int) (*types.AccountConnection, error) {
+		var accountNodes []*types.Account
+		accountNodes = append(accountNodes, nodes...)
+
+		return &types.AccountConnection{
+			Edges:      edges,
+			Nodes:      accountNodes,
+			PageInfo:   info,
+			TotalCount: Int64(int64(totalCount)),
+		}, nil
+	}
+
+	var accountRes []*types.Account
+	for _, c := range accounts.Accounts {
+		p := &types.Account{}
+		if err := copier.Copy(p, &c); err != nil {
+			r.logger.Error("copier failed", zap.Error(err))
+			return nil, errors.New("failed to read account information. please retry")
+		}
+		accountRes = append(accountRes, p)
+	}
+
+	return connections.AccountConnectionCon(accountRes, edger, conn, input)
 }
 
 func (r *queryResolver) Transaction(ctx context.Context, id string) (*types.Transaction, error) {
