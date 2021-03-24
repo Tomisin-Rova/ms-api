@@ -460,12 +460,13 @@ func (r *queryResolver) Products(ctx context.Context, first *int64, after *strin
 }
 
 func (r *queryResolver) Account(ctx context.Context, id string) (*types.Account, error) {
-	_, err := middlewares.GetAuthenticatedUser(ctx)
+	claims, err := middlewares.GetAuthenticatedUser(ctx)
 	if err != nil {
 		return nil, ErrUnAuthenticated
 	}
 	account, err := r.accountService.GetAccount(ctx, &accountService.GetAccountRequest{
-		Id: id,
+		Id:         id,
+		IdentityId: claims.IdentityId,
 	})
 	if err != nil {
 		r.logger.Error("failed to get account", zap.Error(err))

@@ -16,6 +16,7 @@ message CreateAccountRequest {
 
 message GetAccountRequest {
   string id = 1;
+  string identityId =2;
 }
 
 message GetAccountResponse {

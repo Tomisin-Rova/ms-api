@@ -325,6 +325,8 @@ github.com/roava/zebra v0.0.0-20210203155227-86982d5d0e34 h1:nhm4hMjWlKZnfCcfifY
 github.com/roava/zebra v0.0.0-20210203155227-86982d5d0e34/go.mod h1:ck34DN5ocMaLw6Uo7C/PSSyQTDcI9f8T2bYrqJBR5OI=
 github.com/roava/zebra v0.0.0-20210222115245-5bfa91ac11f0 h1:wACoorgllNJDJje9FOp8NhstfodjRZqT2ERSsLodoV4=
 github.com/roava/zebra v0.0.0-20210222115245-5bfa91ac11f0/go.mod h1:ck34DN5ocMaLw6Uo7C/PSSyQTDcI9f8T2bYrqJBR5OI=
+github.com/roava/zebra v0.0.0-20210324131905-664536dad54e h1:zbqXf4Ayj+C6NEMHSXdQcIs5uHoSTFZ2V+UiOu60jJM=
+github.com/roava/zebra v0.0.0-20210324131905-664536dad54e/go.mod h1:ck34DN5ocMaLw6Uo7C/PSSyQTDcI9f8T2bYrqJBR5OI=
 github.com/rogpeppe/fastuuid v0.0.0-20150106093220-6724a57986af/go.mod h1:XWv6SoW27p1b0cqNHllgS5HIMJraePCO15w5zCzIWYg=
 github.com/rogpeppe/go-internal v1.1.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
 github.com/rogpeppe/go-internal v1.2.2/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
