@@ -3,10 +3,12 @@ package graph
 import (
 	"context"
 	"fmt"
-	"ms.api/libs/db"
 	"time"
 
+	"ms.api/libs/db"
+
 	"ms.api/config"
+	"ms.api/protos/pb/accountService"
 	"ms.api/protos/pb/authService"
 	"ms.api/protos/pb/cddService"
 	"ms.api/protos/pb/identityService"
@@ -15,7 +17,6 @@ import (
 	"ms.api/protos/pb/payeeService"
 	"ms.api/protos/pb/paymentService"
 	"ms.api/protos/pb/personService"
-	"ms.api/protos/pb/productService"
 	pb "ms.api/protos/pb/types"
 	"ms.api/protos/pb/verifyService"
 	"ms.api/server/http/middlewares"
@@ -54,7 +55,7 @@ type ResolverOpts struct {
 	PayeeService      payeeService.PayeeServiceClient
 	OnfidoClient      onfidoService.OnfidoServiceClient
 	cddClient         cddService.CddServiceClient
-	productService    productService.ProductServiceClient
+	accountService    accountService.AccountServiceClient
 	OnBoardingService onboardingService.OnBoardingServiceClient
 	verifyService     verifyService.VerifyServiceClient
 	AuthService       authService.AuthServiceClient
@@ -69,7 +70,7 @@ type Resolver struct {
 	PayeeService      payeeService.PayeeServiceClient
 	cddService        cddService.CddServiceClient
 	onBoardingService onboardingService.OnBoardingServiceClient
-	productService    productService.ProductServiceClient
+	accountService    accountService.AccountServiceClient
 	personService     personService.PersonServiceClient
 	verifyService     verifyService.VerifyServiceClient
 	onfidoClient      onfidoService.OnfidoServiceClient
@@ -86,7 +87,7 @@ func NewResolver(opt *ResolverOpts, logger *zap.Logger) *Resolver {
 		PayeeService:      opt.PayeeService,
 		cddService:        opt.cddClient,
 		onBoardingService: opt.OnBoardingService,
-		productService:    opt.productService,
+		accountService:    opt.accountService,
 		personService:     opt.personService,
 		verifyService:     opt.verifyService,
 		onfidoClient:      opt.OnfidoClient,
@@ -147,14 +148,14 @@ func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) 
 	}
 	opts.AuthService = authService.NewAuthServiceClient(connection)
 
-	// Product
+	// Account
 	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	connection, err = dialRPC(ctx, secrets.ProductServiceURL)
+	connection, err = dialRPC(ctx, secrets.AccountServiceURL)
 	if err != nil {
-		return nil, fmt.Errorf("%v: %s", err, secrets.ProductServiceURL)
+		return nil, fmt.Errorf("%v: %s", err, secrets.AccountServiceURL)
 	}
-	opts.productService = productService.NewProductServiceClient(connection)
+	opts.accountService = accountService.NewAccountServiceClient(connection)
 
 	// Payment
 	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)

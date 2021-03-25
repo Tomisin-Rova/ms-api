@@ -13,6 +13,7 @@ import (
 	"ms.api/libs/validator/datevalidator"
 	emailvalidator "ms.api/libs/validator/email"
 	"ms.api/libs/validator/phonenumbervalidator"
+	"ms.api/protos/pb/accountService"
 	"ms.api/protos/pb/authService"
 	"ms.api/protos/pb/identityService"
 	"ms.api/protos/pb/onboardingService"
@@ -459,6 +460,29 @@ func (r *mutationResolver) CreateTransactionPassword(ctx context.Context, passwo
 	})
 	if err != nil {
 		r.logger.Error("error calling identityService.createTransactionPin()", zap.Error(err))
+		return nil, err
+	}
+	return &types.Response{
+		Message: response.Message,
+		Success: response.Success,
+	}, nil
+}
+
+func (r *mutationResolver) CreateAccount(ctx context.Context, product types.ProductInput) (*types.Response, error) {
+	claims, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+	response, err := r.accountService.CreateAccount(ctx, &accountService.CreateAccountRequest{
+		IdentityId: claims.IdentityId,
+		Product: &protoTypes.ProductInput{
+			Id:             product.ID,
+			Identification: *product.Identification,
+			Scheme:         *product.Scheme,
+		},
+	})
+	if err != nil {
+		r.logger.Error("error calling accountService.CreateAccount()", zap.Error(err))
 		return nil, err
 	}
 	return &types.Response{

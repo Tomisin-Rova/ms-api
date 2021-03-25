@@ -1,0 +1,49 @@
+syntax = "proto3";
+package account;
+option go_package = "ms.api/protos/pb/accountService";
+
+// Import types
+import "types.proto";
+
+message SuccessResponse {
+  string message = 1;
+}
+
+message CreateAccountRequest {
+  string identityId = 1;
+  types.ProductInput product = 2;
+}
+
+message GetAccountRequest {
+  string id = 1;
+  string identityId =2;
+}
+
+message GetAccountResponse {
+  string id = 1;
+  string owner = 2;
+  string product = 3;
+  string name =4;
+  types.AccountData accountData = 5;
+  repeated types.Transaction transactions = 6;
+  bool active = 7;
+  string status = 8;
+  repeated string tags = 9;
+  string image = 10;
+  string organisation = 11;
+  int32 ts = 12;
+}
+
+message GetAccountsRequest {
+  string identityId = 1;
+}
+
+message GetAccountsResponse {
+  repeated GetAccountResponse accounts = 1;
+}
+
+service AccountService {
+  rpc CreateAccount(CreateAccountRequest) returns (types.Response) {}
+  rpc GetAccount(GetAccountRequest) returns (GetAccountResponse) {}
+  rpc GetAccounts(GetAccountsRequest) returns (GetAccountsResponse) {}
+}
