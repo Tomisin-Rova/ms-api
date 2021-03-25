@@ -1843,48 +1843,29 @@ type ProductTemplates {
 
 # Representation of a customer account (deposit, savings, loan, credit)
 type Account {
-  # Unique roava ulid for the data record
-  id: ID!
-  # Reference for customer or organization who owns account
-  owner: Entity!
-  # Reference for the financial product linked to the account
-  product: Product
-  # Friendly name given to account by owner
+  id: String
+  owner: String
+  product: String
   name: String
-  # Boolean flag to determine if account active
   active: Boolean
-  # Account status
   status: String
-  # Image background for an account
   image: String
-  # Reference for the organization of this account
   organisation: String
-  # Unix timestamp when the record was created
   ts: Int
-  # Array of tags
-  tags(
-    # Returns the first n elements from the list.
-    first: Int
-    # Returns the elements in the list that come after the specified cursor.
-    after: String
-    # Returns the last n elements from the list.
-    last: Int
-    # Returns the elements in the list that come before the specified cursor.
-    before: String
-  ): TagConnection
-  # Account can have array of 0..n transactions
-  transactions(
-    # Returns the first n elements from the list.
-    first: Int
-    # Returns the elements in the list that come after the specified cursor.
-    after: String
-    # Returns the last n elements from the list.
-    last: Int
-    # Returns the elements in the list that come before the specified cursor.
-    before: String
-  ): TransactionConnection
-  # Reference data of an account
+  tags: [String]
+  transactions: [Transaction]
   account_data: AccountData
+  account_details: AccountDetails
+}
+
+type AccountDetails {
+  virtual_account_id: String
+  iban: String
+  account_number: String
+  sort_code: String
+  swift_bic: String
+  bank_code: String
+  routing_number: String
 }
 
 # The connection type for Account
@@ -1909,196 +1890,122 @@ type AccountEdge {
 
 # Type to define the data of an account
 type AccountData {
-  # Unique roava ulid for the data record
-  id: ID!
-  # Key of the account holder
-  account_holder_key: String
-  # Type of holder type of the account
-  account_holder_type: String
-  # State of the account
-  account_state: String
-  # Type of Aaccount
-  account_type: String
-  # Date that the account was activated
-  activation_date: String
-  # Date that the account was approved
-  approved_date: String
-  # Key of the branch associated to the account
-  assigned_branch_key: String
-  # Key of the centre associated to the account
-  assigned_centre_key: String
-  # Key of the user associated to the account
-  assigned_user_key: String
-  # Date when the account was closed
-  closed_date: String
-  # Date when the account was created
-  creation_date: String
-  # Key to the credit arragement
-  credit_arrangement_key: String
-  # 3 digit code of the currency
-  currency_code: String
-  # Encoded key of the account
-  encoded_key: String
-  # Last date when the account was evaluated
-  last_account_appraisal_date: String
-  # Last date when the interest was calculated
-  last_interest_calculation_date: String
-  # Last date when the interest was stored
-  last_interest_stored_date: String
-  # Last date when the account was modified
-  last_modified_date: String
-  # Last date when the overdraft interest was reviewed
-  last_overdraft_interest_review_date: String
-  # Last date when the interest payments was arreared
-  last_set_to_arrears_date: String
-  # Date when the account was locked
-  locked_date: String
-  # Date when the account was considered mature
-  maturity_date: String
-  # Key of the migration event
-  migration_event_key: String
-  # Account Name
+  accountHolderKey: String
+  accountHolderType: String
+  accountState: String
+  accountType: String
+  activationDate: String
+  approvedDate: String
+  assignedBranchKey: String
+  assignedCentreKey: String
+  assignedUserKey: String
+  closedDate: String
+  creationDate: String
+  creditArrangementKey: String
+  currencyCode: String
+  encodedKey: String
+  id: String
+  lastAccountAppraisalDate: String
+  lastInterestCalculationDate: String
+  lastInterestStoredDate: String
+  lastModifiedDate: String
+  lastOverdraftInterestReviewDate: String
+  lastSetToArrearsDate: String
+  lockedDate: String
+  maturityDate: String
+  migrationEventKey: String
   name: String
-  # Notes about the account
   notes: String
-  # Key of the product type of the account
-  product_type_key: String
-  # Key in the source of the withholding tax
-  withholding_tax_source_key: String
-  # Reference to overdraft settings of the account
-  overdraft_settings: OverdraftSettings
-  # Reference to overdraft interest settings of the account
-  overdraft_interest_settings: OverdraftInterestSettings
-  # Array of settlements of the account
-  linked_settlement_account_keys: [String]
-  # Reference to internal controls of the account
-  internal_controls: InternalControls
-  # Reference to interest settings of the account
-  interest_settings: InterestSettings
-  # Reference to the balances of the account
+  productTypeKey: String
+  withholdingTaxSourceKey: String
+  overdraftSettings: OverdraftSettings
+  overdraftInterestSettings: OverdraftInterestSettings
+  linkedSettlementAccountKeys: [String]
+  internalControls: InternalControls
+  interestSettings: InterestSettings
   balances: Balances
-  # Reference to the accrued ammounts of the account
-  accrued_amounts: AccruedAmounts
+  accruedAmounts: AccruedAmounts
 }
 
 # Type to define the settings of an overdraft
 type OverdraftSettings {
-  # Boolean to define if overdraft is allowed
-  allow_overdraft: Boolean
-  # Date when the overdraft will expire
-  overdraft_expiry_date: String
-  # Overdraft Limit amount
-  overdraft_limit: Int
+  allowOverdraft: Boolean
+  overdraftExpiryDate: String
+  overdraftLimit: Int
 }
 
 # Type to define the tiers of an interest rate
 type InterestRateTiers {
-  # Encoded key of the Interest Rate Tier
-  encoded_key: String
-  # Ending balance of the tier
-  ending_balance: Int
-  # Ending day of the tier
-  ending_day: Int
-  # Interest rate amount
-  interest_rate: Int
+  encodedKey: String
+  endingBalance: Int
+  endingDay: Int
+  interestRate: Int
 }
 
 # Type to define the settings of an interest rate
 type InterestRateSettings {
-  # Interest Rate Settings encoded key
-  encoded_key: String
-  # String representating the frequency that the interest will be charged
-  interest_charge_frequency: String
-  # The charge frequency count of an interest
-  interest_charge_frequency_count: Int
-  # Interest rate amount
-  interest_rate: Int
-  # Interest Rate Review Count
-  interest_rate_review_count: Int
-  # String representating the review unit of an interest rate
-  interest_rate_review_unit: String
-  # String representating the interest rate source
-  interest_rate_source: String
-  # String representating the interest rate terms
-  interest_rate_terms: String
-  # The spread of the interes
-  interest_spread: Int
-  # Array of Interest Rate Tiers
-  interest_rate_tiers: [InterestRateTiers]
+  encodedKey: String
+  interestChargeFrequency: String
+  interestChargeFrequencyCount: Int
+  interestRate: Int
+  interestRateReviewCount: Int
+  interestRateReviewUnit: String
+  interestRateSource: String
+  interestRateTerms: String
+  interestSpread: Int
+  interestRateTiers: [InterestRateTiers]
 }
 
 # Type to define the settings of an interest overdraft
 type OverdraftInterestSettings {
-  # Reference to the Interest Rate Settings
-  interest_rate_settings: InterestRateSettings
+  interestRateSettings: InterestRateSettings
 }
 
 # Type to define the internal controls of an account
 type InternalControls {
-  # Maximum available amount to withdrawal
-  max_withdrawal_amount: Int
-  # Amount recommended to deposint in the account
-  recommended_deposit_amount: Int
-  # Targeted amount of an account
-  target_amount: Int
+  maxDepositBalance: Int
+  maxWithdrawalAmount: Int
+  recommendedDepositAmount: Int
+  targetAmount: Int
 }
 
 # Type to define the interest payment settings
 type InterestPaymentSettings {
-  # The point of payment of the interest
-  interest_payment_point: String
-  # Array of interest payment dates
-  interest_payment_dates: [InterestPaymentDates]
+  interestPaymentPoint: String
+  interestPaymentDates: [InterestPaymentDates]
 }
 
 # Type to define the balances o an account
 type Balances {
-  # Amount available in the account
-  available_balance: Int
-  # Amount blocked in the account
-  blocked_balance: Int
-  # Due date of the fees
-  fees_due: Int
-  # Forwarded available balance
-  forward_available_balance: Int
-  # Amount on hold in account
-  hold_balance: Int
-  # Locked ammount in account
-  locked_balance: Int
-  # Overdraft amount in account
-  overdraft_amount: Int
-  # Overdraft interest due date
-  overdraft_interest_due: Int
-  # Technical overdraft amount in account
-  technical_overdraft_amount: Int
-  # Technical overdraft interest due date
-  technical_overdraft_interest_due: Int
-  # Total account balance
-  total_balance: Int
+  availableBalance: Int
+  blockedBalance: Int
+  feesDue: Int
+  forwardAvailableBalance: Int
+  holdBalance: Int
+  lockedBalance: Int
+  overdraftAmount: Int
+  overdraftInterestDue: Int
+  technicalOverdraftAmount: Int
+  technicalOverdraftInterestDue: Int
+  totalBalance: Int
 }
 
 # Type to define accrued amounts
 type AccruedAmounts {
-  # Accrued interest amount
-  interest_accrued: Int
-  # Overdraft interest accrued amount
-  overdraft_interest_accrued: Int
-  # Technical iverdraft interest accrued amount
-  technical_overdraft_interest_accrued: Int
+  interestAccrued: Int
+  negativeInterestAccrued: Int
+  overdraftInterestAccrued: Int
+  technicalOverdraftInterestAccrued: Int
 }
 
 # https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/977600522/roava+transaction
 
 # Transaction shows changes and activities on customer accounts
 type Transaction {
-  # Unique roava ulid for the data record
-  id: ID!
-  # Reference to the account that the transaction is happening
-  account: String
-  # Unix timestamp when the record was created
+  id: String
+  ref: String
   ts: Int
-  # Reference to the data of the Transaction
-  transaction_data: TransactionData
+  encodedkey: String
 }
 
 # The connection type for Transaction
