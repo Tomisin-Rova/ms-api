@@ -5,6 +5,15 @@ option go_package = "ms.api/protos/pb/paymentService";
 // Import types
 import "types.proto";
 
+service PaymentService {
+  rpc CreatePayee(CreatePayeeRequest) returns (types.Response) {}
+  rpc MakeTransfer(TransferRequest) returns (SuccessResponse) {}
+}
+
+message SuccessResponse {
+  string message = 1;
+}
+
 message TransferRequest {
   string accountNumber = 1;
   string beneficiaryAccountNumber = 2;
@@ -14,6 +23,17 @@ message TransferRequest {
   string transactionPin = 6;
 }
 
-service PaymentService {
-  rpc MakeTransfer(TransferRequest) returns (types.Response) {}
+message CreatePayeeRequest {
+  string identityId = 1;
+  string transactionPin = 2;
+  string name = 3;
+  string AccountName = 4;
+  string accountNumber = 5;
+  string sortCode = 6;
+  string bankCode = 7;
+  string iban = 8;
+  string swiftBic = 9;
+  string routingNumber = 11;
+  string phoneNumber = 12;
+  string currency = 13;
 }

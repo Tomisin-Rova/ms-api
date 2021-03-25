@@ -624,6 +624,7 @@ type ComplexityRoot struct {
 		ConfirmPhone              func(childComplexity int, token string, code string) int
 		CreateAccount             func(childComplexity int, product types.ProductInput) int
 		CreateApplication         func(childComplexity int) int
+		CreatePayee               func(childComplexity int, payee types.PayeeInput, password string) int
 		CreatePhone               func(childComplexity int, phone string, device types.DeviceInput) int
 		CreateTransactionPassword func(childComplexity int, password string) int
 		IntendedActivities        func(childComplexity int, activities []string) int
@@ -1183,6 +1184,7 @@ type MutationResolver interface {
 	SubmitProof(ctx context.Context, proof types.SubmitProofInput) (*types.Response, error)
 	CreateTransactionPassword(ctx context.Context, password string) (*types.Response, error)
 	CreateAccount(ctx context.Context, product types.ProductInput) (*types.Response, error)
+	CreatePayee(ctx context.Context, payee types.PayeeInput, password string) (*types.Response, error)
 }
 type QueryResolver interface {
 	Me(ctx context.Context) (*types.Person, error)
@@ -4008,6 +4010,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateApplication(childComplexity), true
+
+	case "Mutation.createPayee":
+		if e.complexity.Mutation.CreatePayee == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createPayee_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreatePayee(childComplexity, args["payee"].(types.PayeeInput), args["password"].(string)), true
 
 	case "Mutation.createPhone":
 		if e.complexity.Mutation.CreatePhone == nil {
@@ -6977,6 +6991,7 @@ var sources = []*ast.Source{
   createTransactionPassword(password: String!): Response!
   # create new deposit account
   createAccount(product: ProductInput!): Response!
+  createPayee(payee: PayeeInput!, password: String!): Response!
 }
 `, BuiltIn: false},
 	{Name: "graph/schemas/query.graphql", Input: `type Query {
@@ -9528,6 +9543,35 @@ input ProductInput {
   # Name of the identification scheme
   scheme: String
 }
+# Type for creating a new payee
+input PayeeInput {
+  # name of payee/beneficiariy
+  name: String!
+  # account information provided when creating payee
+  accounts: [PayeeAccountInput!]!
+}
+
+input PayeeAccountInput {
+  # nickname of beneficiary account assigned by customer
+  name: String
+  # currency code for the currency
+  currency: String
+  # optional payee account account_number
+  account_number: String
+  # optional payee account sort_code
+  sort_code: String
+  # optional payee account iban
+  iban: String
+  # optional payee account swift_bic
+  swift_bic: String
+  # optional payee account bank_code
+  bank_code: String
+  # optional payee account routing_number
+  routing_number: String
+  # optional payee phone_number
+  phone_number: String
+}
+
 `, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
@@ -9752,6 +9796,30 @@ func (ec *executionContext) field_Mutation_createAccount_args(ctx context.Contex
 		}
 	}
 	args["product"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createPayee_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 types.PayeeInput
+	if tmp, ok := rawArgs["payee"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("payee"))
+		arg0, err = ec.unmarshalNPayeeInput2msᚗapiᚋtypesᚐPayeeInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["payee"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["password"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("password"))
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["password"] = arg1
 	return args, nil
 }
 
@@ -25184,6 +25252,48 @@ func (ec *executionContext) _Mutation_createAccount(ctx context.Context, field g
 	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_createPayee(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createPayee_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreatePayee(rctx, args["payee"].(types.PayeeInput), args["password"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.Response)
+	fc.Result = res
+	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _OpeningBalance_default_value(ctx context.Context, field graphql.CollectedField, obj *types.OpeningBalance) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -38438,6 +38548,118 @@ func (ec *executionContext) unmarshalInputDeviceTokenInput(ctx context.Context, 
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputPayeeAccountInput(ctx context.Context, obj interface{}) (types.PayeeAccountInput, error) {
+	var it types.PayeeAccountInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			it.Name, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "currency":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("currency"))
+			it.Currency, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "account_number":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("account_number"))
+			it.AccountNumber, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "sort_code":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sort_code"))
+			it.SortCode, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "iban":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("iban"))
+			it.Iban, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "swift_bic":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("swift_bic"))
+			it.SwiftBic, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "bank_code":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("bank_code"))
+			it.BankCode, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "routing_number":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("routing_number"))
+			it.RoutingNumber, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "phone_number":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("phone_number"))
+			it.PhoneNumber, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputPayeeInput(ctx context.Context, obj interface{}) (types.PayeeInput, error) {
+	var it types.PayeeInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "accounts":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("accounts"))
+			it.Accounts, err = ec.unmarshalNPayeeAccountInput2ᚕᚖmsᚗapiᚋtypesᚐPayeeAccountInputᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputPersonInput(ctx context.Context, obj interface{}) (types.PersonInput, error) {
 	var it types.PersonInput
 	var asMap = obj.(map[string]interface{})
@@ -41413,6 +41635,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "createAccount":
 			out.Values[i] = ec._Mutation_createAccount(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "createPayee":
+			out.Values[i] = ec._Mutation_createPayee(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -46398,6 +46625,37 @@ func (ec *executionContext) marshalNPageInfo2ᚖmsᚗapiᚋtypesᚐPageInfo(ctx 
 		return graphql.Null
 	}
 	return ec._PageInfo(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNPayeeAccountInput2ᚕᚖmsᚗapiᚋtypesᚐPayeeAccountInputᚄ(ctx context.Context, v interface{}) ([]*types.PayeeAccountInput, error) {
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]*types.PayeeAccountInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNPayeeAccountInput2ᚖmsᚗapiᚋtypesᚐPayeeAccountInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalNPayeeAccountInput2ᚖmsᚗapiᚋtypesᚐPayeeAccountInput(ctx context.Context, v interface{}) (*types.PayeeAccountInput, error) {
+	res, err := ec.unmarshalInputPayeeAccountInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNPayeeInput2msᚗapiᚋtypesᚐPayeeInput(ctx context.Context, v interface{}) (types.PayeeInput, error) {
+	res, err := ec.unmarshalInputPayeeInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNPerson2ᚕᚖmsᚗapiᚋtypesᚐPersonᚄ(ctx context.Context, sel ast.SelectionSet, v []*types.Person) graphql.Marshaler {

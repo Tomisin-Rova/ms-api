@@ -17,6 +17,7 @@ import (
 	"ms.api/protos/pb/authService"
 	"ms.api/protos/pb/identityService"
 	"ms.api/protos/pb/onboardingService"
+	"ms.api/protos/pb/paymentService"
 	protoTypes "ms.api/protos/pb/types"
 	"ms.api/server/http/middlewares"
 	"ms.api/types"
@@ -483,6 +484,40 @@ func (r *mutationResolver) CreateAccount(ctx context.Context, product types.Prod
 	})
 	if err != nil {
 		r.logger.Error("error calling accountService.CreateAccount()", zap.Error(err))
+		return nil, err
+	}
+	return &types.Response{
+		Message: response.Message,
+		Success: response.Success,
+	}, nil
+}
+
+func (r *mutationResolver) CreatePayee(ctx context.Context, payee types.PayeeInput, password string) (*types.Response, error) {
+	claims, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+	payeeAccount, err := validator.ValidatePayeeAccount(payee.Accounts[0])
+	if err != nil {
+		r.logger.Error("validating payee account details", zap.Error(err))
+		return nil, err
+	}
+	response, err := r.paymentService.CreatePayee(ctx, &paymentService.CreatePayeeRequest{
+		IdentityId:     claims.IdentityId,
+		TransactionPin: password,
+		Name:           payee.Name,
+		AccountName:    payeeAccount.Name,
+		AccountNumber:  payeeAccount.AccountNumber,
+		SortCode:       payeeAccount.SortCode,
+		BankCode:       payeeAccount.BankCode,
+		Iban:           payeeAccount.Iban,
+		SwiftBic:       payeeAccount.SwiftBic,
+		RoutingNumber:  payeeAccount.RoutingNumber,
+		PhoneNumber:    payeeAccount.PhoneNumber,
+		Currency:       payeeAccount.Currency,
+	})
+	if err != nil {
+		r.logger.Error("error calling paymentService.CreatePayee()", zap.Error(err))
 		return nil, err
 	}
 	return &types.Response{

@@ -30,4 +30,5 @@ type Mutation {
   createTransactionPassword(password: String!): Response!
   # create new deposit account
   createAccount(product: ProductInput!): Response!
+  createPayee(payee: PayeeInput!, password: String!): Response!
 }
