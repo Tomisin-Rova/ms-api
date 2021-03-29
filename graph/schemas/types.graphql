@@ -2117,6 +2117,49 @@ input ProductInput {
   # Name of the identification scheme
   scheme: String
 }
+
+# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1282539527/roava+payee
+
+# Type to define a payee
+type Payee {
+  # Unique roava ulid for the data record
+  id: ID!
+  # identity that owns the payee
+  owner: String!
+  # name of payee
+  name: String!
+  # avatar (optional) for the payee
+  avatar: String
+  # unix timestamp when payee created
+  ts: Int
+  # beneficiary/payee accounts created by customer
+  accounts: [PayeeAccount]!
+}
+
+# Type to define a payee/beneficiary account features
+type PayeeAccount {
+  # unique id of the payee account
+  id: ID!
+  # nickname of beneficiary account assigned by customer
+  name: String
+  # currency code for the currency
+  currency: String
+  # optional payee account account_number
+  account_number: String
+  # optional payee account sort_code
+  sort_code: String
+  # optional payee account iban
+  iban: String
+  # optional payee account swift_bic
+  swift_bic: String
+  # optional payee account bank_code
+  bank_code: String
+  # optional payee account routing_number
+  routing_number: String
+  # optional payee phone_number
+  phone_number: String
+}
+
 # Type for creating a new payee
 input PayeeInput {
   # name of payee/beneficiariy
@@ -2148,3 +2191,22 @@ input PayeeAccountInput {
   phone_number: String
 }
 
+# The connection type for Payee
+type PayeeConnection {
+  # A list of edges
+  edges: [PayeeEdge!]!
+  # A list of nodes
+  nodes: [Payee!]!
+  # Information to aid in pagination
+  pageInfo: PageInfo!
+  # Identifies the total count of items in the connection
+  totalCount: Int
+}
+
+# An edge in a connection
+type PayeeEdge {
+  # The item at the end of the edge.
+  node: Payee!
+  # A cursor for use in pagination
+  cursor: String!
+}

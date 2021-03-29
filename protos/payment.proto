@@ -7,6 +7,11 @@ import "types.proto";
 
 service PaymentService {
   rpc CreatePayee(CreatePayeeRequest) returns (types.Response) {}
+  rpc GetPayees(GetPayeesRequest) returns (types.Payees) {}
+  rpc GetPayee(GetPayeeRequest) returns (types.Payee) {}
+  rpc DeletePayeeAccount(DeletePayeeAccountRequest) returns (types.Response) {}
+  rpc AddPayeeAccount(AddPayeeAccountRequest) returns (types.Response) {}
+  rpc UpdatePayee(UpdatePayeeRequest) returns (types.Response) {}
   rpc MakeTransfer(TransferRequest) returns (SuccessResponse) {}
 }
 
@@ -37,4 +42,42 @@ message CreatePayeeRequest {
   string phoneNumber = 12;
   string currency = 13;
   string avatar = 14;
+}
+
+message GetPayeesRequest {
+  string identityId = 1;
+}
+
+message GetPayeeRequest {
+  string PayeeId = 1;
+  string IdentityId = 2;
+}
+
+
+message DeletePayeeAccountRequest {
+  string PayeeId = 1;
+  string IdentityId = 2;
+  string payeeAccountId = 3;
+}
+
+message AddPayeeAccountRequest {
+  string identityId = 1;
+  string PayeeId = 2;
+  string AccountName = 4;
+  string accountNumber = 5;
+  string sortCode = 6;
+  string bankCode = 7;
+  string iban = 8;
+  string swiftBic = 9;
+  string routingNumber = 11;
+  string phoneNumber = 12;
+  string currency = 13;
+}
+
+message UpdatePayeeRequest {
+  string IdentityId = 1;
+  string Name = 2;
+  string Avatar = 3;
+  string payeeId = 4;
+  string transactionPin = 5;
 }

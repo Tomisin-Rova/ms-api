@@ -754,6 +754,28 @@ type PageInfo struct {
 	EndCursor       *string `json:"endCursor"`
 }
 
+type Payee struct {
+	ID       string          `json:"id"`
+	Owner    string          `json:"owner"`
+	Name     string          `json:"name"`
+	Avatar   *string         `json:"avatar"`
+	Ts       *int64          `json:"ts"`
+	Accounts []*PayeeAccount `json:"accounts"`
+}
+
+type PayeeAccount struct {
+	ID            string  `json:"id"`
+	Name          *string `json:"name"`
+	Currency      *string `json:"currency"`
+	AccountNumber *string `json:"account_number"`
+	SortCode      *string `json:"sort_code"`
+	Iban          *string `json:"iban"`
+	SwiftBic      *string `json:"swift_bic"`
+	BankCode      *string `json:"bank_code"`
+	RoutingNumber *string `json:"routing_number"`
+	PhoneNumber   *string `json:"phone_number"`
+}
+
 type PayeeAccountInput struct {
 	Name          *string `json:"name"`
 	Currency      *string `json:"currency"`
@@ -764,6 +786,18 @@ type PayeeAccountInput struct {
 	BankCode      *string `json:"bank_code"`
 	RoutingNumber *string `json:"routing_number"`
 	PhoneNumber   *string `json:"phone_number"`
+}
+
+type PayeeConnection struct {
+	Edges      []*PayeeEdge `json:"edges"`
+	Nodes      []*Payee     `json:"nodes"`
+	PageInfo   *PageInfo    `json:"pageInfo"`
+	TotalCount *int64       `json:"totalCount"`
+}
+
+type PayeeEdge struct {
+	Node   *Payee `json:"node"`
+	Cursor string `json:"cursor"`
 }
 
 type PayeeInput struct {

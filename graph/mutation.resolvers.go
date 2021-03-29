@@ -539,6 +539,85 @@ func (r *mutationResolver) CreatePayee(ctx context.Context, payee types.PayeeInp
 	}, nil
 }
 
+func (r *mutationResolver) UpdatePayee(ctx context.Context, payee string, payeeInput *types.PayeeInput, password string) (*types.Response, error) {
+	claims, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+	avatar := ""
+	if payeeInput.Avatar != nil {
+		avatar = *payeeInput.Avatar
+	}
+	response, err := r.paymentService.UpdatePayee(ctx, &paymentService.UpdatePayeeRequest{
+		IdentityId:     claims.IdentityId,
+		TransactionPin: password,
+		Name:           payeeInput.Name,
+		Avatar:         avatar,
+		PayeeId:        payee,
+	})
+	if err != nil {
+		r.logger.Error("error calling paymentService.UpdatePayee()", zap.Error(err))
+		return nil, err
+	}
+	return &types.Response{
+		Message: response.Message,
+		Success: response.Success,
+	}, nil
+}
+
+func (r *mutationResolver) AddPayeeAccount(ctx context.Context, payee string, payeeAccount types.PayeeAccountInput) (*types.Response, error) {
+	claims, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+	p, err := validator.ValidatePayeeAccount(&payeeAccount)
+	if err != nil {
+		r.logger.Error("validating payee account details", zap.Error(err))
+		return nil, err
+	}
+	response, err := r.paymentService.AddPayeeAccount(ctx, &paymentService.AddPayeeAccountRequest{
+		IdentityId:    claims.IdentityId,
+		PayeeId:       payee,
+		AccountName:   p.Name,
+		AccountNumber: p.AccountNumber,
+		SortCode:      p.SortCode,
+		BankCode:      p.BankCode,
+		Iban:          p.Iban,
+		SwiftBic:      p.SwiftBic,
+		RoutingNumber: p.RoutingNumber,
+		PhoneNumber:   p.PhoneNumber,
+		Currency:      p.Currency,
+	})
+	if err != nil {
+		r.logger.Error("error calling paymentService.AddPayeeAccount()", zap.Error(err))
+		return nil, err
+	}
+	return &types.Response{
+		Message: response.Message,
+		Success: response.Success,
+	}, nil
+}
+
+func (r *mutationResolver) DeletePayeeAccount(ctx context.Context, payee string, payeeAccount string) (*types.Response, error) {
+	claims, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+	response, err := r.paymentService.DeletePayeeAccount(ctx, &paymentService.DeletePayeeAccountRequest{
+		IdentityId:     claims.IdentityId,
+		PayeeId:        payee,
+		PayeeAccountId: payeeAccount,
+	})
+	if err != nil {
+		r.logger.Error("error calling paymentService.DeletePayeeAccount()", zap.Error(err))
+		return nil, err
+	}
+	return &types.Response{
+		Message: response.Message,
+		Success: response.Success,
+	}, nil
+}
+
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 

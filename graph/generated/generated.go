@@ -620,6 +620,7 @@ type ComplexityRoot struct {
 
 	Mutation struct {
 		AcceptTerms               func(childComplexity int, documents []*string) int
+		AddPayeeAccount           func(childComplexity int, payee string, payeeAccount types.PayeeAccountInput) int
 		ConfirmPasscodeResetOtp   func(childComplexity int, email string, otp string) int
 		ConfirmPhone              func(childComplexity int, token string, code string) int
 		CreateAccount             func(childComplexity int, product types.ProductInput) int
@@ -627,6 +628,7 @@ type ComplexityRoot struct {
 		CreatePayee               func(childComplexity int, payee types.PayeeInput, password string) int
 		CreatePhone               func(childComplexity int, phone string, device types.DeviceInput) int
 		CreateTransactionPassword func(childComplexity int, password string) int
+		DeletePayeeAccount        func(childComplexity int, payee string, payeeAccount string) int
 		IntendedActivities        func(childComplexity int, activities []string) int
 		Login                     func(childComplexity int, credentials types.AuthInput) int
 		RefreshToken              func(childComplexity int, token string) int
@@ -639,6 +641,7 @@ type ComplexityRoot struct {
 		SubmitApplication         func(childComplexity int) int
 		SubmitProof               func(childComplexity int, proof types.SubmitProofInput) int
 		UpdateDeviceToken         func(childComplexity int, token []*types.DeviceTokenInput) int
+		UpdatePayee               func(childComplexity int, payee string, payeeInput *types.PayeeInput, password string) int
 		VerifyEmail               func(childComplexity int, email string, code string) int
 	}
 
@@ -711,6 +714,40 @@ type ComplexityRoot struct {
 		HasNextPage     func(childComplexity int) int
 		HasPreviousPage func(childComplexity int) int
 		StartCursor     func(childComplexity int) int
+	}
+
+	Payee struct {
+		Accounts func(childComplexity int) int
+		Avatar   func(childComplexity int) int
+		ID       func(childComplexity int) int
+		Name     func(childComplexity int) int
+		Owner    func(childComplexity int) int
+		Ts       func(childComplexity int) int
+	}
+
+	PayeeAccount struct {
+		AccountNumber func(childComplexity int) int
+		BankCode      func(childComplexity int) int
+		Currency      func(childComplexity int) int
+		ID            func(childComplexity int) int
+		Iban          func(childComplexity int) int
+		Name          func(childComplexity int) int
+		PhoneNumber   func(childComplexity int) int
+		RoutingNumber func(childComplexity int) int
+		SortCode      func(childComplexity int) int
+		SwiftBic      func(childComplexity int) int
+	}
+
+	PayeeConnection struct {
+		Edges      func(childComplexity int) int
+		Nodes      func(childComplexity int) int
+		PageInfo   func(childComplexity int) int
+		TotalCount func(childComplexity int) int
+	}
+
+	PayeeEdge struct {
+		Cursor func(childComplexity int) int
+		Node   func(childComplexity int) int
 	}
 
 	Person struct {
@@ -894,6 +931,8 @@ type ComplexityRoot struct {
 		Node              func(childComplexity int, id string) int
 		Organisation      func(childComplexity int, id string) int
 		Organisations     func(childComplexity int, first *int64, after *string, last *int64, before *string) int
+		Payee             func(childComplexity int, id string) int
+		Payees            func(childComplexity int, first *int64, after *string, last *int64, before *string) int
 		People            func(childComplexity int, keywords *string, first *int64, after *string, last *int64, before *string) int
 		Person            func(childComplexity int, id string) int
 		Price             func(childComplexity int, pair *string, ts *int64) int
@@ -1185,6 +1224,9 @@ type MutationResolver interface {
 	CreateTransactionPassword(ctx context.Context, password string) (*types.Response, error)
 	CreateAccount(ctx context.Context, product types.ProductInput) (*types.Response, error)
 	CreatePayee(ctx context.Context, payee types.PayeeInput, password string) (*types.Response, error)
+	UpdatePayee(ctx context.Context, payee string, payeeInput *types.PayeeInput, password string) (*types.Response, error)
+	AddPayeeAccount(ctx context.Context, payee string, payeeAccount types.PayeeAccountInput) (*types.Response, error)
+	DeletePayeeAccount(ctx context.Context, payee string, payeeAccount string) (*types.Response, error)
 }
 type QueryResolver interface {
 	Me(ctx context.Context) (*types.Person, error)
@@ -1239,6 +1281,8 @@ type QueryResolver interface {
 	Products(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.ProductConnection, error)
 	Account(ctx context.Context, id string) (*types.Account, error)
 	Accounts(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.AccountConnection, error)
+	Payee(ctx context.Context, id string) (*types.Payee, error)
+	Payees(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.PayeeConnection, error)
 	Transaction(ctx context.Context, id string) (*types.Transaction, error)
 	Transactions(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.TransactionConnection, error)
 	Acceptance(ctx context.Context, id string) (*types.Acceptance, error)
@@ -3968,6 +4012,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.AcceptTerms(childComplexity, args["documents"].([]*string)), true
 
+	case "Mutation.addPayeeAccount":
+		if e.complexity.Mutation.AddPayeeAccount == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_addPayeeAccount_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.AddPayeeAccount(childComplexity, args["payee"].(string), args["payee_account"].(types.PayeeAccountInput)), true
+
 	case "Mutation.confirmPasscodeResetOtp":
 		if e.complexity.Mutation.ConfirmPasscodeResetOtp == nil {
 			break
@@ -4046,6 +4102,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateTransactionPassword(childComplexity, args["password"].(string)), true
+
+	case "Mutation.deletePayeeAccount":
+		if e.complexity.Mutation.DeletePayeeAccount == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deletePayeeAccount_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeletePayeeAccount(childComplexity, args["payee"].(string), args["payee_account"].(string)), true
 
 	case "Mutation.intendedActivities":
 		if e.complexity.Mutation.IntendedActivities == nil {
@@ -4185,6 +4253,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.UpdateDeviceToken(childComplexity, args["token"].([]*types.DeviceTokenInput)), true
+
+	case "Mutation.updatePayee":
+		if e.complexity.Mutation.UpdatePayee == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updatePayee_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdatePayee(childComplexity, args["payee"].(string), args["payee_input"].(*types.PayeeInput), args["password"].(string)), true
 
 	case "Mutation.verifyEmail":
 		if e.complexity.Mutation.VerifyEmail == nil {
@@ -4505,6 +4585,160 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.PageInfo.StartCursor(childComplexity), true
+
+	case "Payee.accounts":
+		if e.complexity.Payee.Accounts == nil {
+			break
+		}
+
+		return e.complexity.Payee.Accounts(childComplexity), true
+
+	case "Payee.avatar":
+		if e.complexity.Payee.Avatar == nil {
+			break
+		}
+
+		return e.complexity.Payee.Avatar(childComplexity), true
+
+	case "Payee.id":
+		if e.complexity.Payee.ID == nil {
+			break
+		}
+
+		return e.complexity.Payee.ID(childComplexity), true
+
+	case "Payee.name":
+		if e.complexity.Payee.Name == nil {
+			break
+		}
+
+		return e.complexity.Payee.Name(childComplexity), true
+
+	case "Payee.owner":
+		if e.complexity.Payee.Owner == nil {
+			break
+		}
+
+		return e.complexity.Payee.Owner(childComplexity), true
+
+	case "Payee.ts":
+		if e.complexity.Payee.Ts == nil {
+			break
+		}
+
+		return e.complexity.Payee.Ts(childComplexity), true
+
+	case "PayeeAccount.account_number":
+		if e.complexity.PayeeAccount.AccountNumber == nil {
+			break
+		}
+
+		return e.complexity.PayeeAccount.AccountNumber(childComplexity), true
+
+	case "PayeeAccount.bank_code":
+		if e.complexity.PayeeAccount.BankCode == nil {
+			break
+		}
+
+		return e.complexity.PayeeAccount.BankCode(childComplexity), true
+
+	case "PayeeAccount.currency":
+		if e.complexity.PayeeAccount.Currency == nil {
+			break
+		}
+
+		return e.complexity.PayeeAccount.Currency(childComplexity), true
+
+	case "PayeeAccount.id":
+		if e.complexity.PayeeAccount.ID == nil {
+			break
+		}
+
+		return e.complexity.PayeeAccount.ID(childComplexity), true
+
+	case "PayeeAccount.iban":
+		if e.complexity.PayeeAccount.Iban == nil {
+			break
+		}
+
+		return e.complexity.PayeeAccount.Iban(childComplexity), true
+
+	case "PayeeAccount.name":
+		if e.complexity.PayeeAccount.Name == nil {
+			break
+		}
+
+		return e.complexity.PayeeAccount.Name(childComplexity), true
+
+	case "PayeeAccount.phone_number":
+		if e.complexity.PayeeAccount.PhoneNumber == nil {
+			break
+		}
+
+		return e.complexity.PayeeAccount.PhoneNumber(childComplexity), true
+
+	case "PayeeAccount.routing_number":
+		if e.complexity.PayeeAccount.RoutingNumber == nil {
+			break
+		}
+
+		return e.complexity.PayeeAccount.RoutingNumber(childComplexity), true
+
+	case "PayeeAccount.sort_code":
+		if e.complexity.PayeeAccount.SortCode == nil {
+			break
+		}
+
+		return e.complexity.PayeeAccount.SortCode(childComplexity), true
+
+	case "PayeeAccount.swift_bic":
+		if e.complexity.PayeeAccount.SwiftBic == nil {
+			break
+		}
+
+		return e.complexity.PayeeAccount.SwiftBic(childComplexity), true
+
+	case "PayeeConnection.edges":
+		if e.complexity.PayeeConnection.Edges == nil {
+			break
+		}
+
+		return e.complexity.PayeeConnection.Edges(childComplexity), true
+
+	case "PayeeConnection.nodes":
+		if e.complexity.PayeeConnection.Nodes == nil {
+			break
+		}
+
+		return e.complexity.PayeeConnection.Nodes(childComplexity), true
+
+	case "PayeeConnection.pageInfo":
+		if e.complexity.PayeeConnection.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.PayeeConnection.PageInfo(childComplexity), true
+
+	case "PayeeConnection.totalCount":
+		if e.complexity.PayeeConnection.TotalCount == nil {
+			break
+		}
+
+		return e.complexity.PayeeConnection.TotalCount(childComplexity), true
+
+	case "PayeeEdge.cursor":
+		if e.complexity.PayeeEdge.Cursor == nil {
+			break
+		}
+
+		return e.complexity.PayeeEdge.Cursor(childComplexity), true
+
+	case "PayeeEdge.node":
+		if e.complexity.PayeeEdge.Node == nil {
+			break
+		}
+
+		return e.complexity.PayeeEdge.Node(childComplexity), true
 
 	case "Person.activities":
 		if e.complexity.Person.Activities == nil {
@@ -5574,6 +5808,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Organisations(childComplexity, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string)), true
+
+	case "Query.payee":
+		if e.complexity.Query.Payee == nil {
+			break
+		}
+
+		args, err := ec.field_Query_payee_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Payee(childComplexity, args["id"].(string)), true
+
+	case "Query.payees":
+		if e.complexity.Query.Payees == nil {
+			break
+		}
+
+		args, err := ec.field_Query_payees_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Payees(childComplexity, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string)), true
 
 	case "Query.people":
 		if e.complexity.Query.People == nil {
@@ -6991,7 +7249,15 @@ var sources = []*ast.Source{
   createTransactionPassword(password: String!): Response!
   # create new deposit account
   createAccount(product: ProductInput!): Response!
+  # create a new payee using the transaction password
   createPayee(payee: PayeeInput!, password: String!): Response!
+  # update an existing payee using the transaction password
+  # do not include the payee accounts for when updating a payee
+  updatePayee(payee: ID!, payee_input: PayeeInput, password: String!): Response!
+  # add new account to existing payee
+  addPayeeAccount(payee: ID!, payee_account: PayeeAccountInput!): Response!
+  # delete an account from an existing payee - marks as deleted
+  deletePayeeAccount(payee: ID!, payee_account: ID!): Response!
 }
 `, BuiltIn: false},
 	{Name: "graph/schemas/query.graphql", Input: `type Query {
@@ -7380,6 +7646,19 @@ var sources = []*ast.Source{
     # Returns the elements in the list that come before the specified cursor.
     before: String
   ): AccountConnection
+  # fetch an individual payee by ID
+  payee(id: ID!): Payee
+  # fetch all payees for a given customer
+  payees(
+    # Returns the first n elements from the list.
+    first: Int,
+    # Returns the elements in the list that come after the specified cursor.
+    after: String,
+    # Returns the last n elements from the list.
+    last: Int,
+    # Returns the elements in the list that come before the specified cursor.
+    before: String
+  ): PayeeConnection
   # fetch an individual transaction by unique ID
   transaction(
     # The Ulid field for the transaction
@@ -9543,6 +9822,49 @@ input ProductInput {
   # Name of the identification scheme
   scheme: String
 }
+
+# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1282539527/roava+payee
+
+# Type to define a payee
+type Payee {
+  # Unique roava ulid for the data record
+  id: ID!
+  # identity that owns the payee
+  owner: String!
+  # name of payee
+  name: String!
+  # avatar (optional) for the payee
+  avatar: String
+  # unix timestamp when payee created
+  ts: Int
+  # beneficiary/payee accounts created by customer
+  accounts: [PayeeAccount]!
+}
+
+# Type to define a payee/beneficiary account features
+type PayeeAccount {
+  # unique id of the payee account
+  id: ID!
+  # nickname of beneficiary account assigned by customer
+  name: String
+  # currency code for the currency
+  currency: String
+  # optional payee account account_number
+  account_number: String
+  # optional payee account sort_code
+  sort_code: String
+  # optional payee account iban
+  iban: String
+  # optional payee account swift_bic
+  swift_bic: String
+  # optional payee account bank_code
+  bank_code: String
+  # optional payee account routing_number
+  routing_number: String
+  # optional payee phone_number
+  phone_number: String
+}
+
 # Type for creating a new payee
 input PayeeInput {
   # name of payee/beneficiariy
@@ -9574,6 +9896,25 @@ input PayeeAccountInput {
   phone_number: String
 }
 
+# The connection type for Payee
+type PayeeConnection {
+  # A list of edges
+  edges: [PayeeEdge!]!
+  # A list of nodes
+  nodes: [Payee!]!
+  # Information to aid in pagination
+  pageInfo: PageInfo!
+  # Identifies the total count of items in the connection
+  totalCount: Int
+}
+
+# An edge in a connection
+type PayeeEdge {
+  # The item at the end of the edge.
+  node: Payee!
+  # A cursor for use in pagination
+  cursor: String!
+}
 `, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
@@ -9738,6 +10079,30 @@ func (ec *executionContext) field_Mutation_acceptTerms_args(ctx context.Context,
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_addPayeeAccount_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["payee"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("payee"))
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["payee"] = arg0
+	var arg1 types.PayeeAccountInput
+	if tmp, ok := rawArgs["payee_account"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("payee_account"))
+		arg1, err = ec.unmarshalNPayeeAccountInput2msᚗapiᚋtypesᚐPayeeAccountInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["payee_account"] = arg1
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_confirmPasscodeResetOtp_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -9861,6 +10226,30 @@ func (ec *executionContext) field_Mutation_createTransactionPassword_args(ctx co
 		}
 	}
 	args["password"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_deletePayeeAccount_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["payee"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("payee"))
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["payee"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["payee_account"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("payee_account"))
+		arg1, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["payee_account"] = arg1
 	return args, nil
 }
 
@@ -10080,6 +10469,39 @@ func (ec *executionContext) field_Mutation_updateDeviceToken_args(ctx context.Co
 		}
 	}
 	args["token"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updatePayee_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["payee"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("payee"))
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["payee"] = arg0
+	var arg1 *types.PayeeInput
+	if tmp, ok := rawArgs["payee_input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("payee_input"))
+		arg1, err = ec.unmarshalOPayeeInput2ᚖmsᚗapiᚋtypesᚐPayeeInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["payee_input"] = arg1
+	var arg2 string
+	if tmp, ok := rawArgs["password"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("password"))
+		arg2, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["password"] = arg2
 	return args, nil
 }
 
@@ -10867,6 +11289,63 @@ func (ec *executionContext) field_Query_organisation_args(ctx context.Context, r
 }
 
 func (ec *executionContext) field_Query_organisations_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *int64
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg0, err = ec.unmarshalOInt2ᚖint64(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+		arg1, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg1
+	var arg2 *int64
+	if tmp, ok := rawArgs["last"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("last"))
+		arg2, err = ec.unmarshalOInt2ᚖint64(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["last"] = arg2
+	var arg3 *string
+	if tmp, ok := rawArgs["before"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("before"))
+		arg3, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["before"] = arg3
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_payee_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["id"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_payees_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 *int64
@@ -25296,6 +25775,132 @@ func (ec *executionContext) _Mutation_createPayee(ctx context.Context, field gra
 	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_updatePayee(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updatePayee_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdatePayee(rctx, args["payee"].(string), args["payee_input"].(*types.PayeeInput), args["password"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.Response)
+	fc.Result = res
+	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_addPayeeAccount(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_addPayeeAccount_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().AddPayeeAccount(rctx, args["payee"].(string), args["payee_account"].(types.PayeeAccountInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.Response)
+	fc.Result = res
+	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_deletePayeeAccount(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_deletePayeeAccount_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeletePayeeAccount(rctx, args["payee"].(string), args["payee_account"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.Response)
+	fc.Result = res
+	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _OpeningBalance_default_value(ctx context.Context, field graphql.CollectedField, obj *types.OpeningBalance) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -26738,6 +27343,740 @@ func (ec *executionContext) _PageInfo_endCursor(ctx context.Context, field graph
 	res := resTmp.(*string)
 	fc.Result = res
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Payee_id(ctx context.Context, field graphql.CollectedField, obj *types.Payee) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Payee",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Payee_owner(ctx context.Context, field graphql.CollectedField, obj *types.Payee) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Payee",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Owner, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Payee_name(ctx context.Context, field graphql.CollectedField, obj *types.Payee) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Payee",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Payee_avatar(ctx context.Context, field graphql.CollectedField, obj *types.Payee) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Payee",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Avatar, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Payee_ts(ctx context.Context, field graphql.CollectedField, obj *types.Payee) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Payee",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Ts, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int64)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Payee_accounts(ctx context.Context, field graphql.CollectedField, obj *types.Payee) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Payee",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Accounts, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*types.PayeeAccount)
+	fc.Result = res
+	return ec.marshalNPayeeAccount2ᚕᚖmsᚗapiᚋtypesᚐPayeeAccount(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PayeeAccount_id(ctx context.Context, field graphql.CollectedField, obj *types.PayeeAccount) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PayeeAccount",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PayeeAccount_name(ctx context.Context, field graphql.CollectedField, obj *types.PayeeAccount) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PayeeAccount",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PayeeAccount_currency(ctx context.Context, field graphql.CollectedField, obj *types.PayeeAccount) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PayeeAccount",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Currency, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PayeeAccount_account_number(ctx context.Context, field graphql.CollectedField, obj *types.PayeeAccount) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PayeeAccount",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.AccountNumber, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PayeeAccount_sort_code(ctx context.Context, field graphql.CollectedField, obj *types.PayeeAccount) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PayeeAccount",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.SortCode, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PayeeAccount_iban(ctx context.Context, field graphql.CollectedField, obj *types.PayeeAccount) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PayeeAccount",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Iban, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PayeeAccount_swift_bic(ctx context.Context, field graphql.CollectedField, obj *types.PayeeAccount) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PayeeAccount",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.SwiftBic, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PayeeAccount_bank_code(ctx context.Context, field graphql.CollectedField, obj *types.PayeeAccount) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PayeeAccount",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.BankCode, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PayeeAccount_routing_number(ctx context.Context, field graphql.CollectedField, obj *types.PayeeAccount) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PayeeAccount",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.RoutingNumber, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PayeeAccount_phone_number(ctx context.Context, field graphql.CollectedField, obj *types.PayeeAccount) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PayeeAccount",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PhoneNumber, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PayeeConnection_edges(ctx context.Context, field graphql.CollectedField, obj *types.PayeeConnection) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PayeeConnection",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Edges, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*types.PayeeEdge)
+	fc.Result = res
+	return ec.marshalNPayeeEdge2ᚕᚖmsᚗapiᚋtypesᚐPayeeEdgeᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PayeeConnection_nodes(ctx context.Context, field graphql.CollectedField, obj *types.PayeeConnection) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PayeeConnection",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Nodes, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*types.Payee)
+	fc.Result = res
+	return ec.marshalNPayee2ᚕᚖmsᚗapiᚋtypesᚐPayeeᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PayeeConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *types.PayeeConnection) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PayeeConnection",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PageInfo, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.PageInfo)
+	fc.Result = res
+	return ec.marshalNPageInfo2ᚖmsᚗapiᚋtypesᚐPageInfo(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PayeeConnection_totalCount(ctx context.Context, field graphql.CollectedField, obj *types.PayeeConnection) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PayeeConnection",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalCount, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int64)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PayeeEdge_node(ctx context.Context, field graphql.CollectedField, obj *types.PayeeEdge) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PayeeEdge",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Node, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.Payee)
+	fc.Result = res
+	return ec.marshalNPayee2ᚖmsᚗapiᚋtypesᚐPayee(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PayeeEdge_cursor(ctx context.Context, field graphql.CollectedField, obj *types.PayeeEdge) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PayeeEdge",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Cursor, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Person_id(ctx context.Context, field graphql.CollectedField, obj *types.Person) (ret graphql.Marshaler) {
@@ -31994,6 +33333,84 @@ func (ec *executionContext) _Query_accounts(ctx context.Context, field graphql.C
 	res := resTmp.(*types.AccountConnection)
 	fc.Result = res
 	return ec.marshalOAccountConnection2ᚖmsᚗapiᚋtypesᚐAccountConnection(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_payee(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_payee_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Payee(rctx, args["id"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*types.Payee)
+	fc.Result = res
+	return ec.marshalOPayee2ᚖmsᚗapiᚋtypesᚐPayee(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_payees(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_payees_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Payees(rctx, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*types.PayeeConnection)
+	fc.Result = res
+	return ec.marshalOPayeeConnection2ᚖmsᚗapiᚋtypesᚐPayeeConnection(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_transaction(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -41653,6 +43070,21 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "updatePayee":
+			out.Values[i] = ec._Mutation_updatePayee(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "addPayeeAccount":
+			out.Values[i] = ec._Mutation_addPayeeAccount(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "deletePayeeAccount":
+			out.Values[i] = ec._Mutation_deletePayeeAccount(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -41975,6 +43407,168 @@ func (ec *executionContext) _PageInfo(ctx context.Context, sel ast.SelectionSet,
 			out.Values[i] = ec._PageInfo_startCursor(ctx, field, obj)
 		case "endCursor":
 			out.Values[i] = ec._PageInfo_endCursor(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var payeeImplementors = []string{"Payee"}
+
+func (ec *executionContext) _Payee(ctx context.Context, sel ast.SelectionSet, obj *types.Payee) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, payeeImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Payee")
+		case "id":
+			out.Values[i] = ec._Payee_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "owner":
+			out.Values[i] = ec._Payee_owner(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "name":
+			out.Values[i] = ec._Payee_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "avatar":
+			out.Values[i] = ec._Payee_avatar(ctx, field, obj)
+		case "ts":
+			out.Values[i] = ec._Payee_ts(ctx, field, obj)
+		case "accounts":
+			out.Values[i] = ec._Payee_accounts(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var payeeAccountImplementors = []string{"PayeeAccount"}
+
+func (ec *executionContext) _PayeeAccount(ctx context.Context, sel ast.SelectionSet, obj *types.PayeeAccount) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, payeeAccountImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PayeeAccount")
+		case "id":
+			out.Values[i] = ec._PayeeAccount_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "name":
+			out.Values[i] = ec._PayeeAccount_name(ctx, field, obj)
+		case "currency":
+			out.Values[i] = ec._PayeeAccount_currency(ctx, field, obj)
+		case "account_number":
+			out.Values[i] = ec._PayeeAccount_account_number(ctx, field, obj)
+		case "sort_code":
+			out.Values[i] = ec._PayeeAccount_sort_code(ctx, field, obj)
+		case "iban":
+			out.Values[i] = ec._PayeeAccount_iban(ctx, field, obj)
+		case "swift_bic":
+			out.Values[i] = ec._PayeeAccount_swift_bic(ctx, field, obj)
+		case "bank_code":
+			out.Values[i] = ec._PayeeAccount_bank_code(ctx, field, obj)
+		case "routing_number":
+			out.Values[i] = ec._PayeeAccount_routing_number(ctx, field, obj)
+		case "phone_number":
+			out.Values[i] = ec._PayeeAccount_phone_number(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var payeeConnectionImplementors = []string{"PayeeConnection"}
+
+func (ec *executionContext) _PayeeConnection(ctx context.Context, sel ast.SelectionSet, obj *types.PayeeConnection) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, payeeConnectionImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PayeeConnection")
+		case "edges":
+			out.Values[i] = ec._PayeeConnection_edges(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "nodes":
+			out.Values[i] = ec._PayeeConnection_nodes(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "pageInfo":
+			out.Values[i] = ec._PayeeConnection_pageInfo(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "totalCount":
+			out.Values[i] = ec._PayeeConnection_totalCount(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var payeeEdgeImplementors = []string{"PayeeEdge"}
+
+func (ec *executionContext) _PayeeEdge(ctx context.Context, sel ast.SelectionSet, obj *types.PayeeEdge) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, payeeEdgeImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PayeeEdge")
+		case "node":
+			out.Values[i] = ec._PayeeEdge_node(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "cursor":
+			out.Values[i] = ec._PayeeEdge_cursor(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -43239,6 +44833,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_accounts(ctx, field)
+				return res
+			})
+		case "payee":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_payee(ctx, field)
+				return res
+			})
+		case "payees":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_payees(ctx, field)
 				return res
 			})
 		case "transaction":
@@ -46637,6 +48253,95 @@ func (ec *executionContext) marshalNPageInfo2ᚖmsᚗapiᚋtypesᚐPageInfo(ctx 
 	return ec._PageInfo(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNPayee2ᚕᚖmsᚗapiᚋtypesᚐPayeeᚄ(ctx context.Context, sel ast.SelectionSet, v []*types.Payee) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNPayee2ᚖmsᚗapiᚋtypesᚐPayee(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNPayee2ᚖmsᚗapiᚋtypesᚐPayee(ctx context.Context, sel ast.SelectionSet, v *types.Payee) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Payee(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNPayeeAccount2ᚕᚖmsᚗapiᚋtypesᚐPayeeAccount(ctx context.Context, sel ast.SelectionSet, v []*types.PayeeAccount) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOPayeeAccount2ᚖmsᚗapiᚋtypesᚐPayeeAccount(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) unmarshalNPayeeAccountInput2msᚗapiᚋtypesᚐPayeeAccountInput(ctx context.Context, v interface{}) (types.PayeeAccountInput, error) {
+	res, err := ec.unmarshalInputPayeeAccountInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNPayeeAccountInput2ᚕᚖmsᚗapiᚋtypesᚐPayeeAccountInput(ctx context.Context, v interface{}) ([]*types.PayeeAccountInput, error) {
 	var vSlice []interface{}
 	if v != nil {
@@ -46656,6 +48361,53 @@ func (ec *executionContext) unmarshalNPayeeAccountInput2ᚕᚖmsᚗapiᚋtypes�
 		}
 	}
 	return res, nil
+}
+
+func (ec *executionContext) marshalNPayeeEdge2ᚕᚖmsᚗapiᚋtypesᚐPayeeEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*types.PayeeEdge) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNPayeeEdge2ᚖmsᚗapiᚋtypesᚐPayeeEdge(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNPayeeEdge2ᚖmsᚗapiᚋtypesᚐPayeeEdge(ctx context.Context, sel ast.SelectionSet, v *types.PayeeEdge) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._PayeeEdge(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNPayeeInput2msᚗapiᚋtypesᚐPayeeInput(ctx context.Context, v interface{}) (types.PayeeInput, error) {
@@ -49015,11 +50767,40 @@ func (ec *executionContext) marshalOOverdraftSettings2ᚖmsᚗapiᚋtypesᚐOver
 	return ec._OverdraftSettings(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalOPayee2ᚖmsᚗapiᚋtypesᚐPayee(ctx context.Context, sel ast.SelectionSet, v *types.Payee) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Payee(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOPayeeAccount2ᚖmsᚗapiᚋtypesᚐPayeeAccount(ctx context.Context, sel ast.SelectionSet, v *types.PayeeAccount) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._PayeeAccount(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalOPayeeAccountInput2ᚖmsᚗapiᚋtypesᚐPayeeAccountInput(ctx context.Context, v interface{}) (*types.PayeeAccountInput, error) {
 	if v == nil {
 		return nil, nil
 	}
 	res, err := ec.unmarshalInputPayeeAccountInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOPayeeConnection2ᚖmsᚗapiᚋtypesᚐPayeeConnection(ctx context.Context, sel ast.SelectionSet, v *types.PayeeConnection) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._PayeeConnection(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOPayeeInput2ᚖmsᚗapiᚋtypesᚐPayeeInput(ctx context.Context, v interface{}) (*types.PayeeInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputPayeeInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 

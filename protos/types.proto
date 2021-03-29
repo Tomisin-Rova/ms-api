@@ -152,11 +152,30 @@ message Country {
 
 // Payee type
 message Payee {
-  string payeeId = 1;
+  string id = 1;
+  string owner = 2;
+  string name = 3;
+  string avatar = 4;
+  repeated payeeAccount accounts = 5;
+  int64 ts = 6;
+}
+
+message payeeAccount {
+  string id = 1;
   string name = 2;
-  string owner = 3;
-  repeated Account accounts = 4;
-  string phonenumber = 5;
+  string currency = 3;
+  string accountNumber = 4;
+  string sortCode = 5;
+  string iban = 6;
+  string swiftBic = 7;
+  string bankCode = 8;
+  string routingNumber = 9;
+  string phoneNumber = 10;
+}
+
+// Payees type
+message Payees {
+  repeated Payee payee = 1;
 }
 
 // Account type

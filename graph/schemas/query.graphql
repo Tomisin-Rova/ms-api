@@ -384,6 +384,19 @@ type Query {
     # Returns the elements in the list that come before the specified cursor.
     before: String
   ): AccountConnection
+  # fetch an individual payee by ID
+  payee(id: ID!): Payee
+  # fetch all payees for a given customer
+  payees(
+    # Returns the first n elements from the list.
+    first: Int,
+    # Returns the elements in the list that come after the specified cursor.
+    after: String,
+    # Returns the last n elements from the list.
+    last: Int,
+    # Returns the elements in the list that come before the specified cursor.
+    before: String
+  ): PayeeConnection
   # fetch an individual transaction by unique ID
   transaction(
     # The Ulid field for the transaction
