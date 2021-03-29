@@ -34,6 +34,7 @@ gen-mocks:
 	mockery --name=IdentityServiceClient --recursive
 	mockery --name=OnBoardingServiceClient --recursive
 	mockery --name=PersonServiceClient --recursive
+	mockery --name=PaymentServiceClient --recursive
 	go generate ./...
 
 local: schema proto gen-mocks lint test

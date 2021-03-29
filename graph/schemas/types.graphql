@@ -2121,8 +2121,10 @@ input ProductInput {
 input PayeeInput {
   # name of payee/beneficiariy
   name: String!
+  # avatar (optional) for the payee
+  avatar: String
   # account information provided when creating payee
-  accounts: [PayeeAccountInput!]!
+  accounts: [PayeeAccountInput]!
 }
 
 input PayeeAccountInput {

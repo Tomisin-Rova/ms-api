@@ -768,6 +768,7 @@ type PayeeAccountInput struct {
 
 type PayeeInput struct {
 	Name     string               `json:"name"`
+	Avatar   *string              `json:"avatar"`
 	Accounts []*PayeeAccountInput `json:"accounts"`
 }
 

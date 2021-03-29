@@ -36,4 +36,5 @@ message CreatePayeeRequest {
   string routingNumber = 11;
   string phoneNumber = 12;
   string currency = 13;
+  string avatar = 14;
 }

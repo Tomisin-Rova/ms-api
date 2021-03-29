@@ -502,10 +502,15 @@ func (r *mutationResolver) CreatePayee(ctx context.Context, payee types.PayeeInp
 		r.logger.Error("validating payee account details", zap.Error(err))
 		return nil, err
 	}
+	avatar := ""
+	if payee.Avatar != nil {
+		avatar = *payee.Avatar
+	}
 	response, err := r.paymentService.CreatePayee(ctx, &paymentService.CreatePayeeRequest{
 		IdentityId:     claims.IdentityId,
 		TransactionPin: password,
 		Name:           payee.Name,
+		Avatar:         avatar,
 		AccountName:    payeeAccount.Name,
 		AccountNumber:  payeeAccount.AccountNumber,
 		SortCode:       payeeAccount.SortCode,

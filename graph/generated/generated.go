@@ -9547,8 +9547,10 @@ input ProductInput {
 input PayeeInput {
   # name of payee/beneficiariy
   name: String!
+  # avatar (optional) for the payee
+  avatar: String
   # account information provided when creating payee
-  accounts: [PayeeAccountInput!]!
+  accounts: [PayeeAccountInput]!
 }
 
 input PayeeAccountInput {
@@ -38646,11 +38648,19 @@ func (ec *executionContext) unmarshalInputPayeeInput(ctx context.Context, obj in
 			if err != nil {
 				return it, err
 			}
+		case "avatar":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("avatar"))
+			it.Avatar, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "accounts":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("accounts"))
-			it.Accounts, err = ec.unmarshalNPayeeAccountInput2ᚕᚖmsᚗapiᚋtypesᚐPayeeAccountInputᚄ(ctx, v)
+			it.Accounts, err = ec.unmarshalNPayeeAccountInput2ᚕᚖmsᚗapiᚋtypesᚐPayeeAccountInput(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -46627,7 +46637,7 @@ func (ec *executionContext) marshalNPageInfo2ᚖmsᚗapiᚋtypesᚐPageInfo(ctx 
 	return ec._PageInfo(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNPayeeAccountInput2ᚕᚖmsᚗapiᚋtypesᚐPayeeAccountInputᚄ(ctx context.Context, v interface{}) ([]*types.PayeeAccountInput, error) {
+func (ec *executionContext) unmarshalNPayeeAccountInput2ᚕᚖmsᚗapiᚋtypesᚐPayeeAccountInput(ctx context.Context, v interface{}) ([]*types.PayeeAccountInput, error) {
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -46640,17 +46650,12 @@ func (ec *executionContext) unmarshalNPayeeAccountInput2ᚕᚖmsᚗapiᚋtypes�
 	res := make([]*types.PayeeAccountInput, len(vSlice))
 	for i := range vSlice {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNPayeeAccountInput2ᚖmsᚗapiᚋtypesᚐPayeeAccountInput(ctx, vSlice[i])
+		res[i], err = ec.unmarshalOPayeeAccountInput2ᚖmsᚗapiᚋtypesᚐPayeeAccountInput(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
 	}
 	return res, nil
-}
-
-func (ec *executionContext) unmarshalNPayeeAccountInput2ᚖmsᚗapiᚋtypesᚐPayeeAccountInput(ctx context.Context, v interface{}) (*types.PayeeAccountInput, error) {
-	res, err := ec.unmarshalInputPayeeAccountInput(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNPayeeInput2msᚗapiᚋtypesᚐPayeeInput(ctx context.Context, v interface{}) (types.PayeeInput, error) {
@@ -49008,6 +49013,14 @@ func (ec *executionContext) marshalOOverdraftSettings2ᚖmsᚗapiᚋtypesᚐOver
 		return graphql.Null
 	}
 	return ec._OverdraftSettings(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOPayeeAccountInput2ᚖmsᚗapiᚋtypesᚐPayeeAccountInput(ctx context.Context, v interface{}) (*types.PayeeAccountInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputPayeeAccountInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalOPerson2ᚖmsᚗapiᚋtypesᚐPerson(ctx context.Context, sel ast.SelectionSet, v *types.Person) graphql.Marshaler {
