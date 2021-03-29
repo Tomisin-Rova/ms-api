@@ -2,13 +2,13 @@ package graph
 
 import (
 	"errors"
+	"ms.api/protos/pb/paymentService"
 	"testing"
 
 	"ms.api/mocks"
 	"ms.api/protos/pb/accountService"
 	identitySvc "ms.api/protos/pb/identityService"
 	"ms.api/protos/pb/onboardingService"
-	"ms.api/protos/pb/paymentService"
 	protoTypes "ms.api/protos/pb/types"
 	"ms.api/server/http/middlewares"
 	"ms.api/types"
