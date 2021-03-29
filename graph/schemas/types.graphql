@@ -2117,3 +2117,34 @@ input ProductInput {
   # Name of the identification scheme
   scheme: String
 }
+# Type for creating a new payee
+input PayeeInput {
+  # name of payee/beneficiariy
+  name: String!
+  # avatar (optional) for the payee
+  avatar: String
+  # account information provided when creating payee
+  accounts: [PayeeAccountInput]!
+}
+
+input PayeeAccountInput {
+  # nickname of beneficiary account assigned by customer
+  name: String
+  # currency code for the currency
+  currency: String
+  # optional payee account account_number
+  account_number: String
+  # optional payee account sort_code
+  sort_code: String
+  # optional payee account iban
+  iban: String
+  # optional payee account swift_bic
+  swift_bic: String
+  # optional payee account bank_code
+  bank_code: String
+  # optional payee account routing_number
+  routing_number: String
+  # optional payee phone_number
+  phone_number: String
+}
+

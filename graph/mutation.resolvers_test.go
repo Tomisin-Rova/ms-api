@@ -2,6 +2,7 @@ package graph
 
 import (
 	"errors"
+	"ms.api/protos/pb/paymentService"
 	"testing"
 
 	"ms.api/mocks"
@@ -524,6 +525,87 @@ func TestMutationResolver_SubmitApplication(t *testing.T) {
 			}
 
 			onboardingServiceMock.AssertExpectations(t)
+		})
+	}
+}
+
+func TestMutationResolver_CreatePayee(t *testing.T) {
+	const (
+		success = iota
+		errorInvalidUser
+		errorOnboardingSvcSubmitApplication
+	)
+	accountName, accountNumber, passcode := "accountName", "1023413534", "passcode"
+	payeeInput := types.PayeeInput{
+		Name: "test name",
+		Accounts: []*types.PayeeAccountInput{{
+			Name:          &accountName,
+			AccountNumber: &accountNumber,
+		}},
+	}
+	mockReq := &paymentService.CreatePayeeRequest{
+		IdentityId:     identityId,
+		TransactionPin: passcode,
+		Name:           payeeInput.Name,
+		AccountName:    *payeeInput.Accounts[0].Name,
+		AccountNumber:  *payeeInput.Accounts[0].AccountNumber,
+	}
+	var tests = []struct {
+		name     string
+		testType int
+	}{
+		{
+			name:     "Test submit application successfully",
+			testType: success,
+		},
+		{
+			name:     "Test error invalid user context",
+			testType: errorInvalidUser,
+		},
+		{
+			name:     "Test error calling onBoardingService.SubmitApplication",
+			testType: errorOnboardingSvcSubmitApplication,
+		},
+	}
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			// Mocks
+			paymentServiceMock := new(mocks.PaymentServiceClient)
+
+			resolver := NewResolver(&ResolverOpts{
+				paymentService: paymentServiceMock,
+			}, zaptest.NewLogger(t))
+			mutationResolver := resolver.Mutation()
+
+			switch testCase.testType {
+			case success:
+				paymentServiceMock.On("CreatePayee", validUserCtx, mockReq).Return(&protoTypes.Response{
+					Message: "success",
+					Success: true,
+				}, nil)
+
+				response, err := mutationResolver.CreatePayee(validUserCtx, payeeInput, passcode)
+
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+				assert.NotEmpty(t, response)
+			case errorInvalidUser:
+				response, err := mutationResolver.CreatePayee(context.Background(), payeeInput, passcode)
+
+				assert.Error(t, err)
+				assert.Equal(t, 7012, err.(*coreErrors.Terror).Code())
+				assert.Nil(t, response)
+				assert.Empty(t, response)
+			case errorOnboardingSvcSubmitApplication:
+				paymentServiceMock.On("CreatePayee", validUserCtx, mockReq).Return(nil, errors.New(""))
+				response, err := mutationResolver.CreatePayee(validUserCtx, payeeInput, passcode)
+
+				assert.Error(t, err)
+				assert.Nil(t, response)
+				assert.Empty(t, response)
+			}
+
+			paymentServiceMock.AssertExpectations(t)
 		})
 	}
 }
