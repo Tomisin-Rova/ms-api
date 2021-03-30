@@ -474,14 +474,22 @@ func (r *mutationResolver) CreateAccount(ctx context.Context, product types.Prod
 	if err != nil {
 		return nil, ErrUnAuthenticated
 	}
-	response, err := r.accountService.CreateAccount(ctx, &accountService.CreateAccountRequest{
+
+	// Build request
+	request := accountService.CreateAccountRequest{
 		IdentityId: claims.IdentityId,
 		Product: &protoTypes.ProductInput{
-			Id:             product.ID,
-			Identification: *product.Identification,
-			Scheme:         *product.Scheme,
+			Id: product.ID,
 		},
-	})
+	}
+	if product.Identification != nil {
+		request.Product.Identification = *product.Identification
+	}
+	if product.Scheme != nil {
+		request.Product.Scheme = *product.Scheme
+	}
+	// Execute create account
+	response, err := r.accountService.CreateAccount(ctx, &request)
 	if err != nil {
 		r.logger.Error("error calling accountService.CreateAccount()", zap.Error(err))
 		return nil, err

@@ -74,18 +74,21 @@ message Cdd {
   string id = 1;
   string owner = 2;
   bool watchlist = 3;
-  string details = 4;
+  string status = 4;
+  bool onboard = 5;
+  repeated Validation validations = 6;
+  int32 ts = 7;
+}
+
+// Validation type
+message Validation {
+  string id = 1;
+  string validation_type = 2;
+  string applicant = 3;
+  google.protobuf.Any data = 4;
   string status = 5;
-  Kyc kyc = 6;
-  Aml aml = 7;
-  Roava roava = 8;
-  Cra cra = 9;
-  string created_at = 10;
-  string updated_at = 11;
-  bool onboard = 12;
-  int64 ts = 13;  
-  int64 version = 14;
-  bool active = 15;
+  bool approved = 6;
+  int32 ts = 7;
 }
 
 // Kyc type

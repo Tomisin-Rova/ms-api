@@ -18,7 +18,7 @@ import (
 	"ms.api/graph/models"
 	emailvalidator "ms.api/libs/validator/email"
 	"ms.api/protos/pb/accountService"
-	"ms.api/protos/pb/authService"
+	"ms.api/protos/pb/cddService"
 	"ms.api/protos/pb/onboardingService"
 	"ms.api/protos/pb/personService"
 	"ms.api/server/http/middlewares"
@@ -30,22 +30,29 @@ func (r *queryResolver) Me(ctx context.Context) (*types.Person, error) {
 	if err != nil {
 		return nil, ErrUnAuthenticated
 	}
-	person, err := r.authService.GetPerson(ctx, &authService.GetPersonRequest{
-		PersonId:   claims.PersonId,
-		IdentityId: claims.IdentityId,
-		DeviceId:   claims.DeviceId,
+	personDto, err := r.personService.Person(ctx, &personService.PersonRequest{
+		Id: claims.PersonId,
 	})
 	if err != nil {
 		r.logger.Error("failed to get person", zap.Error(err))
 		return nil, err
 	}
-	p := &types.Person{}
-	if err := copier.Copy(p, &person); err != nil {
-		r.logger.Error("copier failed", zap.Error(err))
-		return nil, errors.New("failed to read profile information. please retry")
+	person, err := getPerson(personDto)
+	if err != nil {
+		return nil, err
 	}
-	p.Dob = person.DOB
-	return p, nil
+
+	// Add CDD to response
+	cddDto, err := r.cddService.GetCDDByOwner(ctx, &cddService.GetCDDByOwnerRequest{
+		PersonId: claims.PersonId,
+	})
+	if err != nil {
+		r.logger.Error("get cdd", zap.Error(err))
+		return nil, err
+	}
+	person.Cdd = r.hydrateCDD(cddDto)
+
+	return person, nil
 }
 
 func (r *queryResolver) Person(ctx context.Context, id string) (*types.Person, error) {
@@ -58,6 +65,16 @@ func (r *queryResolver) Person(ctx context.Context, id string) (*types.Person, e
 	if err != nil {
 		return nil, err
 	}
+
+	// Add CDD to response
+	cddDto, err := r.cddService.GetCDDByOwner(ctx, &cddService.GetCDDByOwnerRequest{
+		PersonId: p.ID,
+	})
+	if err != nil {
+		r.logger.Error("get cdd", zap.Error(err))
+		return nil, err
+	}
+	p.Cdd = r.hydrateCDD(cddDto)
 
 	return p, nil
 }
