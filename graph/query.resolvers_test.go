@@ -4,6 +4,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"testing"
+
+	"ms.api/mocks"
+	cddService "ms.api/protos/pb/cddService"
+	"ms.api/protos/pb/onboardingService"
+	"ms.api/protos/pb/personService"
+	protoTypes "ms.api/protos/pb/types"
+	"ms.api/server/http/middlewares"
+
 	"github.com/golang/mock/gomock"
 	coreErrors "github.com/roava/zebra/errors"
 	"github.com/roava/zebra/models"
@@ -11,12 +20,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.uber.org/zap/zaptest"
-	"ms.api/mocks"
-	"ms.api/protos/pb/onboardingService"
-	"ms.api/protos/pb/personService"
-	protoTypes "ms.api/protos/pb/types"
-	"ms.api/server/http/middlewares"
-	"testing"
+	"google.golang.org/protobuf/types/known/anypb"
 )
 
 const (
@@ -330,9 +334,11 @@ func Test_queryResolver_Person(t *testing.T) {
 	}
 
 	personServiceClient := new(mocks.PersonServiceClient)
+	cddServiceClient := new(mocks.CddServiceClient)
 
 	resolver := NewResolver(&ResolverOpts{
 		personService: personServiceClient,
+		cddClient:     cddServiceClient,
 	}, zaptest.NewLogger(t)).Query()
 
 	for _, tt := range tests {
@@ -349,13 +355,127 @@ func Test_queryResolver_Person(t *testing.T) {
 			case personFound:
 				personServiceClient.On("Person", context.Background(), &personService.PersonRequest{
 					Id: "01eyx7ew2gt0en7e613tkyt1xc",
-				}).Return(&protoTypes.Person{}, nil)
+				}).Return(&protoTypes.Person{
+					Id:        "01eyx7ew2gt0en7e613tkyt1xc",
+					Title:     "Title",
+					FirstName: "FirstName",
+					LastName:  "LastName",
+				}, nil)
+				cddServiceClient.On("GetCDDByOwner", context.Background(), &cddService.GetCDDByOwnerRequest{
+					PersonId: "01eyx7ew2gt0en7e613tkyt1xc",
+				}).Return(&protoTypes.Cdd{
+					Id: "cddId",
+				}, nil)
 
 				response, err := resolver.Person(context.Background(), "01eyx7ew2gt0en7e613tkyt1xc")
 				assert.NoError(t, err)
 				assert.NotNil(t, response)
 			}
 
+		})
+	}
+}
+
+func TestQueryResolver_Me(t *testing.T) {
+	const (
+		success = iota
+		errorNotAuthenticatedUser
+		errorGettingPerson
+		errorGettingCDD
+	)
+
+	var tests = []struct {
+		name     string
+		testType int
+	}{
+		{
+			name:     "Test query me successfully",
+			testType: success,
+		},
+		{
+			name:     "Test error not authenticated user",
+			testType: errorNotAuthenticatedUser,
+		},
+		{
+			name:     "Test error getting person",
+			testType: errorGettingPerson,
+		},
+		{
+			name:     "Test error getting cdd",
+			testType: errorGettingCDD,
+		},
+	}
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			personServiceClient := new(mocks.PersonServiceClient)
+			cddServiceClient := new(mocks.CddServiceClient)
+
+			resolver := NewResolver(&ResolverOpts{
+				cddClient:     cddServiceClient,
+				personService: personServiceClient,
+			}, zaptest.NewLogger(t))
+			ctx := context.WithValue(context.Background(), middlewares.AuthenticatedUserContextKey,
+				models.Claims{
+					PersonId:   "personId",
+					IdentityId: "identityId",
+					DeviceId:   "deviceId",
+				})
+			switch testCase.testType {
+			case success:
+				personServiceClient.On("Person", ctx, &personService.PersonRequest{
+					Id: "personId",
+				}).Return(&protoTypes.Person{
+					Id: "personId",
+				}, nil)
+				cddServiceClient.On("GetCDDByOwner", ctx, &cddService.GetCDDByOwnerRequest{
+					PersonId: "personId",
+				}).Return(&protoTypes.Cdd{
+					Id:    "cddId",
+					Owner: "ownerId",
+					Validations: []*protoTypes.Validation{
+						{
+							ValidationType: models.SCREEN,
+							Data: &anypb.Any{
+								TypeUrl: models.SCREEN,
+								Value:   []byte("{}"),
+							},
+						},
+					},
+				}, nil)
+
+				me, err := resolver.Query().Me(ctx)
+				assert.NoError(t, err)
+				assert.NotNil(t, me)
+				assert.NotEmpty(t, me)
+			case errorNotAuthenticatedUser:
+				me, err := resolver.Query().Me(context.Background())
+				assert.Error(t, err)
+				assert.Nil(t, me)
+			case errorGettingPerson:
+				personServiceClient.On("Person", ctx, &personService.PersonRequest{
+					Id: "personId",
+				}).Return(nil, errors.New(""))
+
+				me, err := resolver.Query().Me(ctx)
+				assert.Error(t, err)
+				assert.Nil(t, me)
+			case errorGettingCDD:
+				personServiceClient.On("Person", ctx, &personService.PersonRequest{
+					Id: "personId",
+				}).Return(&protoTypes.Person{
+					Id: "personId",
+				}, nil)
+				cddServiceClient.On("GetCDDByOwner", ctx, &cddService.GetCDDByOwnerRequest{
+					PersonId: "personId",
+				}).Return(nil, errors.New(""))
+
+				me, err := resolver.Query().Me(ctx)
+				assert.Error(t, err)
+				assert.Nil(t, me)
+			}
+
+			personServiceClient.AssertExpectations(t)
+			cddServiceClient.AssertExpectations(t)
 		})
 	}
 }

@@ -25,7 +25,12 @@ message cdd_summary_document {
   repeated string reasons = 3;
 }
 
+message GetCDDByOwnerRequest {
+  string personId = 1;
+}
+
 service CddService{
   rpc GetCDDSummaryReport(PersonIdRequest) returns(Cddsummary){}
   rpc GetCDDById(CddIdRequest) returns(types.Cdd){}
+  rpc GetCDDByOwner(GetCDDByOwnerRequest) returns(types.Cdd){}
 }

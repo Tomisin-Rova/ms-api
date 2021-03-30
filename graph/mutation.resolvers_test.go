@@ -2,12 +2,13 @@ package graph
 
 import (
 	"errors"
-	"ms.api/protos/pb/paymentService"
 	"testing"
 
 	"ms.api/mocks"
+	"ms.api/protos/pb/accountService"
 	identitySvc "ms.api/protos/pb/identityService"
 	"ms.api/protos/pb/onboardingService"
+	"ms.api/protos/pb/paymentService"
 	protoTypes "ms.api/protos/pb/types"
 	"ms.api/server/http/middlewares"
 	"ms.api/types"
@@ -606,6 +607,87 @@ func TestMutationResolver_CreatePayee(t *testing.T) {
 			}
 
 			paymentServiceMock.AssertExpectations(t)
+		})
+	}
+}
+
+func TestMutationResolver_CreateAccount(t *testing.T) {
+	const (
+		success = iota
+		errorNotAuthenticatedUser
+		errorCreatingAccount
+	)
+
+	var tests = []struct {
+		name     string
+		arg      types.ProductInput
+		testType int
+	}{
+		{
+			name: "Test create account successfully",
+			arg: types.ProductInput{
+				ID: "productId",
+			},
+			testType: success,
+		},
+		{
+			name: "Test error not authenticated user",
+			arg: types.ProductInput{
+				ID: "productId",
+			},
+			testType: errorNotAuthenticatedUser,
+		},
+		{
+			name: "Test error creating account",
+			arg: types.ProductInput{
+				ID: "productId",
+			},
+			testType: errorCreatingAccount,
+		},
+	}
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			// Mocks
+			accountServiceClient := new(mocks.AccountServiceClient)
+
+			resolver := NewResolver(&ResolverOpts{
+				accountService: accountServiceClient,
+			}, zaptest.NewLogger(t))
+			ctx := context.WithValue(context.Background(), middlewares.AuthenticatedUserContextKey,
+				models.Claims{
+					PersonId:   "personId",
+					IdentityId: "identityId",
+					DeviceId:   "deviceId",
+				})
+			switch testCase.testType {
+			case success:
+				accountServiceClient.On("CreateAccount", ctx, &accountService.CreateAccountRequest{
+					IdentityId: "identityId",
+					Product: &protoTypes.ProductInput{
+						Id: testCase.arg.ID,
+					},
+				}).Return(&protoTypes.Response{Success: true}, nil)
+
+				response, err := resolver.Mutation().CreateAccount(ctx, testCase.arg)
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+				assert.NotEmpty(t, response)
+			case errorNotAuthenticatedUser:
+				response, err := resolver.Mutation().CreateAccount(context.Background(), testCase.arg)
+				assert.Error(t, err)
+				assert.Nil(t, response)
+			case errorCreatingAccount:
+				accountServiceClient.On("CreateAccount", ctx, &accountService.CreateAccountRequest{
+					IdentityId: "identityId",
+					Product: &protoTypes.ProductInput{
+						Id: testCase.arg.ID,
+					},
+				}).Return(nil, errors.New(""))
+
+				response, err := resolver.Mutation().CreateAccount(ctx, testCase.arg)
+				assert.Error(t, err)
+				assert.Nil(t, response)
+			}
 		})
 	}
 }

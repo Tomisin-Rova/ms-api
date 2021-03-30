@@ -16,3 +16,7 @@ func (c CDDEdge) GetCursor() string {
 func (ac AccountEdge) GetCursor() string {
 	return ac.Cursor
 }
+
+func (ac TagEdge) GetCursor() string {
+	return ac.Cursor
+}
