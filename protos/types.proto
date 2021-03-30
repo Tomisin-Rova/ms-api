@@ -160,6 +160,11 @@ message Payee {
   int64 ts = 6;
 }
 
+// Payees type
+message Payees {
+  repeated Payee payee = 1;
+}
+
 message payeeAccount {
   string id = 1;
   string name = 2;
@@ -171,11 +176,6 @@ message payeeAccount {
   string bankCode = 8;
   string routingNumber = 9;
   string phoneNumber = 10;
-}
-
-// Payees type
-message Payees {
-  repeated Payee payee = 1;
 }
 
 // Account type
