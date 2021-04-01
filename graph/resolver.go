@@ -220,6 +220,41 @@ func getPerson(from *pb.Person) (*types.Person, error) {
 		})
 	}
 	person.Addresses = addresses
+
+	// Add Phones
+	phones := make([]*types.Phone, 0)
+	for _, ph := range from.Phones {
+		phones = append(phones, &types.Phone{
+			Value:    ph.Number,
+			Verified: ph.Verified,
+		})
+	}
+	person.Phones = phones
+
+	// Add Emails
+	emails := make([]*types.Email, 0)
+	for _, em := range from.Emails {
+		emails = append(emails, &types.Email{
+			Value:    em.Value,
+			Verified: em.Verified,
+		})
+	}
+	person.Emails = emails
+
+	// Add Activity
+	activities := make([]*types.Activity, 0)
+	for _, ac := range from.Activities {
+		activities = append(activities, &types.Activity{
+			ID:            ac.Id,
+			Description:   ac.Description,
+			RiskWeighting: int64(ac.RiskWeighting),
+			Supported:     &ac.Supported,
+			Archived:      &ac.Archived,
+			Ts:            &ac.Ts,
+		})
+	}
+	person.Activities = activities
+
 	return &person, nil
 }
 
