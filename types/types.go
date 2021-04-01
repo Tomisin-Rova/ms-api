@@ -1544,15 +1544,17 @@ func (e ProofType) MarshalGQL(w io.Writer) {
 type State string
 
 const (
-	StateActive    State = "ACTIVE"
-	StateInactive  State = "INACTIVE"
-	StateBlocked   State = "BLOCKED"
-	StateExited    State = "EXITED"
-	StateDraft     State = "DRAFT"
-	StatePending   State = "PENDING"
-	StateCompleted State = "COMPLETED"
-	StateApproved  State = "APPROVED"
-	StateRejected  State = "REJECTED"
+	StateActive       State = "ACTIVE"
+	StateInactive     State = "INACTIVE"
+	StateBlocked      State = "BLOCKED"
+	StateExited       State = "EXITED"
+	StateDraft        State = "DRAFT"
+	StatePending      State = "PENDING"
+	StateCompleted    State = "COMPLETED"
+	StateApproved     State = "APPROVED"
+	StateRejected     State = "REJECTED"
+	StateDeclined     State = "DECLINED"
+	StateManualReview State = "MANUAL_REVIEW"
 )
 
 var AllState = []State{
@@ -1565,11 +1567,13 @@ var AllState = []State{
 	StateCompleted,
 	StateApproved,
 	StateRejected,
+	StateDeclined,
+	StateManualReview,
 }
 
 func (e State) IsValid() bool {
 	switch e {
-	case StateActive, StateInactive, StateBlocked, StateExited, StateDraft, StatePending, StateCompleted, StateApproved, StateRejected:
+	case StateActive, StateInactive, StateBlocked, StateExited, StateDraft, StatePending, StateCompleted, StateApproved, StateRejected, StateDeclined, StateManualReview:
 		return true
 	}
 	return false
