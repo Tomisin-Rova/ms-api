@@ -20,6 +20,7 @@ import (
 	"ms.api/protos/pb/accountService"
 	"ms.api/protos/pb/cddService"
 	"ms.api/protos/pb/onboardingService"
+	"ms.api/protos/pb/paymentService"
 	"ms.api/protos/pb/personService"
 	"ms.api/server/http/middlewares"
 	"ms.api/types"
@@ -548,6 +549,93 @@ func (r *queryResolver) Accounts(ctx context.Context, first *int64, after *strin
 	}
 
 	return connections.AccountConnectionCon(accountRes, edger, conn, input)
+}
+
+func (r *queryResolver) Payee(ctx context.Context, id string) (*types.Payee, error) {
+	claims, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+	payee, err := r.paymentService.GetPayee(ctx, &paymentService.GetPayeeRequest{
+		PayeeId:    id,
+		IdentityId: claims.IdentityId,
+	})
+	fmt.Println(payee)
+	if err != nil {
+		r.logger.Error("failed to get payee", zap.Error(err))
+		return nil, err
+	}
+	payeeRes := &types.Payee{}
+	if err := copier.Copy(payeeRes, &payee); err != nil {
+		r.logger.Error("copier failed", zap.Error(err))
+		return nil, errors.New("failed to read payee information. please retry")
+	}
+
+	// update missing copier fields
+	payeeRes.ID = payee.Id
+	for index, account := range payee.Accounts {
+		payeeRes.Accounts[index].ID = account.Id
+	}
+
+	return payeeRes, nil
+}
+
+func (r *queryResolver) Payees(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.PayeeConnection, error) {
+	claims, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+	payees, err := r.paymentService.GetPayees(ctx, &paymentService.GetPayeesRequest{
+		IdentityId: claims.IdentityId,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	input := models.ConnectionInput{
+		Before: before,
+		After:  after,
+		First:  first,
+		Last:   last,
+	}
+
+	edger := func(p *types.Payee, offset int) connections.Edge {
+		return types.PayeeEdge{
+			Node:   p,
+			Cursor: connections.OffsetToCursor(offset),
+		}
+	}
+
+	conn := func(edges []*types.PayeeEdge, nodes []*types.Payee, info *types.PageInfo, totalCount int) (*types.PayeeConnection, error) {
+		var payeeNodes []*types.Payee
+		payeeNodes = append(payeeNodes, nodes...)
+
+		return &types.PayeeConnection{
+			Edges:      edges,
+			Nodes:      payeeNodes,
+			PageInfo:   info,
+			TotalCount: Int64(int64(totalCount)),
+		}, nil
+	}
+
+	var payeeRes []*types.Payee
+	for _, p := range payees.Payee {
+		payee := &types.Payee{}
+		if err := copier.Copy(payee, &p); err != nil {
+			r.logger.Error("copier failed", zap.Error(err))
+			return nil, errors.New("failed to read payee information. please retry")
+		}
+
+		// update missing copier fields
+		payee.ID = p.Id
+		for index, account := range p.Accounts {
+			payee.Accounts[index].ID = account.Id
+		}
+		payeeRes = append(payeeRes, payee)
+	}
+
+	return connections.PayeeConnectionCon(payeeRes, edger, conn, input)
 }
 
 func (r *queryResolver) Transaction(ctx context.Context, id string) (*types.Transaction, error) {

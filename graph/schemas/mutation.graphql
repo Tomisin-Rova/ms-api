@@ -30,5 +30,13 @@ type Mutation {
   createTransactionPassword(password: String!): Response!
   # create new deposit account
   createAccount(product: ProductInput!): Response!
+  # create a new payee using the transaction password
   createPayee(payee: PayeeInput!, password: String!): Response!
+  # update an existing payee using the transaction password
+  # do not include the payee accounts for when updating a payee
+  updatePayee(payee: ID!, payee_input: PayeeInput, password: String!): Response!
+  # add new account to existing payee
+  addPayeeAccount(payee: ID!, payee_account: PayeeAccountInput!): Response!
+  # delete an account from an existing payee - marks as deleted
+  deletePayeeAccount(payee: ID!, payee_account: ID!): Response!
 }

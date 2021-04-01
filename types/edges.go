@@ -20,3 +20,7 @@ func (ac AccountEdge) GetCursor() string {
 func (ac TagEdge) GetCursor() string {
 	return ac.Cursor
 }
+
+func (p PayeeEdge) GetCursor() string {
+	return p.Cursor
+}
