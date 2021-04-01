@@ -7811,7 +7811,10 @@ enum State {
   # workflows
   APPROVED
   REJECTED
+  DECLINED
+  MANUAL_REVIEW
 }
+
 
 # enum of possible device tokens
 enum DeviceTokenType {
