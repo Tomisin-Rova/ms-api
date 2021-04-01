@@ -26,6 +26,8 @@ type Mutation {
   Customer accepts an array of documents displayed to them during onboarding
   """
   acceptTerms(documents: [ID]!): Response!
+  # update a validation status
+  updateValidationStatus(validation: ID!, status: State!, message: String!): Response!
   submitProof(proof: SubmitProofInput!): Response!
   createTransactionPassword(password: String!): Response!
   # create new deposit account

@@ -154,6 +154,12 @@ message SubmitProofRequest {
   string status = 6;
 }
 
+message UpdateValidationStatusRequest {
+  string validation = 1;
+  string status = 2;
+  string message = 3;
+}
+
 service OnBoardingService{
   rpc CreatePhone(CreatePhoneRequest) returns (CreatePhoneResponse) {}
   rpc CreatePerson(CreatePersonRequest) returns (CreatePersonResponse) {}
@@ -174,4 +180,5 @@ service OnBoardingService{
   rpc AddressLookup(AddressLookupRequest) returns (AddressLookupResponse) {}
   rpc SubmitApplication(SubmitApplicationRequest) returns (types.Response) {}
   rpc SubmitProof(SubmitProofRequest) returns (types.Response) {}
+  rpc UpdateValidationStatus(UpdateValidationStatusRequest) returns (types.Response) {}
 }

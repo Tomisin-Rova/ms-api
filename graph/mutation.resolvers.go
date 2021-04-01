@@ -424,6 +424,22 @@ func (r *mutationResolver) AcceptTerms(ctx context.Context, documents []*string)
 	panic(fmt.Errorf("not implemented"))
 }
 
+func (r *mutationResolver) UpdateValidationStatus(ctx context.Context, validation string, status types.State, message string) (*types.Response, error) {
+	response, err := r.onBoardingService.UpdateValidationStatus(ctx, &onboardingService.UpdateValidationStatusRequest{
+		Validation: validation,
+		Status:     string(status),
+		Message:    message,
+	})
+	if err != nil {
+		r.logger.Error("onBoardingService.UpdateValidationStatus()", zap.Error(err))
+		return nil, err
+	}
+	return &types.Response{
+		Message: response.Message,
+		Success: response.Success,
+	}, nil
+}
+
 func (r *mutationResolver) SubmitProof(ctx context.Context, proof types.SubmitProofInput) (*types.Response, error) {
 	claims, err := middlewares.GetAuthenticatedUser(ctx)
 	if err != nil {

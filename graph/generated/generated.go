@@ -642,6 +642,7 @@ type ComplexityRoot struct {
 		SubmitProof               func(childComplexity int, proof types.SubmitProofInput) int
 		UpdateDeviceToken         func(childComplexity int, token []*types.DeviceTokenInput) int
 		UpdatePayee               func(childComplexity int, payee string, payeeInput *types.PayeeInput, password string) int
+		UpdateValidationStatus    func(childComplexity int, validation string, status types.State, message string) int
 		VerifyEmail               func(childComplexity int, email string, code string) int
 	}
 
@@ -1220,6 +1221,7 @@ type MutationResolver interface {
 	ConfirmPasscodeResetOtp(ctx context.Context, email string, otp string) (*types.Response, error)
 	SubmitApplication(ctx context.Context) (*types.Response, error)
 	AcceptTerms(ctx context.Context, documents []*string) (*types.Response, error)
+	UpdateValidationStatus(ctx context.Context, validation string, status types.State, message string) (*types.Response, error)
 	SubmitProof(ctx context.Context, proof types.SubmitProofInput) (*types.Response, error)
 	CreateTransactionPassword(ctx context.Context, password string) (*types.Response, error)
 	CreateAccount(ctx context.Context, product types.ProductInput) (*types.Response, error)
@@ -4266,6 +4268,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.UpdatePayee(childComplexity, args["payee"].(string), args["payee_input"].(*types.PayeeInput), args["password"].(string)), true
 
+	case "Mutation.updateValidationStatus":
+		if e.complexity.Mutation.UpdateValidationStatus == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateValidationStatus_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateValidationStatus(childComplexity, args["validation"].(string), args["status"].(types.State), args["message"].(string)), true
+
 	case "Mutation.verifyEmail":
 		if e.complexity.Mutation.VerifyEmail == nil {
 			break
@@ -7245,6 +7259,8 @@ var sources = []*ast.Source{
   Customer accepts an array of documents displayed to them during onboarding
   """
   acceptTerms(documents: [ID]!): Response!
+  # update a validation status
+  updateValidationStatus(validation: ID!, status: State!, message: String!): Response!
   submitProof(proof: SubmitProofInput!): Response!
   createTransactionPassword(password: String!): Response!
   # create new deposit account
@@ -10502,6 +10518,39 @@ func (ec *executionContext) field_Mutation_updatePayee_args(ctx context.Context,
 		}
 	}
 	args["password"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateValidationStatus_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["validation"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("validation"))
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["validation"] = arg0
+	var arg1 types.State
+	if tmp, ok := rawArgs["status"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
+		arg1, err = ec.unmarshalNState2msᚗapiᚋtypesᚐState(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["status"] = arg1
+	var arg2 string
+	if tmp, ok := rawArgs["message"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("message"))
+		arg2, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["message"] = arg2
 	return args, nil
 }
 
@@ -25591,6 +25640,48 @@ func (ec *executionContext) _Mutation_acceptTerms(ctx context.Context, field gra
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().AcceptTerms(rctx, args["documents"].([]*string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.Response)
+	fc.Result = res
+	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_updateValidationStatus(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updateValidationStatus_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateValidationStatus(rctx, args["validation"].(string), args["status"].(types.State), args["message"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -43047,6 +43138,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "acceptTerms":
 			out.Values[i] = ec._Mutation_acceptTerms(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "updateValidationStatus":
+			out.Values[i] = ec._Mutation_updateValidationStatus(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
