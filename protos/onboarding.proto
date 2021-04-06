@@ -160,6 +160,11 @@ message UpdateValidationStatusRequest {
   string message = 3;
 }
 
+message ResubmitRequest {
+  repeated string reportIds = 1;
+  string message = 2;
+}
+
 service OnBoardingService{
   rpc CreatePhone(CreatePhoneRequest) returns (CreatePhoneResponse) {}
   rpc CreatePerson(CreatePersonRequest) returns (CreatePersonResponse) {}
@@ -181,4 +186,5 @@ service OnBoardingService{
   rpc SubmitApplication(SubmitApplicationRequest) returns (types.Response) {}
   rpc SubmitProof(SubmitProofRequest) returns (types.Response) {}
   rpc UpdateValidationStatus(UpdateValidationStatusRequest) returns (types.Response) {}
+  rpc Resubmit(ResubmitRequest) returns(types.Response){}
 }

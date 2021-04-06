@@ -41,4 +41,6 @@ type Mutation {
   addPayeeAccount(payee: ID!, payee_account: PayeeAccountInput!): Response!
   # delete an account from an existing payee - marks as deleted
   deletePayeeAccount(payee: ID!, payee_account: ID!): Response!
+  # ask for a customer to resubmit a report
+  resubmit(reports: [ReportInput!]!, message: String): Response!
 }

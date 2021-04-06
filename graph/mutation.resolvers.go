@@ -634,6 +634,25 @@ func (r *mutationResolver) DeletePayeeAccount(ctx context.Context, payee string,
 	}, nil
 }
 
+func (r *mutationResolver) Resubmit(ctx context.Context, reports []*types.ReportInput, message *string) (*types.Response, error) {
+	reportIds := make([]string, 0)
+	for _, reportId := range reports {
+		reportIds = append(reportIds, reportId.ID)
+	}
+	response, err := r.onBoardingService.Resubmit(ctx, &onboardingService.ResubmitRequest{
+		ReportIds: reportIds,
+		Message:   *message,
+	})
+	if err != nil {
+		r.logger.Error("onBoardingService.Resubmit()", zap.Error(err))
+		return nil, err
+	}
+	return &types.Response{
+		Message: response.Message,
+		Success: response.Success,
+	}, nil
+}
+
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 

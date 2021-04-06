@@ -1032,6 +1032,10 @@ type ReportEdge struct {
 	Cursor string  `json:"cursor"`
 }
 
+type ReportInput struct {
+	ID string `json:"id"`
+}
+
 type ReportReviewStatus struct {
 	Resubmit *bool   `json:"resubmit"`
 	Message  *string `json:"message"`

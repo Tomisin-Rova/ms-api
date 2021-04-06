@@ -125,3 +125,8 @@ func (f *FakeOnBoardingClient) UpdateValidationStatus(ctx context.Context, in *o
 	opts ...grpc.CallOption) (*types.Response, error) {
 	return &types.Response{}, f.err
 }
+
+func (f *FakeOnBoardingClient) Resubmit(ctx context.Context, in *onboardingService.ResubmitRequest,
+	opts ...grpc.CallOption) (*types.Response, error) {
+	return &types.Response{}, f.err
+}

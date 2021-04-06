@@ -2213,3 +2213,8 @@ type PayeeEdge {
   # A cursor for use in pagination
   cursor: String!
 }
+
+# Report input required to ask for a resubmit
+input ReportInput {
+  id: ID!
+}
