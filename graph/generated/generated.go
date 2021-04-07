@@ -7831,7 +7831,6 @@ enum State {
   MANUAL_REVIEW
 }
 
-
 # enum of possible device tokens
 enum DeviceTokenType {
   FIREBASE
@@ -8775,7 +8774,7 @@ type Validation {
   # type of validation being supplied
   validation_type: ValidationType!
   # the Person or Organisation validation is for
-  applicant: Entity!
+  applicant: Owner!
   # the validation result which can be a check, screen or proof
   data: ValidationData!
   # Organisation id for the company/vendor providing the KYC service
@@ -8787,6 +8786,8 @@ type Validation {
   # Unix timestamp when the record was created
   ts: Int
 }
+# union type representing owner of an entity
+union Owner = Person | Organisation
 
 # union type representing a validation result which can be a kyc CHECK, aml SCREEN or doucment PROOF
 union ValidationData = Check | Screen | Proof
@@ -9954,7 +9955,8 @@ type PayeeEdge {
 # Report input required to ask for a resubmit
 input ReportInput {
   id: ID!
-}`, BuiltIn: false},
+}
+`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
@@ -37858,9 +37860,9 @@ func (ec *executionContext) _Validation_applicant(ctx context.Context, field gra
 		}
 		return graphql.Null
 	}
-	res := resTmp.(types.Entity)
+	res := resTmp.(types.Owner)
 	fc.Result = res
-	return ec.marshalNEntity2msᚗapiᚋtypesᚐEntity(ctx, field.Selections, res)
+	return ec.marshalNOwner2msᚗapiᚋtypesᚐOwner(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Validation_data(ctx context.Context, field graphql.CollectedField, obj *types.Validation) (ret graphql.Marshaler) {
@@ -40465,6 +40467,29 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 	switch obj := (obj).(type) {
 	case nil:
 		return graphql.Null
+	default:
+		panic(fmt.Errorf("unexpected type %T", obj))
+	}
+}
+
+func (ec *executionContext) _Owner(ctx context.Context, sel ast.SelectionSet, obj types.Owner) graphql.Marshaler {
+	switch obj := (obj).(type) {
+	case nil:
+		return graphql.Null
+	case types.Person:
+		return ec._Person(ctx, sel, &obj)
+	case *types.Person:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Person(ctx, sel, obj)
+	case types.Organisation:
+		return ec._Organisation(ctx, sel, &obj)
+	case *types.Organisation:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Organisation(ctx, sel, obj)
 	default:
 		panic(fmt.Errorf("unexpected type %T", obj))
 	}
@@ -43366,7 +43391,7 @@ func (ec *executionContext) _OrgLocation(ctx context.Context, sel ast.SelectionS
 	return out
 }
 
-var organisationImplementors = []string{"Organisation", "Entity"}
+var organisationImplementors = []string{"Organisation", "Entity", "Owner"}
 
 func (ec *executionContext) _Organisation(ctx context.Context, sel ast.SelectionSet, obj *types.Organisation) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, organisationImplementors)
@@ -43790,7 +43815,7 @@ func (ec *executionContext) _PayeeEdge(ctx context.Context, sel ast.SelectionSet
 	return out
 }
 
-var personImplementors = []string{"Person", "Entity"}
+var personImplementors = []string{"Person", "Entity", "Owner"}
 
 func (ec *executionContext) _Person(ctx context.Context, sel ast.SelectionSet, obj *types.Person) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, personImplementors)
@@ -48451,6 +48476,16 @@ func (ec *executionContext) marshalNOrganisationEdge2ᚖmsᚗapiᚋtypesᚐOrgan
 		return graphql.Null
 	}
 	return ec._OrganisationEdge(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNOwner2msᚗapiᚋtypesᚐOwner(ctx context.Context, sel ast.SelectionSet, v types.Owner) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Owner(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNPageInfo2ᚖmsᚗapiᚋtypesᚐPageInfo(ctx context.Context, sel ast.SelectionSet, v *types.PageInfo) graphql.Marshaler {
