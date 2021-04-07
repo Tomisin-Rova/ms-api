@@ -94,7 +94,6 @@ enum State {
   MANUAL_REVIEW
 }
 
-
 # enum of possible device tokens
 enum DeviceTokenType {
   FIREBASE
@@ -1038,7 +1037,7 @@ type Validation {
   # type of validation being supplied
   validation_type: ValidationType!
   # the Person or Organisation validation is for
-  applicant: Entity!
+  applicant: Owner!
   # the validation result which can be a check, screen or proof
   data: ValidationData!
   # Organisation id for the company/vendor providing the KYC service
@@ -1050,6 +1049,8 @@ type Validation {
   # Unix timestamp when the record was created
   ts: Int
 }
+# union type representing owner of an entity
+union Owner = Person | Organisation
 
 # union type representing a validation result which can be a kyc CHECK, aml SCREEN or doucment PROOF
 union ValidationData = Check | Screen | Proof

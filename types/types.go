@@ -20,6 +20,10 @@ type Node interface {
 	IsNode()
 }
 
+type Owner interface {
+	IsOwner()
+}
+
 type ValidationData interface {
 	IsValidationData()
 }
@@ -717,6 +721,7 @@ type Organisation struct {
 }
 
 func (Organisation) IsEntity() {}
+func (Organisation) IsOwner()  {}
 
 type OrganisationConnection struct {
 	Edges      []*OrganisationEdge `json:"edges"`
@@ -829,6 +834,7 @@ type Person struct {
 }
 
 func (Person) IsEntity() {}
+func (Person) IsOwner()  {}
 
 type PersonConnection struct {
 	Edges      []*PersonEdge `json:"edges"`
@@ -1180,7 +1186,7 @@ type TransferDetails struct {
 type Validation struct {
 	ID             string         `json:"id"`
 	ValidationType ValidationType `json:"validation_type"`
-	Applicant      Entity         `json:"applicant"`
+	Applicant      Owner          `json:"applicant"`
 	Data           ValidationData `json:"data"`
 	Organisation   *Organisation  `json:"organisation"`
 	Status         State          `json:"status"`
