@@ -13,6 +13,7 @@ service PaymentService {
   rpc AddPayeeAccount(AddPayeeAccountRequest) returns (types.Response) {}
   rpc UpdatePayee(UpdatePayeeRequest) returns (types.Response) {}
   rpc MakeTransfer(TransferRequest) returns (SuccessResponse) {}
+  rpc CreatePayment(CreatePaymentRequest) returns (SuccessResponse) {}
 }
 
 message SuccessResponse {
@@ -80,4 +81,27 @@ message UpdatePayeeRequest {
   string Avatar = 3;
   string payeeId = 4;
   string transactionPin = 5;
+}
+message CreatePaymentRequest {
+  string Id = 1;            
+	string IdempotencyKey = 2;
+	string Owner = 3;        
+	Beneficiary Beneficiary = 4;  
+	int64 Charge = 5;       
+	string Reference = 6;      
+	string Status = 7;      
+	string Image = 8;         
+	string Notes =9;         
+	repeated string Tags = 10;         
+	string FundingSource = 11;
+	string Currency = 12;     
+	int64 FundingAmount = 13;
+	string Quote = 14;         
+	int64 Ts = 15;
+}
+
+message Beneficiary{
+  string Account = 1;
+  string Currency =2;
+  int64 Amount =3;
 }

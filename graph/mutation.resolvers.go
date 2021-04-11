@@ -653,6 +653,40 @@ func (r *mutationResolver) Resubmit(ctx context.Context, reports []*types.Report
 	}, nil
 }
 
+func (r *mutationResolver) CreatePayment(ctx context.Context, payment types.PaymentInput) (*types.Response, error) {
+	_, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+	response, err := r.paymentService.CreatePayment(ctx, &paymentService.CreatePaymentRequest{
+		IdempotencyKey: payment.IdempotencyKey,
+		Owner:          payment.Owner,
+		Beneficiary: &paymentService.Beneficiary{
+			Account:  payment.Beneficiary.Account,
+			Currency: *payment.Beneficiary.Currency,
+			Amount:   *payment.Beneficiary.Amount,
+		},
+		Charge:        *payment.Charge,
+		Reference:     *payment.Reference,
+		Status:        string(*payment.Status),
+		Image:         *payment.Image,
+		Notes:         *payment.Notes,
+		Tags:          payment.Tags,
+		FundingSource: payment.FundingSource,
+		Currency:      *payment.Currency,
+		FundingAmount: payment.FundingAmount,
+		Quote:         *payment.Quote,
+	})
+	if err != nil {
+		r.logger.Error("error calling paymentService.CreatePayment()", zap.Error(err))
+		return nil, err
+	}
+	return &types.Response{
+		Message: response.Message,
+		// Success: response.Success,
+	}, nil
+}
+
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 
