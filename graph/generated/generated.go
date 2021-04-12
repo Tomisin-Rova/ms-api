@@ -644,6 +644,7 @@ type ComplexityRoot struct {
 		UpdateDeviceToken         func(childComplexity int, token []*types.DeviceTokenInput) int
 		UpdatePayee               func(childComplexity int, payee string, payeeInput *types.PayeeInput, password string) int
 		UpdateValidationStatus    func(childComplexity int, validation string, status types.State, message string) int
+		ValidateBvn               func(childComplexity int, bvn string, phone string) int
 		VerifyEmail               func(childComplexity int, email string, code string) int
 	}
 
@@ -1231,6 +1232,7 @@ type MutationResolver interface {
 	AddPayeeAccount(ctx context.Context, payee string, payeeAccount types.PayeeAccountInput) (*types.Response, error)
 	DeletePayeeAccount(ctx context.Context, payee string, payeeAccount string) (*types.Response, error)
 	Resubmit(ctx context.Context, reports []*types.ReportInput, message *string) (*types.Response, error)
+	ValidateBvn(ctx context.Context, bvn string, phone string) (*types.Response, error)
 }
 type QueryResolver interface {
 	Me(ctx context.Context) (*types.Person, error)
@@ -4294,6 +4296,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.UpdateValidationStatus(childComplexity, args["validation"].(string), args["status"].(types.State), args["message"].(string)), true
 
+	case "Mutation.validateBVN":
+		if e.complexity.Mutation.ValidateBvn == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_validateBVN_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.ValidateBvn(childComplexity, args["bvn"].(string), args["phone"].(string)), true
+
 	case "Mutation.verifyEmail":
 		if e.complexity.Mutation.VerifyEmail == nil {
 			break
@@ -7290,6 +7304,8 @@ var sources = []*ast.Source{
   deletePayeeAccount(payee: ID!, payee_account: ID!): Response!
   # ask for a customer to resubmit a report
   resubmit(reports: [ReportInput!]!, message: String): Response!
+  # validate the customer's BVN
+  validateBVN(bvn: String!, phone: String!): Response!
 }
 `, BuiltIn: false},
 	{Name: "graph/schemas/query.graphql", Input: `type Query {
@@ -10600,6 +10616,30 @@ func (ec *executionContext) field_Mutation_updateValidationStatus_args(ctx conte
 		}
 	}
 	args["message"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_validateBVN_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["bvn"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("bvn"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["bvn"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["phone"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("phone"))
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["phone"] = arg1
 	return args, nil
 }
 
@@ -26067,6 +26107,48 @@ func (ec *executionContext) _Mutation_resubmit(ctx context.Context, field graphq
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().Resubmit(rctx, args["reports"].([]*types.ReportInput), args["message"].(*string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.Response)
+	fc.Result = res
+	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_validateBVN(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_validateBVN_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().ValidateBvn(rctx, args["bvn"].(string), args["phone"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -43317,6 +43399,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "resubmit":
 			out.Values[i] = ec._Mutation_resubmit(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "validateBVN":
+			out.Values[i] = ec._Mutation_validateBVN(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

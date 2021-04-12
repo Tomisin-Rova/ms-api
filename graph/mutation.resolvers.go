@@ -653,6 +653,26 @@ func (r *mutationResolver) Resubmit(ctx context.Context, reports []*types.Report
 	}, nil
 }
 
+func (r *mutationResolver) ValidateBvn(ctx context.Context, bvn string, phone string) (*types.Response, error) {
+	claims, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+	response, err := r.accountService.ValidateBVN(ctx, &accountService.ValidateBVNRequest{
+		PersonId: claims.PersonId,
+		Bvn:      bvn,
+		Phone:    phone,
+	})
+	if err != nil {
+		r.logger.Error("error calling accountService.ValidateBVN()", zap.Error(err))
+		return nil, err
+	}
+	return &types.Response{
+		Message: response.Message,
+		Success: response.Success,
+	}, nil
+}
+
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 

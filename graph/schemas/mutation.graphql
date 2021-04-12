@@ -43,4 +43,6 @@ type Mutation {
   deletePayeeAccount(payee: ID!, payee_account: ID!): Response!
   # ask for a customer to resubmit a report
   resubmit(reports: [ReportInput!]!, message: String): Response!
+  # validate the customer's BVN
+  validateBVN(bvn: String!, phone: String!): Response!
 }

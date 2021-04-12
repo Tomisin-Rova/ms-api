@@ -691,3 +691,58 @@ func TestMutationResolver_CreateAccount(t *testing.T) {
 		})
 	}
 }
+
+func TestMutationResolver_ValidateBvn(t *testing.T) {
+	const (
+		success = iota
+		errorValidatingBVN
+	)
+
+	mockReq := &accountService.ValidateBVNRequest{
+		PersonId: personId,
+		Bvn:      "123412412342",
+		Phone:    "01204201242",
+	}
+
+	var tests = []struct {
+		name     string
+		testType int
+	}{
+		{
+			name:     "Test validate bvn successfully",
+			testType: success,
+		},
+		{
+			name:     "Test account service error",
+			testType: errorValidatingBVN,
+		},
+	}
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			// Mocks
+			accountServiceClient := new(mocks.AccountServiceClient)
+			resolverOpts := &ResolverOpts{accountService: accountServiceClient}
+			resolver := NewResolver(resolverOpts, zaptest.NewLogger(t))
+			ctx := context.WithValue(context.Background(), middlewares.AuthenticatedUserContextKey,
+				models.Claims{PersonId: personId})
+
+			switch testCase.testType {
+			case success:
+				accountServiceClient.On("ValidateBVN", ctx, mockReq).
+					Return(&protoTypes.Response{Success: true}, nil)
+
+				response, err := resolver.Mutation().ValidateBvn(ctx, mockReq.Bvn, mockReq.Phone)
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+				assert.NotEmpty(t, response)
+			case errorValidatingBVN:
+				accountServiceClient.On("ValidateBVN", ctx, mockReq).
+					Return(nil, errors.New(""))
+
+				response, err := resolver.Mutation().ValidateBvn(ctx, mockReq.Bvn, mockReq.Phone)
+				assert.Error(t, err)
+				assert.Nil(t, response)
+			}
+		})
+	}
+}
