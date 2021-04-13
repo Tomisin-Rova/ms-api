@@ -13,7 +13,7 @@ service PaymentService {
   rpc AddPayeeAccount(AddPayeeAccountRequest) returns (types.Response) {}
   rpc UpdatePayee(UpdatePayeeRequest) returns (types.Response) {}
   rpc MakeTransfer(TransferRequest) returns (SuccessResponse) {}
-  rpc CreatePayment(CreatePaymentRequest) returns (SuccessResponse) {}
+  rpc CreatePayment(CreatePaymentRequest) returns (types.Response) {}
 }
 
 message SuccessResponse {

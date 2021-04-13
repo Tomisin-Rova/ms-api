@@ -658,24 +658,31 @@ func (r *mutationResolver) CreatePayment(ctx context.Context, payment types.Paym
 	if err != nil {
 		return nil, ErrUnAuthenticated
 	}
+
+	p, err := validator.ValidatePayment(&payment)
+	if err != nil {
+		r.logger.Error("validating payment details", zap.Error(err))
+		return nil, err
+	}
+
 	response, err := r.paymentService.CreatePayment(ctx, &paymentService.CreatePaymentRequest{
-		IdempotencyKey: payment.IdempotencyKey,
-		Owner:          payment.Owner,
+		IdempotencyKey: p.IdempotencyKey,
+		Owner:          p.Owner,
+		Charge:         *p.Charge,
+		Reference:      *p.Reference,
 		Beneficiary: &paymentService.Beneficiary{
-			Account:  payment.Beneficiary.Account,
-			Currency: *payment.Beneficiary.Currency,
-			Amount:   *payment.Beneficiary.Amount,
+			Account:  p.Beneficiary.Account,
+			Currency: *p.Beneficiary.Currency,
+			Amount:   *p.Beneficiary.Amount,
 		},
-		Charge:        *payment.Charge,
-		Reference:     *payment.Reference,
-		Status:        string(*payment.Status),
-		Image:         *payment.Image,
-		Notes:         *payment.Notes,
-		Tags:          payment.Tags,
-		FundingSource: payment.FundingSource,
-		Currency:      *payment.Currency,
-		FundingAmount: payment.FundingAmount,
-		Quote:         *payment.Quote,
+		Status:        string(*p.Status),
+		Image:         *p.Image,
+		Notes:         *p.Notes,
+		Tags:          p.Tags,
+		FundingSource: p.FundingSource,
+		Currency:      *p.Currency,
+		FundingAmount: p.FundingAmount,
+		Quote:         *p.Quote,
 	})
 	if err != nil {
 		r.logger.Error("error calling paymentService.CreatePayment()", zap.Error(err))
@@ -683,7 +690,7 @@ func (r *mutationResolver) CreatePayment(ctx context.Context, payment types.Paym
 	}
 	return &types.Response{
 		Message: response.Message,
-		// Success: response.Success,
+		Success: response.Success,
 	}, nil
 }
 

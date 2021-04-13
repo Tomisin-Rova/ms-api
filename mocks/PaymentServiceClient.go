@@ -80,7 +80,7 @@ func (_m *PaymentServiceClient) CreatePayee(ctx context.Context, in *paymentServ
 }
 
 // CreatePayment provides a mock function with given fields: ctx, in, opts
-func (_m *PaymentServiceClient) CreatePayment(ctx context.Context, in *paymentService.CreatePaymentRequest, opts ...grpc.CallOption) (*paymentService.SuccessResponse, error) {
+func (_m *PaymentServiceClient) CreatePayment(ctx context.Context, in *paymentService.CreatePaymentRequest, opts ...grpc.CallOption) (*types.Response, error) {
 	_va := make([]interface{}, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
@@ -90,12 +90,12 @@ func (_m *PaymentServiceClient) CreatePayment(ctx context.Context, in *paymentSe
 	_ca = append(_ca, _va...)
 	ret := _m.Called(_ca...)
 
-	var r0 *paymentService.SuccessResponse
-	if rf, ok := ret.Get(0).(func(context.Context, *paymentService.CreatePaymentRequest, ...grpc.CallOption) *paymentService.SuccessResponse); ok {
+	var r0 *types.Response
+	if rf, ok := ret.Get(0).(func(context.Context, *paymentService.CreatePaymentRequest, ...grpc.CallOption) *types.Response); ok {
 		r0 = rf(ctx, in, opts...)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*paymentService.SuccessResponse)
+			r0 = ret.Get(0).(*types.Response)
 		}
 	}
 
