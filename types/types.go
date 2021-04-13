@@ -262,6 +262,12 @@ type Balances struct {
 	TotalBalance                  *int64 `json:"totalBalance"`
 }
 
+type BeneficiaryInput struct {
+	Account  string  `json:"account"`
+	Currency *string `json:"currency"`
+	Amount   *int64  `json:"amount"`
+}
+
 type Cdd struct {
 	ID          string        `json:"id"`
 	Owner       *Person       `json:"owner"`
@@ -809,6 +815,22 @@ type PayeeInput struct {
 	Name     string               `json:"name"`
 	Avatar   *string              `json:"avatar"`
 	Accounts []*PayeeAccountInput `json:"accounts"`
+}
+
+type PaymentInput struct {
+	IdempotencyKey string            `json:"idempotency_key"`
+	Owner          string            `json:"owner"`
+	Charge         *int64            `json:"charge"`
+	Reference      *string           `json:"reference"`
+	Status         *State            `json:"status"`
+	Image          *string           `json:"image"`
+	Notes          *string           `json:"notes"`
+	Quote          *string           `json:"quote"`
+	Tags           []string          `json:"tags"`
+	Beneficiary    *BeneficiaryInput `json:"beneficiary"`
+	FundingSource  string            `json:"funding_source"`
+	Currency       *string           `json:"currency"`
+	FundingAmount  int64             `json:"funding_amount"`
 }
 
 type Person struct {
