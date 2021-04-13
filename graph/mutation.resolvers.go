@@ -654,38 +654,21 @@ func (r *mutationResolver) Resubmit(ctx context.Context, reports []*types.Report
 }
 
 func (r *mutationResolver) CreatePayment(ctx context.Context, payment types.PaymentInput) (*types.Response, error) {
-	_, err := middlewares.GetAuthenticatedUser(ctx)
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *mutationResolver) ValidateBvn(ctx context.Context, bvn string, phone string) (*types.Response, error) {
+	claims, err := middlewares.GetAuthenticatedUser(ctx)
 	if err != nil {
 		return nil, ErrUnAuthenticated
 	}
-
-	p, err := validator.ValidatePayment(&payment)
-	if err != nil {
-		r.logger.Error("validating payment details", zap.Error(err))
-		return nil, err
-	}
-
-	response, err := r.paymentService.CreatePayment(ctx, &paymentService.CreatePaymentRequest{
-		IdempotencyKey: p.IdempotencyKey,
-		Owner:          p.Owner,
-		Charge:         *p.Charge,
-		Reference:      *p.Reference,
-		Beneficiary: &paymentService.Beneficiary{
-			Account:  p.Beneficiary.Account,
-			Currency: *p.Beneficiary.Currency,
-			Amount:   *p.Beneficiary.Amount,
-		},
-		Status:        string(*p.Status),
-		Image:         *p.Image,
-		Notes:         *p.Notes,
-		Tags:          p.Tags,
-		FundingSource: p.FundingSource,
-		Currency:      *p.Currency,
-		FundingAmount: p.FundingAmount,
-		Quote:         *p.Quote,
+	response, err := r.accountService.ValidateBVN(ctx, &accountService.ValidateBVNRequest{
+		PersonId: claims.PersonId,
+		Bvn:      bvn,
+		Phone:    phone,
 	})
 	if err != nil {
-		r.logger.Error("error calling paymentService.CreatePayment()", zap.Error(err))
+		r.logger.Error("error calling accountService.ValidateBVN()", zap.Error(err))
 		return nil, err
 	}
 	return &types.Response{

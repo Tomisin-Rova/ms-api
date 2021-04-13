@@ -49,4 +49,6 @@ type Mutation {
   resubmit(reports: [ReportInput!]!, message: String): Response!
   # create new payment instruction
   createPayment(payment: PaymentInput!): Response!
+  # validate the customer's BVN
+  validateBVN(bvn: String!, phone: String!): Response!
 }
