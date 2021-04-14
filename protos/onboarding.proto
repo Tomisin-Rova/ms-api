@@ -165,6 +165,15 @@ message ResubmitRequest {
   string message = 2;
 }
 
+message ResubmitReportRequest {
+  string personId = 1;
+  repeated ReportInput reports = 2;
+}
+
+message ReportInput {
+  string id = 1;
+}
+
 service OnBoardingService{
   rpc CreatePhone(CreatePhoneRequest) returns (CreatePhoneResponse) {}
   rpc CreatePerson(CreatePersonRequest) returns (CreatePersonResponse) {}
@@ -187,4 +196,5 @@ service OnBoardingService{
   rpc SubmitProof(SubmitProofRequest) returns (types.Response) {}
   rpc UpdateValidationStatus(UpdateValidationStatusRequest) returns (types.Response) {}
   rpc Resubmit(ResubmitRequest) returns(types.Response){}
+  rpc ResubmitReport(ResubmitReportRequest) returns (types.Response) {}
 }

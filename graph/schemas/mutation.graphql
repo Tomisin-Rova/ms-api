@@ -47,6 +47,8 @@ type Mutation {
   deletePayeeAccount(payee: ID!, payee_account: ID!): Response!
   # ask for a customer to resubmit a report
   resubmit(reports: [ReportInput!]!, message: String): Response!
+  # Submit the ids of the reports that has been resubmitted to Onfido
+  resubmitReports(reports: [ReportInput!]): Response!
   # create new payment instruction
   createPayment(payment: PaymentInput!): Response!
   # validate the customer's BVN

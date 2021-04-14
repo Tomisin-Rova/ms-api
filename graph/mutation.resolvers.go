@@ -653,6 +653,33 @@ func (r *mutationResolver) Resubmit(ctx context.Context, reports []*types.Report
 	}, nil
 }
 
+func (r *mutationResolver) ResubmitReports(ctx context.Context, reports []*types.ReportInput) (*types.Response, error) {
+	claims, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+
+	request := onboardingService.ResubmitReportRequest{
+		PersonId: claims.PersonId,
+		Reports:  make([]*onboardingService.ReportInput, len(reports)),
+	}
+	for index, report := range reports {
+		request.Reports[index] = &onboardingService.ReportInput{
+			Id: report.ID,
+		}
+	}
+	response, err := r.onBoardingService.ResubmitReport(ctx, &request)
+	if err != nil {
+		r.logger.Error("call onBoardingService.ResubmitReport()", zap.Error(err))
+		return nil, err
+	}
+
+	return &types.Response{
+		Message: response.Message,
+		Success: response.Success,
+	}, nil
+}
+
 func (r *mutationResolver) CreatePayment(ctx context.Context, payment types.PaymentInput) (*types.Response, error) {
 	_, err := middlewares.GetAuthenticatedUser(ctx)
 	if err != nil {

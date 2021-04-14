@@ -639,6 +639,7 @@ type ComplexityRoot struct {
 		ResendOtp                 func(childComplexity int, phone string) int
 		ResetPasscode             func(childComplexity int, token string, email string, passcode string) int
 		Resubmit                  func(childComplexity int, reports []*types.ReportInput, message *string) int
+		ResubmitReports           func(childComplexity int, reports []*types.ReportInput) int
 		Signup                    func(childComplexity int, token string, email string, passcode string) int
 		SubmitApplication         func(childComplexity int) int
 		SubmitProof               func(childComplexity int, proof types.SubmitProofInput) int
@@ -1233,6 +1234,7 @@ type MutationResolver interface {
 	AddPayeeAccount(ctx context.Context, payee string, payeeAccount types.PayeeAccountInput) (*types.Response, error)
 	DeletePayeeAccount(ctx context.Context, payee string, payeeAccount string) (*types.Response, error)
 	Resubmit(ctx context.Context, reports []*types.ReportInput, message *string) (*types.Response, error)
+	ResubmitReports(ctx context.Context, reports []*types.ReportInput) (*types.Response, error)
 	CreatePayment(ctx context.Context, payment types.PaymentInput) (*types.Response, error)
 	ValidateBvn(ctx context.Context, bvn string, phone string) (*types.Response, error)
 }
@@ -4242,6 +4244,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.Resubmit(childComplexity, args["reports"].([]*types.ReportInput), args["message"].(*string)), true
+
+	case "Mutation.resubmitReports":
+		if e.complexity.Mutation.ResubmitReports == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_resubmitReports_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.ResubmitReports(childComplexity, args["reports"].([]*types.ReportInput)), true
 
 	case "Mutation.signup":
 		if e.complexity.Mutation.Signup == nil {
@@ -7322,6 +7336,8 @@ var sources = []*ast.Source{
   deletePayeeAccount(payee: ID!, payee_account: ID!): Response!
   # ask for a customer to resubmit a report
   resubmit(reports: [ReportInput!]!, message: String): Response!
+  # Submit the ids of the reports that has been resubmitted to Onfido
+  resubmitReports(reports: [ReportInput!]): Response!
   # create new payment instruction
   createPayment(payment: PaymentInput!): Response!
   # validate the customer's BVN
@@ -10538,6 +10554,21 @@ func (ec *executionContext) field_Mutation_resetPasscode_args(ctx context.Contex
 		}
 	}
 	args["passcode"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_resubmitReports_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 []*types.ReportInput
+	if tmp, ok := rawArgs["reports"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("reports"))
+		arg0, err = ec.unmarshalOReportInput2ᚕᚖmsᚗapiᚋtypesᚐReportInputᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["reports"] = arg0
 	return args, nil
 }
 
@@ -26182,6 +26213,48 @@ func (ec *executionContext) _Mutation_resubmit(ctx context.Context, field graphq
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().Resubmit(rctx, args["reports"].([]*types.ReportInput), args["message"].(*string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.Response)
+	fc.Result = res
+	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_resubmitReports(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_resubmitReports_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().ResubmitReports(rctx, args["reports"].([]*types.ReportInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -43671,6 +43744,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "resubmitReports":
+			out.Values[i] = ec._Mutation_resubmitReports(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "createPayment":
 			out.Values[i] = ec._Mutation_createPayment(ctx, field)
 			if out.Values[i] == graphql.Null {
@@ -51586,6 +51664,30 @@ func (ec *executionContext) marshalOReportConnection2ᚖmsᚗapiᚋtypesᚐRepor
 		return graphql.Null
 	}
 	return ec._ReportConnection(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOReportInput2ᚕᚖmsᚗapiᚋtypesᚐReportInputᚄ(ctx context.Context, v interface{}) ([]*types.ReportInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]*types.ReportInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNReportInput2ᚖmsᚗapiᚋtypesᚐReportInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
 }
 
 func (ec *executionContext) marshalOReportReviewStatus2ᚖmsᚗapiᚋtypesᚐReportReviewStatus(ctx context.Context, sel ast.SelectionSet, v *types.ReportReviewStatus) graphql.Marshaler {
