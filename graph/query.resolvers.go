@@ -97,10 +97,9 @@ func (r *queryResolver) People(ctx context.Context, keywords *string, first *int
 	data := make([]*types.Person, 0)
 
 	for _, person := range res.Persons {
-		pto, err := getPerson(person)
+		pto, err := personWithCdd(person)
 		if err != nil {
-			r.logger.Error("copier failed", zap.Error(err))
-			return nil, errors.New("failed to read people information. please retry")
+			return nil, err
 		}
 		data = append(data, pto)
 	}

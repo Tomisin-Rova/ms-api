@@ -373,6 +373,21 @@ func (r *queryResolver) hydrateCDD(cddDto *pb.Cdd) *types.Cdd {
 	return &cdd
 }
 
+func personWithCdd(from *pb.Person) (*types.Person, error) {
+	person, err := getPerson(from)
+	if err != nil {
+		return nil, err
+	}
+	if from.Cdd != nil {
+		ts := int64(from.Cdd.Ts)
+		person.Cdd = &types.Cdd{
+			Status: types.State(from.Cdd.Status),
+			Ts:     &ts,
+		}
+	}
+	return person, nil
+}
+
 func String(s string) *string {
 	return &s
 }
