@@ -2,13 +2,13 @@ package graph
 
 import (
 	"errors"
-	"ms.api/protos/pb/paymentService"
 	"testing"
 
 	"ms.api/mocks"
 	"ms.api/protos/pb/accountService"
 	identitySvc "ms.api/protos/pb/identityService"
 	"ms.api/protos/pb/onboardingService"
+	"ms.api/protos/pb/paymentService"
 	protoTypes "ms.api/protos/pb/types"
 	"ms.api/server/http/middlewares"
 	"ms.api/types"
@@ -740,6 +740,96 @@ func TestMutationResolver_ValidateBvn(t *testing.T) {
 					Return(nil, errors.New(""))
 
 				response, err := resolver.Mutation().ValidateBvn(ctx, mockReq.Bvn, mockReq.Phone)
+				assert.Error(t, err)
+				assert.Nil(t, response)
+			}
+		})
+	}
+}
+
+func TestMutationResolver_ResubmitReports(t *testing.T) {
+	const (
+		success = iota
+		errorUnauthenticatedUser
+		errorResubmittingReports
+	)
+
+	var tests = []struct {
+		name     string
+		arg      []*types.ReportInput
+		testType int
+	}{
+		{
+			name: "Test resubmit reports successfully",
+			arg: []*types.ReportInput{
+				{
+					ID: "123",
+				},
+			},
+			testType: success,
+		},
+		{
+			name: "Test error unauthenticated user",
+			arg: []*types.ReportInput{
+				{
+					ID: "123",
+				},
+			},
+			testType: errorUnauthenticatedUser,
+		},
+		{
+			name: "Test error submitting reports",
+			arg: []*types.ReportInput{
+				{
+					ID: "123",
+				},
+			},
+			testType: errorResubmittingReports,
+		},
+	}
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			// Mocks
+			onboardingServiceClient := new(mocks.OnBoardingServiceClient)
+			resolverOpts := &ResolverOpts{OnBoardingService: onboardingServiceClient}
+			resolver := NewResolver(resolverOpts, zaptest.NewLogger(t))
+
+			switch testCase.testType {
+			case success:
+				request := onboardingService.ResubmitReportRequest{
+					PersonId: personId,
+				}
+				for _, report := range testCase.arg {
+					request.Reports = append(request.Reports, &onboardingService.ReportInput{
+						Id: report.ID,
+					})
+				}
+				onboardingServiceClient.On("ResubmitReport", validUserCtx, &request).Return(&protoTypes.Response{
+					Success: true,
+				}, nil)
+
+				response, err := resolver.Mutation().ResubmitReports(validUserCtx, testCase.arg)
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+				assert.Equal(t, true, response.Success)
+			case errorUnauthenticatedUser:
+				response, err := resolver.Mutation().ResubmitReports(context.Background(), testCase.arg)
+				assert.Error(t, err)
+				assert.IsType(t, &coreErrors.Terror{}, err)
+				assert.Equal(t, 7012, err.(*coreErrors.Terror).Code())
+				assert.Nil(t, response)
+			case errorResubmittingReports:
+				request := onboardingService.ResubmitReportRequest{
+					PersonId: personId,
+				}
+				for _, report := range testCase.arg {
+					request.Reports = append(request.Reports, &onboardingService.ReportInput{
+						Id: report.ID,
+					})
+				}
+				onboardingServiceClient.On("ResubmitReport", validUserCtx, &request).Return(nil, errors.New(""))
+
+				response, err := resolver.Mutation().ResubmitReports(validUserCtx, testCase.arg)
 				assert.Error(t, err)
 				assert.Nil(t, response)
 			}
