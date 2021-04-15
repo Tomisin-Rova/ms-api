@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/99designs/gqlgen/graphql"
 	"strconv"
 
 	"github.com/jinzhu/copier"
@@ -555,25 +556,29 @@ func (r *queryResolver) Payee(ctx context.Context, id string) (*types.Payee, err
 	if err != nil {
 		return nil, ErrUnAuthenticated
 	}
-	payee, err := r.paymentService.GetPayee(ctx, &paymentService.GetPayeeRequest{
-		PayeeId:    id,
-		IdentityId: claims.IdentityId,
-	})
-	fmt.Println(payee)
+
+	preloads := r.GetPreloads(ctx)
+
+	opts := &types.PayeeAggOpts{}
+	for _, item:= range preloads {
+		if item == "owner" {
+			opts.Identity = true
+		}
+		if item == "owner.owner" {
+			opts.Person = true
+		}
+	}
+
+	payee, err := r.dataStore.GetPayee(claims.IdentityId, id, opts)
 	if err != nil {
 		r.logger.Error("failed to get payee", zap.Error(err))
 		return nil, err
 	}
+
 	payeeRes := &types.Payee{}
 	if err := copier.Copy(payeeRes, &payee); err != nil {
 		r.logger.Error("copier failed", zap.Error(err))
 		return nil, errors.New("failed to read payee information. please retry")
-	}
-
-	// update missing copier fields
-	payeeRes.ID = payee.Id
-	for index, account := range payee.Accounts {
-		payeeRes.Accounts[index].ID = account.Id
 	}
 
 	return payeeRes, nil
@@ -675,6 +680,30 @@ func (r *queryResolver) GetOnfidoSDKToken(ctx context.Context) (*types.Response,
 		Success: true,
 		Token:   &resp.Token,
 	}, nil
+}
+
+func (r *queryResolver) GetPreloads(ctx context.Context) []string {
+	return GetNestedPreloads(
+		graphql.GetOperationContext(ctx),
+		graphql.CollectFieldsCtx(ctx, nil),
+		"",
+	)
+}
+
+func GetNestedPreloads(ctx *graphql.OperationContext, fields []graphql.CollectedField, prefix string) (preloads []string) {
+	for _, column := range fields {
+		prefixColumn := GetPreloadString(prefix, column.Name)
+		preloads = append(preloads, prefixColumn)
+		preloads = append(preloads, GetNestedPreloads(ctx, graphql.CollectFields(ctx, column.Selections, nil), prefixColumn)...)
+	}
+	return
+}
+
+func GetPreloadString(prefix, name string) string {
+	if len(prefix) > 0 {
+		return prefix + "." + name
+	}
+	return name
 }
 
 // Query returns generated.QueryResolver implementation.
