@@ -525,7 +525,7 @@ type FxEdge struct {
 
 type Identity struct {
 	ID             string          `json:"id"`
-	Owner          Entity          `json:"owner"`
+	Owner          Owner           `json:"owner"`
 	Nickname       *string         `json:"nickname"`
 	Organisation   *Organisation   `json:"organisation"`
 	Status         *IdentityStatus `json:"status"`
@@ -767,7 +767,7 @@ type PageInfo struct {
 
 type Payee struct {
 	ID       string          `json:"id"`
-	Owner    string          `json:"owner"`
+	Owner    *Identity       `json:"owner"`
 	Name     string          `json:"name"`
 	Avatar   *string         `json:"avatar"`
 	Ts       *int64          `json:"ts"`

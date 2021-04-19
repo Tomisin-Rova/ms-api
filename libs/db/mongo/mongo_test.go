@@ -10,6 +10,7 @@ import (
 	"log"
 	"os"
 	"testing"
+	"time"
 )
 
 var mongoDbPort = ""
@@ -72,4 +73,26 @@ func TestMongoStore_GetCDDs(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, values)
 	assert.Equal(t, 1, len(values))
+}
+
+func TestIdentityRepository_GetIdentityById(t *testing.T) {
+	connectUri := fmt.Sprintf("mongodb://localhost:%s", mongoDbPort)
+	repo, client, err := New(connectUri, "roava", zaptest.NewLogger(t))
+	assert.Nil(t, err)
+	assert.NotNil(t, client)
+
+	identity := &models.Identity{
+		ID:        "identityId",
+		Owner:     "owner",
+		Timestamp: time.Now(),
+	}
+	r, err := client.Database("roava").Collection(identityCollection).
+		InsertOne(context.Background(), identity)
+	assert.Nil(t, err)
+	assert.NotNil(t, r.InsertedID)
+
+	id, err := repo.GetIdentityById(identity.ID)
+	assert.Nil(t, err)
+	assert.NotNil(t, id)
+	assert.Equal(t, id.ID, identity.ID)
 }

@@ -10,19 +10,17 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 	"go.uber.org/zap"
 	"ms.api/libs/db"
-	"ms.api/types"
 	"time"
 )
 
 const (
-	cddsCollection    = "cdds"
-	checksCollection  = "checks"
-	screensCollection = "screens"
-	proofsCollection  = "proofs"
-	personCollection  = "person"
-	identityCollection  = "identities"
-	orgsCollection    = "organizations"
-	payeeCollection    = "payees"
+	cddsCollection     = "cdds"
+	checksCollection   = "checks"
+	screensCollection  = "screens"
+	proofsCollection   = "proofs"
+	personCollection   = "person"
+	orgsCollection     = "organizations"
+	identityCollection = "identities"
 )
 
 func New(connectURI, databaseName string, logger *zap.Logger) (db.DataStore, *mongo.Client, error) {
@@ -110,6 +108,16 @@ func (s *mongoStore) GetPerson(id string) (*models.Person, error) {
 	return person, nil
 }
 
+func (repo *mongoStore) GetIdentityById(identityId string) (*models.Identity, error) {
+	identity := &models.Identity{}
+	filter := bson.M{"id": identityId}
+	err := repo.col(identityCollection).FindOne(context.Background(), filter).Decode(identity)
+	if err != nil {
+		return nil, err
+	}
+	return identity, nil
+}
+
 func (s *mongoStore) GetOrganization(id string) (*models.Organization, error) {
 	org := &models.Organization{}
 	err := s.col(orgsCollection).FindOne(context.Background(), bson.M{
@@ -119,153 +127,6 @@ func (s *mongoStore) GetOrganization(id string) (*models.Organization, error) {
 		return nil, err
 	}
 	return org, nil
-}
-
-
-func (s *mongoStore) GetPayeesByOwner(owner string, opts *types.PayeeAggOpts) ([]*types.PayeeAggregate, error) {
-	query := bson.D{
-		{Key: "owner", Value: owner},
-	}
-	pipeline := getPayeePipeline(query, opts)
-	cursor, err := s.col(payeeCollection).Aggregate(context.Background(), pipeline)
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		if err := cursor.Close(context.Background()); err != nil {
-			s.logger.With(zap.Error(err)).Error("failed to close DB read cursor")
-		}
-	}()
-	payees := make([]*types.PayeeAggregate, 0)
-	if err := cursor.All(context.Background(), &payees); err != nil {
-		return nil, err
-	}
-	return payees, nil
-}
-
-func (s *mongoStore) GetPayee(id, owner string, opts *types.PayeeAggOpts) (*types.PayeeAggregate, error) {
-	query := bson.D{
-		{Key: "id", Value: id},
-		{Key: "owner", Value: owner},
-	}
-	pipeline := getPayeePipeline(query, opts)
-	cursor, err := s.col(payeeCollection).Aggregate(context.Background(), pipeline)
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		if err := cursor.Close(context.Background()); err != nil {
-			s.logger.With(zap.Error(err)).Error("failed to close DB read cursor")
-		}
-	}()
-
-	payee := &types.PayeeAggregate{}
-	if cursor.Next(context.Background()) {
-		err = cursor.Decode(payee)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return payee, nil
-}
-
-func getPayeePipeline(query bson.D, opts *types.PayeeAggOpts) []bson.D {
-	match := bson.D{
-		{Key: "$match", Value: query},
-	}
-
-	// filter only payee accounts that have not been deleted
-	filter := bson.D{
-		{Key: "$project", Value: bson.D{
-			{Key: "id", Value: 1},
-			{Key: "owner", Value: 1},
-			{Key: "name", Value: 1},
-			{Key: "avatar", Value: 1},
-			{Key: "ts", Value: 1},
-			{Key: "accounts", Value: bson.D{
-				{Key: "$filter", Value: bson.D{
-					{Key: "input", Value: "$accounts"},
-					{Key: "as", Value: "account"},
-					{Key: "cond", Value: bson.D{{Key: "$eq", Value: bson.A{"$$account.deleted", false}}}},
-				}},
-			}},
-		}},
-	}
-
-	lookupIdentitty, unwindIdentitty, projectId := bson.D{}, bson.D{}, bson.D{}
-	if opts.Identity {
-		lookupIdentitty = bson.D{
-			{Key: "$lookup", Value: bson.D{
-				{Key: "from", Value: identityCollection},
-				{Key: "localField", Value: "owner"},
-				{Key: "foreignField", Value: "id"},
-				{Key: "as", Value: "identity"},
-			}},
-		}
-
-		unwindIdentitty = bson.D{
-			{Key: "$unwind", Value: bson.D{
-				{Key: "path", Value: "$identity"},
-				{Key: "preserveNullAndEmptyArrays", Value: true},
-			}},
-		}
-
-		projectId = bson.D{
-			{Key: "$project", Value: bson.D{
-				{Key: "id", Value: "1"},
-				{Key: "owner", Value: "$identity"},
-				{Key: "name", Value: "1"},
-				{Key: "avatar", Value: "1"},
-				{Key: "accounts", Value: "1"},
-				{Key: "ts", Value: "1"},
-			}},
-		}
-
-	}
-
-	lookupPerson, unwindPerson, projectPerson := bson.D{}, bson.D{}, bson.D{}
-	if opts.Person {
-		lookupIdentitty = bson.D{
-			{Key: "$lookup", Value: bson.D{
-				{Key: "from", Value: personCollection},
-				{Key: "localField", Value: "owner.owner"},
-				{Key: "foreignField", Value: "id"},
-				{Key: "as", Value: "person"},
-			}},
-		}
-
-		unwindPerson = bson.D{
-			{Key: "$unwind", Value: bson.D{
-				{Key: "path", Value: "$perosn"},
-				{Key: "preserveNullAndEmptyArrays", Value: true},
-			}},
-		}
-
-		projectPerson = bson.D{
-			{Key: "$project", Value: bson.D{
-				{Key: "id", Value: "1"},
-				{Key: "owner.owner", Value: "$person"},
-				{Key: "name", Value: "1"},
-				{Key: "avatar", Value: "1"},
-				{Key: "accounts", Value: "1"},
-				{Key: "ts", Value: "1"},
-			}},
-		}
-	}
-
-	pipeline := mongo.Pipeline{
-		match,
-		filter,
-		lookupIdentitty,
-		unwindIdentitty,
-		projectId,
-		lookupPerson,
-		unwindPerson,
-		projectPerson,
-	}
-
-	return pipeline
 }
 
 func (s *mongoStore) col(collectionName string) *mongo.Collection {

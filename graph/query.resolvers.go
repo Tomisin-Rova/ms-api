@@ -7,7 +7,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/99designs/gqlgen/graphql"
 	"strconv"
 
 	"github.com/jinzhu/copier"
@@ -17,6 +16,7 @@ import (
 	"ms.api/graph/connections"
 	"ms.api/graph/generated"
 	"ms.api/graph/models"
+	"ms.api/libs/preloader"
 	emailvalidator "ms.api/libs/validator/email"
 	"ms.api/protos/pb/accountService"
 	"ms.api/protos/pb/cddService"
@@ -557,19 +557,25 @@ func (r *queryResolver) Payee(ctx context.Context, id string) (*types.Payee, err
 		return nil, ErrUnAuthenticated
 	}
 
-	preloads := r.GetPreloads(ctx)
+	preloads := preloader.GetPreloads(ctx)
 
-	opts := &types.PayeeAggOpts{}
-	for _, item:= range preloads {
+	var opts struct {
+		PersonRequested   bool
+		IdentityRequested bool
+	}
+	for _, item := range preloads {
 		if item == "owner" {
-			opts.Identity = true
+			opts.IdentityRequested = true
 		}
 		if item == "owner.owner" {
-			opts.Person = true
+			opts.PersonRequested = true
 		}
 	}
 
-	payee, err := r.dataStore.GetPayee(claims.IdentityId, id, opts)
+	payee, err := r.paymentService.GetPayee(ctx, &paymentService.GetPayeeRequest{
+		PayeeId:    id,
+		IdentityId: claims.IdentityId,
+	})
 	if err != nil {
 		r.logger.Error("failed to get payee", zap.Error(err))
 		return nil, err
@@ -579,6 +585,45 @@ func (r *queryResolver) Payee(ctx context.Context, id string) (*types.Payee, err
 	if err := copier.Copy(payeeRes, &payee); err != nil {
 		r.logger.Error("copier failed", zap.Error(err))
 		return nil, errors.New("failed to read payee information. please retry")
+	}
+
+	// update missing copier fields
+	payeeRes.ID = payee.Id
+	for index, account := range payee.Accounts {
+		payeeRes.Accounts[index].ID = account.Id
+	}
+
+	if opts.IdentityRequested {
+		identity, err := r.dataStore.GetIdentityById(claims.IdentityId)
+		if err != nil {
+			r.logger.Error("failed to get payee", zap.Error(err))
+			return nil, err
+		}
+
+		identityRes := &types.Identity{}
+		if err := copier.Copy(identityRes, &identity); err != nil {
+			r.logger.Error("copier failed", zap.Error(err))
+			return nil, errors.New("failed to read identity information. please retry")
+		}
+
+		payeeRes.Owner = identityRes
+	}
+
+	if opts.PersonRequested {
+		person, err := r.personService.Person(ctx, &personService.PersonRequest{Id: claims.PersonId})
+		if err != nil {
+			r.logger.Error("failed to get person", zap.Error(err))
+			return nil, err
+		}
+		personRes := &types.Person{}
+		if err := copier.Copy(payeeRes, &payee); err != nil {
+			r.logger.Error("copier failed", zap.Error(err))
+			return nil, errors.New("failed to read person information. please retry")
+		}
+		// update missing copier fields
+		personRes.ID = person.Id
+
+		payeeRes.Owner.Owner = personRes
 	}
 
 	return payeeRes, nil
@@ -680,30 +725,6 @@ func (r *queryResolver) GetOnfidoSDKToken(ctx context.Context) (*types.Response,
 		Success: true,
 		Token:   &resp.Token,
 	}, nil
-}
-
-func (r *queryResolver) GetPreloads(ctx context.Context) []string {
-	return GetNestedPreloads(
-		graphql.GetOperationContext(ctx),
-		graphql.CollectFieldsCtx(ctx, nil),
-		"",
-	)
-}
-
-func GetNestedPreloads(ctx *graphql.OperationContext, fields []graphql.CollectedField, prefix string) (preloads []string) {
-	for _, column := range fields {
-		prefixColumn := GetPreloadString(prefix, column.Name)
-		preloads = append(preloads, prefixColumn)
-		preloads = append(preloads, GetNestedPreloads(ctx, graphql.CollectFields(ctx, column.Selections, nil), prefixColumn)...)
-	}
-	return
-}
-
-func GetPreloadString(prefix, name string) string {
-	if len(prefix) > 0 {
-		return prefix + "." + name
-	}
-	return name
 }
 
 // Query returns generated.QueryResolver implementation.

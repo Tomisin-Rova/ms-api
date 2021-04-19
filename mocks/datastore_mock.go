@@ -122,3 +122,18 @@ func (mr *MockDataStoreMockRecorder) GetOrganization(id interface{}) *gomock.Cal
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrganization", reflect.TypeOf((*MockDataStore)(nil).GetOrganization), id)
 }
+
+// GetIdentityById mocks base method
+func (m *MockDataStore) GetIdentityById(identityId string) (*models.Identity, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetIdentityById", identityId)
+	ret0, _ := ret[0].(*models.Identity)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetIdentityById indicates an expected call of GetIdentityById
+func (mr *MockDataStoreMockRecorder) GetIdentityById(identityId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetIdentityById", reflect.TypeOf((*MockDataStore)(nil).GetIdentityById), identityId)
+}
