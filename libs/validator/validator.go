@@ -8,22 +8,23 @@ import (
 )
 
 var (
-	alphaNumericRegex             = regexp.MustCompile(`^([A-Za-z]+[0-9]|[0-9]+[A-Za-z])[A-Za-z0-9]*$`)
+	characterRegex                = regexp.MustCompile(`[A-Za-z]+`)
+	digitRegex                    = regexp.MustCompile(`[\d]+`)
 	ErrInvalidTransactionPassword = coreError.NewTerror(
 		7010,
 		"InvalidPassword",
-		"8 digit password must have at least one alphabet and one letter",
+		"Your transaction password must have at least one number and at least one letter and must be at least 8-characters long.",
 		"",
 	)
 )
 
 func ValidateTransactionPassword(password string) error {
-	if ok := alphaNumericRegex.MatchString(password); !ok {
+	if len(password) < 8 ||
+		!characterRegex.MatchString(password) ||
+		!digitRegex.MatchString(password) {
 		return ErrInvalidTransactionPassword
 	}
-	if len(password) < 8 {
-		return ErrInvalidTransactionPassword
-	}
+
 	return nil
 }
 
