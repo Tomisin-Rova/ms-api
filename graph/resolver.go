@@ -277,9 +277,9 @@ func (r *Resolver) hydrateAccount(from *accountService.GetAccountResponse) *type
 	}
 
 	// Add tags
-	tags := make([]*string, 0)
-	for _, tag := range from.Tags {
-		tags = append(tags, &tag)
+	tags := make([]*string, len(from.Tags))
+	for index, tag := range from.Tags {
+		tags[index] = &tag
 	}
 	dto.Tags = tags
 
