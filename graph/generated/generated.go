@@ -8081,7 +8081,7 @@ type Identity {
   # The Ulid field for the identity
   id: ID!
   # Reference to the person or organisation who owns this identity (customer relationship)
-  owner: Entity!
+  owner: Owner!
   # The nickname of the owner of identity wishes to be addressed as
   nickname: String
   # Context of the identity. Ulid of the organisation that this identity is for e.g. ROAVA, Onfido, Twitter, Nubank
@@ -9918,7 +9918,7 @@ type Payee {
   # Unique roava ulid for the data record
   id: ID!
   # identity that owns the payee
-  owner: String!
+  owner: Identity!
   # name of payee
   name: String!
   # avatar (optional) for the payee
@@ -22235,9 +22235,9 @@ func (ec *executionContext) _Identity_owner(ctx context.Context, field graphql.C
 		}
 		return graphql.Null
 	}
-	res := resTmp.(types.Entity)
+	res := resTmp.(types.Owner)
 	fc.Result = res
-	return ec.marshalNEntity2msᚗapiᚋtypesᚐEntity(ctx, field.Selections, res)
+	return ec.marshalNOwner2msᚗapiᚋtypesᚐOwner(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Identity_nickname(ctx context.Context, field graphql.CollectedField, obj *types.Identity) (ret graphql.Marshaler) {
@@ -27864,9 +27864,9 @@ func (ec *executionContext) _Payee_owner(ctx context.Context, field graphql.Coll
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*types.Identity)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNIdentity2ᚖmsᚗapiᚋtypesᚐIdentity(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Payee_name(ctx context.Context, field graphql.CollectedField, obj *types.Payee) (ret graphql.Marshaler) {

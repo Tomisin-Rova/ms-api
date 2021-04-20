@@ -292,7 +292,7 @@ type Identity {
   # The Ulid field for the identity
   id: ID!
   # Reference to the person or organisation who owns this identity (customer relationship)
-  owner: Entity!
+  owner: Owner!
   # The nickname of the owner of identity wishes to be addressed as
   nickname: String
   # Context of the identity. Ulid of the organisation that this identity is for e.g. ROAVA, Onfido, Twitter, Nubank
@@ -2129,7 +2129,7 @@ type Payee {
   # Unique roava ulid for the data record
   id: ID!
   # identity that owns the payee
-  owner: String!
+  owner: Identity!
   # name of payee
   name: String!
   # avatar (optional) for the payee

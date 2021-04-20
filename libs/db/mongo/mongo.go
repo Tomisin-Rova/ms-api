@@ -14,12 +14,13 @@ import (
 )
 
 const (
-	cddsCollection    = "cdds"
-	checksCollection  = "checks"
-	screensCollection = "screens"
-	proofsCollection  = "proofs"
-	personCollection  = "person"
-	orgsCollection    = "organizations"
+	cddsCollection     = "cdds"
+	checksCollection   = "checks"
+	screensCollection  = "screens"
+	proofsCollection   = "proofs"
+	personCollection   = "person"
+	orgsCollection     = "organizations"
+	identityCollection = "identities"
 )
 
 func New(connectURI, databaseName string, logger *zap.Logger) (db.DataStore, *mongo.Client, error) {
@@ -105,6 +106,16 @@ func (s *mongoStore) GetPerson(id string) (*models.Person, error) {
 		return nil, err
 	}
 	return person, nil
+}
+
+func (repo *mongoStore) GetIdentityById(identityId string) (*models.Identity, error) {
+	identity := &models.Identity{}
+	filter := bson.M{"id": identityId}
+	err := repo.col(identityCollection).FindOne(context.Background(), filter).Decode(identity)
+	if err != nil {
+		return nil, err
+	}
+	return identity, nil
 }
 
 func (s *mongoStore) GetOrganization(id string) (*models.Organization, error) {

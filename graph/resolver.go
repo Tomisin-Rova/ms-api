@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"ms.api/libs/preloader"
 	"time"
 
 	"ms.api/config"
@@ -64,6 +65,7 @@ type ResolverOpts struct {
 	personService     personService.PersonServiceClient
 	identityService   identityService.IdentityServiceClient
 	DataStore         db.DataStore
+	preloader         preloader.Preloader
 }
 
 type Resolver struct {
@@ -80,6 +82,7 @@ type Resolver struct {
 	authMw            *middlewares.AuthMiddleware
 	logger            *zap.Logger
 	dataStore         db.DataStore
+	preloader         preloader.Preloader
 }
 
 func NewResolver(opt *ResolverOpts, logger *zap.Logger) *Resolver {
@@ -97,11 +100,12 @@ func NewResolver(opt *ResolverOpts, logger *zap.Logger) *Resolver {
 		authMw:            opt.AuthMw,
 		dataStore:         opt.DataStore,
 		logger:            logger,
+		preloader:         opt.preloader,
 	}
 }
 
 func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) {
-	opts := &ResolverOpts{}
+	opts := &ResolverOpts{preloader: preloader.GQLPreloader{}}
 
 	// OnBoarding
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)

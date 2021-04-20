@@ -555,15 +555,31 @@ func (r *queryResolver) Payee(ctx context.Context, id string) (*types.Payee, err
 	if err != nil {
 		return nil, ErrUnAuthenticated
 	}
+
+	preloads := r.preloader.GetPreloads(ctx)
+
+	var opts struct {
+		PersonRequested   bool
+		IdentityRequested bool
+	}
+	for _, item := range preloads {
+		if item == "owner" {
+			opts.IdentityRequested = true
+		}
+		if item == "owner.owner" {
+			opts.PersonRequested = true
+		}
+	}
+
 	payee, err := r.paymentService.GetPayee(ctx, &paymentService.GetPayeeRequest{
 		PayeeId:    id,
 		IdentityId: claims.IdentityId,
 	})
-	fmt.Println(payee)
 	if err != nil {
 		r.logger.Error("failed to get payee", zap.Error(err))
 		return nil, err
 	}
+
 	payeeRes := &types.Payee{}
 	if err := copier.Copy(payeeRes, &payee); err != nil {
 		r.logger.Error("copier failed", zap.Error(err))
@@ -574,6 +590,39 @@ func (r *queryResolver) Payee(ctx context.Context, id string) (*types.Payee, err
 	payeeRes.ID = payee.Id
 	for index, account := range payee.Accounts {
 		payeeRes.Accounts[index].ID = account.Id
+	}
+
+	if opts.IdentityRequested {
+		identity, err := r.dataStore.GetIdentityById(claims.IdentityId)
+		if err != nil {
+			r.logger.Error("failed to get payee", zap.Error(err))
+			return nil, err
+		}
+
+		identityRes := &types.Identity{}
+		if err := copier.Copy(identityRes, &identity); err != nil {
+			r.logger.Error("copier failed", zap.Error(err))
+			return nil, errors.New("failed to read identity information. please retry")
+		}
+
+		payeeRes.Owner = identityRes
+	}
+
+	if opts.PersonRequested {
+		person, err := r.personService.Person(ctx, &personService.PersonRequest{Id: claims.PersonId})
+		if err != nil {
+			r.logger.Error("failed to get person", zap.Error(err))
+			return nil, err
+		}
+		personRes := &types.Person{}
+		if err := copier.Copy(payeeRes, &payee); err != nil {
+			r.logger.Error("copier failed", zap.Error(err))
+			return nil, errors.New("failed to read person information. please retry")
+		}
+		// update missing copier fields
+		personRes.ID = person.Id
+
+		payeeRes.Owner.Owner = personRes
 	}
 
 	return payeeRes, nil
