@@ -5,9 +5,16 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 )
 
+//go:generate mockgen -source=preloader.go -destination=../../mocks/preloader_mock.go -package=mocks
+type Preloader interface {
+	GetPreloads(ctx context.Context) []string
+}
+
+type GQLPreloader struct{}
+
 //GetPreloads returns the fields that were queried for in a grapqhql request
 // makes use of gqlgen collect fields functionality
-func GetPreloads(ctx context.Context) []string {
+func (g GQLPreloader) GetPreloads(ctx context.Context) []string {
 	return getNestedPreloads(
 		graphql.GetOperationContext(ctx),
 		graphql.CollectFieldsCtx(ctx, nil),

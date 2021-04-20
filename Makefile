@@ -38,6 +38,7 @@ gen-mocks:
 	mockery --name=CddServiceClient --recursive
 	mockery --name=AuthServiceClient --recursive
 	mockery --name=AccountServiceClient --recursive
+	mockery --name=Preloader --recursive
 	go generate ./...
 
 local: schema proto gen-mocks lint test

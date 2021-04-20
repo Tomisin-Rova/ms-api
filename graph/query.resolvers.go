@@ -16,7 +16,6 @@ import (
 	"ms.api/graph/connections"
 	"ms.api/graph/generated"
 	"ms.api/graph/models"
-	"ms.api/libs/preloader"
 	emailvalidator "ms.api/libs/validator/email"
 	"ms.api/protos/pb/accountService"
 	"ms.api/protos/pb/cddService"
@@ -557,7 +556,7 @@ func (r *queryResolver) Payee(ctx context.Context, id string) (*types.Payee, err
 		return nil, ErrUnAuthenticated
 	}
 
-	preloads := preloader.GetPreloads(ctx)
+	preloads := r.preloader.GetPreloads(ctx)
 
 	var opts struct {
 		PersonRequested   bool
