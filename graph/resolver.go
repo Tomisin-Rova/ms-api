@@ -4,8 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"ms.api/libs/preloader"
 	"time"
+
+	"ms.api/libs/preloader"
 
 	"ms.api/config"
 	"ms.api/libs/db"
@@ -260,6 +261,100 @@ func getPerson(from *pb.Person) (*types.Person, error) {
 	person.Activities = activities
 
 	return &person, nil
+}
+
+func (r *Resolver) hydrateAccount(from *accountService.GetAccountResponse) *types.Account {
+	dto := types.Account{
+		ID:           &from.Id,
+		Owner:        &from.Owner,
+		Product:      &from.Product,
+		Name:         &from.Name,
+		Active:       &from.Active,
+		Status:       &from.Status,
+		Image:        &from.Image,
+		Organisation: &from.Organisation,
+		Ts:           Int64(int64(from.Ts)),
+	}
+
+	// Add tags
+	tags := make([]*string, 0)
+	for _, tag := range from.Tags {
+		tags = append(tags, &tag)
+	}
+	dto.Tags = tags
+
+	// Add Account Data
+
+	dto.AccountData = &types.AccountData{
+		AccountHolderKey:  &from.AccountData.AccountHolderKey,
+		AccountHolderType: &from.AccountData.AccountHolderType,
+		AccountState:      &from.AccountData.AccountState,
+		AccountType:       &from.AccountData.AccountType,
+		AccruedAmounts: &types.AccruedAmounts{
+			InterestAccrued:                   Int64(int64(from.AccountData.AccruedAmounts.InterestAccrued)),
+			OverdraftInterestAccrued:          Int64(int64(from.AccountData.AccruedAmounts.OverdraftInterestAccrued)),
+			TechnicalOverdraftInterestAccrued: Int64(int64(from.AccountData.AccruedAmounts.TechnicalOverdraftInterestAccrued)),
+		},
+		ActivationDate:    String(string(from.AccountData.ActivationDate)),
+		ApprovedDate:      String(string(from.AccountData.ApprovedDate)),
+		AssignedBranchKey: &from.AccountData.AssignedBranchKey,
+		AssignedCentreKey: &from.AccountData.AssignedCentreKey,
+		AssignedUserKey:   &from.AccountData.AssignedUserKey,
+		Balances: &types.Balances{
+			AvailableBalance:              Int64(int64(from.AccountData.Balances.AvailableBalance)),
+			BlockedBalance:                Int64(int64(from.AccountData.Balances.BlockedBalance)),
+			FeesDue:                       Int64(int64(from.AccountData.Balances.FeesDue)),
+			ForwardAvailableBalance:       Int64(int64(from.AccountData.Balances.ForwardAvailableBalance)),
+			HoldBalance:                   Int64(int64(from.AccountData.Balances.HoldBalance)),
+			LockedBalance:                 Int64(int64(from.AccountData.Balances.LockedBalance)),
+			OverdraftAmount:               Int64(int64(from.AccountData.Balances.OverdraftAmount)),
+			OverdraftInterestDue:          Int64(int64(from.AccountData.Balances.OverdraftInterestDue)),
+			TechnicalOverdraftAmount:      Int64(int64(from.AccountData.Balances.TechnicalOverdraftAmount)),
+			TechnicalOverdraftInterestDue: Int64(int64(from.AccountData.Balances.TechnicalOverdraftInterestDue)),
+			TotalBalance:                  Int64(int64(from.AccountData.Balances.TotalBalance)),
+		},
+		ClosedDate:           &from.AccountData.ClosedDate,
+		CreationDate:         &from.AccountData.CreationDate,
+		CreditArrangementKey: &from.AccountData.CreditArrangementKey,
+		CurrencyCode:         &from.AccountData.CurrencyCode,
+		EncodedKey:           &from.AccountData.EncodedKey,
+		InterestSettings: &types.InterestSettings{
+			InterestPaymentSettings: &types.InterestPaymentSettings{
+				InterestPaymentPoint: &from.AccountData.InterestSettings.InterestPaymentSettings.InterestPaymentPoint,
+			},
+			InterestRateSettings: &types.InterestRateSettings{
+				EncodedKey:                   &from.AccountData.InterestSettings.InterestRateSettings.EncodedKey,
+				InterestChargeFrequency:      &from.AccountData.InterestSettings.InterestRateSettings.InterestChargeFrequency,
+				InterestChargeFrequencyCount: Int64(int64(from.AccountData.InterestSettings.InterestRateSettings.InterestChargeFrequencyCount)),
+				InterestRate:                 Int64(int64(from.AccountData.InterestSettings.InterestRateSettings.InterestRate)),
+				InterestRateTerms:            &from.AccountData.InterestSettings.InterestRateSettings.InterestRateTerms,
+			},
+		},
+		InternalControls: &types.InternalControls{
+			MaxWithdrawalAmount:      Int64(int64(from.AccountData.InternalControls.MaxWithdrawalAmount)),
+			RecommendedDepositAmount: Int64(int64(from.AccountData.InternalControls.RecommendedDepositAmount)),
+			TargetAmount:             Int64(int64(from.AccountData.InternalControls.TargetAmount)),
+		},
+		LastAccountAppraisalDate:        &from.AccountData.LastAccountAppraisalDate,
+		LastInterestCalculationDate:     &from.AccountData.LastInterestCalculationDate,
+		LastInterestStoredDate:          &from.AccountData.LastInterestStoredDate,
+		LastModifiedDate:                &from.AccountData.LastModifiedDate,
+		LastOverdraftInterestReviewDate: &from.AccountData.LastOverdraftInterestReviewDate,
+		LastSetToArrearsDate:            &from.AccountData.LastSetToArrearsDate,
+		LockedDate:                      &from.AccountData.LockedDate,
+		MaturityDate:                    &from.AccountData.MaturityDate,
+		MigrationEventKey:               &from.AccountData.MigrationEventKey,
+		Name:                            &from.AccountData.Name,
+		Notes:                           &from.AccountData.Notes,
+		OverdraftSettings: &types.OverdraftSettings{
+			AllowOverdraft: &from.AccountData.OverdraftSettings.AllowOverdraft,
+			OverdraftLimit: Int64(int64(from.AccountData.OverdraftSettings.OverdraftLimit)),
+		},
+		ProductTypeKey:          &from.AccountData.ProductTypeKey,
+		WithholdingTaxSourceKey: &from.AccountData.WithholdingTaxSourceKey,
+	}
+
+	return &dto
 }
 
 func (r *queryResolver) hydrateCDD(cddDto *pb.Cdd) *types.Cdd {

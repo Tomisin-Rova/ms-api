@@ -489,12 +489,7 @@ func (r *queryResolver) Account(ctx context.Context, id string) (*types.Account,
 		r.logger.Error("failed to get account", zap.Error(err))
 		return nil, err
 	}
-	p := &types.Account{}
-	if err := copier.Copy(p, &account); err != nil {
-		r.logger.Error("copier failed", zap.Error(err))
-		return nil, errors.New("failed to read account information. please retry")
-	}
-
+	p := r.hydrateAccount(account)
 	return p, nil
 }
 
@@ -539,11 +534,7 @@ func (r *queryResolver) Accounts(ctx context.Context, first *int64, after *strin
 
 	var accountRes []*types.Account
 	for _, c := range accounts.Accounts {
-		p := &types.Account{}
-		if err := copier.Copy(p, &c); err != nil {
-			r.logger.Error("copier failed", zap.Error(err))
-			return nil, errors.New("failed to read account information. please retry")
-		}
+		p := r.hydrateAccount(c)
 		accountRes = append(accountRes, p)
 	}
 
