@@ -11,11 +11,6 @@ message LoginRequest {
   types.Device device = 3;
 }
 
-message LoginWithTokenRequest {
-  string token = 1;
-  string authType = 2;
-}
-
 message LoginResponse {
   string token = 1;
   string refreshToken = 2;
@@ -130,7 +125,6 @@ message ApiPerson {
 
 service AuthService {
   rpc Login(LoginRequest) returns (AuthResponse) {}
-  rpc LoginWithToken(LoginWithTokenRequest) returns (AuthResponse) {}
   rpc ValidateToken(ValidateTokenRequest) returns (ValidateTokenResponse) {}
   rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse) {}
   rpc ConfirmPasswordResetDetails(PasswordResetUserDetails) returns (types.Response) {}

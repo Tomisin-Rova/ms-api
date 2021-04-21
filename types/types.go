@@ -1256,45 +1256,6 @@ type VerificationEdge struct {
 	Cursor string        `json:"cursor"`
 }
 
-type AuthType string
-
-const (
-	AuthTypeGoogle AuthType = "GOOGLE"
-)
-
-var AllAuthType = []AuthType{
-	AuthTypeGoogle,
-}
-
-func (e AuthType) IsValid() bool {
-	switch e {
-	case AuthTypeGoogle:
-		return true
-	}
-	return false
-}
-
-func (e AuthType) String() string {
-	return string(e)
-}
-
-func (e *AuthType) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = AuthType(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid AuthType", str)
-	}
-	return nil
-}
-
-func (e AuthType) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
 type ContentType string
 
 const (
