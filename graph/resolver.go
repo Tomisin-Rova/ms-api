@@ -472,6 +472,105 @@ func (r *queryResolver) hydrateCDD(cddDto *pb.Cdd) *types.Cdd {
 	return &cdd
 }
 
+// TODO: Refactor this function to use it on the hydrateCDD
+// It is possible by introducing a goto statement but arguable, though.
+func (r *queryResolver) validation(validationDto *pb.Validation) *types.Validation {
+	tsAsInt64 := int64(validationDto.Ts)
+	validation := types.Validation{
+		ID:             validationDto.Id,
+		ValidationType: types.ValidationType(validationDto.ValidationType),
+		Status:         types.State(validationDto.Status),
+		Approved:       &validationDto.Approved,
+		Ts:             &tsAsInt64,
+	}
+	// Fill validation Data
+	switch validationDto.Data.TypeUrl {
+	case models.SCREEN:
+		var screen models.Screen
+		err := json.Unmarshal(validationDto.Data.Value, &screen)
+		if err != nil {
+			r.logger.Error("marshall screen validation", zap.Error(err))
+		}
+		tsAsInt64 := screen.Timestamp.Unix()
+		var data = types.Screen{
+			ID:     screen.ID,
+			Data:   string(screen.Data),
+			Status: types.State(screen.Status),
+			Ts:     &tsAsInt64,
+		}
+
+		// Add data to validation
+		validation.Data = &data
+	case models.CHECK:
+		var check models.Check
+		err := json.Unmarshal(validationDto.Data.Value, &check)
+		if err != nil {
+			r.logger.Error("marshall screen validation", zap.Error(err))
+		}
+		tsAsInt64 := check.Timestamp.Unix()
+		createdAtAsString := check.Data.CreatedAt.Format(time.RFC3339)
+		var data = types.Check{
+			ID: check.ID,
+			Data: &types.CheckData{
+				ID:                    check.Data.ID,
+				CreatedAt:             &createdAtAsString,
+				Status:                types.State(check.Data.Status),
+				Sandbox:               &check.Data.Sandbox,
+				ResultsURI:            &check.Data.ResultsURI,
+				FormURI:               &check.Data.FormURI,
+				Paused:                &check.Data.Paused,
+				Version:               &check.Data.Version,
+				Href:                  &check.Data.HREF,
+				ApplicantID:           &check.Data.ApplicantID,
+				ApplicantProvidesData: &check.Data.ApplicantProvidesData,
+			},
+			Status: types.State(check.Status),
+			Ts:     &tsAsInt64,
+		}
+		// Add reports
+		for _, reportDto := range check.Data.Reports {
+			tsAsInt64 := reportDto.Timestamp.Unix()
+			var report = types.Report{
+				ID:     reportDto.ID,
+				Data:   string(reportDto.Data),
+				Status: types.State(reportDto.Status),
+				Ts:     &tsAsInt64,
+				Review: &types.ReportReviewStatus{
+					Resubmit: &reportDto.Review.Resubmit,
+					Message:  &reportDto.Review.Message,
+				},
+			}
+			data.Data.Reports = append(data.Data.Reports, &report)
+		}
+		// TODO: Tags connection
+
+		// Add data to validation
+		validation.Data = &data
+	case models.PROOF:
+		var proof models.Proof
+		err := json.Unmarshal(validationDto.Data.Value, &proof)
+		if err != nil {
+			r.logger.Error("marshall screen validation", zap.Error(err))
+		}
+		tsAsInt64 := proof.Timestamp.Unix()
+		var data = types.Proof{
+			ID:   proof.ID,
+			Type: types.ProofType(proof.Type),
+			Data: string(proof.Data),
+			Review: &types.ReportReviewStatus{
+				Resubmit: &proof.Review.Resubmit,
+				Message:  &proof.Review.Message,
+			},
+			Status: types.State(proof.Status),
+			Ts:     &tsAsInt64,
+		}
+
+		// Add data to validation
+		validation.Data = &data
+	}
+	return &validation
+}
+
 func personWithCdd(from *pb.Person) (*types.Person, error) {
 	person, err := getPerson(from)
 	if err != nil {

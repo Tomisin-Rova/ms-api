@@ -29,8 +29,13 @@ message GetCDDByOwnerRequest {
   string personId = 1;
 }
 
+message GetValidationByIdRequest {
+  string validationId = 1;
+}
+
 service CddService{
   rpc GetCDDSummaryReport(PersonIdRequest) returns(Cddsummary){}
   rpc GetCDDById(CddIdRequest) returns(types.Cdd){}
   rpc GetCDDByOwner(GetCDDByOwnerRequest) returns(types.Cdd){}
+  rpc GetValidationById(GetValidationByIdRequest) returns(types.Validation){}
 }

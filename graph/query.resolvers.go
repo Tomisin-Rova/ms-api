@@ -413,7 +413,16 @@ func (r *queryResolver) Cdds(ctx context.Context, keywords *string, first *int64
 }
 
 func (r *queryResolver) Validation(ctx context.Context, id string) (*types.Validation, error) {
-	panic(fmt.Errorf("not implemented"))
+	validationDto, err := r.cddService.GetValidationById(ctx, &cddService.GetValidationByIdRequest{
+		ValidationId: id,
+	})
+	if err != nil {
+		r.logger.Error("get validation", zap.Error(err))
+		return nil, err
+	}
+	validation := r.validation(validationDto)
+
+	return validation, nil
 }
 
 func (r *queryResolver) Validations(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.ValidationConnection, error) {
