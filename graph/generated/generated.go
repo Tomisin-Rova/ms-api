@@ -632,6 +632,7 @@ type ComplexityRoot struct {
 		DeletePayeeAccount        func(childComplexity int, payee string, payeeAccount string) int
 		IntendedActivities        func(childComplexity int, activities []string) int
 		Login                     func(childComplexity int, credentials types.AuthInput) int
+		LoginWithToken            func(childComplexity int, token string, authType types.AuthType) int
 		RefreshToken              func(childComplexity int, token string) int
 		Register                  func(childComplexity int, person types.PersonInput, address types.AddressInput) int
 		RequestPasscodeReset      func(childComplexity int, email string, device types.DeviceInput) int
@@ -1218,6 +1219,7 @@ type MutationResolver interface {
 	ResendOtp(ctx context.Context, phone string) (*types.Response, error)
 	ResendEmailMagicLInk(ctx context.Context, email string) (*types.Response, error)
 	Login(ctx context.Context, credentials types.AuthInput) (*types.AuthResponse, error)
+	LoginWithToken(ctx context.Context, token string, authType types.AuthType) (*types.AuthResponse, error)
 	RefreshToken(ctx context.Context, token string) (*types.AuthResponse, error)
 	UpdateDeviceToken(ctx context.Context, token []*types.DeviceTokenInput) (*types.Response, error)
 	ResetPasscode(ctx context.Context, token string, email string, passcode string) (*types.Response, error)
@@ -4160,6 +4162,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.Login(childComplexity, args["credentials"].(types.AuthInput)), true
+
+	case "Mutation.loginWithToken":
+		if e.complexity.Mutation.LoginWithToken == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_loginWithToken_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.LoginWithToken(childComplexity, args["token"].(string), args["authType"].(types.AuthType)), true
 
 	case "Mutation.refreshToken":
 		if e.complexity.Mutation.RefreshToken == nil {
@@ -7304,6 +7318,7 @@ var sources = []*ast.Source{
   resendEmailMagicLInk(email: String!): Response!
   # auth
   login(credentials: AuthInput!): AuthResponse!
+  loginWithToken(token: String!, authType: AuthType!): AuthResponse!
   refreshToken(token: String!): AuthResponse!
   updateDeviceToken(token: [DeviceTokenInput]!): Response!
   resetPasscode(token: String!, email: String!, passcode: String!): Response!
@@ -9048,6 +9063,9 @@ enum ProofType {
   ADDRESS
 }
 
+# enum representing types of third party available auths
+enum AuthType { GOOGLE }
+
 # The connection type for Proof
 type ProofConnection {
   # A list of edges
@@ -10413,6 +10431,30 @@ func (ec *executionContext) field_Mutation_intendedActivities_args(ctx context.C
 		}
 	}
 	args["activities"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_loginWithToken_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["token"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("token"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["token"] = arg0
+	var arg1 types.AuthType
+	if tmp, ok := rawArgs["authType"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("authType"))
+		arg1, err = ec.unmarshalNAuthType2msᚗapiᚋtypesᚐAuthType(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["authType"] = arg1
 	return args, nil
 }
 
@@ -25548,6 +25590,48 @@ func (ec *executionContext) _Mutation_login(ctx context.Context, field graphql.C
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().Login(rctx, args["credentials"].(types.AuthInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.AuthResponse)
+	fc.Result = res
+	return ec.marshalNAuthResponse2ᚖmsᚗapiᚋtypesᚐAuthResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_loginWithToken(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_loginWithToken_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().LoginWithToken(rctx, args["token"].(string), args["authType"].(types.AuthType))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -43664,6 +43748,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "loginWithToken":
+			out.Values[i] = ec._Mutation_loginWithToken(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "refreshToken":
 			out.Values[i] = ec._Mutation_refreshToken(ctx, field)
 			if out.Values[i] == graphql.Null {
@@ -47515,6 +47604,16 @@ func (ec *executionContext) marshalNAuthResponse2ᚖmsᚗapiᚋtypesᚐAuthRespo
 		return graphql.Null
 	}
 	return ec._AuthResponse(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNAuthType2msᚗapiᚋtypesᚐAuthType(ctx context.Context, v interface{}) (types.AuthType, error) {
+	var res types.AuthType
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNAuthType2msᚗapiᚋtypesᚐAuthType(ctx context.Context, sel ast.SelectionSet, v types.AuthType) graphql.Marshaler {
+	return v
 }
 
 func (ec *executionContext) unmarshalNBeneficiaryInput2ᚖmsᚗapiᚋtypesᚐBeneficiaryInput(ctx context.Context, v interface{}) (*types.BeneficiaryInput, error) {
