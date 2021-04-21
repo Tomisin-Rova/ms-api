@@ -15,7 +15,6 @@ type Mutation {
   resendEmailMagicLInk(email: String!): Response!
   # auth
   login(credentials: AuthInput!): AuthResponse!
-  loginWithToken(token: String!, authType: AuthType!): AuthResponse!
   refreshToken(token: String!): AuthResponse!
   updateDeviceToken(token: [DeviceTokenInput]!): Response!
   resetPasscode(token: String!, email: String!, passcode: String!): Response!

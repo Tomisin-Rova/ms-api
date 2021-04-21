@@ -1259,9 +1259,6 @@ enum ProofType {
   ADDRESS
 }
 
-# enum representing types of third party available auths
-enum AuthType { GOOGLE }
-
 # The connection type for Proof
 type ProofConnection {
   # A list of edges

@@ -279,23 +279,6 @@ func (r *mutationResolver) Login(ctx context.Context, credentials types.AuthInpu
 	}, nil
 }
 
-func (r *mutationResolver) LoginWithToken(ctx context.Context, token string, authType types.AuthType) (*types.AuthResponse, error) {
-	req := &authService.LoginWithTokenRequest{Token: token, AuthType: authType.String()}
-	resp, err := r.authService.LoginWithToken(ctx, req)
-	if err != nil {
-		r.logger.Info(fmt.Sprintf("authService.LoginWithToken() failed: %v", err))
-		return nil, err
-	}
-	return &types.AuthResponse{
-		Message: "Successful!",
-		Success: true,
-		Tokens: &types.AuthTokens{
-			Auth:    resp.AccessToken,
-			Refresh: resp.RefreshToken,
-		},
-	}, nil
-}
-
 func (r *mutationResolver) RefreshToken(ctx context.Context, token string) (*types.AuthResponse, error) {
 	req := &authService.RefreshTokenRequest{RefreshToken: token}
 	resp, err := r.authService.RefreshToken(ctx, req)
