@@ -47616,6 +47616,11 @@ func (ec *executionContext) marshalNAuthType2msᚗapiᚋtypesᚐAuthType(ctx con
 	return v
 }
 
+func (ec *executionContext) unmarshalNBeneficiaryInput2ᚖmsᚗapiᚋtypesᚐBeneficiaryInput(ctx context.Context, v interface{}) (*types.BeneficiaryInput, error) {
+	res, err := ec.unmarshalInputBeneficiaryInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
 	res, err := graphql.UnmarshalBoolean(v)
 	return res, graphql.ErrorOnPath(ctx, err)
