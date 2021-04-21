@@ -45,6 +45,7 @@ func MountServer(secrets *config.Secrets, logger *zap.Logger) *chi.Mux {
 
 	mw := middlewares.NewAuthMiddleware(opts.AuthService, logger)
 	router.Use(mw.Middeware)
+
 	opts.AuthMw = mw
 	opts.DataStore = store
 

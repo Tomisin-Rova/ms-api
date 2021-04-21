@@ -130,3 +130,8 @@ func (f *FakeOnBoardingClient) Resubmit(ctx context.Context, in *onboardingServi
 	opts ...grpc.CallOption) (*types.Response, error) {
 	return &types.Response{}, f.err
 }
+
+func (f *FakeOnBoardingClient) ResubmitReport(ctx context.Context, in *onboardingService.ResubmitReportRequest,
+	opts ...grpc.CallOption) (*types.Response, error) {
+	return &types.Response{}, f.err
+}

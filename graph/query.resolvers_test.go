@@ -4,7 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"ms.api/protos/pb/paymentService"
 	"testing"
+	"time"
 
 	"ms.api/mocks"
 	cddService "ms.api/protos/pb/cddService"
@@ -583,4 +585,84 @@ func TestQueryResolver_Cdds_NoData(t *testing.T) {
 		t.Fail()
 	}
 	assert.Equal(t, terror.ErrorType(), "CddsNotFound")
+}
+
+func TestQueryResolver_Payee(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockPayee := &protoTypes.Payee{
+		Id:     "ID",
+		Owner:  "owner",
+		Name:   "Name",
+		Avatar: "Avatar",
+		Ts:     time.Now().Unix(),
+		Accounts: []*protoTypes.PayeeAccount{
+			{
+				Id:            "accountId",
+				Iban:          "iban",
+				AccountNumber: "accountnumber",
+			},
+		},
+	}
+
+	mockPerson := &protoTypes.Person{
+		Id:         "ID",
+		Title:      "Title",
+		FirstName:  "FirstName",
+		LastName:   "LastName",
+		MiddleName: "MiddleName",
+		Dob:        "Dob",
+		Ts:         time.Now().Unix(),
+	}
+
+	mockIdentity := &models.Identity{
+		ID:     "identityId",
+		Owner:  "personId",
+		Active: true,
+		Credentials: models.Credentials{
+			Identifier: "hashuser@email.com",
+			Password:   "hashpasscode",
+			Pin:        "transactionPin8",
+		},
+	}
+
+	paymentClient, personClient, preloader := &mocks.PaymentServiceClient{}, &mocks.PersonServiceClient{}, &mocks.Preloader{}
+	mockStore := mocks.NewMockDataStore(ctrl)
+
+	ctx := context.WithValue(context.Background(), middlewares.AuthenticatedUserContextKey,
+		models.Claims{
+			PersonId:   "personId",
+			IdentityId: "identityId",
+			DeviceId:   "deviceId",
+		})
+
+	paymentClient.On("GetPayee", ctx, &paymentService.GetPayeeRequest{
+		PayeeId:    "payeeId",
+		IdentityId: "identityId",
+	}).Return(mockPayee, nil)
+
+	personClient.On("Person", ctx, &personService.PersonRequest{Id: "personId"}).
+		Return(mockPerson, nil)
+
+	preloader.On("GetPreloads", ctx).Return([]string{"owner", "owner.owner"})
+
+	mockStore.EXPECT().GetIdentityById("identityId").Return(mockIdentity, nil)
+
+	resolverOpts := &ResolverOpts{
+		paymentService: paymentClient,
+		personService:  personClient,
+		preloader:      preloader,
+		DataStore:      mockStore,
+	}
+	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Query()
+
+	payee, err := resolver.Payee(ctx, "payeeId")
+	assert.Nil(t, err)
+	assert.NotNil(t, payee)
+	assert.Equal(t, payee.ID, mockPayee.Id)
+	assert.Equal(t, payee.Name, mockPayee.Name)
+	assert.Equal(t, mockPayee.Avatar, *payee.Avatar)
+	assert.Equal(t, mockPayee.Accounts[0].Id, payee.Accounts[0].ID)
+	assert.Equal(t, payee.Owner.ID, mockIdentity.ID)
 }

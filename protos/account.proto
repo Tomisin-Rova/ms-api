@@ -16,14 +16,14 @@ message CreateAccountRequest {
 
 message GetAccountRequest {
   string id = 1;
-  string identityId =2;
+  string identityId = 2;
 }
 
 message GetAccountResponse {
   string id = 1;
   string owner = 2;
   string product = 3;
-  string name =4;
+  string name = 4;
   types.AccountData accountData = 5;
   repeated types.Transaction transactions = 6;
   bool active = 7;
@@ -42,8 +42,15 @@ message GetAccountsResponse {
   repeated GetAccountResponse accounts = 1;
 }
 
+message ValidateBVNRequest {
+  string personId = 1;
+  string bvn = 2;
+  string phone = 3;
+}
+
 service AccountService {
   rpc CreateAccount(CreateAccountRequest) returns (types.Response) {}
   rpc GetAccount(GetAccountRequest) returns (GetAccountResponse) {}
   rpc GetAccounts(GetAccountsRequest) returns (GetAccountsResponse) {}
+  rpc ValidateBVN(ValidateBVNRequest) returns (types.Response) {}
 }

@@ -670,6 +670,96 @@ func (r *mutationResolver) Resubmit(ctx context.Context, reports []*types.Report
 	}, nil
 }
 
+func (r *mutationResolver) ResubmitReports(ctx context.Context, reports []*types.ReportInput) (*types.Response, error) {
+	claims, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+
+	request := onboardingService.ResubmitReportRequest{
+		PersonId: claims.PersonId,
+		Reports:  make([]*onboardingService.ReportInput, len(reports)),
+	}
+	for index, report := range reports {
+		request.Reports[index] = &onboardingService.ReportInput{
+			Id: report.ID,
+		}
+	}
+	response, err := r.onBoardingService.ResubmitReport(ctx, &request)
+	if err != nil {
+		r.logger.Error("call onBoardingService.ResubmitReport()", zap.Error(err))
+		return nil, err
+	}
+
+	return &types.Response{
+		Message: response.Message,
+		Success: response.Success,
+	}, nil
+}
+
+func (r *mutationResolver) CreatePayment(ctx context.Context, payment types.PaymentInput) (*types.Response, error) {
+	_, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+
+	p, err := validator.ValidatePayment(&payment)
+	if err != nil {
+		r.logger.Error("validating payment details", zap.Error(err))
+		return nil, err
+	}
+
+	response, err := r.paymentService.CreatePayment(ctx, &paymentService.CreatePaymentRequest{
+		IdempotencyKey: p.IdempotencyKey,
+		Owner:          p.Owner,
+		Beneficiary: &paymentService.Beneficiary{
+			Account:  p.Beneficiary.Account,
+			Currency: *p.Beneficiary.Currency,
+			Amount:   *p.Beneficiary.Amount,
+		},
+		Charge:        *p.Charge,
+		Reference:     *p.Reference,
+		Status:        string(*payment.Status),
+		Image:         *p.Image,
+		Notes:         *p.Notes,
+		Tags:          p.Tags,
+		FundingSource: p.FundingSource,
+		Currency:      *p.Currency,
+		FundingAmount: p.FundingAmount,
+		Quote:         *p.Quote,
+	})
+
+	if err != nil {
+		r.logger.Error("error calling paymentService.CreatePayment()", zap.Error(err))
+		return nil, err
+	}
+
+	return &types.Response{
+		Message: response.Message,
+		Success: response.Success,
+	}, nil
+}
+
+func (r *mutationResolver) ValidateBvn(ctx context.Context, bvn string, phone string) (*types.Response, error) {
+	claims, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+	response, err := r.accountService.ValidateBVN(ctx, &accountService.ValidateBVNRequest{
+		PersonId: claims.PersonId,
+		Bvn:      bvn,
+		Phone:    phone,
+	})
+	if err != nil {
+		r.logger.Error("error calling accountService.ValidateBVN()", zap.Error(err))
+		return nil, err
+	}
+	return &types.Response{
+		Message: response.Message,
+		Success: response.Success,
+	}, nil
+}
+
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 

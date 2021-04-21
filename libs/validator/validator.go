@@ -1,28 +1,30 @@
 package validator
 
 import (
+	"regexp"
+
 	coreError "github.com/roava/zebra/errors"
 	"ms.api/types"
-	"regexp"
 )
 
 var (
-	alphaNumericRegex             = regexp.MustCompile(`^([A-Za-z]+[0-9]|[0-9]+[A-Za-z])[A-Za-z0-9]*$`)
+	characterRegex                = regexp.MustCompile(`[A-Za-z]+`)
+	digitRegex                    = regexp.MustCompile(`[\d]+`)
 	ErrInvalidTransactionPassword = coreError.NewTerror(
 		7010,
 		"InvalidPassword",
-		"8 digit password must have at least one alphabet and one letter",
+		"Your transaction password must have at least one number and at least one letter and must be at least 8-characters long.",
 		"",
 	)
 )
 
 func ValidateTransactionPassword(password string) error {
-	if ok := alphaNumericRegex.MatchString(password); !ok {
+	if len(password) < 8 ||
+		!characterRegex.MatchString(password) ||
+		!digitRegex.MatchString(password) {
 		return ErrInvalidTransactionPassword
 	}
-	if len(password) < 8 {
-		return ErrInvalidTransactionPassword
-	}
+
 	return nil
 }
 
@@ -56,4 +58,51 @@ func ValidatePayeeAccount(p *types.PayeeAccountInput) (*types.PayeeAccountInfo, 
 	}
 
 	return payeeAccount, nil
+}
+
+func ValidatePayment(p *types.PaymentInput) (*types.PaymentInput, error) {
+	payment := &types.PaymentInput{}
+	if p.IdempotencyKey != " " {
+		payment.IdempotencyKey = p.IdempotencyKey
+	}
+	if p.Owner != " " {
+		payment.Owner = p.Owner
+	}
+	if p.Charge != nil {
+		payment.Charge = p.Charge
+	}
+	if p.Currency != nil {
+		payment.Currency = p.Currency
+	}
+	if p.Reference != nil {
+		payment.Reference = p.Reference
+	}
+	if p.Status != nil {
+		payment.Status = p.Status
+	}
+	if p.Image != nil {
+		payment.Image = p.Image
+	}
+	if p.Notes != nil {
+		payment.Notes = p.Notes
+	}
+	if p.Quote != nil {
+		payment.Quote = p.Quote
+	}
+	if p.Tags != nil {
+		payment.Tags = p.Tags
+	}
+	if p.Beneficiary != nil {
+		payment.Beneficiary = p.Beneficiary
+	}
+	if p.FundingSource != " " {
+		payment.FundingSource = p.FundingSource
+	}
+	if p.Currency != nil {
+		payment.Currency = p.Currency
+	}
+	if p.FundingAmount != 0 {
+		payment.FundingAmount = p.FundingAmount
+	}
+	return payment, nil
 }

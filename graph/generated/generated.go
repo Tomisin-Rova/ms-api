@@ -626,6 +626,7 @@ type ComplexityRoot struct {
 		CreateAccount             func(childComplexity int, product types.ProductInput) int
 		CreateApplication         func(childComplexity int) int
 		CreatePayee               func(childComplexity int, payee types.PayeeInput, password string) int
+		CreatePayment             func(childComplexity int, payment types.PaymentInput) int
 		CreatePhone               func(childComplexity int, phone string, device types.DeviceInput) int
 		CreateTransactionPassword func(childComplexity int, password string) int
 		DeletePayeeAccount        func(childComplexity int, payee string, payeeAccount string) int
@@ -639,12 +640,14 @@ type ComplexityRoot struct {
 		ResendOtp                 func(childComplexity int, phone string) int
 		ResetPasscode             func(childComplexity int, token string, email string, passcode string) int
 		Resubmit                  func(childComplexity int, reports []*types.ReportInput, message *string) int
+		ResubmitReports           func(childComplexity int, reports []*types.ReportInput) int
 		Signup                    func(childComplexity int, token string, email string, passcode string) int
 		SubmitApplication         func(childComplexity int) int
 		SubmitProof               func(childComplexity int, proof types.SubmitProofInput) int
 		UpdateDeviceToken         func(childComplexity int, token []*types.DeviceTokenInput) int
 		UpdatePayee               func(childComplexity int, payee string, payeeInput *types.PayeeInput, password string) int
 		UpdateValidationStatus    func(childComplexity int, validation string, status types.State, message string) int
+		ValidateBvn               func(childComplexity int, bvn string, phone string) int
 		VerifyEmail               func(childComplexity int, email string, code string) int
 	}
 
@@ -1233,6 +1236,9 @@ type MutationResolver interface {
 	AddPayeeAccount(ctx context.Context, payee string, payeeAccount types.PayeeAccountInput) (*types.Response, error)
 	DeletePayeeAccount(ctx context.Context, payee string, payeeAccount string) (*types.Response, error)
 	Resubmit(ctx context.Context, reports []*types.ReportInput, message *string) (*types.Response, error)
+	ResubmitReports(ctx context.Context, reports []*types.ReportInput) (*types.Response, error)
+	CreatePayment(ctx context.Context, payment types.PaymentInput) (*types.Response, error)
+	ValidateBvn(ctx context.Context, bvn string, phone string) (*types.Response, error)
 }
 type QueryResolver interface {
 	Me(ctx context.Context) (*types.Person, error)
@@ -4085,6 +4091,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreatePayee(childComplexity, args["payee"].(types.PayeeInput), args["password"].(string)), true
 
+	case "Mutation.createPayment":
+		if e.complexity.Mutation.CreatePayment == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createPayment_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreatePayment(childComplexity, args["payment"].(types.PaymentInput)), true
+
 	case "Mutation.createPhone":
 		if e.complexity.Mutation.CreatePhone == nil {
 			break
@@ -4241,6 +4259,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.Resubmit(childComplexity, args["reports"].([]*types.ReportInput), args["message"].(*string)), true
 
+	case "Mutation.resubmitReports":
+		if e.complexity.Mutation.ResubmitReports == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_resubmitReports_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.ResubmitReports(childComplexity, args["reports"].([]*types.ReportInput)), true
+
 	case "Mutation.signup":
 		if e.complexity.Mutation.Signup == nil {
 			break
@@ -4307,6 +4337,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.UpdateValidationStatus(childComplexity, args["validation"].(string), args["status"].(types.State), args["message"].(string)), true
+
+	case "Mutation.validateBVN":
+		if e.complexity.Mutation.ValidateBvn == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_validateBVN_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.ValidateBvn(childComplexity, args["bvn"].(string), args["phone"].(string)), true
 
 	case "Mutation.verifyEmail":
 		if e.complexity.Mutation.VerifyEmail == nil {
@@ -7289,7 +7331,11 @@ var sources = []*ast.Source{
   """
   acceptTerms(documents: [ID]!): Response!
   # update a validation status
-  updateValidationStatus(validation: ID!, status: State!, message: String!): Response!
+  updateValidationStatus(
+    validation: ID!
+    status: State!
+    message: String!
+  ): Response!
   submitProof(proof: SubmitProofInput!): Response!
   createTransactionPassword(password: String!): Response!
   # create new deposit account
@@ -7305,6 +7351,12 @@ var sources = []*ast.Source{
   deletePayeeAccount(payee: ID!, payee_account: ID!): Response!
   # ask for a customer to resubmit a report
   resubmit(reports: [ReportInput!]!, message: String): Response!
+  # Submit the ids of the reports that has been resubmitted to Onfido
+  resubmitReports(reports: [ReportInput!]): Response!
+  # create new payment instruction
+  createPayment(payment: PaymentInput!): Response!
+  # validate the customer's BVN
+  validateBVN(bvn: String!, phone: String!): Response!
 }
 `, BuiltIn: false},
 	{Name: "graph/schemas/query.graphql", Input: `type Query {
@@ -8044,7 +8096,7 @@ type Identity {
   # The Ulid field for the identity
   id: ID!
   # Reference to the person or organisation who owns this identity (customer relationship)
-  owner: Entity!
+  owner: Owner!
   # The nickname of the owner of identity wishes to be addressed as
   nickname: String
   # Context of the identity. Ulid of the organisation that this identity is for e.g. ROAVA, Onfido, Twitter, Nubank
@@ -9884,7 +9936,7 @@ type Payee {
   # Unique roava ulid for the data record
   id: ID!
   # identity that owns the payee
-  owner: String!
+  owner: Identity!
   # name of payee
   name: String!
   # avatar (optional) for the payee
@@ -9973,6 +10025,46 @@ type PayeeEdge {
 # Report input required to ask for a resubmit
 input ReportInput {
   id: ID!
+}
+
+# Input type for creating new payments
+input PaymentInput {
+  # unique value generated by the client which the server uses to recognize subsequent retries of the same request
+  idempotency_key: String!
+  # the owner (person|organisation) providing payment instruction
+  owner: ID!
+  # total fee and charges applicable to payment
+  charge: Int
+  # reference string provided by the customer
+  reference: String
+  # status of the payment - default=PENDING
+  status: State
+  # optional image (base64 string) provided by the customer
+  image: String
+  # notes attahed to the payment by the customer
+  notes: String
+  # unique ulid for the quote international payments
+  quote: String
+  # optional tags applied to the payment
+  tags: [ID!]
+  # beneficiary account receiving the payment
+  beneficiary: BeneficiaryInput!
+  # unique id of source account from which moneies will be debited
+  funding_source: String!
+  # 3 letter ISO currency code of the funding account for payment
+  currency: String
+  # ammount to be debited from funding source/account
+  funding_amount: Int!
+}
+
+# Type to input a beneficiary account for a payment
+input BeneficiaryInput {
+  # id of beneficiary (Payee Account | Account) for this payment
+  account: String!
+  # 3 letter ISO currency code of the beneficiary account
+  currency: String
+  # amount to be credited to beneficiary account
+  amount: Int
 }
 `, BuiltIn: false},
 }
@@ -10249,6 +10341,21 @@ func (ec *executionContext) field_Mutation_createPayee_args(ctx context.Context,
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_createPayment_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 types.PaymentInput
+	if tmp, ok := rawArgs["payment"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("payment"))
+		arg0, err = ec.unmarshalNPaymentInput2msᚗapiᚋtypesᚐPaymentInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["payment"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_createPhone_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -10492,6 +10599,21 @@ func (ec *executionContext) field_Mutation_resetPasscode_args(ctx context.Contex
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_resubmitReports_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 []*types.ReportInput
+	if tmp, ok := rawArgs["reports"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("reports"))
+		arg0, err = ec.unmarshalOReportInput2ᚕᚖmsᚗapiᚋtypesᚐReportInputᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["reports"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_resubmit_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -10642,6 +10764,30 @@ func (ec *executionContext) field_Mutation_updateValidationStatus_args(ctx conte
 		}
 	}
 	args["message"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_validateBVN_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["bvn"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("bvn"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["bvn"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["phone"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("phone"))
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["phone"] = arg1
 	return args, nil
 }
 
@@ -22131,9 +22277,9 @@ func (ec *executionContext) _Identity_owner(ctx context.Context, field graphql.C
 		}
 		return graphql.Null
 	}
-	res := resTmp.(types.Entity)
+	res := resTmp.(types.Owner)
 	fc.Result = res
-	return ec.marshalNEntity2msᚗapiᚋtypesᚐEntity(ctx, field.Selections, res)
+	return ec.marshalNOwner2msᚗapiᚋtypesᚐOwner(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Identity_nickname(ctx context.Context, field graphql.CollectedField, obj *types.Identity) (ret graphql.Marshaler) {
@@ -26167,6 +26313,132 @@ func (ec *executionContext) _Mutation_resubmit(ctx context.Context, field graphq
 	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_resubmitReports(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_resubmitReports_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().ResubmitReports(rctx, args["reports"].([]*types.ReportInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.Response)
+	fc.Result = res
+	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_createPayment(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createPayment_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreatePayment(rctx, args["payment"].(types.PaymentInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.Response)
+	fc.Result = res
+	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_validateBVN(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_validateBVN_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().ValidateBvn(rctx, args["bvn"].(string), args["phone"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.Response)
+	fc.Result = res
+	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _OpeningBalance_default_value(ctx context.Context, field graphql.CollectedField, obj *types.OpeningBalance) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -27676,9 +27948,9 @@ func (ec *executionContext) _Payee_owner(ctx context.Context, field graphql.Coll
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*types.Identity)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNIdentity2ᚖmsᚗapiᚋtypesᚐIdentity(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Payee_name(ctx context.Context, field graphql.CollectedField, obj *types.Payee) (ret graphql.Marshaler) {
@@ -40161,6 +40433,42 @@ func (ec *executionContext) unmarshalInputAuthInput(ctx context.Context, obj int
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputBeneficiaryInput(ctx context.Context, obj interface{}) (types.BeneficiaryInput, error) {
+	var it types.BeneficiaryInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "account":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("account"))
+			it.Account, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "currency":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("currency"))
+			it.Currency, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "amount":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("amount"))
+			it.Amount, err = ec.unmarshalOInt2ᚖint64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputDeviceInput(ctx context.Context, obj interface{}) (types.DeviceInput, error) {
 	var it types.DeviceInput
 	var asMap = obj.(map[string]interface{})
@@ -40344,6 +40652,122 @@ func (ec *executionContext) unmarshalInputPayeeInput(ctx context.Context, obj in
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("accounts"))
 			it.Accounts, err = ec.unmarshalNPayeeAccountInput2ᚕᚖmsᚗapiᚋtypesᚐPayeeAccountInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputPaymentInput(ctx context.Context, obj interface{}) (types.PaymentInput, error) {
+	var it types.PaymentInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "idempotency_key":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idempotency_key"))
+			it.IdempotencyKey, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "owner":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("owner"))
+			it.Owner, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "charge":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("charge"))
+			it.Charge, err = ec.unmarshalOInt2ᚖint64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "reference":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("reference"))
+			it.Reference, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "status":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
+			it.Status, err = ec.unmarshalOState2ᚖmsᚗapiᚋtypesᚐState(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "image":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("image"))
+			it.Image, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "notes":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("notes"))
+			it.Notes, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "quote":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("quote"))
+			it.Quote, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "tags":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tags"))
+			it.Tags, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "beneficiary":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("beneficiary"))
+			it.Beneficiary, err = ec.unmarshalNBeneficiaryInput2ᚖmsᚗapiᚋtypesᚐBeneficiaryInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "funding_source":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("funding_source"))
+			it.FundingSource, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "currency":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("currency"))
+			it.Currency, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "funding_amount":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("funding_amount"))
+			it.FundingAmount, err = ec.unmarshalNInt2int64(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -43406,6 +43830,21 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "resubmit":
 			out.Values[i] = ec._Mutation_resubmit(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "resubmitReports":
+			out.Values[i] = ec._Mutation_resubmitReports(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "createPayment":
+			out.Values[i] = ec._Mutation_createPayment(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "validateBVN":
+			out.Values[i] = ec._Mutation_validateBVN(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -48759,6 +49198,11 @@ func (ec *executionContext) unmarshalNPayeeInput2msᚗapiᚋtypesᚐPayeeInput(c
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNPaymentInput2msᚗapiᚋtypesᚐPaymentInput(ctx context.Context, v interface{}) (types.PaymentInput, error) {
+	res, err := ec.unmarshalInputPaymentInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) marshalNPerson2ᚕᚖmsᚗapiᚋtypesᚐPersonᚄ(ctx context.Context, sel ast.SelectionSet, v []*types.Person) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
@@ -51314,6 +51758,30 @@ func (ec *executionContext) marshalOReportConnection2ᚖmsᚗapiᚋtypesᚐRepor
 		return graphql.Null
 	}
 	return ec._ReportConnection(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOReportInput2ᚕᚖmsᚗapiᚋtypesᚐReportInputᚄ(ctx context.Context, v interface{}) ([]*types.ReportInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]*types.ReportInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNReportInput2ᚖmsᚗapiᚋtypesᚐReportInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
 }
 
 func (ec *executionContext) marshalOReportReviewStatus2ᚖmsᚗapiᚋtypesᚐReportReviewStatus(ctx context.Context, sel ast.SelectionSet, v *types.ReportReviewStatus) graphql.Marshaler {
