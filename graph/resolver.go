@@ -274,6 +274,15 @@ func (r *Resolver) hydrateAccount(from *accountService.GetAccountResponse) *type
 		Image:        &from.Image,
 		Organisation: &from.Organisation,
 		Ts:           Int64(int64(from.Ts)),
+		AccountDetails: &types.AccountDetails{
+			VirtualAccountID: &from.AccountDetails.VirtualAccountID,
+			Iban:             &from.AccountDetails.Iban,
+			AccountNumber:    &from.AccountDetails.AccountNumber,
+			SortCode:         &from.AccountDetails.SortCode,
+			SwiftBic:         &from.AccountDetails.SwiftBic,
+			BankCode:         &from.AccountDetails.BankCode,
+			RoutingNumber:    &from.AccountDetails.RoutingNumber,
+		},
 	}
 
 	// Add tags
