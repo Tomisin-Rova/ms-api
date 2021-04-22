@@ -65,7 +65,7 @@ func TestMongoStore_GetCDDs(t *testing.T) {
 			Applicant: models.Person{ID: "personId"},
 		}},
 	}
-	newId, err := client.Database("roava").Collection("cdds").InsertOne(context.Background(), cdd)
+	newId, err := client.Database("roava").Collection(cddsCollection).InsertOne(context.Background(), cdd)
 	assert.Nil(t, err)
 	assert.NotNil(t, newId)
 

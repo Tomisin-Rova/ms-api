@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	rerrors "ms.api/libs/errors"
 	"ms.api/protos/pb/paymentService"
 	"testing"
 	"time"
@@ -380,7 +381,8 @@ func Test_queryResolver_Person(t *testing.T) {
 
 func TestQueryResolver_Me(t *testing.T) {
 	const (
-		success = iota
+		success            = iota
+		successNotCDDFound = iota
 		errorNotAuthenticatedUser
 		errorGettingPerson
 		errorGettingCDD
@@ -393,6 +395,10 @@ func TestQueryResolver_Me(t *testing.T) {
 		{
 			name:     "Test query me successfully",
 			testType: success,
+		},
+		{
+			name:     "Test query me successfully with no cdd",
+			testType: successNotCDDFound,
 		},
 		{
 			name:     "Test error not authenticated user",
@@ -444,6 +450,20 @@ func TestQueryResolver_Me(t *testing.T) {
 						},
 					},
 				}, nil)
+
+				me, err := resolver.Query().Me(ctx)
+				assert.NoError(t, err)
+				assert.NotNil(t, me)
+				assert.NotEmpty(t, me)
+			case successNotCDDFound:
+				personServiceClient.On("Person", ctx, &personService.PersonRequest{
+					Id: "personId",
+				}).Return(&protoTypes.Person{
+					Id: "personId",
+				}, nil)
+				cddServiceClient.On("GetCDDByOwner", ctx, &cddService.GetCDDByOwnerRequest{
+					PersonId: "personId",
+				}).Return(nil, coreErrors.NewTerror(rerrors.CddNotFound, "", "", ""))
 
 				me, err := resolver.Query().Me(ctx)
 				assert.NoError(t, err)

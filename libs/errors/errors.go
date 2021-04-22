@@ -1,10 +1,14 @@
-package rerrors
+package errors
 
 import (
 	coreError "github.com/roava/zebra/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 	"google.golang.org/grpc/status"
 	"strings"
+)
+
+const (
+	CddNotFound = 1105
 )
 
 // NewFromGrpc returns a formatted Roava Terror
