@@ -5,36 +5,35 @@
 package mocks
 
 import (
-	reflect "reflect"
-
 	gomock "github.com/golang/mock/gomock"
 	models "github.com/roava/zebra/models"
+	reflect "reflect"
 )
 
-// MockDataStore is a mock of DataStore interface.
+// MockDataStore is a mock of DataStore interface
 type MockDataStore struct {
 	ctrl     *gomock.Controller
 	recorder *MockDataStoreMockRecorder
 }
 
-// MockDataStoreMockRecorder is the mock recorder for MockDataStore.
+// MockDataStoreMockRecorder is the mock recorder for MockDataStore
 type MockDataStoreMockRecorder struct {
 	mock *MockDataStore
 }
 
-// NewMockDataStore creates a new mock instance.
+// NewMockDataStore creates a new mock instance
 func NewMockDataStore(ctrl *gomock.Controller) *MockDataStore {
 	mock := &MockDataStore{ctrl: ctrl}
 	mock.recorder = &MockDataStoreMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use.
+// EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockDataStore) EXPECT() *MockDataStoreMockRecorder {
 	return m.recorder
 }
 
-// GetCDDs mocks base method.
+// GetCDDs mocks base method
 func (m *MockDataStore) GetCDDs(page, perPage int64) ([]*models.CDD, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetCDDs", page, perPage)
@@ -43,13 +42,13 @@ func (m *MockDataStore) GetCDDs(page, perPage int64) ([]*models.CDD, error) {
 	return ret0, ret1
 }
 
-// GetCDDs indicates an expected call of GetCDDs.
+// GetCDDs indicates an expected call of GetCDDs
 func (mr *MockDataStoreMockRecorder) GetCDDs(page, perPage interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCDDs", reflect.TypeOf((*MockDataStore)(nil).GetCDDs), page, perPage)
 }
 
-// GetCheck mocks base method.
+// GetCheck mocks base method
 func (m *MockDataStore) GetCheck(id string) (*models.Check, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetCheck", id)
@@ -58,73 +57,13 @@ func (m *MockDataStore) GetCheck(id string) (*models.Check, error) {
 	return ret0, ret1
 }
 
-// GetCheck indicates an expected call of GetCheck.
+// GetCheck indicates an expected call of GetCheck
 func (mr *MockDataStoreMockRecorder) GetCheck(id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCheck", reflect.TypeOf((*MockDataStore)(nil).GetCheck), id)
 }
 
-// GetIdentityById mocks base method.
-func (m *MockDataStore) GetIdentityById(identityId string) (*models.Identity, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetIdentityById", identityId)
-	ret0, _ := ret[0].(*models.Identity)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetIdentityById indicates an expected call of GetIdentityById.
-func (mr *MockDataStoreMockRecorder) GetIdentityById(identityId interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetIdentityById", reflect.TypeOf((*MockDataStore)(nil).GetIdentityById), identityId)
-}
-
-// GetOrganization mocks base method.
-func (m *MockDataStore) GetOrganization(id string) (*models.Organization, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetOrganization", id)
-	ret0, _ := ret[0].(*models.Organization)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetOrganization indicates an expected call of GetOrganization.
-func (mr *MockDataStoreMockRecorder) GetOrganization(id interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrganization", reflect.TypeOf((*MockDataStore)(nil).GetOrganization), id)
-}
-
-// GetPerson mocks base method.
-func (m *MockDataStore) GetPerson(id string) (*models.Person, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetPerson", id)
-	ret0, _ := ret[0].(*models.Person)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetPerson indicates an expected call of GetPerson.
-func (mr *MockDataStoreMockRecorder) GetPerson(id interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPerson", reflect.TypeOf((*MockDataStore)(nil).GetPerson), id)
-}
-
-// GetProof mocks base method.
-func (m *MockDataStore) GetProof(id string) (*models.Proof, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetProof", id)
-	ret0, _ := ret[0].(*models.Proof)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetProof indicates an expected call of GetProof.
-func (mr *MockDataStoreMockRecorder) GetProof(id interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProof", reflect.TypeOf((*MockDataStore)(nil).GetProof), id)
-}
-
-// GetScreen mocks base method.
+// GetScreen mocks base method
 func (m *MockDataStore) GetScreen(id string) (*models.Screen, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetScreen", id)
@@ -133,8 +72,68 @@ func (m *MockDataStore) GetScreen(id string) (*models.Screen, error) {
 	return ret0, ret1
 }
 
-// GetScreen indicates an expected call of GetScreen.
+// GetScreen indicates an expected call of GetScreen
 func (mr *MockDataStoreMockRecorder) GetScreen(id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetScreen", reflect.TypeOf((*MockDataStore)(nil).GetScreen), id)
+}
+
+// GetProof mocks base method
+func (m *MockDataStore) GetProof(id string) (*models.Proof, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetProof", id)
+	ret0, _ := ret[0].(*models.Proof)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetProof indicates an expected call of GetProof
+func (mr *MockDataStoreMockRecorder) GetProof(id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProof", reflect.TypeOf((*MockDataStore)(nil).GetProof), id)
+}
+
+// GetPerson mocks base method
+func (m *MockDataStore) GetPerson(id string) (*models.Person, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPerson", id)
+	ret0, _ := ret[0].(*models.Person)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetPerson indicates an expected call of GetPerson
+func (mr *MockDataStoreMockRecorder) GetPerson(id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPerson", reflect.TypeOf((*MockDataStore)(nil).GetPerson), id)
+}
+
+// GetOrganization mocks base method
+func (m *MockDataStore) GetOrganization(id string) (*models.Organization, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetOrganization", id)
+	ret0, _ := ret[0].(*models.Organization)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetOrganization indicates an expected call of GetOrganization
+func (mr *MockDataStoreMockRecorder) GetOrganization(id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrganization", reflect.TypeOf((*MockDataStore)(nil).GetOrganization), id)
+}
+
+// GetIdentityById mocks base method
+func (m *MockDataStore) GetIdentityById(identityId string) (*models.Identity, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetIdentityById", identityId)
+	ret0, _ := ret[0].(*models.Identity)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetIdentityById indicates an expected call of GetIdentityById
+func (mr *MockDataStoreMockRecorder) GetIdentityById(identityId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetIdentityById", reflect.TypeOf((*MockDataStore)(nil).GetIdentityById), identityId)
 }

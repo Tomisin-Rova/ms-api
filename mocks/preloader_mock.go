@@ -6,35 +6,34 @@ package mocks
 
 import (
 	context "context"
-	reflect "reflect"
-
 	gomock "github.com/golang/mock/gomock"
+	reflect "reflect"
 )
 
-// MockPreloader is a mock of Preloader interface.
+// MockPreloader is a mock of Preloader interface
 type MockPreloader struct {
 	ctrl     *gomock.Controller
 	recorder *MockPreloaderMockRecorder
 }
 
-// MockPreloaderMockRecorder is the mock recorder for MockPreloader.
+// MockPreloaderMockRecorder is the mock recorder for MockPreloader
 type MockPreloaderMockRecorder struct {
 	mock *MockPreloader
 }
 
-// NewMockPreloader creates a new mock instance.
+// NewMockPreloader creates a new mock instance
 func NewMockPreloader(ctrl *gomock.Controller) *MockPreloader {
 	mock := &MockPreloader{ctrl: ctrl}
 	mock.recorder = &MockPreloaderMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use.
+// EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockPreloader) EXPECT() *MockPreloaderMockRecorder {
 	return m.recorder
 }
 
-// GetPreloads mocks base method.
+// GetPreloads mocks base method
 func (m *MockPreloader) GetPreloads(ctx context.Context) []string {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetPreloads", ctx)
@@ -42,7 +41,7 @@ func (m *MockPreloader) GetPreloads(ctx context.Context) []string {
 	return ret0
 }
 
-// GetPreloads indicates an expected call of GetPreloads.
+// GetPreloads indicates an expected call of GetPreloads
 func (mr *MockPreloaderMockRecorder) GetPreloads(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPreloads", reflect.TypeOf((*MockPreloader)(nil).GetPreloads), ctx)

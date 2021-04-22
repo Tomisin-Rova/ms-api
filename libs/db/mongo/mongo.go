@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	cddsCollection     = "cdds"
+	cddsCollection     = "cdd"
 	checksCollection   = "checks"
 	screensCollection  = "screens"
 	proofsCollection   = "proofs"

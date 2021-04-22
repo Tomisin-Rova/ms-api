@@ -16,6 +16,7 @@ import (
 	"ms.api/graph/connections"
 	"ms.api/graph/generated"
 	"ms.api/graph/models"
+	mainErrors "ms.api/libs/errors"
 	emailvalidator "ms.api/libs/validator/email"
 	"ms.api/protos/pb/accountService"
 	"ms.api/protos/pb/cddService"
@@ -48,8 +49,17 @@ func (r *queryResolver) Me(ctx context.Context) (*types.Person, error) {
 		PersonId: claims.PersonId,
 	})
 	if err != nil {
-		r.logger.Error("get cdd", zap.Error(err))
-		return nil, err
+		// If error it's CddNotFound don't return error
+		switch err := err.(type) {
+		case *terror.Terror:
+			if err.Code() != mainErrors.CddNotFound {
+				r.logger.Error("get cdd", zap.Error(err))
+				return nil, err
+			}
+		default:
+			r.logger.Error("get cdd", zap.Error(err))
+			return nil, err
+		}
 	}
 	person.Cdd = r.hydrateCDD(cddDto)
 
@@ -72,8 +82,17 @@ func (r *queryResolver) Person(ctx context.Context, id string) (*types.Person, e
 		PersonId: p.ID,
 	})
 	if err != nil {
-		r.logger.Error("get cdd", zap.Error(err))
-		return nil, err
+		// If error it's CddNotFound don't return error
+		switch err := err.(type) {
+		case *terror.Terror:
+			if err.Code() != mainErrors.CddNotFound {
+				r.logger.Error("get cdd", zap.Error(err))
+				return nil, err
+			}
+		default:
+			r.logger.Error("get cdd", zap.Error(err))
+			return nil, err
+		}
 	}
 	p.Cdd = r.hydrateCDD(cddDto)
 

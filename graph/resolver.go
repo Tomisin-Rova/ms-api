@@ -367,6 +367,10 @@ func (r *Resolver) hydrateAccount(from *accountService.GetAccountResponse) *type
 }
 
 func (r *queryResolver) hydrateCDD(cddDto *pb.Cdd) *types.Cdd {
+	if cddDto == nil {
+		return nil
+	}
+
 	tsAsInt64 := int64(cddDto.Ts)
 	var cdd = types.Cdd{
 		ID:        cddDto.Id,
