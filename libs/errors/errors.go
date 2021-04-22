@@ -3,7 +3,6 @@ package errors
 import (
 	coreError "github.com/roava/zebra/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
-	"google.golang.org/grpc/status"
 	"strings"
 )
 
@@ -12,30 +11,20 @@ const (
 )
 
 // NewFromGrpc returns a formatted Roava Terror
-func NewFromGrpc(err error) error {
-	st, ok := status.FromError(err)
-	if !ok {
-		if err == nil {
-			return coreError.NewTerror(
-				7000,
-				"InvalidException",
-				"unknown error",
-				"",
-			)
-		}
-		return coreError.NewTerror(
-			7002,
-			"ConnectionError",
-			"error connecting to service",
-			err.Error(),
-		)
+func NewFromGrpc(err error) *coreError.Terror {
+	errStr := err.Error()
+	idx := strings.Index(errStr, "{")
+	message := errStr
+	if idx != -1 {
+		message = strings.TrimSpace(errStr[idx:])
 	}
-	return coreError.NewTerror(
-		7002,
-		"ConnectionError",
-		st.Code().String(),
-		"",
-	)
+
+	terror, err := coreError.NewTerrorFromJSONString(message)
+	if err != nil {
+		return nil
+	}
+
+	return terror
 }
 
 // FormatGqlTError formats the error given to a GQL error

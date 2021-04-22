@@ -34,6 +34,10 @@ import (
 //
 // It serves as dependency injection for your app, add any dependencies you require here.
 
+const (
+	errorMarshallingScreenValidation = "marshall screen validation"
+)
+
 var (
 	ErrUnAuthenticated = errors.NewTerror(
 		7012, "InvalidOrExpiredTokenError", "user not authenticated", "user not authenticated")
@@ -116,15 +120,6 @@ func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) 
 		return nil, fmt.Errorf("%v: %s", err, secrets.OnboardingServiceURL)
 	}
 	opts.OnBoardingService = onboardingService.NewOnBoardingServiceClient(connection)
-
-	// OnFido
-	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	connection, err = dialRPC(ctx, secrets.OnfidoServiceURL)
-	if err != nil {
-		return nil, fmt.Errorf("%v: %s", err, secrets.OnfidoServiceURL)
-	}
-	opts.OnfidoClient = onfidoService.NewOnfidoServiceClient(connection)
 
 	// CDD
 	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
@@ -395,7 +390,7 @@ func (r *queryResolver) hydrateCDD(cddDto *pb.Cdd) *types.Cdd {
 			var screen models.Screen
 			err := json.Unmarshal(validationDto.Data.Value, &screen)
 			if err != nil {
-				r.logger.Error("marshall screen validation", zap.Error(err))
+				r.logger.Error(errorMarshallingScreenValidation, zap.Error(err))
 				continue
 			}
 			tsAsInt64 := screen.Timestamp.Unix()
@@ -412,7 +407,7 @@ func (r *queryResolver) hydrateCDD(cddDto *pb.Cdd) *types.Cdd {
 			var check models.Check
 			err := json.Unmarshal(validationDto.Data.Value, &check)
 			if err != nil {
-				r.logger.Error("marshall screen validation", zap.Error(err))
+				r.logger.Error(errorMarshallingScreenValidation, zap.Error(err))
 				continue
 			}
 			tsAsInt64 := check.Timestamp.Unix()
@@ -458,7 +453,7 @@ func (r *queryResolver) hydrateCDD(cddDto *pb.Cdd) *types.Cdd {
 			var proof models.Proof
 			err := json.Unmarshal(validationDto.Data.Value, &proof)
 			if err != nil {
-				r.logger.Error("marshall screen validation", zap.Error(err))
+				r.logger.Error(errorMarshallingScreenValidation, zap.Error(err))
 				continue
 			}
 			tsAsInt64 := proof.Timestamp.Unix()
@@ -502,7 +497,7 @@ func (r *queryResolver) validation(validationDto *pb.Validation) *types.Validati
 		var screen models.Screen
 		err := json.Unmarshal(validationDto.Data.Value, &screen)
 		if err != nil {
-			r.logger.Error("marshall screen validation", zap.Error(err))
+			r.logger.Error(errorMarshallingScreenValidation, zap.Error(err))
 		}
 		tsAsInt64 := screen.Timestamp.Unix()
 		var data = types.Screen{
@@ -518,7 +513,7 @@ func (r *queryResolver) validation(validationDto *pb.Validation) *types.Validati
 		var check models.Check
 		err := json.Unmarshal(validationDto.Data.Value, &check)
 		if err != nil {
-			r.logger.Error("marshall screen validation", zap.Error(err))
+			r.logger.Error(errorMarshallingScreenValidation, zap.Error(err))
 		}
 		tsAsInt64 := check.Timestamp.Unix()
 		createdAtAsString := check.Data.CreatedAt.Format(time.RFC3339)
@@ -563,7 +558,7 @@ func (r *queryResolver) validation(validationDto *pb.Validation) *types.Validati
 		var proof models.Proof
 		err := json.Unmarshal(validationDto.Data.Value, &proof)
 		if err != nil {
-			r.logger.Error("marshall screen validation", zap.Error(err))
+			r.logger.Error(errorMarshallingScreenValidation, zap.Error(err))
 		}
 		tsAsInt64 := proof.Timestamp.Unix()
 		var data = types.Proof{

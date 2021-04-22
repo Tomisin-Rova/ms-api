@@ -36,7 +36,7 @@ func (r *queryResolver) Me(ctx context.Context) (*types.Person, error) {
 		Id: claims.PersonId,
 	})
 	if err != nil {
-		r.logger.Error("failed to get person", zap.Error(err))
+		r.logger.Error(errorGettingPersonMsg, zap.Error(err))
 		return nil, err
 	}
 	person, err := getPerson(personDto)
@@ -50,16 +50,13 @@ func (r *queryResolver) Me(ctx context.Context) (*types.Person, error) {
 	})
 	if err != nil {
 		// If error it's CddNotFound don't return error
-		switch err := err.(type) {
-		case *terror.Terror:
-			if err.Code() != mainErrors.CddNotFound {
-				r.logger.Error("get cdd", zap.Error(err))
-				return nil, err
-			}
-		default:
+		newTerror := mainErrors.NewFromGrpc(err)
+		if newTerror == nil || newTerror.Code() != mainErrors.CddNotFound {
 			r.logger.Error("get cdd", zap.Error(err))
 			return nil, err
 		}
+
+		r.logger.Info("no cdd found", zap.String("owner", claims.PersonId))
 	}
 	person.Cdd = r.hydrateCDD(cddDto)
 
@@ -83,16 +80,13 @@ func (r *queryResolver) Person(ctx context.Context, id string) (*types.Person, e
 	})
 	if err != nil {
 		// If error it's CddNotFound don't return error
-		switch err := err.(type) {
-		case *terror.Terror:
-			if err.Code() != mainErrors.CddNotFound {
-				r.logger.Error("get cdd", zap.Error(err))
-				return nil, err
-			}
-		default:
+		newTerror := mainErrors.NewFromGrpc(err)
+		if newTerror == nil || newTerror.Code() != mainErrors.CddNotFound {
 			r.logger.Error("get cdd", zap.Error(err))
 			return nil, err
 		}
+
+		r.logger.Info("no cdd found", zap.String("owner", p.ID))
 	}
 	p.Cdd = r.hydrateCDD(cddDto)
 
@@ -311,7 +305,7 @@ func (r *queryResolver) Activities(ctx context.Context, supported *bool) ([]*typ
 		Supported: supported != nil && *supported,
 	})
 	if err != nil {
-		r.logger.Error("failed to get person", zap.Error(err))
+		r.logger.Error(errorGettingPersonMsg, zap.Error(err))
 		return nil, err
 	}
 	p := make([]*types.Activity, 0)
@@ -601,7 +595,7 @@ func (r *queryResolver) Payee(ctx context.Context, id string) (*types.Payee, err
 
 	payeeRes := &types.Payee{}
 	if err := copier.Copy(payeeRes, &payee); err != nil {
-		r.logger.Error("copier failed", zap.Error(err))
+		r.logger.Error(errorCopierFailedMsg, zap.Error(err))
 		return nil, errors.New("failed to read payee information. please retry")
 	}
 
@@ -620,7 +614,7 @@ func (r *queryResolver) Payee(ctx context.Context, id string) (*types.Payee, err
 
 		identityRes := &types.Identity{}
 		if err := copier.Copy(identityRes, &identity); err != nil {
-			r.logger.Error("copier failed", zap.Error(err))
+			r.logger.Error(errorCopierFailedMsg, zap.Error(err))
 			return nil, errors.New("failed to read identity information. please retry")
 		}
 
@@ -630,12 +624,12 @@ func (r *queryResolver) Payee(ctx context.Context, id string) (*types.Payee, err
 	if opts.PersonRequested {
 		person, err := r.personService.Person(ctx, &personService.PersonRequest{Id: claims.PersonId})
 		if err != nil {
-			r.logger.Error("failed to get person", zap.Error(err))
+			r.logger.Error(errorGettingPersonMsg, zap.Error(err))
 			return nil, err
 		}
 		personRes := &types.Person{}
 		if err := copier.Copy(payeeRes, &payee); err != nil {
-			r.logger.Error("copier failed", zap.Error(err))
+			r.logger.Error(errorCopierFailedMsg, zap.Error(err))
 			return nil, errors.New("failed to read person information. please retry")
 		}
 		// update missing copier fields
@@ -690,7 +684,7 @@ func (r *queryResolver) Payees(ctx context.Context, first *int64, after *string,
 	for _, p := range payees.Payee {
 		payee := &types.Payee{}
 		if err := copier.Copy(payee, &p); err != nil {
-			r.logger.Error("copier failed", zap.Error(err))
+			r.logger.Error(errorCopierFailedMsg, zap.Error(err))
 			return nil, errors.New("failed to read payee information. please retry")
 		}
 
@@ -756,6 +750,12 @@ type queryResolver struct{ *Resolver }
 //  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
 //    it when you're done.
 //  - You have helper methods in this file. Move them out to keep these resolver files clean.
+const (
+	// Error messages
+	errorGettingPersonMsg = "failed to get person"
+	errorCopierFailedMsg  = "copier failed"
+)
+
 func (r *queryResolver) OnfidoReport(ctx context.Context, id string) (*string, error) {
 	panic(fmt.Errorf("not implemented"))
 }

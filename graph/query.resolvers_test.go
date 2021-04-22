@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	rerrors "ms.api/libs/errors"
 	"ms.api/protos/pb/paymentService"
 	"testing"
 	"time"
@@ -463,7 +462,7 @@ func TestQueryResolver_Me(t *testing.T) {
 				}, nil)
 				cddServiceClient.On("GetCDDByOwner", ctx, &cddService.GetCDDByOwnerRequest{
 					PersonId: "personId",
-				}).Return(nil, coreErrors.NewTerror(rerrors.CddNotFound, "", "", ""))
+				}).Return(nil, errors.New("rpc error: code = Unknown desc = {\"error\":{\"code\":1105,\"type\":\"CddNotFound\",\"message\":\"cdd record not found for this customer\",\"detail\":\"cdd record not found for this customer: cdd not found by id\"}}"))
 
 				me, err := resolver.Query().Me(ctx)
 				assert.NoError(t, err)
