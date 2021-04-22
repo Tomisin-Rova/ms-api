@@ -32,6 +32,7 @@ message GetAccountResponse {
   string image = 10;
   string organisation = 11;
   int32 ts = 12;
+  types.AccountDetails AccountDetails =13;
 }
 
 message GetAccountsRequest {

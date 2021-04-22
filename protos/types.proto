@@ -352,6 +352,17 @@ message AccountData {
   string withholdingTaxSourceKey =35;
 }
 
+// AccountDetails type
+message AccountDetails {
+  string VirtualAccountID = 1;
+  string Iban = 2;
+  string AccountNumber = 3;
+  string SortCode = 4;
+  string SwiftBic = 5;
+  string BankCode = 6;
+  string RoutingNumber = 7;
+}
+
 // AccruedAmounts type
 message AccruedAmounts  {
   int32 interestAccrued = 1;
