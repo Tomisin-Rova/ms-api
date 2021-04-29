@@ -533,9 +533,11 @@ func (r *mutationResolver) CreateAccount(ctx context.Context, product types.Prod
 		r.logger.Error("error calling accountService.CreateAccount()", zap.Error(err))
 		return nil, err
 	}
+
 	return &types.Response{
 		Message: response.Message,
 		Success: response.Success,
+		Token:   &response.Token,
 	}, nil
 }
 
