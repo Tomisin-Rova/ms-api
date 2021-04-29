@@ -10,10 +10,17 @@ import (
 var (
 	characterRegex                = regexp.MustCompile(`[A-Za-z]+`)
 	digitRegex                    = regexp.MustCompile(`[\d]+`)
+	onlyDiigtsRegex               = regexp.MustCompile(`^[0-9]*$`)
 	ErrInvalidTransactionPassword = coreError.NewTerror(
 		7010,
 		"InvalidPassword",
 		"Your transaction password must have at least one number and at least one letter and must be at least 8-characters long.",
+		"",
+	)
+	ErrInvalidPayeeAccountDetails = coreError.NewTerror(
+		7011,
+		"InvalidPayeeDetails",
+		"Invalid payee account details",
 		"",
 	)
 )
@@ -29,7 +36,6 @@ func ValidateTransactionPassword(password string) error {
 }
 
 // ValidatePayeeAccount validate and serialize payee account information
-// TODO: add validation cases when it's added to the AC
 func ValidatePayeeAccount(p *types.PayeeAccountInput) (*types.PayeeAccountInfo, error) {
 	payeeAccount := &types.PayeeAccountInfo{}
 	if p.Name != nil {
@@ -55,6 +61,11 @@ func ValidatePayeeAccount(p *types.PayeeAccountInput) (*types.PayeeAccountInfo, 
 	}
 	if p.RoutingNumber != nil {
 		payeeAccount.RoutingNumber = *p.RoutingNumber
+	}
+
+	if (!onlyDiigtsRegex.MatchString(payeeAccount.SortCode) && payeeAccount.SortCode != "") ||
+		(!onlyDiigtsRegex.MatchString(payeeAccount.AccountNumber) && payeeAccount.AccountNumber != "") {
+		return nil, ErrInvalidPayeeAccountDetails
 	}
 
 	return payeeAccount, nil

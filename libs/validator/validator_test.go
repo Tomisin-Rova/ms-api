@@ -3,6 +3,7 @@ package validator
 import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
+	"ms.api/types"
 	"testing"
 )
 
@@ -29,4 +30,54 @@ func TestValidateTransactionPassword(t *testing.T) {
 			assert.Equal(t, err, next.err)
 		})
 	}
+}
+
+func TestValidatePayeeAccount(t *testing.T) {
+	type tests struct {
+		payeeAccount *types.PayeeAccountInput
+		err          error
+	}
+
+	cases := []tests{
+		{
+			payeeAccount: &types.PayeeAccountInput{
+				Iban:          stringP("123414"),
+				SortCode:      stringP("12345678"),
+				AccountNumber: stringP("1223112422"),
+			},
+			err: nil,
+		},
+		{
+			payeeAccount: &types.PayeeAccountInput{
+				SortCode: stringP("12345678"),
+			},
+			err: nil,
+		},
+		{
+			payeeAccount: &types.PayeeAccountInput{
+				SortCode:      stringP("12345678aa"),
+				AccountNumber: stringP("1223112422"),
+			},
+			err: ErrInvalidPayeeAccountDetails,
+		},
+		{
+			payeeAccount: &types.PayeeAccountInput{
+				SortCode:      stringP("12345678"),
+				AccountNumber: stringP("some12422"),
+			},
+			err: ErrInvalidPayeeAccountDetails,
+		},
+	}
+
+	for idx, next := range cases {
+		t.Run(fmt.Sprintf("case-%d", idx), func(t *testing.T) {
+			_, err := ValidatePayeeAccount(next.payeeAccount)
+			assert.Equal(t, next.err, err)
+		})
+	}
+}
+
+//stringP - return string pointer
+func stringP(s string) *string {
+	return &s
 }
