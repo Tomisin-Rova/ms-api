@@ -3,16 +3,18 @@ package graph
 import (
 	"github.com/pkg/errors"
 	"github.com/roava/zebra/models"
+	"go.uber.org/zap"
 	"ms.api/libs/db"
 	"ms.api/types"
 )
 
 type DataResolver struct {
-	store db.DataStore
+	store  db.DataStore
+	logger *zap.Logger
 }
 
-func NewDataResolver(store db.DataStore) *DataResolver {
-	return &DataResolver{store: store}
+func NewDataResolver(store db.DataStore, logger *zap.Logger) *DataResolver {
+	return &DataResolver{store: store, logger: logger}
 }
 
 func (r *DataResolver) ResolveValidation(v models.Validation) (*types.Validation, error) {
@@ -204,7 +206,7 @@ func (r *DataResolver) ResolvePerson(id string, p *models.Person) (*types.Person
 	}
 	org, err := r.ResolveOrganization(person.Employer)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to resolver person's organisation")
+		r.logger.With(zap.Error(err)).Error("failed to resolver person's organisation")
 	}
 
 	return &types.Person{

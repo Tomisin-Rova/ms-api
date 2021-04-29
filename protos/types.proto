@@ -74,21 +74,28 @@ message Cdd {
   string id = 1;
   string owner = 2;
   bool watchlist = 3;
-  string status = 4;
-  bool onboard = 5;
-  repeated Validation validations = 6;
-  int32 ts = 7;
+  string details = 4;
+  string status = 5;
+  bool onboard = 6;
+  int64 version = 7;
+  repeated Validation validations = 8;
+  bool active = 9;
+  int32 ts = 10;
 }
 
+message Cdds {
+  repeated Cdd results = 1;
+}
 // Validation type
 message Validation {
   string id = 1;
   string validation_type = 2;
   string applicant = 3;
   google.protobuf.Any data = 4;
-  string status = 5;
-  bool approved = 6;
-  int32 ts = 7;
+  string organisation = 5;
+  string status = 6;
+  bool approved = 7;
+  int32 ts = 8;
 }
 
 // Kyc type

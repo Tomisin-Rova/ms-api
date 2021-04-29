@@ -49,3 +49,7 @@ models:
       - github.com/99designs/gqlgen/graphql.Int64
   DateTime:
     model: ms.api/libs/DateTime.DateTime
+  CDD:
+    fields:
+      validations:
+        resolver: true

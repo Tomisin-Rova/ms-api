@@ -33,9 +33,15 @@ message GetValidationByIdRequest {
   string validationId = 1;
 }
 
+message CDDSRequest {
+  int64 page = 1;
+  int64 perPage = 2;
+}
+
 service CddService{
   rpc GetCDDSummaryReport(PersonIdRequest) returns(Cddsummary){}
   rpc GetCDDById(CddIdRequest) returns(types.Cdd){}
   rpc GetCDDByOwner(GetCDDByOwnerRequest) returns(types.Cdd){}
   rpc GetValidationById(GetValidationByIdRequest) returns(types.Validation){}
+  rpc CDDS(CDDSRequest) returns (types.Cdds){}
 }

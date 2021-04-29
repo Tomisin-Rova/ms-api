@@ -3,14 +3,15 @@ package mongo
 import (
 	"context"
 	"fmt"
-	"github.com/ory/dockertest/v3"
-	"github.com/roava/zebra/models"
-	"github.com/stretchr/testify/assert"
-	"go.uber.org/zap/zaptest"
 	"log"
 	"os"
 	"testing"
 	"time"
+
+	"github.com/ory/dockertest/v3"
+	"github.com/roava/zebra/models"
+	"github.com/stretchr/testify/assert"
+	"go.uber.org/zap/zaptest"
 )
 
 var mongoDbPort = ""
@@ -49,30 +50,6 @@ func TestMain(m *testing.M) {
 		log.Fatal(err)
 	}
 	os.Exit(code)
-}
-
-func TestMongoStore_GetCDDs(t *testing.T) {
-	connectUri := "mongodb://localhost:" + mongoDbPort
-	repo, client, err := New(connectUri, "roava", zaptest.NewLogger(t))
-	assert.Nil(t, err)
-	assert.NotNil(t, repo)
-
-	cdd := &models.CDD{
-		ID:        "id",
-		Owner:     "owner",
-		Watchlist: false,
-		Validations: []models.Validation{{
-			Applicant: models.Person{ID: "personId"},
-		}},
-	}
-	newId, err := client.Database("roava").Collection(cddsCollection).InsertOne(context.Background(), cdd)
-	assert.Nil(t, err)
-	assert.NotNil(t, newId)
-
-	values, err := repo.GetCDDs(1, 100)
-	assert.Nil(t, err)
-	assert.NotNil(t, values)
-	assert.Equal(t, 1, len(values))
 }
 
 func TestIdentityRepository_GetIdentityById(t *testing.T) {

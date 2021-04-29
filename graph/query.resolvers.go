@@ -11,7 +11,6 @@ import (
 
 	"github.com/jinzhu/copier"
 	terror "github.com/roava/zebra/errors"
-	"go.mongodb.org/mongo-driver/mongo"
 	"go.uber.org/zap"
 	"ms.api/graph/connections"
 	"ms.api/graph/generated"
@@ -357,33 +356,43 @@ func (r *queryResolver) Cdd(ctx context.Context, id string) (*types.Cdd, error) 
 }
 
 func (r *queryResolver) Cdds(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string) (*types.CDDConnection, error) {
-	cdds, err := r.dataStore.GetCDDs(1, 100)
-	if err == mongo.ErrNoDocuments {
-		return nil, terror.NewTerror(7012, "CddsNotFound", "no CDDs data in the database", "no CDDs data in the database")
+	req := &cddService.CDDSRequest{
+		Page:    1,
+		PerPage: 100,
 	}
+	resp, err := r.cddService.CDDS(ctx, req)
 	if err != nil {
 		r.logger.With(zap.Error(err)).Error("failed to fetch cdds")
 		return nil, terror.NewTerror(7013, "InternalError", "failed to load CDDs data. Internal system error", "internal system error")
 	}
 
-	dataResolver := NewDataResolver(r.dataStore)
+	cdds := resp.Results
+
+	dataResolver := NewDataResolver(r.dataStore, r.logger)
+	dataConverter := NewDataConverter(r.logger)
 	cddsValues := make([]*types.Cdd, 0)
 	for _, next := range cdds {
 		validations := make([]*types.Validation, 0)
 		for _, validation := range next.Validations {
-			nextValidation, err := dataResolver.ResolveValidation(validation)
+			modelValidation, err := dataConverter.ProtoValidationToModel(validation)
+			if err != nil {
+				r.logger.With(zap.Error(err)).Error("cannot convert validation")
+				continue
+			}
+			nextValidation, err := dataResolver.ResolveValidation(*modelValidation)
 			if err != nil {
 				r.logger.With(zap.Error(err)).Error("cannot resolve validation data")
 				continue
 			}
 			validations = append(validations, nextValidation)
 		}
+
 		owner, err := dataResolver.ResolvePerson(next.Owner, nil)
 		if err != nil {
 			return nil, err
 		}
 		cddValue := &types.Cdd{
-			ID:          next.ID,
+			ID:          next.Id,
 			Owner:       owner,
 			Watchlist:   &next.Watchlist,
 			Details:     &next.Details,
@@ -392,8 +401,9 @@ func (r *queryResolver) Cdds(ctx context.Context, keywords *string, first *int64
 			Version:     Int64(int64(next.Version)),
 			Validations: validations,
 			Active:      &next.Active,
-			Ts:          Int64(next.Timestamp.UnixNano()),
+			Ts:          Int64(int64(next.Ts)),
 		}
+
 		cddsValues = append(cddsValues, cddValue)
 	}
 

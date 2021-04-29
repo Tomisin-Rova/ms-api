@@ -36,6 +36,7 @@ type Config struct {
 }
 
 type ResolverRoot interface {
+	CDD() CDDResolver
 	Mutation() MutationResolver
 	Query() QueryResolver
 }
@@ -247,7 +248,7 @@ type ComplexityRoot struct {
 		Owner       func(childComplexity int) int
 		Status      func(childComplexity int) int
 		Ts          func(childComplexity int) int
-		Validations func(childComplexity int, validationType *types.ValidationType) int
+		Validations func(childComplexity int, validationType *types.ValidationType, status []types.State) int
 		Version     func(childComplexity int) int
 		Watchlist   func(childComplexity int) int
 	}
@@ -1208,6 +1209,9 @@ type ComplexityRoot struct {
 	}
 }
 
+type CDDResolver interface {
+	Validations(ctx context.Context, obj *types.Cdd, validationType *types.ValidationType, status []types.State) ([]*types.Validation, error)
+}
 type MutationResolver interface {
 	CreatePhone(ctx context.Context, phone string, device types.DeviceInput) (*types.Response, error)
 	ConfirmPhone(ctx context.Context, token string, code string) (*types.Response, error)
@@ -2322,7 +2326,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Cdd.Validations(childComplexity, args["validation_type"].(*types.ValidationType)), true
+		return e.complexity.Cdd.Validations(childComplexity, args["validation_type"].(*types.ValidationType), args["status"].([]types.State)), true
 
 	case "CDD.version":
 		if e.complexity.Cdd.Version == nil {
@@ -8808,6 +8812,8 @@ type CDD {
   validations(
     # Filter validations by it's type
     validation_type: ValidationType
+    # Filter CDD validations by it's statuses
+    status: [State!]
   ): [Validation!]!
   # Boolean to indicate if this is the most current or active CDD file for the customer
   active: Boolean @deprecated(reason: "Customers now only have single CDD")
@@ -10086,6 +10092,15 @@ func (ec *executionContext) field_CDD_validations_args(ctx context.Context, rawA
 		}
 	}
 	args["validation_type"] = arg0
+	var arg1 []types.State
+	if tmp, ok := rawArgs["status"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
+		arg1, err = ec.unmarshalOState2ᚕmsᚗapiᚋtypesᚐStateᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["status"] = arg1
 	return args, nil
 }
 
@@ -17145,8 +17160,8 @@ func (ec *executionContext) _CDD_validations(ctx context.Context, field graphql.
 		Object:     "CDD",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
@@ -17159,7 +17174,7 @@ func (ec *executionContext) _CDD_validations(ctx context.Context, field graphql.
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Validations, nil
+		return ec.resolvers.CDD().Validations(rctx, obj, args["validation_type"].(*types.ValidationType), args["status"].([]types.State))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -41875,12 +41890,12 @@ func (ec *executionContext) _CDD(ctx context.Context, sel ast.SelectionSet, obj 
 		case "id":
 			out.Values[i] = ec._CDD_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "owner":
 			out.Values[i] = ec._CDD_owner(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "watchlist":
 			out.Values[i] = ec._CDD_watchlist(ctx, field, obj)
@@ -41889,17 +41904,26 @@ func (ec *executionContext) _CDD(ctx context.Context, sel ast.SelectionSet, obj 
 		case "status":
 			out.Values[i] = ec._CDD_status(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "onboard":
 			out.Values[i] = ec._CDD_onboard(ctx, field, obj)
 		case "version":
 			out.Values[i] = ec._CDD_version(ctx, field, obj)
 		case "validations":
-			out.Values[i] = ec._CDD_validations(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._CDD_validations(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "active":
 			out.Values[i] = ec._CDD_active(ctx, field, obj)
 		case "ts":
@@ -51815,6 +51839,70 @@ func (ec *executionContext) marshalOSocial2ᚖmsᚗapiᚋtypesᚐSocial(ctx cont
 		return graphql.Null
 	}
 	return ec._Social(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOState2ᚕmsᚗapiᚋtypesᚐStateᚄ(ctx context.Context, v interface{}) ([]types.State, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]types.State, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNState2msᚗapiᚋtypesᚐState(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOState2ᚕmsᚗapiᚋtypesᚐStateᚄ(ctx context.Context, sel ast.SelectionSet, v []types.State) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNState2msᚗapiᚋtypesᚐState(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
 }
 
 func (ec *executionContext) unmarshalOState2ᚖmsᚗapiᚋtypesᚐState(ctx context.Context, v interface{}) (*types.State, error) {
