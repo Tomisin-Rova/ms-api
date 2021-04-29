@@ -33,9 +33,13 @@ import (
 // This file will not be regenerated automatically.
 //
 // It serves as dependency injection for your app, add any dependencies you require here.
+type OnboardStatus string
 
 const (
-	errorMarshallingScreenValidation = "marshall screen validation"
+	errorMarshallingScreenValidation               = "marshall screen validation"
+	Onboarded                        OnboardStatus = "ONBOARDED"
+	NotOnboarded                     OnboardStatus = "NOT_ONBOARDED"
+	IgnoreOnboardFilter              OnboardStatus = "IGNORE_ONBOARD_FILTER"
 )
 
 var (
@@ -196,6 +200,7 @@ func dialRPC(ctx context.Context, address string) (*grpc.ClientConn, error) {
 }
 
 func getPerson(from *pb.Person) (*types.Person, error) {
+	personStatus := types.PersonStatus(from.Status)
 	var person = types.Person{
 		ID:               from.Id,
 		Title:            &from.Title,
@@ -205,55 +210,77 @@ func getPerson(from *pb.Person) (*types.Person, error) {
 		Dob:              from.Dob,
 		Ts:               from.Ts,
 		CountryResidence: &from.CountryResidence,
+		Status:           &personStatus,
 	}
 	// TODO: Fill other attributes
 
-	addresses := make([]*types.Address, 0)
-	for _, addr := range from.Addresses {
-		addresses = append(addresses, &types.Address{
+	addresses := make([]*types.Address, len(from.Addresses))
+	for i, addr := range from.Addresses {
+		addresses[i] = &types.Address{
 			Street:   &addr.Street,
 			Postcode: &addr.Postcode,
 			Country: &types.Country{
 				CountryName: addr.Country,
 			},
 			City: &addr.City,
-		})
+		}
 	}
 	person.Addresses = addresses
 
 	// Add Phones
-	phones := make([]*types.Phone, 0)
-	for _, ph := range from.Phones {
-		phones = append(phones, &types.Phone{
+	phones := make([]*types.Phone, len(from.Phones))
+	for i, ph := range from.Phones {
+		phones[i] = &types.Phone{
 			Value:    ph.Number,
 			Verified: ph.Verified,
-		})
+		}
 	}
 	person.Phones = phones
 
 	// Add Emails
-	emails := make([]*types.Email, 0)
-	for _, em := range from.Emails {
-		emails = append(emails, &types.Email{
+	emails := make([]*types.Email, len(from.Emails))
+	for i, em := range from.Emails {
+		emails[i] = &types.Email{
 			Value:    em.Value,
 			Verified: em.Verified,
-		})
+		}
 	}
 	person.Emails = emails
 
 	// Add Activity
-	activities := make([]*types.Activity, 0)
-	for _, ac := range from.Activities {
-		activities = append(activities, &types.Activity{
+	activities := make([]*types.Activity, len(from.Activities))
+	for i, ac := range from.Activities {
+		activities[i] = &types.Activity{
 			ID:            ac.Id,
 			Description:   ac.Description,
 			RiskWeighting: int64(ac.RiskWeighting),
 			Supported:     &ac.Supported,
 			Archived:      &ac.Archived,
 			Ts:            &ac.Ts,
-		})
+		}
 	}
 	person.Activities = activities
+
+	// Add Identities
+	identities := make([]*types.Identity, len(from.Identities))
+	for i, id := range from.Identities {
+		identities[i] = &types.Identity{
+			ID:             id.Id,
+			Nickname:       &id.Nickname,
+			Active:         &id.Active,
+			Authentication: &id.Authentication,
+			Credentials: &types.Credentials{
+				Identifier:   id.Credentials.Identifier,
+				RefreshToken: &id.Credentials.RefreshToken,
+			},
+			Organisation: &types.Organisation{
+				ID:   id.Organisation.Id,
+				Name: &id.Organisation.Name,
+			},
+			Ts: id.Ts,
+		}
+	}
+	person.Identities = identities
 
 	return &person, nil
 }

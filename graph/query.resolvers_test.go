@@ -4,9 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"ms.api/protos/pb/paymentService"
 	"testing"
 	"time"
+
+	"ms.api/protos/pb/paymentService"
 
 	"ms.api/mocks"
 	cddService "ms.api/protos/pb/cddService"
@@ -536,23 +537,24 @@ func Test_queryResolver_People(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			switch tt.testType {
 			case peopleNotFound:
+				var onboarded bool
 				personServiceClient.On("People", context.Background(), &personService.PeopleRequest{
-					Page: 1, PerPage: 100, Keywords: "John Smith",
+					Page: 1, PerPage: 100, Keywords: "John Smith", Onboarded: "NOT_ONBOARDED",
 				}).Return(nil, errors.New(""))
 				kw := "John Smith"
-				response, err := resolver.People(context.Background(), &kw, first, after, last, before)
+				response, err := resolver.People(context.Background(), &kw, first, after, last, before, &onboarded)
 				assert.NotNil(t, err)
 				assert.Nil(t, response)
 			case peopleFound:
 				personServiceClient.On("People", context.Background(), &personService.PeopleRequest{
-					Page: 1, PerPage: 100, Keywords: "Luke",
+					Page: 1, PerPage: 100, Keywords: "Luke", Onboarded: "NOT_ONBOARDED",
 				}).Return(&protoTypes.Persons{}, nil)
 				kw := "Luke"
-				response, err := resolver.People(context.Background(), &kw, first, after, last, before)
+				var onboarded bool
+				response, err := resolver.People(context.Background(), &kw, first, after, last, before, &onboarded)
 				assert.Nil(t, err)
 				assert.NotNil(t, response)
 			}
-
 		})
 	}
 }

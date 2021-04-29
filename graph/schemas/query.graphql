@@ -18,6 +18,8 @@ type Query {
     last: Int,
     # Returns the elements in the list that come before the specified cursor.
     before: String
+    # Filter person by it's status. If empty, should ignore the field
+    onboarded: Boolean
   ): PersonConnection
   # fetch an identity by ID
   identity(
