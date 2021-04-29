@@ -4,9 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"ms.api/protos/pb/paymentService"
 	"testing"
 	"time"
+
+	"ms.api/protos/pb/paymentService"
+	"ms.api/protos/pb/types"
 
 	"ms.api/mocks"
 	cddService "ms.api/protos/pb/cddService"
@@ -20,7 +22,6 @@ import (
 	"github.com/roava/zebra/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"go.mongodb.org/mongo-driver/mongo"
 	"go.uber.org/zap/zaptest"
 	"google.golang.org/protobuf/types/known/anypb"
 )
@@ -562,48 +563,73 @@ func TestQueryResolver_Cdds(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockOwner := "personId"
-	mockCdds := []*models.CDD{
-		{ID: "id1", Owner: mockOwner, Validations: []models.Validation{
-			{ValidationType: "CHECK", Data: "checkId", Organisation: "orgId", Applicant: models.Person{ID: mockOwner}},
-			{ValidationType: "SCREEN", Data: "screenId", Organisation: "orgId", Applicant: models.Person{ID: mockOwner}},
-		}},
-		{ID: "id2", Owner: mockOwner, Validations: []models.Validation{
-			{ValidationType: "CHECK", Data: "checkId", Organisation: "orgId", Applicant: models.Person{ID: mockOwner}},
-			{ValidationType: "SCREEN", Data: "screenId", Organisation: "orgId", Applicant: models.Person{ID: mockOwner}},
-		}},
+	firstCdd := types.Cdd{
+		Id:    "id1",
+		Owner: mockOwner,
+		Validations: []*protoTypes.Validation{
+			{ValidationType: "CHECK", Data: &anypb.Any{Value: []byte("{\"id\": \"checkId\"}")}, Organisation: "orgId", Applicant: mockOwner},
+			{ValidationType: "SCREEN", Data: &anypb.Any{Value: []byte("{\"id\": \"screenId\"}")}, Organisation: "orgId", Applicant: mockOwner},
+		},
+	}
+	secondCdd := types.Cdd{
+		Id:    "id2",
+		Owner: mockOwner,
+		Validations: []*protoTypes.Validation{
+			{ValidationType: "CHECK", Data: &anypb.Any{Value: []byte("{id: \"checkId\"}")}, Organisation: "orgId", Applicant: mockOwner},
+			{ValidationType: "SCREEN", Data: &anypb.Any{Value: []byte("{id: \"screenId\"}")}, Organisation: "orgId", Applicant: mockOwner},
+		},
+	}
+	mockCdds := &types.Cdds{
+		Results: []*protoTypes.Cdd{
+			&firstCdd,
+			&secondCdd,
+		},
 	}
 	mockPerson, mockCheck, mockScreen, mockOrg := &models.Person{ID: mockOwner, Employer: "orgId"}, &models.Check{Organisation: "orgId"}, &models.Screen{Organisation: "orgId"}, &models.Organization{}
 
 	mockStore := mocks.NewMockDataStore(ctrl)
-	mockStore.EXPECT().GetCDDs(int64(1), int64(100)).Return(mockCdds, nil).Times(1)
-	mockStore.EXPECT().GetPerson(mockOwner).Return(mockPerson, nil).MinTimes(1)
+	mockStore.EXPECT().GetPerson(mockOwner).Return(mockPerson, nil).MinTimes(2)
 	mockStore.EXPECT().GetCheck("checkId").Return(mockCheck, nil).MinTimes(1)
 	mockStore.EXPECT().GetScreen("screenId").Return(mockScreen, nil).MinTimes(1)
-	mockStore.EXPECT().GetOrganization("orgId").Return(mockOrg, nil).MinTimes(1)
-	resolver := NewResolver(&ResolverOpts{DataStore: mockStore}, zaptest.NewLogger(t)).Query()
+	mockStore.EXPECT().GetOrganization("orgId").Return(mockOrg, nil).MinTimes(2)
 
-	data, err := resolver.Cdds(context.Background(), nil, nil, nil, nil, nil)
-	assert.Nil(t, err)
-	assert.NotNil(t, data)
-	assert.Equal(t, 2, len(data.Nodes))
-}
+	var first *int64
+	var after *string
+	var last *int64
+	var before *string
 
-func TestQueryResolver_Cdds_NoData(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
+	t.Run("CDDS_No_Data", func(t *testing.T) {
+		cddServiceClient := new(mocks.CddServiceClient)
+		resolver := NewResolver(&ResolverOpts{
+			cddClient: cddServiceClient,
+			DataStore: mockStore,
+		}, zaptest.NewLogger(t)).Query()
+		cddServiceClient.On("CDDS", context.Background(), &cddService.CDDSRequest{
+			Page:    1,
+			PerPage: 100,
+		}).Return(nil, errors.New("No Data"))
+		kw := "John Smith"
 
-	mockStore := mocks.NewMockDataStore(ctrl)
-	mockStore.EXPECT().GetCDDs(int64(1), int64(100)).Return(nil, mongo.ErrNoDocuments).Times(1)
-	resolver := NewResolver(&ResolverOpts{DataStore: mockStore}, zaptest.NewLogger(t)).Query()
+		response, err := resolver.Cdds(context.Background(), &kw, first, after, last, before)
+		assert.NotNil(t, err, "should return an error if no data is found")
+		assert.Nil(t, response, "should return empty response if no data is found")
+	})
 
-	data, err := resolver.Cdds(context.Background(), nil, nil, nil, nil, nil)
-	assert.NotNil(t, err)
-	assert.Nil(t, data)
-	terror, ok := err.(*coreErrors.Terror)
-	if !ok {
-		t.Fail()
-	}
-	assert.Equal(t, terror.ErrorType(), "CddsNotFound")
+	t.Run("CDDS_With_Data", func(t *testing.T) {
+		cddServiceClient := new(mocks.CddServiceClient)
+		resolver := NewResolver(&ResolverOpts{
+			cddClient: cddServiceClient,
+			DataStore: mockStore,
+		}, zaptest.NewLogger(t)).Query()
+		cddServiceClient.On("CDDS", context.Background(), &cddService.CDDSRequest{
+			Page:    1,
+			PerPage: 100,
+		}).Return(mockCdds, nil)
+		kw := "John Smith"
+		response, err := resolver.Cdds(context.Background(), &kw, first, after, last, before)
+		assert.Nil(t, err, "should not return an error if data is found")
+		assert.NotNil(t, response, "should return a valid response if data is found")
+	})
 }
 
 func TestQueryResolver_Payee(t *testing.T) {
