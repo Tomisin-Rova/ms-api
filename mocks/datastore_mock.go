@@ -34,21 +34,6 @@ func (m *MockDataStore) EXPECT() *MockDataStoreMockRecorder {
 	return m.recorder
 }
 
-// GetCDDs mocks base method.
-func (m *MockDataStore) GetCDDs(page, perPage int64) ([]*models.CDD, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetCDDs", page, perPage)
-	ret0, _ := ret[0].([]*models.CDD)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetCDDs indicates an expected call of GetCDDs.
-func (mr *MockDataStoreMockRecorder) GetCDDs(page, perPage interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCDDs", reflect.TypeOf((*MockDataStore)(nil).GetCDDs), page, perPage)
-}
-
 // GetCheck mocks base method.
 func (m *MockDataStore) GetCheck(id string) (*models.Check, error) {
 	m.ctrl.T.Helper()

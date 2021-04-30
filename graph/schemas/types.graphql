@@ -1004,6 +1004,8 @@ type CDD {
   validations(
     # Filter validations by it's type
     validation_type: ValidationType
+    # Filter CDD validations by it's statuses
+    status: [State!]
   ): [Validation!]!
   # Boolean to indicate if this is the most current or active CDD file for the customer
   active: Boolean @deprecated(reason: "Customers now only have single CDD")
