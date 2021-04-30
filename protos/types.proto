@@ -30,6 +30,7 @@ message Person {
   int64 ts = 14;
   Cdd cdd = 15;
   repeated Activity activities = 16;
+  string status = 17;
 }
 
 // Persons type

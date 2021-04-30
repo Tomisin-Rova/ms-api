@@ -92,28 +92,34 @@ func (r *queryResolver) Person(ctx context.Context, id string) (*types.Person, e
 	return p, nil
 }
 
-func (r *queryResolver) People(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string) (*types.PersonConnection, error) {
+func (r *queryResolver) People(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string, onboarded *bool) (*types.PersonConnection, error) {
 	var kw string
 	if keywords != nil {
 		kw = *keywords
 	}
-
+	onboardedStatus := IgnoreOnboardFilter
+	if onboarded != nil && *onboarded {
+		onboardedStatus = Onboarded
+	} else if onboarded != nil {
+		onboardedStatus = NotOnboarded
+	}
 	res, err := r.personService.People(ctx, &personService.PeopleRequest{
-		Page:     1,
-		PerPage:  100,
-		Keywords: kw,
+		Page:      1,
+		PerPage:   100,
+		Keywords:  kw,
+		Onboarded: string(onboardedStatus),
 	})
 	if err != nil {
 		return nil, err
 	}
-	data := make([]*types.Person, 0)
+	data := make([]*types.Person, len(res.Persons))
 
-	for _, person := range res.Persons {
+	for i, person := range res.Persons {
 		pto, err := personWithCdd(person)
 		if err != nil {
 			return nil, err
 		}
-		data = append(data, pto)
+		data[i] = pto
 	}
 
 	if err != nil {
@@ -760,6 +766,7 @@ type queryResolver struct{ *Resolver }
 //  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
 //    it when you're done.
 //  - You have helper methods in this file. Move them out to keep these resolver files clean.
+
 const (
 	// Error messages
 	errorGettingPersonMsg = "failed to get person"

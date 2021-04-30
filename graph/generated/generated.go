@@ -940,7 +940,7 @@ type ComplexityRoot struct {
 		Organisations     func(childComplexity int, first *int64, after *string, last *int64, before *string) int
 		Payee             func(childComplexity int, id string) int
 		Payees            func(childComplexity int, first *int64, after *string, last *int64, before *string) int
-		People            func(childComplexity int, keywords *string, first *int64, after *string, last *int64, before *string) int
+		People            func(childComplexity int, keywords *string, first *int64, after *string, last *int64, before *string, onboarded *bool) int
 		Person            func(childComplexity int, id string) int
 		Price             func(childComplexity int, pair *string, ts *int64) int
 		Prices            func(childComplexity int, first *int64, after *string, last *int64, before *string) int
@@ -1247,7 +1247,7 @@ type MutationResolver interface {
 type QueryResolver interface {
 	Me(ctx context.Context) (*types.Person, error)
 	Person(ctx context.Context, id string) (*types.Person, error)
-	People(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string) (*types.PersonConnection, error)
+	People(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string, onboarded *bool) (*types.PersonConnection, error)
 	Identity(ctx context.Context, id string) (*types.Identity, error)
 	Identities(ctx context.Context) ([]*types.Identity, error)
 	CheckEmail(ctx context.Context, email string) (*bool, error)
@@ -5931,7 +5931,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.People(childComplexity, args["keywords"].(*string), args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string)), true
+		return e.complexity.Query.People(childComplexity, args["keywords"].(*string), args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string), args["onboarded"].(*bool)), true
 
 	case "Query.person":
 		if e.complexity.Query.Person == nil {
@@ -7383,6 +7383,8 @@ var sources = []*ast.Source{
     last: Int,
     # Returns the elements in the list that come before the specified cursor.
     before: String
+    # Filter person by it's status. If empty, should ignore the field
+    onboarded: Boolean
   ): PersonConnection
   # fetch an identity by ID
   identity(
@@ -11736,6 +11738,15 @@ func (ec *executionContext) field_Query_people_args(ctx context.Context, rawArgs
 		}
 	}
 	args["before"] = arg4
+	var arg5 *bool
+	if tmp, ok := rawArgs["onboarded"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("onboarded"))
+		arg5, err = ec.unmarshalOBoolean2ᚖbool(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["onboarded"] = arg5
 	return args, nil
 }
 
@@ -31981,7 +31992,7 @@ func (ec *executionContext) _Query_people(ctx context.Context, field graphql.Col
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().People(rctx, args["keywords"].(*string), args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string))
+		return ec.resolvers.Query().People(rctx, args["keywords"].(*string), args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string), args["onboarded"].(*bool))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

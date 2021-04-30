@@ -95,12 +95,16 @@ func (r *mutationResolver) Register(ctx context.Context, person types.PersonInpu
 	if err != nil {
 		return nil, ErrUnAuthenticated
 	}
+
+	// Validate request
 	if err := datevalidator.ValidateDob(person.Dob); err != nil {
 		return nil, err
 	}
 	if err := r.validateAddress(address); err != nil {
 		return nil, err
 	}
+
+	// Build person bio data payload
 	postCode, bvn := "", ""
 	if address.Postcode != nil {
 		postCode = *address.Postcode
@@ -108,7 +112,6 @@ func (r *mutationResolver) Register(ctx context.Context, person types.PersonInpu
 	if person.Bvn != nil {
 		bvn = *person.Bvn
 	}
-
 	payload := onboardingService.UpdatePersonRequest{
 		PersonId: personId.PersonId,
 		Address: &onboardingService.InputAddress{
@@ -121,60 +124,63 @@ func (r *mutationResolver) Register(ctx context.Context, person types.PersonInpu
 		CountryResidence: person.CountryResidence,
 		Bvn:              bvn,
 	}
-	res, err := r.onBoardingService.UpdatePersonBiodata(context.Background(), &payload)
+	// Call onboarding service
+	response, err := r.onBoardingService.UpdatePersonBiodata(context.Background(), &payload)
 	if err != nil {
 		return nil, err
 	}
-	identities := make([]*types.Identity, 0)
-	emails := make([]*types.Email, 0)
-	phones := make([]*types.Phone, 0)
-	addresses := make([]*types.Address, 0)
-	for _, id := range res.Identities {
-		identities = append(identities, &types.Identity{
+
+	// Build response
+	identities := make([]*types.Identity, len(response.Identities))
+	emails := make([]*types.Email, len(response.Emails))
+	phones := make([]*types.Phone, len(response.Phones))
+	addresses := make([]*types.Address, len(response.Addresses))
+	nationality := make([]*string, len(response.Nationality))
+	for index, id := range response.Identities {
+		identities[index] = &types.Identity{
 			ID:             id.Id,
 			Nickname:       &id.Nickname,
 			Active:         &id.Active,
 			Authentication: &id.Authentication,
-		})
+		}
 	}
-	for _, email := range res.Emails {
-		emails = append(emails, &types.Email{
+	for index, email := range response.Emails {
+		emails[index] = &types.Email{
 			Value:    email.Value,
 			Verified: email.Verified,
-		})
+		}
 	}
-	for _, phone := range res.Phones {
-		phones = append(phones, &types.Phone{
+	for index, phone := range response.Phones {
+		phones[index] = &types.Phone{
 			Value:    phone.Number,
 			Verified: phone.Verified,
-		})
+		}
 	}
-	for _, addr := range res.Addresses {
-		addresses = append(addresses, &types.Address{
+	for index, addr := range response.Addresses {
+		addresses[index] = &types.Address{
 			Street:   &addr.Street,
 			State:    &addr.State,
 			Postcode: &addr.Postcode,
 			Country:  &types.Country{CountryName: addr.Country},
-		})
+		}
 	}
-	nationality := make([]*string, 0)
-	for _, next := range res.Nationality {
-		nationality = append(nationality, &next)
+	for index, next := range response.Nationality {
+		nationality[index] = &next
 	}
 	return &types.Person{
-		ID:               res.Id,
-		Title:            &res.Title,
-		FirstName:        res.FirstName,
-		LastName:         res.LastName,
-		MiddleName:       &res.MiddleName,
+		ID:               response.Id,
+		Title:            &response.Title,
+		FirstName:        response.FirstName,
+		LastName:         response.LastName,
+		MiddleName:       &response.MiddleName,
 		Phones:           phones,
 		Emails:           emails,
-		Dob:              res.Dob,
-		CountryResidence: &res.CountryResidence,
+		Dob:              response.Dob,
+		CountryResidence: &response.CountryResidence,
 		Nationality:      nationality,
 		Addresses:        addresses,
 		Identities:       identities,
-		Ts:               int64(res.Ts),
+		Ts:               int64(response.Ts),
 	}, nil
 }
 
@@ -527,9 +533,11 @@ func (r *mutationResolver) CreateAccount(ctx context.Context, product types.Prod
 		r.logger.Error("error calling accountService.CreateAccount()", zap.Error(err))
 		return nil, err
 	}
+
 	return &types.Response{
 		Message: response.Message,
 		Success: response.Success,
+		Token:   &response.Token,
 	}, nil
 }
 

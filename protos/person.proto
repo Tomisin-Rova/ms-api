@@ -15,6 +15,7 @@ message PeopleRequest {
   int64 page = 1;
   int64 perPage = 2;
   string keywords = 3;
+  string onboarded = 4;
 }
 
 // Request type for endpoint requiring JWT token
