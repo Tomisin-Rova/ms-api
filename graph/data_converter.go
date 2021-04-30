@@ -2,6 +2,7 @@ package graph
 
 import (
 	"encoding/json"
+	"errors"
 	"time"
 
 	"github.com/roava/zebra/models"
@@ -33,7 +34,10 @@ func (c *DataConverter) ProtoValidationToModel(validation *types.Validation) (*m
 		return nil, err
 	}
 
-	dataId := decodedData["id"].(string)
+	dataId, ok := decodedData["id"].(string)
+	if !ok {
+		return nil, errors.New("could not decode id from data")
+	}
 	protoValidation := models.Validation{
 		ID:             validation.Id,
 		ValidationType: models.ValidationType(validation.ValidationType),

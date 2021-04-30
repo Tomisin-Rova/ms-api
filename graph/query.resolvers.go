@@ -370,8 +370,8 @@ func (r *queryResolver) Cdds(ctx context.Context, keywords *string, first *int64
 
 	dataResolver := NewDataResolver(r.dataStore, r.logger)
 	dataConverter := NewDataConverter(r.logger)
-	cddsValues := make([]*types.Cdd, 0)
-	for _, next := range cdds {
+	cddsValues := make([]*types.Cdd, len(cdds))
+	for i, next := range cdds {
 		validations := make([]*types.Validation, 0)
 		for _, validation := range next.Validations {
 			modelValidation, err := dataConverter.ProtoValidationToModel(validation)
@@ -404,7 +404,7 @@ func (r *queryResolver) Cdds(ctx context.Context, keywords *string, first *int64
 			Ts:          Int64(int64(next.Ts)),
 		}
 
-		cddsValues = append(cddsValues, cddValue)
+		cddsValues[i] = cddValue
 	}
 
 	input := models.ConnectionInput{
