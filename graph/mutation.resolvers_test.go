@@ -836,3 +836,56 @@ func TestMutationResolver_ResubmitReports(t *testing.T) {
 		})
 	}
 }
+
+func TestMutationResolver_CreatePayment(t *testing.T) {
+	const (
+		success = iota
+	)
+
+	var tests = []struct {
+		name     string
+		arg      *paymentService.CreatePaymentRequest
+		testType int
+	}{
+		{
+			name: "Test successful funding of Vault account",
+			arg: &paymentService.CreatePaymentRequest{
+				IdempotencyKey: "1234567",
+				Owner:          "Princewill Chiaka",
+				FundingSource:  "1234567",
+				Charge:         50,
+				Reference:      "Test payment to Vault account",
+				Status:         string(types.StateApproved),
+				Currency:       "GBP",
+				FundingAmount:  100000,
+				Beneficiary: &paymentService.Beneficiary{
+					Account:  "1234567",
+					Currency: "GBP",
+					Amount:   100000,
+				},
+			},
+			testType: success,
+		},
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			// Mocks
+			serviceClient := new(mocks.PaymentServiceClient)
+			resolverOpts := &ResolverOpts{paymentService: serviceClient}
+			resolver := NewResolver(resolverOpts, zaptest.NewLogger(t))
+
+			switch testCase.testType {
+			case success:
+				serviceClient.On("CreatePayment", validUserCtx, testCase.arg).Return(&protoTypes.Response{
+					Success: true,
+				}, nil)
+
+				response, err := resolver.paymentService.CreatePayment(validUserCtx, testCase.arg)
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+				assert.Equal(t, true, response.Success)
+			}
+		})
+	}
+}

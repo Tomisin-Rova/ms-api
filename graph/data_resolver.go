@@ -94,10 +94,7 @@ func (r *DataResolver) ResolveValidation(v models.Validation) (*types.Validation
 			Ts:           Int64(screen.Timestamp.UnixNano()),
 		}
 	}
-	//nolint
-	if validation.ValidationType == types.ValidationTypeProof {
 
-	}
 	return validation, nil
 }
 
