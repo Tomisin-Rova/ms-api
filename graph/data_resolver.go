@@ -96,7 +96,7 @@ func (r *DataResolver) ResolveValidation(v models.Validation) (*types.Validation
 	}
 	//nolint
 	if validation.ValidationType == types.ValidationTypeProof {
-
+		// TODO: Please fix this
 	}
 	return validation, nil
 }
