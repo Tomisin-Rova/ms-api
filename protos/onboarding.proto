@@ -177,7 +177,7 @@ message ReportInput {
 service OnBoardingService{
   rpc CreatePhone(CreatePhoneRequest) returns (CreatePhoneResponse) {}
   rpc CreatePerson(CreatePersonRequest) returns (CreatePersonResponse) {}
-  rpc UpdatePersonBiodata(UpdatePersonRequest) returns (types.Person) {}
+  rpc UpdatePersonBioData(UpdatePersonRequest) returns (types.Person) {}
   rpc AddReasonsForUsingRoava(RoavaReasonsRequest) returns (types.Response) {}
   rpc CheckEmailExistence(CheckEmailExistenceRequest) returns (CheckEmailExistenceResponse) {}
   rpc VerifySmsOtp(OtpVerificationRequest) returns (OtpVerificationResponse) {}

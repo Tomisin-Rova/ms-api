@@ -2093,7 +2093,7 @@ var file_onboarding_proto_rawDesc = []byte{
 	0x6e, 0x62, 0x6f, 0x61, 0x72, 0x64, 0x69, 0x6e, 0x67, 0x2e, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65,
 	0x50, 0x65, 0x72, 0x73, 0x6f, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00,
 	0x12, 0x47, 0x0a, 0x13, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x50, 0x65, 0x72, 0x73, 0x6f, 0x6e,
-	0x42, 0x69, 0x6f, 0x64, 0x61, 0x74, 0x61, 0x12, 0x1f, 0x2e, 0x6f, 0x6e, 0x62, 0x6f, 0x61, 0x72,
+	0x42, 0x69, 0x6f, 0x44, 0x61, 0x74, 0x61, 0x12, 0x1f, 0x2e, 0x6f, 0x6e, 0x62, 0x6f, 0x61, 0x72,
 	0x64, 0x69, 0x6e, 0x67, 0x2e, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x50, 0x65, 0x72, 0x73, 0x6f,
 	0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x0d, 0x2e, 0x74, 0x79, 0x70, 0x65, 0x73,
 	0x2e, 0x50, 0x65, 0x72, 0x73, 0x6f, 0x6e, 0x22, 0x00, 0x12, 0x4d, 0x0a, 0x17, 0x41, 0x64, 0x64,
@@ -2264,7 +2264,7 @@ var file_onboarding_proto_depIdxs = []int32{
 	34, // 5: onboarding.ResubmitReportRequest.reports:type_name -> onboarding.ReportInput
 	0,  // 6: onboarding.OnBoardingService.CreatePhone:input_type -> onboarding.CreatePhoneRequest
 	3,  // 7: onboarding.OnBoardingService.CreatePerson:input_type -> onboarding.CreatePersonRequest
-	5,  // 8: onboarding.OnBoardingService.UpdatePersonBiodata:input_type -> onboarding.UpdatePersonRequest
+	5,  // 8: onboarding.OnBoardingService.UpdatePersonBioData:input_type -> onboarding.UpdatePersonRequest
 	6,  // 9: onboarding.OnBoardingService.AddReasonsForUsingRoava:input_type -> onboarding.RoavaReasonsRequest
 	7,  // 10: onboarding.OnBoardingService.CheckEmailExistence:input_type -> onboarding.CheckEmailExistenceRequest
 	10, // 11: onboarding.OnBoardingService.VerifySmsOtp:input_type -> onboarding.OtpVerificationRequest
@@ -2286,7 +2286,7 @@ var file_onboarding_proto_depIdxs = []int32{
 	33, // 27: onboarding.OnBoardingService.ResubmitReport:input_type -> onboarding.ResubmitReportRequest
 	2,  // 28: onboarding.OnBoardingService.CreatePhone:output_type -> onboarding.CreatePhoneResponse
 	4,  // 29: onboarding.OnBoardingService.CreatePerson:output_type -> onboarding.CreatePersonResponse
-	38, // 30: onboarding.OnBoardingService.UpdatePersonBiodata:output_type -> types.Person
+	38, // 30: onboarding.OnBoardingService.UpdatePersonBioData:output_type -> types.Person
 	39, // 31: onboarding.OnBoardingService.AddReasonsForUsingRoava:output_type -> types.Response
 	8,  // 32: onboarding.OnBoardingService.CheckEmailExistence:output_type -> onboarding.CheckEmailExistenceResponse
 	9,  // 33: onboarding.OnBoardingService.VerifySmsOtp:output_type -> onboarding.OtpVerificationResponse
@@ -2774,7 +2774,7 @@ const _ = grpc.SupportPackageIsVersion6
 type OnBoardingServiceClient interface {
 	CreatePhone(ctx context.Context, in *CreatePhoneRequest, opts ...grpc.CallOption) (*CreatePhoneResponse, error)
 	CreatePerson(ctx context.Context, in *CreatePersonRequest, opts ...grpc.CallOption) (*CreatePersonResponse, error)
-	UpdatePersonBiodata(ctx context.Context, in *UpdatePersonRequest, opts ...grpc.CallOption) (*types.Person, error)
+	UpdatePersonBioData(ctx context.Context, in *UpdatePersonRequest, opts ...grpc.CallOption) (*types.Person, error)
 	AddReasonsForUsingRoava(ctx context.Context, in *RoavaReasonsRequest, opts ...grpc.CallOption) (*types.Response, error)
 	CheckEmailExistence(ctx context.Context, in *CheckEmailExistenceRequest, opts ...grpc.CallOption) (*CheckEmailExistenceResponse, error)
 	VerifySmsOtp(ctx context.Context, in *OtpVerificationRequest, opts ...grpc.CallOption) (*OtpVerificationResponse, error)
@@ -2822,9 +2822,9 @@ func (c *onBoardingServiceClient) CreatePerson(ctx context.Context, in *CreatePe
 	return out, nil
 }
 
-func (c *onBoardingServiceClient) UpdatePersonBiodata(ctx context.Context, in *UpdatePersonRequest, opts ...grpc.CallOption) (*types.Person, error) {
+func (c *onBoardingServiceClient) UpdatePersonBioData(ctx context.Context, in *UpdatePersonRequest, opts ...grpc.CallOption) (*types.Person, error) {
 	out := new(types.Person)
-	err := c.cc.Invoke(ctx, "/onboarding.OnBoardingService/UpdatePersonBiodata", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/onboarding.OnBoardingService/UpdatePersonBioData", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -3006,7 +3006,7 @@ func (c *onBoardingServiceClient) ResubmitReport(ctx context.Context, in *Resubm
 type OnBoardingServiceServer interface {
 	CreatePhone(context.Context, *CreatePhoneRequest) (*CreatePhoneResponse, error)
 	CreatePerson(context.Context, *CreatePersonRequest) (*CreatePersonResponse, error)
-	UpdatePersonBiodata(context.Context, *UpdatePersonRequest) (*types.Person, error)
+	UpdatePersonBioData(context.Context, *UpdatePersonRequest) (*types.Person, error)
 	AddReasonsForUsingRoava(context.Context, *RoavaReasonsRequest) (*types.Response, error)
 	CheckEmailExistence(context.Context, *CheckEmailExistenceRequest) (*CheckEmailExistenceResponse, error)
 	VerifySmsOtp(context.Context, *OtpVerificationRequest) (*OtpVerificationResponse, error)
@@ -3038,8 +3038,8 @@ func (*UnimplementedOnBoardingServiceServer) CreatePhone(context.Context, *Creat
 func (*UnimplementedOnBoardingServiceServer) CreatePerson(context.Context, *CreatePersonRequest) (*CreatePersonResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreatePerson not implemented")
 }
-func (*UnimplementedOnBoardingServiceServer) UpdatePersonBiodata(context.Context, *UpdatePersonRequest) (*types.Person, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdatePersonBiodata not implemented")
+func (*UnimplementedOnBoardingServiceServer) UpdatePersonBioData(context.Context, *UpdatePersonRequest) (*types.Person, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdatePersonBioData not implemented")
 }
 func (*UnimplementedOnBoardingServiceServer) AddReasonsForUsingRoava(context.Context, *RoavaReasonsRequest) (*types.Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddReasonsForUsingRoava not implemented")
@@ -3139,20 +3139,20 @@ func _OnBoardingService_CreatePerson_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
-func _OnBoardingService_UpdatePersonBiodata_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _OnBoardingService_UpdatePersonBioData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdatePersonRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(OnBoardingServiceServer).UpdatePersonBiodata(ctx, in)
+		return srv.(OnBoardingServiceServer).UpdatePersonBioData(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/onboarding.OnBoardingService/UpdatePersonBiodata",
+		FullMethod: "/onboarding.OnBoardingService/UpdatePersonBioData",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OnBoardingServiceServer).UpdatePersonBiodata(ctx, req.(*UpdatePersonRequest))
+		return srv.(OnBoardingServiceServer).UpdatePersonBioData(ctx, req.(*UpdatePersonRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -3512,8 +3512,8 @@ var _OnBoardingService_serviceDesc = grpc.ServiceDesc{
 			Handler:    _OnBoardingService_CreatePerson_Handler,
 		},
 		{
-			MethodName: "UpdatePersonBiodata",
-			Handler:    _OnBoardingService_UpdatePersonBiodata_Handler,
+			MethodName: "UpdatePersonBioData",
+			Handler:    _OnBoardingService_UpdatePersonBioData_Handler,
 		},
 		{
 			MethodName: "AddReasonsForUsingRoava",

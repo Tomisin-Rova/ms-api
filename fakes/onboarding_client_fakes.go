@@ -30,7 +30,7 @@ func (f *FakeOnBoardingClient) CreatePhone(ctx context.Context,
 	return f.createPhoneResp, f.err
 }
 
-func (f *FakeOnBoardingClient) UpdatePersonBiodata(ctx context.Context, in *onboardingService.UpdatePersonRequest, opts ...grpc.CallOption) (*types.Person, error) {
+func (f *FakeOnBoardingClient) UpdatePersonBioData(ctx context.Context, in *onboardingService.UpdatePersonRequest, opts ...grpc.CallOption) (*types.Person, error) {
 	return &types.Person{}, f.err
 }
 
