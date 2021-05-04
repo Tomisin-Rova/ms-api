@@ -125,7 +125,7 @@ func (r *mutationResolver) Register(ctx context.Context, person types.PersonInpu
 		Bvn:              bvn,
 	}
 	// Call onboarding service
-	response, err := r.onBoardingService.UpdatePersonBiodata(context.Background(), &payload)
+	response, err := r.onBoardingService.UpdatePersonBioData(context.Background(), &payload)
 	if err != nil {
 		return nil, err
 	}
