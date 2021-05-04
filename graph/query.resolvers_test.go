@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"ms.api/protos/pb/paymentService"
-	"ms.api/protos/pb/types"
 
 	"ms.api/mocks"
 	cddService "ms.api/protos/pb/cddService"
@@ -564,7 +563,7 @@ func TestQueryResolver_Cdds(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockOwner := "personId"
-	firstCdd := types.Cdd{
+	firstCdd := protoTypes.Cdd{
 		Id:    "id1",
 		Owner: mockOwner,
 		Validations: []*protoTypes.Validation{
@@ -572,7 +571,7 @@ func TestQueryResolver_Cdds(t *testing.T) {
 			{ValidationType: "SCREEN", Data: &anypb.Any{Value: []byte("{\"id\": \"screenId\"}")}, Organisation: "orgId", Applicant: mockOwner},
 		},
 	}
-	secondCdd := types.Cdd{
+	secondCdd := protoTypes.Cdd{
 		Id:    "id2",
 		Owner: mockOwner,
 		Validations: []*protoTypes.Validation{
@@ -580,7 +579,7 @@ func TestQueryResolver_Cdds(t *testing.T) {
 			{ValidationType: "SCREEN", Data: &anypb.Any{Value: []byte("{id: \"screenId\"}")}, Organisation: "orgId", Applicant: mockOwner},
 		},
 	}
-	mockCdds := &types.Cdds{
+	mockCdds := &protoTypes.Cdds{
 		Results: []*protoTypes.Cdd{
 			&firstCdd,
 			&secondCdd,
