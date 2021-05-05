@@ -35,6 +35,13 @@ import (
 // It serves as dependency injection for your app, add any dependencies you require here.
 type OnboardStatus string
 
+// CddChunk store the data to fill cdds slice
+// on the right position
+type CddChunk struct {
+	pos  int
+	cdds []*types.Cdd
+}
+
 const (
 	errorMarshallingScreenValidation               = "marshall screen validation"
 	Onboarded                        OnboardStatus = "ONBOARDED"
@@ -619,6 +626,46 @@ func personWithCdd(from *pb.Person) (*types.Person, error) {
 		}
 	}
 	return person, nil
+}
+
+func (r *queryResolver) processCddChunk(ctx context.Context, cdds []*pb.Cdd, dataResolver *DataResolver, dataConverter *DataConverter) ([]*types.Cdd, error) {
+	cddsValues := make([]*types.Cdd, len(cdds))
+	for i, next := range cdds {
+		validations := make([]*types.Validation, 0)
+		for _, validation := range next.Validations {
+			modelValidation, err := dataConverter.ProtoValidationToModel(validation)
+			if err != nil {
+				r.logger.With(zap.Error(err)).Error("cannot convert validation")
+				continue
+			}
+			nextValidation, err := dataResolver.ResolveValidation(*modelValidation)
+			if err != nil {
+				r.logger.With(zap.Error(err)).Error("cannot resolve validation data")
+				continue
+			}
+			validations = append(validations, nextValidation)
+		}
+
+		owner, err := dataResolver.ResolvePerson(next.Owner, nil)
+		if err != nil {
+			return nil, err
+		}
+		cddValue := &types.Cdd{
+			ID:          next.Id,
+			Owner:       owner,
+			Watchlist:   &next.Watchlist,
+			Details:     &next.Details,
+			Status:      types.State(next.Status),
+			Onboard:     &next.Onboard,
+			Version:     Int64(int64(next.Version)),
+			Validations: validations,
+			Active:      &next.Active,
+			Ts:          Int64(int64(next.Ts)),
+		}
+
+		cddsValues[i] = cddValue
+	}
+	return cddsValues, nil
 }
 
 func String(s string) *string {

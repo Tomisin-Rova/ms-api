@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"sync"
 
 	"github.com/jinzhu/copier"
 	terror "github.com/roava/zebra/errors"
@@ -24,6 +25,10 @@ import (
 	"ms.api/protos/pb/personService"
 	"ms.api/server/http/middlewares"
 	"ms.api/types"
+)
+
+const (
+	cddsQueryMaxGroupGouroutines = 20
 )
 
 func (r *queryResolver) Me(ctx context.Context) (*types.Person, error) {
@@ -377,40 +382,72 @@ func (r *queryResolver) Cdds(ctx context.Context, keywords *string, first *int64
 	dataResolver := NewDataResolver(r.dataStore, r.logger)
 	dataConverter := NewDataConverter(r.logger)
 	cddsValues := make([]*types.Cdd, len(cdds))
-	for i, next := range cdds {
-		validations := make([]*types.Validation, 0)
-		for _, validation := range next.Validations {
-			modelValidation, err := dataConverter.ProtoValidationToModel(validation)
-			if err != nil {
-				r.logger.With(zap.Error(err)).Error("cannot convert validation")
-				continue
+	// Wait until all cdds are inserted into the cddsValues slice
+	var wg sync.WaitGroup
+	maxGouroutinesCount := cddsQueryMaxGroupGouroutines
+	cddsChan := make(chan *CddChunk)
+	errorsChan := make(chan error)
+	// Goroutines count can't be higher than cdds count
+	if len(cdds) < cddsQueryMaxGroupGouroutines {
+		maxGouroutinesCount = len(cdds)
+	}
+	if maxGouroutinesCount > 0 {
+		size := len(cdds) / maxGouroutinesCount
+		for i := 0; i < maxGouroutinesCount; i++ {
+			var rest int
+			// Process the rest of the people in the slice
+			if i == maxGouroutinesCount-1 {
+				rest = len(cdds) % maxGouroutinesCount
 			}
-			nextValidation, err := dataResolver.ResolveValidation(*modelValidation)
-			if err != nil {
-				r.logger.With(zap.Error(err)).Error("cannot resolve validation data")
-				continue
-			}
-			validations = append(validations, nextValidation)
+			cddsChunk := cdds[i*size : (i+1)*size+rest]
+			wg.Add(1)
+			go func(pos int, cddsChan chan *CddChunk, errorsChan chan error) {
+				defer wg.Done()
+				data, err := r.processCddChunk(ctx, cddsChunk, dataResolver, dataConverter)
+				if err != nil {
+					errorsChan <- err
+					return
+				}
+				chunk := &CddChunk{
+					pos:  pos * size,
+					cdds: data,
+				}
+				cddsChan <- chunk
+			}(i, cddsChan, errorsChan)
 		}
 
-		owner, err := dataResolver.ResolvePerson(next.Owner, nil)
-		if err != nil {
-			return nil, err
-		}
-		cddValue := &types.Cdd{
-			ID:          next.Id,
-			Owner:       owner,
-			Watchlist:   &next.Watchlist,
-			Details:     &next.Details,
-			Status:      types.State(next.Status),
-			Onboard:     &next.Onboard,
-			Version:     Int64(int64(next.Version)),
-			Validations: validations,
-			Active:      &next.Active,
-			Ts:          Int64(int64(next.Ts)),
-		}
+		quit := make(chan int)
+		go func(targetData []*types.Cdd, quit chan int) {
+			for {
+				select {
+				case chunk := <-cddsChan:
+					for i := range chunk.cdds {
+						targetData[i+chunk.pos] = chunk.cdds[i]
+					}
+				case err = <-errorsChan:
+					return
+				case <-quit:
+					return
+				}
+			}
+		}(cddsValues, quit)
+		// Halt cddsChan consumer goroutine
+		defer func() {
+			quit <- 1
+		}()
+	}
 
-		cddsValues[i] = cddValue
+	wg.Wait()
+	if err != nil {
+		return nil, err
+	}
+	//Remove null values
+	cddsResult := make([]*types.Cdd, 0)
+	for i := range cddsValues {
+		if cddsValues[i] != nil {
+			cddsResult = append(cddsResult, cddsValues[i])
+
+		}
 	}
 
 	input := models.ConnectionInput{
@@ -438,7 +475,7 @@ func (r *queryResolver) Cdds(ctx context.Context, keywords *string, first *int64
 			TotalCount: &count,
 		}, nil
 	}
-	return connections.CddLookupCon(cddsValues, edger, conn, input)
+	return connections.CddLookupCon(cddsResult, edger, conn, input)
 }
 
 func (r *queryResolver) Validation(ctx context.Context, id string) (*types.Validation, error) {
