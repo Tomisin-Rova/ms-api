@@ -157,8 +157,15 @@ func (r *mutationResolver) Register(ctx context.Context, person types.PersonInpu
 		}
 	}
 	for index, addr := range response.Addresses {
+		if addr == nil {
+			continue
+		}
+
 		addresses[index] = &types.Address{
+			Primary:  &addr.Primary,
 			Street:   &addr.Street,
+			City:     &addr.City,
+			County:   &addr.County,
 			State:    &addr.State,
 			Postcode: &addr.Postcode,
 			Country:  &types.Country{CountryName: addr.Country},
