@@ -144,6 +144,14 @@ type AccruedAmounts struct {
 	TechnicalOverdraftInterestAccrued *int64 `json:"technicalOverdraftInterestAccrued"`
 }
 
+type Action struct {
+	ID       string  `json:"id"`
+	Reporter *Person `json:"reporter"`
+	Notes    string  `json:"notes"`
+	Status   string  `json:"status"`
+	Ts       int64   `json:"ts"`
+}
+
 type Activity struct {
 	ID            string `json:"id"`
 	Description   string `json:"description"`
@@ -1214,6 +1222,7 @@ type Validation struct {
 	Status         State          `json:"status"`
 	Approved       *bool          `json:"approved"`
 	Ts             *int64         `json:"ts"`
+	Actions        []*Action      `json:"actions"`
 }
 
 type ValidationConnection struct {

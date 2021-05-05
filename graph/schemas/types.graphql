@@ -1050,7 +1050,56 @@ type Validation {
   approved: Boolean
   # Unix timestamp when the record was created
   ts: Int
+  # Reference for the actions taken in a Validation
+  actions: [Action!]!
 }
+
+# Actions taken, such as an onboarding case review
+type Action {
+  # Unique roava ulid for the data record
+  id: ID!
+  # Person who created the task
+  reporter: Person!
+  ## Person whom task is assigned to
+  #assignee: Person!
+  ## Person who task is referred to approve the task
+  #approver: Person
+  # Notes for the task
+  notes: String!
+  ## ROAVA operations workflow stage
+  #stage: String @examples(values: "some_workflow_stage")
+  ## Approval status of the task
+  #approved: Boolean @examples(values: [true, false])
+  # The action type of this action
+  status: String!
+  ## Version of the task
+  #version: Int
+  # Unix timestamp when the record was created
+  ts: Int!
+  ## Array of comments associated to this task
+  #comments(
+  #  # Returns the first n elements from the list.
+  #  first: Int,
+  #  # Returns the elements in the list that come after the specified cursor.
+  #  after: String,
+  #  # Returns the last n elements from the list.
+  #  last: Int,
+  #  # Returns the elements in the list that come before the specified cursor.
+  #  before: String
+  #): CommentConnection
+  ## Array of tags associated to this task
+  #tags(
+  #  # Returns the first n elements from the list.
+  #  first: Int,
+  #  # Returns the elements in the list that come after the specified cursor.
+  #  after: String,
+  #  # Returns the last n elements from the list.
+  #  last: Int,
+  #  # Returns the elements in the list that come before the specified cursor.
+  #  before: String
+  #): TagConnection
+}
+
 # union type representing owner of an entity
 union Owner = Person | Organisation
 
@@ -1262,7 +1311,9 @@ enum ProofType {
 }
 
 # enum representing types of third party available auths
-enum AuthType { GOOGLE }
+enum AuthType {
+  GOOGLE
+}
 
 # The connection type for Proof
 type ProofConnection {
