@@ -610,7 +610,7 @@ func TestQueryResolver_Cdds(t *testing.T) {
 		}).Return(nil, errors.New("No Data"))
 		kw := "John Smith"
 
-		response, err := resolver.Cdds(context.Background(), &kw, first, after, last, before)
+		response, err := resolver.Cdds(context.Background(), &kw, nil, first, after, last, before)
 		assert.NotNil(t, err, "should return an error if no data is found")
 		assert.Nil(t, response, "should return empty response if no data is found")
 	})
@@ -626,7 +626,7 @@ func TestQueryResolver_Cdds(t *testing.T) {
 			PerPage: 100,
 		}).Return(mockCdds, nil)
 		kw := "John Smith"
-		response, err := resolver.Cdds(context.Background(), &kw, first, after, last, before)
+		response, err := resolver.Cdds(context.Background(), &kw, nil, first, after, last, before)
 		assert.Nil(t, err, "should not return an error if data is found")
 		assert.NotNil(t, response, "should return a valid response if data is found")
 	})

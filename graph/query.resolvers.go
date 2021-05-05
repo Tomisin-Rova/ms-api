@@ -366,10 +366,13 @@ func (r *queryResolver) Cdd(ctx context.Context, id string) (*types.Cdd, error) 
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *queryResolver) Cdds(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string) (*types.CDDConnection, error) {
+func (r *queryResolver) Cdds(ctx context.Context, keywords *string, status []types.State, first *int64, after *string, last *int64, before *string) (*types.CDDConnection, error) {
+	dataConverter := NewDataConverter(r.logger)
+
 	req := &cddService.CDDSRequest{
 		Page:    1,
 		PerPage: 100,
+		Status:  dataConverter.StateToStringSlice(status),
 	}
 	resp, err := r.cddService.CDDS(ctx, req)
 	if err != nil {
@@ -380,7 +383,6 @@ func (r *queryResolver) Cdds(ctx context.Context, keywords *string, first *int64
 	cdds := resp.Results
 
 	dataResolver := NewDataResolver(r.dataStore, r.logger)
-	dataConverter := NewDataConverter(r.logger)
 	cddsValues := make([]*types.Cdd, len(cdds))
 	// Wait until all cdds are inserted into the cddsValues slice
 	var wg sync.WaitGroup
