@@ -371,7 +371,7 @@ func (r *queryResolver) Cdds(ctx context.Context, keywords *string, status []typ
 		PerPage: perPage,
 		Status:  dataConverter.StateToStringSlice(status),
 	}
-	resp, err := r.cddService.CDDS(ctx, req)
+	resp, err := r.cddService.CDDS(context.Background(), req)
 	if err != nil {
 		r.logger.With(zap.Error(err)).Error("failed to fetch cdds")
 		return nil, terror.NewTerror(7013, "InternalError", "failed to load CDDs data. Internal system error", "internal system error")
@@ -385,7 +385,7 @@ func (r *queryResolver) Cdds(ctx context.Context, keywords *string, status []typ
 	var wg sync.WaitGroup
 	maxGouroutinesCount := len(cdds)
 	cddsChan := make(chan *CddChunk)
-	errorsChan := make(chan error)
+	errorsChan := make(chan error, maxGouroutinesCount+1)
 	if maxGouroutinesCount > 0 {
 		size := len(cdds) / maxGouroutinesCount
 		for i := 0; i < maxGouroutinesCount; i++ {
