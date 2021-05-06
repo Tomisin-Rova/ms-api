@@ -27,10 +27,6 @@ import (
 	"ms.api/types"
 )
 
-const (
-	cddsQueryMaxGroupGouroutines = 20
-)
-
 func (r *queryResolver) Me(ctx context.Context) (*types.Person, error) {
 	claims, err := middlewares.GetAuthenticatedUser(ctx)
 	if err != nil {
@@ -368,10 +364,11 @@ func (r *queryResolver) Cdd(ctx context.Context, id string) (*types.Cdd, error) 
 
 func (r *queryResolver) Cdds(ctx context.Context, keywords *string, status []types.State, first *int64, after *string, last *int64, before *string) (*types.CDDConnection, error) {
 	dataConverter := NewDataConverter(r.logger)
+	perPage := r.perPageCddsQuery(first, after, last, before)
 
 	req := &cddService.CDDSRequest{
 		Page:    1,
-		PerPage: 100,
+		PerPage: perPage,
 		Status:  dataConverter.StateToStringSlice(status),
 	}
 	resp, err := r.cddService.CDDS(ctx, req)
@@ -386,13 +383,9 @@ func (r *queryResolver) Cdds(ctx context.Context, keywords *string, status []typ
 	cddsValues := make([]*types.Cdd, len(cdds))
 	// Wait until all cdds are inserted into the cddsValues slice
 	var wg sync.WaitGroup
-	maxGouroutinesCount := cddsQueryMaxGroupGouroutines
+	maxGouroutinesCount := len(cdds)
 	cddsChan := make(chan *CddChunk)
 	errorsChan := make(chan error)
-	// Goroutines count can't be higher than cdds count
-	if len(cdds) < cddsQueryMaxGroupGouroutines {
-		maxGouroutinesCount = len(cdds)
-	}
 	if maxGouroutinesCount > 0 {
 		size := len(cdds) / maxGouroutinesCount
 		for i := 0; i < maxGouroutinesCount; i++ {
@@ -448,7 +441,6 @@ func (r *queryResolver) Cdds(ctx context.Context, keywords *string, status []typ
 	for i := range cddsValues {
 		if cddsValues[i] != nil {
 			cddsResult = append(cddsResult, cddsValues[i])
-
 		}
 	}
 
