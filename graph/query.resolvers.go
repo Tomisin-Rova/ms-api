@@ -365,6 +365,7 @@ func (r *queryResolver) Cdd(ctx context.Context, id string) (*types.Cdd, error) 
 func (r *queryResolver) Cdds(ctx context.Context, keywords *string, status []types.State, first *int64, after *string, last *int64, before *string) (*types.CDDConnection, error) {
 	dataConverter := NewDataConverter(r.logger)
 	perPage := r.perPageCddsQuery(first, after, last, before)
+	var chunkProcessErr error
 
 	req := &cddService.CDDSRequest{
 		Page:    1,
@@ -420,7 +421,7 @@ func (r *queryResolver) Cdds(ctx context.Context, keywords *string, status []typ
 						targetData[i+chunk.pos] = chunk.cdds[i]
 					}
 				case errValue := <-errorsChan:
-					err = errValue
+					chunkProcessErr = errValue
 				case <-quit:
 					return
 				}
@@ -436,6 +437,10 @@ func (r *queryResolver) Cdds(ctx context.Context, keywords *string, status []typ
 	if err != nil {
 		return nil, err
 	}
+	if chunkProcessErr != nil {
+		r.logger.With(zap.Error(chunkProcessErr)).Error("failed to fetch some cdds")
+	}
+
 	//Remove null values
 	cddsResult := make([]*types.Cdd, 0)
 	for i := range cddsValues {
