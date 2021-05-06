@@ -9,6 +9,7 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/anypb"
 	"ms.api/protos/pb/types"
+	apitypes "ms.api/types"
 )
 
 type DataConverter struct {
@@ -52,4 +53,16 @@ func (c *DataConverter) ProtoValidationToModel(validation *types.Validation) (*m
 	}
 
 	return &protoValidation, nil
+}
+
+func (c *DataConverter) StateToStringSlice(states []apitypes.State) []string {
+	if len(states) == 0 {
+		return nil
+	}
+
+	strSlice := make([]string, len(states))
+	for i, state := range states {
+		strSlice[i] = string(state)
+	}
+	return strSlice
 }

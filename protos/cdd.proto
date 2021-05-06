@@ -36,6 +36,7 @@ message GetValidationByIdRequest {
 message CDDSRequest {
   int64 page = 1;
   int64 perPage = 2;
+  repeated string status = 3;
 }
 
 service CddService{
