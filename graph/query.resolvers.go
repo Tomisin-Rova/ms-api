@@ -419,8 +419,8 @@ func (r *queryResolver) Cdds(ctx context.Context, keywords *string, status []typ
 					for i := range chunk.cdds {
 						targetData[i+chunk.pos] = chunk.cdds[i]
 					}
-				case err = <-errorsChan:
-					return
+				case errValue := <-errorsChan:
+					err = errValue
 				case <-quit:
 					return
 				}
