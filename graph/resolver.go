@@ -670,7 +670,7 @@ func (r *queryResolver) processCddChunk(ctx context.Context, cdds []*pb.Cdd, dat
 
 // TODO: Converts from cursor-based pagination to number based pagination
 func (r *queryResolver) perPageCddsQuery(first *int64, after *string, last *int64, before *string) int64 {
-	if after != nil && before != nil && first != nil {
+	if after == nil && before == nil && first != nil {
 		return *first
 	}
 	return 100
