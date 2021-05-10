@@ -923,7 +923,7 @@ type ComplexityRoot struct {
 		Addresses         func(childComplexity int) int
 		Auths             func(childComplexity int) int
 		Cdd               func(childComplexity int, id string) int
-		Cdds              func(childComplexity int, keywords *string, first *int64, after *string, last *int64, before *string) int
+		Cdds              func(childComplexity int, keywords *string, status []types.State, first *int64, after *string, last *int64, before *string) int
 		Check             func(childComplexity int, id string) int
 		CheckEmail        func(childComplexity int, email string) int
 		Checks            func(childComplexity int, first *int64, after *string, last *int64, before *string) int
@@ -1287,7 +1287,7 @@ type QueryResolver interface {
 	Tag(ctx context.Context, id string) (*types.Task, error)
 	Tags(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.TagConnection, error)
 	Cdd(ctx context.Context, id string) (*types.Cdd, error)
-	Cdds(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string) (*types.CDDConnection, error)
+	Cdds(ctx context.Context, keywords *string, status []types.State, first *int64, after *string, last *int64, before *string) (*types.CDDConnection, error)
 	Validation(ctx context.Context, id string) (*types.Validation, error)
 	Validations(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.ValidationConnection, error)
 	Check(ctx context.Context, id string) (*types.Check, error)
@@ -5690,7 +5690,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Cdds(childComplexity, args["keywords"].(*string), args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string)), true
+		return e.complexity.Query.Cdds(childComplexity, args["keywords"].(*string), args["status"].([]types.State), args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string)), true
 
 	case "Query.check":
 		if e.complexity.Query.Check == nil {
@@ -7649,6 +7649,8 @@ var sources = []*ast.Source{
   cdds(
     # Keywords used to filter the cdds
     keywords: String,
+    # Filter CDDs by it's statuses
+    status: [State!],
     # Returns the first n elements from the list.
     first: Int,
     # Returns the elements in the list that come after the specified cursor.
@@ -11186,42 +11188,51 @@ func (ec *executionContext) field_Query_cdds_args(ctx context.Context, rawArgs m
 		}
 	}
 	args["keywords"] = arg0
-	var arg1 *int64
+	var arg1 []types.State
+	if tmp, ok := rawArgs["status"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
+		arg1, err = ec.unmarshalOState2ᚕmsᚗapiᚋtypesᚐStateᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["status"] = arg1
+	var arg2 *int64
 	if tmp, ok := rawArgs["first"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
-		arg1, err = ec.unmarshalOInt2ᚖint64(ctx, tmp)
+		arg2, err = ec.unmarshalOInt2ᚖint64(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["first"] = arg1
-	var arg2 *string
+	args["first"] = arg2
+	var arg3 *string
 	if tmp, ok := rawArgs["after"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
-		arg2, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		arg3, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["after"] = arg2
-	var arg3 *int64
+	args["after"] = arg3
+	var arg4 *int64
 	if tmp, ok := rawArgs["last"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("last"))
-		arg3, err = ec.unmarshalOInt2ᚖint64(ctx, tmp)
+		arg4, err = ec.unmarshalOInt2ᚖint64(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["last"] = arg3
-	var arg4 *string
+	args["last"] = arg4
+	var arg5 *string
 	if tmp, ok := rawArgs["before"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("before"))
-		arg4, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		arg5, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["before"] = arg4
+	args["before"] = arg5
 	return args, nil
 }
 
@@ -33460,7 +33471,7 @@ func (ec *executionContext) _Query_cdds(ctx context.Context, field graphql.Colle
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Cdds(rctx, args["keywords"].(*string), args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string))
+		return ec.resolvers.Query().Cdds(rctx, args["keywords"].(*string), args["status"].([]types.State), args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

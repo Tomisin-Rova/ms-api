@@ -40,15 +40,14 @@ message Persons {
 
 // Address type
 message Address {
-  string flat_number = 1;
-  string building_number = 2;
-  string building_name = 3;
-  string street = 4;
-  string sub_street = 5;
-  string city = 6;
-  string state = 7;
-  string postcode = 8;
-  string country = 9;
+  string name = 1;
+  bool primary = 2;
+  string street = 3;
+  string city = 4;
+  string county = 5;
+  string state = 6;
+  string postcode = 7;
+  string country = 8;
 }
 
 // Device type
@@ -315,12 +314,12 @@ message AddressLookup {
 
 // Activity type
 message Activity {
-	string id = 1;
-	string description = 2;   
-	int64 risk_weighting = 3;  
-	bool supported = 4;
-	int64 archived = 5;
-	int64 ts = 6;
+  string id = 1;
+  string description = 2;
+  int64 risk_weighting = 3;
+  bool supported = 4;
+  int64 archived = 5;
+  int64 ts = 6;
 }
 
 // Product type
@@ -332,41 +331,41 @@ message ProductInput {
 
 // AccountData type
 message AccountData {
-  string accountHolderKey =1;
-  string accountHolderType =2;
-  string accountState =3;
-  string accountType =4;
-  AccruedAmounts accruedAmounts =5;
-  int32 activationDate =6;
+  string accountHolderKey = 1;
+  string accountHolderType = 2;
+  string accountState = 3;
+  string accountType = 4;
+  AccruedAmounts accruedAmounts = 5;
+  int32 activationDate = 6;
   int32 approvedDate = 7;
-  string assignedBranchKey =8;
-  string assignedCentreKey =9;
-  string assignedUserKey =10;
+  string assignedBranchKey = 8;
+  string assignedCentreKey = 9;
+  string assignedUserKey = 10;
   Balances balances = 11;
   string closedDate = 12;
   string creationDate = 13;
-  string creditArrangementKey =14;
-  string currencyCode =15;
-  string encodedKey =16;
-  string id =17;
-  InterestSettings interestSettings =18;
-  InternalControls internalControls =19;
-  string lastAccountAppraisalDate =20;
-  string lastInterestCalculationDate =21;
+  string creditArrangementKey = 14;
+  string currencyCode = 15;
+  string encodedKey = 16;
+  string id = 17;
+  InterestSettings interestSettings = 18;
+  InternalControls internalControls = 19;
+  string lastAccountAppraisalDate = 20;
+  string lastInterestCalculationDate = 21;
   string lastInterestStoredDate = 22;
-  string lastModifiedDate =23;
+  string lastModifiedDate = 23;
   string lastOverdraftInterestReviewDate = 24;
   string lastSetToArrearsDate = 25;
-  repeated string linkedSettlementAccountKeys =26;
+  repeated string linkedSettlementAccountKeys = 26;
   string lockedDate = 27;
-  string maturityDate =28;
+  string maturityDate = 28;
   string migrationEventKey = 29;
-  string name =30;
-  string notes =31;
-  OverdraftInterestSettings overdraftInterestSettings =32;
+  string name = 30;
+  string notes = 31;
+  OverdraftInterestSettings overdraftInterestSettings = 32;
   OverdraftSettings overdraftSettings = 33;
-  string productTypeKey =34;
-  string withholdingTaxSourceKey =35;
+  string productTypeKey = 34;
+  string withholdingTaxSourceKey = 35;
 }
 
 // AccountDetails type
@@ -389,126 +388,126 @@ message AccruedAmounts  {
 
 // Balances type
 message Balances {
-  int32 availableBalance =1;
-  int32 blockedBalance =2;
-  int32 feesDue =3;
-  int32 forwardAvailableBalance =4;
-  int32 holdBalance =5;
-  int32 lockedBalance =6;
-  int32 overdraftAmount =7;
-  int32 overdraftInterestDue =8;
-  int32 technicalOverdraftAmount =9;
-  int32 technicalOverdraftInterestDue =10;
-  int32 totalBalance =11;
+  int32 availableBalance = 1;
+  int32 blockedBalance = 2;
+  int32 feesDue = 3;
+  int32 forwardAvailableBalance = 4;
+  int32 holdBalance = 5;
+  int32 lockedBalance = 6;
+  int32 overdraftAmount = 7;
+  int32 overdraftInterestDue = 8;
+  int32 technicalOverdraftAmount = 9;
+  int32 technicalOverdraftInterestDue = 10;
+  int32 totalBalance = 11;
 }
 
 // InterestSettings type
 message InterestSettings {
-  InterestPaymentSettings interestPaymentSettings =1;
-  InterestRateSettings interestRateSettings=2;
+  InterestPaymentSettings interestPaymentSettings = 1;
+  InterestRateSettings interestRateSettings = 2;
 }
 
 // InterestPaymentSettings type
 message InterestPaymentSettings {
-  repeated InterestPaymentDate interestPaymentDates =1;
-  string interestPaymentPoint =2;
+  repeated InterestPaymentDate interestPaymentDates = 1;
+  string interestPaymentPoint = 2;
 }
 
 // InterestPaymentDate type
 message InterestPaymentDate {
-  int32 day =1;
-  int32 month =2;
+  int32 day = 1;
+  int32 month = 2;
 }
 
 // InternalControls type
 message InternalControls {
-  int32 maxWithdrawalAmount =1;
-  int32 recommendedDepositAmount =2;
-  int32 targetAmount =3;
+  int32 maxWithdrawalAmount = 1;
+  int32 recommendedDepositAmount = 2;
+  int32 targetAmount = 3;
 }
 
 // OverdraftInterestSettings type
 message OverdraftInterestSettings {
-  InterestRateSettings interestRateSettings =1;
+  InterestRateSettings interestRateSettings = 1;
 }
 
 // InterestRateSettings type
 message InterestRateSettings {
-  string encodedKey =1;
-  string interestChargeFrequency =2;
-  int32 interestChargeFrequencyCount =3;
-  int32 interestRate =4;
-  int32 interestRateReviewCount =5;
-  string interestRateReviewUnit =6;
-  string interestRateSource =7;
-  string interestRateTerms =8;
-  repeated InterestRateTier interestRateTiers =9;
-  int32 interestSpread =10;
+  string encodedKey = 1;
+  string interestChargeFrequency = 2;
+  int32 interestChargeFrequencyCount = 3;
+  int32 interestRate = 4;
+  int32 interestRateReviewCount = 5;
+  string interestRateReviewUnit = 6;
+  string interestRateSource = 7;
+  string interestRateTerms = 8;
+  repeated InterestRateTier interestRateTiers = 9;
+  int32 interestSpread = 10;
 }
 
 // OverdraftSettings type
 message OverdraftSettings {
-  bool allowOverdraft =1;
-  int32 overdraftExpiryDate =2;
-  int32 overdraftLimit =3;
+  bool allowOverdraft = 1;
+  int32 overdraftExpiryDate = 2;
+  int32 overdraftLimit = 3;
 }
 
 // InterestRateTier type
 message InterestRateTier {
-  string encodedKey=1;
-  int32 endingBalance =2;
-  int32 endingDay =3;
-  int32 interestRate =4;
+  string encodedKey = 1;
+  int32 endingBalance = 2;
+  int32 endingDay = 3;
+  int32 interestRate = 4;
 }
 
 // Transaction type
 message Transaction {
   string id = 1;
-  string account =2;
-  int32 ts =3;
-  TransactionData transactionData =4;
+  string account = 2;
+  int32 ts = 3;
+  TransactionData transactionData = 4;
 }
 
 // TransactionData type
 message TransactionData {
-  AccountBalances accountBalances =1;
-  AffectedAmounts affectedAmounts=2;
-  int32 amount=3;
-  string bookingDate  =4;
-  string creationDate =5;
-  string currencyCode=6;
-  string encodedKey=7;
-  string externalID=8;
-  string fees =9;
-  string id =10;
-  string notes =11;
-  string parentAccountKey =12;
-  string paymentOrderID =13;
-  Taxes taxes =14;
-  Terms terms=15;
-  TransactionDetails transactionDetails=16;
-  TransferDetails transferDetails =17;
-  string type=18;
-  string userKey =19;
-  string valueDate =20;
+  AccountBalances accountBalances = 1;
+  AffectedAmounts affectedAmounts = 2;
+  int32 amount = 3;
+  string bookingDate = 4;
+  string creationDate = 5;
+  string currencyCode = 6;
+  string encodedKey = 7;
+  string externalID = 8;
+  string fees = 9;
+  string id = 10;
+  string notes = 11;
+  string parentAccountKey = 12;
+  string paymentOrderID = 13;
+  Taxes taxes = 14;
+  Terms terms = 15;
+  TransactionDetails transactionDetails = 16;
+  TransferDetails transferDetails = 17;
+  string type = 18;
+  string userKey = 19;
+  string valueDate = 20;
 }
 
 // AccountBalances type
 message AccountBalances  {
-  int32 totalBalance =1;
+  int32 totalBalance = 1;
 }
 
 // AffectedAmounts type
 message AffectedAmounts {
-  int32 feesAmount =1;
-  int32 fractionAmount  =2;
-  int32 fundsAmount  =3;
-  int32 interestAmount =4;
-  int32 overdraftAmount =5;
-  int32 overdraftFeesAmount  =6;
-  int32 overdraftInterestAmount  =7;
-  int32 technicalOverdraftAmount =8;
-  int32 technicalOverdraftInterestAmount  =9;
+  int32 feesAmount = 1;
+  int32 fractionAmount = 2;
+  int32 fundsAmount = 3;
+  int32 interestAmount = 4;
+  int32 overdraftAmount = 5;
+  int32 overdraftFeesAmount = 6;
+  int32 overdraftInterestAmount = 7;
+  int32 technicalOverdraftAmount = 8;
+  int32 technicalOverdraftInterestAmount = 9;
 }
 
 // Taxes type
@@ -517,7 +516,7 @@ message Taxes {
 
 // TransferDetails type
 message TransferDetails {
-  string linkedLoanTransactionKey =1;
+  string linkedLoanTransactionKey = 1;
 }
 
 // TransactionDetails type
@@ -526,7 +525,7 @@ message TransactionDetails {
 
 // Terms type
 message Terms {
-  google.protobuf.Any interestSettings =1;
-  google.protobuf.Any overdraftInterestSettings =2;
-  google.protobuf.Any overdraftSettings =3;
+  google.protobuf.Any interestSettings = 1;
+  google.protobuf.Any overdraftInterestSettings = 2;
+  google.protobuf.Any overdraftSettings = 3;
 }
