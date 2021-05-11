@@ -157,6 +157,14 @@ type ComplexityRoot struct {
 		TechnicalOverdraftInterestAccrued func(childComplexity int) int
 	}
 
+	Action struct {
+		ID       func(childComplexity int) int
+		Notes    func(childComplexity int) int
+		Reporter func(childComplexity int) int
+		Status   func(childComplexity int) int
+		Ts       func(childComplexity int) int
+	}
+
 	Activity struct {
 		Archived      func(childComplexity int) int
 		Description   func(childComplexity int) int
@@ -1158,6 +1166,7 @@ type ComplexityRoot struct {
 	}
 
 	Validation struct {
+		Actions        func(childComplexity int) int
 		Applicant      func(childComplexity int) int
 		Approved       func(childComplexity int) int
 		Data           func(childComplexity int) int
@@ -1874,6 +1883,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.AccruedAmounts.TechnicalOverdraftInterestAccrued(childComplexity), true
+
+	case "Action.id":
+		if e.complexity.Action.ID == nil {
+			break
+		}
+
+		return e.complexity.Action.ID(childComplexity), true
+
+	case "Action.notes":
+		if e.complexity.Action.Notes == nil {
+			break
+		}
+
+		return e.complexity.Action.Notes(childComplexity), true
+
+	case "Action.reporter":
+		if e.complexity.Action.Reporter == nil {
+			break
+		}
+
+		return e.complexity.Action.Reporter(childComplexity), true
+
+	case "Action.status":
+		if e.complexity.Action.Status == nil {
+			break
+		}
+
+		return e.complexity.Action.Status(childComplexity), true
+
+	case "Action.ts":
+		if e.complexity.Action.Ts == nil {
+			break
+		}
+
+		return e.complexity.Action.Ts(childComplexity), true
 
 	case "Activity.archived":
 		if e.complexity.Activity.Archived == nil {
@@ -7031,6 +7075,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.TransferDetails.LinkedLoanTransactionKey(childComplexity), true
 
+	case "Validation.actions":
+		if e.complexity.Validation.Actions == nil {
+			break
+		}
+
+		return e.complexity.Validation.Actions(childComplexity), true
+
 	case "Validation.applicant":
 		if e.complexity.Validation.Applicant == nil {
 			break
@@ -8862,7 +8913,56 @@ type Validation {
   approved: Boolean
   # Unix timestamp when the record was created
   ts: Int
+  # Reference for the actions taken in a Validation
+  actions: [Action!]!
 }
+
+# Actions taken, such as an onboarding case review
+type Action {
+  # Unique roava ulid for the data record
+  id: ID!
+  # Person who created the task
+  reporter: Person!
+  ## Person whom task is assigned to
+  #assignee: Person!
+  ## Person who task is referred to approve the task
+  #approver: Person
+  # Notes for the task
+  notes: String!
+  ## ROAVA operations workflow stage
+  #stage: String @examples(values: "some_workflow_stage")
+  ## Approval status of the task
+  #approved: Boolean @examples(values: [true, false])
+  # The action type of this action
+  status: String!
+  ## Version of the task
+  #version: Int
+  # Unix timestamp when the record was created
+  ts: Int!
+  ## Array of comments associated to this task
+  #comments(
+  #  # Returns the first n elements from the list.
+  #  first: Int,
+  #  # Returns the elements in the list that come after the specified cursor.
+  #  after: String,
+  #  # Returns the last n elements from the list.
+  #  last: Int,
+  #  # Returns the elements in the list that come before the specified cursor.
+  #  before: String
+  #): CommentConnection
+  ## Array of tags associated to this task
+  #tags(
+  #  # Returns the first n elements from the list.
+  #  first: Int,
+  #  # Returns the elements in the list that come after the specified cursor.
+  #  after: String,
+  #  # Returns the last n elements from the list.
+  #  last: Int,
+  #  # Returns the elements in the list that come before the specified cursor.
+  #  before: String
+  #): TagConnection
+}
+
 # union type representing owner of an entity
 union Owner = Person | Organisation
 
@@ -9074,7 +9174,9 @@ enum ProofType {
 }
 
 # enum representing types of third party available auths
-enum AuthType { GOOGLE }
+enum AuthType {
+  GOOGLE
+}
 
 # The connection type for Proof
 type ProofConnection {
@@ -15099,6 +15201,181 @@ func (ec *executionContext) _AccruedAmounts_technicalOverdraftInterestAccrued(ct
 	res := resTmp.(*int64)
 	fc.Result = res
 	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Action_id(ctx context.Context, field graphql.CollectedField, obj *types.Action) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Action",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Action_reporter(ctx context.Context, field graphql.CollectedField, obj *types.Action) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Action",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Reporter, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.Person)
+	fc.Result = res
+	return ec.marshalNPerson2ᚖmsᚗapiᚋtypesᚐPerson(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Action_notes(ctx context.Context, field graphql.CollectedField, obj *types.Action) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Action",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Notes, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Action_status(ctx context.Context, field graphql.CollectedField, obj *types.Action) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Action",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Status, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Action_ts(ctx context.Context, field graphql.CollectedField, obj *types.Action) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Action",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Ts, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int64)
+	fc.Result = res
+	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Activity_id(ctx context.Context, field graphql.CollectedField, obj *types.Activity) (ret graphql.Marshaler) {
@@ -38427,6 +38704,41 @@ func (ec *executionContext) _Validation_ts(ctx context.Context, field graphql.Co
 	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Validation_actions(ctx context.Context, field graphql.CollectedField, obj *types.Validation) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Validation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Actions, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*types.Action)
+	fc.Result = res
+	return ec.marshalNAction2ᚕᚖmsᚗapiᚋtypesᚐActionᚄ(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _ValidationConnection_edges(ctx context.Context, field graphql.CollectedField, obj *types.ValidationConnection) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -41532,6 +41844,53 @@ func (ec *executionContext) _AccruedAmounts(ctx context.Context, sel ast.Selecti
 			out.Values[i] = ec._AccruedAmounts_overdraftInterestAccrued(ctx, field, obj)
 		case "technicalOverdraftInterestAccrued":
 			out.Values[i] = ec._AccruedAmounts_technicalOverdraftInterestAccrued(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var actionImplementors = []string{"Action"}
+
+func (ec *executionContext) _Action(ctx context.Context, sel ast.SelectionSet, obj *types.Action) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, actionImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Action")
+		case "id":
+			out.Values[i] = ec._Action_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "reporter":
+			out.Values[i] = ec._Action_reporter(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "notes":
+			out.Values[i] = ec._Action_notes(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "status":
+			out.Values[i] = ec._Action_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "ts":
+			out.Values[i] = ec._Action_ts(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -46715,6 +47074,11 @@ func (ec *executionContext) _Validation(ctx context.Context, sel ast.SelectionSe
 			out.Values[i] = ec._Validation_approved(ctx, field, obj)
 		case "ts":
 			out.Values[i] = ec._Validation_ts(ctx, field, obj)
+		case "actions":
+			out.Values[i] = ec._Validation_actions(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -47406,6 +47770,53 @@ func (ec *executionContext) marshalNAccountingRules2ᚕᚖmsᚗapiᚋtypesᚐAcc
 	}
 	wg.Wait()
 	return ret
+}
+
+func (ec *executionContext) marshalNAction2ᚕᚖmsᚗapiᚋtypesᚐActionᚄ(ctx context.Context, sel ast.SelectionSet, v []*types.Action) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNAction2ᚖmsᚗapiᚋtypesᚐAction(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNAction2ᚖmsᚗapiᚋtypesᚐAction(ctx context.Context, sel ast.SelectionSet, v *types.Action) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Action(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNActivity2ᚕᚖmsᚗapiᚋtypesᚐActivity(ctx context.Context, sel ast.SelectionSet, v []*types.Activity) graphql.Marshaler {

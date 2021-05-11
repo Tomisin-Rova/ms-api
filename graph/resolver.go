@@ -395,9 +395,9 @@ func (r *Resolver) hydrateAccount(from *accountService.GetAccountResponse) *type
 	return &dto
 }
 
-func (r *queryResolver) hydrateCDD(cddDto *pb.Cdd) *types.Cdd {
+func (r *queryResolver) hydrateCDD(cddDto *pb.Cdd) (*types.Cdd, error) {
 	if cddDto == nil {
-		return nil
+		return nil, nil
 	}
 
 	tsAsInt64 := int64(cddDto.Ts)
@@ -411,12 +411,29 @@ func (r *queryResolver) hydrateCDD(cddDto *pb.Cdd) *types.Cdd {
 	// Add validations
 	for _, validationDto := range cddDto.Validations {
 		tsAsInt64 := int64(validationDto.Ts)
+		actions := make([]*types.Action, len(validationDto.Actions))
+
+		for index, action := range validationDto.Actions {
+			person, err := getPerson(action.Reporter)
+			if err != nil {
+				return nil, err
+			}
+			actions[index] = &types.Action{
+				ID:       action.Id,
+				Reporter: person,
+				Notes:    action.Notes,
+				Status:   action.Status,
+				Ts:       tsAsInt64,
+			}
+		}
+
 		validation := types.Validation{
 			ID:             validationDto.Id,
 			ValidationType: types.ValidationType(validationDto.ValidationType),
 			Status:         types.State(validationDto.Status),
 			Approved:       &validationDto.Approved,
 			Ts:             &tsAsInt64,
+			Actions:        actions,
 		}
 		// Fill validation Data
 		switch validationDto.Data.TypeUrl {
@@ -511,7 +528,7 @@ func (r *queryResolver) hydrateCDD(cddDto *pb.Cdd) *types.Cdd {
 		cdd.Validations = append(cdd.Validations, &validation)
 	}
 
-	return &cdd
+	return &cdd, nil
 }
 
 // TODO: Refactor this function to use it on the hydrateCDD
