@@ -10,16 +10,6 @@ message CreatePhoneRequest {
   types.Device device = 2;
 }
 
-message InputAddress {
-  string country = 1;
-  string street = 2;
-  string city = 3;
-  string postcode = 4;
-  string country2 = 5;
-  string state = 6;
-  string county = 7;
-}
-
 message CreatePhoneResponse {
   string message = 1;
   string token = 2;
@@ -45,6 +35,16 @@ message UpdatePersonRequest {
   string dob = 5;
   string countryResidence = 6;
   string bvn = 7;
+}
+
+message InputAddress {
+  string country = 1;
+  string street = 2;
+  string city = 3;
+  string postcode = 4;
+  string country2 = 5;
+  string state = 6;
+  string county = 7;
 }
 
 message RoavaReasonsRequest {
@@ -111,11 +111,6 @@ message FetchCountriesResponse {
   repeated types.Country Countries = 2;
 }
 
-message FetchReasonsRequest {
-  bool supported = 1;
-}
-
-
 message Reasons {
   string Id = 1;
   string Description = 2;
@@ -141,6 +136,10 @@ message AddressLookupRequest {
 
 message AddressLookupResponse {
   repeated types.AddressLookup addresses = 1;
+}
+
+message FetchReasonsRequest {
+  bool supported = 1;
 }
 
 message SubmitApplicationRequest {
