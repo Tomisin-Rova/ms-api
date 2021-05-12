@@ -158,6 +158,7 @@ message UpdateValidationStatusRequest {
   string validation = 1;
   string status = 2;
   string message = 3;
+  string owner = 4;
 }
 
 message ResubmitRequest {

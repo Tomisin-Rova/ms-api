@@ -455,15 +455,22 @@ func (r *mutationResolver) AcceptTerms(ctx context.Context, documents []*string)
 }
 
 func (r *mutationResolver) UpdateValidationStatus(ctx context.Context, validation string, status types.State, message string) (*types.Response, error) {
+	claims, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+
 	response, err := r.onBoardingService.UpdateValidationStatus(ctx, &onboardingService.UpdateValidationStatusRequest{
 		Validation: validation,
 		Status:     string(status),
 		Message:    message,
+		Owner:      claims.PersonId,
 	})
 	if err != nil {
 		r.logger.Error("onBoardingService.UpdateValidationStatus()", zap.Error(err))
 		return nil, err
 	}
+
 	return &types.Response{
 		Message: response.Message,
 		Success: response.Success,
