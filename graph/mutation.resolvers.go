@@ -105,24 +105,38 @@ func (r *mutationResolver) Register(ctx context.Context, person types.PersonInpu
 	}
 
 	// Build person bio data payload
-	postCode, bvn := "", ""
-	if address.Postcode != nil {
-		postCode = *address.Postcode
-	}
-	if person.Bvn != nil {
-		bvn = *person.Bvn
-	}
 	payload := onboardingService.UpdatePersonRequest{
-		PersonId: personId.PersonId,
-		Address: &onboardingService.InputAddress{
-			Postcode: postCode, Street: *address.Street,
-			City: *address.City, Country: *address.Country,
-		},
+		PersonId:         personId.PersonId,
+		Address:          &onboardingService.InputAddress{},
 		FirstName:        person.FirstName,
 		LastName:         person.LastName,
 		Dob:              person.Dob,
 		CountryResidence: person.CountryResidence,
-		Bvn:              bvn,
+		Bvn:              *person.Bvn,
+	}
+	if address.Country != nil {
+		payload.Address.Country = *address.Country
+	}
+	if address.Street != nil {
+		payload.Address.Street = *address.Street
+	}
+	if address.City != nil {
+		payload.Address.City = *address.City
+	}
+	if address.Postcode != nil {
+		payload.Address.Postcode = *address.Postcode
+	}
+	if address.Country2 != nil {
+		payload.Address.Country2 = *address.Country2
+	}
+	if address.State != nil {
+		payload.Address.State = *address.State
+	}
+	if address.County != nil {
+		payload.Address.County = *address.County
+	}
+	if person.Bvn != nil {
+		payload.Bvn = *person.Bvn
 	}
 	// Call onboarding service
 	response, err := r.onBoardingService.UpdatePersonBioData(context.Background(), &payload)
@@ -187,7 +201,7 @@ func (r *mutationResolver) Register(ctx context.Context, person types.PersonInpu
 		Nationality:      nationality,
 		Addresses:        addresses,
 		Identities:       identities,
-		Ts:               int64(response.Ts),
+		Ts:               response.Ts,
 	}, nil
 }
 
