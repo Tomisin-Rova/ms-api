@@ -249,6 +249,54 @@ func (x *TransactionPinRequest) GetPin() string {
 	return ""
 }
 
+// Request type for staff by ID
+type StaffRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+}
+
+func (x *StaffRequest) Reset() {
+	*x = StaffRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_person_proto_msgTypes[4]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *StaffRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StaffRequest) ProtoMessage() {}
+
+func (x *StaffRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_person_proto_msgTypes[4]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use StaffRequest.ProtoReflect.Descriptor instead.
+func (*StaffRequest) Descriptor() ([]byte, []int) {
+	return file_person_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *StaffRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
 var File_person_proto protoreflect.FileDescriptor
 
 var file_person_proto_rawDesc = []byte{
@@ -272,7 +320,9 @@ var file_person_proto_rawDesc = []byte{
 	0x69, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1a, 0x0a, 0x08, 0x69, 0x64, 0x65,
 	0x6e, 0x74, 0x69, 0x74, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x69, 0x64, 0x65,
 	0x6e, 0x74, 0x69, 0x74, 0x79, 0x12, 0x10, 0x0a, 0x03, 0x70, 0x69, 0x6e, 0x18, 0x02, 0x20, 0x01,
-	0x28, 0x09, 0x52, 0x03, 0x70, 0x69, 0x6e, 0x32, 0xea, 0x01, 0x0a, 0x0d, 0x50, 0x65, 0x72, 0x73,
+	0x28, 0x09, 0x52, 0x03, 0x70, 0x69, 0x6e, 0x22, 0x1e, 0x0a, 0x0c, 0x53, 0x74, 0x61, 0x66, 0x66,
+	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x32, 0xa0, 0x02, 0x0a, 0x0d, 0x50, 0x65, 0x72, 0x73,
 	0x6f, 0x6e, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x2d, 0x0a, 0x02, 0x4d, 0x65, 0x12,
 	0x14, 0x2e, 0x70, 0x65, 0x72, 0x73, 0x6f, 0x6e, 0x2e, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x52, 0x65,
 	0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x0f, 0x2e, 0x74, 0x79, 0x70, 0x65, 0x73, 0x2e, 0x52, 0x65,
@@ -282,14 +332,18 @@ var file_person_proto_rawDesc = []byte{
 	0x73, 0x2e, 0x50, 0x65, 0x72, 0x73, 0x6f, 0x6e, 0x22, 0x00, 0x12, 0x31, 0x0a, 0x06, 0x50, 0x65,
 	0x6f, 0x70, 0x6c, 0x65, 0x12, 0x15, 0x2e, 0x70, 0x65, 0x72, 0x73, 0x6f, 0x6e, 0x2e, 0x50, 0x65,
 	0x6f, 0x70, 0x6c, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x0e, 0x2e, 0x74, 0x79,
-	0x70, 0x65, 0x73, 0x2e, 0x50, 0x65, 0x72, 0x73, 0x6f, 0x6e, 0x73, 0x22, 0x00, 0x12, 0x45, 0x0a,
-	0x11, 0x53, 0x65, 0x74, 0x54, 0x72, 0x61, 0x6e, 0x73, 0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x50,
-	0x69, 0x6e, 0x12, 0x1d, 0x2e, 0x70, 0x65, 0x72, 0x73, 0x6f, 0x6e, 0x2e, 0x54, 0x72, 0x61, 0x6e,
-	0x73, 0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x50, 0x69, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
-	0x74, 0x1a, 0x0f, 0x2e, 0x74, 0x79, 0x70, 0x65, 0x73, 0x2e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
-	0x73, 0x65, 0x22, 0x00, 0x42, 0x20, 0x5a, 0x1e, 0x6d, 0x73, 0x2e, 0x61, 0x70, 0x69, 0x2f, 0x70,
-	0x72, 0x6f, 0x74, 0x6f, 0x73, 0x2f, 0x70, 0x62, 0x2f, 0x70, 0x65, 0x72, 0x73, 0x6f, 0x6e, 0x53,
-	0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x70, 0x65, 0x73, 0x2e, 0x50, 0x65, 0x72, 0x73, 0x6f, 0x6e, 0x73, 0x22, 0x00, 0x12, 0x34, 0x0a,
+	0x0c, 0x47, 0x65, 0x74, 0x53, 0x74, 0x61, 0x66, 0x66, 0x42, 0x79, 0x49, 0x64, 0x12, 0x14, 0x2e,
+	0x70, 0x65, 0x72, 0x73, 0x6f, 0x6e, 0x2e, 0x53, 0x74, 0x61, 0x66, 0x66, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x1a, 0x0c, 0x2e, 0x74, 0x79, 0x70, 0x65, 0x73, 0x2e, 0x53, 0x74, 0x61, 0x66,
+	0x66, 0x22, 0x00, 0x12, 0x45, 0x0a, 0x11, 0x53, 0x65, 0x74, 0x54, 0x72, 0x61, 0x6e, 0x73, 0x61,
+	0x63, 0x74, 0x69, 0x6f, 0x6e, 0x50, 0x69, 0x6e, 0x12, 0x1d, 0x2e, 0x70, 0x65, 0x72, 0x73, 0x6f,
+	0x6e, 0x2e, 0x54, 0x72, 0x61, 0x6e, 0x73, 0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x50, 0x69, 0x6e,
+	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x0f, 0x2e, 0x74, 0x79, 0x70, 0x65, 0x73, 0x2e,
+	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x42, 0x20, 0x5a, 0x1e, 0x6d, 0x73,
+	0x2e, 0x61, 0x70, 0x69, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x73, 0x2f, 0x70, 0x62, 0x2f, 0x70,
+	0x65, 0x72, 0x73, 0x6f, 0x6e, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x62, 0x06, 0x70, 0x72,
+	0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -304,27 +358,31 @@ func file_person_proto_rawDescGZIP() []byte {
 	return file_person_proto_rawDescData
 }
 
-var file_person_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_person_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_person_proto_goTypes = []interface{}{
 	(*PersonRequest)(nil),         // 0: person.PersonRequest
 	(*PeopleRequest)(nil),         // 1: person.PeopleRequest
 	(*TokenRequest)(nil),          // 2: person.TokenRequest
 	(*TransactionPinRequest)(nil), // 3: person.TransactionPinRequest
-	(*types.Response)(nil),        // 4: types.Response
-	(*types.Person)(nil),          // 5: types.Person
-	(*types.Persons)(nil),         // 6: types.Persons
+	(*StaffRequest)(nil),          // 4: person.StaffRequest
+	(*types.Response)(nil),        // 5: types.Response
+	(*types.Person)(nil),          // 6: types.Person
+	(*types.Persons)(nil),         // 7: types.Persons
+	(*types.Staff)(nil),           // 8: types.Staff
 }
 var file_person_proto_depIdxs = []int32{
 	2, // 0: person.PersonService.Me:input_type -> person.TokenRequest
 	0, // 1: person.PersonService.Person:input_type -> person.PersonRequest
 	1, // 2: person.PersonService.People:input_type -> person.PeopleRequest
-	3, // 3: person.PersonService.SetTransactionPin:input_type -> person.TransactionPinRequest
-	4, // 4: person.PersonService.Me:output_type -> types.Response
-	5, // 5: person.PersonService.Person:output_type -> types.Person
-	6, // 6: person.PersonService.People:output_type -> types.Persons
-	4, // 7: person.PersonService.SetTransactionPin:output_type -> types.Response
-	4, // [4:8] is the sub-list for method output_type
-	0, // [0:4] is the sub-list for method input_type
+	4, // 3: person.PersonService.GetStaffById:input_type -> person.StaffRequest
+	3, // 4: person.PersonService.SetTransactionPin:input_type -> person.TransactionPinRequest
+	5, // 5: person.PersonService.Me:output_type -> types.Response
+	6, // 6: person.PersonService.Person:output_type -> types.Person
+	7, // 7: person.PersonService.People:output_type -> types.Persons
+	8, // 8: person.PersonService.GetStaffById:output_type -> types.Staff
+	5, // 9: person.PersonService.SetTransactionPin:output_type -> types.Response
+	5, // [5:10] is the sub-list for method output_type
+	0, // [0:5] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -384,6 +442,18 @@ func file_person_proto_init() {
 				return nil
 			}
 		}
+		file_person_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*StaffRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -391,7 +461,7 @@ func file_person_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_person_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
@@ -421,6 +491,7 @@ type PersonServiceClient interface {
 	Me(ctx context.Context, in *TokenRequest, opts ...grpc.CallOption) (*types.Response, error)
 	Person(ctx context.Context, in *PersonRequest, opts ...grpc.CallOption) (*types.Person, error)
 	People(ctx context.Context, in *PeopleRequest, opts ...grpc.CallOption) (*types.Persons, error)
+	GetStaffById(ctx context.Context, in *StaffRequest, opts ...grpc.CallOption) (*types.Staff, error)
 	// M U T A T I O N S
 	SetTransactionPin(ctx context.Context, in *TransactionPinRequest, opts ...grpc.CallOption) (*types.Response, error)
 }
@@ -460,6 +531,15 @@ func (c *personServiceClient) People(ctx context.Context, in *PeopleRequest, opt
 	return out, nil
 }
 
+func (c *personServiceClient) GetStaffById(ctx context.Context, in *StaffRequest, opts ...grpc.CallOption) (*types.Staff, error) {
+	out := new(types.Staff)
+	err := c.cc.Invoke(ctx, "/person.PersonService/GetStaffById", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *personServiceClient) SetTransactionPin(ctx context.Context, in *TransactionPinRequest, opts ...grpc.CallOption) (*types.Response, error) {
 	out := new(types.Response)
 	err := c.cc.Invoke(ctx, "/person.PersonService/SetTransactionPin", in, out, opts...)
@@ -475,6 +555,7 @@ type PersonServiceServer interface {
 	Me(context.Context, *TokenRequest) (*types.Response, error)
 	Person(context.Context, *PersonRequest) (*types.Person, error)
 	People(context.Context, *PeopleRequest) (*types.Persons, error)
+	GetStaffById(context.Context, *StaffRequest) (*types.Staff, error)
 	// M U T A T I O N S
 	SetTransactionPin(context.Context, *TransactionPinRequest) (*types.Response, error)
 }
@@ -491,6 +572,9 @@ func (*UnimplementedPersonServiceServer) Person(context.Context, *PersonRequest)
 }
 func (*UnimplementedPersonServiceServer) People(context.Context, *PeopleRequest) (*types.Persons, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method People not implemented")
+}
+func (*UnimplementedPersonServiceServer) GetStaffById(context.Context, *StaffRequest) (*types.Staff, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetStaffById not implemented")
 }
 func (*UnimplementedPersonServiceServer) SetTransactionPin(context.Context, *TransactionPinRequest) (*types.Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetTransactionPin not implemented")
@@ -554,6 +638,24 @@ func _PersonService_People_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PersonService_GetStaffById_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(StaffRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PersonServiceServer).GetStaffById(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/person.PersonService/GetStaffById",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PersonServiceServer).GetStaffById(ctx, req.(*StaffRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _PersonService_SetTransactionPin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(TransactionPinRequest)
 	if err := dec(in); err != nil {
@@ -587,6 +689,10 @@ var _PersonService_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "People",
 			Handler:    _PersonService_People_Handler,
+		},
+		{
+			MethodName: "GetStaffById",
+			Handler:    _PersonService_GetStaffById_Handler,
 		},
 		{
 			MethodName: "SetTransactionPin",

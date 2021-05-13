@@ -2315,3 +2315,28 @@ input BeneficiaryInput {
   # amount to be credited to beneficiary account
   amount: Int
 }
+
+# Type to define a staff member account
+type Staff {
+  # unique ulid for the staff member
+  id: ID!
+  # First name of the Staff member
+  first_name: String!
+  # Last name of the Staff member
+  last_name: String!
+  # Current status of the Staff member
+  status: StaffStatus!
+  # Array of email addresses the staff member
+  emails: [Email]!
+  # Array of phone numbersof the staff member
+  phones: [Phone]!
+  # Role of the Staff Member in Roava
+  # role: [Role!]
+  # Array of identities for the staff member
+  identities: [Identity]!
+  # Unix timestamp when the record was created
+  ts: Int!
+}
+
+# list of Staff states
+enum StaffStatus { ACTIVE INACTIVE EXITED }

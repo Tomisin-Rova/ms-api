@@ -66,6 +66,64 @@ func (r *queryResolver) Me(ctx context.Context) (*types.Person, error) {
 	return person, nil
 }
 
+func (r *queryResolver) MeStaff(ctx context.Context) (*types.Staff, error) {
+	claims, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+	req := &personService.StaffRequest{
+		Id: claims.PersonId,
+	}
+	staffDto, err := r.personService.GetStaffById(ctx, req)
+	if err != nil {
+		r.logger.Error(errorGettingPersonMsg, zap.Error(err))
+		return nil, err
+	}
+
+	emails := make([]*types.Email, len(staffDto.Emails))
+	for i, email := range staffDto.Emails {
+		emails[i] = &types.Email{
+			Value:    email.Value,
+			Verified: email.Verified,
+		}
+	}
+
+	phones := make([]*types.Phone, len(staffDto.Phones))
+	for i, phone := range staffDto.Phones {
+		phones[i] = &types.Phone{
+			Value:    phone.Number,
+			Verified: phone.Verified,
+		}
+	}
+
+	identities := make([]*types.Identity, len(staffDto.Identities))
+	for i, identity := range staffDto.Identities {
+		identities[i] = &types.Identity{
+			Active:         &identity.Active,
+			Authentication: &identity.Authentication,
+			Credentials: &types.Credentials{
+				Identifier:   identity.Credentials.Identifier,
+				RefreshToken: &identity.Credentials.RefreshToken,
+			},
+			Organisation: &types.Organisation{
+				ID:   identity.Organisation.Id,
+				Name: &identity.Organisation.Name,
+			},
+			Ts: identity.Ts,
+		}
+	}
+
+	return &types.Staff{
+		ID:         staffDto.Id,
+		FirstName:  staffDto.FirstName,
+		LastName:   staffDto.LastName,
+		Status:     types.StaffStatus(staffDto.Status),
+		Emails:     emails,
+		Phones:     phones,
+		Identities: identities,
+	}, nil
+}
+
 func (r *queryResolver) Person(ctx context.Context, id string) (*types.Person, error) {
 	person, err := r.personService.Person(ctx, &personService.PersonRequest{Id: id})
 	if err != nil {
@@ -808,6 +866,9 @@ type queryResolver struct{ *Resolver }
 //  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
 //    it when you're done.
 //  - You have helper methods in this file. Move them out to keep these resolver files clean.
+const (
+	cddsQueryMaxGroupGouroutines = 20
+)
 const (
 	// Error messages
 	errorGettingPersonMsg = "failed to get person"

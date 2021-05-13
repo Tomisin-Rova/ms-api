@@ -226,6 +226,21 @@ message Identity {
   int64 ts = 10;
 }
 
+// Identity type
+message ExtendedIdentity {
+  string id = 1;
+  Person owner = 2;
+  string nickname = 3;
+  Organisation organisation = 4;
+  string status = 5;
+  bool active = 6;
+  bool authentication = 7;
+  repeated Device devices = 8;
+  Credentials credentials = 9;
+  int64 ts = 10;
+}
+
+
 // Credentials type
 message Credentials {
   string identifier = 1;
@@ -528,4 +543,17 @@ message Terms {
   google.protobuf.Any interestSettings = 1;
   google.protobuf.Any overdraftInterestSettings = 2;
   google.protobuf.Any overdraftSettings = 3;
+}
+
+
+// Staff type
+message Staff {
+  string id = 1;
+  string first_name = 2;
+  string last_name = 3;
+  string status = 4;
+  repeated Email emails = 5;
+  repeated PhoneNumber phones = 6;
+  repeated ExtendedIdentity identities = 7;
+  int64 ts = 8;
 }

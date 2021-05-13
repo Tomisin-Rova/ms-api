@@ -2022,6 +2022,126 @@ func (x *Identity) GetTs() int64 {
 	return 0
 }
 
+// Identity type
+type ExtendedIdentity struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Id             string        `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Owner          *Person       `protobuf:"bytes,2,opt,name=owner,proto3" json:"owner,omitempty"`
+	Nickname       string        `protobuf:"bytes,3,opt,name=nickname,proto3" json:"nickname,omitempty"`
+	Organisation   *Organisation `protobuf:"bytes,4,opt,name=organisation,proto3" json:"organisation,omitempty"`
+	Status         string        `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"`
+	Active         bool          `protobuf:"varint,6,opt,name=active,proto3" json:"active,omitempty"`
+	Authentication bool          `protobuf:"varint,7,opt,name=authentication,proto3" json:"authentication,omitempty"`
+	Devices        []*Device     `protobuf:"bytes,8,rep,name=devices,proto3" json:"devices,omitempty"`
+	Credentials    *Credentials  `protobuf:"bytes,9,opt,name=credentials,proto3" json:"credentials,omitempty"`
+	Ts             int64         `protobuf:"varint,10,opt,name=ts,proto3" json:"ts,omitempty"`
+}
+
+func (x *ExtendedIdentity) Reset() {
+	*x = ExtendedIdentity{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_types_proto_msgTypes[21]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ExtendedIdentity) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ExtendedIdentity) ProtoMessage() {}
+
+func (x *ExtendedIdentity) ProtoReflect() protoreflect.Message {
+	mi := &file_types_proto_msgTypes[21]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ExtendedIdentity.ProtoReflect.Descriptor instead.
+func (*ExtendedIdentity) Descriptor() ([]byte, []int) {
+	return file_types_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *ExtendedIdentity) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *ExtendedIdentity) GetOwner() *Person {
+	if x != nil {
+		return x.Owner
+	}
+	return nil
+}
+
+func (x *ExtendedIdentity) GetNickname() string {
+	if x != nil {
+		return x.Nickname
+	}
+	return ""
+}
+
+func (x *ExtendedIdentity) GetOrganisation() *Organisation {
+	if x != nil {
+		return x.Organisation
+	}
+	return nil
+}
+
+func (x *ExtendedIdentity) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+func (x *ExtendedIdentity) GetActive() bool {
+	if x != nil {
+		return x.Active
+	}
+	return false
+}
+
+func (x *ExtendedIdentity) GetAuthentication() bool {
+	if x != nil {
+		return x.Authentication
+	}
+	return false
+}
+
+func (x *ExtendedIdentity) GetDevices() []*Device {
+	if x != nil {
+		return x.Devices
+	}
+	return nil
+}
+
+func (x *ExtendedIdentity) GetCredentials() *Credentials {
+	if x != nil {
+		return x.Credentials
+	}
+	return nil
+}
+
+func (x *ExtendedIdentity) GetTs() int64 {
+	if x != nil {
+		return x.Ts
+	}
+	return 0
+}
+
 // Credentials type
 type Credentials struct {
 	state         protoimpl.MessageState
@@ -4684,6 +4804,110 @@ func (x *Terms) GetOverdraftSettings() *anypb.Any {
 	return nil
 }
 
+// Staff type
+type Staff struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Id         string              `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	FirstName  string              `protobuf:"bytes,2,opt,name=first_name,json=firstName,proto3" json:"first_name,omitempty"`
+	LastName   string              `protobuf:"bytes,3,opt,name=last_name,json=lastName,proto3" json:"last_name,omitempty"`
+	Status     string              `protobuf:"bytes,4,opt,name=status,proto3" json:"status,omitempty"`
+	Emails     []*Email            `protobuf:"bytes,5,rep,name=emails,proto3" json:"emails,omitempty"`
+	Phones     []*PhoneNumber      `protobuf:"bytes,6,rep,name=phones,proto3" json:"phones,omitempty"`
+	Identities []*ExtendedIdentity `protobuf:"bytes,7,rep,name=identities,proto3" json:"identities,omitempty"`
+	Ts         int64               `protobuf:"varint,8,opt,name=ts,proto3" json:"ts,omitempty"`
+}
+
+func (x *Staff) Reset() {
+	*x = Staff{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_types_proto_msgTypes[51]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Staff) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Staff) ProtoMessage() {}
+
+func (x *Staff) ProtoReflect() protoreflect.Message {
+	mi := &file_types_proto_msgTypes[51]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Staff.ProtoReflect.Descriptor instead.
+func (*Staff) Descriptor() ([]byte, []int) {
+	return file_types_proto_rawDescGZIP(), []int{51}
+}
+
+func (x *Staff) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *Staff) GetFirstName() string {
+	if x != nil {
+		return x.FirstName
+	}
+	return ""
+}
+
+func (x *Staff) GetLastName() string {
+	if x != nil {
+		return x.LastName
+	}
+	return ""
+}
+
+func (x *Staff) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+func (x *Staff) GetEmails() []*Email {
+	if x != nil {
+		return x.Emails
+	}
+	return nil
+}
+
+func (x *Staff) GetPhones() []*PhoneNumber {
+	if x != nil {
+		return x.Phones
+	}
+	return nil
+}
+
+func (x *Staff) GetIdentities() []*ExtendedIdentity {
+	if x != nil {
+		return x.Identities
+	}
+	return nil
+}
+
+func (x *Staff) GetTs() int64 {
+	if x != nil {
+		return x.Ts
+	}
+	return 0
+}
+
 var File_types_proto protoreflect.FileDescriptor
 
 var file_types_proto_rawDesc = []byte{
@@ -6203,6 +6427,18 @@ func file_types_proto_init() {
 		}
 		file_types_proto_msgTypes[50].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Terms); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_types_proto_msgTypes[51].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Staff); i {
 			case 0:
 				return &v.state
 			case 1:

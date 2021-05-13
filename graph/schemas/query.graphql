@@ -1,6 +1,8 @@
 type Query {
   # fetch person using JWT claims
   me: Person
+  # fetch staff using JWT claims
+  meStaff: Staff @deprecated(reason: "Further updates will replace me with an Union of Person and Status")
   # fetch person by given ID
   person(
     # Unique roava ulid for the data record
