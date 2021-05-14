@@ -303,6 +303,7 @@ type CDDEdge struct {
 
 type Check struct {
 	ID           string        `json:"id"`
+	Owner        Owner         `json:"owner"`
 	Organisation *Organisation `json:"organisation"`
 	Status       State         `json:"status"`
 	Ts           *int64        `json:"ts"`

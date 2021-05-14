@@ -92,7 +92,7 @@ message Validation {
   string validation_type = 2;
   string applicant = 3;
   google.protobuf.Any data = 4;
-  string organisation = 5;
+  Organisation organisation = 5;
   string status = 6;
   bool approved = 7;
   int32 ts = 8;

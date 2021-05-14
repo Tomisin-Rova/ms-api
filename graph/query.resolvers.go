@@ -491,7 +491,8 @@ func (r *queryResolver) Validation(ctx context.Context, id string) (*types.Valid
 		r.logger.Error("get validation", zap.Error(err))
 		return nil, err
 	}
-	validation := r.validation(validationDto)
+	dataResolver := NewDataResolver(r.dataStore, r.logger)
+	validation := r.validation(validationDto, dataResolver)
 
 	return validation, nil
 }

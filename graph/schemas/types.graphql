@@ -1132,6 +1132,8 @@ type ValidationEdge {
 type Check {
   # Unique roava ulid for the data record
   id: ID!
+  # Reference for customer or organization who owns the Check Validation
+  owner: Owner!
   # Organisation id for the company/vendor providing the KYC service
   organisation: Organisation!
   # The status of the check

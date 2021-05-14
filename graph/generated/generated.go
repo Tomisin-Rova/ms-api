@@ -277,6 +277,7 @@ type ComplexityRoot struct {
 		Data         func(childComplexity int) int
 		ID           func(childComplexity int) int
 		Organisation func(childComplexity int) int
+		Owner        func(childComplexity int) int
 		Status       func(childComplexity int) int
 		Ts           func(childComplexity int) int
 	}
@@ -2448,6 +2449,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Check.Organisation(childComplexity), true
+
+	case "Check.owner":
+		if e.complexity.Check.Owner == nil {
+			break
+		}
+
+		return e.complexity.Check.Owner(childComplexity), true
 
 	case "Check.status":
 		if e.complexity.Check.Status == nil {
@@ -8995,6 +9003,8 @@ type ValidationEdge {
 type Check {
   # Unique roava ulid for the data record
   id: ID!
+  # Reference for customer or organization who owns the Check Validation
+  owner: Owner!
   # Organisation id for the company/vendor providing the KYC service
   organisation: Organisation!
   # The status of the check
@@ -17794,6 +17804,41 @@ func (ec *executionContext) _Check_id(ctx context.Context, field graphql.Collect
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Check_owner(ctx context.Context, field graphql.CollectedField, obj *types.Check) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Check",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Owner, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(types.Owner)
+	fc.Result = res
+	return ec.marshalNOwner2msᚗapiᚋtypesᚐOwner(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Check_organisation(ctx context.Context, field graphql.CollectedField, obj *types.Check) (ret graphql.Marshaler) {
@@ -42404,6 +42449,11 @@ func (ec *executionContext) _Check(ctx context.Context, sel ast.SelectionSet, ob
 			out.Values[i] = graphql.MarshalString("Check")
 		case "id":
 			out.Values[i] = ec._Check_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "owner":
+			out.Values[i] = ec._Check_owner(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

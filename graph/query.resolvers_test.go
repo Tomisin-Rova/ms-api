@@ -567,16 +567,16 @@ func TestQueryResolver_Cdds(t *testing.T) {
 		Id:    "id1",
 		Owner: mockOwner,
 		Validations: []*protoTypes.Validation{
-			{ValidationType: "CHECK", Data: &anypb.Any{Value: []byte("{\"id\": \"checkId\"}")}, Organisation: "orgId", Applicant: mockOwner},
-			{ValidationType: "SCREEN", Data: &anypb.Any{Value: []byte("{\"id\": \"screenId\"}")}, Organisation: "orgId", Applicant: mockOwner},
+			{ValidationType: "CHECK", Data: &anypb.Any{Value: []byte("{\"id\": \"checkId\"}")}, Organisation: &protoTypes.Organisation{Id: "orgId"}, Applicant: mockOwner},
+			{ValidationType: "SCREEN", Data: &anypb.Any{Value: []byte("{\"id\": \"screenId\"}")}, Organisation: &protoTypes.Organisation{Id: "orgId"}, Applicant: mockOwner},
 		},
 	}
 	secondCdd := protoTypes.Cdd{
 		Id:    "id2",
 		Owner: mockOwner,
 		Validations: []*protoTypes.Validation{
-			{ValidationType: "CHECK", Data: &anypb.Any{Value: []byte("{id: \"checkId\"}")}, Organisation: "orgId", Applicant: mockOwner},
-			{ValidationType: "SCREEN", Data: &anypb.Any{Value: []byte("{id: \"screenId\"}")}, Organisation: "orgId", Applicant: mockOwner},
+			{ValidationType: "CHECK", Data: &anypb.Any{Value: []byte("{id: \"checkId\"}")}, Organisation: &protoTypes.Organisation{Id: "orgId"}, Applicant: mockOwner},
+			{ValidationType: "SCREEN", Data: &anypb.Any{Value: []byte("{id: \"screenId\"}")}, Organisation: &protoTypes.Organisation{Id: "orgId"}, Applicant: mockOwner},
 		},
 	}
 	mockCdds := &protoTypes.Cdds{
@@ -591,7 +591,7 @@ func TestQueryResolver_Cdds(t *testing.T) {
 	mockStore.EXPECT().GetPerson(mockOwner).Return(mockPerson, nil).MinTimes(2)
 	mockStore.EXPECT().GetCheck("checkId").Return(mockCheck, nil).MinTimes(1)
 	mockStore.EXPECT().GetScreen("screenId").Return(mockScreen, nil).MinTimes(1)
-	mockStore.EXPECT().GetOrganization("orgId").Return(mockOrg, nil).MinTimes(2)
+	mockStore.EXPECT().GetOrganization(gomock.Any()).Return(mockOrg, nil).MinTimes(2)
 
 	var first *int64
 	var after *string
