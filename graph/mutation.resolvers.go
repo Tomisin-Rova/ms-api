@@ -112,7 +112,6 @@ func (r *mutationResolver) Register(ctx context.Context, person types.PersonInpu
 		LastName:         person.LastName,
 		Dob:              person.Dob,
 		CountryResidence: person.CountryResidence,
-		Bvn:              *person.Bvn,
 	}
 	if address.Country != nil {
 		payload.Address.Country = *address.Country
