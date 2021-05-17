@@ -46,7 +46,7 @@ func (c *DataConverter) ProtoValidationToModel(validation *types.Validation) (*m
 			ID: validation.Applicant,
 		},
 		Data:         dataId,
-		Organisation: validation.Organisation,
+		Organisation: validation.Organisation.Id,
 		Status:       models.State(validation.Status),
 		Approved:     validation.Approved,
 		Timestamp:    time.Unix(int64(validation.Ts), 0),

@@ -49,9 +49,32 @@ message ValidateBVNRequest {
   string phone = 3;
 }
 
+message GetProductRequest {
+  string id = 1;
+}
+
+message GetProductResponse {
+  string id = 1;
+  string identification = 2;
+  string scheme = 3;
+  types.ProductDetails details = 4;
+  int64 ts = 5;
+}
+
+message GetProductsRequest {
+  int64 page = 1;
+  int64 perPage = 2;
+}
+
+message GetProductsResponse {
+  repeated types.Product products = 1;
+}
+
 service AccountService {
   rpc CreateAccount(CreateAccountRequest) returns (types.Response) {}
   rpc GetAccount(GetAccountRequest) returns (GetAccountResponse) {}
   rpc GetAccounts(GetAccountsRequest) returns (GetAccountsResponse) {}
   rpc ValidateBVN(ValidateBVNRequest) returns (types.Response) {}
+  rpc GetProduct(GetProductRequest) returns (types.Product) {}
+  rpc GetProducts(GetProductsRequest) returns (GetProductsResponse) {}
 }

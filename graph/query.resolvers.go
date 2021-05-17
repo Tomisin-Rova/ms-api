@@ -561,7 +561,8 @@ func (r *queryResolver) Validation(ctx context.Context, id string) (*types.Valid
 		r.logger.Error("get validation", zap.Error(err))
 		return nil, err
 	}
-	validation := r.validation(validationDto)
+	dataResolver := NewDataResolver(r.dataStore, r.logger)
+	validation := r.validation(validationDto, dataResolver)
 
 	return validation, nil
 }
@@ -619,11 +620,70 @@ func (r *queryResolver) Comments(ctx context.Context, first *int64, after *strin
 }
 
 func (r *queryResolver) Product(ctx context.Context, id string) (*types.Product, error) {
-	panic(fmt.Errorf("not implemented"))
+	product, err := r.accountService.GetProduct(ctx, &accountService.GetProductRequest{Id: id})
+	if err != nil {
+		r.logger.Error("failed to get product", zap.Error(err))
+		return nil, err
+	}
+
+	var productRes types.Product
+	if err := r.mapper.Hydrate(product, &productRes); err != nil {
+		err := mainErrors.Format(mainErrors.InternalErr, nil)
+		r.logger.Error("debug", zap.Error(err))
+		return nil, err
+	}
+	return &productRes, nil
 }
 
 func (r *queryResolver) Products(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.ProductConnection, error) {
-	panic(fmt.Errorf("not implemented"))
+	products, err := r.accountService.GetProducts(ctx, &accountService.GetProductsRequest{
+		Page:    1,
+		PerPage: 100,
+	})
+	if err != nil {
+		r.logger.Error("failed to get products", zap.Error(err))
+		return nil, err
+	}
+
+	input := models.ConnectionInput{
+		Before: before,
+		After:  after,
+		First:  first,
+		Last:   last,
+	}
+
+	edger := func(p *types.Product, offset int) connections.Edge {
+		return types.ProductEdge{
+			Node:   p,
+			Cursor: connections.OffsetToCursor(offset),
+		}
+	}
+
+	conn := func(edges []*types.ProductEdge, nodes []*types.Product, info *types.PageInfo, totalCount int) (*types.ProductConnection, error) {
+		var productNodes []*types.Product
+		productNodes = append(productNodes, nodes...)
+
+		return &types.ProductConnection{
+			Edges:      edges,
+			Nodes:      productNodes,
+			PageInfo:   info,
+			TotalCount: Int64(int64(totalCount)),
+		}, nil
+	}
+
+	var productRes []*types.Product
+	for _, p := range products.Products {
+		var product types.Product
+		if err := r.mapper.Hydrate(p, &product); err != nil {
+			err := mainErrors.Format(mainErrors.InternalErr, nil)
+			r.logger.Error("debug", zap.Error(err))
+			return nil, err
+		}
+
+		productRes = append(productRes, &product)
+	}
+
+	return connections.ProductConnectionCon(productRes, edger, conn, input)
 }
 
 func (r *queryResolver) Account(ctx context.Context, id string) (*types.Account, error) {

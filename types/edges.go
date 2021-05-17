@@ -24,3 +24,7 @@ func (ac TagEdge) GetCursor() string {
 func (p PayeeEdge) GetCursor() string {
 	return p.Cursor
 }
+
+func (p ProductEdge) GetCursor() string {
+	return p.Cursor
+}

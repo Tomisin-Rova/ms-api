@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"ms.api/libs/mapper"
 	"time"
 
 	"ms.api/libs/preloader"
@@ -82,6 +83,7 @@ type ResolverOpts struct {
 	identityService   identityService.IdentityServiceClient
 	DataStore         db.DataStore
 	preloader         preloader.Preloader
+	mapper            mapper.Mapper
 }
 
 type Resolver struct {
@@ -99,6 +101,7 @@ type Resolver struct {
 	logger            *zap.Logger
 	dataStore         db.DataStore
 	preloader         preloader.Preloader
+	mapper            mapper.Mapper
 }
 
 func NewResolver(opt *ResolverOpts, logger *zap.Logger) *Resolver {
@@ -117,11 +120,15 @@ func NewResolver(opt *ResolverOpts, logger *zap.Logger) *Resolver {
 		dataStore:         opt.DataStore,
 		logger:            logger,
 		preloader:         opt.preloader,
+		mapper:            opt.mapper,
 	}
 }
 
 func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) {
-	opts := &ResolverOpts{preloader: preloader.GQLPreloader{}}
+	opts := &ResolverOpts{
+		preloader: preloader.GQLPreloader{},
+		mapper:    &mapper.GQLMapper{},
+	}
 
 	// OnBoarding
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -533,14 +540,35 @@ func (r *queryResolver) hydrateCDD(cddDto *pb.Cdd) (*types.Cdd, error) {
 
 // TODO: Refactor this function to use it on the hydrateCDD
 // It is possible by introducing a goto statement but arguable, though.
-func (r *queryResolver) validation(validationDto *pb.Validation) *types.Validation {
+func (r *queryResolver) validation(validationDto *pb.Validation, dataResolver *DataResolver) *types.Validation {
 	tsAsInt64 := int64(validationDto.Ts)
+	//Build Validation Action
+	actions := make([]*types.Action, len(validationDto.Actions))
+
+	for index, action := range validationDto.Actions {
+		person, err := getPerson(action.Reporter)
+		if err != nil {
+			r.logger.Error("get person data", zap.Error(err))
+		}
+		actions[index] = &types.Action{
+			ID:       action.Id,
+			Reporter: person,
+			Notes:    action.Notes,
+			Status:   action.Status,
+			Ts:       int64(action.Ts),
+		}
+	}
 	validation := types.Validation{
 		ID:             validationDto.Id,
 		ValidationType: types.ValidationType(validationDto.ValidationType),
 		Status:         types.State(validationDto.Status),
 		Approved:       &validationDto.Approved,
-		Ts:             &tsAsInt64,
+		Organisation: &types.Organisation{
+			ID:   validationDto.Organisation.Id,
+			Name: &validationDto.Organisation.Name,
+		},
+		Actions: actions,
+		Ts:      &tsAsInt64,
 	}
 	// Fill validation Data
 	switch validationDto.Data.TypeUrl {
@@ -566,6 +594,10 @@ func (r *queryResolver) validation(validationDto *pb.Validation) *types.Validati
 		if err != nil {
 			r.logger.Error(errorMarshallingScreenValidation, zap.Error(err))
 		}
+		owner, err := dataResolver.ResolvePerson(validationDto.Applicant, nil)
+		if err != nil {
+			r.logger.Error("resolve person data", zap.Error(err))
+		}
 		tsAsInt64 := check.Timestamp.Unix()
 		createdAtAsString := check.Data.CreatedAt.Format(time.RFC3339)
 		var data = types.Check{
@@ -585,6 +617,11 @@ func (r *queryResolver) validation(validationDto *pb.Validation) *types.Validati
 			},
 			Status: types.State(check.Status),
 			Ts:     &tsAsInt64,
+			Owner:  owner,
+			Organisation: &types.Organisation{
+				ID:   validationDto.Organisation.Id,
+				Name: &validationDto.Organisation.Name,
+			},
 		}
 		// Add reports
 		for _, reportDto := range check.Data.Reports {

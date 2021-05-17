@@ -92,7 +92,7 @@ message Validation {
   string validation_type = 2;
   string applicant = 3;
   google.protobuf.Any data = 4;
-  string organisation = 5;
+  Organisation organisation = 5;
   string status = 6;
   bool approved = 7;
   int32 ts = 8;
@@ -420,6 +420,17 @@ message Balances {
 message InterestSettings {
   InterestPaymentSettings interestPaymentSettings = 1;
   InterestRateSettings interestRateSettings = 2;
+  string daysInYear = 3;
+  string interestCalculationBalance = 4;
+  string indexSourceKey = 5;
+  string chargeFrequency = 6;
+  int32 chargeFrequencyCount = 7;
+  int32 rateReviewCount = 8;
+  string interestRateReviewUnit = 9;
+  string rateSource = 10;
+  string rateTerms = 11;
+  InterestRate interestRate = 12;
+  repeated RateTiers rateTiers = 13;
 }
 
 // InterestPaymentSettings type
@@ -473,6 +484,137 @@ message InterestRateTier {
   int32 endingBalance = 2;
   int32 endingDay = 3;
   int32 interestRate = 4;
+}
+
+// Product type
+message Product {
+  string id = 1;
+  string identification = 2;
+  string scheme = 3;
+  ProductDetails details = 4;
+}
+
+// ProductDetails type
+message ProductDetails {
+  string category = 1;
+  string type = 2;
+  string name = 3;
+  string state = 4;
+  string currency = 5;
+  string notes = 6;
+  string creditRequirement = 7;
+  bool withholdingTaxEnabled = 8;
+  bool allowOffset = 9;
+  repeated ProductTemplates productTemplates = 10;
+  repeated ProductFees productFees = 11;
+  ProductControl productControl = 12;
+  ProductMaturity productMaturity = 13;
+  OverdraftSetting overdraftSetting = 14;
+  ProductInterestSetting interestSetting = 15;
+  ProductSetting productSetting = 16;
+}
+
+// ProductControl type
+message ProductControl {
+  int64 dormancyPeriodDays = 1;
+  int64 maxWithdrawalAmount = 2;
+  int64 recommendedDepositAmount = 3;
+  OpeningBalance openingBalance = 4;
+}
+
+// OpeningBalance type
+message OpeningBalance {
+  int64 defaultValue = 1;
+  int64 max = 2;
+  int64 min = 3;
+}
+
+// ProductFees type
+message ProductFees {
+  int64 amount = 1;
+  string name = 2;
+  string state = 3;
+  string creationDate = 4;
+  string encodedKey = 5;
+  string feeApplication = 6;
+  string lastModified = 7;
+  string calculationMethod = 8;
+  string applyDateMethod = 9;
+  string trigger = 10;
+  repeated AccountingRules accountingRules = 11;
+}
+
+// ProductTemplates type
+message ProductTemplates {
+  string name = 1;
+  string type = 2;
+  string creationDate = 3;
+  string encodedKey = 4;
+  string lastModifiedDate = 5;
+}
+
+// ProductMaturity type
+message ProductMaturity {
+  string unit = 1;
+  int64 defaultValue = 2;
+  int64 max = 3;
+  int64 min = 4;
+}
+
+// OverdraftSetting type
+message OverdraftSetting {
+  bool allowOverdraft = 1;
+  bool allowTechnicalOverdraft = 2;
+  int64 maxLimit = 3;
+  InterestSettings interestSettings = 4;
+}
+
+message ProductInterestSetting {
+  bool collectInterestWhenLocked = 1;
+  string daysInYear = 2;
+  string interestCalculationBalance = 3;
+  bool interestPaidIntoAccount = 4;
+  string interestPaymentPoint = 5;
+  int64 maximumBalance = 6;
+  RateSetting rateSetting = 7;
+  repeated InterestPaymentDate interestPaymentDates = 8;
+}
+
+message RateSetting {
+  bool accrueAfterMaturity = 1;
+  string indexSourceKey = 2;
+  string chargeFrequency = 3;
+  int64 chargeFrequencyCount = 4;
+  string rateSource = 5;
+  string rateTerms = 6;
+  repeated RateTiers rateTiers = 7;
+  InterestRate interestRate = 8;
+}
+
+message RateTiers {
+  string encodedKey = 1;
+  int64 endingBalance = 2;
+  int64 endingDay = 3;
+  int64 interestRate = 4;
+}
+
+
+message InterestRate {
+  int64 defaultValue = 1;
+  int64 maxValue = 2;
+  int64 minValue = 3;
+}
+
+message ProductSetting {
+  string accountingMethod = 1;
+  string interestAccounting = 2;
+  repeated AccountingRules accountingRules = 3;
+}
+
+message AccountingRules {
+  string encoded_key = 1;
+  string financialResource = 2;
+  string glKey = 3;
 }
 
 // Transaction type

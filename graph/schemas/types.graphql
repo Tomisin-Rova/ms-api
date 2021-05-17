@@ -1132,6 +1132,8 @@ type ValidationEdge {
 type Check {
   # Unique roava ulid for the data record
   id: ID!
+  # Reference for customer or organization who owns the Check Validation
+  owner: Owner!
   # Organisation id for the company/vendor providing the KYC service
   organisation: Organisation!
   # The status of the check
@@ -1688,7 +1690,7 @@ type ProductDetails {
   # Refers to the overdraft settings used in the Product
   overdraft_setting: OverdraftSetting
   # Refers to the intereset settings used in the Product
-  interest_setting: InterestSetting
+  interest_setting: ProductInterestSetting
   # Refers to the product settings used in the Product
   product_setting: ProductSetting
 }
@@ -1830,7 +1832,7 @@ type InterestPaymentDates {
 }
 
 # Type to define an interest setting
-type InterestSetting {
+type ProductInterestSetting {
   # Boolean to define if interests can be collected from a locked account
   collect_interest_when_locked: Boolean
   # String representating the amount of the days in a year

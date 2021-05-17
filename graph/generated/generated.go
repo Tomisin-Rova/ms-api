@@ -277,6 +277,7 @@ type ComplexityRoot struct {
 		Data         func(childComplexity int) int
 		ID           func(childComplexity int) int
 		Organisation func(childComplexity int) int
+		Owner        func(childComplexity int) int
 		Status       func(childComplexity int) int
 		Ts           func(childComplexity int) int
 	}
@@ -560,17 +561,6 @@ type ComplexityRoot struct {
 		EndingBalance func(childComplexity int) int
 		EndingDay     func(childComplexity int) int
 		InterestRate  func(childComplexity int) int
-	}
-
-	InterestSetting struct {
-		CollectInterestWhenLocked  func(childComplexity int) int
-		DaysInYear                 func(childComplexity int) int
-		InterestCalculationBalance func(childComplexity int) int
-		InterestPaidIntoAccount    func(childComplexity int) int
-		InterestPaymentDates       func(childComplexity int) int
-		InterestPaymentPoint       func(childComplexity int) int
-		MaximumBalance             func(childComplexity int) int
-		RateSetting                func(childComplexity int) int
 	}
 
 	InterestSettings struct {
@@ -866,6 +856,17 @@ type ComplexityRoot struct {
 		Name              func(childComplexity int) int
 		State             func(childComplexity int) int
 		Trigger           func(childComplexity int) int
+	}
+
+	ProductInterestSetting struct {
+		CollectInterestWhenLocked  func(childComplexity int) int
+		DaysInYear                 func(childComplexity int) int
+		InterestCalculationBalance func(childComplexity int) int
+		InterestPaidIntoAccount    func(childComplexity int) int
+		InterestPaymentDates       func(childComplexity int) int
+		InterestPaymentPoint       func(childComplexity int) int
+		MaximumBalance             func(childComplexity int) int
+		RateSetting                func(childComplexity int) int
 	}
 
 	ProductMaturity struct {
@@ -2462,6 +2463,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Check.Organisation(childComplexity), true
 
+	case "Check.owner":
+		if e.complexity.Check.Owner == nil {
+			break
+		}
+
+		return e.complexity.Check.Owner(childComplexity), true
+
 	case "Check.status":
 		if e.complexity.Check.Status == nil {
 			break
@@ -3764,62 +3772,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.InterestRateTiers.InterestRate(childComplexity), true
-
-	case "InterestSetting.collect_interest_when_locked":
-		if e.complexity.InterestSetting.CollectInterestWhenLocked == nil {
-			break
-		}
-
-		return e.complexity.InterestSetting.CollectInterestWhenLocked(childComplexity), true
-
-	case "InterestSetting.days_in_year":
-		if e.complexity.InterestSetting.DaysInYear == nil {
-			break
-		}
-
-		return e.complexity.InterestSetting.DaysInYear(childComplexity), true
-
-	case "InterestSetting.interest_calculation_balance":
-		if e.complexity.InterestSetting.InterestCalculationBalance == nil {
-			break
-		}
-
-		return e.complexity.InterestSetting.InterestCalculationBalance(childComplexity), true
-
-	case "InterestSetting.interest_paid_into_account":
-		if e.complexity.InterestSetting.InterestPaidIntoAccount == nil {
-			break
-		}
-
-		return e.complexity.InterestSetting.InterestPaidIntoAccount(childComplexity), true
-
-	case "InterestSetting.interest_payment_dates":
-		if e.complexity.InterestSetting.InterestPaymentDates == nil {
-			break
-		}
-
-		return e.complexity.InterestSetting.InterestPaymentDates(childComplexity), true
-
-	case "InterestSetting.interest_payment_point":
-		if e.complexity.InterestSetting.InterestPaymentPoint == nil {
-			break
-		}
-
-		return e.complexity.InterestSetting.InterestPaymentPoint(childComplexity), true
-
-	case "InterestSetting.maximum_balance":
-		if e.complexity.InterestSetting.MaximumBalance == nil {
-			break
-		}
-
-		return e.complexity.InterestSetting.MaximumBalance(childComplexity), true
-
-	case "InterestSetting.rate_setting":
-		if e.complexity.InterestSetting.RateSetting == nil {
-			break
-		}
-
-		return e.complexity.InterestSetting.RateSetting(childComplexity), true
 
 	case "InterestSettings.charge_frequency":
 		if e.complexity.InterestSettings.ChargeFrequency == nil {
@@ -5395,6 +5347,62 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ProductFees.Trigger(childComplexity), true
+
+	case "ProductInterestSetting.collect_interest_when_locked":
+		if e.complexity.ProductInterestSetting.CollectInterestWhenLocked == nil {
+			break
+		}
+
+		return e.complexity.ProductInterestSetting.CollectInterestWhenLocked(childComplexity), true
+
+	case "ProductInterestSetting.days_in_year":
+		if e.complexity.ProductInterestSetting.DaysInYear == nil {
+			break
+		}
+
+		return e.complexity.ProductInterestSetting.DaysInYear(childComplexity), true
+
+	case "ProductInterestSetting.interest_calculation_balance":
+		if e.complexity.ProductInterestSetting.InterestCalculationBalance == nil {
+			break
+		}
+
+		return e.complexity.ProductInterestSetting.InterestCalculationBalance(childComplexity), true
+
+	case "ProductInterestSetting.interest_paid_into_account":
+		if e.complexity.ProductInterestSetting.InterestPaidIntoAccount == nil {
+			break
+		}
+
+		return e.complexity.ProductInterestSetting.InterestPaidIntoAccount(childComplexity), true
+
+	case "ProductInterestSetting.interest_payment_dates":
+		if e.complexity.ProductInterestSetting.InterestPaymentDates == nil {
+			break
+		}
+
+		return e.complexity.ProductInterestSetting.InterestPaymentDates(childComplexity), true
+
+	case "ProductInterestSetting.interest_payment_point":
+		if e.complexity.ProductInterestSetting.InterestPaymentPoint == nil {
+			break
+		}
+
+		return e.complexity.ProductInterestSetting.InterestPaymentPoint(childComplexity), true
+
+	case "ProductInterestSetting.maximum_balance":
+		if e.complexity.ProductInterestSetting.MaximumBalance == nil {
+			break
+		}
+
+		return e.complexity.ProductInterestSetting.MaximumBalance(childComplexity), true
+
+	case "ProductInterestSetting.rate_setting":
+		if e.complexity.ProductInterestSetting.RateSetting == nil {
+			break
+		}
+
+		return e.complexity.ProductInterestSetting.RateSetting(childComplexity), true
 
 	case "ProductMaturity.default_value":
 		if e.complexity.ProductMaturity.DefaultValue == nil {
@@ -9073,6 +9081,8 @@ type ValidationEdge {
 type Check {
   # Unique roava ulid for the data record
   id: ID!
+  # Reference for customer or organization who owns the Check Validation
+  owner: Owner!
   # Organisation id for the company/vendor providing the KYC service
   organisation: Organisation!
   # The status of the check
@@ -9629,7 +9639,7 @@ type ProductDetails {
   # Refers to the overdraft settings used in the Product
   overdraft_setting: OverdraftSetting
   # Refers to the intereset settings used in the Product
-  interest_setting: InterestSetting
+  interest_setting: ProductInterestSetting
   # Refers to the product settings used in the Product
   product_setting: ProductSetting
 }
@@ -9771,7 +9781,7 @@ type InterestPaymentDates {
 }
 
 # Type to define an interest setting
-type InterestSetting {
+type ProductInterestSetting {
   # Boolean to define if interests can be collected from a locked account
   collect_interest_when_locked: Boolean
   # String representating the amount of the days in a year
@@ -17899,6 +17909,41 @@ func (ec *executionContext) _Check_id(ctx context.Context, field graphql.Collect
 	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Check_owner(ctx context.Context, field graphql.CollectedField, obj *types.Check) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Check",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Owner, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(types.Owner)
+	fc.Result = res
+	return ec.marshalNOwner2msᚗapiᚋtypesᚐOwner(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Check_organisation(ctx context.Context, field graphql.CollectedField, obj *types.Check) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -24170,265 +24215,6 @@ func (ec *executionContext) _InterestRateTiers_interestRate(ctx context.Context,
 	res := resTmp.(*int64)
 	fc.Result = res
 	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _InterestSetting_collect_interest_when_locked(ctx context.Context, field graphql.CollectedField, obj *types.InterestSetting) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "InterestSetting",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.CollectInterestWhenLocked, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*bool)
-	fc.Result = res
-	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _InterestSetting_days_in_year(ctx context.Context, field graphql.CollectedField, obj *types.InterestSetting) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "InterestSetting",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.DaysInYear, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
-	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _InterestSetting_interest_calculation_balance(ctx context.Context, field graphql.CollectedField, obj *types.InterestSetting) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "InterestSetting",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.InterestCalculationBalance, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
-	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _InterestSetting_interest_paid_into_account(ctx context.Context, field graphql.CollectedField, obj *types.InterestSetting) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "InterestSetting",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.InterestPaidIntoAccount, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*bool)
-	fc.Result = res
-	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _InterestSetting_interest_payment_point(ctx context.Context, field graphql.CollectedField, obj *types.InterestSetting) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "InterestSetting",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.InterestPaymentPoint, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
-	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _InterestSetting_maximum_balance(ctx context.Context, field graphql.CollectedField, obj *types.InterestSetting) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "InterestSetting",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.MaximumBalance, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*int64)
-	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _InterestSetting_rate_setting(ctx context.Context, field graphql.CollectedField, obj *types.InterestSetting) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "InterestSetting",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.RateSetting, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*types.RateSetting)
-	fc.Result = res
-	return ec.marshalORateSetting2ᚖmsᚗapiᚋtypesᚐRateSetting(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _InterestSetting_interest_payment_dates(ctx context.Context, field graphql.CollectedField, obj *types.InterestSetting) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "InterestSetting",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.InterestPaymentDates, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*types.InterestPaymentDates)
-	fc.Result = res
-	return ec.marshalNInterestPaymentDates2ᚕᚖmsᚗapiᚋtypesᚐInterestPaymentDates(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _InterestSettings_days_in_year(ctx context.Context, field graphql.CollectedField, obj *types.InterestSettings) (ret graphql.Marshaler) {
@@ -30995,9 +30781,9 @@ func (ec *executionContext) _ProductDetails_interest_setting(ctx context.Context
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*types.InterestSetting)
+	res := resTmp.(*types.ProductInterestSetting)
 	fc.Result = res
-	return ec.marshalOInterestSetting2ᚖmsᚗapiᚋtypesᚐInterestSetting(ctx, field.Selections, res)
+	return ec.marshalOProductInterestSetting2ᚖmsᚗapiᚋtypesᚐProductInterestSetting(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _ProductDetails_product_setting(ctx context.Context, field graphql.CollectedField, obj *types.ProductDetails) (ret graphql.Marshaler) {
@@ -31455,6 +31241,265 @@ func (ec *executionContext) _ProductFees_accounting_rules(ctx context.Context, f
 	res := resTmp.([]*types.AccountingRules)
 	fc.Result = res
 	return ec.marshalNAccountingRules2ᚕᚖmsᚗapiᚋtypesᚐAccountingRules(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ProductInterestSetting_collect_interest_when_locked(ctx context.Context, field graphql.CollectedField, obj *types.ProductInterestSetting) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ProductInterestSetting",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CollectInterestWhenLocked, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*bool)
+	fc.Result = res
+	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ProductInterestSetting_days_in_year(ctx context.Context, field graphql.CollectedField, obj *types.ProductInterestSetting) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ProductInterestSetting",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DaysInYear, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ProductInterestSetting_interest_calculation_balance(ctx context.Context, field graphql.CollectedField, obj *types.ProductInterestSetting) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ProductInterestSetting",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.InterestCalculationBalance, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ProductInterestSetting_interest_paid_into_account(ctx context.Context, field graphql.CollectedField, obj *types.ProductInterestSetting) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ProductInterestSetting",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.InterestPaidIntoAccount, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*bool)
+	fc.Result = res
+	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ProductInterestSetting_interest_payment_point(ctx context.Context, field graphql.CollectedField, obj *types.ProductInterestSetting) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ProductInterestSetting",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.InterestPaymentPoint, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ProductInterestSetting_maximum_balance(ctx context.Context, field graphql.CollectedField, obj *types.ProductInterestSetting) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ProductInterestSetting",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.MaximumBalance, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int64)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ProductInterestSetting_rate_setting(ctx context.Context, field graphql.CollectedField, obj *types.ProductInterestSetting) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ProductInterestSetting",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.RateSetting, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*types.RateSetting)
+	fc.Result = res
+	return ec.marshalORateSetting2ᚖmsᚗapiᚋtypesᚐRateSetting(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ProductInterestSetting_interest_payment_dates(ctx context.Context, field graphql.CollectedField, obj *types.ProductInterestSetting) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ProductInterestSetting",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.InterestPaymentDates, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*types.InterestPaymentDates)
+	fc.Result = res
+	return ec.marshalNInterestPaymentDates2ᚕᚖmsᚗapiᚋtypesᚐInterestPaymentDates(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _ProductMaturity_unit(ctx context.Context, field graphql.CollectedField, obj *types.ProductMaturity) (ret graphql.Marshaler) {
@@ -42822,6 +42867,11 @@ func (ec *executionContext) _Check(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "owner":
+			out.Values[i] = ec._Check_owner(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "organisation":
 			out.Values[i] = ec._Check_organisation(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -44231,47 +44281,6 @@ func (ec *executionContext) _InterestRateTiers(ctx context.Context, sel ast.Sele
 	return out
 }
 
-var interestSettingImplementors = []string{"InterestSetting"}
-
-func (ec *executionContext) _InterestSetting(ctx context.Context, sel ast.SelectionSet, obj *types.InterestSetting) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, interestSettingImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("InterestSetting")
-		case "collect_interest_when_locked":
-			out.Values[i] = ec._InterestSetting_collect_interest_when_locked(ctx, field, obj)
-		case "days_in_year":
-			out.Values[i] = ec._InterestSetting_days_in_year(ctx, field, obj)
-		case "interest_calculation_balance":
-			out.Values[i] = ec._InterestSetting_interest_calculation_balance(ctx, field, obj)
-		case "interest_paid_into_account":
-			out.Values[i] = ec._InterestSetting_interest_paid_into_account(ctx, field, obj)
-		case "interest_payment_point":
-			out.Values[i] = ec._InterestSetting_interest_payment_point(ctx, field, obj)
-		case "maximum_balance":
-			out.Values[i] = ec._InterestSetting_maximum_balance(ctx, field, obj)
-		case "rate_setting":
-			out.Values[i] = ec._InterestSetting_rate_setting(ctx, field, obj)
-		case "interest_payment_dates":
-			out.Values[i] = ec._InterestSetting_interest_payment_dates(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
 var interestSettingsImplementors = []string{"InterestSettings"}
 
 func (ec *executionContext) _InterestSettings(ctx context.Context, sel ast.SelectionSet, obj *types.InterestSettings) graphql.Marshaler {
@@ -45602,6 +45611,47 @@ func (ec *executionContext) _ProductFees(ctx context.Context, sel ast.SelectionS
 			out.Values[i] = ec._ProductFees_trigger(ctx, field, obj)
 		case "accounting_rules":
 			out.Values[i] = ec._ProductFees_accounting_rules(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var productInterestSettingImplementors = []string{"ProductInterestSetting"}
+
+func (ec *executionContext) _ProductInterestSetting(ctx context.Context, sel ast.SelectionSet, obj *types.ProductInterestSetting) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, productInterestSettingImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ProductInterestSetting")
+		case "collect_interest_when_locked":
+			out.Values[i] = ec._ProductInterestSetting_collect_interest_when_locked(ctx, field, obj)
+		case "days_in_year":
+			out.Values[i] = ec._ProductInterestSetting_days_in_year(ctx, field, obj)
+		case "interest_calculation_balance":
+			out.Values[i] = ec._ProductInterestSetting_interest_calculation_balance(ctx, field, obj)
+		case "interest_paid_into_account":
+			out.Values[i] = ec._ProductInterestSetting_interest_paid_into_account(ctx, field, obj)
+		case "interest_payment_point":
+			out.Values[i] = ec._ProductInterestSetting_interest_payment_point(ctx, field, obj)
+		case "maximum_balance":
+			out.Values[i] = ec._ProductInterestSetting_maximum_balance(ctx, field, obj)
+		case "rate_setting":
+			out.Values[i] = ec._ProductInterestSetting_rate_setting(ctx, field, obj)
+		case "interest_payment_dates":
+			out.Values[i] = ec._ProductInterestSetting_interest_payment_dates(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -52427,13 +52477,6 @@ func (ec *executionContext) marshalOInterestRateTiers2ᚖmsᚗapiᚋtypesᚐInte
 	return ec._InterestRateTiers(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOInterestSetting2ᚖmsᚗapiᚋtypesᚐInterestSetting(ctx context.Context, sel ast.SelectionSet, v *types.InterestSetting) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._InterestSetting(ctx, sel, v)
-}
-
 func (ec *executionContext) marshalOInterestSettings2ᚖmsᚗapiᚋtypesᚐInterestSettings(ctx context.Context, sel ast.SelectionSet, v *types.InterestSettings) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -52641,6 +52684,13 @@ func (ec *executionContext) marshalOProductFees2ᚖmsᚗapiᚋtypesᚐProductFee
 		return graphql.Null
 	}
 	return ec._ProductFees(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOProductInterestSetting2ᚖmsᚗapiᚋtypesᚐProductInterestSetting(ctx context.Context, sel ast.SelectionSet, v *types.ProductInterestSetting) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._ProductInterestSetting(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOProductMaturity2ᚖmsᚗapiᚋtypesᚐProductMaturity(ctx context.Context, sel ast.SelectionSet, v *types.ProductMaturity) graphql.Marshaler {

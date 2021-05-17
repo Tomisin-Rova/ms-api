@@ -303,6 +303,7 @@ type CDDEdge struct {
 
 type Check struct {
 	ID           string        `json:"id"`
+	Owner        Owner         `json:"owner"`
 	Organisation *Organisation `json:"organisation"`
 	Status       State         `json:"status"`
 	Ts           *int64        `json:"ts"`
@@ -608,17 +609,6 @@ type InterestRateTiers struct {
 	InterestRate  *int64  `json:"interestRate"`
 }
 
-type InterestSetting struct {
-	CollectInterestWhenLocked  *bool                   `json:"collect_interest_when_locked"`
-	DaysInYear                 *string                 `json:"days_in_year"`
-	InterestCalculationBalance *string                 `json:"interest_calculation_balance"`
-	InterestPaidIntoAccount    *bool                   `json:"interest_paid_into_account"`
-	InterestPaymentPoint       *string                 `json:"interest_payment_point"`
-	MaximumBalance             *int64                  `json:"maximum_balance"`
-	RateSetting                *RateSetting            `json:"rate_setting"`
-	InterestPaymentDates       []*InterestPaymentDates `json:"interest_payment_dates"`
-}
-
 type InterestSettings struct {
 	DaysInYear                 *string                  `json:"days_in_year"`
 	InterestCalculationBalance *string                  `json:"interest_calculation_balance"`
@@ -920,22 +910,22 @@ type ProductControl struct {
 }
 
 type ProductDetails struct {
-	Category              *string             `json:"category"`
-	Type                  *string             `json:"type"`
-	Name                  *string             `json:"name"`
-	State                 *string             `json:"state"`
-	Currency              *string             `json:"currency"`
-	Notes                 *string             `json:"notes"`
-	CreditRequirement     *string             `json:"credit_requirement"`
-	WithholdingTaxEnabled *bool               `json:"withholding_tax_enabled"`
-	AllowOffset           *bool               `json:"allow_offset"`
-	ProductTemplates      []*ProductTemplates `json:"product_templates"`
-	ProductFees           []*ProductFees      `json:"product_fees"`
-	ProductControl        *ProductControl     `json:"product_control"`
-	ProductMaturity       *ProductMaturity    `json:"product_maturity"`
-	OverdraftSetting      *OverdraftSetting   `json:"overdraft_setting"`
-	InterestSetting       *InterestSetting    `json:"interest_setting"`
-	ProductSetting        *ProductSetting     `json:"product_setting"`
+	Category              *string                 `json:"category"`
+	Type                  *string                 `json:"type"`
+	Name                  *string                 `json:"name"`
+	State                 *string                 `json:"state"`
+	Currency              *string                 `json:"currency"`
+	Notes                 *string                 `json:"notes"`
+	CreditRequirement     *string                 `json:"credit_requirement"`
+	WithholdingTaxEnabled *bool                   `json:"withholding_tax_enabled"`
+	AllowOffset           *bool                   `json:"allow_offset"`
+	ProductTemplates      []*ProductTemplates     `json:"product_templates"`
+	ProductFees           []*ProductFees          `json:"product_fees"`
+	ProductControl        *ProductControl         `json:"product_control"`
+	ProductMaturity       *ProductMaturity        `json:"product_maturity"`
+	OverdraftSetting      *OverdraftSetting       `json:"overdraft_setting"`
+	InterestSetting       *ProductInterestSetting `json:"interest_setting"`
+	ProductSetting        *ProductSetting         `json:"product_setting"`
 }
 
 type ProductEdge struct {
@@ -961,6 +951,17 @@ type ProductInput struct {
 	ID             string  `json:"id"`
 	Identification *string `json:"identification"`
 	Scheme         *string `json:"scheme"`
+}
+
+type ProductInterestSetting struct {
+	CollectInterestWhenLocked  *bool                   `json:"collect_interest_when_locked"`
+	DaysInYear                 *string                 `json:"days_in_year"`
+	InterestCalculationBalance *string                 `json:"interest_calculation_balance"`
+	InterestPaidIntoAccount    *bool                   `json:"interest_paid_into_account"`
+	InterestPaymentPoint       *string                 `json:"interest_payment_point"`
+	MaximumBalance             *int64                  `json:"maximum_balance"`
+	RateSetting                *RateSetting            `json:"rate_setting"`
+	InterestPaymentDates       []*InterestPaymentDates `json:"interest_payment_dates"`
 }
 
 type ProductMaturity struct {
