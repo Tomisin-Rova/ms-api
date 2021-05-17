@@ -66,6 +66,76 @@ func (r *queryResolver) Me(ctx context.Context) (*types.Person, error) {
 	return person, nil
 }
 
+func (r *queryResolver) MeStaff(ctx context.Context) (*types.Staff, error) {
+	claims, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+	req := &personService.StaffRequest{
+		Id: claims.PersonId,
+	}
+	staffDto, err := r.personService.GetStaffById(ctx, req)
+	if err != nil {
+		r.logger.Error(errorGettingPersonMsg, zap.Error(err))
+		return nil, err
+	}
+
+	emails := make([]*types.Email, len(staffDto.Emails))
+	for i, email := range staffDto.Emails {
+		emails[i] = &types.Email{
+			Value:    email.Value,
+			Verified: email.Verified,
+		}
+	}
+
+	phones := make([]*types.Phone, len(staffDto.Phones))
+	for i, phone := range staffDto.Phones {
+		phones[i] = &types.Phone{
+			Value:    phone.Number,
+			Verified: phone.Verified,
+		}
+	}
+
+	identities := make([]*types.Identity, len(staffDto.Identities))
+	for i, identity := range staffDto.Identities {
+		org := &types.Organisation{
+			ID:   identity.Organisation.Id,
+			Name: &identity.Organisation.Name,
+		}
+		identities[i] = &types.Identity{
+			Active:         &identity.Active,
+			Authentication: &identity.Authentication,
+			Credentials: &types.Credentials{
+				Identifier:   identity.Credentials.Identifier,
+				RefreshToken: &identity.Credentials.RefreshToken,
+			},
+			Organisation: org,
+			Ts:           identity.Ts,
+		}
+		identities[i].Owner = &types.Person{
+			ID:               identity.Owner.Id,
+			Title:            &identity.Owner.Title,
+			FirstName:        identity.Owner.FirstName,
+			LastName:         identity.Owner.LastName,
+			MiddleName:       &identity.Owner.MiddleName,
+			Dob:              identity.Owner.Dob,
+			Employer:         org,
+			Ts:               identity.Owner.Ts,
+			CountryResidence: &identity.Owner.CountryResidence,
+		}
+	}
+
+	return &types.Staff{
+		ID:         staffDto.Id,
+		FirstName:  staffDto.FirstName,
+		LastName:   staffDto.LastName,
+		Status:     types.StaffStatus(staffDto.Status),
+		Emails:     emails,
+		Phones:     phones,
+		Identities: identities,
+	}, nil
+}
+
 func (r *queryResolver) Person(ctx context.Context, id string) (*types.Person, error) {
 	person, err := r.personService.Person(ctx, &personService.PersonRequest{Id: id})
 	if err != nil {

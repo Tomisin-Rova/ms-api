@@ -1121,6 +1121,17 @@ type Social struct {
 	Twitter    *string `json:"twitter"`
 }
 
+type Staff struct {
+	ID         string      `json:"id"`
+	FirstName  string      `json:"first_name"`
+	LastName   string      `json:"last_name"`
+	Status     StaffStatus `json:"status"`
+	Emails     []*Email    `json:"emails"`
+	Phones     []*Phone    `json:"phones"`
+	Identities []*Identity `json:"identities"`
+	Ts         int64       `json:"ts"`
+}
+
 type SubmitProofInput struct {
 	Type   ProofType `json:"type"`
 	Data   string    `json:"data"`
@@ -1619,6 +1630,49 @@ func (e *ProofType) UnmarshalGQL(v interface{}) error {
 }
 
 func (e ProofType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type StaffStatus string
+
+const (
+	StaffStatusActive   StaffStatus = "ACTIVE"
+	StaffStatusInactive StaffStatus = "INACTIVE"
+	StaffStatusExited   StaffStatus = "EXITED"
+)
+
+var AllStaffStatus = []StaffStatus{
+	StaffStatusActive,
+	StaffStatusInactive,
+	StaffStatusExited,
+}
+
+func (e StaffStatus) IsValid() bool {
+	switch e {
+	case StaffStatusActive, StaffStatusInactive, StaffStatusExited:
+		return true
+	}
+	return false
+}
+
+func (e StaffStatus) String() string {
+	return string(e)
+}
+
+func (e *StaffStatus) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = StaffStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid StaffStatus", str)
+	}
+	return nil
+}
+
+func (e StaffStatus) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

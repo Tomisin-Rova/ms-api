@@ -758,3 +758,63 @@ func TestQueryResolver_Product(t *testing.T) {
 	assert.Equal(t, *product.Identification, mockProduct.Identification)
 	assert.Equal(t, *product.Details.OverdraftSetting.InterestSettings.DaysInYear, mockProduct.Details.OverdraftSetting.InterestSettings.DaysInYear)
 }
+
+func TestQueryResolver_MeStaff(t *testing.T) {
+	const (
+		success = iota
+		errorNotAuthenticatedUser
+		errorGettingStaff
+	)
+
+	var tests = []struct {
+		name     string
+		testType int
+	}{
+		{
+			name:     "Test query me staff successfully",
+			testType: success,
+		},
+		{
+			name:     "Test error not authenticated user",
+			testType: errorNotAuthenticatedUser,
+		},
+		{
+			name:     "Test error getting staff",
+			testType: errorGettingStaff,
+		},
+	}
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			personServiceClient := new(mocks.PersonServiceClient)
+
+			resolver := NewResolver(&ResolverOpts{
+				personService: personServiceClient,
+			}, zaptest.NewLogger(t))
+			ctx := context.WithValue(context.Background(), middlewares.AuthenticatedUserContextKey,
+				models.Claims{
+					PersonId:   "personId",
+					IdentityId: "identityId",
+					DeviceId:   "deviceId",
+				})
+			switch testCase.testType {
+			case success:
+				personServiceClient.On("GetStaffById", ctx, &personService.StaffRequest{
+					Id: "personId",
+				}).Return(&protoTypes.Staff{
+					Id: "personId",
+				}, nil)
+
+				me, err := resolver.Query().MeStaff(ctx)
+				assert.NoError(t, err)
+				assert.NotNil(t, me)
+				assert.NotEmpty(t, me)
+			case errorNotAuthenticatedUser:
+				me, err := resolver.Query().MeStaff(context.Background())
+				assert.Error(t, err)
+				assert.Nil(t, me)
+			}
+
+			personServiceClient.AssertExpectations(t)
+		})
+	}
+}

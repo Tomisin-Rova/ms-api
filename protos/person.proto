@@ -29,11 +29,17 @@ message TransactionPinRequest {
   string pin = 2;
 }
 
+// Request type for staff by ID
+message StaffRequest {
+  string id = 1;
+}
+
 service PersonService{
   // Q U E R I E S
   rpc Me(TokenRequest) returns (types.Response) {}
   rpc Person(PersonRequest) returns (types.Person) {}
   rpc People(PeopleRequest) returns (types.Persons) {}
+  rpc GetStaffById(StaffRequest) returns (types.Staff) {}
 
   // M U T A T I O N S
   rpc SetTransactionPin(TransactionPinRequest) returns (types.Response) {}
