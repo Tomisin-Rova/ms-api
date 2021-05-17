@@ -98,6 +98,10 @@ func (r *queryResolver) MeStaff(ctx context.Context) (*types.Staff, error) {
 
 	identities := make([]*types.Identity, len(staffDto.Identities))
 	for i, identity := range staffDto.Identities {
+		org := &types.Organisation{
+			ID:   identity.Organisation.Id,
+			Name: &identity.Organisation.Name,
+		}
 		identities[i] = &types.Identity{
 			Active:         &identity.Active,
 			Authentication: &identity.Authentication,
@@ -105,11 +109,19 @@ func (r *queryResolver) MeStaff(ctx context.Context) (*types.Staff, error) {
 				Identifier:   identity.Credentials.Identifier,
 				RefreshToken: &identity.Credentials.RefreshToken,
 			},
-			Organisation: &types.Organisation{
-				ID:   identity.Organisation.Id,
-				Name: &identity.Organisation.Name,
-			},
-			Ts: identity.Ts,
+			Organisation: org,
+			Ts:           identity.Ts,
+		}
+		identities[i].Owner = &types.Person{
+			ID:               identity.Owner.Id,
+			Title:            &identity.Owner.Title,
+			FirstName:        identity.Owner.FirstName,
+			LastName:         identity.Owner.LastName,
+			MiddleName:       &identity.Owner.MiddleName,
+			Dob:              identity.Owner.Dob,
+			Employer:         org,
+			Ts:               identity.Owner.Ts,
+			CountryResidence: &identity.Owner.CountryResidence,
 		}
 	}
 
@@ -866,9 +878,6 @@ type queryResolver struct{ *Resolver }
 //  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
 //    it when you're done.
 //  - You have helper methods in this file. Move them out to keep these resolver files clean.
-const (
-	cddsQueryMaxGroupGouroutines = 20
-)
 const (
 	// Error messages
 	errorGettingPersonMsg = "failed to get person"
