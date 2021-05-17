@@ -38,6 +38,7 @@ gen-mocks:
 	mockery --name=CddServiceClient --recursive
 	mockery --name=AuthServiceClient --recursive
 	mockery --name=AccountServiceClient --recursive
+	mockery --name=ProductServiceClient --recursive
 	mockery --name=Preloader --recursive
 	go generate ./...
 

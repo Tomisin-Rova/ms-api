@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"ms.api/libs/mapper"
+	"ms.api/protos/pb/accountService"
 	"testing"
 	"time"
 
@@ -710,4 +712,49 @@ func TestQueryResolver_Payee(t *testing.T) {
 	assert.Equal(t, mockPayee.Avatar, *payee.Avatar)
 	assert.Equal(t, mockPayee.Accounts[0].Id, payee.Accounts[0].ID)
 	assert.Equal(t, payee.Owner.ID, mockIdentity.ID)
+}
+
+func TestQueryResolver_Product(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockProduct := &protoTypes.Product{
+		Id:             "ID",
+		Identification: "identification",
+		Scheme:         "scheme",
+		Details: &protoTypes.ProductDetails{
+			OverdraftSetting: &protoTypes.OverdraftSetting{
+				AllowTechnicalOverdraft: true,
+				InterestSettings: &protoTypes.InterestSettings{
+					DaysInYear: "123",
+					RateTiers: []*protoTypes.RateTiers{{
+						EndingBalance: 12,
+					}},
+				},
+			},
+		},
+	}
+
+	accountServiceClient := &mocks.AccountServiceClient{}
+
+	ctx := context.WithValue(context.Background(), middlewares.AuthenticatedUserContextKey,
+		models.Claims{
+			PersonId:   "personId",
+			IdentityId: "identityId",
+			DeviceId:   "deviceId",
+		})
+
+	resolverOpts := &ResolverOpts{
+		accountService: accountServiceClient,
+		mapper:         &mapper.GQLMapper{},
+	}
+	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Query()
+	accountServiceClient.On("GetProduct", ctx, &accountService.GetProductRequest{Id: "productId"}).
+		Return(mockProduct, nil)
+	product, err := resolver.Product(ctx, "productId")
+	assert.Nil(t, err)
+	assert.NotNil(t, product)
+	assert.Equal(t, product.ID, mockProduct.Id)
+	assert.Equal(t, *product.Identification, mockProduct.Identification)
+	assert.Equal(t, *product.Details.OverdraftSetting.InterestSettings.DaysInYear, mockProduct.Details.OverdraftSetting.InterestSettings.DaysInYear)
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"ms.api/libs/mapper"
 	"time"
 
 	"ms.api/libs/preloader"
@@ -82,6 +83,7 @@ type ResolverOpts struct {
 	identityService   identityService.IdentityServiceClient
 	DataStore         db.DataStore
 	preloader         preloader.Preloader
+	mapper            mapper.Mapper
 }
 
 type Resolver struct {
@@ -99,6 +101,7 @@ type Resolver struct {
 	logger            *zap.Logger
 	dataStore         db.DataStore
 	preloader         preloader.Preloader
+	mapper            mapper.Mapper
 }
 
 func NewResolver(opt *ResolverOpts, logger *zap.Logger) *Resolver {
@@ -117,11 +120,15 @@ func NewResolver(opt *ResolverOpts, logger *zap.Logger) *Resolver {
 		dataStore:         opt.DataStore,
 		logger:            logger,
 		preloader:         opt.preloader,
+		mapper:            opt.mapper,
 	}
 }
 
 func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) {
-	opts := &ResolverOpts{preloader: preloader.GQLPreloader{}}
+	opts := &ResolverOpts{
+		preloader: preloader.GQLPreloader{},
+		mapper:    &mapper.GQLMapper{},
+	}
 
 	// OnBoarding
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
