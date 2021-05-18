@@ -103,6 +103,7 @@ func (r *queryResolver) MeStaff(ctx context.Context) (*types.Staff, error) {
 			Name: &identity.Organisation.Name,
 		}
 		identities[i] = &types.Identity{
+			ID:             identity.Id,
 			Active:         &identity.Active,
 			Authentication: &identity.Authentication,
 			Credentials: &types.Credentials{
