@@ -563,7 +563,7 @@ func (r *queryResolver) Validation(ctx context.Context, id string) (*types.Valid
 		return nil, err
 	}
 	dataResolver := NewDataResolver(r.dataStore, r.logger)
-	validation := r.validation(validationDto, dataResolver)
+	validation := r.validation(ctx, validationDto, dataResolver)
 
 	return validation, nil
 }

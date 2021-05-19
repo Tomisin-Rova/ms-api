@@ -4,8 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"ms.api/libs/mapper"
 	"time"
+
+	"ms.api/libs/mapper"
 
 	"ms.api/libs/preloader"
 
@@ -540,7 +541,7 @@ func (r *queryResolver) hydrateCDD(cddDto *pb.Cdd) (*types.Cdd, error) {
 
 // TODO: Refactor this function to use it on the hydrateCDD
 // It is possible by introducing a goto statement but arguable, though.
-func (r *queryResolver) validation(validationDto *pb.Validation, dataResolver *DataResolver) *types.Validation {
+func (r *queryResolver) validation(ctx context.Context, validationDto *pb.Validation, dataResolver *DataResolver) *types.Validation {
 	tsAsInt64 := int64(validationDto.Ts)
 	//Build Validation Action
 	actions := make([]*types.Action, len(validationDto.Actions))
@@ -594,10 +595,17 @@ func (r *queryResolver) validation(validationDto *pb.Validation, dataResolver *D
 		if err != nil {
 			r.logger.Error(errorMarshallingScreenValidation, zap.Error(err))
 		}
-		owner, err := dataResolver.ResolvePerson(validationDto.Applicant, nil)
+		pbOwner, err := r.personService.Person(ctx, &personService.PersonRequest{Id: validationDto.Applicant})
+		var owner *types.Person
 		if err != nil {
-			r.logger.Error("resolve person data", zap.Error(err))
+			r.logger.Error(errorGettingPersonMsg, zap.Error(err))
+		} else {
+			owner, err = getPerson(pbOwner)
+			if err != nil {
+				r.logger.Error("resolve person data", zap.Error(err))
+			}
 		}
+
 		tsAsInt64 := check.Timestamp.Unix()
 		createdAtAsString := check.Data.CreatedAt.Format(time.RFC3339)
 		var data = types.Check{
@@ -626,6 +634,12 @@ func (r *queryResolver) validation(validationDto *pb.Validation, dataResolver *D
 		// Add reports
 		for _, reportDto := range check.Data.Reports {
 			tsAsInt64 := reportDto.Timestamp.Unix()
+
+			organization, err := r.dataStore.GetOrganization(reportDto.Organisation)
+			if err != nil {
+				r.logger.Error("get organization data", zap.Error(err))
+				organization = &models.Organization{}
+			}
 			var report = types.Report{
 				ID:     reportDto.ID,
 				Data:   string(reportDto.Data),
@@ -634,6 +648,10 @@ func (r *queryResolver) validation(validationDto *pb.Validation, dataResolver *D
 				Review: &types.ReportReviewStatus{
 					Resubmit: &reportDto.Review.Resubmit,
 					Message:  &reportDto.Review.Message,
+				},
+				Organisation: &types.Organisation{
+					ID:   organization.ID,
+					Name: &organization.Name,
 				},
 			}
 			data.Data.Reports = append(data.Data.Reports, &report)
