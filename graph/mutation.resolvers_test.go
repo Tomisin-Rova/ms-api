@@ -850,19 +850,20 @@ func TestMutationResolver_CreatePayment(t *testing.T) {
 		{
 			name: "Test successful funding of Vault account",
 			arg: &paymentService.CreatePaymentRequest{
+				IdentityId:     "identityId",
+				TransactionPin: "123456789",
 				IdempotencyKey: "1234567",
 				Owner:          "Princewill Chiaka",
-				FundingSource:  "1234567",
 				Charge:         50,
 				Reference:      "Test payment to Vault account",
-				Status:         string(types.StateApproved),
-				Currency:       "GBP",
-				FundingAmount:  100000,
-				Beneficiary: &paymentService.Beneficiary{
+				Beneficiary: &paymentService.BeneficiaryInput{
 					Account:  "1234567",
 					Currency: "GBP",
 					Amount:   100000,
 				},
+				FundingSource: "1234567",
+				Currency:      "GBP",
+				FundingAmount: 100000,
 			},
 			testType: success,
 		},

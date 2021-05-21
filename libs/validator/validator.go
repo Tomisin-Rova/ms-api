@@ -23,6 +23,12 @@ var (
 		"Invalid payee account details",
 		"",
 	)
+	ErrInvalidPaymentDetails = coreError.NewTerror(
+		7012,
+		"InvalidPaymentDetails",
+		"Invalid payment details",
+		"",
+	)
 )
 
 func ValidateTransactionPassword(password string) error {
@@ -72,48 +78,10 @@ func ValidatePayeeAccount(p *types.PayeeAccountInput) (*types.PayeeAccountInfo, 
 }
 
 func ValidatePayment(p *types.PaymentInput) (*types.PaymentInput, error) {
-	payment := &types.PaymentInput{}
-	if p.IdempotencyKey != " " {
-		payment.IdempotencyKey = p.IdempotencyKey
+	if p.Beneficiary == nil ||
+		p.Beneficiary.Amount == nil {
+		return nil, ErrInvalidPaymentDetails
 	}
-	if p.Owner != " " {
-		payment.Owner = p.Owner
-	}
-	if p.Charge != nil {
-		payment.Charge = p.Charge
-	}
-	if p.Currency != nil {
-		payment.Currency = p.Currency
-	}
-	if p.Reference != nil {
-		payment.Reference = p.Reference
-	}
-	if p.Status != nil {
-		payment.Status = p.Status
-	}
-	if p.Image != nil {
-		payment.Image = p.Image
-	}
-	if p.Notes != nil {
-		payment.Notes = p.Notes
-	}
-	if p.Quote != nil {
-		payment.Quote = p.Quote
-	}
-	if p.Tags != nil {
-		payment.Tags = p.Tags
-	}
-	if p.Beneficiary != nil {
-		payment.Beneficiary = p.Beneficiary
-	}
-	if p.FundingSource != " " {
-		payment.FundingSource = p.FundingSource
-	}
-	if p.Currency != nil {
-		payment.Currency = p.Currency
-	}
-	if p.FundingAmount != 0 {
-		payment.FundingAmount = p.FundingAmount
-	}
-	return payment, nil
+
+	return p, nil
 }

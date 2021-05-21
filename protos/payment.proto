@@ -5,30 +5,6 @@ option go_package = "ms.api/protos/pb/paymentService";
 // Import types
 import "types.proto";
 
-service PaymentService {
-  rpc CreatePayee(CreatePayeeRequest) returns (types.Response) {}
-  rpc GetPayees(GetPayeesRequest) returns (types.Payees) {}
-  rpc GetPayee(GetPayeeRequest) returns (types.Payee) {}
-  rpc DeletePayeeAccount(DeletePayeeAccountRequest) returns (types.Response) {}
-  rpc AddPayeeAccount(AddPayeeAccountRequest) returns (types.Response) {}
-  rpc UpdatePayee(UpdatePayeeRequest) returns (types.Response) {}
-  rpc MakeTransfer(TransferRequest) returns (SuccessResponse) {}
-  rpc CreatePayment(CreatePaymentRequest) returns (types.Response) {}
-}
-
-message SuccessResponse {
-  string message = 1;
-}
-
-message TransferRequest {
-  string accountNumber = 1;
-  string beneficiaryAccountNumber = 2;
-  int64 amount = 3;
-  string notes = 4;
-  string personId = 5;
-  string transactionPin = 6;
-}
-
 message CreatePayeeRequest {
   string identityId = 1;
   string transactionPin = 2;
@@ -82,26 +58,37 @@ message UpdatePayeeRequest {
   string payeeId = 4;
   string transactionPin = 5;
 }
+
 message CreatePaymentRequest {
-  string Id = 1;            
-	string IdempotencyKey = 2;
-	string Owner = 3;        
-	Beneficiary Beneficiary = 4;  
-	int64 Charge = 5;       
-	string Reference = 6;      
-	string Status = 7;      
-	string Image = 8;         
-	string Notes =9;         
-	repeated string Tags = 10;         
-	string FundingSource = 11;
-	string Currency = 12;     
-	int64 FundingAmount = 13;
-	string Quote = 14;         
-	int64 Ts = 15;
+  string identity_id = 1;
+  string transaction_pin = 2;
+  string idempotency_key = 3;
+  string owner = 4;
+  int64 charge = 5;
+  string reference = 6;
+  string state = 7;
+  string image = 8;
+  string notes = 9;
+  string quote = 10;
+  repeated string tags = 11;
+  BeneficiaryInput beneficiary = 12;
+  string funding_source = 13;
+  string currency = 14;
+  int64 funding_amount = 15;
 }
 
-message Beneficiary{
-  string Account = 1;
-  string Currency =2;
-  int64 Amount =3;
+message BeneficiaryInput {
+  string account = 1;
+  string currency = 2;
+  int64  amount = 3;
+}
+
+service PaymentService {
+  rpc CreatePayee(CreatePayeeRequest) returns (types.Response) {}
+  rpc GetPayees(GetPayeesRequest) returns (types.Payees) {}
+  rpc GetPayee(GetPayeeRequest) returns (types.Payee) {}
+  rpc DeletePayeeAccount(DeletePayeeAccountRequest) returns (types.Response) {}
+  rpc AddPayeeAccount(AddPayeeAccountRequest) returns (types.Response) {}
+  rpc UpdatePayee(UpdatePayeeRequest) returns (types.Response) {}
+  rpc CreatePayment(CreatePaymentRequest) returns (types.Response) {}
 }

@@ -732,38 +732,55 @@ func (r *mutationResolver) ResubmitReports(ctx context.Context, reports []*types
 	}, nil
 }
 
-func (r *mutationResolver) CreatePayment(ctx context.Context, payment types.PaymentInput) (*types.Response, error) {
-	_, err := middlewares.GetAuthenticatedUser(ctx)
+func (r *mutationResolver) CreatePayment(ctx context.Context, payment types.PaymentInput, password string) (*types.Response, error) {
+	claims, err := middlewares.GetAuthenticatedUser(ctx)
 	if err != nil {
 		return nil, ErrUnAuthenticated
 	}
 
 	p, err := validator.ValidatePayment(&payment)
 	if err != nil {
-		r.logger.Error("validating payment details", zap.Error(err))
+		r.logger.Error("validate payment request details", zap.Error(err))
 		return nil, err
 	}
 
-	response, err := r.paymentService.CreatePayment(ctx, &paymentService.CreatePaymentRequest{
+	// Build request
+	request := &paymentService.CreatePaymentRequest{
+		IdentityId:     claims.IdentityId,
+		TransactionPin: password,
 		IdempotencyKey: p.IdempotencyKey,
 		Owner:          p.Owner,
-		Beneficiary: &paymentService.Beneficiary{
-			Account:  p.Beneficiary.Account,
-			Currency: *p.Beneficiary.Currency,
-			Amount:   *p.Beneficiary.Amount,
+		Tags:           p.Tags,
+		Beneficiary: &paymentService.BeneficiaryInput{
+			Account: p.Beneficiary.Account,
+			Amount:  *p.Beneficiary.Amount,
 		},
-		Charge:        *p.Charge,
-		Reference:     *p.Reference,
-		Status:        string(*payment.Status),
-		Image:         *p.Image,
-		Notes:         *p.Notes,
-		Tags:          p.Tags,
 		FundingSource: p.FundingSource,
-		Currency:      *p.Currency,
 		FundingAmount: p.FundingAmount,
-		Quote:         *p.Quote,
-	})
-
+	}
+	if p.Charge != nil {
+		request.Charge = *p.Charge
+	}
+	if p.Reference != nil {
+		request.Reference = *p.Reference
+	}
+	if p.Image != nil {
+		request.Image = *p.Image
+	}
+	if p.Notes != nil {
+		request.Notes = *p.Notes
+	}
+	if p.Quote != nil {
+		request.Quote = *p.Quote
+	}
+	if p.Beneficiary.Currency != nil {
+		request.Beneficiary.Currency = *p.Beneficiary.Currency
+	}
+	if p.Currency != nil {
+		request.Currency = *p.Currency
+	}
+	// Make call
+	response, err := r.paymentService.CreatePayment(ctx, request)
 	if err != nil {
 		r.logger.Error("error calling paymentService.CreatePayment()", zap.Error(err))
 		return nil, err
