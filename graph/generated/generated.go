@@ -625,7 +625,7 @@ type ComplexityRoot struct {
 		CreateAccount             func(childComplexity int, product types.ProductInput) int
 		CreateApplication         func(childComplexity int) int
 		CreatePayee               func(childComplexity int, payee types.PayeeInput, password string) int
-		CreatePayment             func(childComplexity int, payment types.PaymentInput) int
+		CreatePayment             func(childComplexity int, payment types.PaymentInput, password string) int
 		CreatePhone               func(childComplexity int, phone string, device types.DeviceInput) int
 		CreateTransactionPassword func(childComplexity int, password string) int
 		DeletePayeeAccount        func(childComplexity int, payee string, payeeAccount string) int
@@ -1263,7 +1263,7 @@ type MutationResolver interface {
 	DeletePayeeAccount(ctx context.Context, payee string, payeeAccount string) (*types.Response, error)
 	Resubmit(ctx context.Context, reports []*types.ReportInput, message *string) (*types.Response, error)
 	ResubmitReports(ctx context.Context, reports []*types.ReportInput) (*types.Response, error)
-	CreatePayment(ctx context.Context, payment types.PaymentInput) (*types.Response, error)
+	CreatePayment(ctx context.Context, payment types.PaymentInput, password string) (*types.Response, error)
 	ValidateBvn(ctx context.Context, bvn string, phone string) (*types.Response, error)
 }
 type QueryResolver interface {
@@ -4114,7 +4114,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreatePayment(childComplexity, args["payment"].(types.PaymentInput)), true
+		return e.complexity.Mutation.CreatePayment(childComplexity, args["payment"].(types.PaymentInput), args["password"].(string)), true
 
 	case "Mutation.createPhone":
 		if e.complexity.Mutation.CreatePhone == nil {
@@ -7493,7 +7493,7 @@ var sources = []*ast.Source{
   # Submit the ids of the reports that has been resubmitted to Onfido
   resubmitReports(reports: [ReportInput!]): Response!
   # create new payment instruction
-  createPayment(payment: PaymentInput!): Response!
+  createPayment(payment: PaymentInput!, password: String!): Response!
   # validate the customer's BVN
   validateBVN(bvn: String!, phone: String!): Response!
 }
@@ -10587,6 +10587,15 @@ func (ec *executionContext) field_Mutation_createPayment_args(ctx context.Contex
 		}
 	}
 	args["payment"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["password"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("password"))
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["password"] = arg1
 	return args, nil
 }
 
@@ -26583,7 +26592,7 @@ func (ec *executionContext) _Mutation_createPayment(ctx context.Context, field g
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreatePayment(rctx, args["payment"].(types.PaymentInput))
+		return ec.resolvers.Mutation().CreatePayment(rctx, args["payment"].(types.PaymentInput), args["password"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

@@ -51,7 +51,7 @@ type Mutation {
   # Submit the ids of the reports that has been resubmitted to Onfido
   resubmitReports(reports: [ReportInput!]): Response!
   # create new payment instruction
-  createPayment(payment: PaymentInput!): Response!
+  createPayment(payment: PaymentInput!, password: String!): Response!
   # validate the customer's BVN
   validateBVN(bvn: String!, phone: String!): Response!
 }
