@@ -632,7 +632,9 @@ func (r *queryResolver) validation(ctx context.Context, validationDto *pb.Valida
 			},
 		}
 		// Add reports
-		for _, reportDto := range check.Data.Reports {
+		reports := make([]*types.Report, len(check.Data.Reports))
+		for i := range check.Data.Reports {
+			reportDto := check.Data.Reports[i]
 			tsAsInt64 := reportDto.Timestamp.Unix()
 
 			organization, err := r.dataStore.GetOrganization(reportDto.Organisation)
@@ -654,8 +656,9 @@ func (r *queryResolver) validation(ctx context.Context, validationDto *pb.Valida
 					Name: &organization.Name,
 				},
 			}
-			data.Data.Reports = append(data.Data.Reports, &report)
+			reports[i] = &report
 		}
+		data.Data.Reports = reports
 		// TODO: Tags connection
 
 		// Add data to validation
