@@ -37,13 +37,6 @@ import (
 // It serves as dependency injection for your app, add any dependencies you require here.
 type OnboardStatus string
 
-// CddChunk store the data to fill cdds slice
-// on the right position
-type CddChunk struct {
-	pos  int
-	cdds []*types.Cdd
-}
-
 const (
 	errorMarshallingScreenValidation               = "marshall screen validation"
 	Onboarded                        OnboardStatus = "ONBOARDED"
@@ -214,7 +207,7 @@ func dialRPC(ctx context.Context, address string) (*grpc.ClientConn, error) {
 	return connection, nil
 }
 
-func getPerson(from *pb.Person) (*types.Person, error) {
+func getPerson(from *pb.Person) *types.Person {
 	personStatus := types.PersonStatus(from.Status)
 	var person = types.Person{
 		ID:               from.Id,
@@ -297,7 +290,7 @@ func getPerson(from *pb.Person) (*types.Person, error) {
 	}
 	person.Identities = identities
 
-	return &person, nil
+	return &person
 }
 
 func (r *Resolver) hydrateAccount(from *accountService.GetAccountResponse) *types.Account {
@@ -422,10 +415,7 @@ func (r *queryResolver) hydrateCDD(cddDto *pb.Cdd) (*types.Cdd, error) {
 		actions := make([]*types.Action, len(validationDto.Actions))
 
 		for index, action := range validationDto.Actions {
-			person, err := getPerson(action.Reporter)
-			if err != nil {
-				return nil, err
-			}
+			person := getPerson(action.Reporter)
 			actions[index] = &types.Action{
 				ID:       action.Id,
 				Reporter: person,
@@ -547,10 +537,7 @@ func (r *queryResolver) validation(ctx context.Context, validationDto *pb.Valida
 	actions := make([]*types.Action, len(validationDto.Actions))
 
 	for index, action := range validationDto.Actions {
-		person, err := getPerson(action.Reporter)
-		if err != nil {
-			r.logger.Error("get person data", zap.Error(err))
-		}
+		person := getPerson(action.Reporter)
 		actions[index] = &types.Action{
 			ID:       action.Id,
 			Reporter: person,
@@ -600,10 +587,7 @@ func (r *queryResolver) validation(ctx context.Context, validationDto *pb.Valida
 		if err != nil {
 			r.logger.Error(errorGettingPersonMsg, zap.Error(err))
 		} else {
-			owner, err = getPerson(pbOwner)
-			if err != nil {
-				r.logger.Error("resolve person data", zap.Error(err))
-			}
+			owner = getPerson(pbOwner)
 		}
 
 		tsAsInt64 := check.Timestamp.Unix()
@@ -689,10 +673,7 @@ func (r *queryResolver) validation(ctx context.Context, validationDto *pb.Valida
 }
 
 func personWithCdd(from *pb.Person) (*types.Person, error) {
-	person, err := getPerson(from)
-	if err != nil {
-		return nil, err
-	}
+	person := getPerson(from)
 	if from.Cdd != nil {
 		ts := int64(from.Cdd.Ts)
 		person.Cdd = &types.Cdd{
@@ -701,46 +682,6 @@ func personWithCdd(from *pb.Person) (*types.Person, error) {
 		}
 	}
 	return person, nil
-}
-
-func (r *queryResolver) processCddChunk(ctx context.Context, cdds []*pb.Cdd, dataResolver *DataResolver, dataConverter *DataConverter) ([]*types.Cdd, error) {
-	cddsValues := make([]*types.Cdd, len(cdds))
-	for i, next := range cdds {
-		validations := make([]*types.Validation, 0)
-		for _, validation := range next.Validations {
-			modelValidation, err := dataConverter.ProtoValidationToModel(validation)
-			if err != nil {
-				r.logger.With(zap.Error(err)).Error("cannot convert validation")
-				continue
-			}
-			nextValidation, err := dataResolver.ResolveValidation(*modelValidation)
-			if err != nil {
-				r.logger.With(zap.Error(err)).Error("cannot resolve validation data")
-				continue
-			}
-			validations = append(validations, nextValidation)
-		}
-
-		owner, err := dataResolver.ResolvePerson(next.Owner, nil)
-		if err != nil {
-			return nil, err
-		}
-		cddValue := &types.Cdd{
-			ID:          next.Id,
-			Owner:       owner,
-			Watchlist:   &next.Watchlist,
-			Details:     &next.Details,
-			Status:      types.State(next.Status),
-			Onboard:     &next.Onboard,
-			Version:     Int64(int64(next.Version)),
-			Validations: validations,
-			Active:      &next.Active,
-			Ts:          Int64(int64(next.Ts)),
-		}
-
-		cddsValues[i] = cddValue
-	}
-	return cddsValues, nil
 }
 
 // TODO: Converts from cursor-based pagination to number based pagination

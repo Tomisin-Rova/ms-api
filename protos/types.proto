@@ -48,6 +48,8 @@ message Address {
   string state = 6;
   string postcode = 7;
   string country = 8;
+  string address_type = 10;
+  repeated double coordinate = 11;
 }
 
 // Device type
@@ -72,7 +74,7 @@ message PhoneNumber {
 // Cdd type
 message Cdd {
   string id = 1;
-  string owner = 2;
+  Person owner = 2;
   bool watchlist = 3;
   string details = 4;
   string status = 5;
