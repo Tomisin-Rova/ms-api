@@ -52,19 +52,19 @@ type AcceptanceEdge struct {
 }
 
 type Account struct {
-	ID             *string         `json:"id"`
-	Owner          *string         `json:"owner"`
-	Product        *string         `json:"product"`
-	Name           *string         `json:"name"`
-	Active         *bool           `json:"active"`
-	Status         *string         `json:"status"`
-	Image          *string         `json:"image"`
-	Organisation   *string         `json:"organisation"`
-	Ts             *int64          `json:"ts"`
-	Tags           []*string       `json:"tags"`
-	Transactions   []*Transaction  `json:"transactions"`
-	AccountData    *AccountData    `json:"account_data"`
-	AccountDetails *AccountDetails `json:"account_details"`
+	ID             string                 `json:"id"`
+	Owner          Owner                  `json:"owner"`
+	Product        *Product               `json:"product"`
+	Name           *string                `json:"name"`
+	Active         *bool                  `json:"active"`
+	Status         *string                `json:"status"`
+	Image          *string                `json:"image"`
+	Organisation   *Organisation          `json:"organisation"`
+	Ts             *int64                 `json:"ts"`
+	Tags           *TagConnection         `json:"tags"`
+	Transactions   *TransactionConnection `json:"transactions"`
+	AccountData    *AccountData           `json:"account_data"`
+	AccountDetails *AccountDetails        `json:"account_details"`
 }
 
 type AccountBalances struct {
@@ -79,41 +79,41 @@ type AccountConnection struct {
 }
 
 type AccountData struct {
-	AccountHolderKey                *string                    `json:"accountHolderKey"`
-	AccountHolderType               *string                    `json:"accountHolderType"`
-	AccountState                    *string                    `json:"accountState"`
-	AccountType                     *string                    `json:"accountType"`
-	ActivationDate                  *string                    `json:"activationDate"`
-	ApprovedDate                    *string                    `json:"approvedDate"`
-	AssignedBranchKey               *string                    `json:"assignedBranchKey"`
-	AssignedCentreKey               *string                    `json:"assignedCentreKey"`
-	AssignedUserKey                 *string                    `json:"assignedUserKey"`
-	ClosedDate                      *string                    `json:"closedDate"`
-	CreationDate                    *string                    `json:"creationDate"`
-	CreditArrangementKey            *string                    `json:"creditArrangementKey"`
-	CurrencyCode                    *string                    `json:"currencyCode"`
-	EncodedKey                      *string                    `json:"encodedKey"`
-	ID                              *string                    `json:"id"`
-	LastAccountAppraisalDate        *string                    `json:"lastAccountAppraisalDate"`
-	LastInterestCalculationDate     *string                    `json:"lastInterestCalculationDate"`
-	LastInterestStoredDate          *string                    `json:"lastInterestStoredDate"`
-	LastModifiedDate                *string                    `json:"lastModifiedDate"`
-	LastOverdraftInterestReviewDate *string                    `json:"lastOverdraftInterestReviewDate"`
-	LastSetToArrearsDate            *string                    `json:"lastSetToArrearsDate"`
-	LockedDate                      *string                    `json:"lockedDate"`
-	MaturityDate                    *string                    `json:"maturityDate"`
-	MigrationEventKey               *string                    `json:"migrationEventKey"`
+	ID                              string                     `json:"id"`
+	AccountHolderKey                *string                    `json:"account_holder_key"`
+	AccountHolderType               *string                    `json:"account_holder_type"`
+	AccountState                    *string                    `json:"account_state"`
+	AccountType                     *string                    `json:"account_type"`
+	ActivationDate                  *string                    `json:"activation_date"`
+	ApprovedDate                    *string                    `json:"approved_date"`
+	AssignedBranchKey               *string                    `json:"assigned_branch_key"`
+	AssignedCentreKey               *string                    `json:"assigned_centre_key"`
+	AssignedUserKey                 *string                    `json:"assigned_user_key"`
+	ClosedDate                      *string                    `json:"closed_date"`
+	CreationDate                    *string                    `json:"creation_date"`
+	CreditArrangementKey            *string                    `json:"credit_arrangement_key"`
+	CurrencyCode                    *string                    `json:"currency_code"`
+	EncodedKey                      *string                    `json:"encoded_key"`
+	LastAccountAppraisalDate        *string                    `json:"last_account_appraisal_date"`
+	LastInterestCalculationDate     *string                    `json:"last_interest_calculation_date"`
+	LastInterestStoredDate          *string                    `json:"last_interest_stored_date"`
+	LastModifiedDate                *string                    `json:"last_modified_date"`
+	LastOverdraftInterestReviewDate *string                    `json:"last_overdraft_interest_review_date"`
+	LastSetToArrearsDate            *string                    `json:"last_set_to_arrears_date"`
+	LockedDate                      *string                    `json:"locked_date"`
+	MaturityDate                    *string                    `json:"maturity_date"`
+	MigrationEventKey               *string                    `json:"migration_event_key"`
 	Name                            *string                    `json:"name"`
 	Notes                           *string                    `json:"notes"`
-	ProductTypeKey                  *string                    `json:"productTypeKey"`
-	WithholdingTaxSourceKey         *string                    `json:"withholdingTaxSourceKey"`
-	OverdraftSettings               *OverdraftSettings         `json:"overdraftSettings"`
-	OverdraftInterestSettings       *OverdraftInterestSettings `json:"overdraftInterestSettings"`
-	LinkedSettlementAccountKeys     []*string                  `json:"linkedSettlementAccountKeys"`
-	InternalControls                *InternalControls          `json:"internalControls"`
-	InterestSettings                *InterestSettings          `json:"interestSettings"`
+	ProductTypeKey                  *string                    `json:"product_type_key"`
+	WithholdingTaxSourceKey         *string                    `json:"withholding_tax_source_key"`
+	OverdraftSettings               *OverdraftSettings         `json:"overdraft_settings"`
+	OverdraftInterestSettings       *OverdraftInterestSettings `json:"overdraft_interest_settings"`
+	LinkedSettlementAccountKeys     []*string                  `json:"linked_settlement_account_keys"`
+	InternalControls                *InternalControls          `json:"internal_controls"`
+	InterestSettings                *InterestSettings          `json:"interest_settings"`
 	Balances                        *Balances                  `json:"balances"`
-	AccruedAmounts                  *AccruedAmounts            `json:"accruedAmounts"`
+	AccruedAmounts                  *AccruedAmounts            `json:"accrued_amounts"`
 }
 
 type AccountDetails struct {
@@ -131,6 +131,10 @@ type AccountEdge struct {
 	Cursor string   `json:"cursor"`
 }
 
+type AccountInput struct {
+	Name *string `json:"name"`
+}
+
 type AccountingRules struct {
 	EncodedKey        *string `json:"encoded_key"`
 	FinancialResource *string `json:"financial_resource"`
@@ -138,10 +142,10 @@ type AccountingRules struct {
 }
 
 type AccruedAmounts struct {
-	InterestAccrued                   *int64 `json:"interestAccrued"`
-	NegativeInterestAccrued           *int64 `json:"negativeInterestAccrued"`
-	OverdraftInterestAccrued          *int64 `json:"overdraftInterestAccrued"`
-	TechnicalOverdraftInterestAccrued *int64 `json:"technicalOverdraftInterestAccrued"`
+	InterestAccrued                   *int64 `json:"interest_accrued"`
+	NegativeInterestAccrued           *int64 `json:"negative_interest_accrued"`
+	OverdraftInterestAccrued          *int64 `json:"overdraft_interest_accrued"`
+	TechnicalOverdraftInterestAccrued *int64 `json:"technical_overdraft_interest_accrued"`
 }
 
 type Action struct {
@@ -257,17 +261,17 @@ type AuthTokens struct {
 }
 
 type Balances struct {
-	AvailableBalance              *int64 `json:"availableBalance"`
-	BlockedBalance                *int64 `json:"blockedBalance"`
-	FeesDue                       *int64 `json:"feesDue"`
-	ForwardAvailableBalance       *int64 `json:"forwardAvailableBalance"`
-	HoldBalance                   *int64 `json:"holdBalance"`
-	LockedBalance                 *int64 `json:"lockedBalance"`
-	OverdraftAmount               *int64 `json:"overdraftAmount"`
-	OverdraftInterestDue          *int64 `json:"overdraftInterestDue"`
-	TechnicalOverdraftAmount      *int64 `json:"technicalOverdraftAmount"`
-	TechnicalOverdraftInterestDue *int64 `json:"technicalOverdraftInterestDue"`
-	TotalBalance                  *int64 `json:"totalBalance"`
+	AvailableBalance              *int64 `json:"available_balance"`
+	BlockedBalance                *int64 `json:"blocked_balance"`
+	FeesDue                       *int64 `json:"fees_due"`
+	ForwardAvailableBalance       *int64 `json:"forward_available_balance"`
+	HoldBalance                   *int64 `json:"hold_balance"`
+	LockedBalance                 *int64 `json:"locked_balance"`
+	OverdraftAmount               *int64 `json:"overdraft_amount"`
+	OverdraftInterestDue          *int64 `json:"overdraft_interest_due"`
+	TechnicalOverdraftAmount      *int64 `json:"technical_overdraft_amount"`
+	TechnicalOverdraftInterestDue *int64 `json:"technical_overdraft_interest_due"`
+	TotalBalance                  *int64 `json:"total_balance"`
 }
 
 type BeneficiaryInput struct {
@@ -579,8 +583,8 @@ type InterestPaymentDates struct {
 }
 
 type InterestPaymentSettings struct {
-	InterestPaymentPoint *string                 `json:"interestPaymentPoint"`
-	InterestPaymentDates []*InterestPaymentDates `json:"interestPaymentDates"`
+	InterestPaymentPoint *string                 `json:"interest_payment_point"`
+	InterestPaymentDates []*InterestPaymentDates `json:"interest_payment_dates"`
 }
 
 type InterestRate struct {
@@ -590,23 +594,23 @@ type InterestRate struct {
 }
 
 type InterestRateSettings struct {
-	EncodedKey                   *string              `json:"encodedKey"`
-	InterestChargeFrequency      *string              `json:"interestChargeFrequency"`
-	InterestChargeFrequencyCount *int64               `json:"interestChargeFrequencyCount"`
-	InterestRate                 *int64               `json:"interestRate"`
-	InterestRateReviewCount      *int64               `json:"interestRateReviewCount"`
-	InterestRateReviewUnit       *string              `json:"interestRateReviewUnit"`
-	InterestRateSource           *string              `json:"interestRateSource"`
-	InterestRateTerms            *string              `json:"interestRateTerms"`
-	InterestSpread               *int64               `json:"interestSpread"`
-	InterestRateTiers            []*InterestRateTiers `json:"interestRateTiers"`
+	EncodedKey                   *string              `json:"encoded_key"`
+	InterestChargeFrequency      *string              `json:"interest_charge_frequency"`
+	InterestChargeFrequencyCount *int64               `json:"interest_charge_frequency_count"`
+	InterestRate                 *int64               `json:"interest_rate"`
+	InterestRateReviewCount      *int64               `json:"interest_rate_review_count"`
+	InterestRateReviewUnit       *string              `json:"interest_rate_review_unit"`
+	InterestRateSource           *string              `json:"interest_rate_source"`
+	InterestRateTerms            *string              `json:"interest_rate_terms"`
+	InterestSpread               *int64               `json:"interest_spread"`
+	InterestRateTiers            []*InterestRateTiers `json:"interest_rate_tiers"`
 }
 
 type InterestRateTiers struct {
-	EncodedKey    *string `json:"encodedKey"`
-	EndingBalance *int64  `json:"endingBalance"`
-	EndingDay     *int64  `json:"endingDay"`
-	InterestRate  *int64  `json:"interestRate"`
+	EncodedKey    *string `json:"encoded_key"`
+	EndingBalance *int64  `json:"ending_balance"`
+	EndingDay     *int64  `json:"ending_day"`
+	InterestRate  *int64  `json:"interest_rate"`
 }
 
 type InterestSettings struct {
@@ -626,10 +630,10 @@ type InterestSettings struct {
 }
 
 type InternalControls struct {
-	MaxDepositBalance        *int64 `json:"maxDepositBalance"`
-	MaxWithdrawalAmount      *int64 `json:"maxWithdrawalAmount"`
-	RecommendedDepositAmount *int64 `json:"recommendedDepositAmount"`
-	TargetAmount             *int64 `json:"targetAmount"`
+	MaxDepositBalance        *int64 `json:"max_deposit_balance"`
+	MaxWithdrawalAmount      *int64 `json:"max_withdrawal_amount"`
+	RecommendedDepositAmount *int64 `json:"recommended_deposit_amount"`
+	TargetAmount             *int64 `json:"target_amount"`
 }
 
 type Location struct {
@@ -740,7 +744,7 @@ type OrganisationEdge struct {
 }
 
 type OverdraftInterestSettings struct {
-	InterestRateSettings *InterestRateSettings `json:"interestRateSettings"`
+	InterestRateSettings *InterestRateSettings `json:"interest_rate_settings"`
 }
 
 type OverdraftSetting struct {
@@ -751,9 +755,9 @@ type OverdraftSetting struct {
 }
 
 type OverdraftSettings struct {
-	AllowOverdraft      *bool   `json:"allowOverdraft"`
-	OverdraftExpiryDate *string `json:"overdraftExpiryDate"`
-	OverdraftLimit      *int64  `json:"overdraftLimit"`
+	AllowOverdraft      *bool   `json:"allow_overdraft"`
+	OverdraftExpiryDate *string `json:"overdraft_expiry_date"`
+	OverdraftLimit      *int64  `json:"overdraft_limit"`
 }
 
 type PageInfo struct {
@@ -1183,10 +1187,10 @@ type TaskEdge struct {
 }
 
 type Transaction struct {
-	ID         *string `json:"id"`
-	Ref        *string `json:"ref"`
-	Ts         *int64  `json:"ts"`
-	Encodedkey *string `json:"encodedkey"`
+	ID              string           `json:"id"`
+	Account         *Account         `json:"account"`
+	Ts              *int64           `json:"ts"`
+	TransactionData *TransactionData `json:"transaction_data"`
 }
 
 type TransactionConnection struct {
@@ -1197,28 +1201,36 @@ type TransactionConnection struct {
 }
 
 type TransactionData struct {
-	ID               string           `json:"id"`
-	Amount           *int64           `json:"amount"`
-	BookingDate      *string          `json:"booking_date"`
-	CreationDate     *string          `json:"creation_date"`
-	CurrencyCode     *string          `json:"currency_code"`
-	EncodedKey       *string          `json:"encoded_key"`
-	ExternalID       *string          `json:"external_id"`
-	Notes            *string          `json:"notes"`
-	ParentAccountKey *string          `json:"parent_account_key"`
-	PaymentOrderID   *string          `json:"payment_order_id"`
-	Type             *string          `json:"type"`
-	UserKey          *string          `json:"user_key"`
-	ValueDate        *string          `json:"value_date"`
-	TransferDetails  *TransferDetails `json:"transfer_details"`
-	Fees             []*string        `json:"fees"`
-	AffectedAmounts  *AffectedAmounts `json:"affected_amounts"`
-	AccountBalances  *AccountBalances `json:"account_balances"`
+	ID               string            `json:"id"`
+	Amount           *int64            `json:"amount"`
+	BookingDate      *string           `json:"booking_date"`
+	CreationDate     *string           `json:"creation_date"`
+	CurrencyCode     *string           `json:"currency_code"`
+	EncodedKey       *string           `json:"encoded_key"`
+	ExternalID       *string           `json:"external_id"`
+	Notes            *string           `json:"notes"`
+	ParentAccountKey *string           `json:"parent_account_key"`
+	PaymentOrderID   *string           `json:"payment_order_id"`
+	Type             *string           `json:"type"`
+	UserKey          *string           `json:"user_key"`
+	ValueDate        *string           `json:"value_date"`
+	TransferDetails  *TransferDetails  `json:"transfer_details"`
+	Fees             []*TransactionFee `json:"fees"`
+	AffectedAmounts  *AffectedAmounts  `json:"affected_amounts"`
+	AccountBalances  *AccountBalances  `json:"account_balances"`
 }
 
 type TransactionEdge struct {
 	Node   *Transaction `json:"node"`
 	Cursor string       `json:"cursor"`
+}
+
+type TransactionFee struct {
+	Amount           *int64  `json:"Amount"`
+	Name             *string `json:"Name"`
+	PredefinedFeeKey *string `json:"PredefinedFeeKey"`
+	TaxAmount        *int64  `json:"TaxAmount"`
+	Trigger          *string `json:"Trigger"`
 }
 
 type TransferDetails struct {

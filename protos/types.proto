@@ -48,6 +48,8 @@ message Address {
   string state = 6;
   string postcode = 7;
   string country = 8;
+  string address_type = 10;
+  repeated double coordinate = 11;
 }
 
 // Device type
@@ -72,7 +74,7 @@ message PhoneNumber {
 // Cdd type
 message Cdd {
   string id = 1;
-  string owner = 2;
+  Person owner = 2;
   bool watchlist = 3;
   string details = 4;
   string status = 5;
@@ -192,24 +194,6 @@ message payeeAccount {
   string bankCode = 8;
   string routingNumber = 9;
   string phoneNumber = 10;
-}
-
-// Account type
-message Account {
-  string accountName = 1;
-  string accountNumber = 2;
-  string sortCode = 3;
-  string bankCode = 4;
-  string routingNumber = 5;
-  string BIC = 6;
-  string IBAN = 7;
-  string country = 8;
-  string bankName = 9;
-  string routingType = 10;
-  string shortCode = 11;
-  string balance = 12;
-  string currencyCode = 13;
-  string currencySymbol = 14;
 }
 
 // Identity type
@@ -344,43 +328,65 @@ message ProductInput {
   string scheme = 3;
 }
 
+// Roava Account type
+message Account {
+  string id = 1;
+  string owner = 2;
+  string product = 3;
+  string name = 4;
+  types.AccountData accountData = 5;
+  repeated types.Transaction transactions = 6;
+  bool active = 7;
+  string status = 8;
+  repeated Tag tags = 9;
+  string image = 10;
+  string organisation = 11;
+  int32 ts = 12;
+  types.AccountDetails AccountDetails =13;
+}
+
+message Tag {
+  string id = 1;
+  string name = 2;
+}
+
 // AccountData type
 message AccountData {
-  string accountHolderKey = 1;
-  string accountHolderType = 2;
-  string accountState = 3;
-  string accountType = 4;
-  AccruedAmounts accruedAmounts = 5;
-  int32 activationDate = 6;
+  string accountHolderKey =1;
+  string accountHolderType =2;
+  string accountState =3;
+  string accountType =4;
+  AccruedAmounts accruedAmounts =5;
+  int32 activationDate =6;
   int32 approvedDate = 7;
-  string assignedBranchKey = 8;
-  string assignedCentreKey = 9;
-  string assignedUserKey = 10;
+  string assignedBranchKey =8;
+  string assignedCentreKey =9;
+  string assignedUserKey =10;
   Balances balances = 11;
   string closedDate = 12;
   string creationDate = 13;
-  string creditArrangementKey = 14;
-  string currencyCode = 15;
-  string encodedKey = 16;
-  string id = 17;
-  InterestSettings interestSettings = 18;
-  InternalControls internalControls = 19;
-  string lastAccountAppraisalDate = 20;
-  string lastInterestCalculationDate = 21;
+  string creditArrangementKey =14;
+  string currencyCode =15;
+  string encodedKey =16;
+  string id =17;
+  InterestSettings interestSettings =18;
+  InternalControls internalControls =19;
+  string lastAccountAppraisalDate =20;
+  string lastInterestCalculationDate =21;
   string lastInterestStoredDate = 22;
-  string lastModifiedDate = 23;
+  string lastModifiedDate =23;
   string lastOverdraftInterestReviewDate = 24;
   string lastSetToArrearsDate = 25;
-  repeated string linkedSettlementAccountKeys = 26;
+  repeated string linkedSettlementAccountKeys =26;
   string lockedDate = 27;
-  string maturityDate = 28;
+  string maturityDate =28;
   string migrationEventKey = 29;
-  string name = 30;
-  string notes = 31;
-  OverdraftInterestSettings overdraftInterestSettings = 32;
+  string name =30;
+  string notes =31;
+  OverdraftInterestSettings overdraftInterestSettings =32;
   OverdraftSettings overdraftSettings = 33;
-  string productTypeKey = 34;
-  string withholdingTaxSourceKey = 35;
+  string productTypeKey =34;
+  string withholdingTaxSourceKey =35;
 }
 
 // AccountDetails type
@@ -620,71 +626,62 @@ message AccountingRules {
 // Transaction type
 message Transaction {
   string id = 1;
-  string account = 2;
-  int32 ts = 3;
-  TransactionData transactionData = 4;
+  Account account =2;
+  int32 ts =3;
+  TransactionData transactionData =4;
 }
 
 // TransactionData type
 message TransactionData {
-  AccountBalances accountBalances = 1;
-  AffectedAmounts affectedAmounts = 2;
-  int32 amount = 3;
-  string bookingDate = 4;
-  string creationDate = 5;
-  string currencyCode = 6;
-  string encodedKey = 7;
-  string externalID = 8;
-  string fees = 9;
-  string id = 10;
-  string notes = 11;
-  string parentAccountKey = 12;
-  string paymentOrderID = 13;
-  Taxes taxes = 14;
-  Terms terms = 15;
-  TransactionDetails transactionDetails = 16;
-  TransferDetails transferDetails = 17;
-  string type = 18;
-  string userKey = 19;
-  string valueDate = 20;
+  string id = 1;
+  int32 amount = 2;
+  string bookingDate = 3;
+  string creationDate = 4;
+  string currencyCode = 5;
+  string encodedKey = 6;
+  string externalID = 7;
+  string notes = 8;
+  string parentAccountKey = 9;
+  string paymentOrderID = 10;
+  string type = 11;
+  string userKey = 12;
+  string valueDate    = 13;
+  TransferDetails transferDetails= 14;
+  repeated TransactionFee fees = 15;
+  AffectedAmounts affectedAmounts= 16;
+  AccountBalances accountBalances = 17;
 }
 
 // AccountBalances type
 message AccountBalances  {
-  int32 totalBalance = 1;
+  float totalBalance =1;
 }
 
 // AffectedAmounts type
 message AffectedAmounts {
-  int32 feesAmount = 1;
-  int32 fractionAmount = 2;
-  int32 fundsAmount = 3;
-  int32 interestAmount = 4;
-  int32 overdraftAmount = 5;
-  int32 overdraftFeesAmount = 6;
-  int32 overdraftInterestAmount = 7;
-  int32 technicalOverdraftAmount = 8;
-  int32 technicalOverdraftInterestAmount = 9;
-}
-
-// Taxes type
-message Taxes {
+  float feesAmount =1;
+  float fractionAmount  =2;
+  float fundsAmount  =3;
+  float interestAmount =4;
+  float overdraftAmount =5;
+  float overdraftFeesAmount  =6;
+  float overdraftInterestAmount  =7;
+  float technicalOverdraftAmount =8;
+  float technicalOverdraftInterestAmount  =9;
 }
 
 // TransferDetails type
 message TransferDetails {
-  string linkedLoanTransactionKey = 1;
+  string linkedLoanTransactionKey =1;
 }
 
-// TransactionDetails type
-message TransactionDetails {
-}
-
-// Terms type
-message Terms {
-  google.protobuf.Any interestSettings = 1;
-  google.protobuf.Any overdraftInterestSettings = 2;
-  google.protobuf.Any overdraftSettings = 3;
+// TransactionFee type
+message TransactionFee {
+  int32 Amount = 1;
+  string Name = 2;
+  string PredefinedFeeKey = 3;
+  int32 TaxAmount = 4;
+  string Trigger = 5;
 }
 
 

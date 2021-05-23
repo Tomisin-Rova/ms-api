@@ -5,6 +5,8 @@
 //go:generate genny -in=connection_template.go -out=gen_tag_lookup.go gen "Name=TagLookup NodeType=*types.Tag EdgeType=types.TagEdge ConnectionType=types.TagConnection"
 //go:generate genny -in=connection_template.go -out=gen_payee_lookup.go gen "Name=PayeeConnection NodeType=*types.Payee EdgeType=types.PayeeEdge ConnectionType=types.PayeeConnection"
 //go:generate genny -in=connection_template.go -out=gen_product_lookup.go gen "Name=ProductConnection NodeType=*types.Product EdgeType=types.ProductEdge ConnectionType=types.ProductConnection"
+//go:generate genny -in=connection_template.go -out=gen_transaction_lookup.go gen "Name=TransactionConnection NodeType=*types.Transaction EdgeType=types.TransactionEdge ConnectionType=types.TransactionConnection"
+//go:generate genny -in=connection_template.go -out=gen_tags_lookup.go gen "Name=TagConnection NodeType=*types.Tag EdgeType=types.TagEdge ConnectionType=types.TagConnection"
 
 // Package connections implement a generic GraphQL relay connection
 package connections
