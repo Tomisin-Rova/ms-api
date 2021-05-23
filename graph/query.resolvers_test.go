@@ -4,10 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"ms.api/libs/mapper"
-	"ms.api/protos/pb/accountService"
 	"testing"
 	"time"
+
+	"ms.api/libs/mapper"
+	"ms.api/protos/pb/accountService"
 
 	"ms.api/protos/pb/paymentService"
 
@@ -439,8 +440,10 @@ func TestQueryResolver_Me(t *testing.T) {
 				cddServiceClient.On("GetCDDByOwner", ctx, &cddService.GetCDDByOwnerRequest{
 					PersonId: "personId",
 				}).Return(&protoTypes.Cdd{
-					Id:    "cddId",
-					Owner: "ownerId",
+					Id: "cddId",
+					Owner: &protoTypes.Person{
+						Id: "ownerId",
+					},
 					Validations: []*protoTypes.Validation{
 						{
 							ValidationType: models.SCREEN,
@@ -566,16 +569,20 @@ func TestQueryResolver_Cdds(t *testing.T) {
 
 	mockOwner := "personId"
 	firstCdd := protoTypes.Cdd{
-		Id:    "id1",
-		Owner: mockOwner,
+		Id: "id1",
+		Owner: &protoTypes.Person{
+			Id: mockOwner,
+		},
 		Validations: []*protoTypes.Validation{
 			{ValidationType: "CHECK", Data: &anypb.Any{Value: []byte("{\"id\": \"checkId\"}")}, Organisation: &protoTypes.Organisation{Id: "orgId"}, Applicant: mockOwner},
 			{ValidationType: "SCREEN", Data: &anypb.Any{Value: []byte("{\"id\": \"screenId\"}")}, Organisation: &protoTypes.Organisation{Id: "orgId"}, Applicant: mockOwner},
 		},
 	}
 	secondCdd := protoTypes.Cdd{
-		Id:    "id2",
-		Owner: mockOwner,
+		Id: "id2",
+		Owner: &protoTypes.Person{
+			Id: mockOwner,
+		},
 		Validations: []*protoTypes.Validation{
 			{ValidationType: "CHECK", Data: &anypb.Any{Value: []byte("{id: \"checkId\"}")}, Organisation: &protoTypes.Organisation{Id: "orgId"}, Applicant: mockOwner},
 			{ValidationType: "SCREEN", Data: &anypb.Any{Value: []byte("{id: \"screenId\"}")}, Organisation: &protoTypes.Organisation{Id: "orgId"}, Applicant: mockOwner},
@@ -587,13 +594,8 @@ func TestQueryResolver_Cdds(t *testing.T) {
 			&secondCdd,
 		},
 	}
-	mockPerson, mockCheck, mockScreen, mockOrg := &models.Person{ID: mockOwner, Employer: "orgId"}, &models.Check{Organisation: "orgId"}, &models.Screen{Organisation: "orgId"}, &models.Organization{}
 
 	mockStore := mocks.NewMockDataStore(ctrl)
-	mockStore.EXPECT().GetPerson(mockOwner).Return(mockPerson, nil).MinTimes(2)
-	mockStore.EXPECT().GetCheck("checkId").Return(mockCheck, nil).MinTimes(1)
-	mockStore.EXPECT().GetScreen("screenId").Return(mockScreen, nil).MinTimes(1)
-	mockStore.EXPECT().GetOrganization(gomock.Any()).Return(mockOrg, nil).MinTimes(2)
 
 	var first *int64
 	var after *string
@@ -606,11 +608,12 @@ func TestQueryResolver_Cdds(t *testing.T) {
 			cddClient: cddServiceClient,
 			DataStore: mockStore,
 		}, zaptest.NewLogger(t)).Query()
-		cddServiceClient.On("CDDS", context.Background(), &cddService.CDDSRequest{
-			Page:    1,
-			PerPage: 100,
-		}).Return(nil, errors.New("No Data"))
 		kw := "John Smith"
+		cddServiceClient.On("CDDS", context.Background(), &cddService.CDDSRequest{
+			Page:     1,
+			PerPage:  100,
+			Keywords: kw,
+		}).Return(nil, errors.New("No Data"))
 
 		response, err := resolver.Cdds(context.Background(), &kw, nil, first, after, last, before)
 		assert.NotNil(t, err, "should return an error if no data is found")
@@ -623,11 +626,12 @@ func TestQueryResolver_Cdds(t *testing.T) {
 			cddClient: cddServiceClient,
 			DataStore: mockStore,
 		}, zaptest.NewLogger(t)).Query()
-		cddServiceClient.On("CDDS", context.Background(), &cddService.CDDSRequest{
-			Page:    1,
-			PerPage: 100,
-		}).Return(mockCdds, nil)
 		kw := "John Smith"
+		cddServiceClient.On("CDDS", context.Background(), &cddService.CDDSRequest{
+			Page:     1,
+			PerPage:  100,
+			Keywords: kw,
+		}).Return(mockCdds, nil)
 		response, err := resolver.Cdds(context.Background(), &kw, nil, first, after, last, before)
 		assert.Nil(t, err, "should not return an error if data is found")
 		assert.NotNil(t, response, "should return a valid response if data is found")

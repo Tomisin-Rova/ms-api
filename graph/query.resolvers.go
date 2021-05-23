@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
-	"sync"
 
 	"github.com/jinzhu/copier"
 	terror "github.com/roava/zebra/errors"
@@ -39,11 +38,7 @@ func (r *queryResolver) Me(ctx context.Context) (*types.Person, error) {
 		r.logger.Error(errorGettingPersonMsg, zap.Error(err))
 		return nil, err
 	}
-	person, err := getPerson(personDto)
-	if err != nil {
-		return nil, err
-	}
-
+	person := getPerson(personDto)
 	// Add CDD to response
 	cddDto, err := r.cddService.GetCDDByOwner(ctx, &cddService.GetCDDByOwnerRequest{
 		PersonId: claims.PersonId,
@@ -143,10 +138,7 @@ func (r *queryResolver) Person(ctx context.Context, id string) (*types.Person, e
 		return nil, err
 	}
 
-	p, err := getPerson(person)
-	if err != nil {
-		return nil, err
-	}
+	p := getPerson(person)
 
 	// Add CDD to response
 	cddDto, err := r.cddService.GetCDDByOwner(ctx, &cddService.GetCDDByOwnerRequest{
@@ -442,12 +434,14 @@ func (r *queryResolver) Cdd(ctx context.Context, id string) (*types.Cdd, error) 
 func (r *queryResolver) Cdds(ctx context.Context, keywords *string, status []types.State, first *int64, after *string, last *int64, before *string) (*types.CDDConnection, error) {
 	dataConverter := NewDataConverter(r.logger)
 	perPage := r.perPageCddsQuery(first, after, last, before)
-	var chunkProcessErr error
 
 	req := &cddService.CDDSRequest{
 		Page:    1,
 		PerPage: perPage,
 		Status:  dataConverter.StateToStringSlice(status),
+	}
+	if keywords != nil {
+		req.Keywords = *keywords
 	}
 	resp, err := r.cddService.CDDS(context.Background(), req)
 	if err != nil {
@@ -455,74 +449,44 @@ func (r *queryResolver) Cdds(ctx context.Context, keywords *string, status []typ
 		return nil, terror.NewTerror(7013, "InternalError", "failed to load CDDs data. Internal system error", "internal system error")
 	}
 
+	// dataResolver := NewDataResolver(r.dataStore, r.logger)
 	cdds := resp.Results
-
-	dataResolver := NewDataResolver(r.dataStore, r.logger)
-	cddsValues := make([]*types.Cdd, len(cdds))
-	// Wait until all cdds are inserted into the cddsValues slice
-	var wg sync.WaitGroup
-	maxGouroutinesCount := len(cdds)
-	cddsChan := make(chan *CddChunk)
-	errorsChan := make(chan error, maxGouroutinesCount+1)
-	if maxGouroutinesCount > 0 {
-		size := len(cdds) / maxGouroutinesCount
-		for i := 0; i < maxGouroutinesCount; i++ {
-			var rest int
-			// Process the rest of the people in the slice
-			if i == maxGouroutinesCount-1 {
-				rest = len(cdds) % maxGouroutinesCount
+	cddsResult := make([]*types.Cdd, len(cdds))
+	for i, cdd := range cdds {
+		validations := make([]*types.Validation, len(cdd.Validations))
+		for j, validation := range cdd.Validations {
+			actions := make([]*types.Action, len(validation.Actions))
+			for k, action := range validation.Actions {
+				actions[k] = &types.Action{
+					ID:       action.Id,
+					Reporter: getPerson(action.Reporter),
+					Notes:    action.Notes,
+					Status:   action.Status,
+					Ts:       int64(action.Ts),
+				}
 			}
-			cddsChunk := cdds[i*size : (i+1)*size+rest]
-			wg.Add(1)
-			go func(pos int, cddsChan chan *CddChunk, errorsChan chan error) {
-				defer wg.Done()
-				data, err := r.processCddChunk(ctx, cddsChunk, dataResolver, dataConverter)
-				if err != nil {
-					errorsChan <- err
-					return
-				}
-				chunk := &CddChunk{
-					pos:  pos * size,
-					cdds: data,
-				}
-				cddsChan <- chunk
-			}(i, cddsChan, errorsChan)
+			validations[j] = &types.Validation{
+				ID:             validation.Id,
+				ValidationType: types.ValidationType(validation.ValidationType),
+				Applicant:      getPerson(cdd.Owner),
+				Status:         types.State(validation.Status),
+				Approved:       &validation.Approved,
+				Ts:             Int64(int64(validation.Ts)),
+				Actions:        actions,
+				Organisation:   dataConverter.OrganizationFromProto(validation.Organisation),
+			}
 		}
-
-		quit := make(chan int)
-		go func(targetData []*types.Cdd, quit chan int) {
-			for {
-				select {
-				case chunk := <-cddsChan:
-					for i := range chunk.cdds {
-						targetData[i+chunk.pos] = chunk.cdds[i]
-					}
-				case errValue := <-errorsChan:
-					chunkProcessErr = errValue
-				case <-quit:
-					return
-				}
-			}
-		}(cddsValues, quit)
-		// Halt cddsChan consumer goroutine
-		defer func() {
-			quit <- 1
-		}()
-	}
-
-	wg.Wait()
-	if err != nil {
-		return nil, err
-	}
-	if chunkProcessErr != nil {
-		r.logger.With(zap.Error(chunkProcessErr)).Error("failed to fetch some cdds")
-	}
-
-	//Remove null values
-	cddsResult := make([]*types.Cdd, 0)
-	for i := range cddsValues {
-		if cddsValues[i] != nil {
-			cddsResult = append(cddsResult, cddsValues[i])
+		cddsResult[i] = &types.Cdd{
+			ID:          cdd.Id,
+			Owner:       getPerson(cdd.Owner),
+			Watchlist:   &cdd.Watchlist,
+			Details:     &cdd.Details,
+			Status:      types.State(cdd.Status),
+			Onboard:     &cdd.Onboard,
+			Version:     Int64(int64(cdd.Version)),
+			Validations: validations,
+			Active:      &cdd.Active,
+			Ts:          Int64(int64(cdd.Ts)),
 		}
 	}
 
