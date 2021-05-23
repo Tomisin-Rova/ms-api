@@ -2,6 +2,7 @@ package graph
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"time"
@@ -191,12 +192,16 @@ func (c *DataConverter) HydrateValidationData(validation *apitypes.Validation, d
 							}
 							var reportData string
 							if reportMap["data"] != nil {
-								jsonBytes, err := json.Marshal(reportMap["data"])
-								if err != nil {
-									c.logger.Debug("failed to trancode report data from validation", zap.Error(err))
-									continue
+								if reportMapData, ok := reportMap["data"].(map[string]interface{}); ok {
+									if reportMap64Encoded, ok := reportMapData["Data"].(string); ok {
+										b, err := base64.StdEncoding.DecodeString(reportMap64Encoded)
+										if err != nil {
+											c.logger.Debug("failed to trancode report data from validation", zap.Error(err))
+											continue
+										}
+										reportData = string(b)
+									}
 								}
-								reportData = string(jsonBytes)
 								reportMap["data"] = nil
 							}
 							var reportOrganization apitypes.Organisation
