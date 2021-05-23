@@ -13,6 +13,22 @@ type Preloader struct {
 	mock.Mock
 }
 
+// GetArgMap provides a mock function with given fields: ctx, field
+func (_m *Preloader) GetArgMap(ctx context.Context, field string) map[string]interface{} {
+	ret := _m.Called(ctx, field)
+
+	var r0 map[string]interface{}
+	if rf, ok := ret.Get(0).(func(context.Context, string) map[string]interface{}); ok {
+		r0 = rf(ctx, field)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(map[string]interface{})
+		}
+	}
+
+	return r0
+}
+
 // GetPreloads provides a mock function with given fields: ctx
 func (_m *Preloader) GetPreloads(ctx context.Context) []string {
 	ret := _m.Called(ctx)

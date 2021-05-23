@@ -11,6 +11,7 @@ import (
 	"ms.api/libs/preloader"
 
 	"ms.api/config"
+	graphModels "ms.api/graph/models"
 	"ms.api/libs/db"
 	"ms.api/protos/pb/accountService"
 	"ms.api/protos/pb/authService"
@@ -291,109 +292,6 @@ func getPerson(from *pb.Person) *types.Person {
 	person.Identities = identities
 
 	return &person
-}
-
-func (r *Resolver) hydrateAccount(from *accountService.GetAccountResponse) *types.Account {
-	dto := types.Account{
-		ID:           &from.Id,
-		Owner:        &from.Owner,
-		Product:      &from.Product,
-		Name:         &from.Name,
-		Active:       &from.Active,
-		Status:       &from.Status,
-		Image:        &from.Image,
-		Organisation: &from.Organisation,
-		Ts:           Int64(int64(from.Ts)),
-		AccountDetails: &types.AccountDetails{
-			VirtualAccountID: &from.AccountDetails.VirtualAccountID,
-			Iban:             &from.AccountDetails.Iban,
-			AccountNumber:    &from.AccountDetails.AccountNumber,
-			SortCode:         &from.AccountDetails.SortCode,
-			SwiftBic:         &from.AccountDetails.SwiftBic,
-			BankCode:         &from.AccountDetails.BankCode,
-			RoutingNumber:    &from.AccountDetails.RoutingNumber,
-		},
-	}
-
-	// Add tags
-	tags := make([]*string, len(from.Tags))
-	for index, tag := range from.Tags {
-		tags[index] = &tag
-	}
-	dto.Tags = tags
-
-	// Add Account Data
-
-	dto.AccountData = &types.AccountData{
-		AccountHolderKey:  &from.AccountData.AccountHolderKey,
-		AccountHolderType: &from.AccountData.AccountHolderType,
-		AccountState:      &from.AccountData.AccountState,
-		AccountType:       &from.AccountData.AccountType,
-		AccruedAmounts: &types.AccruedAmounts{
-			InterestAccrued:                   Int64(int64(from.AccountData.AccruedAmounts.InterestAccrued)),
-			OverdraftInterestAccrued:          Int64(int64(from.AccountData.AccruedAmounts.OverdraftInterestAccrued)),
-			TechnicalOverdraftInterestAccrued: Int64(int64(from.AccountData.AccruedAmounts.TechnicalOverdraftInterestAccrued)),
-		},
-		ActivationDate:    String(string(from.AccountData.ActivationDate)),
-		ApprovedDate:      String(string(from.AccountData.ApprovedDate)),
-		AssignedBranchKey: &from.AccountData.AssignedBranchKey,
-		AssignedCentreKey: &from.AccountData.AssignedCentreKey,
-		AssignedUserKey:   &from.AccountData.AssignedUserKey,
-		Balances: &types.Balances{
-			AvailableBalance:              Int64(int64(from.AccountData.Balances.AvailableBalance)),
-			BlockedBalance:                Int64(int64(from.AccountData.Balances.BlockedBalance)),
-			FeesDue:                       Int64(int64(from.AccountData.Balances.FeesDue)),
-			ForwardAvailableBalance:       Int64(int64(from.AccountData.Balances.ForwardAvailableBalance)),
-			HoldBalance:                   Int64(int64(from.AccountData.Balances.HoldBalance)),
-			LockedBalance:                 Int64(int64(from.AccountData.Balances.LockedBalance)),
-			OverdraftAmount:               Int64(int64(from.AccountData.Balances.OverdraftAmount)),
-			OverdraftInterestDue:          Int64(int64(from.AccountData.Balances.OverdraftInterestDue)),
-			TechnicalOverdraftAmount:      Int64(int64(from.AccountData.Balances.TechnicalOverdraftAmount)),
-			TechnicalOverdraftInterestDue: Int64(int64(from.AccountData.Balances.TechnicalOverdraftInterestDue)),
-			TotalBalance:                  Int64(int64(from.AccountData.Balances.TotalBalance)),
-		},
-		ClosedDate:           &from.AccountData.ClosedDate,
-		CreationDate:         &from.AccountData.CreationDate,
-		CreditArrangementKey: &from.AccountData.CreditArrangementKey,
-		CurrencyCode:         &from.AccountData.CurrencyCode,
-		EncodedKey:           &from.AccountData.EncodedKey,
-		InterestSettings: &types.InterestSettings{
-			InterestPaymentSettings: &types.InterestPaymentSettings{
-				InterestPaymentPoint: &from.AccountData.InterestSettings.InterestPaymentSettings.InterestPaymentPoint,
-			},
-			InterestRateSettings: &types.InterestRateSettings{
-				EncodedKey:                   &from.AccountData.InterestSettings.InterestRateSettings.EncodedKey,
-				InterestChargeFrequency:      &from.AccountData.InterestSettings.InterestRateSettings.InterestChargeFrequency,
-				InterestChargeFrequencyCount: Int64(int64(from.AccountData.InterestSettings.InterestRateSettings.InterestChargeFrequencyCount)),
-				InterestRate:                 Int64(int64(from.AccountData.InterestSettings.InterestRateSettings.InterestRate)),
-				InterestRateTerms:            &from.AccountData.InterestSettings.InterestRateSettings.InterestRateTerms,
-			},
-		},
-		InternalControls: &types.InternalControls{
-			MaxWithdrawalAmount:      Int64(int64(from.AccountData.InternalControls.MaxWithdrawalAmount)),
-			RecommendedDepositAmount: Int64(int64(from.AccountData.InternalControls.RecommendedDepositAmount)),
-			TargetAmount:             Int64(int64(from.AccountData.InternalControls.TargetAmount)),
-		},
-		LastAccountAppraisalDate:        &from.AccountData.LastAccountAppraisalDate,
-		LastInterestCalculationDate:     &from.AccountData.LastInterestCalculationDate,
-		LastInterestStoredDate:          &from.AccountData.LastInterestStoredDate,
-		LastModifiedDate:                &from.AccountData.LastModifiedDate,
-		LastOverdraftInterestReviewDate: &from.AccountData.LastOverdraftInterestReviewDate,
-		LastSetToArrearsDate:            &from.AccountData.LastSetToArrearsDate,
-		LockedDate:                      &from.AccountData.LockedDate,
-		MaturityDate:                    &from.AccountData.MaturityDate,
-		MigrationEventKey:               &from.AccountData.MigrationEventKey,
-		Name:                            &from.AccountData.Name,
-		Notes:                           &from.AccountData.Notes,
-		OverdraftSettings: &types.OverdraftSettings{
-			AllowOverdraft: &from.AccountData.OverdraftSettings.AllowOverdraft,
-			OverdraftLimit: Int64(int64(from.AccountData.OverdraftSettings.OverdraftLimit)),
-		},
-		ProductTypeKey:          &from.AccountData.ProductTypeKey,
-		WithholdingTaxSourceKey: &from.AccountData.WithholdingTaxSourceKey,
-	}
-
-	return &dto
 }
 
 func (r *queryResolver) hydrateCDD(cddDto *pb.Cdd) (*types.Cdd, error) {
@@ -691,6 +589,32 @@ func (r *queryResolver) perPageCddsQuery(first *int64, after *string, last *int6
 	}
 	return 100
 }
+
+// getConnInput this method returns the connection input type based on the context and a field name
+// this can be use for sub-fields that contain a pagination
+func (r *queryResolver) getConnInput(argMap map[string]interface{}) graphModels.ConnectionInput {
+	connInput := graphModels.ConnectionInput{}
+
+	if argMap == nil {
+		return connInput
+	}
+
+	if v, ok := argMap["before"].(string); ok {
+		connInput.Before = &v
+	}
+	if v, ok := argMap["after"].(string); ok {
+		connInput.After = &v
+	}
+	if v, ok := argMap["first"].(int64); ok {
+		connInput.First = &v
+	}
+	if v, ok := argMap["last"].(int64); ok {
+		connInput.Last = &v
+	}
+
+	return connInput
+}
+
 func String(s string) *string {
 	return &s
 }

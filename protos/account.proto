@@ -19,28 +19,12 @@ message GetAccountRequest {
   string identityId = 2;
 }
 
-message GetAccountResponse {
-  string id = 1;
-  string owner = 2;
-  string product = 3;
-  string name = 4;
-  types.AccountData accountData = 5;
-  repeated types.Transaction transactions = 6;
-  bool active = 7;
-  string status = 8;
-  repeated string tags = 9;
-  string image = 10;
-  string organisation = 11;
-  int32 ts = 12;
-  types.AccountDetails AccountDetails =13;
-}
-
 message GetAccountsRequest {
   string identityId = 1;
 }
 
 message GetAccountsResponse {
-  repeated GetAccountResponse accounts = 1;
+  repeated types.Account accounts = 1;
 }
 
 message ValidateBVNRequest {
@@ -53,14 +37,6 @@ message GetProductRequest {
   string id = 1;
 }
 
-message GetProductResponse {
-  string id = 1;
-  string identification = 2;
-  string scheme = 3;
-  types.ProductDetails details = 4;
-  int64 ts = 5;
-}
-
 message GetProductsRequest {
   int64 page = 1;
   int64 perPage = 2;
@@ -70,11 +46,26 @@ message GetProductsResponse {
   repeated types.Product products = 1;
 }
 
+message GetTransactionRequest {
+  string id = 2;
+}
+
+
+message GetTransactionsRequest {
+  string account = 1;
+}
+
+message GetTransactionsResponse {
+  repeated types.Transaction transactions = 1;
+}
+
 service AccountService {
   rpc CreateAccount(CreateAccountRequest) returns (types.Response) {}
-  rpc GetAccount(GetAccountRequest) returns (GetAccountResponse) {}
+  rpc GetAccount(GetAccountRequest) returns (types.Account) {}
   rpc GetAccounts(GetAccountsRequest) returns (GetAccountsResponse) {}
   rpc ValidateBVN(ValidateBVNRequest) returns (types.Response) {}
   rpc GetProduct(GetProductRequest) returns (types.Product) {}
   rpc GetProducts(GetProductsRequest) returns (GetProductsResponse) {}
+  rpc GetTransaction(GetTransactionRequest) returns (types.Transaction) {}
+  rpc GetTransactions(GetTransactionsRequest) returns (GetTransactionsResponse) {}
 }
