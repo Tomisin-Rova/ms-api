@@ -672,7 +672,7 @@ func (r *queryResolver) Account(ctx context.Context, id string) (*types.Account,
 			opts.TagsRequested = true
 		}
 		if item == "transactions" {
-			opts.TagsRequested = true
+			opts.TransactionsRequested = true
 		}
 	}
 
@@ -825,7 +825,7 @@ func (r *queryResolver) Accounts(ctx context.Context, first *int64, after *strin
 			opts.TagsRequested = true
 		}
 		if item == "transactions" {
-			opts.TagsRequested = true
+			opts.TransactionsRequested = true
 		}
 	}
 
