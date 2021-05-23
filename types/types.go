@@ -145,11 +145,11 @@ type AccruedAmounts struct {
 }
 
 type Action struct {
-	ID       string  `json:"id"`
-	Reporter *Person `json:"reporter"`
-	Notes    string  `json:"notes"`
-	Status   string  `json:"status"`
-	Ts       int64   `json:"ts"`
+	ID       string `json:"id"`
+	Reporter *Staff `json:"reporter"`
+	Notes    string `json:"notes"`
+	Status   string `json:"status"`
+	Ts       int64  `json:"ts"`
 }
 
 type Activity struct {

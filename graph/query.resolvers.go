@@ -58,7 +58,7 @@ func (r *queryResolver) Me(ctx context.Context) (*types.Person, error) {
 
 		r.logger.Info("no cdd found", zap.String("owner", claims.PersonId))
 	}
-	person.Cdd, err = r.hydrateCDD(cddDto)
+	person.Cdd, err = r.hydrateCDD(ctx, cddDto)
 	if err != nil {
 		return nil, err
 	}
@@ -162,7 +162,7 @@ func (r *queryResolver) Person(ctx context.Context, id string) (*types.Person, e
 
 		r.logger.Info("no cdd found", zap.String("owner", p.ID))
 	}
-	p.Cdd, err = r.hydrateCDD(cddDto)
+	p.Cdd, err = r.hydrateCDD(ctx, cddDto)
 	if err != nil {
 		return nil, err
 	}

@@ -101,7 +101,7 @@ message Validation {
 
 message Action {
     string id = 1;
-    Person reporter = 2;
+    string reporter = 2;
     string notes= 3;
     string status = 4;
     int32 ts = 5;
