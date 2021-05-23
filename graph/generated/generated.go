@@ -75,8 +75,8 @@ type ComplexityRoot struct {
 		Owner          func(childComplexity int) int
 		Product        func(childComplexity int) int
 		Status         func(childComplexity int) int
-		Tags           func(childComplexity int) int
-		Transactions   func(childComplexity int) int
+		Tags           func(childComplexity int, first *int64, after *string, last *int64, before *string) int
+		Transactions   func(childComplexity int, first *int64, after *string, last *int64, before *string) int
 		Ts             func(childComplexity int) int
 	}
 
@@ -969,7 +969,7 @@ type ComplexityRoot struct {
 		Task              func(childComplexity int, id string) int
 		Tasks             func(childComplexity int, first *int64, after *string, last *int64, before *string) int
 		Transaction       func(childComplexity int, id string) int
-		Transactions      func(childComplexity int, first *int64, after *string, last *int64, before *string) int
+		Transactions      func(childComplexity int, first *int64, after *string, last *int64, before *string, account string) int
 		Validation        func(childComplexity int, id string) int
 		Validations       func(childComplexity int, first *int64, after *string, last *int64, before *string) int
 		Verification      func(childComplexity int, code string) int
@@ -1136,10 +1136,10 @@ type ComplexityRoot struct {
 	}
 
 	Transaction struct {
-		Encodedkey func(childComplexity int) int
-		ID         func(childComplexity int) int
-		Ref        func(childComplexity int) int
-		Ts         func(childComplexity int) int
+		Account         func(childComplexity int) int
+		ID              func(childComplexity int) int
+		TransactionData func(childComplexity int) int
+		Ts              func(childComplexity int) int
 	}
 
 	TransactionConnection struct {
@@ -1172,6 +1172,14 @@ type ComplexityRoot struct {
 	TransactionEdge struct {
 		Cursor func(childComplexity int) int
 		Node   func(childComplexity int) int
+	}
+
+	TransactionFee struct {
+		Amount           func(childComplexity int) int
+		Name             func(childComplexity int) int
+		PredefinedFeeKey func(childComplexity int) int
+		TaxAmount        func(childComplexity int) int
+		Trigger          func(childComplexity int) int
 	}
 
 	TransferDetails struct {
@@ -1323,7 +1331,7 @@ type QueryResolver interface {
 	Payee(ctx context.Context, id string) (*types.Payee, error)
 	Payees(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.PayeeConnection, error)
 	Transaction(ctx context.Context, id string) (*types.Transaction, error)
-	Transactions(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.TransactionConnection, error)
+	Transactions(ctx context.Context, first *int64, after *string, last *int64, before *string, account string) (*types.TransactionConnection, error)
 	Acceptance(ctx context.Context, id string) (*types.Acceptance, error)
 	Acceptances(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.AcceptanceConnection, error)
 	Node(ctx context.Context, id string) (types.Node, error)
@@ -1490,14 +1498,24 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.Account.Tags(childComplexity), true
+		args, err := ec.field_Account_tags_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Account.Tags(childComplexity, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string)), true
 
 	case "Account.transactions":
 		if e.complexity.Account.Transactions == nil {
 			break
 		}
 
-		return e.complexity.Account.Transactions(childComplexity), true
+		args, err := ec.field_Account_transactions_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Account.Transactions(childComplexity, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string)), true
 
 	case "Account.ts":
 		if e.complexity.Account.Ts == nil {
@@ -1541,70 +1559,70 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.AccountConnection.TotalCount(childComplexity), true
 
-	case "AccountData.accountHolderKey":
+	case "AccountData.account_holder_key":
 		if e.complexity.AccountData.AccountHolderKey == nil {
 			break
 		}
 
 		return e.complexity.AccountData.AccountHolderKey(childComplexity), true
 
-	case "AccountData.accountHolderType":
+	case "AccountData.account_holder_type":
 		if e.complexity.AccountData.AccountHolderType == nil {
 			break
 		}
 
 		return e.complexity.AccountData.AccountHolderType(childComplexity), true
 
-	case "AccountData.accountState":
+	case "AccountData.account_state":
 		if e.complexity.AccountData.AccountState == nil {
 			break
 		}
 
 		return e.complexity.AccountData.AccountState(childComplexity), true
 
-	case "AccountData.accountType":
+	case "AccountData.account_type":
 		if e.complexity.AccountData.AccountType == nil {
 			break
 		}
 
 		return e.complexity.AccountData.AccountType(childComplexity), true
 
-	case "AccountData.accruedAmounts":
+	case "AccountData.accrued_amounts":
 		if e.complexity.AccountData.AccruedAmounts == nil {
 			break
 		}
 
 		return e.complexity.AccountData.AccruedAmounts(childComplexity), true
 
-	case "AccountData.activationDate":
+	case "AccountData.activation_date":
 		if e.complexity.AccountData.ActivationDate == nil {
 			break
 		}
 
 		return e.complexity.AccountData.ActivationDate(childComplexity), true
 
-	case "AccountData.approvedDate":
+	case "AccountData.approved_date":
 		if e.complexity.AccountData.ApprovedDate == nil {
 			break
 		}
 
 		return e.complexity.AccountData.ApprovedDate(childComplexity), true
 
-	case "AccountData.assignedBranchKey":
+	case "AccountData.assigned_branch_key":
 		if e.complexity.AccountData.AssignedBranchKey == nil {
 			break
 		}
 
 		return e.complexity.AccountData.AssignedBranchKey(childComplexity), true
 
-	case "AccountData.assignedCentreKey":
+	case "AccountData.assigned_centre_key":
 		if e.complexity.AccountData.AssignedCentreKey == nil {
 			break
 		}
 
 		return e.complexity.AccountData.AssignedCentreKey(childComplexity), true
 
-	case "AccountData.assignedUserKey":
+	case "AccountData.assigned_user_key":
 		if e.complexity.AccountData.AssignedUserKey == nil {
 			break
 		}
@@ -1618,35 +1636,35 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.AccountData.Balances(childComplexity), true
 
-	case "AccountData.closedDate":
+	case "AccountData.closed_date":
 		if e.complexity.AccountData.ClosedDate == nil {
 			break
 		}
 
 		return e.complexity.AccountData.ClosedDate(childComplexity), true
 
-	case "AccountData.creationDate":
+	case "AccountData.creation_date":
 		if e.complexity.AccountData.CreationDate == nil {
 			break
 		}
 
 		return e.complexity.AccountData.CreationDate(childComplexity), true
 
-	case "AccountData.creditArrangementKey":
+	case "AccountData.credit_arrangement_key":
 		if e.complexity.AccountData.CreditArrangementKey == nil {
 			break
 		}
 
 		return e.complexity.AccountData.CreditArrangementKey(childComplexity), true
 
-	case "AccountData.currencyCode":
+	case "AccountData.currency_code":
 		if e.complexity.AccountData.CurrencyCode == nil {
 			break
 		}
 
 		return e.complexity.AccountData.CurrencyCode(childComplexity), true
 
-	case "AccountData.encodedKey":
+	case "AccountData.encoded_key":
 		if e.complexity.AccountData.EncodedKey == nil {
 			break
 		}
@@ -1660,84 +1678,84 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.AccountData.ID(childComplexity), true
 
-	case "AccountData.interestSettings":
+	case "AccountData.interest_settings":
 		if e.complexity.AccountData.InterestSettings == nil {
 			break
 		}
 
 		return e.complexity.AccountData.InterestSettings(childComplexity), true
 
-	case "AccountData.internalControls":
+	case "AccountData.internal_controls":
 		if e.complexity.AccountData.InternalControls == nil {
 			break
 		}
 
 		return e.complexity.AccountData.InternalControls(childComplexity), true
 
-	case "AccountData.lastAccountAppraisalDate":
+	case "AccountData.last_account_appraisal_date":
 		if e.complexity.AccountData.LastAccountAppraisalDate == nil {
 			break
 		}
 
 		return e.complexity.AccountData.LastAccountAppraisalDate(childComplexity), true
 
-	case "AccountData.lastInterestCalculationDate":
+	case "AccountData.last_interest_calculation_date":
 		if e.complexity.AccountData.LastInterestCalculationDate == nil {
 			break
 		}
 
 		return e.complexity.AccountData.LastInterestCalculationDate(childComplexity), true
 
-	case "AccountData.lastInterestStoredDate":
+	case "AccountData.last_interest_stored_date":
 		if e.complexity.AccountData.LastInterestStoredDate == nil {
 			break
 		}
 
 		return e.complexity.AccountData.LastInterestStoredDate(childComplexity), true
 
-	case "AccountData.lastModifiedDate":
+	case "AccountData.last_modified_date":
 		if e.complexity.AccountData.LastModifiedDate == nil {
 			break
 		}
 
 		return e.complexity.AccountData.LastModifiedDate(childComplexity), true
 
-	case "AccountData.lastOverdraftInterestReviewDate":
+	case "AccountData.last_overdraft_interest_review_date":
 		if e.complexity.AccountData.LastOverdraftInterestReviewDate == nil {
 			break
 		}
 
 		return e.complexity.AccountData.LastOverdraftInterestReviewDate(childComplexity), true
 
-	case "AccountData.lastSetToArrearsDate":
+	case "AccountData.last_set_to_arrears_date":
 		if e.complexity.AccountData.LastSetToArrearsDate == nil {
 			break
 		}
 
 		return e.complexity.AccountData.LastSetToArrearsDate(childComplexity), true
 
-	case "AccountData.linkedSettlementAccountKeys":
+	case "AccountData.linked_settlement_account_keys":
 		if e.complexity.AccountData.LinkedSettlementAccountKeys == nil {
 			break
 		}
 
 		return e.complexity.AccountData.LinkedSettlementAccountKeys(childComplexity), true
 
-	case "AccountData.lockedDate":
+	case "AccountData.locked_date":
 		if e.complexity.AccountData.LockedDate == nil {
 			break
 		}
 
 		return e.complexity.AccountData.LockedDate(childComplexity), true
 
-	case "AccountData.maturityDate":
+	case "AccountData.maturity_date":
 		if e.complexity.AccountData.MaturityDate == nil {
 			break
 		}
 
 		return e.complexity.AccountData.MaturityDate(childComplexity), true
 
-	case "AccountData.migrationEventKey":
+	case "AccountData.migration_event_key":
 		if e.complexity.AccountData.MigrationEventKey == nil {
 			break
 		}
@@ -1758,28 +1776,28 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.AccountData.Notes(childComplexity), true
 
-	case "AccountData.overdraftInterestSettings":
+	case "AccountData.overdraft_interest_settings":
 		if e.complexity.AccountData.OverdraftInterestSettings == nil {
 			break
 		}
 
 		return e.complexity.AccountData.OverdraftInterestSettings(childComplexity), true
 
-	case "AccountData.overdraftSettings":
+	case "AccountData.overdraft_settings":
 		if e.complexity.AccountData.OverdraftSettings == nil {
 			break
 		}
 
 		return e.complexity.AccountData.OverdraftSettings(childComplexity), true
 
-	case "AccountData.productTypeKey":
+	case "AccountData.product_type_key":
 		if e.complexity.AccountData.ProductTypeKey == nil {
 			break
 		}
 
 		return e.complexity.AccountData.ProductTypeKey(childComplexity), true
 
-	case "AccountData.withholdingTaxSourceKey":
+	case "AccountData.withholding_tax_source_key":
 		if e.complexity.AccountData.WithholdingTaxSourceKey == nil {
 			break
 		}
@@ -1870,28 +1888,28 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.AccountingRules.GlKey(childComplexity), true
 
-	case "AccruedAmounts.interestAccrued":
+	case "AccruedAmounts.interest_accrued":
 		if e.complexity.AccruedAmounts.InterestAccrued == nil {
 			break
 		}
 
 		return e.complexity.AccruedAmounts.InterestAccrued(childComplexity), true
 
-	case "AccruedAmounts.negativeInterestAccrued":
+	case "AccruedAmounts.negative_interest_accrued":
 		if e.complexity.AccruedAmounts.NegativeInterestAccrued == nil {
 			break
 		}
 
 		return e.complexity.AccruedAmounts.NegativeInterestAccrued(childComplexity), true
 
-	case "AccruedAmounts.overdraftInterestAccrued":
+	case "AccruedAmounts.overdraft_interest_accrued":
 		if e.complexity.AccruedAmounts.OverdraftInterestAccrued == nil {
 			break
 		}
 
 		return e.complexity.AccruedAmounts.OverdraftInterestAccrued(childComplexity), true
 
-	case "AccruedAmounts.technicalOverdraftInterestAccrued":
+	case "AccruedAmounts.technical_overdraft_interest_accrued":
 		if e.complexity.AccruedAmounts.TechnicalOverdraftInterestAccrued == nil {
 			break
 		}
@@ -2248,77 +2266,77 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.AuthTokens.Refresh(childComplexity), true
 
-	case "Balances.availableBalance":
+	case "Balances.available_balance":
 		if e.complexity.Balances.AvailableBalance == nil {
 			break
 		}
 
 		return e.complexity.Balances.AvailableBalance(childComplexity), true
 
-	case "Balances.blockedBalance":
+	case "Balances.blocked_balance":
 		if e.complexity.Balances.BlockedBalance == nil {
 			break
 		}
 
 		return e.complexity.Balances.BlockedBalance(childComplexity), true
 
-	case "Balances.feesDue":
+	case "Balances.fees_due":
 		if e.complexity.Balances.FeesDue == nil {
 			break
 		}
 
 		return e.complexity.Balances.FeesDue(childComplexity), true
 
-	case "Balances.forwardAvailableBalance":
+	case "Balances.forward_available_balance":
 		if e.complexity.Balances.ForwardAvailableBalance == nil {
 			break
 		}
 
 		return e.complexity.Balances.ForwardAvailableBalance(childComplexity), true
 
-	case "Balances.holdBalance":
+	case "Balances.hold_balance":
 		if e.complexity.Balances.HoldBalance == nil {
 			break
 		}
 
 		return e.complexity.Balances.HoldBalance(childComplexity), true
 
-	case "Balances.lockedBalance":
+	case "Balances.locked_balance":
 		if e.complexity.Balances.LockedBalance == nil {
 			break
 		}
 
 		return e.complexity.Balances.LockedBalance(childComplexity), true
 
-	case "Balances.overdraftAmount":
+	case "Balances.overdraft_amount":
 		if e.complexity.Balances.OverdraftAmount == nil {
 			break
 		}
 
 		return e.complexity.Balances.OverdraftAmount(childComplexity), true
 
-	case "Balances.overdraftInterestDue":
+	case "Balances.overdraft_interest_due":
 		if e.complexity.Balances.OverdraftInterestDue == nil {
 			break
 		}
 
 		return e.complexity.Balances.OverdraftInterestDue(childComplexity), true
 
-	case "Balances.technicalOverdraftAmount":
+	case "Balances.technical_overdraft_amount":
 		if e.complexity.Balances.TechnicalOverdraftAmount == nil {
 			break
 		}
 
 		return e.complexity.Balances.TechnicalOverdraftAmount(childComplexity), true
 
-	case "Balances.technicalOverdraftInterestDue":
+	case "Balances.technical_overdraft_interest_due":
 		if e.complexity.Balances.TechnicalOverdraftInterestDue == nil {
 			break
 		}
 
 		return e.complexity.Balances.TechnicalOverdraftInterestDue(childComplexity), true
 
-	case "Balances.totalBalance":
+	case "Balances.total_balance":
 		if e.complexity.Balances.TotalBalance == nil {
 			break
 		}
@@ -3640,14 +3658,14 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.InterestPaymentDates.Month(childComplexity), true
 
-	case "InterestPaymentSettings.interestPaymentDates":
+	case "InterestPaymentSettings.interest_payment_dates":
 		if e.complexity.InterestPaymentSettings.InterestPaymentDates == nil {
 			break
 		}
 
 		return e.complexity.InterestPaymentSettings.InterestPaymentDates(childComplexity), true
 
-	case "InterestPaymentSettings.interestPaymentPoint":
+	case "InterestPaymentSettings.interest_payment_point":
 		if e.complexity.InterestPaymentSettings.InterestPaymentPoint == nil {
 			break
 		}
@@ -3675,98 +3693,98 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.InterestRate.MinValue(childComplexity), true
 
-	case "InterestRateSettings.encodedKey":
+	case "InterestRateSettings.encoded_key":
 		if e.complexity.InterestRateSettings.EncodedKey == nil {
 			break
 		}
 
 		return e.complexity.InterestRateSettings.EncodedKey(childComplexity), true
 
-	case "InterestRateSettings.interestChargeFrequency":
+	case "InterestRateSettings.interest_charge_frequency":
 		if e.complexity.InterestRateSettings.InterestChargeFrequency == nil {
 			break
 		}
 
 		return e.complexity.InterestRateSettings.InterestChargeFrequency(childComplexity), true
 
-	case "InterestRateSettings.interestChargeFrequencyCount":
+	case "InterestRateSettings.interest_charge_frequency_count":
 		if e.complexity.InterestRateSettings.InterestChargeFrequencyCount == nil {
 			break
 		}
 
 		return e.complexity.InterestRateSettings.InterestChargeFrequencyCount(childComplexity), true
 
-	case "InterestRateSettings.interestRate":
+	case "InterestRateSettings.interest_rate":
 		if e.complexity.InterestRateSettings.InterestRate == nil {
 			break
 		}
 
 		return e.complexity.InterestRateSettings.InterestRate(childComplexity), true
 
-	case "InterestRateSettings.interestRateReviewCount":
+	case "InterestRateSettings.interest_rate_review_count":
 		if e.complexity.InterestRateSettings.InterestRateReviewCount == nil {
 			break
 		}
 
 		return e.complexity.InterestRateSettings.InterestRateReviewCount(childComplexity), true
 
-	case "InterestRateSettings.interestRateReviewUnit":
+	case "InterestRateSettings.interest_rate_review_unit":
 		if e.complexity.InterestRateSettings.InterestRateReviewUnit == nil {
 			break
 		}
 
 		return e.complexity.InterestRateSettings.InterestRateReviewUnit(childComplexity), true
 
-	case "InterestRateSettings.interestRateSource":
+	case "InterestRateSettings.interest_rate_source":
 		if e.complexity.InterestRateSettings.InterestRateSource == nil {
 			break
 		}
 
 		return e.complexity.InterestRateSettings.InterestRateSource(childComplexity), true
 
-	case "InterestRateSettings.interestRateTerms":
+	case "InterestRateSettings.interest_rate_terms":
 		if e.complexity.InterestRateSettings.InterestRateTerms == nil {
 			break
 		}
 
 		return e.complexity.InterestRateSettings.InterestRateTerms(childComplexity), true
 
-	case "InterestRateSettings.interestRateTiers":
+	case "InterestRateSettings.interest_rate_tiers":
 		if e.complexity.InterestRateSettings.InterestRateTiers == nil {
 			break
 		}
 
 		return e.complexity.InterestRateSettings.InterestRateTiers(childComplexity), true
 
-	case "InterestRateSettings.interestSpread":
+	case "InterestRateSettings.interest_spread":
 		if e.complexity.InterestRateSettings.InterestSpread == nil {
 			break
 		}
 
 		return e.complexity.InterestRateSettings.InterestSpread(childComplexity), true
 
-	case "InterestRateTiers.encodedKey":
+	case "InterestRateTiers.encoded_key":
 		if e.complexity.InterestRateTiers.EncodedKey == nil {
 			break
 		}
 
 		return e.complexity.InterestRateTiers.EncodedKey(childComplexity), true
 
-	case "InterestRateTiers.endingBalance":
+	case "InterestRateTiers.ending_balance":
 		if e.complexity.InterestRateTiers.EndingBalance == nil {
 			break
 		}
 
 		return e.complexity.InterestRateTiers.EndingBalance(childComplexity), true
 
-	case "InterestRateTiers.endingDay":
+	case "InterestRateTiers.ending_day":
 		if e.complexity.InterestRateTiers.EndingDay == nil {
 			break
 		}
 
 		return e.complexity.InterestRateTiers.EndingDay(childComplexity), true
 
-	case "InterestRateTiers.interestRate":
+	case "InterestRateTiers.interest_rate":
 		if e.complexity.InterestRateTiers.InterestRate == nil {
 			break
 		}
@@ -3864,28 +3882,28 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.InterestSettings.RateTiers(childComplexity), true
 
-	case "InternalControls.maxDepositBalance":
+	case "InternalControls.max_deposit_balance":
 		if e.complexity.InternalControls.MaxDepositBalance == nil {
 			break
 		}
 
 		return e.complexity.InternalControls.MaxDepositBalance(childComplexity), true
 
-	case "InternalControls.maxWithdrawalAmount":
+	case "InternalControls.max_withdrawal_amount":
 		if e.complexity.InternalControls.MaxWithdrawalAmount == nil {
 			break
 		}
 
 		return e.complexity.InternalControls.MaxWithdrawalAmount(childComplexity), true
 
-	case "InternalControls.recommendedDepositAmount":
+	case "InternalControls.recommended_deposit_amount":
 		if e.complexity.InternalControls.RecommendedDepositAmount == nil {
 			break
 		}
 
 		return e.complexity.InternalControls.RecommendedDepositAmount(childComplexity), true
 
-	case "InternalControls.targetAmount":
+	case "InternalControls.target_amount":
 		if e.complexity.InternalControls.TargetAmount == nil {
 			break
 		}
@@ -4599,7 +4617,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.OrganisationEdge.Node(childComplexity), true
 
-	case "OverdraftInterestSettings.interestRateSettings":
+	case "OverdraftInterestSettings.interest_rate_settings":
 		if e.complexity.OverdraftInterestSettings.InterestRateSettings == nil {
 			break
 		}
@@ -4634,21 +4652,21 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.OverdraftSetting.MaxLimit(childComplexity), true
 
-	case "OverdraftSettings.allowOverdraft":
+	case "OverdraftSettings.allow_overdraft":
 		if e.complexity.OverdraftSettings.AllowOverdraft == nil {
 			break
 		}
 
 		return e.complexity.OverdraftSettings.AllowOverdraft(childComplexity), true
 
-	case "OverdraftSettings.overdraftExpiryDate":
+	case "OverdraftSettings.overdraft_expiry_date":
 		if e.complexity.OverdraftSettings.OverdraftExpiryDate == nil {
 			break
 		}
 
 		return e.complexity.OverdraftSettings.OverdraftExpiryDate(childComplexity), true
 
-	case "OverdraftSettings.overdraftLimit":
+	case "OverdraftSettings.overdraft_limit":
 		if e.complexity.OverdraftSettings.OverdraftLimit == nil {
 			break
 		}
@@ -6231,7 +6249,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Transactions(childComplexity, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string)), true
+		return e.complexity.Query.Transactions(childComplexity, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string), args["account"].(string)), true
 
 	case "Query.validation":
 		if e.complexity.Query.Validation == nil {
@@ -6963,12 +6981,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.TaskEdge.Node(childComplexity), true
 
-	case "Transaction.encodedkey":
-		if e.complexity.Transaction.Encodedkey == nil {
+	case "Transaction.account":
+		if e.complexity.Transaction.Account == nil {
 			break
 		}
 
-		return e.complexity.Transaction.Encodedkey(childComplexity), true
+		return e.complexity.Transaction.Account(childComplexity), true
 
 	case "Transaction.id":
 		if e.complexity.Transaction.ID == nil {
@@ -6977,12 +6995,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Transaction.ID(childComplexity), true
 
-	case "Transaction.ref":
-		if e.complexity.Transaction.Ref == nil {
+	case "Transaction.transaction_data":
+		if e.complexity.Transaction.TransactionData == nil {
 			break
 		}
 
-		return e.complexity.Transaction.Ref(childComplexity), true
+		return e.complexity.Transaction.TransactionData(childComplexity), true
 
 	case "Transaction.ts":
 		if e.complexity.Transaction.Ts == nil {
@@ -7151,6 +7169,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.TransactionEdge.Node(childComplexity), true
+
+	case "TransactionFee.Amount":
+		if e.complexity.TransactionFee.Amount == nil {
+			break
+		}
+
+		return e.complexity.TransactionFee.Amount(childComplexity), true
+
+	case "TransactionFee.Name":
+		if e.complexity.TransactionFee.Name == nil {
+			break
+		}
+
+		return e.complexity.TransactionFee.Name(childComplexity), true
+
+	case "TransactionFee.PredefinedFeeKey":
+		if e.complexity.TransactionFee.PredefinedFeeKey == nil {
+			break
+		}
+
+		return e.complexity.TransactionFee.PredefinedFeeKey(childComplexity), true
+
+	case "TransactionFee.TaxAmount":
+		if e.complexity.TransactionFee.TaxAmount == nil {
+			break
+		}
+
+		return e.complexity.TransactionFee.TaxAmount(childComplexity), true
+
+	case "TransactionFee.Trigger":
+		if e.complexity.TransactionFee.Trigger == nil {
+			break
+		}
+
+		return e.complexity.TransactionFee.Trigger(childComplexity), true
 
 	case "TransferDetails.linked_loan_transaction_key":
 		if e.complexity.TransferDetails.LinkedLoanTransactionKey == nil {
@@ -7918,6 +7971,8 @@ var sources = []*ast.Source{
     last: Int,
     # Returns the elements in the list that come before the specified cursor.
     before: String
+    # Filter transactions by an account id
+    account: ID!
   ): TransactionConnection
   # get an record of an accepted document term by an individual by ID
   acceptance(
@@ -9854,29 +9909,50 @@ type ProductTemplates {
 
 # Representation of a customer account (deposit, savings, loan, credit)
 type Account {
-  id: String
-  owner: String
-  product: String
+  # Unique roava ulid for the data record
+  id: ID!
+  # Reference for customer or organization who owns account
+  owner: Owner!
+  # Reference for the financial product linked to the account
+  product: Product
+  # Friendly name given to account by owner
   name: String
+  # Boolean flag to determine if account active
   active: Boolean
+  # Account status
   status: String
+  # Image background for an account
   image: String
-  organisation: String
+  # Reference for the organization of this account
+  organisation: Organisation
+  # Unix timestamp when the record was created
   ts: Int
-  tags: [String]
-  transactions: [Transaction]
+  # Array of tags
+  tags(
+    # Returns the first n elements from the list.
+    first: Int,
+    # Returns the elements in the list that come after the specified cursor.
+    after: String,
+    # Returns the last n elements from the list.
+    last: Int,
+    # Returns the elements in the list that come before the specified cursor.
+    before: String
+  ): TagConnection
+  # Account can have array of 0..n transactions
+  transactions(
+    # Returns the first n elements from the list.
+    first: Int,
+    # Returns the elements in the list that come after the specified cursor.
+    after: String,
+    # Returns the last n elements from the list.
+    last: Int,
+    # Returns the elements in the list that come before the specified cursor.
+    before: String
+  ): TransactionConnection
+  # Reference data of an account
   account_data: AccountData
+  # Account details suchs as IBAN, number and sort codes
   account_details: AccountDetails
-}
-
-type AccountDetails {
-  virtual_account_id: String
-  iban: String
-  account_number: String
-  sort_code: String
-  swift_bic: String
-  bank_code: String
-  routing_number: String
 }
 
 # The connection type for Account
@@ -9899,124 +9975,225 @@ type AccountEdge {
   cursor: String!
 }
 
+# Type to define optional inputs when creating an account
+input AccountInput {
+  # Friendly name given to account by owner
+  name: String
+}
+# Type to define account details
+type AccountDetails {
+  # virtual account id from clearbank
+  virtual_account_id: String
+  # account iban number
+  iban: String
+  # account number
+  account_number: String
+  # sort code for the account
+  sort_code: String
+  # swift/bic code for the account
+  swift_bic: String
+  # the bank code for the account servicer
+  bank_code: String
+  # account routing number required in US and Canada
+  routing_number: String
+}
+
 # Type to define the data of an account
 type AccountData {
-  accountHolderKey: String
-  accountHolderType: String
-  accountState: String
-  accountType: String
-  activationDate: String
-  approvedDate: String
-  assignedBranchKey: String
-  assignedCentreKey: String
-  assignedUserKey: String
-  closedDate: String
-  creationDate: String
-  creditArrangementKey: String
-  currencyCode: String
-  encodedKey: String
-  id: String
-  lastAccountAppraisalDate: String
-  lastInterestCalculationDate: String
-  lastInterestStoredDate: String
-  lastModifiedDate: String
-  lastOverdraftInterestReviewDate: String
-  lastSetToArrearsDate: String
-  lockedDate: String
-  maturityDate: String
-  migrationEventKey: String
+  # Unique roava ulid for the data record
+  id: ID!
+  # Key of the account holder
+  account_holder_key: String
+  # Type of holder type of the account
+  account_holder_type: String
+  # State of the account
+  account_state: String
+  # Type of Aaccount
+  account_type: String
+  # Date that the account was activated
+  activation_date: String
+  # Date that the account was approved
+  approved_date: String
+  # Key of the branch associated to the account
+  assigned_branch_key: String
+  # Key of the centre associated to the account
+  assigned_centre_key: String
+  # Key of the user associated to the account
+  assigned_user_key: String
+  # Date when the account was closed
+  closed_date: String
+  # Date when the account was created
+  creation_date: String
+  # Key to the credit arragement
+  credit_arrangement_key: String
+  # 3 digit code of the currency
+  currency_code: String
+  # Encoded key of the account
+  encoded_key: String
+  # Last date when the account was evaluated
+  last_account_appraisal_date: String
+  # Last date when the interest was calculated
+  last_interest_calculation_date: String
+  # Last date when the interest was stored
+  last_interest_stored_date: String
+  # Last date when the account was modified
+  last_modified_date: String
+  # Last date when the overdraft interest was reviewed
+  last_overdraft_interest_review_date: String
+  # Last date when the interest payments was arreared
+  last_set_to_arrears_date: String
+  # Date when the account was locked
+  locked_date: String
+  # Date when the account was considered mature
+  maturity_date: String
+  # Key of the migration event
+  migration_event_key: String
+  # Account Name
   name: String
+  # Notes about the account
   notes: String
-  productTypeKey: String
-  withholdingTaxSourceKey: String
-  overdraftSettings: OverdraftSettings
-  overdraftInterestSettings: OverdraftInterestSettings
-  linkedSettlementAccountKeys: [String]
-  internalControls: InternalControls
-  interestSettings: InterestSettings
+  # Key of the product type of the account
+  product_type_key: String
+  # Key in the source of the withholding tax
+  withholding_tax_source_key: String
+  # Reference to overdraft settings of the account
+  overdraft_settings: OverdraftSettings
+  # Reference to overdraft interest settings of the account
+  overdraft_interest_settings: OverdraftInterestSettings
+  # Array of settlements of the account
+  linked_settlement_account_keys: [String]
+  # Reference to internal controls of the account
+  internal_controls: InternalControls
+  # Reference to interest settings of the account
+  interest_settings: InterestSettings
+  # Reference to the balances of the account
   balances: Balances
-  accruedAmounts: AccruedAmounts
-}
-
-# Type to define the settings of an overdraft
-type OverdraftSettings {
-  allowOverdraft: Boolean
-  overdraftExpiryDate: String
-  overdraftLimit: Int
-}
-
-# Type to define the tiers of an interest rate
-type InterestRateTiers {
-  encodedKey: String
-  endingBalance: Int
-  endingDay: Int
-  interestRate: Int
-}
-
-# Type to define the settings of an interest rate
-type InterestRateSettings {
-  encodedKey: String
-  interestChargeFrequency: String
-  interestChargeFrequencyCount: Int
-  interestRate: Int
-  interestRateReviewCount: Int
-  interestRateReviewUnit: String
-  interestRateSource: String
-  interestRateTerms: String
-  interestSpread: Int
-  interestRateTiers: [InterestRateTiers]
-}
-
-# Type to define the settings of an interest overdraft
-type OverdraftInterestSettings {
-  interestRateSettings: InterestRateSettings
-}
-
-# Type to define the internal controls of an account
-type InternalControls {
-  maxDepositBalance: Int
-  maxWithdrawalAmount: Int
-  recommendedDepositAmount: Int
-  targetAmount: Int
-}
-
-# Type to define the interest payment settings
-type InterestPaymentSettings {
-  interestPaymentPoint: String
-  interestPaymentDates: [InterestPaymentDates]
-}
-
-# Type to define the balances o an account
-type Balances {
-  availableBalance: Int
-  blockedBalance: Int
-  feesDue: Int
-  forwardAvailableBalance: Int
-  holdBalance: Int
-  lockedBalance: Int
-  overdraftAmount: Int
-  overdraftInterestDue: Int
-  technicalOverdraftAmount: Int
-  technicalOverdraftInterestDue: Int
-  totalBalance: Int
+  # Reference to the accrued ammounts of the account
+  accrued_amounts: AccruedAmounts
 }
 
 # Type to define accrued amounts
 type AccruedAmounts {
-  interestAccrued: Int
-  negativeInterestAccrued: Int
-  overdraftInterestAccrued: Int
-  technicalOverdraftInterestAccrued: Int
+  # Accrued interest amount
+  interest_accrued: Int
+  # Negative interest amounts accrued
+  negative_interest_accrued: Int
+  # Overdraft interest accrued amount
+  overdraft_interest_accrued: Int
+  # Technical iverdraft interest accrued amount
+  technical_overdraft_interest_accrued: Int
+}
+
+# Type to define the balances o an account
+type Balances {
+  # Amount available in the account
+  available_balance: Int
+  # Amount blocked in the account
+  blocked_balance: Int
+  # Due date of the fees
+  fees_due: Int
+  # Forwarded available balance
+  forward_available_balance: Int
+  # Amount on hold in account
+  hold_balance: Int
+  # Locked ammount in account
+  locked_balance: Int
+  # Overdraft amount in account
+  overdraft_amount: Int
+  # Overdraft interest due date
+  overdraft_interest_due: Int
+  # Technical overdraft amount in account
+  technical_overdraft_amount: Int
+  # Technical overdraft interest due date
+  technical_overdraft_interest_due: Int
+  # Total account balance
+  total_balance: Int
+}
+
+# Type to define the interest payment settings
+type InterestPaymentSettings {
+  # The point of payment of the interest
+  interest_payment_point: String
+  # Array of interest payment dates
+  interest_payment_dates: [InterestPaymentDates]
+}
+
+# Type to define the internal controls of an account
+type InternalControls {
+  # Maximum deposit balance amount
+  max_deposit_balance: Int
+  # Maximum available amount to withdrawal
+  max_withdrawal_amount: Int
+  # Amount recommended to deposint in the account
+  recommended_deposit_amount: Int
+  # Targeted amount of an account
+  target_amount: Int
+}
+
+# Type to define the settings of an interest overdraft
+type OverdraftInterestSettings {
+  # Reference to the Interest Rate Settings
+  interest_rate_settings: InterestRateSettings
+}
+
+# Type to define the settings of an interest rate
+type InterestRateSettings {
+  # Interest Rate Settings encoded key
+  encoded_key: String
+  # String representating the frequency that the interest will be charged
+  interest_charge_frequency: String
+  # The charge frequency count of an interest
+  interest_charge_frequency_count: Int
+  # Interest rate amount
+  interest_rate: Int
+  # Interest Rate Review Count
+  interest_rate_review_count: Int
+  # String representating the review unit of an interest rate
+  interest_rate_review_unit: String
+  # String representating the interest rate source
+  interest_rate_source: String
+  # String representating the interest rate terms
+  interest_rate_terms: String
+  # The spread of the interes
+  interest_spread: Int
+  # Array of Interest Rate Tiers
+  interest_rate_tiers: [InterestRateTiers]
+}
+
+# Type to define the tiers of an interest rate
+type InterestRateTiers {
+  # Encoded key of the Interest Rate Tier
+  encoded_key: String
+  # Ending balance of the tier
+  ending_balance: Int
+  # Ending day of the tier
+  ending_day: Int
+  # Interest rate amount
+  interest_rate: Int
+}
+
+# Type to define the settings of an overdraft
+type OverdraftSettings {
+  # Boolean to define if overdraft is allowed
+  allow_overdraft: Boolean
+  # Date when the overdraft will expire
+  overdraft_expiry_date: String
+  # Overdraft Limit amount
+  overdraft_limit: Int
 }
 
 # https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/977600522/roava+transaction
 
 # Transaction shows changes and activities on customer accounts
 type Transaction {
-  id: String
-  ref: String
+  # Unique roava ulid for the data record
+  id: ID!
+  # Reference to the account that the transaction is happening
+  account: Account!
+  # Unix timestamp when the record was created
   ts: Int
-  encodedkey: String
+  # Reference to the data of the Transaction
+  transaction_data: TransactionData
 }
 
 # The connection type for Transaction
@@ -10070,11 +10247,19 @@ type TransactionData {
   # Reference to the details of the transaction
   transfer_details: TransferDetails
   # Array of fees applied to this transaction
-  fees: [String]
+  fees: [TransactionFee]
   # The values involved in the transaction calcule
   affected_amounts: AffectedAmounts
   # The balance of the account involved in the transaction
   account_balances: AccountBalances
+}
+
+type TransactionFee {
+  Amount: Int
+  Name: String
+  PredefinedFeeKey: String
+  TaxAmount: Int
+  Trigger: String
 }
 
 # Type to define an account balance in a Transaction
@@ -10110,6 +10295,7 @@ type TransferDetails {
   # Reference the loan linked to the transfer
   linked_loan_transaction_key: String
 }
+
 
 input SubmitProofInput {
   type: ProofType!
@@ -10298,6 +10484,90 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Account_tags_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *int64
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg0, err = ec.unmarshalOInt2ᚖint64(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+		arg1, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg1
+	var arg2 *int64
+	if tmp, ok := rawArgs["last"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("last"))
+		arg2, err = ec.unmarshalOInt2ᚖint64(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["last"] = arg2
+	var arg3 *string
+	if tmp, ok := rawArgs["before"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("before"))
+		arg3, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["before"] = arg3
+	return args, nil
+}
+
+func (ec *executionContext) field_Account_transactions_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *int64
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg0, err = ec.unmarshalOInt2ᚖint64(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+		arg1, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg1
+	var arg2 *int64
+	if tmp, ok := rawArgs["last"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("last"))
+		arg2, err = ec.unmarshalOInt2ᚖint64(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["last"] = arg2
+	var arg3 *string
+	if tmp, ok := rawArgs["before"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("before"))
+		arg3, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["before"] = arg3
+	return args, nil
+}
 
 func (ec *executionContext) field_CDD_validations_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -12519,6 +12789,15 @@ func (ec *executionContext) field_Query_transactions_args(ctx context.Context, r
 		}
 	}
 	args["before"] = arg3
+	var arg4 string
+	if tmp, ok := rawArgs["account"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("account"))
+		arg4, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["account"] = arg4
 	return args, nil
 }
 
@@ -13127,11 +13406,14 @@ func (ec *executionContext) _Account_id(ctx context.Context, field graphql.Colle
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Account_owner(ctx context.Context, field graphql.CollectedField, obj *types.Account) (ret graphql.Marshaler) {
@@ -13159,11 +13441,14 @@ func (ec *executionContext) _Account_owner(ctx context.Context, field graphql.Co
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(types.Owner)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalNOwner2msᚗapiᚋtypesᚐOwner(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Account_product(ctx context.Context, field graphql.CollectedField, obj *types.Account) (ret graphql.Marshaler) {
@@ -13193,9 +13478,9 @@ func (ec *executionContext) _Account_product(ctx context.Context, field graphql.
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(*types.Product)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalOProduct2ᚖmsᚗapiᚋtypesᚐProduct(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Account_name(ctx context.Context, field graphql.CollectedField, obj *types.Account) (ret graphql.Marshaler) {
@@ -13353,9 +13638,9 @@ func (ec *executionContext) _Account_organisation(ctx context.Context, field gra
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(*types.Organisation)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalOOrganisation2ᚖmsᚗapiᚋtypesᚐOrganisation(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Account_ts(ctx context.Context, field graphql.CollectedField, obj *types.Account) (ret graphql.Marshaler) {
@@ -13406,6 +13691,13 @@ func (ec *executionContext) _Account_tags(ctx context.Context, field graphql.Col
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Account_tags_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Tags, nil
@@ -13417,9 +13709,9 @@ func (ec *executionContext) _Account_tags(ctx context.Context, field graphql.Col
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]*string)
+	res := resTmp.(*types.TagConnection)
 	fc.Result = res
-	return ec.marshalOString2ᚕᚖstring(ctx, field.Selections, res)
+	return ec.marshalOTagConnection2ᚖmsᚗapiᚋtypesᚐTagConnection(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Account_transactions(ctx context.Context, field graphql.CollectedField, obj *types.Account) (ret graphql.Marshaler) {
@@ -13438,6 +13730,13 @@ func (ec *executionContext) _Account_transactions(ctx context.Context, field gra
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Account_transactions_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Transactions, nil
@@ -13449,9 +13748,9 @@ func (ec *executionContext) _Account_transactions(ctx context.Context, field gra
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]*types.Transaction)
+	res := resTmp.(*types.TransactionConnection)
 	fc.Result = res
-	return ec.marshalOTransaction2ᚕᚖmsᚗapiᚋtypesᚐTransaction(ctx, field.Selections, res)
+	return ec.marshalOTransactionConnection2ᚖmsᚗapiᚋtypesᚐTransactionConnection(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Account_account_data(ctx context.Context, field graphql.CollectedField, obj *types.Account) (ret graphql.Marshaler) {
@@ -13687,7 +13986,42 @@ func (ec *executionContext) _AccountConnection_totalCount(ctx context.Context, f
 	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _AccountData_accountHolderKey(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
+func (ec *executionContext) _AccountData_id(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "AccountData",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _AccountData_account_holder_key(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -13719,7 +14053,7 @@ func (ec *executionContext) _AccountData_accountHolderKey(ctx context.Context, f
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _AccountData_accountHolderType(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
+func (ec *executionContext) _AccountData_account_holder_type(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -13751,7 +14085,7 @@ func (ec *executionContext) _AccountData_accountHolderType(ctx context.Context, 
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _AccountData_accountState(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
+func (ec *executionContext) _AccountData_account_state(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -13783,7 +14117,7 @@ func (ec *executionContext) _AccountData_accountState(ctx context.Context, field
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _AccountData_accountType(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
+func (ec *executionContext) _AccountData_account_type(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -13815,7 +14149,7 @@ func (ec *executionContext) _AccountData_accountType(ctx context.Context, field 
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _AccountData_activationDate(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
+func (ec *executionContext) _AccountData_activation_date(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -13847,7 +14181,7 @@ func (ec *executionContext) _AccountData_activationDate(ctx context.Context, fie
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _AccountData_approvedDate(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
+func (ec *executionContext) _AccountData_approved_date(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -13879,7 +14213,7 @@ func (ec *executionContext) _AccountData_approvedDate(ctx context.Context, field
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _AccountData_assignedBranchKey(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
+func (ec *executionContext) _AccountData_assigned_branch_key(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -13911,7 +14245,7 @@ func (ec *executionContext) _AccountData_assignedBranchKey(ctx context.Context, 
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _AccountData_assignedCentreKey(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
+func (ec *executionContext) _AccountData_assigned_centre_key(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -13943,7 +14277,7 @@ func (ec *executionContext) _AccountData_assignedCentreKey(ctx context.Context, 
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _AccountData_assignedUserKey(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
+func (ec *executionContext) _AccountData_assigned_user_key(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -13975,7 +14309,7 @@ func (ec *executionContext) _AccountData_assignedUserKey(ctx context.Context, fi
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _AccountData_closedDate(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
+func (ec *executionContext) _AccountData_closed_date(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -14007,7 +14341,7 @@ func (ec *executionContext) _AccountData_closedDate(ctx context.Context, field g
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _AccountData_creationDate(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
+func (ec *executionContext) _AccountData_creation_date(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -14039,7 +14373,7 @@ func (ec *executionContext) _AccountData_creationDate(ctx context.Context, field
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _AccountData_creditArrangementKey(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
+func (ec *executionContext) _AccountData_credit_arrangement_key(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -14071,7 +14405,7 @@ func (ec *executionContext) _AccountData_creditArrangementKey(ctx context.Contex
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _AccountData_currencyCode(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
+func (ec *executionContext) _AccountData_currency_code(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -14103,7 +14437,7 @@ func (ec *executionContext) _AccountData_currencyCode(ctx context.Context, field
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _AccountData_encodedKey(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
+func (ec *executionContext) _AccountData_encoded_key(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -14135,39 +14469,7 @@ func (ec *executionContext) _AccountData_encodedKey(ctx context.Context, field g
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _AccountData_id(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "AccountData",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
-	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _AccountData_lastAccountAppraisalDate(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
+func (ec *executionContext) _AccountData_last_account_appraisal_date(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -14199,7 +14501,7 @@ func (ec *executionContext) _AccountData_lastAccountAppraisalDate(ctx context.Co
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _AccountData_lastInterestCalculationDate(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
+func (ec *executionContext) _AccountData_last_interest_calculation_date(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -14231,7 +14533,7 @@ func (ec *executionContext) _AccountData_lastInterestCalculationDate(ctx context
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _AccountData_lastInterestStoredDate(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
+func (ec *executionContext) _AccountData_last_interest_stored_date(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -14263,7 +14565,7 @@ func (ec *executionContext) _AccountData_lastInterestStoredDate(ctx context.Cont
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _AccountData_lastModifiedDate(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
+func (ec *executionContext) _AccountData_last_modified_date(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -14295,7 +14597,7 @@ func (ec *executionContext) _AccountData_lastModifiedDate(ctx context.Context, f
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _AccountData_lastOverdraftInterestReviewDate(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
+func (ec *executionContext) _AccountData_last_overdraft_interest_review_date(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -14327,7 +14629,7 @@ func (ec *executionContext) _AccountData_lastOverdraftInterestReviewDate(ctx con
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _AccountData_lastSetToArrearsDate(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
+func (ec *executionContext) _AccountData_last_set_to_arrears_date(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -14359,7 +14661,7 @@ func (ec *executionContext) _AccountData_lastSetToArrearsDate(ctx context.Contex
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _AccountData_lockedDate(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
+func (ec *executionContext) _AccountData_locked_date(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -14391,7 +14693,7 @@ func (ec *executionContext) _AccountData_lockedDate(ctx context.Context, field g
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _AccountData_maturityDate(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
+func (ec *executionContext) _AccountData_maturity_date(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -14423,7 +14725,7 @@ func (ec *executionContext) _AccountData_maturityDate(ctx context.Context, field
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _AccountData_migrationEventKey(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
+func (ec *executionContext) _AccountData_migration_event_key(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -14519,7 +14821,7 @@ func (ec *executionContext) _AccountData_notes(ctx context.Context, field graphq
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _AccountData_productTypeKey(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
+func (ec *executionContext) _AccountData_product_type_key(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -14551,7 +14853,7 @@ func (ec *executionContext) _AccountData_productTypeKey(ctx context.Context, fie
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _AccountData_withholdingTaxSourceKey(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
+func (ec *executionContext) _AccountData_withholding_tax_source_key(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -14583,7 +14885,7 @@ func (ec *executionContext) _AccountData_withholdingTaxSourceKey(ctx context.Con
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _AccountData_overdraftSettings(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
+func (ec *executionContext) _AccountData_overdraft_settings(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -14615,7 +14917,7 @@ func (ec *executionContext) _AccountData_overdraftSettings(ctx context.Context, 
 	return ec.marshalOOverdraftSettings2ᚖmsᚗapiᚋtypesᚐOverdraftSettings(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _AccountData_overdraftInterestSettings(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
+func (ec *executionContext) _AccountData_overdraft_interest_settings(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -14647,7 +14949,7 @@ func (ec *executionContext) _AccountData_overdraftInterestSettings(ctx context.C
 	return ec.marshalOOverdraftInterestSettings2ᚖmsᚗapiᚋtypesᚐOverdraftInterestSettings(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _AccountData_linkedSettlementAccountKeys(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
+func (ec *executionContext) _AccountData_linked_settlement_account_keys(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -14679,7 +14981,7 @@ func (ec *executionContext) _AccountData_linkedSettlementAccountKeys(ctx context
 	return ec.marshalOString2ᚕᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _AccountData_internalControls(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
+func (ec *executionContext) _AccountData_internal_controls(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -14711,7 +15013,7 @@ func (ec *executionContext) _AccountData_internalControls(ctx context.Context, f
 	return ec.marshalOInternalControls2ᚖmsᚗapiᚋtypesᚐInternalControls(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _AccountData_interestSettings(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
+func (ec *executionContext) _AccountData_interest_settings(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -14775,7 +15077,7 @@ func (ec *executionContext) _AccountData_balances(ctx context.Context, field gra
 	return ec.marshalOBalances2ᚖmsᚗapiᚋtypesᚐBalances(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _AccountData_accruedAmounts(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
+func (ec *executionContext) _AccountData_accrued_amounts(ctx context.Context, field graphql.CollectedField, obj *types.AccountData) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -15197,7 +15499,7 @@ func (ec *executionContext) _AccountingRules_gl_key(ctx context.Context, field g
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _AccruedAmounts_interestAccrued(ctx context.Context, field graphql.CollectedField, obj *types.AccruedAmounts) (ret graphql.Marshaler) {
+func (ec *executionContext) _AccruedAmounts_interest_accrued(ctx context.Context, field graphql.CollectedField, obj *types.AccruedAmounts) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -15229,7 +15531,7 @@ func (ec *executionContext) _AccruedAmounts_interestAccrued(ctx context.Context,
 	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _AccruedAmounts_negativeInterestAccrued(ctx context.Context, field graphql.CollectedField, obj *types.AccruedAmounts) (ret graphql.Marshaler) {
+func (ec *executionContext) _AccruedAmounts_negative_interest_accrued(ctx context.Context, field graphql.CollectedField, obj *types.AccruedAmounts) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -15261,7 +15563,7 @@ func (ec *executionContext) _AccruedAmounts_negativeInterestAccrued(ctx context.
 	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _AccruedAmounts_overdraftInterestAccrued(ctx context.Context, field graphql.CollectedField, obj *types.AccruedAmounts) (ret graphql.Marshaler) {
+func (ec *executionContext) _AccruedAmounts_overdraft_interest_accrued(ctx context.Context, field graphql.CollectedField, obj *types.AccruedAmounts) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -15293,7 +15595,7 @@ func (ec *executionContext) _AccruedAmounts_overdraftInterestAccrued(ctx context
 	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _AccruedAmounts_technicalOverdraftInterestAccrued(ctx context.Context, field graphql.CollectedField, obj *types.AccruedAmounts) (ret graphql.Marshaler) {
+func (ec *executionContext) _AccruedAmounts_technical_overdraft_interest_accrued(ctx context.Context, field graphql.CollectedField, obj *types.AccruedAmounts) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -16985,7 +17287,7 @@ func (ec *executionContext) _AuthTokens_refresh(ctx context.Context, field graph
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Balances_availableBalance(ctx context.Context, field graphql.CollectedField, obj *types.Balances) (ret graphql.Marshaler) {
+func (ec *executionContext) _Balances_available_balance(ctx context.Context, field graphql.CollectedField, obj *types.Balances) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -17017,7 +17319,7 @@ func (ec *executionContext) _Balances_availableBalance(ctx context.Context, fiel
 	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Balances_blockedBalance(ctx context.Context, field graphql.CollectedField, obj *types.Balances) (ret graphql.Marshaler) {
+func (ec *executionContext) _Balances_blocked_balance(ctx context.Context, field graphql.CollectedField, obj *types.Balances) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -17049,7 +17351,7 @@ func (ec *executionContext) _Balances_blockedBalance(ctx context.Context, field 
 	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Balances_feesDue(ctx context.Context, field graphql.CollectedField, obj *types.Balances) (ret graphql.Marshaler) {
+func (ec *executionContext) _Balances_fees_due(ctx context.Context, field graphql.CollectedField, obj *types.Balances) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -17081,7 +17383,7 @@ func (ec *executionContext) _Balances_feesDue(ctx context.Context, field graphql
 	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Balances_forwardAvailableBalance(ctx context.Context, field graphql.CollectedField, obj *types.Balances) (ret graphql.Marshaler) {
+func (ec *executionContext) _Balances_forward_available_balance(ctx context.Context, field graphql.CollectedField, obj *types.Balances) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -17113,7 +17415,7 @@ func (ec *executionContext) _Balances_forwardAvailableBalance(ctx context.Contex
 	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Balances_holdBalance(ctx context.Context, field graphql.CollectedField, obj *types.Balances) (ret graphql.Marshaler) {
+func (ec *executionContext) _Balances_hold_balance(ctx context.Context, field graphql.CollectedField, obj *types.Balances) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -17145,7 +17447,7 @@ func (ec *executionContext) _Balances_holdBalance(ctx context.Context, field gra
 	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Balances_lockedBalance(ctx context.Context, field graphql.CollectedField, obj *types.Balances) (ret graphql.Marshaler) {
+func (ec *executionContext) _Balances_locked_balance(ctx context.Context, field graphql.CollectedField, obj *types.Balances) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -17177,7 +17479,7 @@ func (ec *executionContext) _Balances_lockedBalance(ctx context.Context, field g
 	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Balances_overdraftAmount(ctx context.Context, field graphql.CollectedField, obj *types.Balances) (ret graphql.Marshaler) {
+func (ec *executionContext) _Balances_overdraft_amount(ctx context.Context, field graphql.CollectedField, obj *types.Balances) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -17209,7 +17511,7 @@ func (ec *executionContext) _Balances_overdraftAmount(ctx context.Context, field
 	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Balances_overdraftInterestDue(ctx context.Context, field graphql.CollectedField, obj *types.Balances) (ret graphql.Marshaler) {
+func (ec *executionContext) _Balances_overdraft_interest_due(ctx context.Context, field graphql.CollectedField, obj *types.Balances) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -17241,7 +17543,7 @@ func (ec *executionContext) _Balances_overdraftInterestDue(ctx context.Context, 
 	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Balances_technicalOverdraftAmount(ctx context.Context, field graphql.CollectedField, obj *types.Balances) (ret graphql.Marshaler) {
+func (ec *executionContext) _Balances_technical_overdraft_amount(ctx context.Context, field graphql.CollectedField, obj *types.Balances) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -17273,7 +17575,7 @@ func (ec *executionContext) _Balances_technicalOverdraftAmount(ctx context.Conte
 	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Balances_technicalOverdraftInterestDue(ctx context.Context, field graphql.CollectedField, obj *types.Balances) (ret graphql.Marshaler) {
+func (ec *executionContext) _Balances_technical_overdraft_interest_due(ctx context.Context, field graphql.CollectedField, obj *types.Balances) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -17305,7 +17607,7 @@ func (ec *executionContext) _Balances_technicalOverdraftInterestDue(ctx context.
 	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Balances_totalBalance(ctx context.Context, field graphql.CollectedField, obj *types.Balances) (ret graphql.Marshaler) {
+func (ec *executionContext) _Balances_total_balance(ctx context.Context, field graphql.CollectedField, obj *types.Balances) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -23618,7 +23920,7 @@ func (ec *executionContext) _InterestPaymentDates_month(ctx context.Context, fie
 	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _InterestPaymentSettings_interestPaymentPoint(ctx context.Context, field graphql.CollectedField, obj *types.InterestPaymentSettings) (ret graphql.Marshaler) {
+func (ec *executionContext) _InterestPaymentSettings_interest_payment_point(ctx context.Context, field graphql.CollectedField, obj *types.InterestPaymentSettings) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -23650,7 +23952,7 @@ func (ec *executionContext) _InterestPaymentSettings_interestPaymentPoint(ctx co
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _InterestPaymentSettings_interestPaymentDates(ctx context.Context, field graphql.CollectedField, obj *types.InterestPaymentSettings) (ret graphql.Marshaler) {
+func (ec *executionContext) _InterestPaymentSettings_interest_payment_dates(ctx context.Context, field graphql.CollectedField, obj *types.InterestPaymentSettings) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -23778,7 +24080,7 @@ func (ec *executionContext) _InterestRate_min_value(ctx context.Context, field g
 	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _InterestRateSettings_encodedKey(ctx context.Context, field graphql.CollectedField, obj *types.InterestRateSettings) (ret graphql.Marshaler) {
+func (ec *executionContext) _InterestRateSettings_encoded_key(ctx context.Context, field graphql.CollectedField, obj *types.InterestRateSettings) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -23810,7 +24112,7 @@ func (ec *executionContext) _InterestRateSettings_encodedKey(ctx context.Context
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _InterestRateSettings_interestChargeFrequency(ctx context.Context, field graphql.CollectedField, obj *types.InterestRateSettings) (ret graphql.Marshaler) {
+func (ec *executionContext) _InterestRateSettings_interest_charge_frequency(ctx context.Context, field graphql.CollectedField, obj *types.InterestRateSettings) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -23842,7 +24144,7 @@ func (ec *executionContext) _InterestRateSettings_interestChargeFrequency(ctx co
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _InterestRateSettings_interestChargeFrequencyCount(ctx context.Context, field graphql.CollectedField, obj *types.InterestRateSettings) (ret graphql.Marshaler) {
+func (ec *executionContext) _InterestRateSettings_interest_charge_frequency_count(ctx context.Context, field graphql.CollectedField, obj *types.InterestRateSettings) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -23874,7 +24176,7 @@ func (ec *executionContext) _InterestRateSettings_interestChargeFrequencyCount(c
 	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _InterestRateSettings_interestRate(ctx context.Context, field graphql.CollectedField, obj *types.InterestRateSettings) (ret graphql.Marshaler) {
+func (ec *executionContext) _InterestRateSettings_interest_rate(ctx context.Context, field graphql.CollectedField, obj *types.InterestRateSettings) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -23906,7 +24208,7 @@ func (ec *executionContext) _InterestRateSettings_interestRate(ctx context.Conte
 	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _InterestRateSettings_interestRateReviewCount(ctx context.Context, field graphql.CollectedField, obj *types.InterestRateSettings) (ret graphql.Marshaler) {
+func (ec *executionContext) _InterestRateSettings_interest_rate_review_count(ctx context.Context, field graphql.CollectedField, obj *types.InterestRateSettings) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -23938,7 +24240,7 @@ func (ec *executionContext) _InterestRateSettings_interestRateReviewCount(ctx co
 	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _InterestRateSettings_interestRateReviewUnit(ctx context.Context, field graphql.CollectedField, obj *types.InterestRateSettings) (ret graphql.Marshaler) {
+func (ec *executionContext) _InterestRateSettings_interest_rate_review_unit(ctx context.Context, field graphql.CollectedField, obj *types.InterestRateSettings) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -23970,7 +24272,7 @@ func (ec *executionContext) _InterestRateSettings_interestRateReviewUnit(ctx con
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _InterestRateSettings_interestRateSource(ctx context.Context, field graphql.CollectedField, obj *types.InterestRateSettings) (ret graphql.Marshaler) {
+func (ec *executionContext) _InterestRateSettings_interest_rate_source(ctx context.Context, field graphql.CollectedField, obj *types.InterestRateSettings) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -24002,7 +24304,7 @@ func (ec *executionContext) _InterestRateSettings_interestRateSource(ctx context
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _InterestRateSettings_interestRateTerms(ctx context.Context, field graphql.CollectedField, obj *types.InterestRateSettings) (ret graphql.Marshaler) {
+func (ec *executionContext) _InterestRateSettings_interest_rate_terms(ctx context.Context, field graphql.CollectedField, obj *types.InterestRateSettings) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -24034,7 +24336,7 @@ func (ec *executionContext) _InterestRateSettings_interestRateTerms(ctx context.
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _InterestRateSettings_interestSpread(ctx context.Context, field graphql.CollectedField, obj *types.InterestRateSettings) (ret graphql.Marshaler) {
+func (ec *executionContext) _InterestRateSettings_interest_spread(ctx context.Context, field graphql.CollectedField, obj *types.InterestRateSettings) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -24066,7 +24368,7 @@ func (ec *executionContext) _InterestRateSettings_interestSpread(ctx context.Con
 	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _InterestRateSettings_interestRateTiers(ctx context.Context, field graphql.CollectedField, obj *types.InterestRateSettings) (ret graphql.Marshaler) {
+func (ec *executionContext) _InterestRateSettings_interest_rate_tiers(ctx context.Context, field graphql.CollectedField, obj *types.InterestRateSettings) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -24098,7 +24400,7 @@ func (ec *executionContext) _InterestRateSettings_interestRateTiers(ctx context.
 	return ec.marshalOInterestRateTiers2ᚕᚖmsᚗapiᚋtypesᚐInterestRateTiers(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _InterestRateTiers_encodedKey(ctx context.Context, field graphql.CollectedField, obj *types.InterestRateTiers) (ret graphql.Marshaler) {
+func (ec *executionContext) _InterestRateTiers_encoded_key(ctx context.Context, field graphql.CollectedField, obj *types.InterestRateTiers) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -24130,7 +24432,7 @@ func (ec *executionContext) _InterestRateTiers_encodedKey(ctx context.Context, f
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _InterestRateTiers_endingBalance(ctx context.Context, field graphql.CollectedField, obj *types.InterestRateTiers) (ret graphql.Marshaler) {
+func (ec *executionContext) _InterestRateTiers_ending_balance(ctx context.Context, field graphql.CollectedField, obj *types.InterestRateTiers) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -24162,7 +24464,7 @@ func (ec *executionContext) _InterestRateTiers_endingBalance(ctx context.Context
 	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _InterestRateTiers_endingDay(ctx context.Context, field graphql.CollectedField, obj *types.InterestRateTiers) (ret graphql.Marshaler) {
+func (ec *executionContext) _InterestRateTiers_ending_day(ctx context.Context, field graphql.CollectedField, obj *types.InterestRateTiers) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -24194,7 +24496,7 @@ func (ec *executionContext) _InterestRateTiers_endingDay(ctx context.Context, fi
 	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _InterestRateTiers_interestRate(ctx context.Context, field graphql.CollectedField, obj *types.InterestRateTiers) (ret graphql.Marshaler) {
+func (ec *executionContext) _InterestRateTiers_interest_rate(ctx context.Context, field graphql.CollectedField, obj *types.InterestRateTiers) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -24645,7 +24947,7 @@ func (ec *executionContext) _InterestSettings_interest_payment_settings(ctx cont
 	return ec.marshalOInterestPaymentSettings2ᚖmsᚗapiᚋtypesᚐInterestPaymentSettings(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _InternalControls_maxDepositBalance(ctx context.Context, field graphql.CollectedField, obj *types.InternalControls) (ret graphql.Marshaler) {
+func (ec *executionContext) _InternalControls_max_deposit_balance(ctx context.Context, field graphql.CollectedField, obj *types.InternalControls) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -24677,7 +24979,7 @@ func (ec *executionContext) _InternalControls_maxDepositBalance(ctx context.Cont
 	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _InternalControls_maxWithdrawalAmount(ctx context.Context, field graphql.CollectedField, obj *types.InternalControls) (ret graphql.Marshaler) {
+func (ec *executionContext) _InternalControls_max_withdrawal_amount(ctx context.Context, field graphql.CollectedField, obj *types.InternalControls) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -24709,7 +25011,7 @@ func (ec *executionContext) _InternalControls_maxWithdrawalAmount(ctx context.Co
 	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _InternalControls_recommendedDepositAmount(ctx context.Context, field graphql.CollectedField, obj *types.InternalControls) (ret graphql.Marshaler) {
+func (ec *executionContext) _InternalControls_recommended_deposit_amount(ctx context.Context, field graphql.CollectedField, obj *types.InternalControls) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -24741,7 +25043,7 @@ func (ec *executionContext) _InternalControls_recommendedDepositAmount(ctx conte
 	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _InternalControls_targetAmount(ctx context.Context, field graphql.CollectedField, obj *types.InternalControls) (ret graphql.Marshaler) {
+func (ec *executionContext) _InternalControls_target_amount(ctx context.Context, field graphql.CollectedField, obj *types.InternalControls) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -27705,7 +28007,7 @@ func (ec *executionContext) _OrganisationEdge_cursor(ctx context.Context, field 
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _OverdraftInterestSettings_interestRateSettings(ctx context.Context, field graphql.CollectedField, obj *types.OverdraftInterestSettings) (ret graphql.Marshaler) {
+func (ec *executionContext) _OverdraftInterestSettings_interest_rate_settings(ctx context.Context, field graphql.CollectedField, obj *types.OverdraftInterestSettings) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -27865,7 +28167,7 @@ func (ec *executionContext) _OverdraftSetting_interest_settings(ctx context.Cont
 	return ec.marshalOInterestSettings2ᚖmsᚗapiᚋtypesᚐInterestSettings(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _OverdraftSettings_allowOverdraft(ctx context.Context, field graphql.CollectedField, obj *types.OverdraftSettings) (ret graphql.Marshaler) {
+func (ec *executionContext) _OverdraftSettings_allow_overdraft(ctx context.Context, field graphql.CollectedField, obj *types.OverdraftSettings) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -27897,7 +28199,7 @@ func (ec *executionContext) _OverdraftSettings_allowOverdraft(ctx context.Contex
 	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _OverdraftSettings_overdraftExpiryDate(ctx context.Context, field graphql.CollectedField, obj *types.OverdraftSettings) (ret graphql.Marshaler) {
+func (ec *executionContext) _OverdraftSettings_overdraft_expiry_date(ctx context.Context, field graphql.CollectedField, obj *types.OverdraftSettings) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -27929,7 +28231,7 @@ func (ec *executionContext) _OverdraftSettings_overdraftExpiryDate(ctx context.C
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _OverdraftSettings_overdraftLimit(ctx context.Context, field graphql.CollectedField, obj *types.OverdraftSettings) (ret graphql.Marshaler) {
+func (ec *executionContext) _OverdraftSettings_overdraft_limit(ctx context.Context, field graphql.CollectedField, obj *types.OverdraftSettings) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -34518,7 +34820,7 @@ func (ec *executionContext) _Query_transactions(ctx context.Context, field graph
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Transactions(rctx, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string))
+		return ec.resolvers.Query().Transactions(rctx, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string), args["account"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -38010,14 +38312,17 @@ func (ec *executionContext) _Transaction_id(ctx context.Context, field graphql.C
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Transaction_ref(ctx context.Context, field graphql.CollectedField, obj *types.Transaction) (ret graphql.Marshaler) {
+func (ec *executionContext) _Transaction_account(ctx context.Context, field graphql.CollectedField, obj *types.Transaction) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -38035,18 +38340,21 @@ func (ec *executionContext) _Transaction_ref(ctx context.Context, field graphql.
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Ref, nil
+		return obj.Account, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(*types.Account)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalNAccount2ᚖmsᚗapiᚋtypesᚐAccount(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Transaction_ts(ctx context.Context, field graphql.CollectedField, obj *types.Transaction) (ret graphql.Marshaler) {
@@ -38081,7 +38389,7 @@ func (ec *executionContext) _Transaction_ts(ctx context.Context, field graphql.C
 	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Transaction_encodedkey(ctx context.Context, field graphql.CollectedField, obj *types.Transaction) (ret graphql.Marshaler) {
+func (ec *executionContext) _Transaction_transaction_data(ctx context.Context, field graphql.CollectedField, obj *types.Transaction) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -38099,7 +38407,7 @@ func (ec *executionContext) _Transaction_encodedkey(ctx context.Context, field g
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Encodedkey, nil
+		return obj.TransactionData, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -38108,9 +38416,9 @@ func (ec *executionContext) _Transaction_encodedkey(ctx context.Context, field g
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(*types.TransactionData)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalOTransactionData2ᚖmsᚗapiᚋtypesᚐTransactionData(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _TransactionConnection_edges(ctx context.Context, field graphql.CollectedField, obj *types.TransactionConnection) (ret graphql.Marshaler) {
@@ -38728,9 +39036,9 @@ func (ec *executionContext) _TransactionData_fees(ctx context.Context, field gra
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]*string)
+	res := resTmp.([]*types.TransactionFee)
 	fc.Result = res
-	return ec.marshalOString2ᚕᚖstring(ctx, field.Selections, res)
+	return ec.marshalOTransactionFee2ᚕᚖmsᚗapiᚋtypesᚐTransactionFee(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _TransactionData_affected_amounts(ctx context.Context, field graphql.CollectedField, obj *types.TransactionData) (ret graphql.Marshaler) {
@@ -38865,6 +39173,166 @@ func (ec *executionContext) _TransactionEdge_cursor(ctx context.Context, field g
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _TransactionFee_Amount(ctx context.Context, field graphql.CollectedField, obj *types.TransactionFee) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "TransactionFee",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Amount, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int64)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _TransactionFee_Name(ctx context.Context, field graphql.CollectedField, obj *types.TransactionFee) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "TransactionFee",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _TransactionFee_PredefinedFeeKey(ctx context.Context, field graphql.CollectedField, obj *types.TransactionFee) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "TransactionFee",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PredefinedFeeKey, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _TransactionFee_TaxAmount(ctx context.Context, field graphql.CollectedField, obj *types.TransactionFee) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "TransactionFee",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TaxAmount, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int64)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _TransactionFee_Trigger(ctx context.Context, field graphql.CollectedField, obj *types.TransactionFee) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "TransactionFee",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Trigger, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _TransferDetails_linked_loan_transaction_key(ctx context.Context, field graphql.CollectedField, obj *types.TransferDetails) (ret graphql.Marshaler) {
@@ -41035,6 +41503,26 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputAccountInput(ctx context.Context, obj interface{}) (types.AccountInput, error) {
+	var it types.AccountInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			it.Name, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputActivityInput(ctx context.Context, obj interface{}) (types.ActivityInput, error) {
 	var it types.ActivityInput
 	var asMap = obj.(map[string]interface{})
@@ -42008,8 +42496,14 @@ func (ec *executionContext) _Account(ctx context.Context, sel ast.SelectionSet, 
 			out.Values[i] = graphql.MarshalString("Account")
 		case "id":
 			out.Values[i] = ec._Account_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "owner":
 			out.Values[i] = ec._Account_owner(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "product":
 			out.Values[i] = ec._Account_product(ctx, field, obj)
 		case "name":
@@ -42117,76 +42611,79 @@ func (ec *executionContext) _AccountData(ctx context.Context, sel ast.SelectionS
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("AccountData")
-		case "accountHolderKey":
-			out.Values[i] = ec._AccountData_accountHolderKey(ctx, field, obj)
-		case "accountHolderType":
-			out.Values[i] = ec._AccountData_accountHolderType(ctx, field, obj)
-		case "accountState":
-			out.Values[i] = ec._AccountData_accountState(ctx, field, obj)
-		case "accountType":
-			out.Values[i] = ec._AccountData_accountType(ctx, field, obj)
-		case "activationDate":
-			out.Values[i] = ec._AccountData_activationDate(ctx, field, obj)
-		case "approvedDate":
-			out.Values[i] = ec._AccountData_approvedDate(ctx, field, obj)
-		case "assignedBranchKey":
-			out.Values[i] = ec._AccountData_assignedBranchKey(ctx, field, obj)
-		case "assignedCentreKey":
-			out.Values[i] = ec._AccountData_assignedCentreKey(ctx, field, obj)
-		case "assignedUserKey":
-			out.Values[i] = ec._AccountData_assignedUserKey(ctx, field, obj)
-		case "closedDate":
-			out.Values[i] = ec._AccountData_closedDate(ctx, field, obj)
-		case "creationDate":
-			out.Values[i] = ec._AccountData_creationDate(ctx, field, obj)
-		case "creditArrangementKey":
-			out.Values[i] = ec._AccountData_creditArrangementKey(ctx, field, obj)
-		case "currencyCode":
-			out.Values[i] = ec._AccountData_currencyCode(ctx, field, obj)
-		case "encodedKey":
-			out.Values[i] = ec._AccountData_encodedKey(ctx, field, obj)
 		case "id":
 			out.Values[i] = ec._AccountData_id(ctx, field, obj)
-		case "lastAccountAppraisalDate":
-			out.Values[i] = ec._AccountData_lastAccountAppraisalDate(ctx, field, obj)
-		case "lastInterestCalculationDate":
-			out.Values[i] = ec._AccountData_lastInterestCalculationDate(ctx, field, obj)
-		case "lastInterestStoredDate":
-			out.Values[i] = ec._AccountData_lastInterestStoredDate(ctx, field, obj)
-		case "lastModifiedDate":
-			out.Values[i] = ec._AccountData_lastModifiedDate(ctx, field, obj)
-		case "lastOverdraftInterestReviewDate":
-			out.Values[i] = ec._AccountData_lastOverdraftInterestReviewDate(ctx, field, obj)
-		case "lastSetToArrearsDate":
-			out.Values[i] = ec._AccountData_lastSetToArrearsDate(ctx, field, obj)
-		case "lockedDate":
-			out.Values[i] = ec._AccountData_lockedDate(ctx, field, obj)
-		case "maturityDate":
-			out.Values[i] = ec._AccountData_maturityDate(ctx, field, obj)
-		case "migrationEventKey":
-			out.Values[i] = ec._AccountData_migrationEventKey(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "account_holder_key":
+			out.Values[i] = ec._AccountData_account_holder_key(ctx, field, obj)
+		case "account_holder_type":
+			out.Values[i] = ec._AccountData_account_holder_type(ctx, field, obj)
+		case "account_state":
+			out.Values[i] = ec._AccountData_account_state(ctx, field, obj)
+		case "account_type":
+			out.Values[i] = ec._AccountData_account_type(ctx, field, obj)
+		case "activation_date":
+			out.Values[i] = ec._AccountData_activation_date(ctx, field, obj)
+		case "approved_date":
+			out.Values[i] = ec._AccountData_approved_date(ctx, field, obj)
+		case "assigned_branch_key":
+			out.Values[i] = ec._AccountData_assigned_branch_key(ctx, field, obj)
+		case "assigned_centre_key":
+			out.Values[i] = ec._AccountData_assigned_centre_key(ctx, field, obj)
+		case "assigned_user_key":
+			out.Values[i] = ec._AccountData_assigned_user_key(ctx, field, obj)
+		case "closed_date":
+			out.Values[i] = ec._AccountData_closed_date(ctx, field, obj)
+		case "creation_date":
+			out.Values[i] = ec._AccountData_creation_date(ctx, field, obj)
+		case "credit_arrangement_key":
+			out.Values[i] = ec._AccountData_credit_arrangement_key(ctx, field, obj)
+		case "currency_code":
+			out.Values[i] = ec._AccountData_currency_code(ctx, field, obj)
+		case "encoded_key":
+			out.Values[i] = ec._AccountData_encoded_key(ctx, field, obj)
+		case "last_account_appraisal_date":
+			out.Values[i] = ec._AccountData_last_account_appraisal_date(ctx, field, obj)
+		case "last_interest_calculation_date":
+			out.Values[i] = ec._AccountData_last_interest_calculation_date(ctx, field, obj)
+		case "last_interest_stored_date":
+			out.Values[i] = ec._AccountData_last_interest_stored_date(ctx, field, obj)
+		case "last_modified_date":
+			out.Values[i] = ec._AccountData_last_modified_date(ctx, field, obj)
+		case "last_overdraft_interest_review_date":
+			out.Values[i] = ec._AccountData_last_overdraft_interest_review_date(ctx, field, obj)
+		case "last_set_to_arrears_date":
+			out.Values[i] = ec._AccountData_last_set_to_arrears_date(ctx, field, obj)
+		case "locked_date":
+			out.Values[i] = ec._AccountData_locked_date(ctx, field, obj)
+		case "maturity_date":
+			out.Values[i] = ec._AccountData_maturity_date(ctx, field, obj)
+		case "migration_event_key":
+			out.Values[i] = ec._AccountData_migration_event_key(ctx, field, obj)
 		case "name":
 			out.Values[i] = ec._AccountData_name(ctx, field, obj)
 		case "notes":
 			out.Values[i] = ec._AccountData_notes(ctx, field, obj)
-		case "productTypeKey":
-			out.Values[i] = ec._AccountData_productTypeKey(ctx, field, obj)
-		case "withholdingTaxSourceKey":
-			out.Values[i] = ec._AccountData_withholdingTaxSourceKey(ctx, field, obj)
-		case "overdraftSettings":
-			out.Values[i] = ec._AccountData_overdraftSettings(ctx, field, obj)
-		case "overdraftInterestSettings":
-			out.Values[i] = ec._AccountData_overdraftInterestSettings(ctx, field, obj)
-		case "linkedSettlementAccountKeys":
-			out.Values[i] = ec._AccountData_linkedSettlementAccountKeys(ctx, field, obj)
-		case "internalControls":
-			out.Values[i] = ec._AccountData_internalControls(ctx, field, obj)
-		case "interestSettings":
-			out.Values[i] = ec._AccountData_interestSettings(ctx, field, obj)
+		case "product_type_key":
+			out.Values[i] = ec._AccountData_product_type_key(ctx, field, obj)
+		case "withholding_tax_source_key":
+			out.Values[i] = ec._AccountData_withholding_tax_source_key(ctx, field, obj)
+		case "overdraft_settings":
+			out.Values[i] = ec._AccountData_overdraft_settings(ctx, field, obj)
+		case "overdraft_interest_settings":
+			out.Values[i] = ec._AccountData_overdraft_interest_settings(ctx, field, obj)
+		case "linked_settlement_account_keys":
+			out.Values[i] = ec._AccountData_linked_settlement_account_keys(ctx, field, obj)
+		case "internal_controls":
+			out.Values[i] = ec._AccountData_internal_controls(ctx, field, obj)
+		case "interest_settings":
+			out.Values[i] = ec._AccountData_interest_settings(ctx, field, obj)
 		case "balances":
 			out.Values[i] = ec._AccountData_balances(ctx, field, obj)
-		case "accruedAmounts":
-			out.Values[i] = ec._AccountData_accruedAmounts(ctx, field, obj)
+		case "accrued_amounts":
+			out.Values[i] = ec._AccountData_accrued_amounts(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -42305,14 +42802,14 @@ func (ec *executionContext) _AccruedAmounts(ctx context.Context, sel ast.Selecti
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("AccruedAmounts")
-		case "interestAccrued":
-			out.Values[i] = ec._AccruedAmounts_interestAccrued(ctx, field, obj)
-		case "negativeInterestAccrued":
-			out.Values[i] = ec._AccruedAmounts_negativeInterestAccrued(ctx, field, obj)
-		case "overdraftInterestAccrued":
-			out.Values[i] = ec._AccruedAmounts_overdraftInterestAccrued(ctx, field, obj)
-		case "technicalOverdraftInterestAccrued":
-			out.Values[i] = ec._AccruedAmounts_technicalOverdraftInterestAccrued(ctx, field, obj)
+		case "interest_accrued":
+			out.Values[i] = ec._AccruedAmounts_interest_accrued(ctx, field, obj)
+		case "negative_interest_accrued":
+			out.Values[i] = ec._AccruedAmounts_negative_interest_accrued(ctx, field, obj)
+		case "overdraft_interest_accrued":
+			out.Values[i] = ec._AccruedAmounts_overdraft_interest_accrued(ctx, field, obj)
+		case "technical_overdraft_interest_accrued":
+			out.Values[i] = ec._AccruedAmounts_technical_overdraft_interest_accrued(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -42693,28 +43190,28 @@ func (ec *executionContext) _Balances(ctx context.Context, sel ast.SelectionSet,
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Balances")
-		case "availableBalance":
-			out.Values[i] = ec._Balances_availableBalance(ctx, field, obj)
-		case "blockedBalance":
-			out.Values[i] = ec._Balances_blockedBalance(ctx, field, obj)
-		case "feesDue":
-			out.Values[i] = ec._Balances_feesDue(ctx, field, obj)
-		case "forwardAvailableBalance":
-			out.Values[i] = ec._Balances_forwardAvailableBalance(ctx, field, obj)
-		case "holdBalance":
-			out.Values[i] = ec._Balances_holdBalance(ctx, field, obj)
-		case "lockedBalance":
-			out.Values[i] = ec._Balances_lockedBalance(ctx, field, obj)
-		case "overdraftAmount":
-			out.Values[i] = ec._Balances_overdraftAmount(ctx, field, obj)
-		case "overdraftInterestDue":
-			out.Values[i] = ec._Balances_overdraftInterestDue(ctx, field, obj)
-		case "technicalOverdraftAmount":
-			out.Values[i] = ec._Balances_technicalOverdraftAmount(ctx, field, obj)
-		case "technicalOverdraftInterestDue":
-			out.Values[i] = ec._Balances_technicalOverdraftInterestDue(ctx, field, obj)
-		case "totalBalance":
-			out.Values[i] = ec._Balances_totalBalance(ctx, field, obj)
+		case "available_balance":
+			out.Values[i] = ec._Balances_available_balance(ctx, field, obj)
+		case "blocked_balance":
+			out.Values[i] = ec._Balances_blocked_balance(ctx, field, obj)
+		case "fees_due":
+			out.Values[i] = ec._Balances_fees_due(ctx, field, obj)
+		case "forward_available_balance":
+			out.Values[i] = ec._Balances_forward_available_balance(ctx, field, obj)
+		case "hold_balance":
+			out.Values[i] = ec._Balances_hold_balance(ctx, field, obj)
+		case "locked_balance":
+			out.Values[i] = ec._Balances_locked_balance(ctx, field, obj)
+		case "overdraft_amount":
+			out.Values[i] = ec._Balances_overdraft_amount(ctx, field, obj)
+		case "overdraft_interest_due":
+			out.Values[i] = ec._Balances_overdraft_interest_due(ctx, field, obj)
+		case "technical_overdraft_amount":
+			out.Values[i] = ec._Balances_technical_overdraft_amount(ctx, field, obj)
+		case "technical_overdraft_interest_due":
+			out.Values[i] = ec._Balances_technical_overdraft_interest_due(ctx, field, obj)
+		case "total_balance":
+			out.Values[i] = ec._Balances_total_balance(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -44175,10 +44672,10 @@ func (ec *executionContext) _InterestPaymentSettings(ctx context.Context, sel as
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("InterestPaymentSettings")
-		case "interestPaymentPoint":
-			out.Values[i] = ec._InterestPaymentSettings_interestPaymentPoint(ctx, field, obj)
-		case "interestPaymentDates":
-			out.Values[i] = ec._InterestPaymentSettings_interestPaymentDates(ctx, field, obj)
+		case "interest_payment_point":
+			out.Values[i] = ec._InterestPaymentSettings_interest_payment_point(ctx, field, obj)
+		case "interest_payment_dates":
+			out.Values[i] = ec._InterestPaymentSettings_interest_payment_dates(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -44229,26 +44726,26 @@ func (ec *executionContext) _InterestRateSettings(ctx context.Context, sel ast.S
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("InterestRateSettings")
-		case "encodedKey":
-			out.Values[i] = ec._InterestRateSettings_encodedKey(ctx, field, obj)
-		case "interestChargeFrequency":
-			out.Values[i] = ec._InterestRateSettings_interestChargeFrequency(ctx, field, obj)
-		case "interestChargeFrequencyCount":
-			out.Values[i] = ec._InterestRateSettings_interestChargeFrequencyCount(ctx, field, obj)
-		case "interestRate":
-			out.Values[i] = ec._InterestRateSettings_interestRate(ctx, field, obj)
-		case "interestRateReviewCount":
-			out.Values[i] = ec._InterestRateSettings_interestRateReviewCount(ctx, field, obj)
-		case "interestRateReviewUnit":
-			out.Values[i] = ec._InterestRateSettings_interestRateReviewUnit(ctx, field, obj)
-		case "interestRateSource":
-			out.Values[i] = ec._InterestRateSettings_interestRateSource(ctx, field, obj)
-		case "interestRateTerms":
-			out.Values[i] = ec._InterestRateSettings_interestRateTerms(ctx, field, obj)
-		case "interestSpread":
-			out.Values[i] = ec._InterestRateSettings_interestSpread(ctx, field, obj)
-		case "interestRateTiers":
-			out.Values[i] = ec._InterestRateSettings_interestRateTiers(ctx, field, obj)
+		case "encoded_key":
+			out.Values[i] = ec._InterestRateSettings_encoded_key(ctx, field, obj)
+		case "interest_charge_frequency":
+			out.Values[i] = ec._InterestRateSettings_interest_charge_frequency(ctx, field, obj)
+		case "interest_charge_frequency_count":
+			out.Values[i] = ec._InterestRateSettings_interest_charge_frequency_count(ctx, field, obj)
+		case "interest_rate":
+			out.Values[i] = ec._InterestRateSettings_interest_rate(ctx, field, obj)
+		case "interest_rate_review_count":
+			out.Values[i] = ec._InterestRateSettings_interest_rate_review_count(ctx, field, obj)
+		case "interest_rate_review_unit":
+			out.Values[i] = ec._InterestRateSettings_interest_rate_review_unit(ctx, field, obj)
+		case "interest_rate_source":
+			out.Values[i] = ec._InterestRateSettings_interest_rate_source(ctx, field, obj)
+		case "interest_rate_terms":
+			out.Values[i] = ec._InterestRateSettings_interest_rate_terms(ctx, field, obj)
+		case "interest_spread":
+			out.Values[i] = ec._InterestRateSettings_interest_spread(ctx, field, obj)
+		case "interest_rate_tiers":
+			out.Values[i] = ec._InterestRateSettings_interest_rate_tiers(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -44271,14 +44768,14 @@ func (ec *executionContext) _InterestRateTiers(ctx context.Context, sel ast.Sele
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("InterestRateTiers")
-		case "encodedKey":
-			out.Values[i] = ec._InterestRateTiers_encodedKey(ctx, field, obj)
-		case "endingBalance":
-			out.Values[i] = ec._InterestRateTiers_endingBalance(ctx, field, obj)
-		case "endingDay":
-			out.Values[i] = ec._InterestRateTiers_endingDay(ctx, field, obj)
-		case "interestRate":
-			out.Values[i] = ec._InterestRateTiers_interestRate(ctx, field, obj)
+		case "encoded_key":
+			out.Values[i] = ec._InterestRateTiers_encoded_key(ctx, field, obj)
+		case "ending_balance":
+			out.Values[i] = ec._InterestRateTiers_ending_balance(ctx, field, obj)
+		case "ending_day":
+			out.Values[i] = ec._InterestRateTiers_ending_day(ctx, field, obj)
+		case "interest_rate":
+			out.Values[i] = ec._InterestRateTiers_interest_rate(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -44352,14 +44849,14 @@ func (ec *executionContext) _InternalControls(ctx context.Context, sel ast.Selec
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("InternalControls")
-		case "maxDepositBalance":
-			out.Values[i] = ec._InternalControls_maxDepositBalance(ctx, field, obj)
-		case "maxWithdrawalAmount":
-			out.Values[i] = ec._InternalControls_maxWithdrawalAmount(ctx, field, obj)
-		case "recommendedDepositAmount":
-			out.Values[i] = ec._InternalControls_recommendedDepositAmount(ctx, field, obj)
-		case "targetAmount":
-			out.Values[i] = ec._InternalControls_targetAmount(ctx, field, obj)
+		case "max_deposit_balance":
+			out.Values[i] = ec._InternalControls_max_deposit_balance(ctx, field, obj)
+		case "max_withdrawal_amount":
+			out.Values[i] = ec._InternalControls_max_withdrawal_amount(ctx, field, obj)
+		case "recommended_deposit_amount":
+			out.Values[i] = ec._InternalControls_recommended_deposit_amount(ctx, field, obj)
+		case "target_amount":
+			out.Values[i] = ec._InternalControls_target_amount(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -44912,8 +45409,8 @@ func (ec *executionContext) _OverdraftInterestSettings(ctx context.Context, sel 
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("OverdraftInterestSettings")
-		case "interestRateSettings":
-			out.Values[i] = ec._OverdraftInterestSettings_interestRateSettings(ctx, field, obj)
+		case "interest_rate_settings":
+			out.Values[i] = ec._OverdraftInterestSettings_interest_rate_settings(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -44966,12 +45463,12 @@ func (ec *executionContext) _OverdraftSettings(ctx context.Context, sel ast.Sele
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("OverdraftSettings")
-		case "allowOverdraft":
-			out.Values[i] = ec._OverdraftSettings_allowOverdraft(ctx, field, obj)
-		case "overdraftExpiryDate":
-			out.Values[i] = ec._OverdraftSettings_overdraftExpiryDate(ctx, field, obj)
-		case "overdraftLimit":
-			out.Values[i] = ec._OverdraftSettings_overdraftLimit(ctx, field, obj)
+		case "allow_overdraft":
+			out.Values[i] = ec._OverdraftSettings_allow_overdraft(ctx, field, obj)
+		case "overdraft_expiry_date":
+			out.Values[i] = ec._OverdraftSettings_overdraft_expiry_date(ctx, field, obj)
+		case "overdraft_limit":
+			out.Values[i] = ec._OverdraftSettings_overdraft_limit(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -47405,12 +47902,18 @@ func (ec *executionContext) _Transaction(ctx context.Context, sel ast.SelectionS
 			out.Values[i] = graphql.MarshalString("Transaction")
 		case "id":
 			out.Values[i] = ec._Transaction_id(ctx, field, obj)
-		case "ref":
-			out.Values[i] = ec._Transaction_ref(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "account":
+			out.Values[i] = ec._Transaction_account(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "ts":
 			out.Values[i] = ec._Transaction_ts(ctx, field, obj)
-		case "encodedkey":
-			out.Values[i] = ec._Transaction_encodedkey(ctx, field, obj)
+		case "transaction_data":
+			out.Values[i] = ec._Transaction_transaction_data(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -47541,6 +48044,38 @@ func (ec *executionContext) _TransactionEdge(ctx context.Context, sel ast.Select
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var transactionFeeImplementors = []string{"TransactionFee"}
+
+func (ec *executionContext) _TransactionFee(ctx context.Context, sel ast.SelectionSet, obj *types.TransactionFee) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, transactionFeeImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("TransactionFee")
+		case "Amount":
+			out.Values[i] = ec._TransactionFee_Amount(ctx, field, obj)
+		case "Name":
+			out.Values[i] = ec._TransactionFee_Name(ctx, field, obj)
+		case "PredefinedFeeKey":
+			out.Values[i] = ec._TransactionFee_PredefinedFeeKey(ctx, field, obj)
+		case "TaxAmount":
+			out.Values[i] = ec._TransactionFee_TaxAmount(ctx, field, obj)
+		case "Trigger":
+			out.Values[i] = ec._TransactionFee_Trigger(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -53006,7 +53541,28 @@ func (ec *executionContext) marshalOTaskConnection2ᚖmsᚗapiᚋtypesᚐTaskCon
 	return ec._TaskConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOTransaction2ᚕᚖmsᚗapiᚋtypesᚐTransaction(ctx context.Context, sel ast.SelectionSet, v []*types.Transaction) graphql.Marshaler {
+func (ec *executionContext) marshalOTransaction2ᚖmsᚗapiᚋtypesᚐTransaction(ctx context.Context, sel ast.SelectionSet, v *types.Transaction) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Transaction(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOTransactionConnection2ᚖmsᚗapiᚋtypesᚐTransactionConnection(ctx context.Context, sel ast.SelectionSet, v *types.TransactionConnection) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._TransactionConnection(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOTransactionData2ᚖmsᚗapiᚋtypesᚐTransactionData(ctx context.Context, sel ast.SelectionSet, v *types.TransactionData) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._TransactionData(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOTransactionFee2ᚕᚖmsᚗapiᚋtypesᚐTransactionFee(ctx context.Context, sel ast.SelectionSet, v []*types.TransactionFee) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -53033,7 +53589,7 @@ func (ec *executionContext) marshalOTransaction2ᚕᚖmsᚗapiᚋtypesᚐTransac
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOTransaction2ᚖmsᚗapiᚋtypesᚐTransaction(ctx, sel, v[i])
+			ret[i] = ec.marshalOTransactionFee2ᚖmsᚗapiᚋtypesᚐTransactionFee(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -53046,18 +53602,11 @@ func (ec *executionContext) marshalOTransaction2ᚕᚖmsᚗapiᚋtypesᚐTransac
 	return ret
 }
 
-func (ec *executionContext) marshalOTransaction2ᚖmsᚗapiᚋtypesᚐTransaction(ctx context.Context, sel ast.SelectionSet, v *types.Transaction) graphql.Marshaler {
+func (ec *executionContext) marshalOTransactionFee2ᚖmsᚗapiᚋtypesᚐTransactionFee(ctx context.Context, sel ast.SelectionSet, v *types.TransactionFee) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
-	return ec._Transaction(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOTransactionConnection2ᚖmsᚗapiᚋtypesᚐTransactionConnection(ctx context.Context, sel ast.SelectionSet, v *types.TransactionConnection) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._TransactionConnection(ctx, sel, v)
+	return ec._TransactionFee(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOTransferDetails2ᚖmsᚗapiᚋtypesᚐTransferDetails(ctx context.Context, sel ast.SelectionSet, v *types.TransferDetails) graphql.Marshaler {

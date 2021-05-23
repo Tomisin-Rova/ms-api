@@ -418,6 +418,8 @@ type Query {
     last: Int,
     # Returns the elements in the list that come before the specified cursor.
     before: String
+    # Filter transactions by an account id
+    account: ID!
   ): TransactionConnection
   # get an record of an accepted document term by an individual by ID
   acceptance(

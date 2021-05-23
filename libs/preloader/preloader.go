@@ -8,6 +8,7 @@ import (
 //go:generate mockgen -source=preloader.go -destination=../../mocks/preloader_mock.go -package=mocks
 type Preloader interface {
 	GetPreloads(ctx context.Context) []string
+	GetArgMap(ctx context.Context, field string) map[string]interface{}
 }
 
 type GQLPreloader struct{}
@@ -21,6 +22,19 @@ func (g GQLPreloader) GetPreloads(ctx context.Context) []string {
 		"",
 	)
 }
+
+// getArgMap returns the argument map for a specified field from the gqlgen field collector
+func (g GQLPreloader) GetArgMap(ctx context.Context, field string) map[string]interface{} {
+	var argMap map[string]interface{}
+	for _, f := range graphql.CollectFieldsCtx(ctx, nil) {
+		if f.Name == field {
+			argMap = f.ArgumentMap(nil)
+			break
+		}
+	}
+	return argMap
+}
+
 func getNestedPreloads(ctx *graphql.OperationContext, fields []graphql.CollectedField, prefix string) (preloads []string) {
 	for _, column := range fields {
 		prefixColumn := getPreloadString(prefix, column.Name)
@@ -29,6 +43,7 @@ func getNestedPreloads(ctx *graphql.OperationContext, fields []graphql.Collected
 	}
 	return
 }
+
 func getPreloadString(prefix, name string) string {
 	if len(prefix) > 0 {
 		return prefix + "." + name

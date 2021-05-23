@@ -45,3 +45,70 @@ func TestGQLMapper_HydrateProduct(t *testing.T) {
 	assert.Equal(t, from.Details.OverdraftSetting.AllowTechnicalOverdraft, *product.Details.OverdraftSetting.AllowTechnicalOverdraft)
 	assert.Equal(t, from.Details.OverdraftSetting.InterestSettings.RateTiers[0].EndingBalance, *product.Details.OverdraftSetting.InterestSettings.RateTiers[0].EndingBalance)
 }
+
+func TestGQLMapper_HydrateAccount(t *testing.T) {
+	mapper := &GQLMapper{}
+
+	from := &pb.Account{
+		Id:    "id",
+		Owner: "owner",
+		AccountData: &pb.AccountData{
+			Name: "name",
+		},
+	}
+
+	var account types.Account
+	err := mapper.Hydrate(from, &account)
+	assert.Nil(t, err)
+
+	assert.NotNil(t, account)
+	assert.Equal(t, from.Id, account.ID)
+}
+
+func TestGQLMapper_HydrateTransaction(t *testing.T) {
+	mapper := &GQLMapper{}
+
+	from := &pb.Transaction{
+		Id: "id",
+		Account: &pb.Account{
+			Id:    "accountId",
+			Owner: "owner",
+		},
+		TransactionData: &pb.TransactionData{
+			Id:     "id",
+			Amount: 123,
+			Fees: []*pb.TransactionFee{{
+				Name: "name",
+			}},
+			AffectedAmounts: &pb.AffectedAmounts{
+				FeesAmount: 43,
+			},
+		},
+	}
+
+	var transaction types.Transaction
+	err := mapper.Hydrate(from, &transaction)
+	assert.Nil(t, err)
+
+	assert.Nil(t, err)
+	assert.Equal(t, from.Id, transaction.ID)
+	assert.Equal(t, from.Account.Id, transaction.Account.ID)
+	assert.Equal(t, from.TransactionData.Fees[0].Name, *transaction.TransactionData.Fees[0].Name)
+}
+
+func TestGQLMapper_HydrateTag(t *testing.T) {
+	mapper := &GQLMapper{}
+
+	from := &pb.Tag{
+		Id:   "id",
+		Name: "name",
+	}
+
+	var tag types.Tag
+	err := mapper.Hydrate(from, &tag)
+	assert.Nil(t, err)
+
+	assert.NotNil(t, tag)
+	assert.Equal(t, from.Id, tag.ID)
+	assert.Equal(t, from.Name, *tag.Name)
+}

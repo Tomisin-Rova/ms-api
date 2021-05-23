@@ -656,6 +656,26 @@ func (r *queryResolver) Account(ctx context.Context, id string) (*types.Account,
 	if err != nil {
 		return nil, ErrUnAuthenticated
 	}
+
+	preloads := r.preloader.GetPreloads(ctx)
+
+	var opts struct {
+		ProductRequested      bool
+		TagsRequested         bool
+		TransactionsRequested bool
+	}
+	for _, item := range preloads {
+		if item == "product" {
+			opts.ProductRequested = true
+		}
+		if item == "tags" {
+			opts.TagsRequested = true
+		}
+		if item == "transactions" {
+			opts.TagsRequested = true
+		}
+	}
+
 	account, err := r.accountService.GetAccount(ctx, &accountService.GetAccountRequest{
 		Id:         id,
 		IdentityId: claims.IdentityId,
@@ -664,8 +684,124 @@ func (r *queryResolver) Account(ctx context.Context, id string) (*types.Account,
 		r.logger.Error("failed to get account", zap.Error(err))
 		return nil, err
 	}
-	p := r.hydrateAccount(account)
-	return p, nil
+
+	var accountRes types.Account
+	if err := r.mapper.Hydrate(account, &accountRes); err != nil {
+		err := mainErrors.Format(mainErrors.InternalErr, nil)
+		r.logger.Error("debug", zap.Error(err))
+		return nil, err
+	}
+
+	// Add Products if requested
+	if opts.ProductRequested {
+		product, err := r.accountService.GetProduct(ctx, &accountService.GetProductRequest{Id: account.Product})
+		if err != nil {
+			r.logger.Error("failed to get product", zap.Error(err))
+			return nil, err
+		}
+
+		var productRes types.Product
+		if err := r.mapper.Hydrate(product, &productRes); err != nil {
+			err := mainErrors.Format(mainErrors.InternalErr, nil)
+			r.logger.Error("debug", zap.Error(err))
+			return nil, err
+		}
+		accountRes.Product = &productRes
+	}
+
+	// Add Transactions if requested
+	if opts.TransactionsRequested && account.Transactions != nil {
+		var transactionRes []*types.Transaction
+		for _, p := range account.Transactions {
+			var transaction types.Transaction
+			if err := r.mapper.Hydrate(p, &transaction); err != nil {
+				err := mainErrors.Format(mainErrors.InternalErr, nil)
+				r.logger.Error("debug", zap.Error(err))
+				return nil, err
+			}
+
+			transactionRes = append(transactionRes, &transaction)
+		}
+
+		transArgMap := r.preloader.GetArgMap(ctx, "Transactions")
+		transConnInput := r.getConnInput(transArgMap)
+
+		edger := func(p *types.Transaction, offset int) connections.Edge {
+			return types.TransactionEdge{
+				Node:   p,
+				Cursor: connections.OffsetToCursor(offset),
+			}
+		}
+
+		conn := func(edges []*types.TransactionEdge, nodes []*types.Transaction, info *types.PageInfo, totalCount int) (*types.TransactionConnection, error) {
+			var transactionNodes []*types.Transaction
+			transactionNodes = append(transactionNodes, nodes...)
+
+			return &types.TransactionConnection{
+				Edges:      edges,
+				Nodes:      transactionNodes,
+				PageInfo:   info,
+				TotalCount: Int64(int64(totalCount)),
+			}, nil
+		}
+
+		transConn, err := connections.TransactionConnectionCon(transactionRes, edger, conn, transConnInput)
+		if err != nil {
+			err := mainErrors.Format(mainErrors.InternalErr, err)
+			r.logger.Error("debug", zap.Error(err))
+			return nil, err
+		}
+
+		accountRes.Transactions = transConn
+	}
+
+	// Add Tags if requested
+	if opts.TagsRequested && account.Tags != nil {
+		var tagsRes []*types.Tag
+		for _, p := range account.Tags {
+			var tag types.Tag
+			if err := r.mapper.Hydrate(p, &tag); err != nil {
+				err := mainErrors.Format(mainErrors.InternalErr, nil)
+				r.logger.Error("debug", zap.Error(err))
+				return nil, err
+			}
+
+			tagsRes = append(tagsRes, &tag)
+		}
+
+		tagsArgMap := r.preloader.GetArgMap(ctx, "Tags")
+		tagsConnInput := r.getConnInput(tagsArgMap)
+
+		edger := func(p *types.Tag, offset int) connections.Edge {
+			return types.TagEdge{
+				Node:   p,
+				Cursor: connections.OffsetToCursor(offset),
+			}
+		}
+
+		conn := func(edges []*types.TagEdge, nodes []*types.Tag, info *types.PageInfo, totalCount int) (*types.TagConnection, error) {
+			var TagNodes []*types.Tag
+			TagNodes = append(TagNodes, nodes...)
+
+			return &types.TagConnection{
+				Edges:      edges,
+				Nodes:      TagNodes,
+				PageInfo:   info,
+				TotalCount: Int64(int64(totalCount)),
+			}, nil
+		}
+
+		tagsConn, err := connections.TagConnectionCon(tagsRes, edger, conn, tagsConnInput)
+		if err != nil {
+			err := mainErrors.Format(mainErrors.InternalErr, err)
+			r.logger.Error("debug", zap.Error(err))
+			return nil, err
+		}
+
+		accountRes.Tags = tagsConn
+	}
+
+	return &accountRes, nil
 }
 
 func (r *queryResolver) Accounts(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.AccountConnection, error) {
@@ -673,6 +809,26 @@ func (r *queryResolver) Accounts(ctx context.Context, first *int64, after *strin
 	if err != nil {
 		return nil, ErrUnAuthenticated
 	}
+
+	preloads := r.preloader.GetPreloads(ctx)
+
+	var opts struct {
+		ProductRequested      bool
+		TagsRequested         bool
+		TransactionsRequested bool
+	}
+	for _, item := range preloads {
+		if item == "product" {
+			opts.ProductRequested = true
+		}
+		if item == "tags" {
+			opts.TagsRequested = true
+		}
+		if item == "transactions" {
+			opts.TagsRequested = true
+		}
+	}
+
 	accounts, err := r.accountService.GetAccounts(ctx, &accountService.GetAccountsRequest{
 		IdentityId: claims.IdentityId,
 	})
@@ -707,13 +863,128 @@ func (r *queryResolver) Accounts(ctx context.Context, first *int64, after *strin
 		}, nil
 	}
 
-	var accountRes []*types.Account
+	var accountsRes []*types.Account
 	for _, c := range accounts.Accounts {
-		p := r.hydrateAccount(c)
-		accountRes = append(accountRes, p)
+		var account types.Account
+		if err := r.mapper.Hydrate(c, &account); err != nil {
+			err := mainErrors.Format(mainErrors.InternalErr, nil)
+			r.logger.Error("debug", zap.Error(err))
+			return nil, err
+		}
+
+		// Add Products if requested
+		if opts.ProductRequested {
+			product, err := r.accountService.GetProduct(ctx, &accountService.GetProductRequest{Id: account.Product.ID})
+			if err != nil {
+				r.logger.Error("failed to get product", zap.Error(err))
+				return nil, err
+			}
+
+			var productRes types.Product
+			if err := r.mapper.Hydrate(product, &productRes); err != nil {
+				err := mainErrors.Format(mainErrors.InternalErr, nil)
+				r.logger.Error("debug", zap.Error(err))
+				return nil, err
+			}
+			account.Product = &productRes
+		}
+
+		// Add Transactions if requested
+		if opts.TransactionsRequested && account.Transactions != nil {
+			var transactionRes []*types.Transaction
+			for _, p := range c.Transactions {
+				var transaction types.Transaction
+				if err := r.mapper.Hydrate(p, &transaction); err != nil {
+					err := mainErrors.Format(mainErrors.InternalErr, nil)
+					r.logger.Error("debug", zap.Error(err))
+					return nil, err
+				}
+
+				transactionRes = append(transactionRes, &transaction)
+			}
+
+			transArgMap := r.preloader.GetArgMap(ctx, "Transactions")
+			transConnInput := r.getConnInput(transArgMap)
+
+			edger := func(p *types.Transaction, offset int) connections.Edge {
+				return types.TransactionEdge{
+					Node:   p,
+					Cursor: connections.OffsetToCursor(offset),
+				}
+			}
+
+			conn := func(edges []*types.TransactionEdge, nodes []*types.Transaction, info *types.PageInfo, totalCount int) (*types.TransactionConnection, error) {
+				var transactionNodes []*types.Transaction
+				transactionNodes = append(transactionNodes, nodes...)
+
+				return &types.TransactionConnection{
+					Edges:      edges,
+					Nodes:      transactionNodes,
+					PageInfo:   info,
+					TotalCount: Int64(int64(totalCount)),
+				}, nil
+			}
+
+			transConn, err := connections.TransactionConnectionCon(transactionRes, edger, conn, transConnInput)
+			if err != nil {
+				err := mainErrors.Format(mainErrors.InternalErr, err)
+				r.logger.Error("debug", zap.Error(err))
+				return nil, err
+			}
+
+			account.Transactions = transConn
+		}
+
+		// Add Tags if requested
+		if opts.TagsRequested && account.Tags != nil {
+			var tagsRes []*types.Tag
+			for _, p := range c.Tags {
+				var tag types.Tag
+				if err := r.mapper.Hydrate(p, &tag); err != nil {
+					err := mainErrors.Format(mainErrors.InternalErr, nil)
+					r.logger.Error("debug", zap.Error(err))
+					return nil, err
+				}
+
+				tagsRes = append(tagsRes, &tag)
+			}
+
+			tagsArgMap := r.preloader.GetArgMap(ctx, "Tags")
+			tagsConnInput := r.getConnInput(tagsArgMap)
+
+			edger := func(p *types.Tag, offset int) connections.Edge {
+				return types.TagEdge{
+					Node:   p,
+					Cursor: connections.OffsetToCursor(offset),
+				}
+			}
+
+			conn := func(edges []*types.TagEdge, nodes []*types.Tag, info *types.PageInfo, totalCount int) (*types.TagConnection, error) {
+				var TagNodes []*types.Tag
+				TagNodes = append(TagNodes, nodes...)
+
+				return &types.TagConnection{
+					Edges:      edges,
+					Nodes:      TagNodes,
+					PageInfo:   info,
+					TotalCount: Int64(int64(totalCount)),
+				}, nil
+			}
+
+			tagsConn, err := connections.TagConnectionCon(tagsRes, edger, conn, tagsConnInput)
+			if err != nil {
+				err := mainErrors.Format(mainErrors.InternalErr, err)
+				r.logger.Error("debug", zap.Error(err))
+				return nil, err
+			}
+
+			account.Tags = tagsConn
+		}
+
+		accountsRes = append(accountsRes, &account)
 	}
 
-	return connections.AccountConnectionCon(accountRes, edger, conn, input)
+	return connections.AccountConnectionCon(accountsRes, edger, conn, input)
 }
 
 func (r *queryResolver) Payee(ctx context.Context, id string) (*types.Payee, error) {
@@ -853,11 +1124,97 @@ func (r *queryResolver) Payees(ctx context.Context, first *int64, after *string,
 }
 
 func (r *queryResolver) Transaction(ctx context.Context, id string) (*types.Transaction, error) {
-	panic(fmt.Errorf("not implemented"))
+	_, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+	transaction, err := r.accountService.GetTransaction(ctx, &accountService.GetTransactionRequest{
+		Id: id,
+	})
+	if err != nil {
+		r.logger.Error("failed to get transaction", zap.Error(err))
+		return nil, err
+	}
+	var transactionRes types.Transaction
+	if err := r.mapper.Hydrate(transaction, &transactionRes); err != nil {
+		err := mainErrors.Format(mainErrors.InternalErr, nil)
+		r.logger.Error("debug", zap.Error(err))
+		return nil, err
+	}
+
+	var accountRes types.Account
+	if err := r.mapper.Hydrate(transaction.Account, &accountRes); err != nil {
+		err := mainErrors.Format(mainErrors.InternalErr, nil)
+		r.logger.Error("debug", zap.Error(err))
+		return nil, err
+	}
+	transactionRes.Account = &accountRes
+
+	return &transactionRes, nil
 }
 
-func (r *queryResolver) Transactions(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.TransactionConnection, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *queryResolver) Transactions(ctx context.Context, first *int64, after *string, last *int64, before *string, account string) (*types.TransactionConnection, error) {
+	_, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+	transactions, err := r.accountService.GetTransactions(ctx, &accountService.GetTransactionsRequest{
+		Account: account,
+	})
+	if err != nil {
+		r.logger.Error("failed to get transaction", zap.Error(err))
+		return nil, err
+	}
+
+	input := models.ConnectionInput{
+		Before: before,
+		After:  after,
+		First:  first,
+		Last:   last,
+	}
+
+	edger := func(p *types.Transaction, offset int) connections.Edge {
+		return types.TransactionEdge{
+			Node:   p,
+			Cursor: connections.OffsetToCursor(offset),
+		}
+	}
+
+	conn := func(edges []*types.TransactionEdge, nodes []*types.Transaction, info *types.PageInfo, totalCount int) (*types.TransactionConnection, error) {
+		var transactionNodes []*types.Transaction
+		transactionNodes = append(transactionNodes, nodes...)
+
+		return &types.TransactionConnection{
+			Edges:      edges,
+			Nodes:      transactionNodes,
+			PageInfo:   info,
+			TotalCount: Int64(int64(totalCount)),
+		}, nil
+	}
+
+	fmt.Println(len(transactions.Transactions))
+	var transactionRes []*types.Transaction
+	for _, p := range transactions.Transactions {
+		var transaction types.Transaction
+		if err := r.mapper.Hydrate(p, &transaction); err != nil {
+			err := mainErrors.Format(mainErrors.InternalErr, nil)
+			r.logger.Error("debug", zap.Error(err))
+			return nil, err
+		}
+
+		var account types.Account
+		if err := r.mapper.Hydrate(p.Account, &account); err != nil {
+			err := mainErrors.Format(mainErrors.InternalErr, nil)
+			r.logger.Error("debug", zap.Error(err))
+			return nil, err
+		}
+		transaction.Account = &account
+
+		transactionRes = append(transactionRes, &transaction)
+	}
+	fmt.Println(len(transactions.Transactions), len(transactionRes))
+
+	return connections.TransactionConnectionCon(transactionRes, edger, conn, input)
 }
 
 func (r *queryResolver) Acceptance(ctx context.Context, id string) (*types.Acceptance, error) {
