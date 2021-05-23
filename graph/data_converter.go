@@ -1,6 +1,7 @@
 package graph
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"time"
@@ -151,4 +152,167 @@ func (c *DataConverter) OrganizationFromProto(org *types.Organisation) *apitypes
 	}
 
 	return organization
+}
+
+func (c *DataConverter) HydrateValidationData(validation *apitypes.Validation, data *anypb.Any, owner apitypes.Owner) error {
+	decodedData, err := decodeValidationData(data)
+	if err != nil {
+		return err
+	}
+	// TODO - There are some repeated patterns below we should update in the future
+	switch validation.ValidationType {
+	case apitypes.ValidationTypeCheck:
+		check := &apitypes.Check{
+			ID:           validation.ID,
+			Owner:        owner,
+			Organisation: validation.Organisation,
+			Status:       apitypes.State(validation.Status),
+			Ts:           validation.Ts,
+		}
+		var checkData apitypes.CheckData
+		var dataReports []apitypes.Report
+		if decodedData["data"] != nil {
+			if dataMap, ok := decodedData["data"].(map[string]interface{}); ok {
+				if dataMap["reports"] != nil {
+					if reports, ok := dataMap["reports"].([]interface{}); ok {
+						for _, reportInterface := range reports {
+							reportMap, ok := reportInterface.(map[string]interface{})
+							if !ok {
+								continue
+							}
+							var report apitypes.Report
+							var review apitypes.ReportReviewStatus
+							if reportMap["review"] != nil {
+								err = c.transcodeData(reportMap["review"], &review)
+								if err != nil {
+									c.logger.Debug("failed to trancode report review from validation report", zap.Error(err))
+								}
+								reportMap["review"] = nil
+							}
+							var reportData string
+							if reportMap["data"] != nil {
+								jsonBytes, err := json.Marshal(reportMap["data"])
+								if err != nil {
+									c.logger.Debug("failed to trancode report data from validation", zap.Error(err))
+									continue
+								}
+								reportData = string(jsonBytes)
+								reportMap["data"] = nil
+							}
+							var reportOrganization apitypes.Organisation
+							if orgId, ok := reportMap["organisation"].(string); ok {
+								reportOrganization = apitypes.Organisation{
+									ID: orgId,
+								}
+								reportMap["organisation"] = nil
+							}
+							var reportTs int64
+							if tsStr, ok := reportMap["ts"].(string); ok {
+								ts, err := time.Parse(time.RFC3339, tsStr)
+								if err != nil {
+									c.logger.Debug("failed to parse timestamp data from validation report", zap.Error(err))
+								}
+								reportTs = ts.UnixNano()
+								reportMap["ts"] = nil
+							}
+							err = c.transcodeData(reportMap, &report)
+							if err != nil {
+								c.logger.Debug("failed to trancode reports from validation", zap.Error(err))
+							}
+							report.Review = &review
+							report.Data = reportData
+							report.Organisation = &reportOrganization
+							report.Ts = &reportTs
+							dataReports = append(dataReports, report)
+						}
+					}
+					dataMap["reports"] = nil
+				}
+				if dataMap["tags"] != nil {
+					dataMap["tags"] = nil
+				}
+			}
+		}
+		err := c.transcodeData(decodedData["data"], &checkData)
+		if err != nil {
+			return err
+		}
+		checkData.Reports = make([]*apitypes.Report, len(dataReports))
+		for i := range dataReports {
+			report := dataReports[i]
+			checkData.Reports[i] = &report
+		}
+		check.Data = &checkData
+		validation.Data = check
+	case apitypes.ValidationTypeScreen:
+		var screen apitypes.Screen
+		var screenData string
+		if decodedData["data"] != nil {
+			jsonBytes, err := json.Marshal(decodedData["data"])
+			if err != nil {
+				c.logger.Debug("failed to decode screen data", zap.Error(err))
+			}
+			screenData = string(jsonBytes)
+			decodedData["data"] = nil
+		}
+		var screenOrganization apitypes.Organisation
+		if orgId, ok := decodedData["organisation"].(string); ok {
+			screenOrganization = apitypes.Organisation{
+				ID: orgId,
+			}
+			decodedData["organisation"] = nil
+		}
+		if decodedData["organisation"] != nil {
+			decodedData["organisation"] = nil
+		}
+		var screenTs int64
+		if tsStr, ok := decodedData["ts"].(string); ok {
+			ts, err := time.Parse(time.RFC3339, tsStr)
+			if err != nil {
+				c.logger.Debug("failed to parse timestamp data from validation report", zap.Error(err))
+			}
+			screenTs = ts.UnixNano()
+			decodedData["ts"] = nil
+		}
+		err := c.transcodeData(decodedData, &screen)
+		if err != nil {
+			c.logger.Debug("failed to trancode screen from validation", zap.Error(err))
+			return err
+		}
+		validation.Data = &apitypes.Screen{
+			ID:           screen.ID,
+			Data:         screenData,
+			Organisation: &screenOrganization,
+			Status:       apitypes.State(screen.Status),
+			Ts:           &screenTs,
+		}
+	case apitypes.ValidationTypeProof:
+		var proof models.Proof
+		err := c.transcodeData(decodedData, &proof)
+		if err != nil {
+			return err
+		}
+		validation.Data = &apitypes.Proof{
+			ID:     proof.ID,
+			Type:   apitypes.ProofType(proof.Data),
+			Data:   string(proof.Data),
+			Status: apitypes.State(proof.Status),
+			Ts:     Int64(proof.Timestamp.UnixNano()),
+		}
+	}
+
+	return nil
+}
+
+func (c *DataConverter) transcodeData(in, out interface{}) error {
+	buf := new(bytes.Buffer)
+	err := json.NewEncoder(buf).Encode(in)
+	if err != nil {
+		return err
+	}
+	err = json.NewDecoder(buf).Decode(out)
+	if err != nil {
+		return err
+	}
+	return nil
 }

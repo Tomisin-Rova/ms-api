@@ -465,16 +465,23 @@ func (r *queryResolver) Cdds(ctx context.Context, keywords *string, status []typ
 					Ts:       int64(action.Ts),
 				}
 			}
-			validations[j] = &types.Validation{
+			owner := getPerson(cdd.Owner)
+			typeValidation := &types.Validation{
 				ID:             validation.Id,
 				ValidationType: types.ValidationType(validation.ValidationType),
-				Applicant:      getPerson(cdd.Owner),
+				Applicant:      owner,
 				Status:         types.State(validation.Status),
 				Approved:       &validation.Approved,
 				Ts:             Int64(int64(validation.Ts)),
 				Actions:        actions,
 				Organisation:   dataConverter.OrganizationFromProto(validation.Organisation),
 			}
+			err := dataConverter.HydrateValidationData(typeValidation, validation.Data, owner)
+			if err != nil {
+				r.logger.Error("hydrate validation data", zap.Error(err))
+				continue
+			}
+			validations[j] = typeValidation
 		}
 		cddsResult[i] = &types.Cdd{
 			ID:          cdd.Id,
