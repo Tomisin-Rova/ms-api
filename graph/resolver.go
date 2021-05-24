@@ -316,7 +316,7 @@ func (r *queryResolver) hydrateCDD(ctx context.Context, cddDto *pb.Cdd) (*types.
 			req := &personService.StaffRequest{
 				Id: action.Reporter,
 			}
-			var staff *types.Staff
+			staff := &types.Staff{}
 			staffDto, err := r.personService.GetStaffById(ctx, req)
 			if err != nil {
 				r.logger.Error(errorGettingPersonMsg, zap.Error(err))
