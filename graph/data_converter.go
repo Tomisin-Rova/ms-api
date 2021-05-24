@@ -202,6 +202,9 @@ func (c *DataConverter) HydrateValidationData(validation *apitypes.Validation, d
 										reportData = string(b)
 									}
 								}
+								if reportMapDataStr, ok := reportMap["data"].(string); ok {
+									reportData = reportMapDataStr
+								}
 								reportMap["data"] = nil
 							}
 							var reportOrganization apitypes.Organisation
