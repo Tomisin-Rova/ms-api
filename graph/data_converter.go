@@ -74,38 +74,46 @@ func (c *DataConverter) OrganizationFromProto(org *types.Organisation) *apitypes
 	industries := make([]*apitypes.Industry, 0)
 	imageAssets := make([]*apitypes.ImageAssets, 0)
 
-	for _, addr := range org.Addresses {
-		coordinateLatitude, coordinateLongitutde := 0.0, 0.0
-		if len(addr.Coordinate) == 2 {
-			coordinateLatitude, coordinateLongitutde = addr.Coordinate[0], addr.Coordinate[1]
+	if org.Addresses != nil {
+		for _, addr := range org.Addresses {
+			coordinateLatitude, coordinateLongitutde := 0.0, 0.0
+			if len(addr.Coordinate) == 2 {
+				coordinateLatitude, coordinateLongitutde = addr.Coordinate[0], addr.Coordinate[1]
+			}
+			addresses = append(addresses, &apitypes.Address{
+				Street:   &addr.Street,
+				City:     &addr.City,
+				Postcode: &addr.Postcode,
+				Country:  &apitypes.Country{CountryName: addr.Country},
+				Location: &apitypes.Location{
+					Longitude: &coordinateLongitutde,
+					Latitude:  &coordinateLatitude,
+				},
+			})
 		}
-		addresses = append(addresses, &apitypes.Address{
-			Street:   &addr.Street,
-			City:     &addr.City,
-			Postcode: &addr.Postcode,
-			Country:  &apitypes.Country{CountryName: addr.Country},
-			Location: &apitypes.Location{
-				Longitude: &coordinateLongitutde,
-				Latitude:  &coordinateLatitude,
-			},
-		})
 	}
-	for _, indr := range org.Industries {
-		score := float64(indr.Score)
-		industries = append(industries, &apitypes.Industry{
-			Code:        int64(indr.Code),
-			Score:       &score,
-			Section:     &indr.Section,
-			Description: &indr.Description,
-		})
+
+	if org.Industries != nil {
+		for _, indr := range org.Industries {
+			score := float64(indr.Score)
+			industries = append(industries, &apitypes.Industry{
+				Code:        int64(indr.Code),
+				Score:       &score,
+				Section:     &indr.Section,
+				Description: &indr.Description,
+			})
+		}
 	}
-	for _, img := range org.ImageAssets {
-		imageAssets = append(imageAssets, &apitypes.ImageAssets{
-			Safe:  &img.Safe,
-			Type:  &img.Type,
-			Image: &img.Type,
-			Svg:   &img.Svg,
-		})
+
+	if org.ImageAssets != nil {
+		for _, img := range org.ImageAssets {
+			imageAssets = append(imageAssets, &apitypes.ImageAssets{
+				Safe:  &img.Safe,
+				Type:  &img.Type,
+				Image: &img.Type,
+				Svg:   &img.Svg,
+			})
+		}
 	}
 
 	revenue := float64(org.Revenue)
@@ -323,4 +331,55 @@ func (c *DataConverter) transcodeData(in, out interface{}) error {
 		return err
 	}
 	return nil
+}
+
+func (c *DataConverter) makeCdd(cdd *types.Cdd) *apitypes.Cdd {
+	if cdd == nil {
+		return nil
+	}
+
+	validations := make([]*apitypes.Validation, len(cdd.Validations))
+	for j, validation := range cdd.Validations {
+		actions := make([]*apitypes.Action, len(validation.Actions))
+		for k, action := range validation.Actions {
+			actions[k] = &apitypes.Action{
+				ID: action.Id,
+				Reporter: &apitypes.Staff{
+					ID: action.Reporter,
+				},
+				Notes:  action.Notes,
+				Status: action.Status,
+				Ts:     int64(action.Ts),
+			}
+		}
+		owner := getPerson(cdd.Owner)
+		typeValidation := &apitypes.Validation{
+			ID:             validation.Id,
+			ValidationType: apitypes.ValidationType(validation.ValidationType),
+			Applicant:      owner,
+			Status:         apitypes.State(validation.Status),
+			Approved:       &validation.Approved,
+			Ts:             Int64(int64(validation.Ts)),
+			Actions:        actions,
+			Organisation:   c.OrganizationFromProto(validation.Organisation),
+		}
+		err := c.HydrateValidationData(typeValidation, validation.Data, owner)
+		if err != nil {
+			c.logger.Error("hydrate validation data", zap.Error(err))
+			continue
+		}
+		validations[j] = typeValidation
+	}
+	return &apitypes.Cdd{
+		ID:          cdd.Id,
+		Owner:       getPerson(cdd.Owner),
+		Watchlist:   &cdd.Watchlist,
+		Details:     &cdd.Details,
+		Status:      apitypes.State(cdd.Status),
+		Onboard:     &cdd.Onboard,
+		Version:     Int64(int64(cdd.Version)),
+		Validations: validations,
+		Active:      &cdd.Active,
+		Ts:          Int64(int64(cdd.Ts)),
+	}
 }

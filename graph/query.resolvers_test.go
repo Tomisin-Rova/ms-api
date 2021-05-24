@@ -451,6 +451,7 @@ func TestQueryResolver_Me(t *testing.T) {
 								TypeUrl: models.SCREEN,
 								Value:   []byte("{}"),
 							},
+							Organisation: &protoTypes.Organisation{},
 						},
 					},
 				}, nil)

@@ -53,9 +53,11 @@ func (r *queryResolver) Me(ctx context.Context) (*types.Person, error) {
 
 		r.logger.Info("no cdd found", zap.String("owner", claims.PersonId))
 	}
-	person.Cdd, err = r.hydrateCDD(ctx, cddDto)
-	if err != nil {
-		return nil, err
+	dataConverter := NewDataConverter(r.logger)
+	person.Cdd = dataConverter.makeCdd(cddDto)
+
+	for i := range person.Identities {
+		person.Identities[i].Owner = person
 	}
 
 	return person, nil
@@ -453,58 +455,7 @@ func (r *queryResolver) Cdds(ctx context.Context, keywords *string, status []typ
 	cdds := resp.Results
 	cddsResult := make([]*types.Cdd, len(cdds))
 	for i, cdd := range cdds {
-		validations := make([]*types.Validation, len(cdd.Validations))
-		for j, validation := range cdd.Validations {
-			actions := make([]*types.Action, len(validation.Actions))
-			for k, action := range validation.Actions {
-				req := &personService.StaffRequest{
-					Id: action.Reporter,
-				}
-				staff := &types.Staff{}
-				staffDto, err := r.personService.GetStaffById(ctx, req)
-				if err != nil {
-					r.logger.Error(errorGettingPersonMsg, zap.Error(err))
-				} else {
-					staff = r.hydrateStaff(staffDto)
-				}
-				actions[k] = &types.Action{
-					ID:       action.Id,
-					Reporter: staff,
-					Notes:    action.Notes,
-					Status:   action.Status,
-					Ts:       int64(action.Ts),
-				}
-			}
-			owner := getPerson(cdd.Owner)
-			typeValidation := &types.Validation{
-				ID:             validation.Id,
-				ValidationType: types.ValidationType(validation.ValidationType),
-				Applicant:      owner,
-				Status:         types.State(validation.Status),
-				Approved:       &validation.Approved,
-				Ts:             Int64(int64(validation.Ts)),
-				Actions:        actions,
-				Organisation:   dataConverter.OrganizationFromProto(validation.Organisation),
-			}
-			err := dataConverter.HydrateValidationData(typeValidation, validation.Data, owner)
-			if err != nil {
-				r.logger.Error("hydrate validation data", zap.Error(err))
-				continue
-			}
-			validations[j] = typeValidation
-		}
-		cddsResult[i] = &types.Cdd{
-			ID:          cdd.Id,
-			Owner:       getPerson(cdd.Owner),
-			Watchlist:   &cdd.Watchlist,
-			Details:     &cdd.Details,
-			Status:      types.State(cdd.Status),
-			Onboard:     &cdd.Onboard,
-			Version:     Int64(int64(cdd.Version)),
-			Validations: validations,
-			Active:      &cdd.Active,
-			Ts:          Int64(int64(cdd.Ts)),
-		}
+		cddsResult[i] = dataConverter.makeCdd(cdd)
 	}
 
 	input := models.ConnectionInput{
