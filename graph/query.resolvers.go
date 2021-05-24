@@ -53,7 +53,7 @@ func (r *queryResolver) Me(ctx context.Context) (*types.Person, error) {
 
 		r.logger.Info("no cdd found", zap.String("owner", claims.PersonId))
 	}
-	person.Cdd, err = r.hydrateCDD(cddDto)
+	person.Cdd, err = r.hydrateCDD(ctx, cddDto)
 	if err != nil {
 		return nil, err
 	}
@@ -154,7 +154,7 @@ func (r *queryResolver) Person(ctx context.Context, id string) (*types.Person, e
 
 		r.logger.Info("no cdd found", zap.String("owner", p.ID))
 	}
-	p.Cdd, err = r.hydrateCDD(cddDto)
+	p.Cdd, err = r.hydrateCDD(ctx, cddDto)
 	if err != nil {
 		return nil, err
 	}
@@ -457,9 +457,19 @@ func (r *queryResolver) Cdds(ctx context.Context, keywords *string, status []typ
 		for j, validation := range cdd.Validations {
 			actions := make([]*types.Action, len(validation.Actions))
 			for k, action := range validation.Actions {
+				req := &personService.StaffRequest{
+					Id: action.Reporter,
+				}
+				staff := &types.Staff{}
+				staffDto, err := r.personService.GetStaffById(ctx, req)
+				if err != nil {
+					r.logger.Error(errorGettingPersonMsg, zap.Error(err))
+				} else {
+					staff = r.hydrateStaff(staffDto)
+				}
 				actions[k] = &types.Action{
 					ID:       action.Id,
-					Reporter: getPerson(action.Reporter),
+					Reporter: staff,
 					Notes:    action.Notes,
 					Status:   action.Status,
 					Ts:       int64(action.Ts),

@@ -294,7 +294,7 @@ func getPerson(from *pb.Person) *types.Person {
 	return &person
 }
 
-func (r *queryResolver) hydrateCDD(cddDto *pb.Cdd) (*types.Cdd, error) {
+func (r *queryResolver) hydrateCDD(ctx context.Context, cddDto *pb.Cdd) (*types.Cdd, error) {
 	if cddDto == nil {
 		return nil, nil
 	}
@@ -313,10 +313,19 @@ func (r *queryResolver) hydrateCDD(cddDto *pb.Cdd) (*types.Cdd, error) {
 		actions := make([]*types.Action, len(validationDto.Actions))
 
 		for index, action := range validationDto.Actions {
-			person := getPerson(action.Reporter)
+			req := &personService.StaffRequest{
+				Id: action.Reporter,
+			}
+			var staff *types.Staff
+			staffDto, err := r.personService.GetStaffById(ctx, req)
+			if err != nil {
+				r.logger.Error(errorGettingPersonMsg, zap.Error(err))
+			} else {
+				staff = r.hydrateStaff(staffDto)
+			}
 			actions[index] = &types.Action{
 				ID:       action.Id,
-				Reporter: person,
+				Reporter: staff,
 				Notes:    action.Notes,
 				Status:   action.Status,
 				Ts:       tsAsInt64,
@@ -435,10 +444,19 @@ func (r *queryResolver) validation(ctx context.Context, validationDto *pb.Valida
 	actions := make([]*types.Action, len(validationDto.Actions))
 
 	for index, action := range validationDto.Actions {
-		person := getPerson(action.Reporter)
+		req := &personService.StaffRequest{
+			Id: action.Reporter,
+		}
+		staff := &types.Staff{}
+		staffDto, err := r.personService.GetStaffById(ctx, req)
+		if err != nil {
+			r.logger.Error(errorGettingPersonMsg, zap.Error(err))
+		} else {
+			staff = r.hydrateStaff(staffDto)
+		}
 		actions[index] = &types.Action{
 			ID:       action.Id,
-			Reporter: person,
+			Reporter: staff,
 			Notes:    action.Notes,
 			Status:   action.Status,
 			Ts:       int64(action.Ts),
@@ -580,6 +598,67 @@ func personWithCdd(from *pb.Person) (*types.Person, error) {
 		}
 	}
 	return person, nil
+}
+
+func (r *queryResolver) hydrateStaff(staffDto *pb.Staff) *types.Staff {
+	if staffDto == nil {
+		return nil
+	}
+	emails := make([]*types.Email, len(staffDto.Emails))
+	for i, email := range staffDto.Emails {
+		emails[i] = &types.Email{
+			Value:    email.Value,
+			Verified: email.Verified,
+		}
+	}
+
+	phones := make([]*types.Phone, len(staffDto.Phones))
+	for i, phone := range staffDto.Phones {
+		phones[i] = &types.Phone{
+			Value:    phone.Number,
+			Verified: phone.Verified,
+		}
+	}
+
+	identities := make([]*types.Identity, len(staffDto.Identities))
+	for i, identity := range staffDto.Identities {
+		org := &types.Organisation{
+			ID:   identity.Organisation.Id,
+			Name: &identity.Organisation.Name,
+		}
+		identities[i] = &types.Identity{
+			ID:             identity.Id,
+			Active:         &identity.Active,
+			Authentication: &identity.Authentication,
+			Credentials: &types.Credentials{
+				Identifier:   identity.Credentials.Identifier,
+				RefreshToken: &identity.Credentials.RefreshToken,
+			},
+			Organisation: org,
+			Ts:           identity.Ts,
+		}
+		identities[i].Owner = &types.Person{
+			ID:               identity.Owner.Id,
+			Title:            &identity.Owner.Title,
+			FirstName:        identity.Owner.FirstName,
+			LastName:         identity.Owner.LastName,
+			MiddleName:       &identity.Owner.MiddleName,
+			Dob:              identity.Owner.Dob,
+			Employer:         org,
+			Ts:               identity.Owner.Ts,
+			CountryResidence: &identity.Owner.CountryResidence,
+		}
+	}
+
+	return &types.Staff{
+		ID:         staffDto.Id,
+		FirstName:  staffDto.FirstName,
+		LastName:   staffDto.LastName,
+		Status:     types.StaffStatus(staffDto.Status),
+		Emails:     emails,
+		Phones:     phones,
+		Identities: identities,
+	}
 }
 
 // TODO: Converts from cursor-based pagination to number based pagination

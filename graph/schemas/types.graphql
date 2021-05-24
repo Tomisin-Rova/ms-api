@@ -1059,7 +1059,7 @@ type Action {
   # Unique roava ulid for the data record
   id: ID!
   # Person who created the task
-  reporter: Person!
+  reporter: Staff!
   ## Person whom task is assigned to
   #assignee: Person!
   ## Person who task is referred to approve the task

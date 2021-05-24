@@ -9063,7 +9063,7 @@ type Action {
   # Unique roava ulid for the data record
   id: ID!
   # Person who created the task
-  reporter: Person!
+  reporter: Staff!
   ## Person whom task is assigned to
   #assignee: Person!
   ## Person who task is referred to approve the task
@@ -15692,9 +15692,9 @@ func (ec *executionContext) _Action_reporter(ctx context.Context, field graphql.
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*types.Person)
+	res := resTmp.(*types.Staff)
 	fc.Result = res
-	return ec.marshalNPerson2ᚖmsᚗapiᚋtypesᚐPerson(ctx, field.Selections, res)
+	return ec.marshalNStaff2ᚖmsᚗapiᚋtypesᚐStaff(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Action_notes(ctx context.Context, field graphql.CollectedField, obj *types.Action) (ret graphql.Marshaler) {
@@ -51564,6 +51564,16 @@ func (ec *executionContext) marshalNScreenEdge2ᚖmsᚗapiᚋtypesᚐScreenEdge(
 		return graphql.Null
 	}
 	return ec._ScreenEdge(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNStaff2ᚖmsᚗapiᚋtypesᚐStaff(ctx context.Context, sel ast.SelectionSet, v *types.Staff) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Staff(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNStaffStatus2msᚗapiᚋtypesᚐStaffStatus(ctx context.Context, v interface{}) (types.StaffStatus, error) {
