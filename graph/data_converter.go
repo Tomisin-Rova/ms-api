@@ -342,14 +342,28 @@ func (c *DataConverter) makeCdd(cdd *types.Cdd) *apitypes.Cdd {
 	for j, validation := range cdd.Validations {
 		actions := make([]*apitypes.Action, len(validation.Actions))
 		for k, action := range validation.Actions {
+			reporter := &apitypes.Staff{}
+			if action.Reporter != nil {
+				var emails []*apitypes.Email
+				err := c.transcodeData(action.Reporter.Emails, &emails)
+				if err != nil {
+					c.logger.Error("transcode reporter email", zap.Error(err))
+				}
+				reporter = &apitypes.Staff{
+					ID:        action.Reporter.Id,
+					FirstName: action.Reporter.FirstName,
+					LastName:  action.Reporter.LastName,
+					Status:    apitypes.StaffStatus(action.Reporter.Status),
+					Emails:    emails,
+					Ts:        action.Reporter.Ts,
+				}
+			}
 			actions[k] = &apitypes.Action{
-				ID: action.Id,
-				Reporter: &apitypes.Staff{
-					ID: action.Reporter,
-				},
-				Notes:  action.Notes,
-				Status: action.Status,
-				Ts:     int64(action.Ts),
+				ID:       action.Id,
+				Reporter: reporter,
+				Notes:    action.Notes,
+				Status:   action.Status,
+				Ts:       int64(action.Ts),
 			}
 		}
 		owner := getPerson(cdd.Owner)
