@@ -101,9 +101,20 @@ message Validation {
   repeated Action actions = 9;
 }
 
+// Staff type without identities Reporter type
+message Reporter {
+  string id = 1;
+  string first_name = 2;
+  string last_name = 3;
+  string status = 4;
+  repeated Email emails = 5;
+  repeated PhoneNumber phones = 6;
+  int64 ts = 7;
+}
+
 message Action {
     string id = 1;
-    string reporter = 2;
+    Reporter reporter = 2;
     string notes= 3;
     string status = 4;
     int32 ts = 5;

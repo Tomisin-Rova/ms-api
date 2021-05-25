@@ -303,7 +303,7 @@ func (r *queryResolver) validation(ctx context.Context, validationDto *pb.Valida
 
 	for index, action := range validationDto.Actions {
 		req := &personService.StaffRequest{
-			Id: action.Reporter,
+			Id: action.Reporter.Id,
 		}
 		staff := &types.Staff{}
 		staffDto, err := r.personService.GetStaffById(ctx, req)
