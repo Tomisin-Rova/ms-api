@@ -383,6 +383,9 @@ func (c *DataConverter) makeCdd(cdd *types.Cdd) *apitypes.Cdd {
 			continue
 		}
 		validations[j] = typeValidation
+		if validations[j].Data == nil {
+			validations = validations[:j]
+		}
 	}
 	var cddOwner *apitypes.Person
 	if cdd.Owner != nil {
