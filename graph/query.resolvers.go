@@ -785,13 +785,13 @@ func (r *queryResolver) Accounts(ctx context.Context, first *int64, after *strin
 		TransactionsRequested bool
 	}
 	for _, item := range preloads {
-		if item == "product" {
+		if item == "nodes.product" {
 			opts.ProductRequested = true
 		}
-		if item == "tags" {
+		if item == "nodes.tags" {
 			opts.TagsRequested = true
 		}
-		if item == "transactions" {
+		if item == "nodes.transactions" {
 			opts.TransactionsRequested = true
 		}
 	}
@@ -857,7 +857,7 @@ func (r *queryResolver) Accounts(ctx context.Context, first *int64, after *strin
 		}
 
 		// Add Transactions if requested
-		if opts.TransactionsRequested && account.Transactions != nil {
+		if opts.TransactionsRequested && c.Transactions != nil {
 			var transactionRes []*types.Transaction
 			for _, p := range c.Transactions {
 				var transaction types.Transaction
@@ -898,12 +898,11 @@ func (r *queryResolver) Accounts(ctx context.Context, first *int64, after *strin
 				r.logger.Error("debug", zap.Error(err))
 				return nil, err
 			}
-
 			account.Transactions = transConn
 		}
 
 		// Add Tags if requested
-		if opts.TagsRequested && account.Tags != nil {
+		if opts.TagsRequested && c.Tags != nil {
 			var tagsRes []*types.Tag
 			for _, p := range c.Tags {
 				var tag types.Tag
