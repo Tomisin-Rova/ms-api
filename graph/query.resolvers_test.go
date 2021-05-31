@@ -823,3 +823,61 @@ func TestQueryResolver_MeStaff(t *testing.T) {
 		})
 	}
 }
+
+func TestQueryResolver_Accounts(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockAccounts := []*protoTypes.Account{{
+		Id:      "ID",
+		Product: "product",
+		AccountData: &protoTypes.AccountData{
+			Balances: &protoTypes.Balances{
+				TotalBalance: 100,
+			},
+		},
+		Transactions: []*protoTypes.Transaction{
+			{
+				Id: "trans1",
+				TransactionData: &protoTypes.TransactionData{
+					Amount: 500,
+				},
+			},
+			{
+				Id: "trans2",
+				TransactionData: &protoTypes.TransactionData{
+					Amount: 400,
+				},
+			},
+		},
+	}}
+
+	accountServiceClient, preloader := &mocks.AccountServiceClient{}, &mocks.Preloader{}
+
+	ctx := context.WithValue(context.Background(), middlewares.AuthenticatedUserContextKey,
+		models.Claims{
+			PersonId:   "personId",
+			IdentityId: "identityId",
+			DeviceId:   "deviceId",
+		})
+
+	accountServiceClient.On("GetAccounts", mock.Anything, &accountService.GetAccountsRequest{IdentityId: "identityId"}).
+		Return(&accountService.GetAccountsResponse{Accounts: mockAccounts}, nil)
+	preloader.On("GetPreloads", ctx).Return([]string{"nodes.transactions"})
+	var argMap = map[string]interface{}{}
+	preloader.On("GetArgMap", ctx, "Transactions").Return(argMap)
+
+	resolverOpts := &ResolverOpts{
+		accountService: accountServiceClient,
+		mapper:         &mapper.GQLMapper{},
+		preloader:      preloader,
+	}
+	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Query()
+	accounts, err := resolver.Accounts(ctx, Int64(1), String(""), Int64(10), String(""))
+	assert.Nil(t, err)
+	assert.NotNil(t, accounts)
+	assert.Equal(t, accounts.Nodes[0].ID, mockAccounts[0].Id)
+	assert.Equal(t, accounts.Nodes[0].AccountData.Balances.TotalBalance, Int64(int64(mockAccounts[0].AccountData.Balances.TotalBalance)))
+	assert.Equal(t, accounts.Nodes[0].Transactions.Nodes[0].ID, mockAccounts[0].Transactions[0].Id)
+	assert.Equal(t, accounts.Nodes[0].Transactions.Nodes[0].TransactionData.Amount, Int64(int64(mockAccounts[0].Transactions[0].TransactionData.Amount)))
+}
