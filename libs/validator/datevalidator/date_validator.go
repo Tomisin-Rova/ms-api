@@ -26,7 +26,7 @@ var (
 	ErrInvalidAge = coreError.NewTerror(
 		7009,
 		"ErrInvalidAge",
-		"minimum age requirement for using Roava is 16years",
+		"minimum age requirement for using Roava is 18years",
 		"",
 	)
 )
