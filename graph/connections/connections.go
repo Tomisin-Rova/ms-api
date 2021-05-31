@@ -25,6 +25,14 @@ type Edge interface {
 	GetCursor() string
 }
 
+// Pagination stores the pagination details based on its cursor-based counterpart
+type Pagination struct {
+	After  string
+	First  int64
+	Before string
+	Last   int64
+}
+
 // OffsetToCursor create the cursor string from an offset
 func OffsetToCursor(offset int) string {
 	str := fmt.Sprintf("%v%v", cursorPrefix, offset)
@@ -41,7 +49,55 @@ func CursorToOffset(cursor string) (int, error) {
 	str = strings.Replace(str, cursorPrefix, "", -1)
 	offset, err := strconv.Atoi(str)
 	if err != nil {
-		return 0, fmt.Errorf("Invalid cursor")
+		return 0, fmt.Errorf("invalid cursor")
 	}
 	return offset, nil
+}
+
+// IdToCursor create the cursor string from an id
+func IdToCursor(id string) string {
+	return base64.StdEncoding.EncodeToString([]byte(id))
+}
+
+// CursorToId re-derives the id from the cursor string.
+func CursorToId(cursor string) (string, error) {
+	str := ""
+	b, err := base64.StdEncoding.DecodeString(cursor)
+	if err != nil {
+		return "", fmt.Errorf("invalid cursor")
+	}
+	str = string(b)
+	return str, nil
+}
+
+// Paginate resolves values for pagination
+func Paginate(first *int64, after *string, last *int64, before *string) (Pagination, error) {
+	var pagAfter, pagBefore string
+	var pagFirst, pagLast int64
+	pagFirst = 0
+	pagLast = 0
+	var err error
+	if after != nil {
+		pagAfter, err = CursorToId(*after)
+		if err != nil {
+			return Pagination{}, err
+		}
+	}
+	if before != nil {
+		pagBefore, err = CursorToId(*before)
+		if err != nil {
+			return Pagination{}, err
+		}
+	}
+	if first != nil {
+		pagFirst = *first
+	}
+	if last != nil {
+		pagLast = *last
+	}
+	if first == nil && after == nil && last == nil && before == nil {
+		pagFirst = 100
+	}
+
+	return Pagination{First: pagFirst, After: pagAfter, Last: pagLast, Before: pagBefore}, err
 }
