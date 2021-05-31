@@ -1,11 +1,12 @@
 package datevalidator
 
 import (
-	coreError "github.com/roava/zebra/errors"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
+
+	coreError "github.com/roava/zebra/errors"
 )
 
 var (
@@ -46,7 +47,7 @@ func ValidateDob(value string) error {
 
 	currentYear := time.Now().Year()
 	age := currentYear - year
-	if age < 16 {
+	if age < 18 {
 		return ErrInvalidAge
 	}
 	return nil
