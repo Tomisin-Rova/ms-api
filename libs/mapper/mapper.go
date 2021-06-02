@@ -150,9 +150,9 @@ func (G *GQLMapper) hydrateProduct(data *pb.Product, to interface{}) error {
 				for index, value := range data.Details.OverdraftSetting.InterestSettings.InterestRateSettings.InterestRateTiers {
 					interestRateTiers[index] = &types.InterestRateTiers{}
 					interestRateTiers[index].EncodedKey = &value.EncodedKey
-					interestRateTiers[index].EndingBalance = Int64(int64(value.EndingBalance))
+					interestRateTiers[index].EndingBalance = &value.EndingBalance
 					interestRateTiers[index].EndingDay = Int64(int64(value.EndingDay))
-					interestRateTiers[index].InterestRate = Int64(int64(value.InterestRate))
+					interestRateTiers[index].InterestRate = &value.InterestRate
 				}
 
 				product.Details.OverdraftSetting.InterestSettings.InterestRateSettings = &types.InterestRateSettings{
@@ -332,9 +332,9 @@ func (G *GQLMapper) hydrateAccount(data *pb.Account, to interface{}) error {
 		// InternalControls
 		if data.AccountData.AccruedAmounts != nil {
 			account.AccountData.InternalControls = &types.InternalControls{
-				MaxWithdrawalAmount:      Int64(int64(data.AccountData.InternalControls.MaxWithdrawalAmount)),
-				RecommendedDepositAmount: Int64(int64(data.AccountData.InternalControls.RecommendedDepositAmount)),
-				TargetAmount:             Int64(int64(data.AccountData.InternalControls.TargetAmount)),
+				MaxWithdrawalAmount:      &data.AccountData.InternalControls.MaxWithdrawalAmount,
+				RecommendedDepositAmount: &data.AccountData.InternalControls.RecommendedDepositAmount,
+				TargetAmount:             &data.AccountData.InternalControls.TargetAmount,
 			}
 		}
 
