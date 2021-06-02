@@ -588,9 +588,9 @@ type InterestPaymentSettings struct {
 }
 
 type InterestRate struct {
-	DefaultValue *int64 `json:"default_value"`
-	MaxValue     *int64 `json:"max_value"`
-	MinValue     *int64 `json:"min_value"`
+	DefaultValue *float64 `json:"default_value"`
+	MaxValue     *float64 `json:"max_value"`
+	MinValue     *float64 `json:"min_value"`
 }
 
 type InterestRateSettings struct {
@@ -607,10 +607,10 @@ type InterestRateSettings struct {
 }
 
 type InterestRateTiers struct {
-	EncodedKey    *string `json:"encoded_key"`
-	EndingBalance *int64  `json:"ending_balance"`
-	EndingDay     *int64  `json:"ending_day"`
-	InterestRate  *int64  `json:"interest_rate"`
+	EncodedKey    *string  `json:"encoded_key"`
+	EndingBalance *float64 `json:"ending_balance"`
+	EndingDay     *int64   `json:"ending_day"`
+	InterestRate  *float64 `json:"interest_rate"`
 }
 
 type InterestSettings struct {
@@ -630,10 +630,10 @@ type InterestSettings struct {
 }
 
 type InternalControls struct {
-	MaxDepositBalance        *int64 `json:"max_deposit_balance"`
-	MaxWithdrawalAmount      *int64 `json:"max_withdrawal_amount"`
-	RecommendedDepositAmount *int64 `json:"recommended_deposit_amount"`
-	TargetAmount             *int64 `json:"target_amount"`
+	MaxDepositBalance        *float64 `json:"max_deposit_balance"`
+	MaxWithdrawalAmount      *float64 `json:"max_withdrawal_amount"`
+	RecommendedDepositAmount *float64 `json:"recommended_deposit_amount"`
+	TargetAmount             *float64 `json:"target_amount"`
 }
 
 type Location struct {
@@ -694,9 +694,9 @@ type MessageEdge struct {
 }
 
 type OpeningBalance struct {
-	DefaultValue *int64 `json:"default_value"`
-	Max          *int64 `json:"max"`
-	Min          *int64 `json:"min"`
+	DefaultValue *float64 `json:"default_value"`
+	Max          *float64 `json:"max"`
+	Min          *float64 `json:"min"`
 }
 
 type OrgLocation struct {
@@ -963,7 +963,7 @@ type ProductInterestSetting struct {
 	InterestCalculationBalance *string                 `json:"interest_calculation_balance"`
 	InterestPaidIntoAccount    *bool                   `json:"interest_paid_into_account"`
 	InterestPaymentPoint       *string                 `json:"interest_payment_point"`
-	MaximumBalance             *int64                  `json:"maximum_balance"`
+	MaximumBalance             *float64                `json:"maximum_balance"`
 	RateSetting                *RateSetting            `json:"rate_setting"`
 	InterestPaymentDates       []*InterestPaymentDates `json:"interest_payment_dates"`
 }

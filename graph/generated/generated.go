@@ -9712,11 +9712,11 @@ type AccountingRules {
 # Type to define the opening balance
 type OpeningBalance {
   # The default value used in the opening balance
-  default_value: Int
+  default_value: Float
   # Max value allowed in the opening balance
-  max: Int
+  max: Float
   # Min value allowed in the opening balance
-  min: Int
+  min: Float
 }
 
 # Type to define Product Controls
@@ -9746,11 +9746,11 @@ type ProductMaturity {
 # Type to define the interest rates
 type InterestRate {
   # Default value for the interest Rate
-  default_value: Int
+  default_value: Float
   # Max value for the interest Rate
-  max_value: Int
+  max_value: Float
   # Min value for the interest Rate
-  min_value: Int
+  min_value: Float
 }
 
 # Type to define the settings of interest rates
@@ -9848,7 +9848,7 @@ type ProductInterestSetting {
   # String representating the interest payment point
   interest_payment_point: String
   # Interest maxumim balance amount
-  maximum_balance: Int
+  maximum_balance: Float
   # Reference for rate setting
   rate_setting: RateSetting
   # Array of Interest Payment Dates
@@ -10121,13 +10121,13 @@ type InterestPaymentSettings {
 # Type to define the internal controls of an account
 type InternalControls {
   # Maximum deposit balance amount
-  max_deposit_balance: Int
+  max_deposit_balance: Float
   # Maximum available amount to withdrawal
-  max_withdrawal_amount: Int
+  max_withdrawal_amount: Float
   # Amount recommended to deposint in the account
-  recommended_deposit_amount: Int
+  recommended_deposit_amount: Float
   # Targeted amount of an account
-  target_amount: Int
+  target_amount: Float
 }
 
 # Type to define the settings of an interest overdraft
@@ -10165,11 +10165,11 @@ type InterestRateTiers {
   # Encoded key of the Interest Rate Tier
   encoded_key: String
   # Ending balance of the tier
-  ending_balance: Int
+  ending_balance: Float
   # Ending day of the tier
   ending_day: Int
   # Interest rate amount
-  interest_rate: Int
+  interest_rate: Float
 }
 
 # Type to define the settings of an overdraft
@@ -24011,9 +24011,9 @@ func (ec *executionContext) _InterestRate_default_value(ctx context.Context, fie
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int64)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _InterestRate_max_value(ctx context.Context, field graphql.CollectedField, obj *types.InterestRate) (ret graphql.Marshaler) {
@@ -24043,9 +24043,9 @@ func (ec *executionContext) _InterestRate_max_value(ctx context.Context, field g
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int64)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _InterestRate_min_value(ctx context.Context, field graphql.CollectedField, obj *types.InterestRate) (ret graphql.Marshaler) {
@@ -24075,9 +24075,9 @@ func (ec *executionContext) _InterestRate_min_value(ctx context.Context, field g
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int64)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _InterestRateSettings_encoded_key(ctx context.Context, field graphql.CollectedField, obj *types.InterestRateSettings) (ret graphql.Marshaler) {
@@ -24459,9 +24459,9 @@ func (ec *executionContext) _InterestRateTiers_ending_balance(ctx context.Contex
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int64)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _InterestRateTiers_ending_day(ctx context.Context, field graphql.CollectedField, obj *types.InterestRateTiers) (ret graphql.Marshaler) {
@@ -24523,9 +24523,9 @@ func (ec *executionContext) _InterestRateTiers_interest_rate(ctx context.Context
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int64)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _InterestSettings_days_in_year(ctx context.Context, field graphql.CollectedField, obj *types.InterestSettings) (ret graphql.Marshaler) {
@@ -24974,9 +24974,9 @@ func (ec *executionContext) _InternalControls_max_deposit_balance(ctx context.Co
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int64)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _InternalControls_max_withdrawal_amount(ctx context.Context, field graphql.CollectedField, obj *types.InternalControls) (ret graphql.Marshaler) {
@@ -25006,9 +25006,9 @@ func (ec *executionContext) _InternalControls_max_withdrawal_amount(ctx context.
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int64)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _InternalControls_recommended_deposit_amount(ctx context.Context, field graphql.CollectedField, obj *types.InternalControls) (ret graphql.Marshaler) {
@@ -25038,9 +25038,9 @@ func (ec *executionContext) _InternalControls_recommended_deposit_amount(ctx con
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int64)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _InternalControls_target_amount(ctx context.Context, field graphql.CollectedField, obj *types.InternalControls) (ret graphql.Marshaler) {
@@ -25070,9 +25070,9 @@ func (ec *executionContext) _InternalControls_target_amount(ctx context.Context,
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int64)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Location_longitude(ctx context.Context, field graphql.CollectedField, obj *types.Location) (ret graphql.Marshaler) {
@@ -26980,9 +26980,9 @@ func (ec *executionContext) _OpeningBalance_default_value(ctx context.Context, f
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int64)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _OpeningBalance_max(ctx context.Context, field graphql.CollectedField, obj *types.OpeningBalance) (ret graphql.Marshaler) {
@@ -27012,9 +27012,9 @@ func (ec *executionContext) _OpeningBalance_max(ctx context.Context, field graph
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int64)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _OpeningBalance_min(ctx context.Context, field graphql.CollectedField, obj *types.OpeningBalance) (ret graphql.Marshaler) {
@@ -27044,9 +27044,9 @@ func (ec *executionContext) _OpeningBalance_min(ctx context.Context, field graph
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int64)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _OrgLocation_continent(ctx context.Context, field graphql.CollectedField, obj *types.OrgLocation) (ret graphql.Marshaler) {
@@ -31741,9 +31741,9 @@ func (ec *executionContext) _ProductInterestSetting_maximum_balance(ctx context.
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int64)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _ProductInterestSetting_rate_setting(ctx context.Context, field graphql.CollectedField, obj *types.ProductInterestSetting) (ret graphql.Marshaler) {

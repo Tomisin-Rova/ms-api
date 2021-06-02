@@ -468,9 +468,9 @@ message InterestPaymentDate {
 
 // InternalControls type
 message InternalControls {
-  int32 maxWithdrawalAmount = 1;
-  int32 recommendedDepositAmount = 2;
-  int32 targetAmount = 3;
+  double maxWithdrawalAmount = 1;
+  double recommendedDepositAmount = 2;
+  double targetAmount = 3;
 }
 
 // OverdraftInterestSettings type
@@ -502,9 +502,9 @@ message OverdraftSettings {
 // InterestRateTier type
 message InterestRateTier {
   string encodedKey = 1;
-  int32 endingBalance = 2;
+  double endingBalance = 2;
   int32 endingDay = 3;
-  int32 interestRate = 4;
+  double interestRate = 4;
 }
 
 // Product type
@@ -545,9 +545,9 @@ message ProductControl {
 
 // OpeningBalance type
 message OpeningBalance {
-  int64 defaultValue = 1;
-  int64 max = 2;
-  int64 min = 3;
+  double defaultValue = 1;
+  double max = 2;
+  double min = 3;
 }
 
 // ProductFees type
@@ -596,7 +596,7 @@ message ProductInterestSetting {
   string interestCalculationBalance = 3;
   bool interestPaidIntoAccount = 4;
   string interestPaymentPoint = 5;
-  int64 maximumBalance = 6;
+  double maximumBalance = 6;
   RateSetting rateSetting = 7;
   repeated InterestPaymentDate interestPaymentDates = 8;
 }
@@ -621,9 +621,9 @@ message RateTiers {
 
 
 message InterestRate {
-  int64 defaultValue = 1;
-  int64 maxValue = 2;
-  int64 minValue = 3;
+  double defaultValue = 1;
+  double maxValue = 2;
+  double minValue = 3;
 }
 
 message ProductSetting {
