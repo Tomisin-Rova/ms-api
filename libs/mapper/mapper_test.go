@@ -14,6 +14,7 @@ func TestGQLMapper_HydrateProduct(t *testing.T) {
 		Id:             "id",
 		Identification: "identification",
 		Details: &pb.ProductDetails{
+			Name: "Roava Classic GBP Current Account",
 			ProductControl: &pb.ProductControl{
 				DormancyPeriodDays: 12,
 				OpeningBalance: &pb.OpeningBalance{
@@ -39,6 +40,7 @@ func TestGQLMapper_HydrateProduct(t *testing.T) {
 	assert.NotNil(t, product)
 	assert.Equal(t, from.Id, product.ID)
 	assert.Equal(t, from.Identification, *product.Identification)
+	assert.Equal(t, from.Details.Name, *product.Details.Name)
 	assert.Equal(t, from.Details.ProductControl.DormancyPeriodDays, *product.Details.ProductControl.DormancyPeriodDays)
 	assert.Equal(t, from.Details.ProductControl.OpeningBalance.Max, *product.Details.ProductControl.OpeningBalance.Max)
 	assert.Equal(t, from.Details.OverdraftSetting.InterestSettings.DaysInYear, *product.Details.OverdraftSetting.InterestSettings.DaysInYear)

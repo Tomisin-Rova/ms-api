@@ -57,7 +57,17 @@ func (G *GQLMapper) hydrateProduct(data *pb.Product, to interface{}) error {
 		return nil
 	}
 
-	product.Details = &types.ProductDetails{}
+	product.Details = &types.ProductDetails{
+		Category:              &data.Details.Category,
+		Type:                  &data.Details.Type,
+		Name:                  &data.Details.Name,
+		State:                 &data.Details.State,
+		Currency:              &data.Details.Currency,
+		Notes:                 &data.Details.Notes,
+		CreditRequirement:     &data.Details.CreditRequirement,
+		WithholdingTaxEnabled: &data.Details.WithholdingTaxEnabled,
+		AllowOffset:           &data.Details.AllowOffset,
+	}
 
 	// ProductControl
 	if data.Details.ProductControl != nil {
