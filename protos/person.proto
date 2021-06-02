@@ -12,10 +12,12 @@ message PersonRequest {
 }
 
 message PeopleRequest {
-  int64 page = 1;
-  int64 perPage = 2;
-  string keywords = 3;
-  string onboarded = 4;
+  int64 first = 1;
+  int64 last = 2;
+  string after = 3;
+  string before = 4;
+  string keywords = 5;
+  string onboarded = 6;
 }
 
 // Request type for endpoint requiring JWT token

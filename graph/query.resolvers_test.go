@@ -522,7 +522,7 @@ func Test_queryResolver_People(t *testing.T) {
 			testType: peopleNotFound,
 		},
 		{
-			name:     "Test person  found",
+			name:     "Test people found",
 			testType: peopleFound,
 		},
 	}
@@ -544,7 +544,7 @@ func Test_queryResolver_People(t *testing.T) {
 			case peopleNotFound:
 				var onboarded bool
 				personServiceClient.On("People", context.Background(), &personService.PeopleRequest{
-					Page: 1, PerPage: 100, Keywords: "John Smith", Onboarded: "NOT_ONBOARDED",
+					First: 100, After: "", Last: 0, Before: "", Keywords: "John Smith", Onboarded: "NOT_ONBOARDED",
 				}).Return(nil, errors.New(""))
 				kw := "John Smith"
 				response, err := resolver.People(context.Background(), &kw, first, after, last, before, &onboarded)
@@ -552,7 +552,7 @@ func Test_queryResolver_People(t *testing.T) {
 				assert.Nil(t, response)
 			case peopleFound:
 				personServiceClient.On("People", context.Background(), &personService.PeopleRequest{
-					Page: 1, PerPage: 100, Keywords: "Luke", Onboarded: "NOT_ONBOARDED",
+					First: 100, After: "", Last: 0, Before: "", Keywords: "Luke", Onboarded: "NOT_ONBOARDED",
 				}).Return(&protoTypes.Persons{}, nil)
 				kw := "Luke"
 				var onboarded bool

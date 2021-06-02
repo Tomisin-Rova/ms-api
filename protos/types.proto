@@ -31,11 +31,15 @@ message Person {
   Cdd cdd = 15;
   repeated Activity activities = 16;
   string status = 17;
+  string objectId = 18;
 }
 
 // Persons type
 message Persons {
   repeated Person persons = 1;
+  int64 totalCount = 2;
+  bool hasNextPage = 3;
+  bool hasPreviousPage = 4;
 }
 
 // Address type

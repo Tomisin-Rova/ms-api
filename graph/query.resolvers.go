@@ -174,9 +174,15 @@ func (r *queryResolver) People(ctx context.Context, keywords *string, first *int
 	} else if onboarded != nil {
 		onboardedStatus = NotOnboarded
 	}
+	pagination, err := connections.Paginate(first, after, last, before)
+	if err != nil {
+		return nil, err
+	}
 	res, err := r.personService.People(ctx, &personService.PeopleRequest{
-		Page:      1,
-		PerPage:   100,
+		First:     pagination.First,
+		After:     pagination.After,
+		Last:      pagination.Last,
+		Before:    pagination.Before,
 		Keywords:  kw,
 		Onboarded: string(onboardedStatus),
 	})
@@ -184,8 +190,10 @@ func (r *queryResolver) People(ctx context.Context, keywords *string, first *int
 		return nil, err
 	}
 	data := make([]*types.Person, len(res.Persons))
+	objectIdMap := make(map[string]string)
 
 	for i, person := range res.Persons {
+		objectIdMap[person.Id] = person.ObjectId
 		pto, err := personWithCdd(person)
 		if err != nil {
 			return nil, err
@@ -207,19 +215,23 @@ func (r *queryResolver) People(ctx context.Context, keywords *string, first *int
 	edger := func(person *types.Person, offset int) connections.Edge {
 		return types.PersonEdge{
 			Node:   person,
-			Cursor: connections.OffsetToCursor(offset),
+			Cursor: connections.IdToCursor(objectIdMap[person.ID]),
 		}
 	}
 
 	conn := func(edges []*types.PersonEdge, nodes []*types.Person, info *types.PageInfo, totalCount int) (*types.PersonConnection, error) {
 		var personNodes []*types.Person
 		personNodes = append(personNodes, nodes...)
-		count := int64(totalCount)
 		return &types.PersonConnection{
-			Edges:      edges,
-			Nodes:      personNodes,
-			PageInfo:   info,
-			TotalCount: &count,
+			Edges: edges,
+			Nodes: personNodes,
+			PageInfo: &types.PageInfo{
+				HasNextPage:     info.HasNextPage || res.HasNextPage,
+				HasPreviousPage: info.HasPreviousPage || res.HasPreviousPage,
+				EndCursor:       info.EndCursor,
+				StartCursor:     info.StartCursor,
+			},
+			TotalCount: &res.TotalCount,
 		}, nil
 	}
 	return connections.PeopleLookupCon(data, edger, conn, input)
