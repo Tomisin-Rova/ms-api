@@ -527,6 +527,14 @@ func (r *queryResolver) perPageCddsQuery(first *int64, after *string, last *int6
 	return 100
 }
 
+// TODO: Converts from cursor-based pagination to number based pagination
+func (r *subscriptionResolver) perPageCddsQuery(first *int64, after *string, last *int64, before *string) int64 {
+	if after == nil && before == nil && first != nil {
+		return *first
+	}
+	return 100
+}
+
 // getConnInput this method returns the connection input type based on the context and a field name
 // this can be use for sub-fields that contain a pagination
 func (r *queryResolver) getConnInput(argMap map[string]interface{}) graphModels.ConnectionInput {

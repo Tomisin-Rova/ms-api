@@ -3,14 +3,18 @@ package httpServer
 import (
 	"context"
 	"fmt"
-	"ms.api/libs/db/mongo"
 	"net/http"
+	"time"
+
+	"ms.api/libs/db/mongo"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/gorilla/websocket"
 	"github.com/rs/cors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 	"go.uber.org/zap"
@@ -66,8 +70,20 @@ func MountServer(secrets *config.Secrets, logger *zap.Logger) *chi.Mux {
 		err := graphql.DefaultErrorPresenter(ctx, e)
 		return rerrors.FormatGqlTError(e, err)
 	})
+	// Configure WebSocket with CORS
+	server.AddTransport(&transport.Websocket{
+		Upgrader: websocket.Upgrader{
+			CheckOrigin: func(r *http.Request) bool {
+				return true
+			},
+			ReadBufferSize:  1024,
+			WriteBufferSize: 1024,
+		},
+		KeepAlivePingInterval: 10 * time.Second,
+	})
 
 	router.Handle("/graphql", server)
 	router.Get("/verify_email", httpHandlers.VerifyMagicLinkHandler)
+
 	return router
 }

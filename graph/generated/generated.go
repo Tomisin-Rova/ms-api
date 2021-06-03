@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -39,6 +40,7 @@ type ResolverRoot interface {
 	CDD() CDDResolver
 	Mutation() MutationResolver
 	Query() QueryResolver
+	Subscription() SubscriptionResolver
 }
 
 type DirectiveRoot struct {
@@ -1091,6 +1093,10 @@ type ComplexityRoot struct {
 		Ts         func(childComplexity int) int
 	}
 
+	Subscription struct {
+		Cdds func(childComplexity int, keywords *string, status []types.State, first *int64, after *string, last *int64, before *string) int
+	}
+
 	Tag struct {
 		ID   func(childComplexity int) int
 		Name func(childComplexity int) int
@@ -1336,6 +1342,9 @@ type QueryResolver interface {
 	Acceptances(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.AcceptanceConnection, error)
 	Node(ctx context.Context, id string) (types.Node, error)
 	GetOnfidoSDKToken(ctx context.Context) (*types.Response, error)
+}
+type SubscriptionResolver interface {
+	Cdds(ctx context.Context, keywords *string, status []types.State, first *int64, after *string, last *int64, before *string) (<-chan *types.CDDConnection, error)
 }
 
 type executableSchema struct {
@@ -6789,6 +6798,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Staff.Ts(childComplexity), true
 
+	case "Subscription.cdds":
+		if e.complexity.Subscription.Cdds == nil {
+			break
+		}
+
+		args, err := ec.field_Subscription_cdds_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Subscription.Cdds(childComplexity, args["keywords"].(*string), args["status"].([]types.State), args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string)), true
+
 	case "Tag.id":
 		if e.complexity.Tag.ID == nil {
 			break
@@ -7467,6 +7488,23 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 				Data: buf.Bytes(),
 			}
 		}
+	case ast.Subscription:
+		next := ec._Subscription(ctx, rc.Operation.SelectionSet)
+
+		var buf bytes.Buffer
+		return func(ctx context.Context) *graphql.Response {
+			buf.Reset()
+			data := next()
+
+			if data == nil {
+				return nil
+			}
+			data.MarshalGQL(&buf)
+
+			return &graphql.Response{
+				Data: buf.Bytes(),
+			}
+		}
 
 	default:
 		return graphql.OneShot(graphql.ErrorResponse(ctx, "unsupported GraphQL operation"))
@@ -8001,7 +8039,22 @@ var sources = []*ast.Source{
   getOnfidoSDKToken: Response!
 }
 `, BuiltIn: false},
-	{Name: "graph/schemas/subscriptions.graphql", Input: ``, BuiltIn: false},
+	{Name: "graph/schemas/subscriptions.graphql", Input: `type Subscription {
+     cdds(
+    # Keywords used to filter the cdds
+    keywords: String,
+    # Filter CDDs by it's statuses
+    status: [State!],
+    # Returns the first n elements from the list.
+    first: Int,
+    # Returns the elements in the list that come after the specified cursor.
+    after: String,
+    # Returns the last n elements from the list.
+    last: Int,
+    # Returns the elements in the list that come before the specified cursor.
+    before: String
+  ): CDDConnection
+}`, BuiltIn: false},
 	{Name: "graph/schemas/types.graphql", Input: `# I N T E R F A C E S
 
 # Interface for relay
@@ -12912,6 +12965,66 @@ func (ec *executionContext) field_Query_verifications_args(ctx context.Context, 
 		}
 	}
 	args["before"] = arg3
+	return args, nil
+}
+
+func (ec *executionContext) field_Subscription_cdds_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *string
+	if tmp, ok := rawArgs["keywords"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("keywords"))
+		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["keywords"] = arg0
+	var arg1 []types.State
+	if tmp, ok := rawArgs["status"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
+		arg1, err = ec.unmarshalOState2ᚕmsᚗapiᚋtypesᚐStateᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["status"] = arg1
+	var arg2 *int64
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg2, err = ec.unmarshalOInt2ᚖint64(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg2
+	var arg3 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+		arg3, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg3
+	var arg4 *int64
+	if tmp, ok := rawArgs["last"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("last"))
+		arg4, err = ec.unmarshalOInt2ᚖint64(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["last"] = arg4
+	var arg5 *string
+	if tmp, ok := rawArgs["before"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("before"))
+		arg5, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["before"] = arg5
 	return args, nil
 }
 
@@ -37399,6 +37512,55 @@ func (ec *executionContext) _Staff_ts(ctx context.Context, field graphql.Collect
 	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Subscription_cdds(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = nil
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Subscription",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Subscription_cdds_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Subscription().Cdds(rctx, args["keywords"].(*string), args["status"].([]types.State), args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	if resTmp == nil {
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-resTmp.(<-chan *types.CDDConnection)
+		if !ok {
+			return nil
+		}
+		return graphql.WriterFunc(func(w io.Writer) {
+			w.Write([]byte{'{'})
+			graphql.MarshalString(field.Alias).MarshalGQL(w)
+			w.Write([]byte{':'})
+			ec.marshalOCDDConnection2ᚖmsᚗapiᚋtypesᚐCDDConnection(ctx, field.Selections, res).MarshalGQL(w)
+			w.Write([]byte{'}'})
+		})
+	}
+}
+
 func (ec *executionContext) _Tag_id(ctx context.Context, field graphql.CollectedField, obj *types.Tag) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -47661,6 +47823,26 @@ func (ec *executionContext) _Staff(ctx context.Context, sel ast.SelectionSet, ob
 		return graphql.Null
 	}
 	return out
+}
+
+var subscriptionImplementors = []string{"Subscription"}
+
+func (ec *executionContext) _Subscription(ctx context.Context, sel ast.SelectionSet) func() graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, subscriptionImplementors)
+	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
+		Object: "Subscription",
+	})
+	if len(fields) != 1 {
+		ec.Errorf(ctx, "must subscribe to exactly one stream")
+		return nil
+	}
+
+	switch fields[0].Name {
+	case "cdds":
+		return ec._Subscription_cdds(ctx, fields[0])
+	default:
+		panic("unknown field " + strconv.Quote(fields[0].Name))
+	}
 }
 
 var tagImplementors = []string{"Tag"}
