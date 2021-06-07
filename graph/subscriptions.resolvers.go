@@ -12,6 +12,8 @@ import (
 	"ms.api/graph/connections"
 	"ms.api/graph/generated"
 	"ms.api/graph/models"
+	"ms.api/protos/pb/accountService"
+	"ms.api/protos/pb/authService"
 	"ms.api/protos/pb/cddService"
 	"ms.api/server/http/middlewares"
 	"ms.api/types"
@@ -126,6 +128,39 @@ func (r *subscriptionResolver) Cdd(ctx context.Context, id string) (<-chan *type
 	}()
 
 	return cddChannel, nil
+}
+
+func (r *subscriptionResolver) Accounts(ctx context.Context, first *int64, after *string, last *int64, before *string, token string) (<-chan *types.AccountConnection, error) {
+	claims, err := r.authService.ValidateToken(context.Background(),
+		&authService.ValidateTokenRequest{Token: token})
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+
+	stream, err := r.accountService.GetAccountsStream(ctx, &accountService.GetAccountsRequest{
+		IdentityId: claims.IdentityId,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	accountsChan := make(chan *types.AccountConnection, 1)
+
+	go func() {
+		for {
+			accounts, err := stream.Recv()
+			if err != nil {
+				break
+			}
+			accountsRes, err := r.getAccountsResponse(ctx, first, after, last, before, accounts)
+			if err != nil {
+				break
+			}
+			accountsChan <- accountsRes
+		}
+	}()
+	return accountsChan, nil
 }
 
 // Subscription returns generated.SubscriptionResolver implementation.

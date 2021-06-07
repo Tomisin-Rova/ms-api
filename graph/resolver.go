@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"ms.api/graph/connections"
+	mainErrors "ms.api/libs/errors"
 	"time"
 
 	"ms.api/libs/mapper"
@@ -537,7 +539,7 @@ func (r *subscriptionResolver) perPageCddsQuery(first *int64, after *string, las
 
 // getConnInput this method returns the connection input type based on the context and a field name
 // this can be use for sub-fields that contain a pagination
-func (r *queryResolver) getConnInput(argMap map[string]interface{}) graphModels.ConnectionInput {
+func (r *Resolver) getConnInput(argMap map[string]interface{}) graphModels.ConnectionInput {
 	connInput := graphModels.ConnectionInput{}
 
 	if argMap == nil {
@@ -558,6 +560,175 @@ func (r *queryResolver) getConnInput(argMap map[string]interface{}) graphModels.
 	}
 
 	return connInput
+}
+
+func (r *Resolver) getAccountsResponse(ctx context.Context, first *int64, after *string, last *int64, before *string, accounts *accountService.GetAccountsResponse) (*types.AccountConnection, error) {
+	preloads := r.preloader.GetPreloads(ctx)
+
+	var opts struct {
+		ProductRequested      bool
+		TagsRequested         bool
+		TransactionsRequested bool
+	}
+	for _, item := range preloads {
+		if item == "nodes.product" {
+			opts.ProductRequested = true
+		}
+		if item == "nodes.tags" {
+			opts.TagsRequested = true
+		}
+		if item == "nodes.transactions" {
+			opts.TransactionsRequested = true
+		}
+	}
+
+	input := graphModels.ConnectionInput{
+		Before: before,
+		After:  after,
+		First:  first,
+		Last:   last,
+	}
+
+	edger := func(account *types.Account, offset int) connections.Edge {
+		return types.AccountEdge{
+			Node:   account,
+			Cursor: connections.OffsetToCursor(offset),
+		}
+	}
+
+	conn := func(edges []*types.AccountEdge, nodes []*types.Account, info *types.PageInfo, totalCount int) (*types.AccountConnection, error) {
+		var accountNodes []*types.Account
+		accountNodes = append(accountNodes, nodes...)
+
+		return &types.AccountConnection{
+			Edges:      edges,
+			Nodes:      accountNodes,
+			PageInfo:   info,
+			TotalCount: Int64(int64(totalCount)),
+		}, nil
+	}
+
+	var accountsRes []*types.Account
+	for _, c := range accounts.Accounts {
+		var account types.Account
+		if err := r.mapper.Hydrate(c, &account); err != nil {
+			err := mainErrors.Format(mainErrors.InternalErr, nil)
+			r.logger.Error("debug", zap.Error(err))
+			return nil, err
+		}
+
+		// Add Products if requested
+		if opts.ProductRequested {
+			product, err := r.accountService.GetProduct(ctx, &accountService.GetProductRequest{Id: account.Product.ID})
+			if err != nil {
+				r.logger.Error("failed to get product", zap.Error(err))
+				return nil, err
+			}
+
+			var productRes types.Product
+			if err := r.mapper.Hydrate(product, &productRes); err != nil {
+				err := mainErrors.Format(mainErrors.InternalErr, nil)
+				r.logger.Error("debug", zap.Error(err))
+				return nil, err
+			}
+			account.Product = &productRes
+		}
+
+		// Add Transactions if requested
+		if opts.TransactionsRequested && c.Transactions != nil {
+			var transactionRes []*types.Transaction
+			for _, p := range c.Transactions {
+				var transaction types.Transaction
+				if err := r.mapper.Hydrate(p, &transaction); err != nil {
+					err := mainErrors.Format(mainErrors.InternalErr, nil)
+					r.logger.Error("debug", zap.Error(err))
+					return nil, err
+				}
+
+				transactionRes = append(transactionRes, &transaction)
+			}
+
+			transArgMap := r.preloader.GetArgMap(ctx, "Transactions")
+			transConnInput := r.getConnInput(transArgMap)
+
+			edger := func(p *types.Transaction, offset int) connections.Edge {
+				return types.TransactionEdge{
+					Node:   p,
+					Cursor: connections.OffsetToCursor(offset),
+				}
+			}
+
+			conn := func(edges []*types.TransactionEdge, nodes []*types.Transaction, info *types.PageInfo, totalCount int) (*types.TransactionConnection, error) {
+				var transactionNodes []*types.Transaction
+				transactionNodes = append(transactionNodes, nodes...)
+
+				return &types.TransactionConnection{
+					Edges:      edges,
+					Nodes:      transactionNodes,
+					PageInfo:   info,
+					TotalCount: Int64(int64(totalCount)),
+				}, nil
+			}
+
+			transConn, err := connections.TransactionConnectionCon(transactionRes, edger, conn, transConnInput)
+			if err != nil {
+				err := mainErrors.Format(mainErrors.InternalErr, err)
+				r.logger.Error("debug", zap.Error(err))
+				return nil, err
+			}
+			account.Transactions = transConn
+		}
+
+		// Add Tags if requested
+		if opts.TagsRequested && c.Tags != nil {
+			var tagsRes []*types.Tag
+			for _, p := range c.Tags {
+				var tag types.Tag
+				if err := r.mapper.Hydrate(p, &tag); err != nil {
+					err := mainErrors.Format(mainErrors.InternalErr, nil)
+					r.logger.Error("debug", zap.Error(err))
+					return nil, err
+				}
+
+				tagsRes = append(tagsRes, &tag)
+			}
+
+			tagsArgMap := r.preloader.GetArgMap(ctx, "Tags")
+			tagsConnInput := r.getConnInput(tagsArgMap)
+
+			edger := func(p *types.Tag, offset int) connections.Edge {
+				return types.TagEdge{
+					Node:   p,
+					Cursor: connections.OffsetToCursor(offset),
+				}
+			}
+
+			conn := func(edges []*types.TagEdge, nodes []*types.Tag, info *types.PageInfo, totalCount int) (*types.TagConnection, error) {
+				var TagNodes []*types.Tag
+				TagNodes = append(TagNodes, nodes...)
+
+				return &types.TagConnection{
+					Edges:      edges,
+					Nodes:      TagNodes,
+					PageInfo:   info,
+					TotalCount: Int64(int64(totalCount)),
+				}, nil
+			}
+
+			tagsConn, err := connections.TagConnectionCon(tagsRes, edger, conn, tagsConnInput)
+			if err != nil {
+				err := mainErrors.Format(mainErrors.InternalErr, err)
+				r.logger.Error("debug", zap.Error(err))
+				return nil, err
+			}
+
+			account.Tags = tagsConn
+		}
+
+		accountsRes = append(accountsRes, &account)
+	}
+
+	return connections.AccountConnectionCon(accountsRes, edger, conn, input)
 }
 
 func String(s string) *string {
