@@ -13,6 +13,7 @@ import (
 	"ms.api/graph/generated"
 	"ms.api/graph/models"
 	"ms.api/protos/pb/cddService"
+	"ms.api/server/http/middlewares"
 	"ms.api/types"
 )
 
@@ -96,10 +97,10 @@ func (r *subscriptionResolver) Cdds(ctx context.Context, keywords *string, statu
 }
 
 func (r *subscriptionResolver) Cdd(ctx context.Context, id string) (<-chan *types.Cdd, error) {
-	// claims, err := middlewares.GetAuthenticatedUser(ctx)
-	// if err != nil {
-	// 	return nil, ErrUnAuthenticated
-	// }
+	_, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
 	cddChannel := make(chan *types.Cdd, 1)
 
 	go func() {
