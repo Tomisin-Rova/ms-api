@@ -46,4 +46,6 @@ service CddService{
   rpc GetCDDByOwner(GetCDDByOwnerRequest) returns(types.Cdd){}
   rpc GetValidationById(GetValidationByIdRequest) returns(types.Validation){}
   rpc CDDS(CDDSRequest) returns (types.Cdds){}
+  rpc CDDSStreamed(CDDSRequest) returns (stream types.Cdds){}
+  rpc CDDByIdStreamed(CddIdRequest) returns(stream types.Cdd){}
 }

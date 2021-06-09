@@ -11,6 +11,7 @@ require (
 	github.com/go-redis/redis/v7 v7.4.0
 	github.com/golang/mock v1.3.1
 	github.com/golang/protobuf v1.5.2
+	github.com/gorilla/websocket v1.4.2
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/jinzhu/copier v0.2.4
 	github.com/kr/pretty v0.2.1 // indirect
