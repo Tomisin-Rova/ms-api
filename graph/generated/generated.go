@@ -1094,8 +1094,9 @@ type ComplexityRoot struct {
 	}
 
 	Subscription struct {
-		Cdd  func(childComplexity int, id string) int
-		Cdds func(childComplexity int, keywords *string, status []types.State, first *int64, after *string, last *int64, before *string) int
+		Accounts func(childComplexity int, first *int64, after *string, last *int64, before *string, token string) int
+		Cdd      func(childComplexity int, id string) int
+		Cdds     func(childComplexity int, keywords *string, status []types.State, first *int64, after *string, last *int64, before *string) int
 	}
 
 	Tag struct {
@@ -1347,6 +1348,7 @@ type QueryResolver interface {
 type SubscriptionResolver interface {
 	Cdds(ctx context.Context, keywords *string, status []types.State, first *int64, after *string, last *int64, before *string) (<-chan *types.CDDConnection, error)
 	Cdd(ctx context.Context, id string) (<-chan *types.Cdd, error)
+	Accounts(ctx context.Context, first *int64, after *string, last *int64, before *string, token string) (<-chan *types.AccountConnection, error)
 }
 
 type executableSchema struct {
@@ -6800,6 +6802,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Staff.Ts(childComplexity), true
 
+	case "Subscription.accounts":
+		if e.complexity.Subscription.Accounts == nil {
+			break
+		}
+
+		args, err := ec.field_Subscription_accounts_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Subscription.Accounts(childComplexity, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string), args["token"].(string)), true
+
 	case "Subscription.cdd":
 		if e.complexity.Subscription.Cdd == nil {
 			break
@@ -8073,6 +8087,19 @@ var sources = []*ast.Source{
     # The Ulid field for the cdd
     id: ID!
   ): CDD
+
+    accounts(
+        # Returns the first n elements from the list.
+        first: Int,
+        # Returns the elements in the list that come after the specified cursor.
+        after: String,
+        # Returns the last n elements from the list.
+        last: Int,
+        # Returns the elements in the list that come before the specified cursor.
+        before: String
+
+        token: String!
+    ): AccountConnection
 }`, BuiltIn: false},
 	{Name: "graph/schemas/types.graphql", Input: `# I N T E R F A C E S
 
@@ -12984,6 +13011,57 @@ func (ec *executionContext) field_Query_verifications_args(ctx context.Context, 
 		}
 	}
 	args["before"] = arg3
+	return args, nil
+}
+
+func (ec *executionContext) field_Subscription_accounts_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *int64
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg0, err = ec.unmarshalOInt2ᚖint64(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+		arg1, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg1
+	var arg2 *int64
+	if tmp, ok := rawArgs["last"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("last"))
+		arg2, err = ec.unmarshalOInt2ᚖint64(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["last"] = arg2
+	var arg3 *string
+	if tmp, ok := rawArgs["before"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("before"))
+		arg3, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["before"] = arg3
+	var arg4 string
+	if tmp, ok := rawArgs["token"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("token"))
+		arg4, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["token"] = arg4
 	return args, nil
 }
 
@@ -37644,6 +37722,55 @@ func (ec *executionContext) _Subscription_cdd(ctx context.Context, field graphql
 	}
 }
 
+func (ec *executionContext) _Subscription_accounts(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = nil
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Subscription",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Subscription_accounts_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Subscription().Accounts(rctx, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string), args["token"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	if resTmp == nil {
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-resTmp.(<-chan *types.AccountConnection)
+		if !ok {
+			return nil
+		}
+		return graphql.WriterFunc(func(w io.Writer) {
+			w.Write([]byte{'{'})
+			graphql.MarshalString(field.Alias).MarshalGQL(w)
+			w.Write([]byte{':'})
+			ec.marshalOAccountConnection2ᚖmsᚗapiᚋtypesᚐAccountConnection(ctx, field.Selections, res).MarshalGQL(w)
+			w.Write([]byte{'}'})
+		})
+	}
+}
+
 func (ec *executionContext) _Tag_id(ctx context.Context, field graphql.CollectedField, obj *types.Tag) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -47925,6 +48052,8 @@ func (ec *executionContext) _Subscription(ctx context.Context, sel ast.Selection
 		return ec._Subscription_cdds(ctx, fields[0])
 	case "cdd":
 		return ec._Subscription_cdd(ctx, fields[0])
+	case "accounts":
+		return ec._Subscription_accounts(ctx, fields[0])
 	default:
 		panic("unknown field " + strconv.Quote(fields[0].Name))
 	}

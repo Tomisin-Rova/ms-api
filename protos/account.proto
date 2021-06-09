@@ -63,6 +63,7 @@ service AccountService {
   rpc CreateAccount(CreateAccountRequest) returns (types.Response) {}
   rpc GetAccount(GetAccountRequest) returns (types.Account) {}
   rpc GetAccounts(GetAccountsRequest) returns (GetAccountsResponse) {}
+  rpc GetAccountsStream(GetAccountsRequest) returns (stream GetAccountsResponse) {}
   rpc ValidateBVN(ValidateBVNRequest) returns (types.Response) {}
   rpc GetProduct(GetProductRequest) returns (types.Product) {}
   rpc GetProducts(GetProductsRequest) returns (GetProductsResponse) {}
