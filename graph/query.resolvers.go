@@ -1132,12 +1132,13 @@ func (r *queryResolver) Transaction(ctx context.Context, id string) (*types.Tran
 }
 
 func (r *queryResolver) Transactions(ctx context.Context, first *int64, after *string, last *int64, before *string, account string) (*types.TransactionConnection, error) {
-	_, err := middlewares.GetAuthenticatedUser(ctx)
+	claims, err := middlewares.GetAuthenticatedUser(ctx)
 	if err != nil {
 		return nil, ErrUnAuthenticated
 	}
 	transactions, err := r.accountService.GetTransactions(ctx, &accountService.GetTransactionsRequest{
-		Account: account,
+		IdentityId: claims.IdentityId,
+		Account:    account,
 	})
 	if err != nil {
 		r.logger.Error("failed to get transaction", zap.Error(err))

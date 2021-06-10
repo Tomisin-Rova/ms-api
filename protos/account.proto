@@ -50,9 +50,9 @@ message GetTransactionRequest {
   string id = 2;
 }
 
-
 message GetTransactionsRequest {
-  string account = 1;
+  string identityId = 1;
+  string account = 2;
 }
 
 message GetTransactionsResponse {
