@@ -64,7 +64,7 @@ message CreatePaymentRequest {
   string transaction_pin = 2;
   string idempotency_key = 3;
   string owner = 4;
-  int64 charge = 5;
+  double charge = 5;
   string reference = 6;
   string state = 7;
   string image = 8;
@@ -74,13 +74,13 @@ message CreatePaymentRequest {
   BeneficiaryInput beneficiary = 12;
   string funding_source = 13;
   string currency = 14;
-  int64 funding_amount = 15;
+  double funding_amount = 15;
 }
 
 message BeneficiaryInput {
   string account = 1;
   string currency = 2;
-  int64  amount = 3;
+  double  amount = 3;
 }
 
 service PaymentService {

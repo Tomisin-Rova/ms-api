@@ -10519,7 +10519,7 @@ input PaymentInput {
   # the owner (person|organisation) providing payment instruction
   owner: ID!
   # total fee and charges applicable to payment
-  charge: Int
+  charge: Float
   # reference string provided by the customer
   reference: String
   # status of the payment - default=PENDING
@@ -10539,7 +10539,7 @@ input PaymentInput {
   # 3 letter ISO currency code of the funding account for payment
   currency: String
   # ammount to be debited from funding source/account
-  funding_amount: Int!
+  funding_amount: Float!
 }
 
 # Type to input a beneficiary account for a payment
@@ -10549,7 +10549,7 @@ input BeneficiaryInput {
   # 3 letter ISO currency code of the beneficiary account
   currency: String
   # amount to be credited to beneficiary account
-  amount: Int
+  amount: Float
 }
 
 # Type to define a staff member account
@@ -42137,7 +42137,7 @@ func (ec *executionContext) unmarshalInputBeneficiaryInput(ctx context.Context, 
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("amount"))
-			it.Amount, err = ec.unmarshalOInt2ᚖint64(ctx, v)
+			it.Amount, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -42365,7 +42365,7 @@ func (ec *executionContext) unmarshalInputPaymentInput(ctx context.Context, obj 
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("charge"))
-			it.Charge, err = ec.unmarshalOInt2ᚖint64(ctx, v)
+			it.Charge, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -42445,7 +42445,7 @@ func (ec *executionContext) unmarshalInputPaymentInput(ctx context.Context, obj 
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("funding_amount"))
-			it.FundingAmount, err = ec.unmarshalNInt2int64(ctx, v)
+			it.FundingAmount, err = ec.unmarshalNFloat2float64(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -50345,6 +50345,21 @@ func (ec *executionContext) marshalNFee2ᚖmsᚗapiᚋtypesᚐFee(ctx context.Co
 		return graphql.Null
 	}
 	return ec._Fee(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNFloat2float64(ctx context.Context, v interface{}) (float64, error) {
+	res, err := graphql.UnmarshalFloat(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNFloat2float64(ctx context.Context, sel ast.SelectionSet, v float64) graphql.Marshaler {
+	res := graphql.MarshalFloat(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
 }
 
 func (ec *executionContext) marshalNFx2ᚕᚖmsᚗapiᚋtypesᚐFxᚄ(ctx context.Context, sel ast.SelectionSet, v []*types.Fx) graphql.Marshaler {
