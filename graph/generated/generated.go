@@ -636,6 +636,7 @@ type ComplexityRoot struct {
 		LoginWithToken            func(childComplexity int, token string, authType types.AuthType) int
 		RefreshToken              func(childComplexity int, token string) int
 		Register                  func(childComplexity int, person types.PersonInput, address types.AddressInput) int
+		RequestOtp                func(childComplexity int, typeArg types.DeliveryMode, target string, expireTime *int64) int
 		RequestPasscodeReset      func(childComplexity int, email string, device types.DeviceInput) int
 		ResendEmailMagicLInk      func(childComplexity int, email string) int
 		ResendOtp                 func(childComplexity int, phone string) int
@@ -650,6 +651,7 @@ type ComplexityRoot struct {
 		UpdateValidationStatus    func(childComplexity int, validation string, status types.State, message string) int
 		ValidateBvn               func(childComplexity int, bvn string, phone string) int
 		VerifyEmail               func(childComplexity int, email string, code string) int
+		VerifyOtp                 func(childComplexity int, target string, token string) int
 	}
 
 	OpeningBalance struct {
@@ -1281,6 +1283,8 @@ type MutationResolver interface {
 	ResubmitReports(ctx context.Context, reports []*types.ReportInput) (*types.Response, error)
 	CreatePayment(ctx context.Context, payment types.PaymentInput, password string) (*types.Response, error)
 	ValidateBvn(ctx context.Context, bvn string, phone string) (*types.Response, error)
+	RequestOtp(ctx context.Context, typeArg types.DeliveryMode, target string, expireTime *int64) (*types.Response, error)
+	VerifyOtp(ctx context.Context, target string, token string) (*types.Response, error)
 }
 type QueryResolver interface {
 	Me(ctx context.Context) (*types.Person, error)
@@ -4243,6 +4247,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.Register(childComplexity, args["person"].(types.PersonInput), args["address"].(types.AddressInput)), true
 
+	case "Mutation.requestOTP":
+		if e.complexity.Mutation.RequestOtp == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_requestOTP_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.RequestOtp(childComplexity, args["type"].(types.DeliveryMode), args["target"].(string), args["expireTime"].(*int64)), true
+
 	case "Mutation.requestPasscodeReset":
 		if e.complexity.Mutation.RequestPasscodeReset == nil {
 			break
@@ -4405,6 +4421,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.VerifyEmail(childComplexity, args["email"].(string), args["code"].(string)), true
+
+	case "Mutation.verifyOTP":
+		if e.complexity.Mutation.VerifyOtp == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_verifyOTP_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.VerifyOtp(childComplexity, args["target"].(string), args["token"].(string)), true
 
 	case "OpeningBalance.default_value":
 		if e.complexity.OpeningBalance.DefaultValue == nil {
@@ -7615,6 +7643,11 @@ var sources = []*ast.Source{
   createPayment(payment: PaymentInput!, password: String!): Response!
   # validate the customer's BVN
   validateBVN(bvn: String!, phone: String!): Response!
+  # create and send a new OTP
+  # expireTime in seconds
+  requestOTP(type: DeliveryMode!, target: String!, expireTime: Int): Response!
+  # verify the sent OTP
+  verifyOTP(target: String!, token: String!): Response!
 }
 `, BuiltIn: false},
 	{Name: "graph/schemas/query.graphql", Input: `type Query {
@@ -11124,6 +11157,39 @@ func (ec *executionContext) field_Mutation_register_args(ctx context.Context, ra
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_requestOTP_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 types.DeliveryMode
+	if tmp, ok := rawArgs["type"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
+		arg0, err = ec.unmarshalNDeliveryMode2msᚗapiᚋtypesᚐDeliveryMode(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["type"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["target"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("target"))
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["target"] = arg1
+	var arg2 *int64
+	if tmp, ok := rawArgs["expireTime"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("expireTime"))
+		arg2, err = ec.unmarshalOInt2ᚖint64(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["expireTime"] = arg2
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_requestPasscodeReset_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -11424,6 +11490,30 @@ func (ec *executionContext) field_Mutation_verifyEmail_args(ctx context.Context,
 		}
 	}
 	args["code"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_verifyOTP_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["target"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("target"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["target"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["token"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("token"))
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["token"] = arg1
 	return args, nil
 }
 
@@ -27162,6 +27252,90 @@ func (ec *executionContext) _Mutation_validateBVN(ctx context.Context, field gra
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().ValidateBvn(rctx, args["bvn"].(string), args["phone"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.Response)
+	fc.Result = res
+	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_requestOTP(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_requestOTP_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().RequestOtp(rctx, args["type"].(types.DeliveryMode), args["target"].(string), args["expireTime"].(*int64))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.Response)
+	fc.Result = res
+	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_verifyOTP(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_verifyOTP_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().VerifyOtp(rctx, args["target"].(string), args["token"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -45552,6 +45726,16 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "validateBVN":
 			out.Values[i] = ec._Mutation_validateBVN(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "requestOTP":
+			out.Values[i] = ec._Mutation_requestOTP(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "verifyOTP":
+			out.Values[i] = ec._Mutation_verifyOTP(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

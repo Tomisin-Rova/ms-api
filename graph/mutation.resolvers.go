@@ -19,6 +19,7 @@ import (
 	"ms.api/protos/pb/onboardingService"
 	"ms.api/protos/pb/paymentService"
 	protoTypes "ms.api/protos/pb/types"
+	"ms.api/protos/pb/verifyService"
 	"ms.api/server/http/middlewares"
 	"ms.api/types"
 )
@@ -806,6 +807,44 @@ func (r *mutationResolver) ValidateBvn(ctx context.Context, bvn string, phone st
 		r.logger.Error("error calling accountService.ValidateBVN()", zap.Error(err))
 		return nil, err
 	}
+	return &types.Response{
+		Message: response.Message,
+		Success: response.Success,
+	}, nil
+}
+
+func (r *mutationResolver) RequestOtp(ctx context.Context, typeArg types.DeliveryMode, target string, expireTime *int64) (*types.Response, error) {
+	// Build request
+	requestOTPRequest := verifyService.RequestOTPRequest{
+		DeliveryMode: typeArg.String(),
+		Target:       target,
+	}
+	if expireTime != nil {
+		requestOTPRequest.ExpireTime = *expireTime
+	}
+	response, err := r.verifyService.RequestOTP(ctx, &requestOTPRequest)
+	if err != nil {
+		r.logger.Error("verifyService request OTP", zap.Error(err))
+		return nil, err
+	}
+
+	return &types.Response{
+		Message: response.Message,
+		Success: response.Success,
+	}, nil
+}
+
+func (r *mutationResolver) VerifyOtp(ctx context.Context, target string, token string) (*types.Response, error) {
+	// Build request
+	response, err := r.verifyService.VerifyOTP(ctx, &verifyService.VerifyOTPRequest{
+		Target: target,
+		Token:  token,
+	})
+	if err != nil {
+		r.logger.Error("verifyService verify OTP", zap.Error(err))
+		return nil, err
+	}
+
 	return &types.Response{
 		Message: response.Message,
 		Success: response.Success,

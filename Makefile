@@ -39,6 +39,7 @@ gen-mocks:
 	mockery --name=AuthServiceClient --recursive
 	mockery --name=AccountServiceClient --recursive
 	mockery --name=ProductServiceClient --recursive
+	mockery --name=VerifyServiceClient --recursive
 	mockery --name=Preloader --recursive
 	go generate ./...
 
@@ -98,8 +99,9 @@ docker-pulsar:
 	docker run -d \
       -p 6650:6650 \
       -p 8080:8080 \
-      --mount source=pulsardata,target=/var/pulsar/data \
-      --mount source=pulsarconf,target=/var/pulsar/conf \
+      --mount source=pulsardata,target=/pulsar/data \
+      --mount source=pulsarconf,target=/pulsar/conf \
+      --name pulsar-standalone \
       apachepulsar/pulsar:2.6.1 \
       bin/pulsar standalone
 

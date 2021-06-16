@@ -10,6 +10,7 @@ import (
 	"ms.api/protos/pb/onboardingService"
 	"ms.api/protos/pb/paymentService"
 	protoTypes "ms.api/protos/pb/types"
+	"ms.api/protos/pb/verifyService"
 	"ms.api/server/http/middlewares"
 	"ms.api/types"
 
@@ -886,6 +887,139 @@ func TestMutationResolver_CreatePayment(t *testing.T) {
 				assert.NoError(t, err)
 				assert.NotNil(t, response)
 				assert.Equal(t, true, response.Success)
+			}
+		})
+	}
+}
+
+func TestMutationResolver_RequestOtp(t *testing.T) {
+	const (
+		success = iota
+		errorRequestingOTP
+	)
+
+	var expireTime int64 = 20
+
+	var tests = []struct {
+		name string
+		arg  struct {
+			typeArg    types.DeliveryMode
+			target     string
+			expireTime *int64
+		}
+		testType int
+	}{
+		{
+			name: "Test request OTP successfully",
+			arg: struct {
+				typeArg    types.DeliveryMode
+				target     string
+				expireTime *int64
+			}{typeArg: types.DeliveryModeEmail, target: "test@email.com", expireTime: &expireTime},
+			testType: success,
+		},
+		{
+			name: "Test error calling RequestOTP",
+			arg: struct {
+				typeArg    types.DeliveryMode
+				target     string
+				expireTime *int64
+			}{typeArg: types.DeliveryModeEmail, target: "test@email.com", expireTime: nil},
+			testType: errorRequestingOTP,
+		},
+	}
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			// Mocks
+			verifyServiceMock := new(mocks.VerifyServiceClient)
+			resolverOpts := &ResolverOpts{verifyService: verifyServiceMock}
+			resolver := NewResolver(resolverOpts, zaptest.NewLogger(t))
+
+			switch testCase.testType {
+			case success:
+				verifyServiceMock.On("RequestOTP", context.Background(), &verifyService.RequestOTPRequest{
+					DeliveryMode: testCase.arg.typeArg.String(),
+					Target:       testCase.arg.target,
+					ExpireTime:   expireTime,
+				}).Return(&protoTypes.Response{}, nil)
+
+				response, err := resolver.Mutation().RequestOtp(context.Background(), testCase.arg.typeArg, testCase.arg.target,
+					testCase.arg.expireTime)
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+			case errorRequestingOTP:
+				verifyServiceMock.On("RequestOTP", context.Background(), &verifyService.RequestOTPRequest{
+					DeliveryMode: testCase.arg.typeArg.String(),
+					Target:       testCase.arg.target,
+					ExpireTime:   0,
+				}).Return(nil, errors.New(""))
+
+				response, err := resolver.Mutation().RequestOtp(context.Background(), testCase.arg.typeArg, testCase.arg.target,
+					testCase.arg.expireTime)
+				assert.Error(t, err)
+				assert.Nil(t, response)
+			}
+		})
+	}
+}
+
+func TestMutationResolver_VerifyOtp(t *testing.T) {
+	const (
+		success = iota
+		errorVerifyingOTP
+	)
+
+	var tests = []struct {
+		name string
+		arg  struct {
+			target string
+			token  string
+		}
+		testType int
+	}{
+		{
+			name: "Test verify OTP successfully",
+			arg: struct {
+				target string
+				token  string
+			}{target: "target", token: "12345"},
+			testType: success,
+		},
+		{
+			name: "Test error calling VerifyOTP",
+			arg: struct {
+				target string
+				token  string
+			}{target: "target", token: "12345"},
+			testType: errorVerifyingOTP,
+		},
+	}
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			// Mocks
+			verifyServiceMock := new(mocks.VerifyServiceClient)
+			resolverOpts := &ResolverOpts{verifyService: verifyServiceMock}
+			resolver := NewResolver(resolverOpts, zaptest.NewLogger(t))
+
+			switch testCase.testType {
+			case success:
+				verifyServiceMock.On("VerifyOTP", context.Background(), &verifyService.VerifyOTPRequest{
+					Target: testCase.arg.target,
+					Token:  testCase.arg.token,
+				}).Return(&protoTypes.Response{}, nil)
+
+				response, err := resolver.Mutation().VerifyOtp(context.Background(), testCase.arg.target, testCase.arg.token)
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+			case errorVerifyingOTP:
+				verifyServiceMock.On("VerifyOTP", context.Background(), &verifyService.VerifyOTPRequest{
+					Target: testCase.arg.target,
+					Token:  testCase.arg.token,
+				}).Return(nil, errors.New(""))
+
+				response, err := resolver.Mutation().VerifyOtp(context.Background(), testCase.arg.target, testCase.arg.token)
+				assert.Error(t, err)
+				assert.Nil(t, response)
 			}
 		})
 	}
