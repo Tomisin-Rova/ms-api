@@ -54,4 +54,9 @@ type Mutation {
   createPayment(payment: PaymentInput!, password: String!): Response!
   # validate the customer's BVN
   validateBVN(bvn: String!, phone: String!): Response!
+  # create and send a new OTP
+  # expireTime in seconds
+  requestOTP(type: DeliveryMode!, target: String!, expireTime: Int): Response!
+  # verify the sent OTP
+  verifyOTP(target: String!, token: String!): Response!
 }

@@ -11,28 +11,24 @@ message ValidateEmailRequest {
   string password = 3;
 }
 
-message OtpVerificationResponse {
-  bool match = 1;
-  string message = 2;
+message SuccessResponse {
+  string message = 1;
 }
 
-message OtpVerificationRequest {
-  string phone = 1;
-  string code = 2;
+message RequestOTPRequest {
+  string deliveryMode = 1;
+  string target = 2;
+  // expireTime in seconds
+  int64 expireTime = 3;
 }
 
-message OtpVerificationByEmailRequest {
-  string email = 1;
-  string code = 2;
-}
-
-message ResendOtpRequest {
-  string phone = 1;
+message VerifyOTPRequest {
+  string target = 1;
+  string token = 2;
 }
 
 service VerifyService {
-  rpc ValidateEmail(ValidateEmailRequest) returns (types.Response) {}
-  rpc VerifySmsOtp(OtpVerificationRequest) returns (OtpVerificationResponse) {}
-  rpc VerifyEmailOtp(OtpVerificationByEmailRequest) returns (OtpVerificationResponse) {}
-  rpc ResendOtp(ResendOtpRequest) returns (types.Response) {}
+  rpc RequestOTP(RequestOTPRequest) returns (types.Response) {}
+  rpc VerifyOTP(VerifyOTPRequest) returns (types.Response) {}
+  rpc ValidateEmail(ValidateEmailRequest) returns (SuccessResponse) {}
 }

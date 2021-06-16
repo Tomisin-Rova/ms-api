@@ -88,17 +88,16 @@ func (x *ValidateEmailRequest) GetPassword() string {
 	return ""
 }
 
-type OtpVerificationResponse struct {
+type SuccessResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Match   bool   `protobuf:"varint,1,opt,name=match,proto3" json:"match,omitempty"`
-	Message string `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	Message string `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 }
 
-func (x *OtpVerificationResponse) Reset() {
-	*x = OtpVerificationResponse{}
+func (x *SuccessResponse) Reset() {
+	*x = SuccessResponse{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_verify_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -106,13 +105,13 @@ func (x *OtpVerificationResponse) Reset() {
 	}
 }
 
-func (x *OtpVerificationResponse) String() string {
+func (x *SuccessResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*OtpVerificationResponse) ProtoMessage() {}
+func (*SuccessResponse) ProtoMessage() {}
 
-func (x *OtpVerificationResponse) ProtoReflect() protoreflect.Message {
+func (x *SuccessResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_verify_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -124,36 +123,31 @@ func (x *OtpVerificationResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use OtpVerificationResponse.ProtoReflect.Descriptor instead.
-func (*OtpVerificationResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use SuccessResponse.ProtoReflect.Descriptor instead.
+func (*SuccessResponse) Descriptor() ([]byte, []int) {
 	return file_verify_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *OtpVerificationResponse) GetMatch() bool {
-	if x != nil {
-		return x.Match
-	}
-	return false
-}
-
-func (x *OtpVerificationResponse) GetMessage() string {
+func (x *SuccessResponse) GetMessage() string {
 	if x != nil {
 		return x.Message
 	}
 	return ""
 }
 
-type OtpVerificationRequest struct {
+type RequestOTPRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Phone string `protobuf:"bytes,1,opt,name=phone,proto3" json:"phone,omitempty"`
-	Code  string `protobuf:"bytes,2,opt,name=code,proto3" json:"code,omitempty"`
+	DeliveryMode string `protobuf:"bytes,1,opt,name=deliveryMode,proto3" json:"deliveryMode,omitempty"`
+	Target       string `protobuf:"bytes,2,opt,name=target,proto3" json:"target,omitempty"`
+	// expireTime in seconds
+	ExpireTime int64 `protobuf:"varint,3,opt,name=expireTime,proto3" json:"expireTime,omitempty"`
 }
 
-func (x *OtpVerificationRequest) Reset() {
-	*x = OtpVerificationRequest{}
+func (x *RequestOTPRequest) Reset() {
+	*x = RequestOTPRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_verify_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -161,13 +155,13 @@ func (x *OtpVerificationRequest) Reset() {
 	}
 }
 
-func (x *OtpVerificationRequest) String() string {
+func (x *RequestOTPRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*OtpVerificationRequest) ProtoMessage() {}
+func (*RequestOTPRequest) ProtoMessage() {}
 
-func (x *OtpVerificationRequest) ProtoReflect() protoreflect.Message {
+func (x *RequestOTPRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_verify_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -179,36 +173,43 @@ func (x *OtpVerificationRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use OtpVerificationRequest.ProtoReflect.Descriptor instead.
-func (*OtpVerificationRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use RequestOTPRequest.ProtoReflect.Descriptor instead.
+func (*RequestOTPRequest) Descriptor() ([]byte, []int) {
 	return file_verify_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *OtpVerificationRequest) GetPhone() string {
+func (x *RequestOTPRequest) GetDeliveryMode() string {
 	if x != nil {
-		return x.Phone
+		return x.DeliveryMode
 	}
 	return ""
 }
 
-func (x *OtpVerificationRequest) GetCode() string {
+func (x *RequestOTPRequest) GetTarget() string {
 	if x != nil {
-		return x.Code
+		return x.Target
 	}
 	return ""
 }
 
-type OtpVerificationByEmailRequest struct {
+func (x *RequestOTPRequest) GetExpireTime() int64 {
+	if x != nil {
+		return x.ExpireTime
+	}
+	return 0
+}
+
+type VerifyOTPRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Email string `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
-	Code  string `protobuf:"bytes,2,opt,name=code,proto3" json:"code,omitempty"`
+	Target string `protobuf:"bytes,1,opt,name=target,proto3" json:"target,omitempty"`
+	Token  string `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty"`
 }
 
-func (x *OtpVerificationByEmailRequest) Reset() {
-	*x = OtpVerificationByEmailRequest{}
+func (x *VerifyOTPRequest) Reset() {
+	*x = VerifyOTPRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_verify_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -216,13 +217,13 @@ func (x *OtpVerificationByEmailRequest) Reset() {
 	}
 }
 
-func (x *OtpVerificationByEmailRequest) String() string {
+func (x *VerifyOTPRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*OtpVerificationByEmailRequest) ProtoMessage() {}
+func (*VerifyOTPRequest) ProtoMessage() {}
 
-func (x *OtpVerificationByEmailRequest) ProtoReflect() protoreflect.Message {
+func (x *VerifyOTPRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_verify_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -234,68 +235,21 @@ func (x *OtpVerificationByEmailRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use OtpVerificationByEmailRequest.ProtoReflect.Descriptor instead.
-func (*OtpVerificationByEmailRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use VerifyOTPRequest.ProtoReflect.Descriptor instead.
+func (*VerifyOTPRequest) Descriptor() ([]byte, []int) {
 	return file_verify_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *OtpVerificationByEmailRequest) GetEmail() string {
+func (x *VerifyOTPRequest) GetTarget() string {
 	if x != nil {
-		return x.Email
+		return x.Target
 	}
 	return ""
 }
 
-func (x *OtpVerificationByEmailRequest) GetCode() string {
+func (x *VerifyOTPRequest) GetToken() string {
 	if x != nil {
-		return x.Code
-	}
-	return ""
-}
-
-type ResendOtpRequest struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Phone string `protobuf:"bytes,1,opt,name=phone,proto3" json:"phone,omitempty"`
-}
-
-func (x *ResendOtpRequest) Reset() {
-	*x = ResendOtpRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_verify_proto_msgTypes[4]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *ResendOtpRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ResendOtpRequest) ProtoMessage() {}
-
-func (x *ResendOtpRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_verify_proto_msgTypes[4]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ResendOtpRequest.ProtoReflect.Descriptor instead.
-func (*ResendOtpRequest) Descriptor() ([]byte, []int) {
-	return file_verify_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *ResendOtpRequest) GetPhone() string {
-	if x != nil {
-		return x.Phone
+		return x.Token
 	}
 	return ""
 }
@@ -311,45 +265,36 @@ var file_verify_proto_rawDesc = []byte{
 	0x14, 0x0a, 0x05, 0x65, 0x6d, 0x61, 0x69, 0x6c, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05,
 	0x65, 0x6d, 0x61, 0x69, 0x6c, 0x12, 0x1a, 0x0a, 0x08, 0x70, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72,
 	0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x70, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72,
-	0x64, 0x22, 0x49, 0x0a, 0x17, 0x4f, 0x74, 0x70, 0x56, 0x65, 0x72, 0x69, 0x66, 0x69, 0x63, 0x61,
-	0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x14, 0x0a, 0x05,
-	0x6d, 0x61, 0x74, 0x63, 0x68, 0x18, 0x01, 0x20, 0x01, 0x28, 0x08, 0x52, 0x05, 0x6d, 0x61, 0x74,
-	0x63, 0x68, 0x12, 0x18, 0x0a, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x18, 0x02, 0x20,
-	0x01, 0x28, 0x09, 0x52, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x22, 0x42, 0x0a, 0x16,
-	0x4f, 0x74, 0x70, 0x56, 0x65, 0x72, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52,
-	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x14, 0x0a, 0x05, 0x70, 0x68, 0x6f, 0x6e, 0x65, 0x18,
-	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x70, 0x68, 0x6f, 0x6e, 0x65, 0x12, 0x12, 0x0a, 0x04,
-	0x63, 0x6f, 0x64, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x63, 0x6f, 0x64, 0x65,
-	0x22, 0x49, 0x0a, 0x1d, 0x4f, 0x74, 0x70, 0x56, 0x65, 0x72, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74,
-	0x69, 0x6f, 0x6e, 0x42, 0x79, 0x45, 0x6d, 0x61, 0x69, 0x6c, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
-	0x74, 0x12, 0x14, 0x0a, 0x05, 0x65, 0x6d, 0x61, 0x69, 0x6c, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09,
-	0x52, 0x05, 0x65, 0x6d, 0x61, 0x69, 0x6c, 0x12, 0x12, 0x0a, 0x04, 0x63, 0x6f, 0x64, 0x65, 0x18,
-	0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x63, 0x6f, 0x64, 0x65, 0x22, 0x28, 0x0a, 0x10, 0x52,
-	0x65, 0x73, 0x65, 0x6e, 0x64, 0x4f, 0x74, 0x70, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12,
-	0x14, 0x0a, 0x05, 0x70, 0x68, 0x6f, 0x6e, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05,
-	0x70, 0x68, 0x6f, 0x6e, 0x65, 0x32, 0xba, 0x02, 0x0a, 0x0d, 0x56, 0x65, 0x72, 0x69, 0x66, 0x79,
-	0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x40, 0x0a, 0x0d, 0x56, 0x61, 0x6c, 0x69, 0x64,
-	0x61, 0x74, 0x65, 0x45, 0x6d, 0x61, 0x69, 0x6c, 0x12, 0x1c, 0x2e, 0x76, 0x65, 0x72, 0x69, 0x66,
-	0x79, 0x2e, 0x56, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x65, 0x45, 0x6d, 0x61, 0x69, 0x6c, 0x52,
+	0x64, 0x22, 0x2b, 0x0a, 0x0f, 0x53, 0x75, 0x63, 0x63, 0x65, 0x73, 0x73, 0x52, 0x65, 0x73, 0x70,
+	0x6f, 0x6e, 0x73, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x22, 0x6f,
+	0x0a, 0x11, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x4f, 0x54, 0x50, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x12, 0x22, 0x0a, 0x0c, 0x64, 0x65, 0x6c, 0x69, 0x76, 0x65, 0x72, 0x79, 0x4d,
+	0x6f, 0x64, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0c, 0x64, 0x65, 0x6c, 0x69, 0x76,
+	0x65, 0x72, 0x79, 0x4d, 0x6f, 0x64, 0x65, 0x12, 0x16, 0x0a, 0x06, 0x74, 0x61, 0x72, 0x67, 0x65,
+	0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x74, 0x61, 0x72, 0x67, 0x65, 0x74, 0x12,
+	0x1e, 0x0a, 0x0a, 0x65, 0x78, 0x70, 0x69, 0x72, 0x65, 0x54, 0x69, 0x6d, 0x65, 0x18, 0x03, 0x20,
+	0x01, 0x28, 0x03, 0x52, 0x0a, 0x65, 0x78, 0x70, 0x69, 0x72, 0x65, 0x54, 0x69, 0x6d, 0x65, 0x22,
+	0x40, 0x0a, 0x10, 0x56, 0x65, 0x72, 0x69, 0x66, 0x79, 0x4f, 0x54, 0x50, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x12, 0x16, 0x0a, 0x06, 0x74, 0x61, 0x72, 0x67, 0x65, 0x74, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x06, 0x74, 0x61, 0x72, 0x67, 0x65, 0x74, 0x12, 0x14, 0x0a, 0x05, 0x74,
+	0x6f, 0x6b, 0x65, 0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x74, 0x6f, 0x6b, 0x65,
+	0x6e, 0x32, 0xcf, 0x01, 0x0a, 0x0d, 0x56, 0x65, 0x72, 0x69, 0x66, 0x79, 0x53, 0x65, 0x72, 0x76,
+	0x69, 0x63, 0x65, 0x12, 0x3a, 0x0a, 0x0a, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x4f, 0x54,
+	0x50, 0x12, 0x19, 0x2e, 0x76, 0x65, 0x72, 0x69, 0x66, 0x79, 0x2e, 0x52, 0x65, 0x71, 0x75, 0x65,
+	0x73, 0x74, 0x4f, 0x54, 0x50, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x0f, 0x2e, 0x74,
+	0x79, 0x70, 0x65, 0x73, 0x2e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12,
+	0x38, 0x0a, 0x09, 0x56, 0x65, 0x72, 0x69, 0x66, 0x79, 0x4f, 0x54, 0x50, 0x12, 0x18, 0x2e, 0x76,
+	0x65, 0x72, 0x69, 0x66, 0x79, 0x2e, 0x56, 0x65, 0x72, 0x69, 0x66, 0x79, 0x4f, 0x54, 0x50, 0x52,
 	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x0f, 0x2e, 0x74, 0x79, 0x70, 0x65, 0x73, 0x2e, 0x52,
-	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x51, 0x0a, 0x0c, 0x56, 0x65, 0x72,
-	0x69, 0x66, 0x79, 0x53, 0x6d, 0x73, 0x4f, 0x74, 0x70, 0x12, 0x1e, 0x2e, 0x76, 0x65, 0x72, 0x69,
-	0x66, 0x79, 0x2e, 0x4f, 0x74, 0x70, 0x56, 0x65, 0x72, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x69,
-	0x6f, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1f, 0x2e, 0x76, 0x65, 0x72, 0x69,
-	0x66, 0x79, 0x2e, 0x4f, 0x74, 0x70, 0x56, 0x65, 0x72, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x69,
-	0x6f, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x5a, 0x0a, 0x0e,
-	0x56, 0x65, 0x72, 0x69, 0x66, 0x79, 0x45, 0x6d, 0x61, 0x69, 0x6c, 0x4f, 0x74, 0x70, 0x12, 0x25,
-	0x2e, 0x76, 0x65, 0x72, 0x69, 0x66, 0x79, 0x2e, 0x4f, 0x74, 0x70, 0x56, 0x65, 0x72, 0x69, 0x66,
-	0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x42, 0x79, 0x45, 0x6d, 0x61, 0x69, 0x6c, 0x52, 0x65,
-	0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1f, 0x2e, 0x76, 0x65, 0x72, 0x69, 0x66, 0x79, 0x2e, 0x4f,
-	0x74, 0x70, 0x56, 0x65, 0x72, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65,
-	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x38, 0x0a, 0x09, 0x52, 0x65, 0x73, 0x65,
-	0x6e, 0x64, 0x4f, 0x74, 0x70, 0x12, 0x18, 0x2e, 0x76, 0x65, 0x72, 0x69, 0x66, 0x79, 0x2e, 0x52,
-	0x65, 0x73, 0x65, 0x6e, 0x64, 0x4f, 0x74, 0x70, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a,
-	0x0f, 0x2e, 0x74, 0x79, 0x70, 0x65, 0x73, 0x2e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
-	0x22, 0x00, 0x42, 0x20, 0x5a, 0x1e, 0x6d, 0x73, 0x2e, 0x61, 0x70, 0x69, 0x2f, 0x70, 0x72, 0x6f,
-	0x74, 0x6f, 0x73, 0x2f, 0x70, 0x62, 0x2f, 0x76, 0x65, 0x72, 0x69, 0x66, 0x79, 0x53, 0x65, 0x72,
-	0x76, 0x69, 0x63, 0x65, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x48, 0x0a, 0x0d, 0x56, 0x61, 0x6c,
+	0x69, 0x64, 0x61, 0x74, 0x65, 0x45, 0x6d, 0x61, 0x69, 0x6c, 0x12, 0x1c, 0x2e, 0x76, 0x65, 0x72,
+	0x69, 0x66, 0x79, 0x2e, 0x56, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x65, 0x45, 0x6d, 0x61, 0x69,
+	0x6c, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x17, 0x2e, 0x76, 0x65, 0x72, 0x69, 0x66,
+	0x79, 0x2e, 0x53, 0x75, 0x63, 0x63, 0x65, 0x73, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
+	0x65, 0x22, 0x00, 0x42, 0x20, 0x5a, 0x1e, 0x6d, 0x73, 0x2e, 0x61, 0x70, 0x69, 0x2f, 0x70, 0x72,
+	0x6f, 0x74, 0x6f, 0x73, 0x2f, 0x70, 0x62, 0x2f, 0x76, 0x65, 0x72, 0x69, 0x66, 0x79, 0x53, 0x65,
+	0x72, 0x76, 0x69, 0x63, 0x65, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -364,26 +309,23 @@ func file_verify_proto_rawDescGZIP() []byte {
 	return file_verify_proto_rawDescData
 }
 
-var file_verify_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_verify_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_verify_proto_goTypes = []interface{}{
-	(*ValidateEmailRequest)(nil),          // 0: verify.ValidateEmailRequest
-	(*OtpVerificationResponse)(nil),       // 1: verify.OtpVerificationResponse
-	(*OtpVerificationRequest)(nil),        // 2: verify.OtpVerificationRequest
-	(*OtpVerificationByEmailRequest)(nil), // 3: verify.OtpVerificationByEmailRequest
-	(*ResendOtpRequest)(nil),              // 4: verify.ResendOtpRequest
-	(*types.Response)(nil),                // 5: types.Response
+	(*ValidateEmailRequest)(nil), // 0: verify.ValidateEmailRequest
+	(*SuccessResponse)(nil),      // 1: verify.SuccessResponse
+	(*RequestOTPRequest)(nil),    // 2: verify.RequestOTPRequest
+	(*VerifyOTPRequest)(nil),     // 3: verify.VerifyOTPRequest
+	(*types.Response)(nil),       // 4: types.Response
 }
 var file_verify_proto_depIdxs = []int32{
-	0, // 0: verify.VerifyService.ValidateEmail:input_type -> verify.ValidateEmailRequest
-	2, // 1: verify.VerifyService.VerifySmsOtp:input_type -> verify.OtpVerificationRequest
-	3, // 2: verify.VerifyService.VerifyEmailOtp:input_type -> verify.OtpVerificationByEmailRequest
-	4, // 3: verify.VerifyService.ResendOtp:input_type -> verify.ResendOtpRequest
-	5, // 4: verify.VerifyService.ValidateEmail:output_type -> types.Response
-	1, // 5: verify.VerifyService.VerifySmsOtp:output_type -> verify.OtpVerificationResponse
-	1, // 6: verify.VerifyService.VerifyEmailOtp:output_type -> verify.OtpVerificationResponse
-	5, // 7: verify.VerifyService.ResendOtp:output_type -> types.Response
-	4, // [4:8] is the sub-list for method output_type
-	0, // [0:4] is the sub-list for method input_type
+	2, // 0: verify.VerifyService.RequestOTP:input_type -> verify.RequestOTPRequest
+	3, // 1: verify.VerifyService.VerifyOTP:input_type -> verify.VerifyOTPRequest
+	0, // 2: verify.VerifyService.ValidateEmail:input_type -> verify.ValidateEmailRequest
+	4, // 3: verify.VerifyService.RequestOTP:output_type -> types.Response
+	4, // 4: verify.VerifyService.VerifyOTP:output_type -> types.Response
+	1, // 5: verify.VerifyService.ValidateEmail:output_type -> verify.SuccessResponse
+	3, // [3:6] is the sub-list for method output_type
+	0, // [0:3] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -408,7 +350,7 @@ func file_verify_proto_init() {
 			}
 		}
 		file_verify_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*OtpVerificationResponse); i {
+			switch v := v.(*SuccessResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -420,7 +362,7 @@ func file_verify_proto_init() {
 			}
 		}
 		file_verify_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*OtpVerificationRequest); i {
+			switch v := v.(*RequestOTPRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -432,19 +374,7 @@ func file_verify_proto_init() {
 			}
 		}
 		file_verify_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*OtpVerificationByEmailRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_verify_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ResendOtpRequest); i {
+			switch v := v.(*VerifyOTPRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -462,7 +392,7 @@ func file_verify_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_verify_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
@@ -488,10 +418,9 @@ const _ = grpc.SupportPackageIsVersion6
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type VerifyServiceClient interface {
-	ValidateEmail(ctx context.Context, in *ValidateEmailRequest, opts ...grpc.CallOption) (*types.Response, error)
-	VerifySmsOtp(ctx context.Context, in *OtpVerificationRequest, opts ...grpc.CallOption) (*OtpVerificationResponse, error)
-	VerifyEmailOtp(ctx context.Context, in *OtpVerificationByEmailRequest, opts ...grpc.CallOption) (*OtpVerificationResponse, error)
-	ResendOtp(ctx context.Context, in *ResendOtpRequest, opts ...grpc.CallOption) (*types.Response, error)
+	RequestOTP(ctx context.Context, in *RequestOTPRequest, opts ...grpc.CallOption) (*types.Response, error)
+	VerifyOTP(ctx context.Context, in *VerifyOTPRequest, opts ...grpc.CallOption) (*types.Response, error)
+	ValidateEmail(ctx context.Context, in *ValidateEmailRequest, opts ...grpc.CallOption) (*SuccessResponse, error)
 }
 
 type verifyServiceClient struct {
@@ -502,36 +431,27 @@ func NewVerifyServiceClient(cc grpc.ClientConnInterface) VerifyServiceClient {
 	return &verifyServiceClient{cc}
 }
 
-func (c *verifyServiceClient) ValidateEmail(ctx context.Context, in *ValidateEmailRequest, opts ...grpc.CallOption) (*types.Response, error) {
+func (c *verifyServiceClient) RequestOTP(ctx context.Context, in *RequestOTPRequest, opts ...grpc.CallOption) (*types.Response, error) {
 	out := new(types.Response)
+	err := c.cc.Invoke(ctx, "/verify.VerifyService/RequestOTP", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *verifyServiceClient) VerifyOTP(ctx context.Context, in *VerifyOTPRequest, opts ...grpc.CallOption) (*types.Response, error) {
+	out := new(types.Response)
+	err := c.cc.Invoke(ctx, "/verify.VerifyService/VerifyOTP", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *verifyServiceClient) ValidateEmail(ctx context.Context, in *ValidateEmailRequest, opts ...grpc.CallOption) (*SuccessResponse, error) {
+	out := new(SuccessResponse)
 	err := c.cc.Invoke(ctx, "/verify.VerifyService/ValidateEmail", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *verifyServiceClient) VerifySmsOtp(ctx context.Context, in *OtpVerificationRequest, opts ...grpc.CallOption) (*OtpVerificationResponse, error) {
-	out := new(OtpVerificationResponse)
-	err := c.cc.Invoke(ctx, "/verify.VerifyService/VerifySmsOtp", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *verifyServiceClient) VerifyEmailOtp(ctx context.Context, in *OtpVerificationByEmailRequest, opts ...grpc.CallOption) (*OtpVerificationResponse, error) {
-	out := new(OtpVerificationResponse)
-	err := c.cc.Invoke(ctx, "/verify.VerifyService/VerifyEmailOtp", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *verifyServiceClient) ResendOtp(ctx context.Context, in *ResendOtpRequest, opts ...grpc.CallOption) (*types.Response, error) {
-	out := new(types.Response)
-	err := c.cc.Invoke(ctx, "/verify.VerifyService/ResendOtp", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -540,31 +460,63 @@ func (c *verifyServiceClient) ResendOtp(ctx context.Context, in *ResendOtpReques
 
 // VerifyServiceServer is the server API for VerifyService service.
 type VerifyServiceServer interface {
-	ValidateEmail(context.Context, *ValidateEmailRequest) (*types.Response, error)
-	VerifySmsOtp(context.Context, *OtpVerificationRequest) (*OtpVerificationResponse, error)
-	VerifyEmailOtp(context.Context, *OtpVerificationByEmailRequest) (*OtpVerificationResponse, error)
-	ResendOtp(context.Context, *ResendOtpRequest) (*types.Response, error)
+	RequestOTP(context.Context, *RequestOTPRequest) (*types.Response, error)
+	VerifyOTP(context.Context, *VerifyOTPRequest) (*types.Response, error)
+	ValidateEmail(context.Context, *ValidateEmailRequest) (*SuccessResponse, error)
 }
 
 // UnimplementedVerifyServiceServer can be embedded to have forward compatible implementations.
 type UnimplementedVerifyServiceServer struct {
 }
 
-func (*UnimplementedVerifyServiceServer) ValidateEmail(context.Context, *ValidateEmailRequest) (*types.Response, error) {
+func (*UnimplementedVerifyServiceServer) RequestOTP(context.Context, *RequestOTPRequest) (*types.Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RequestOTP not implemented")
+}
+func (*UnimplementedVerifyServiceServer) VerifyOTP(context.Context, *VerifyOTPRequest) (*types.Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method VerifyOTP not implemented")
+}
+func (*UnimplementedVerifyServiceServer) ValidateEmail(context.Context, *ValidateEmailRequest) (*SuccessResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ValidateEmail not implemented")
-}
-func (*UnimplementedVerifyServiceServer) VerifySmsOtp(context.Context, *OtpVerificationRequest) (*OtpVerificationResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method VerifySmsOtp not implemented")
-}
-func (*UnimplementedVerifyServiceServer) VerifyEmailOtp(context.Context, *OtpVerificationByEmailRequest) (*OtpVerificationResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method VerifyEmailOtp not implemented")
-}
-func (*UnimplementedVerifyServiceServer) ResendOtp(context.Context, *ResendOtpRequest) (*types.Response, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ResendOtp not implemented")
 }
 
 func RegisterVerifyServiceServer(s *grpc.Server, srv VerifyServiceServer) {
 	s.RegisterService(&_VerifyService_serviceDesc, srv)
+}
+
+func _VerifyService_RequestOTP_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RequestOTPRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VerifyServiceServer).RequestOTP(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/verify.VerifyService/RequestOTP",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VerifyServiceServer).RequestOTP(ctx, req.(*RequestOTPRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _VerifyService_VerifyOTP_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VerifyOTPRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VerifyServiceServer).VerifyOTP(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/verify.VerifyService/VerifyOTP",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VerifyServiceServer).VerifyOTP(ctx, req.(*VerifyOTPRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _VerifyService_ValidateEmail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -585,79 +537,21 @@ func _VerifyService_ValidateEmail_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _VerifyService_VerifySmsOtp_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(OtpVerificationRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(VerifyServiceServer).VerifySmsOtp(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/verify.VerifyService/VerifySmsOtp",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(VerifyServiceServer).VerifySmsOtp(ctx, req.(*OtpVerificationRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _VerifyService_VerifyEmailOtp_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(OtpVerificationByEmailRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(VerifyServiceServer).VerifyEmailOtp(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/verify.VerifyService/VerifyEmailOtp",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(VerifyServiceServer).VerifyEmailOtp(ctx, req.(*OtpVerificationByEmailRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _VerifyService_ResendOtp_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ResendOtpRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(VerifyServiceServer).ResendOtp(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/verify.VerifyService/ResendOtp",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(VerifyServiceServer).ResendOtp(ctx, req.(*ResendOtpRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 var _VerifyService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "verify.VerifyService",
 	HandlerType: (*VerifyServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
+			MethodName: "RequestOTP",
+			Handler:    _VerifyService_RequestOTP_Handler,
+		},
+		{
+			MethodName: "VerifyOTP",
+			Handler:    _VerifyService_VerifyOTP_Handler,
+		},
+		{
 			MethodName: "ValidateEmail",
 			Handler:    _VerifyService_ValidateEmail_Handler,
-		},
-		{
-			MethodName: "VerifySmsOtp",
-			Handler:    _VerifyService_VerifySmsOtp_Handler,
-		},
-		{
-			MethodName: "VerifyEmailOtp",
-			Handler:    _VerifyService_VerifyEmailOtp_Handler,
-		},
-		{
-			MethodName: "ResendOtp",
-			Handler:    _VerifyService_ResendOtp_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
