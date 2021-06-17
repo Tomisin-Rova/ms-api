@@ -8185,11 +8185,18 @@ enum DeliveryMode {
 
 # list of person states
 enum PersonStatus {
-  ACTIVE
-  INACTIVE
-  EXITED
-  BLACKLIST
+  # signed up with email & passcode
+  SIGNEDUP
+  # enter personal info
+  REGISTERED
+  # finished ID & verification captured
+  VERIFIED
+  # already onboarded
+  ONBOARDED
+  # onboarding process rejected
   REJECTED
+  # person exited
+  EXITED
 }
 
 # list of customer identity states
@@ -10062,22 +10069,22 @@ type Account {
   # Array of tags
   tags(
     # Returns the first n elements from the list.
-    first: Int,
+    first: Int
     # Returns the elements in the list that come after the specified cursor.
-    after: String,
+    after: String
     # Returns the last n elements from the list.
-    last: Int,
+    last: Int
     # Returns the elements in the list that come before the specified cursor.
     before: String
   ): TagConnection
   # Account can have array of 0..n transactions
   transactions(
     # Returns the first n elements from the list.
-    first: Int,
+    first: Int
     # Returns the elements in the list that come after the specified cursor.
-    after: String,
+    after: String
     # Returns the last n elements from the list.
-    last: Int,
+    last: Int
     # Returns the elements in the list that come before the specified cursor.
     before: String
   ): TransactionConnection
@@ -10428,7 +10435,6 @@ type TransferDetails {
   linked_loan_transaction_key: String
 }
 
-
 input SubmitProofInput {
   type: ProofType!
   # base64 string of the image captured
@@ -10608,7 +10614,11 @@ type Staff {
 }
 
 # list of Staff states
-enum StaffStatus { ACTIVE INACTIVE EXITED }
+enum StaffStatus {
+  ACTIVE
+  INACTIVE
+  EXITED
+}
 `, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
