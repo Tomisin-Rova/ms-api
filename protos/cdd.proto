@@ -38,6 +38,10 @@ message CDDSRequest {
   int64 perPage = 2;
   repeated string status = 3;
   string keywords = 4;
+  int64 first = 5;
+  int64 last = 6;
+  string after = 7;
+  string before = 8;
 }
 
 service CddService{
