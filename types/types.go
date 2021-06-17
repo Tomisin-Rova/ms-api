@@ -1562,24 +1562,26 @@ func (e OnboardingCheckPoint) MarshalGQL(w io.Writer) {
 type PersonStatus string
 
 const (
-	PersonStatusActive    PersonStatus = "ACTIVE"
-	PersonStatusInactive  PersonStatus = "INACTIVE"
-	PersonStatusExited    PersonStatus = "EXITED"
-	PersonStatusBlacklist PersonStatus = "BLACKLIST"
-	PersonStatusRejected  PersonStatus = "REJECTED"
+	PersonStatusSignedup   PersonStatus = "SIGNEDUP"
+	PersonStatusRegistered PersonStatus = "REGISTERED"
+	PersonStatusVerified   PersonStatus = "VERIFIED"
+	PersonStatusOnboarded  PersonStatus = "ONBOARDED"
+	PersonStatusRejected   PersonStatus = "REJECTED"
+	PersonStatusExited     PersonStatus = "EXITED"
 )
 
 var AllPersonStatus = []PersonStatus{
-	PersonStatusActive,
-	PersonStatusInactive,
-	PersonStatusExited,
-	PersonStatusBlacklist,
+	PersonStatusSignedup,
+	PersonStatusRegistered,
+	PersonStatusVerified,
+	PersonStatusOnboarded,
 	PersonStatusRejected,
+	PersonStatusExited,
 }
 
 func (e PersonStatus) IsValid() bool {
 	switch e {
-	case PersonStatusActive, PersonStatusInactive, PersonStatusExited, PersonStatusBlacklist, PersonStatusRejected:
+	case PersonStatusSignedup, PersonStatusRegistered, PersonStatusVerified, PersonStatusOnboarded, PersonStatusRejected, PersonStatusExited:
 		return true
 	}
 	return false
