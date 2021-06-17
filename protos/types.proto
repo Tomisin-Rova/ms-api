@@ -87,10 +87,14 @@ message Cdd {
   repeated Validation validations = 8;
   bool active = 9;
   int32 ts = 10;
+  string objectId = 11;
 }
 
 message Cdds {
   repeated Cdd results = 1;
+  int64 totalCount = 2;
+  bool hasNextPage = 3;
+  bool hasPreviousPage = 4;
 }
 // Validation type
 message Validation {

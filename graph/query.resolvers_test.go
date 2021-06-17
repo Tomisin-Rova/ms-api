@@ -614,6 +614,7 @@ func TestQueryResolver_Cdds(t *testing.T) {
 			Page:     1,
 			PerPage:  100,
 			Keywords: kw,
+			First:    100,
 		}).Return(nil, errors.New("No Data"))
 
 		response, err := resolver.Cdds(context.Background(), &kw, nil, first, after, last, before)
@@ -632,6 +633,7 @@ func TestQueryResolver_Cdds(t *testing.T) {
 			Page:     1,
 			PerPage:  100,
 			Keywords: kw,
+			First:    100,
 		}).Return(mockCdds, nil)
 		response, err := resolver.Cdds(context.Background(), &kw, nil, first, after, last, before)
 		assert.Nil(t, err, "should not return an error if data is found")

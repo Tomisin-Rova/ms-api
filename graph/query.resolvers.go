@@ -448,7 +448,16 @@ func (r *queryResolver) Cdds(ctx context.Context, keywords *string, status []typ
 	dataConverter := NewDataConverter(r.logger)
 	perPage := r.perPageCddsQuery(first, after, last, before)
 
+	pagination, err := connections.Paginate(first, after, last, before)
+	if err != nil {
+		return nil, err
+	}
+
 	req := &cddService.CDDSRequest{
+		First:   pagination.First,
+		After:   pagination.After,
+		Last:    pagination.Last,
+		Before:  pagination.Before,
 		Page:    1,
 		PerPage: perPage,
 		Status:  dataConverter.StateToStringSlice(status),
@@ -465,8 +474,10 @@ func (r *queryResolver) Cdds(ctx context.Context, keywords *string, status []typ
 	// dataResolver := NewDataResolver(r.dataStore, r.logger)
 	cdds := resp.Results
 	cddsResult := make([]*types.Cdd, len(cdds))
+	objectIdMap := make(map[string]string)
 	for i, cdd := range cdds {
 		cddsResult[i] = dataConverter.makeCdd(cdd)
+		objectIdMap[cdd.Id] = cdd.ObjectId
 	}
 
 	input := models.ConnectionInput{
@@ -479,19 +490,23 @@ func (r *queryResolver) Cdds(ctx context.Context, keywords *string, status []typ
 	edger := func(cdd *types.Cdd, offset int) connections.Edge {
 		return types.CDDEdge{
 			Node:   cdd,
-			Cursor: connections.OffsetToCursor(offset),
+			Cursor: connections.IdToCursor(objectIdMap[cdd.ID]),
 		}
 	}
 
 	conn := func(edges []*types.CDDEdge, nodes []*types.Cdd, info *types.PageInfo, totalCount int) (*types.CDDConnection, error) {
 		var cddNodes []*types.Cdd
 		cddNodes = append(cddNodes, nodes...)
-		count := int64(totalCount)
 		return &types.CDDConnection{
-			Edges:      edges,
-			Nodes:      cddNodes,
-			PageInfo:   info,
-			TotalCount: &count,
+			Edges: edges,
+			Nodes: cddNodes,
+			PageInfo: &types.PageInfo{
+				HasNextPage:     info.HasNextPage || resp.HasNextPage,
+				HasPreviousPage: info.HasPreviousPage || resp.HasPreviousPage,
+				EndCursor:       info.EndCursor,
+				StartCursor:     info.StartCursor,
+			},
+			TotalCount: &resp.TotalCount,
 		}, nil
 	}
 	return connections.CddLookupCon(cddsResult, edger, conn, input)
