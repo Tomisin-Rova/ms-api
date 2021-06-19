@@ -753,6 +753,9 @@ func Int64(i int64) *int64 {
 }
 
 func Float64(f float32) *float64 {
+	if f == 0.0 {
+		return nil
+	}
 	float := float64(f)
 	return &float
 }
