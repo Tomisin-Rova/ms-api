@@ -27,6 +27,7 @@ type Secrets struct {
 	PersonServiceURL         string        `mapstructure:"PERSON_SERVICE_URL"`
 	PaymentServiceURL        string        `mapstructure:"PAYMENT_SERVICE_URL"`
 	IdentityServiceURL       string        `mapstructure:"IDENTITY_SERVICE_URL"`
+	PricingServiceURL        string        `mapstructure:"PRICING_SERVICE_URL"`
 	JWTSecrets               string        `json:"jwt_secrets" mapstructure:"JWT_SECRETS"`
 	RedisURL                 string        `json:"redis_url" mapstructure:"REDIS_URL"`
 	RedisPassword            string        `json:"redis_password" mapstructure:"REDIS_PASSWORD"`

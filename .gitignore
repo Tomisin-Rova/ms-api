@@ -22,3 +22,5 @@ local-docker-compose.yml
 #editors files and directories
 *.code-workspace
 .vscode
+
+.DS_Store

@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"ms.api/protos/pb/pricingService"
 	"strconv"
 
 	"github.com/jinzhu/copier"
@@ -1209,6 +1210,57 @@ func (r *queryResolver) Transactions(ctx context.Context, first *int64, after *s
 	fmt.Println(len(transactions.Transactions), len(transactionRes))
 
 	return connections.TransactionConnectionCon(transactionRes, edger, conn, input)
+}
+
+func (r *queryResolver) Fx(ctx context.Context, currency string, baseCurrency string) (*types.Fx, error) {
+	fx, err := r.pricingService.GetFxRates(ctx, &pricingService.FxRequest{
+		Currency:     currency,
+		BaseCurrency: baseCurrency,
+	})
+	if err != nil {
+		r.logger.Error("get fx rates", zap.Error(err))
+		return nil, err
+	}
+	fxRes := &types.Fx{
+		Currency:     fx.Currency,
+		BaseCurrency: fx.BaseCurrency,
+		BuyRate:      float64(fx.BuyRate),
+		SellRate:     float64(fx.SellRate),
+		Ts:           fx.Ts,
+	}
+
+	return fxRes, nil
+}
+
+func (r *queryResolver) TransferFees(ctx context.Context, currency string, baseCurrency string) (*types.TransferFees, error) {
+	tfees, err := r.pricingService.GetTransferFees(ctx, &pricingService.TransferFeesRequest{
+		Currency:     currency,
+		BaseCurrency: baseCurrency,
+	})
+	if err != nil {
+		r.logger.Error("get transfer fees", zap.Error(err))
+		return nil, err
+	}
+	transFees := &types.TransferFees{
+		Currency:     tfees.Currency,
+		BaseCurrency: tfees.BaseCurrency,
+		Fees: func() []*types.Fee {
+
+			fees := make([]*types.Fee, len(tfees.Fees))
+			for i, fee := range tfees.Fees {
+				fees[i] = &types.Fee{
+					LowerBoundary: Float64(fee.LowerBoundary),
+					UpperBoundary: Float64(fee.UpperBoundary),
+					Fee:           float64(fee.Fee),
+				}
+			}
+			return fees
+
+		}(),
+		Ts: tfees.Ts,
+	}
+
+	return transFees, nil
 }
 
 func (r *queryResolver) Acceptance(ctx context.Context, id string) (*types.Acceptance, error) {

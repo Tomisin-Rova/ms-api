@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package pricing;
+option go_package = "ms.api/protos/pb/pricingService";
+
+// Import types
+import "types.proto";
+
+message FxRequest {
+  string currency = 1;
+  string baseCurrency = 2;
+}
+
+message TransferFeesRequest {
+  string currency = 1;
+  string baseCurrency = 2;
+}
+
+service pricingService {
+  rpc GetFxRates(FxRequest) returns (types.Fx) {}
+  rpc GetTransferFees(TransferFeesRequest) returns (types.TransferFees) {}
+}

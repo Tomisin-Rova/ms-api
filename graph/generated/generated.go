@@ -462,18 +462,17 @@ type ComplexityRoot struct {
 	}
 
 	Fee struct {
-		FixedFee    func(childComplexity int) int
-		VariableFee func(childComplexity int) int
+		Fee           func(childComplexity int) int
+		LowerBoundary func(childComplexity int) int
+		UpperBoundary func(childComplexity int) int
 	}
 
 	Fx struct {
-		Close  func(childComplexity int) int
-		High   func(childComplexity int) int
-		Low    func(childComplexity int) int
-		Open   func(childComplexity int) int
-		Pair   func(childComplexity int) int
-		Source func(childComplexity int) int
-		Ts     func(childComplexity int) int
+		BaseCurrency func(childComplexity int) int
+		BuyRate      func(childComplexity int) int
+		Currency     func(childComplexity int) int
+		SellRate     func(childComplexity int) int
+		Ts           func(childComplexity int) int
 	}
 
 	FxConnection struct {
@@ -940,6 +939,7 @@ type ComplexityRoot struct {
 		Currency          func(childComplexity int, code string) int
 		Device            func(childComplexity int, identifier string) int
 		Devices           func(childComplexity int, first *int64, after *string, last *int64, before *string) int
+		Fx                func(childComplexity int, currency string, baseCurrency string) int
 		GetOnfidoSDKToken func(childComplexity int) int
 		Identities        func(childComplexity int) int
 		Identity          func(childComplexity int, id string) int
@@ -974,6 +974,7 @@ type ComplexityRoot struct {
 		Tasks             func(childComplexity int, first *int64, after *string, last *int64, before *string) int
 		Transaction       func(childComplexity int, id string) int
 		Transactions      func(childComplexity int, first *int64, after *string, last *int64, before *string, account string) int
+		TransferFees      func(childComplexity int, currency string, baseCurrency string) int
 		Validation        func(childComplexity int, id string) int
 		Validations       func(childComplexity int, first *int64, after *string, last *int64, before *string) int
 		Verification      func(childComplexity int, code string) int
@@ -1196,6 +1197,13 @@ type ComplexityRoot struct {
 		LinkedLoanTransactionKey func(childComplexity int) int
 	}
 
+	TransferFees struct {
+		BaseCurrency func(childComplexity int) int
+		Currency     func(childComplexity int) int
+		Fees         func(childComplexity int) int
+		Ts           func(childComplexity int) int
+	}
+
 	Validation struct {
 		Actions        func(childComplexity int) int
 		Applicant      func(childComplexity int) int
@@ -1344,6 +1352,8 @@ type QueryResolver interface {
 	Payees(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.PayeeConnection, error)
 	Transaction(ctx context.Context, id string) (*types.Transaction, error)
 	Transactions(ctx context.Context, first *int64, after *string, last *int64, before *string, account string) (*types.TransactionConnection, error)
+	Fx(ctx context.Context, currency string, baseCurrency string) (*types.Fx, error)
+	TransferFees(ctx context.Context, currency string, baseCurrency string) (*types.TransferFees, error)
 	Acceptance(ctx context.Context, id string) (*types.Acceptance, error)
 	Acceptances(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.AcceptanceConnection, error)
 	Node(ctx context.Context, id string) (types.Node, error)
@@ -3374,61 +3384,54 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Email.Verified(childComplexity), true
 
-	case "Fee.fixed_fee":
-		if e.complexity.Fee.FixedFee == nil {
+	case "Fee.fee":
+		if e.complexity.Fee.Fee == nil {
 			break
 		}
 
-		return e.complexity.Fee.FixedFee(childComplexity), true
+		return e.complexity.Fee.Fee(childComplexity), true
 
-	case "Fee.variable_fee":
-		if e.complexity.Fee.VariableFee == nil {
+	case "Fee.lowerBoundary":
+		if e.complexity.Fee.LowerBoundary == nil {
 			break
 		}
 
-		return e.complexity.Fee.VariableFee(childComplexity), true
+		return e.complexity.Fee.LowerBoundary(childComplexity), true
 
-	case "Fx.close":
-		if e.complexity.Fx.Close == nil {
+	case "Fee.upperBoundary":
+		if e.complexity.Fee.UpperBoundary == nil {
 			break
 		}
 
-		return e.complexity.Fx.Close(childComplexity), true
+		return e.complexity.Fee.UpperBoundary(childComplexity), true
 
-	case "Fx.high":
-		if e.complexity.Fx.High == nil {
+	case "Fx.base_currency":
+		if e.complexity.Fx.BaseCurrency == nil {
 			break
 		}
 
-		return e.complexity.Fx.High(childComplexity), true
+		return e.complexity.Fx.BaseCurrency(childComplexity), true
 
-	case "Fx.low":
-		if e.complexity.Fx.Low == nil {
+	case "Fx.buy_rate":
+		if e.complexity.Fx.BuyRate == nil {
 			break
 		}
 
-		return e.complexity.Fx.Low(childComplexity), true
+		return e.complexity.Fx.BuyRate(childComplexity), true
 
-	case "Fx.open":
-		if e.complexity.Fx.Open == nil {
+	case "Fx.currency":
+		if e.complexity.Fx.Currency == nil {
 			break
 		}
 
-		return e.complexity.Fx.Open(childComplexity), true
+		return e.complexity.Fx.Currency(childComplexity), true
 
-	case "Fx.pair":
-		if e.complexity.Fx.Pair == nil {
+	case "Fx.sell_rate":
+		if e.complexity.Fx.SellRate == nil {
 			break
 		}
 
-		return e.complexity.Fx.Pair(childComplexity), true
-
-	case "Fx.source":
-		if e.complexity.Fx.Source == nil {
-			break
-		}
-
-		return e.complexity.Fx.Source(childComplexity), true
+		return e.complexity.Fx.SellRate(childComplexity), true
 
 	case "Fx.ts":
 		if e.complexity.Fx.Ts == nil {
@@ -5904,6 +5907,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Devices(childComplexity, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string)), true
 
+	case "Query.fx":
+		if e.complexity.Query.Fx == nil {
+			break
+		}
+
+		args, err := ec.field_Query_fx_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Fx(childComplexity, args["currency"].(string), args["base_currency"].(string)), true
+
 	case "Query.getOnfidoSDKToken":
 		if e.complexity.Query.GetOnfidoSDKToken == nil {
 			break
@@ -6291,6 +6306,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Transactions(childComplexity, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string), args["account"].(string)), true
+
+	case "Query.transferFees":
+		if e.complexity.Query.TransferFees == nil {
+			break
+		}
+
+		args, err := ec.field_Query_transferFees_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.TransferFees(childComplexity, args["currency"].(string), args["base_currency"].(string)), true
 
 	case "Query.validation":
 		if e.complexity.Query.Validation == nil {
@@ -7289,6 +7316,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.TransferDetails.LinkedLoanTransactionKey(childComplexity), true
 
+	case "TransferFees.base_currency":
+		if e.complexity.TransferFees.BaseCurrency == nil {
+			break
+		}
+
+		return e.complexity.TransferFees.BaseCurrency(childComplexity), true
+
+	case "TransferFees.currency":
+		if e.complexity.TransferFees.Currency == nil {
+			break
+		}
+
+		return e.complexity.TransferFees.Currency(childComplexity), true
+
+	case "TransferFees.fees":
+		if e.complexity.TransferFees.Fees == nil {
+			break
+		}
+
+		return e.complexity.TransferFees.Fees(childComplexity), true
+
+	case "TransferFees.ts":
+		if e.complexity.TransferFees.Ts == nil {
+			break
+		}
+
+		return e.complexity.TransferFees.Ts(childComplexity), true
+
 	case "Validation.actions":
 		if e.complexity.Validation.Actions == nil {
 			break
@@ -8073,6 +8128,12 @@ var sources = []*ast.Source{
     # Filter transactions by an account id
     account: ID!
   ): TransactionConnection
+  # Get fx value from a currency pair
+  fx(currency: String!, base_currency: String!): Fx
+  # Get transfer fees from a currency pair
+  # Fee value it's expressed on currency attribute
+  transferFees(currency: String!, base_currency: String!): TransferFees
+  # get an record of an accepted document term by an individual by ID
   # get an record of an accepted document term by an individual by ID
   acceptance(
     # The Ulid field for the acceptance document
@@ -9672,20 +9733,11 @@ type AcceptanceEdge {
 
 # FX rates (prices) for currency pairs
 type Fx {
-  # The first listed currency of a currency pair is called the base currency, and the second currency is called the quote currency e.g. GBP_NGNin the format of sold_bought or base_quote currency.
-  pair: String
-  # Opening price for the day’s trading in the given currency pair
-  open: Int
-  # 24hr (day)high for the currency pair - highest price in the past 24hrs (or for that day)
-  high: Int
-  # 24hr low for the currency pair
-  low: Int
-  # Closing price for day’s trading in the given currency pair
-  close: Int
-  # Unix timestamp when the record was created
-  ts: Int
-  # Name (or unique id reference to an organisation) for the feed, company or source of the price
-  source: String
+  currency: String!
+  base_currency: String!
+  buy_rate: Float!
+  sell_rate: Float!
+  ts: Int!
 }
 
 # The connection type for Fx
@@ -9706,6 +9758,20 @@ type FxEdge {
   node: Fx!
   # A cursor for use in pagination
   cursor: String!
+}
+
+# Type to define the fees of a transfer
+type TransferFees {
+  currency: String!
+  base_currency: String!
+  fees: [Fee!]!
+  ts: Int!
+}
+
+type Fee {
+  lowerBoundary: Float
+  upperBoundary: Float
+  fee:  Float!
 }
 
 # https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/983400449/roava+quote
@@ -9744,14 +9810,6 @@ type QuoteEdge {
   node: Quote!
   # A cursor for use in pagination
   cursor: String!
-}
-
-# Fee type
-type Fee {
-  # Value of the fixed fee in base currency
-  fixed_fee: Int
-  # Variable component of the fee quote
-  variable_fee: VariableFee!
 }
 
 # Variable Fee type
@@ -12136,6 +12194,30 @@ func (ec *executionContext) field_Query_devices_args(ctx context.Context, rawArg
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_fx_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["currency"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("currency"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["currency"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["base_currency"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("base_currency"))
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["base_currency"] = arg1
+	return args, nil
+}
+
 func (ec *executionContext) field_Query_identity_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -12997,6 +13079,30 @@ func (ec *executionContext) field_Query_transactions_args(ctx context.Context, r
 		}
 	}
 	args["account"] = arg4
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_transferFees_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["currency"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("currency"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["currency"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["base_currency"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("base_currency"))
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["base_currency"] = arg1
 	return args, nil
 }
 
@@ -22812,7 +22918,7 @@ func (ec *executionContext) _Email_alias(ctx context.Context, field graphql.Coll
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Fee_fixed_fee(ctx context.Context, field graphql.CollectedField, obj *types.Fee) (ret graphql.Marshaler) {
+func (ec *executionContext) _Fee_lowerBoundary(ctx context.Context, field graphql.CollectedField, obj *types.Fee) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -22830,7 +22936,7 @@ func (ec *executionContext) _Fee_fixed_fee(ctx context.Context, field graphql.Co
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.FixedFee, nil
+		return obj.LowerBoundary, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -22839,12 +22945,12 @@ func (ec *executionContext) _Fee_fixed_fee(ctx context.Context, field graphql.Co
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int64)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Fee_variable_fee(ctx context.Context, field graphql.CollectedField, obj *types.Fee) (ret graphql.Marshaler) {
+func (ec *executionContext) _Fee_upperBoundary(ctx context.Context, field graphql.CollectedField, obj *types.Fee) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -22862,7 +22968,39 @@ func (ec *executionContext) _Fee_variable_fee(ctx context.Context, field graphql
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.VariableFee, nil
+		return obj.UpperBoundary, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*float64)
+	fc.Result = res
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Fee_fee(ctx context.Context, field graphql.CollectedField, obj *types.Fee) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Fee",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Fee, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -22874,12 +23012,12 @@ func (ec *executionContext) _Fee_variable_fee(ctx context.Context, field graphql
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*types.VariableFee)
+	res := resTmp.(float64)
 	fc.Result = res
-	return ec.marshalNVariableFee2ᚖmsᚗapiᚋtypesᚐVariableFee(ctx, field.Selections, res)
+	return ec.marshalNFloat2float64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Fx_pair(ctx context.Context, field graphql.CollectedField, obj *types.Fx) (ret graphql.Marshaler) {
+func (ec *executionContext) _Fx_currency(ctx context.Context, field graphql.CollectedField, obj *types.Fx) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -22897,21 +23035,24 @@ func (ec *executionContext) _Fx_pair(ctx context.Context, field graphql.Collecte
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Pair, nil
+		return obj.Currency, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Fx_open(ctx context.Context, field graphql.CollectedField, obj *types.Fx) (ret graphql.Marshaler) {
+func (ec *executionContext) _Fx_base_currency(ctx context.Context, field graphql.CollectedField, obj *types.Fx) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -22929,21 +23070,24 @@ func (ec *executionContext) _Fx_open(ctx context.Context, field graphql.Collecte
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Open, nil
+		return obj.BaseCurrency, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*int64)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Fx_high(ctx context.Context, field graphql.CollectedField, obj *types.Fx) (ret graphql.Marshaler) {
+func (ec *executionContext) _Fx_buy_rate(ctx context.Context, field graphql.CollectedField, obj *types.Fx) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -22961,21 +23105,24 @@ func (ec *executionContext) _Fx_high(ctx context.Context, field graphql.Collecte
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.High, nil
+		return obj.BuyRate, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*int64)
+	res := resTmp.(float64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+	return ec.marshalNFloat2float64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Fx_low(ctx context.Context, field graphql.CollectedField, obj *types.Fx) (ret graphql.Marshaler) {
+func (ec *executionContext) _Fx_sell_rate(ctx context.Context, field graphql.CollectedField, obj *types.Fx) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -22993,50 +23140,21 @@ func (ec *executionContext) _Fx_low(ctx context.Context, field graphql.Collected
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Low, nil
+		return obj.SellRate, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
 	}
 	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*int64)
-	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Fx_close(ctx context.Context, field graphql.CollectedField, obj *types.Fx) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
 		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Fx",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Close, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
 		return graphql.Null
 	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*int64)
+	res := resTmp.(float64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+	return ec.marshalNFloat2float64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Fx_ts(ctx context.Context, field graphql.CollectedField, obj *types.Fx) (ret graphql.Marshaler) {
@@ -23064,43 +23182,14 @@ func (ec *executionContext) _Fx_ts(ctx context.Context, field graphql.CollectedF
 		return graphql.Null
 	}
 	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*int64)
-	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Fx_source(ctx context.Context, field graphql.CollectedField, obj *types.Fx) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
 		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Fx",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Source, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
 		return graphql.Null
 	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
+	res := resTmp.(int64)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _FxConnection_edges(ctx context.Context, field graphql.CollectedField, obj *types.FxConnection) (ret graphql.Marshaler) {
@@ -35243,6 +35332,84 @@ func (ec *executionContext) _Query_transactions(ctx context.Context, field graph
 	return ec.marshalOTransactionConnection2ᚖmsᚗapiᚋtypesᚐTransactionConnection(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Query_fx(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_fx_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Fx(rctx, args["currency"].(string), args["base_currency"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*types.Fx)
+	fc.Result = res
+	return ec.marshalOFx2ᚖmsᚗapiᚋtypesᚐFx(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_transferFees(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_transferFees_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().TransferFees(rctx, args["currency"].(string), args["base_currency"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*types.TransferFees)
+	fc.Result = res
+	return ec.marshalOTransferFees2ᚖmsᚗapiᚋtypesᚐTransferFees(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query_acceptance(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -39921,6 +40088,146 @@ func (ec *executionContext) _TransferDetails_linked_loan_transaction_key(ctx con
 	res := resTmp.(*string)
 	fc.Result = res
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _TransferFees_currency(ctx context.Context, field graphql.CollectedField, obj *types.TransferFees) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "TransferFees",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Currency, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _TransferFees_base_currency(ctx context.Context, field graphql.CollectedField, obj *types.TransferFees) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "TransferFees",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.BaseCurrency, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _TransferFees_fees(ctx context.Context, field graphql.CollectedField, obj *types.TransferFees) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "TransferFees",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Fees, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*types.Fee)
+	fc.Result = res
+	return ec.marshalNFee2ᚕᚖmsᚗapiᚋtypesᚐFeeᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _TransferFees_ts(ctx context.Context, field graphql.CollectedField, obj *types.TransferFees) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "TransferFees",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Ts, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int64)
+	fc.Result = res
+	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Validation_id(ctx context.Context, field graphql.CollectedField, obj *types.Validation) (ret graphql.Marshaler) {
@@ -44865,10 +45172,12 @@ func (ec *executionContext) _Fee(ctx context.Context, sel ast.SelectionSet, obj 
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Fee")
-		case "fixed_fee":
-			out.Values[i] = ec._Fee_fixed_fee(ctx, field, obj)
-		case "variable_fee":
-			out.Values[i] = ec._Fee_variable_fee(ctx, field, obj)
+		case "lowerBoundary":
+			out.Values[i] = ec._Fee_lowerBoundary(ctx, field, obj)
+		case "upperBoundary":
+			out.Values[i] = ec._Fee_upperBoundary(ctx, field, obj)
+		case "fee":
+			out.Values[i] = ec._Fee_fee(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -44894,20 +45203,31 @@ func (ec *executionContext) _Fx(ctx context.Context, sel ast.SelectionSet, obj *
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Fx")
-		case "pair":
-			out.Values[i] = ec._Fx_pair(ctx, field, obj)
-		case "open":
-			out.Values[i] = ec._Fx_open(ctx, field, obj)
-		case "high":
-			out.Values[i] = ec._Fx_high(ctx, field, obj)
-		case "low":
-			out.Values[i] = ec._Fx_low(ctx, field, obj)
-		case "close":
-			out.Values[i] = ec._Fx_close(ctx, field, obj)
+		case "currency":
+			out.Values[i] = ec._Fx_currency(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "base_currency":
+			out.Values[i] = ec._Fx_base_currency(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "buy_rate":
+			out.Values[i] = ec._Fx_buy_rate(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "sell_rate":
+			out.Values[i] = ec._Fx_sell_rate(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "ts":
 			out.Values[i] = ec._Fx_ts(ctx, field, obj)
-		case "source":
-			out.Values[i] = ec._Fx_source(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -47595,6 +47915,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				res = ec._Query_transactions(ctx, field)
 				return res
 			})
+		case "fx":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_fx(ctx, field)
+				return res
+			})
+		case "transferFees":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_transferFees(ctx, field)
+				return res
+			})
 		case "acceptance":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -48690,6 +49032,48 @@ func (ec *executionContext) _TransferDetails(ctx context.Context, sel ast.Select
 			out.Values[i] = graphql.MarshalString("TransferDetails")
 		case "linked_loan_transaction_key":
 			out.Values[i] = ec._TransferDetails_linked_loan_transaction_key(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var transferFeesImplementors = []string{"TransferFees"}
+
+func (ec *executionContext) _TransferFees(ctx context.Context, sel ast.SelectionSet, obj *types.TransferFees) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, transferFeesImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("TransferFees")
+		case "currency":
+			out.Values[i] = ec._TransferFees_currency(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "base_currency":
+			out.Values[i] = ec._TransferFees_base_currency(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "fees":
+			out.Values[i] = ec._TransferFees_fees(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "ts":
+			out.Values[i] = ec._TransferFees_ts(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -50529,6 +50913,43 @@ func (ec *executionContext) marshalNEntity2msᚗapiᚋtypesᚐEntity(ctx context
 		return graphql.Null
 	}
 	return ec._Entity(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNFee2ᚕᚖmsᚗapiᚋtypesᚐFeeᚄ(ctx context.Context, sel ast.SelectionSet, v []*types.Fee) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNFee2ᚖmsᚗapiᚋtypesᚐFee(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
 }
 
 func (ec *executionContext) marshalNFee2ᚖmsᚗapiᚋtypesᚐFee(ctx context.Context, sel ast.SelectionSet, v *types.Fee) graphql.Marshaler {
@@ -52684,16 +53105,6 @@ func (ec *executionContext) marshalNValidationType2msᚗapiᚋtypesᚐValidation
 	return v
 }
 
-func (ec *executionContext) marshalNVariableFee2ᚖmsᚗapiᚋtypesᚐVariableFee(ctx context.Context, sel ast.SelectionSet, v *types.VariableFee) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._VariableFee(ctx, sel, v)
-}
-
 func (ec *executionContext) marshalNVerifiable2msᚗapiᚋtypesᚐVerifiable(ctx context.Context, sel ast.SelectionSet, v types.Verifiable) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -54229,6 +54640,13 @@ func (ec *executionContext) marshalOTransferDetails2ᚖmsᚗapiᚋtypesᚐTransf
 		return graphql.Null
 	}
 	return ec._TransferDetails(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOTransferFees2ᚖmsᚗapiᚋtypesᚐTransferFees(ctx context.Context, sel ast.SelectionSet, v *types.TransferFees) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._TransferFees(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOValidation2ᚖmsᚗapiᚋtypesᚐValidation(ctx context.Context, sel ast.SelectionSet, v *types.Validation) graphql.Marshaler {
