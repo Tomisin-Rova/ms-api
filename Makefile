@@ -40,6 +40,7 @@ gen-mocks:
 	mockery --name=AccountServiceClient --recursive
 	mockery --name=ProductServiceClient --recursive
 	mockery --name=VerifyServiceClient --recursive
+	mockery --name=PricingServiceClient --recursive
 	mockery --name=Preloader --recursive
 	go generate ./...
 

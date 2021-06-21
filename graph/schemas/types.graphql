@@ -1536,20 +1536,11 @@ type AcceptanceEdge {
 
 # FX rates (prices) for currency pairs
 type Fx {
-  # The first listed currency of a currency pair is called the base currency, and the second currency is called the quote currency e.g. GBP_NGNin the format of sold_bought or base_quote currency.
-  pair: String
-  # Opening price for the day’s trading in the given currency pair
-  open: Int
-  # 24hr (day)high for the currency pair - highest price in the past 24hrs (or for that day)
-  high: Int
-  # 24hr low for the currency pair
-  low: Int
-  # Closing price for day’s trading in the given currency pair
-  close: Int
-  # Unix timestamp when the record was created
-  ts: Int
-  # Name (or unique id reference to an organisation) for the feed, company or source of the price
-  source: String
+  currency: String!
+  base_currency: String!
+  buy_rate: Float!
+  sell_rate: Float!
+  ts: Int!
 }
 
 # The connection type for Fx
@@ -1570,6 +1561,20 @@ type FxEdge {
   node: Fx!
   # A cursor for use in pagination
   cursor: String!
+}
+
+# Type to define the fees of a transfer
+type TransferFees {
+  currency: String!
+  base_currency: String!
+  fees: [Fee!]!
+  ts: Int!
+}
+
+type Fee {
+  lowerBoundary: Float
+  upperBoundary: Float
+  fee:  Float!
 }
 
 # https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/983400449/roava+quote
@@ -1608,14 +1613,6 @@ type QuoteEdge {
   node: Quote!
   # A cursor for use in pagination
   cursor: String!
-}
-
-# Fee type
-type Fee {
-  # Value of the fixed fee in base currency
-  fixed_fee: Int
-  # Variable component of the fee quote
-  variable_fee: VariableFee!
 }
 
 # Variable Fee type

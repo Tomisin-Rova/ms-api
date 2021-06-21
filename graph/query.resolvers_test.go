@@ -9,6 +9,7 @@ import (
 
 	"ms.api/libs/mapper"
 	"ms.api/protos/pb/accountService"
+	"ms.api/protos/pb/pricingService"
 
 	"ms.api/protos/pb/paymentService"
 
@@ -882,4 +883,69 @@ func TestQueryResolver_Accounts(t *testing.T) {
 	assert.Equal(t, accounts.Nodes[0].AccountData.Balances.TotalBalance, Int64(int64(mockAccounts[0].AccountData.Balances.TotalBalance)))
 	assert.Equal(t, accounts.Nodes[0].Transactions.Nodes[0].ID, mockAccounts[0].Transactions[0].Id)
 	assert.Equal(t, accounts.Nodes[0].Transactions.Nodes[0].TransactionData.Amount, Int64(int64(mockAccounts[0].Transactions[0].TransactionData.Amount)))
+}
+
+func TestQueryResolver_TransferFees(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	PricingServiceClient := new(mocks.PricingServiceClient)
+
+	mockFee := &protoTypes.TransferFees{
+		Currency:     "GBP",
+		BaseCurrency: "NGN",
+		Fees: []*protoTypes.Fee{{
+			LowerBoundary: 12,
+			UpperBoundary: 2,
+			Fee:           50,
+		}},
+		Ts: 12,
+	}
+	mockReq := &pricingService.TransferFeesRequest{
+		Currency:     "GBP",
+		BaseCurrency: "NGN",
+	}
+	PricingServiceClient.On("GetTransferFees", mock.Anything, mockReq).Return(mockFee, nil)
+
+	resolverOpts := &ResolverOpts{
+		pricingService: PricingServiceClient,
+	}
+	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Query()
+	fees, err := resolver.TransferFees(context.Background(), mockReq.Currency, mockReq.BaseCurrency)
+	assert.Nil(t, err)
+	assert.NotNil(t, fees)
+	assert.Equal(t, mockFee.Currency, fees.Currency)
+	assert.Equal(t, mockFee.BaseCurrency, fees.BaseCurrency)
+	assert.Equal(t, mockFee.Fees[0].Fee, float32(fees.Fees[0].Fee))
+}
+
+func TestQueryResolver_Fx(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	PricingServiceClient := new(mocks.PricingServiceClient)
+
+	mockFx := &protoTypes.Fx{
+		Currency:     "GBP",
+		BaseCurrency: "NGN",
+		BuyRate:      123,
+		SellRate:     2313,
+		Ts:           12,
+	}
+	mockReq := &pricingService.FxRequest{
+		Currency:     "GBP",
+		BaseCurrency: "NGN",
+	}
+	PricingServiceClient.On("GetFxRates", mock.Anything, mockReq).Return(mockFx, nil)
+
+	resolverOpts := &ResolverOpts{
+		pricingService: PricingServiceClient,
+	}
+	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Query()
+	fx, err := resolver.Fx(context.Background(), mockReq.Currency, mockReq.BaseCurrency)
+	assert.Nil(t, err)
+	assert.NotNil(t, fx)
+	assert.Equal(t, mockFx.Currency, fx.Currency)
+	assert.Equal(t, mockFx.BaseCurrency, fx.BaseCurrency)
+	assert.Equal(t, mockFx.BuyRate, float32(fx.BuyRate))
 }

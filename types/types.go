@@ -510,18 +510,17 @@ type Email struct {
 func (Email) IsVerifiable() {}
 
 type Fee struct {
-	FixedFee    *int64       `json:"fixed_fee"`
-	VariableFee *VariableFee `json:"variable_fee"`
+	LowerBoundary *float64 `json:"lowerBoundary"`
+	UpperBoundary *float64 `json:"upperBoundary"`
+	Fee           float64  `json:"fee"`
 }
 
 type Fx struct {
-	Pair   *string `json:"pair"`
-	Open   *int64  `json:"open"`
-	High   *int64  `json:"high"`
-	Low    *int64  `json:"low"`
-	Close  *int64  `json:"close"`
-	Ts     *int64  `json:"ts"`
-	Source *string `json:"source"`
+	Currency     string  `json:"currency"`
+	BaseCurrency string  `json:"base_currency"`
+	BuyRate      float64 `json:"buy_rate"`
+	SellRate     float64 `json:"sell_rate"`
+	Ts           int64   `json:"ts"`
 }
 
 type FxConnection struct {
@@ -1235,6 +1234,13 @@ type TransactionFee struct {
 
 type TransferDetails struct {
 	LinkedLoanTransactionKey *string `json:"linked_loan_transaction_key"`
+}
+
+type TransferFees struct {
+	Currency     string `json:"currency"`
+	BaseCurrency string `json:"base_currency"`
+	Fees         []*Fee `json:"fees"`
+	Ts           int64  `json:"ts"`
 }
 
 type Validation struct {

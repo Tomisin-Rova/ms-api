@@ -715,3 +715,24 @@ message Staff {
   repeated ExtendedIdentity identities = 7;
   int64 ts = 8;
 }
+
+message Fx {
+  string currency = 1;
+  string baseCurrency = 2;
+  float buyRate = 3;
+  float sellRate = 4;
+  int64 ts = 5;
+}
+
+message TransferFees {
+  string currency = 1;
+  string baseCurrency = 2;
+  repeated Fee fees = 3;
+  int64 ts = 4;
+}
+
+message Fee {
+  float lowerBoundary = 1;
+  float upperBoundary = 2;
+  float fee = 3;
+}

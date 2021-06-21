@@ -421,6 +421,12 @@ type Query {
     # Filter transactions by an account id
     account: ID!
   ): TransactionConnection
+  # Get fx value from a currency pair
+  fx(currency: String!, base_currency: String!): Fx
+  # Get transfer fees from a currency pair
+  # Fee value it's expressed on currency attribute
+  transferFees(currency: String!, base_currency: String!): TransferFees
+  # get an record of an accepted document term by an individual by ID
   # get an record of an accepted document term by an individual by ID
   acceptance(
     # The Ulid field for the acceptance document

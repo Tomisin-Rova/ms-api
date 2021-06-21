@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"ms.api/graph/connections"
 	mainErrors "ms.api/libs/errors"
+	"ms.api/protos/pb/pricingService"
 	"time"
 
 	"ms.api/libs/mapper"
@@ -78,6 +79,7 @@ type ResolverOpts struct {
 	AuthMw            *middlewares.AuthMiddleware
 	personService     personService.PersonServiceClient
 	identityService   identityService.IdentityServiceClient
+	pricingService    pricingService.PricingServiceClient
 	DataStore         db.DataStore
 	preloader         preloader.Preloader
 	mapper            mapper.Mapper
@@ -94,6 +96,7 @@ type Resolver struct {
 	authService       authService.AuthServiceClient
 	paymentService    paymentService.PaymentServiceClient
 	identityService   identityService.IdentityServiceClient
+	pricingService    pricingService.PricingServiceClient
 	authMw            *middlewares.AuthMiddleware
 	logger            *zap.Logger
 	dataStore         db.DataStore
@@ -113,6 +116,7 @@ func NewResolver(opt *ResolverOpts, logger *zap.Logger) *Resolver {
 		authService:       opt.AuthService,
 		paymentService:    opt.paymentService,
 		identityService:   opt.identityService,
+		pricingService:    opt.pricingService,
 		authMw:            opt.AuthMw,
 		dataStore:         opt.DataStore,
 		logger:            logger,
@@ -198,6 +202,15 @@ func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) 
 		return nil, fmt.Errorf("%v: %s", err, secrets.IdentityServiceURL)
 	}
 	opts.identityService = identityService.NewIdentityServiceClient(connection)
+
+	// Pricing
+	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	connection, err = dialRPC(ctx, secrets.PricingServiceURL)
+	if err != nil {
+		return nil, fmt.Errorf("%v: %s", err, secrets.PricingServiceURL)
+	}
+	opts.pricingService = pricingService.NewPricingServiceClient(connection)
 
 	return opts, nil
 }
@@ -737,6 +750,11 @@ func String(s string) *string {
 
 func Int64(i int64) *int64 {
 	return &i
+}
+
+func Float64(f float32) *float64 {
+	float := float64(f)
+	return &float
 }
 
 func Bool(b bool) *bool {
