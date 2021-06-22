@@ -47,9 +47,10 @@ func ValidatePayeeAccount(p *types.PayeeAccountInput) (*types.PayeeAccountInfo, 
 	if p.Name != nil {
 		payeeAccount.Name = *p.Name
 	}
-	if p.Currency != nil {
-		payeeAccount.Currency = *p.Currency
+	if p.Currency == nil || *p.Currency == "" {
+		return nil, ErrInvalidPayeeAccountDetails
 	}
+	payeeAccount.Currency = *p.Currency
 	if p.AccountNumber != nil {
 		payeeAccount.AccountNumber = *p.AccountNumber
 	}

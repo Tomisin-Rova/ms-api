@@ -7,7 +7,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"ms.api/protos/pb/pricingService"
 	"strconv"
 
 	"github.com/jinzhu/copier"
@@ -23,6 +22,7 @@ import (
 	"ms.api/protos/pb/onboardingService"
 	"ms.api/protos/pb/paymentService"
 	"ms.api/protos/pb/personService"
+	"ms.api/protos/pb/pricingService"
 	"ms.api/server/http/middlewares"
 	"ms.api/types"
 )
