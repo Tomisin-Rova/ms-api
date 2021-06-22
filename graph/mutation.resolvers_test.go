@@ -535,14 +535,16 @@ func TestMutationResolver_CreatePayee(t *testing.T) {
 	const (
 		success = iota
 		errorInvalidUser
+		errorEmptyCurrency
 		errorOnboardingSvcSubmitApplication
 	)
-	accountName, accountNumber, passcode := "accountName", "1023413534", "passcode"
+	accountName, accountNumber, passcode, currency := "accountName", "1023413534", "passcode", "GBP"
 	payeeInput := types.PayeeInput{
 		Name: "test name",
 		Accounts: []*types.PayeeAccountInput{{
 			Name:          &accountName,
 			AccountNumber: &accountNumber,
+			Currency:      &currency,
 		}},
 	}
 	mockReq := &paymentService.CreatePayeeRequest{
@@ -551,6 +553,7 @@ func TestMutationResolver_CreatePayee(t *testing.T) {
 		Name:           payeeInput.Name,
 		AccountName:    *payeeInput.Accounts[0].Name,
 		AccountNumber:  *payeeInput.Accounts[0].AccountNumber,
+		Currency:       currency,
 	}
 	var tests = []struct {
 		name     string
@@ -563,6 +566,10 @@ func TestMutationResolver_CreatePayee(t *testing.T) {
 		{
 			name:     "Test error invalid user context",
 			testType: errorInvalidUser,
+		},
+		{
+			name:     "Test error empty currency field",
+			testType: errorEmptyCurrency,
 		},
 		{
 			name:     "Test error calling onBoardingService.SubmitApplication",
@@ -598,7 +605,16 @@ func TestMutationResolver_CreatePayee(t *testing.T) {
 				assert.Equal(t, 7012, err.(*coreErrors.Terror).Code())
 				assert.Nil(t, response)
 				assert.Empty(t, response)
+			case errorEmptyCurrency:
+				payeeInput.Accounts[0].Currency = nil
+				response, err := mutationResolver.CreatePayee(context.Background(), payeeInput, passcode)
+
+				assert.Error(t, err)
+				assert.Equal(t, 7012, err.(*coreErrors.Terror).Code())
+				assert.Nil(t, response)
+				assert.Empty(t, response)
 			case errorOnboardingSvcSubmitApplication:
+				payeeInput.Accounts[0].Currency = &currency
 				paymentServiceMock.On("CreatePayee", validUserCtx, mockReq).Return(nil, errors.New(""))
 				response, err := mutationResolver.CreatePayee(validUserCtx, payeeInput, passcode)
 

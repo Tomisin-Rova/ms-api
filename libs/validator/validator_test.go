@@ -44,6 +44,14 @@ func TestValidatePayeeAccount(t *testing.T) {
 				Iban:          stringP("123414"),
 				SortCode:      stringP("12345678"),
 				AccountNumber: stringP("1223112422"),
+				Currency:      stringP("GBP"),
+			},
+			err: nil,
+		},
+		{
+			payeeAccount: &types.PayeeAccountInput{
+				SortCode: stringP("12345678"),
+				Currency: stringP("GBP"),
 			},
 			err: nil,
 		},
@@ -51,7 +59,7 @@ func TestValidatePayeeAccount(t *testing.T) {
 			payeeAccount: &types.PayeeAccountInput{
 				SortCode: stringP("12345678"),
 			},
-			err: nil,
+			err: ErrInvalidPayeeAccountDetails,
 		},
 		{
 			payeeAccount: &types.PayeeAccountInput{
