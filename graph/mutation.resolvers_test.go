@@ -538,7 +538,7 @@ func TestMutationResolver_CreatePayee(t *testing.T) {
 		errorEmptyCurrency
 		errorOnboardingSvcSubmitApplication
 	)
-	accountName, accountNumber, passcode, currency := "accountName", "1023413534", "passcode", "GBP"
+	accountName, accountNumber, passcode, currency := "accountName", "12345678", "passcode", "GBP"
 	payeeInput := types.PayeeInput{
 		Name: "test name",
 		Accounts: []*types.PayeeAccountInput{{

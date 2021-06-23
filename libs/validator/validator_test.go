@@ -2,6 +2,7 @@ package validator
 
 import (
 	"fmt"
+	coreError "github.com/roava/zebra/errors"
 	"github.com/stretchr/testify/assert"
 	"ms.api/types"
 	"testing"
@@ -42,22 +43,22 @@ func TestValidatePayeeAccount(t *testing.T) {
 		{
 			payeeAccount: &types.PayeeAccountInput{
 				Iban:          stringP("123414"),
-				SortCode:      stringP("12345678"),
-				AccountNumber: stringP("1223112422"),
+				SortCode:      stringP("123456"),
+				AccountNumber: stringP("12345678"),
 				Currency:      stringP("GBP"),
 			},
 			err: nil,
 		},
 		{
 			payeeAccount: &types.PayeeAccountInput{
-				SortCode: stringP("12345678"),
+				SortCode: stringP("123456"),
 				Currency: stringP("GBP"),
 			},
 			err: nil,
 		},
 		{
 			payeeAccount: &types.PayeeAccountInput{
-				SortCode: stringP("12345678"),
+				SortCode: stringP("1234561"),
 			},
 			err: ErrInvalidPayeeAccountDetails,
 		},
@@ -70,10 +71,35 @@ func TestValidatePayeeAccount(t *testing.T) {
 		},
 		{
 			payeeAccount: &types.PayeeAccountInput{
-				SortCode:      stringP("12345678"),
+				SortCode:      stringP("123456"),
 				AccountNumber: stringP("some12422"),
 			},
 			err: ErrInvalidPayeeAccountDetails,
+		},
+		{
+			payeeAccount: &types.PayeeAccountInput{
+				Iban:          stringP("123414"),
+				SortCode:      stringP("123456"),
+				AccountNumber: stringP("12345678"),
+				BankCode:      stringP("12345"),
+				Currency:      stringP(ngnCurrency),
+			},
+			err: nil,
+		},
+		{
+			payeeAccount: &types.PayeeAccountInput{
+				Iban:          stringP("123414"),
+				SortCode:      stringP("123456"),
+				AccountNumber: stringP("12345678"),
+				Currency:      stringP(ngnCurrency),
+			},
+			err: coreError.NewTerror(
+				ErrInvalidPayeeAccountDetailsCode,
+				ErrInvalidPayeeAccountDetailsType,
+				ErrInvalidPayeeAccountDetailsMessage,
+				"",
+				coreError.WithHelp("bank code is required for NGN account"),
+			),
 		},
 	}
 
