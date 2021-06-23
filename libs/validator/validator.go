@@ -7,20 +7,28 @@ import (
 	"ms.api/types"
 )
 
+const (
+	ngnCurrency = "NGN"
+)
+
 var (
 	characterRegex                = regexp.MustCompile(`[A-Za-z]+`)
 	digitRegex                    = regexp.MustCompile(`[\d]+`)
-	onlyDiigtsRegex               = regexp.MustCompile(`^[0-9]*$`)
+	accountNumberRegex            = regexp.MustCompile(`^\d{8}$`)
+	sortCodeRegex                 = regexp.MustCompile(`^\d{6}$`)
 	ErrInvalidTransactionPassword = coreError.NewTerror(
 		7010,
 		"InvalidPassword",
 		"Your transaction password must have at least one number and at least one letter and must be at least 8-characters long.",
 		"",
 	)
-	ErrInvalidPayeeAccountDetails = coreError.NewTerror(
-		7011,
-		"InvalidPayeeDetails",
-		"Invalid payee account details",
+	ErrInvalidPayeeAccountDetailsCode    = 7011
+	ErrInvalidPayeeAccountDetailsType    = "InvalidPayeeDetails"
+	ErrInvalidPayeeAccountDetailsMessage = "Invalid payee account details"
+	ErrInvalidPayeeAccountDetails        = coreError.NewTerror(
+		ErrInvalidPayeeAccountDetailsCode,
+		ErrInvalidPayeeAccountDetailsType,
+		ErrInvalidPayeeAccountDetailsMessage,
 		"",
 	)
 	ErrInvalidPaymentDetails = coreError.NewTerror(
@@ -52,9 +60,27 @@ func ValidatePayeeAccount(p *types.PayeeAccountInput) (*types.PayeeAccountInfo, 
 	}
 	payeeAccount.Currency = *p.Currency
 	if p.AccountNumber != nil {
+		if !accountNumberRegex.MatchString(*p.AccountNumber) {
+			return nil, coreError.NewTerror(
+				ErrInvalidPayeeAccountDetailsCode,
+				ErrInvalidPayeeAccountDetailsType,
+				ErrInvalidPayeeAccountDetailsMessage,
+				"",
+				coreError.WithHelp("account number must be an 8 digit value"),
+			)
+		}
 		payeeAccount.AccountNumber = *p.AccountNumber
 	}
 	if p.SortCode != nil {
+		if !sortCodeRegex.MatchString(*p.SortCode) {
+			return nil, coreError.NewTerror(
+				ErrInvalidPayeeAccountDetailsCode,
+				ErrInvalidPayeeAccountDetailsType,
+				ErrInvalidPayeeAccountDetailsMessage,
+				"",
+				coreError.WithHelp("sort code must be a 6 digit value"),
+			)
+		}
 		payeeAccount.SortCode = *p.SortCode
 	}
 	if p.Iban != nil {
@@ -63,16 +89,20 @@ func ValidatePayeeAccount(p *types.PayeeAccountInput) (*types.PayeeAccountInfo, 
 	if p.SwiftBic != nil {
 		payeeAccount.SwiftBic = *p.SwiftBic
 	}
+	if *p.Currency == ngnCurrency && (p.BankCode == nil || *p.BankCode == "") {
+		return nil, coreError.NewTerror(
+			ErrInvalidPayeeAccountDetailsCode,
+			ErrInvalidPayeeAccountDetailsType,
+			ErrInvalidPayeeAccountDetailsMessage,
+			"",
+			coreError.WithHelp("bank code is required for NGN account"),
+		)
+	}
 	if p.BankCode != nil {
 		payeeAccount.BankCode = *p.BankCode
 	}
 	if p.RoutingNumber != nil {
 		payeeAccount.RoutingNumber = *p.RoutingNumber
-	}
-
-	if (!onlyDiigtsRegex.MatchString(payeeAccount.SortCode) && payeeAccount.SortCode != "") ||
-		(!onlyDiigtsRegex.MatchString(payeeAccount.AccountNumber) && payeeAccount.AccountNumber != "") {
-		return nil, ErrInvalidPayeeAccountDetails
 	}
 
 	return payeeAccount, nil
