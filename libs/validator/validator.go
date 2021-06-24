@@ -14,7 +14,8 @@ const (
 var (
 	characterRegex                = regexp.MustCompile(`[A-Za-z]+`)
 	digitRegex                    = regexp.MustCompile(`[\d]+`)
-	accountNumberRegex            = regexp.MustCompile(`^\d{8}$`)
+	ngnAccountNumberRegex         = regexp.MustCompile(`^\d{10}$`)
+	gbpAccountNumberRegex         = regexp.MustCompile(`^\d{8}$`)
 	sortCodeRegex                 = regexp.MustCompile(`^\d{6}$`)
 	ErrInvalidTransactionPassword = coreError.NewTerror(
 		7010,
@@ -60,14 +61,27 @@ func ValidatePayeeAccount(p *types.PayeeAccountInput) (*types.PayeeAccountInfo, 
 	}
 	payeeAccount.Currency = *p.Currency
 	if p.AccountNumber != nil {
-		if !accountNumberRegex.MatchString(*p.AccountNumber) {
-			return nil, coreError.NewTerror(
-				ErrInvalidPayeeAccountDetailsCode,
-				ErrInvalidPayeeAccountDetailsType,
-				ErrInvalidPayeeAccountDetailsMessage,
-				"",
-				coreError.WithHelp("account number must be an 8 digit value"),
-			)
+		switch *p.Currency {
+		case ngnCurrency:
+			if !ngnAccountNumberRegex.MatchString(*p.AccountNumber) {
+				return nil, coreError.NewTerror(
+					ErrInvalidPayeeAccountDetailsCode,
+					ErrInvalidPayeeAccountDetailsType,
+					ErrInvalidPayeeAccountDetailsMessage,
+					"",
+					coreError.WithHelp("account number must be a 10 digit value"),
+				)
+			}
+		default:
+			if !gbpAccountNumberRegex.MatchString(*p.AccountNumber) {
+				return nil, coreError.NewTerror(
+					ErrInvalidPayeeAccountDetailsCode,
+					ErrInvalidPayeeAccountDetailsType,
+					ErrInvalidPayeeAccountDetailsMessage,
+					"",
+					coreError.WithHelp("account number must be an 8 digit value"),
+				)
+			}
 		}
 		payeeAccount.AccountNumber = *p.AccountNumber
 	}
