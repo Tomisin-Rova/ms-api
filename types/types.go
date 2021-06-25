@@ -1243,6 +1243,16 @@ type TransferFees struct {
 	Ts           int64  `json:"ts"`
 }
 
+type ValidateUserInput struct {
+	Email         string       `json:"email"`
+	FirstName     string       `json:"first_name"`
+	LastName      string       `json:"last_name"`
+	Dob           string       `json:"dob"`
+	AccountNumber string       `json:"account_number"`
+	SortCode      string       `json:"sort_code"`
+	Device        *DeviceInput `json:"device"`
+}
+
 type Validation struct {
 	ID             string         `json:"id"`
 	ValidationType ValidationType `json:"validation_type"`

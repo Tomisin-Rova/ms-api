@@ -851,6 +851,63 @@ func (r *mutationResolver) VerifyOtp(ctx context.Context, target string, token s
 	}, nil
 }
 
+func (r *mutationResolver) ValidateEmail(ctx context.Context, email string, device types.DeviceInput) (*types.Response, error) {
+	newEmail, err := emailvalidator.Validate(email)
+	if err != nil {
+		r.logger.Info("invalid email supplied", zap.String("email", email))
+		return nil, err
+	}
+	resp, err := r.authService.ValidateEmail(ctx,
+		&authService.ValidateEmailRequest{
+			Email: newEmail,
+			Device: &protoTypes.Device{
+				Identifier: device.Identifier,
+				Brand:      device.Brand,
+				Os:         device.Os,
+			},
+		},
+	)
+	if err != nil {
+		r.logger.Error("error calling authService.ValidateEmail()", zap.Error(err))
+		return nil, err
+	}
+	return &types.Response{
+		Message: resp.Message,
+		Success: resp.Success,
+	}, nil
+}
+
+func (r *mutationResolver) ValidateUser(ctx context.Context, user types.ValidateUserInput) (*types.Response, error) {
+	newEmail, err := emailvalidator.Validate(user.Email)
+	if err != nil {
+		r.logger.Info("invalid email supplied", zap.String("email", user.Email))
+		return nil, err
+	}
+	resp, err := r.authService.ValidateUser(ctx,
+		&authService.ValidateUserRequest{
+			Email:         newEmail,
+			FirstName:     user.FirstName,
+			LastName:      user.LastName,
+			DOB:           user.Dob,
+			AccountNumber: user.AccountNumber,
+			SortCode:      user.SortCode,
+			Device: &protoTypes.Device{
+				Identifier: user.Device.Identifier,
+				Brand:      user.Device.Brand,
+				Os:         user.Device.Os,
+			},
+		},
+	)
+	if err != nil {
+		r.logger.Error("error calling authService.ValidateUser()", zap.Error(err))
+		return nil, err
+	}
+	return &types.Response{
+		Message: resp.Message,
+		Success: resp.Success,
+	}, nil
+}
+
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 

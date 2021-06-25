@@ -59,4 +59,8 @@ type Mutation {
   requestOTP(type: DeliveryMode!, target: String!, expireTime: Int): Response!
   # verify the sent OTP
   verifyOTP(target: String!, token: String!): Response!
+   # Code XXXX represents that the user has a GBP account and more data from the user should be require
+  validateEmail(email: String!, device: DeviceInput!): Response!
+  # If the user has a GBP account, verify the additional required data from the user
+  validateUser(user: ValidateUserInput!): Response!
 }

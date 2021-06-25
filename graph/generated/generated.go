@@ -649,6 +649,8 @@ type ComplexityRoot struct {
 		UpdatePayee               func(childComplexity int, payee string, payeeInput *types.PayeeInput, password string) int
 		UpdateValidationStatus    func(childComplexity int, validation string, status types.State, message string) int
 		ValidateBvn               func(childComplexity int, bvn string, phone string) int
+		ValidateEmail             func(childComplexity int, email string, device types.DeviceInput) int
+		ValidateUser              func(childComplexity int, user types.ValidateUserInput) int
 		VerifyEmail               func(childComplexity int, email string, code string) int
 		VerifyOtp                 func(childComplexity int, target string, token string) int
 	}
@@ -1293,6 +1295,8 @@ type MutationResolver interface {
 	ValidateBvn(ctx context.Context, bvn string, phone string) (*types.Response, error)
 	RequestOtp(ctx context.Context, typeArg types.DeliveryMode, target string, expireTime *int64) (*types.Response, error)
 	VerifyOtp(ctx context.Context, target string, token string) (*types.Response, error)
+	ValidateEmail(ctx context.Context, email string, device types.DeviceInput) (*types.Response, error)
+	ValidateUser(ctx context.Context, user types.ValidateUserInput) (*types.Response, error)
 }
 type QueryResolver interface {
 	Me(ctx context.Context) (*types.Person, error)
@@ -4412,6 +4416,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.ValidateBvn(childComplexity, args["bvn"].(string), args["phone"].(string)), true
+
+	case "Mutation.validateEmail":
+		if e.complexity.Mutation.ValidateEmail == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_validateEmail_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.ValidateEmail(childComplexity, args["email"].(string), args["device"].(types.DeviceInput)), true
+
+	case "Mutation.validateUser":
+		if e.complexity.Mutation.ValidateUser == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_validateUser_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.ValidateUser(childComplexity, args["user"].(types.ValidateUserInput)), true
 
 	case "Mutation.verifyEmail":
 		if e.complexity.Mutation.VerifyEmail == nil {
@@ -7703,6 +7731,10 @@ var sources = []*ast.Source{
   requestOTP(type: DeliveryMode!, target: String!, expireTime: Int): Response!
   # verify the sent OTP
   verifyOTP(target: String!, token: String!): Response!
+   # Code XXXX represents that the user has a GBP account and more data from the user should be require
+  validateEmail(email: String!, device: DeviceInput!): Response!
+  # If the user has a GBP account, verify the additional required data from the user
+  validateUser(user: ValidateUserInput!): Response!
 }
 `, BuiltIn: false},
 	{Name: "graph/schemas/query.graphql", Input: `type Query {
@@ -10677,7 +10709,17 @@ enum StaffStatus {
   INACTIVE
   EXITED
 }
-`, BuiltIn: false},
+
+# Input used to validate the user data if the user has a GBP Account
+input ValidateUserInput {
+  email: String!
+  first_name: String!
+  last_name: String!
+  dob: String!
+  account_number: String!
+  sort_code:String!
+  device: DeviceInput!
+}`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
@@ -11534,6 +11576,45 @@ func (ec *executionContext) field_Mutation_validateBVN_args(ctx context.Context,
 		}
 	}
 	args["phone"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_validateEmail_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["email"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["email"] = arg0
+	var arg1 types.DeviceInput
+	if tmp, ok := rawArgs["device"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("device"))
+		arg1, err = ec.unmarshalNDeviceInput2msᚗapiᚋtypesᚐDeviceInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["device"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_validateUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 types.ValidateUserInput
+	if tmp, ok := rawArgs["user"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("user"))
+		arg0, err = ec.unmarshalNValidateUserInput2msᚗapiᚋtypesᚐValidateUserInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["user"] = arg0
 	return args, nil
 }
 
@@ -27451,6 +27532,90 @@ func (ec *executionContext) _Mutation_verifyOTP(ctx context.Context, field graph
 	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_validateEmail(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_validateEmail_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().ValidateEmail(rctx, args["email"].(string), args["device"].(types.DeviceInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.Response)
+	fc.Result = res
+	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_validateUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_validateUser_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().ValidateUser(rctx, args["user"].(types.ValidateUserInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.Response)
+	fc.Result = res
+	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _OpeningBalance_default_value(ctx context.Context, field graphql.CollectedField, obj *types.OpeningBalance) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -43090,6 +43255,74 @@ func (ec *executionContext) unmarshalInputSubmitProofInput(ctx context.Context, 
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputValidateUserInput(ctx context.Context, obj interface{}) (types.ValidateUserInput, error) {
+	var it types.ValidateUserInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "email":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+			it.Email, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "first_name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first_name"))
+			it.FirstName, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "last_name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("last_name"))
+			it.LastName, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "dob":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("dob"))
+			it.Dob, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "account_number":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("account_number"))
+			it.AccountNumber, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "sort_code":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sort_code"))
+			it.SortCode, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "device":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("device"))
+			it.Device, err = ec.unmarshalNDeviceInput2ᚖmsᚗapiᚋtypesᚐDeviceInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -46066,6 +46299,16 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "verifyOTP":
 			out.Values[i] = ec._Mutation_verifyOTP(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "validateEmail":
+			out.Values[i] = ec._Mutation_validateEmail(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "validateUser":
+			out.Values[i] = ec._Mutation_validateUser(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -52989,6 +53232,11 @@ func (ec *executionContext) marshalNTransactionEdge2ᚖmsᚗapiᚋtypesᚐTransa
 		return graphql.Null
 	}
 	return ec._TransactionEdge(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNValidateUserInput2msᚗapiᚋtypesᚐValidateUserInput(ctx context.Context, v interface{}) (types.ValidateUserInput, error) {
+	res, err := ec.unmarshalInputValidateUserInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNValidation2ᚕᚖmsᚗapiᚋtypesᚐValidationᚄ(ctx context.Context, sel ast.SelectionSet, v []*types.Validation) graphql.Marshaler {
