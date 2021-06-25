@@ -9,6 +9,7 @@ import (
 
 const (
 	ngnCurrency = "NGN"
+	gbpCurrency = "GBP"
 )
 
 var (
@@ -86,14 +87,17 @@ func ValidatePayeeAccount(p *types.PayeeAccountInput) (*types.PayeeAccountInfo, 
 		payeeAccount.AccountNumber = *p.AccountNumber
 	}
 	if p.SortCode != nil {
-		if !sortCodeRegex.MatchString(*p.SortCode) {
-			return nil, coreError.NewTerror(
-				ErrInvalidPayeeAccountDetailsCode,
-				ErrInvalidPayeeAccountDetailsType,
-				ErrInvalidPayeeAccountDetailsMessage,
-				"",
-				coreError.WithHelp("sort code must be a 6 digit value"),
-			)
+		switch *p.Currency {
+		case gbpCurrency:
+			if !sortCodeRegex.MatchString(*p.SortCode) {
+				return nil, coreError.NewTerror(
+					ErrInvalidPayeeAccountDetailsCode,
+					ErrInvalidPayeeAccountDetailsType,
+					ErrInvalidPayeeAccountDetailsMessage,
+					"",
+					coreError.WithHelp("sort code must be a 6 digit value"),
+				)
+			}
 		}
 		payeeAccount.SortCode = *p.SortCode
 	}
