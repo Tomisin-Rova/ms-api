@@ -79,7 +79,6 @@ func TestValidatePayeeAccount(t *testing.T) {
 		{
 			payeeAccount: &types.PayeeAccountInput{
 				Iban:          stringP("123414"),
-				SortCode:      stringP("123456"),
 				AccountNumber: stringP("1234567891"),
 				BankCode:      stringP("12345"),
 				Currency:      stringP(ngnCurrency),
@@ -89,7 +88,6 @@ func TestValidatePayeeAccount(t *testing.T) {
 		{
 			payeeAccount: &types.PayeeAccountInput{
 				Iban:          stringP("123414"),
-				SortCode:      stringP("123456"),
 				AccountNumber: stringP("1234567891"),
 				Currency:      stringP(ngnCurrency),
 			},
