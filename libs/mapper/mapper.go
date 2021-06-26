@@ -390,7 +390,7 @@ func (G *GQLMapper) hydrateTransaction(data *pb.Transaction, to interface{}) err
 	if data.TransactionData != nil {
 		transaction.TransactionData = &types.TransactionData{
 			ID:               data.TransactionData.Id,
-			Amount:           Int64(int64(data.TransactionData.Amount)),
+			Amount:           &data.TransactionData.Amount,
 			BookingDate:      &data.TransactionData.BookingDate,
 			CreationDate:     &data.TransactionData.CreationDate,
 			CurrencyCode:     &data.TransactionData.CurrencyCode,
@@ -414,22 +414,22 @@ func (G *GQLMapper) hydrateTransaction(data *pb.Transaction, to interface{}) err
 		// AffectedAmounts
 		if data.TransactionData.AffectedAmounts != nil {
 			transaction.TransactionData.AffectedAmounts = &types.AffectedAmounts{
-				FeesAmount:                       Int64(int64(data.TransactionData.AffectedAmounts.FeesAmount)),
-				FractionAmount:                   Int64(int64(data.TransactionData.AffectedAmounts.FractionAmount)),
-				FundsAmount:                      Int64(int64(data.TransactionData.AffectedAmounts.FundsAmount)),
-				InterestAmount:                   Int64(int64(data.TransactionData.AffectedAmounts.InterestAmount)),
-				OverdraftAmount:                  Int64(int64(data.TransactionData.AffectedAmounts.OverdraftAmount)),
-				OverdraftFeesAmount:              Int64(int64(data.TransactionData.AffectedAmounts.OverdraftFeesAmount)),
-				OverdraftInterestAmount:          Int64(int64(data.TransactionData.AffectedAmounts.OverdraftInterestAmount)),
-				TechnicalOverdraftAmount:         Int64(int64(data.TransactionData.AffectedAmounts.TechnicalOverdraftAmount)),
-				TechnicalOverdraftInterestAmount: Int64(int64(data.TransactionData.AffectedAmounts.TechnicalOverdraftInterestAmount)),
+				FeesAmount:                       &data.TransactionData.AffectedAmounts.FeesAmount,
+				FractionAmount:                   &data.TransactionData.AffectedAmounts.FractionAmount,
+				FundsAmount:                      &data.TransactionData.AffectedAmounts.FundsAmount,
+				InterestAmount:                   &data.TransactionData.AffectedAmounts.InterestAmount,
+				OverdraftAmount:                  &data.TransactionData.AffectedAmounts.OverdraftAmount,
+				OverdraftFeesAmount:              &data.TransactionData.AffectedAmounts.OverdraftFeesAmount,
+				OverdraftInterestAmount:          &data.TransactionData.AffectedAmounts.OverdraftInterestAmount,
+				TechnicalOverdraftAmount:         &data.TransactionData.AffectedAmounts.TechnicalOverdraftAmount,
+				TechnicalOverdraftInterestAmount: &data.TransactionData.AffectedAmounts.TechnicalOverdraftInterestAmount,
 			}
 		}
 
 		// AccountBalances
 		if data.TransactionData.AccountBalances != nil {
 			transaction.TransactionData.AccountBalances = &types.AccountBalances{
-				TotalBalance: Int64(int64(data.TransactionData.AccountBalances.TotalBalance)),
+				TotalBalance: &data.TransactionData.AccountBalances.TotalBalance,
 			}
 		}
 

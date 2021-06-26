@@ -653,7 +653,7 @@ message Transaction {
 // TransactionData type
 message TransactionData {
   string id = 1;
-  int32 amount = 2;
+  double amount = 2;
   string bookingDate = 3;
   string creationDate = 4;
   string currencyCode = 5;
@@ -664,29 +664,29 @@ message TransactionData {
   string paymentOrderID = 10;
   string type = 11;
   string userKey = 12;
-  string valueDate    = 13;
-  TransferDetails transferDetails= 14;
+  string valueDate = 13;
+  TransferDetails transferDetails = 14;
   repeated TransactionFee fees = 15;
-  AffectedAmounts affectedAmounts= 16;
+  AffectedAmounts affectedAmounts = 16;
   AccountBalances accountBalances = 17;
 }
 
 // AccountBalances type
 message AccountBalances  {
-  float totalBalance =1;
+  double totalBalance = 1;
 }
 
 // AffectedAmounts type
 message AffectedAmounts {
-  float feesAmount =1;
-  float fractionAmount  =2;
-  float fundsAmount  =3;
-  float interestAmount =4;
-  float overdraftAmount =5;
-  float overdraftFeesAmount  =6;
-  float overdraftInterestAmount  =7;
-  float technicalOverdraftAmount =8;
-  float technicalOverdraftInterestAmount  =9;
+  double feesAmount = 1;
+  double fractionAmount = 2;
+  double fundsAmount = 3;
+  double interestAmount = 4;
+  double overdraftAmount = 5;
+  double overdraftFeesAmount = 6;
+  double overdraftInterestAmount = 7;
+  double technicalOverdraftAmount = 8;
+  double technicalOverdraftInterestAmount = 9;
 }
 
 // TransferDetails type

@@ -2221,7 +2221,7 @@ type TransactionData {
   # Unique roava ulid for the data record
   id: ID!
   # Amount involved in the transaction
-  amount: Int
+  amount: Float
   # Scheduled day that the transaction will happen
   booking_date: String
   # Date when the transaction has been created
@@ -2265,29 +2265,29 @@ type TransactionFee {
 # Type to define an account balance in a Transaction
 type AccountBalances {
   # Total balance of the account
-  total_balance: Int
+  total_balance: Float
 }
 
 # Type to define an account balance in a Transaction
 type AffectedAmounts {
   # Total amount of fees applied to the transaction
-  fees_amount: Int
+  fees_amount: Float
   # Fraction of the transaction
-  fraction_amount: Int
+  fraction_amount: Float
   # Total amount of funds used in the transaction
-  funds_amount: Int
+  funds_amount: Float
   # Interest applied to the transaction
-  interest_amount: Int
+  interest_amount: Float
   # Overdraft amount applied to the transaction
-  overdraft_amount: Int
+  overdraft_amount: Float
   # Overdraft fees applied to the transaction
-  overdraft_fees_amount: Int
+  overdraft_fees_amount: Float
   # Overdraft interest rate applied to the transaction
-  overdraft_interest_amount: Int
+  overdraft_interest_amount: Float
   # Thecnical overdraft amount applied to the transaction
-  technical_overdraft_amount: Int
+  technical_overdraft_amount: Float
   # Thecnical overdraft interest rate applied to the transaction
-  technical_overdraft_interest_amount: Int
+  technical_overdraft_interest_amount: Float
 }
 
 # Type to define the details of a transfer

@@ -10418,7 +10418,7 @@ type TransactionData {
   # Unique roava ulid for the data record
   id: ID!
   # Amount involved in the transaction
-  amount: Int
+  amount: Float
   # Scheduled day that the transaction will happen
   booking_date: String
   # Date when the transaction has been created
@@ -10462,29 +10462,29 @@ type TransactionFee {
 # Type to define an account balance in a Transaction
 type AccountBalances {
   # Total balance of the account
-  total_balance: Int
+  total_balance: Float
 }
 
 # Type to define an account balance in a Transaction
 type AffectedAmounts {
   # Total amount of fees applied to the transaction
-  fees_amount: Int
+  fees_amount: Float
   # Fraction of the transaction
-  fraction_amount: Int
+  fraction_amount: Float
   # Total amount of funds used in the transaction
-  funds_amount: Int
+  funds_amount: Float
   # Interest applied to the transaction
-  interest_amount: Int
+  interest_amount: Float
   # Overdraft amount applied to the transaction
-  overdraft_amount: Int
+  overdraft_amount: Float
   # Overdraft fees applied to the transaction
-  overdraft_fees_amount: Int
+  overdraft_fees_amount: Float
   # Overdraft interest rate applied to the transaction
-  overdraft_interest_amount: Int
+  overdraft_interest_amount: Float
   # Thecnical overdraft amount applied to the transaction
-  technical_overdraft_amount: Int
+  technical_overdraft_amount: Float
   # Thecnical overdraft interest rate applied to the transaction
-  technical_overdraft_interest_amount: Int
+  technical_overdraft_interest_amount: Float
 }
 
 # Type to define the details of a transfer
@@ -14275,9 +14275,9 @@ func (ec *executionContext) _AccountBalances_total_balance(ctx context.Context, 
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int64)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _AccountConnection_edges(ctx context.Context, field graphql.CollectedField, obj *types.AccountConnection) (ret graphql.Marshaler) {
@@ -17055,9 +17055,9 @@ func (ec *executionContext) _AffectedAmounts_fees_amount(ctx context.Context, fi
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int64)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _AffectedAmounts_fraction_amount(ctx context.Context, field graphql.CollectedField, obj *types.AffectedAmounts) (ret graphql.Marshaler) {
@@ -17087,9 +17087,9 @@ func (ec *executionContext) _AffectedAmounts_fraction_amount(ctx context.Context
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int64)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _AffectedAmounts_funds_amount(ctx context.Context, field graphql.CollectedField, obj *types.AffectedAmounts) (ret graphql.Marshaler) {
@@ -17119,9 +17119,9 @@ func (ec *executionContext) _AffectedAmounts_funds_amount(ctx context.Context, f
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int64)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _AffectedAmounts_interest_amount(ctx context.Context, field graphql.CollectedField, obj *types.AffectedAmounts) (ret graphql.Marshaler) {
@@ -17151,9 +17151,9 @@ func (ec *executionContext) _AffectedAmounts_interest_amount(ctx context.Context
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int64)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _AffectedAmounts_overdraft_amount(ctx context.Context, field graphql.CollectedField, obj *types.AffectedAmounts) (ret graphql.Marshaler) {
@@ -17183,9 +17183,9 @@ func (ec *executionContext) _AffectedAmounts_overdraft_amount(ctx context.Contex
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int64)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _AffectedAmounts_overdraft_fees_amount(ctx context.Context, field graphql.CollectedField, obj *types.AffectedAmounts) (ret graphql.Marshaler) {
@@ -17215,9 +17215,9 @@ func (ec *executionContext) _AffectedAmounts_overdraft_fees_amount(ctx context.C
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int64)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _AffectedAmounts_overdraft_interest_amount(ctx context.Context, field graphql.CollectedField, obj *types.AffectedAmounts) (ret graphql.Marshaler) {
@@ -17247,9 +17247,9 @@ func (ec *executionContext) _AffectedAmounts_overdraft_interest_amount(ctx conte
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int64)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _AffectedAmounts_technical_overdraft_amount(ctx context.Context, field graphql.CollectedField, obj *types.AffectedAmounts) (ret graphql.Marshaler) {
@@ -17279,9 +17279,9 @@ func (ec *executionContext) _AffectedAmounts_technical_overdraft_amount(ctx cont
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int64)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _AffectedAmounts_technical_overdraft_interest_amount(ctx context.Context, field graphql.CollectedField, obj *types.AffectedAmounts) (ret graphql.Marshaler) {
@@ -17311,9 +17311,9 @@ func (ec *executionContext) _AffectedAmounts_technical_overdraft_interest_amount
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int64)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Auth_id(ctx context.Context, field graphql.CollectedField, obj *types.Auth) (ret graphql.Marshaler) {
@@ -39343,9 +39343,9 @@ func (ec *executionContext) _TransactionData_amount(ctx context.Context, field g
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int64)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _TransactionData_booking_date(ctx context.Context, field graphql.CollectedField, obj *types.TransactionData) (ret graphql.Marshaler) {
