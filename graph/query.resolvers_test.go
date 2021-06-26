@@ -882,7 +882,7 @@ func TestQueryResolver_Accounts(t *testing.T) {
 	assert.Equal(t, accounts.Nodes[0].ID, mockAccounts[0].Id)
 	assert.Equal(t, accounts.Nodes[0].AccountData.Balances.TotalBalance, Int64(int64(mockAccounts[0].AccountData.Balances.TotalBalance)))
 	assert.Equal(t, accounts.Nodes[0].Transactions.Nodes[0].ID, mockAccounts[0].Transactions[0].Id)
-	assert.Equal(t, accounts.Nodes[0].Transactions.Nodes[0].TransactionData.Amount, Int64(int64(mockAccounts[0].Transactions[0].TransactionData.Amount)))
+	assert.Equal(t, accounts.Nodes[0].Transactions.Nodes[0].TransactionData.Amount, &mockAccounts[0].Transactions[0].TransactionData.Amount)
 }
 
 func TestQueryResolver_TransferFees(t *testing.T) {

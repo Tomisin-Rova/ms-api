@@ -68,7 +68,7 @@ type Account struct {
 }
 
 type AccountBalances struct {
-	TotalBalance *int64 `json:"total_balance"`
+	TotalBalance *float64 `json:"total_balance"`
 }
 
 type AccountConnection struct {
@@ -210,15 +210,15 @@ type AddressInput struct {
 }
 
 type AffectedAmounts struct {
-	FeesAmount                       *int64 `json:"fees_amount"`
-	FractionAmount                   *int64 `json:"fraction_amount"`
-	FundsAmount                      *int64 `json:"funds_amount"`
-	InterestAmount                   *int64 `json:"interest_amount"`
-	OverdraftAmount                  *int64 `json:"overdraft_amount"`
-	OverdraftFeesAmount              *int64 `json:"overdraft_fees_amount"`
-	OverdraftInterestAmount          *int64 `json:"overdraft_interest_amount"`
-	TechnicalOverdraftAmount         *int64 `json:"technical_overdraft_amount"`
-	TechnicalOverdraftInterestAmount *int64 `json:"technical_overdraft_interest_amount"`
+	FeesAmount                       *float64 `json:"fees_amount"`
+	FractionAmount                   *float64 `json:"fraction_amount"`
+	FundsAmount                      *float64 `json:"funds_amount"`
+	InterestAmount                   *float64 `json:"interest_amount"`
+	OverdraftAmount                  *float64 `json:"overdraft_amount"`
+	OverdraftFeesAmount              *float64 `json:"overdraft_fees_amount"`
+	OverdraftInterestAmount          *float64 `json:"overdraft_interest_amount"`
+	TechnicalOverdraftAmount         *float64 `json:"technical_overdraft_amount"`
+	TechnicalOverdraftInterestAmount *float64 `json:"technical_overdraft_interest_amount"`
 }
 
 type ApplicantInput struct {
@@ -1201,7 +1201,7 @@ type TransactionConnection struct {
 
 type TransactionData struct {
 	ID               string            `json:"id"`
-	Amount           *int64            `json:"amount"`
+	Amount           *float64          `json:"amount"`
 	BookingDate      *string           `json:"booking_date"`
 	CreationDate     *string           `json:"creation_date"`
 	CurrencyCode     *string           `json:"currency_code"`
