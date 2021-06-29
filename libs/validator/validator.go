@@ -127,8 +127,7 @@ func ValidatePayeeAccount(p *types.PayeeAccountInput) (*types.PayeeAccountInfo, 
 }
 
 func ValidatePayment(p *types.PaymentInput) (*types.PaymentInput, error) {
-	if p.Beneficiary == nil ||
-		p.Beneficiary.Amount == nil {
+	if p.Beneficiary == nil {
 		return nil, ErrInvalidPaymentDetails
 	}
 
