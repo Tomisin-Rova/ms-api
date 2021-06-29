@@ -142,10 +142,10 @@ type AccountingRules struct {
 }
 
 type AccruedAmounts struct {
-	InterestAccrued                   *int64 `json:"interest_accrued"`
-	NegativeInterestAccrued           *int64 `json:"negative_interest_accrued"`
-	OverdraftInterestAccrued          *int64 `json:"overdraft_interest_accrued"`
-	TechnicalOverdraftInterestAccrued *int64 `json:"technical_overdraft_interest_accrued"`
+	InterestAccrued                   *float64 `json:"interest_accrued"`
+	NegativeInterestAccrued           *float64 `json:"negative_interest_accrued"`
+	OverdraftInterestAccrued          *float64 `json:"overdraft_interest_accrued"`
+	TechnicalOverdraftInterestAccrued *float64 `json:"technical_overdraft_interest_accrued"`
 }
 
 type Action struct {
@@ -261,17 +261,17 @@ type AuthTokens struct {
 }
 
 type Balances struct {
-	AvailableBalance              *int64 `json:"available_balance"`
-	BlockedBalance                *int64 `json:"blocked_balance"`
-	FeesDue                       *int64 `json:"fees_due"`
-	ForwardAvailableBalance       *int64 `json:"forward_available_balance"`
-	HoldBalance                   *int64 `json:"hold_balance"`
-	LockedBalance                 *int64 `json:"locked_balance"`
-	OverdraftAmount               *int64 `json:"overdraft_amount"`
-	OverdraftInterestDue          *int64 `json:"overdraft_interest_due"`
-	TechnicalOverdraftAmount      *int64 `json:"technical_overdraft_amount"`
-	TechnicalOverdraftInterestDue *int64 `json:"technical_overdraft_interest_due"`
-	TotalBalance                  *int64 `json:"total_balance"`
+	AvailableBalance              *float64 `json:"available_balance"`
+	BlockedBalance                *float64 `json:"blocked_balance"`
+	FeesDue                       *float64 `json:"fees_due"`
+	ForwardAvailableBalance       *float64 `json:"forward_available_balance"`
+	HoldBalance                   *float64 `json:"hold_balance"`
+	LockedBalance                 *float64 `json:"locked_balance"`
+	OverdraftAmount               *float64 `json:"overdraft_amount"`
+	OverdraftInterestDue          *float64 `json:"overdraft_interest_due"`
+	TechnicalOverdraftAmount      *float64 `json:"technical_overdraft_amount"`
+	TechnicalOverdraftInterestDue *float64 `json:"technical_overdraft_interest_due"`
+	TotalBalance                  *float64 `json:"total_balance"`
 }
 
 type BeneficiaryInput struct {

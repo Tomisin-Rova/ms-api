@@ -10304,39 +10304,39 @@ type AccountData {
 # Type to define accrued amounts
 type AccruedAmounts {
   # Accrued interest amount
-  interest_accrued: Int
+  interest_accrued: Float
   # Negative interest amounts accrued
-  negative_interest_accrued: Int
+  negative_interest_accrued: Float
   # Overdraft interest accrued amount
-  overdraft_interest_accrued: Int
+  overdraft_interest_accrued: Float
   # Technical iverdraft interest accrued amount
-  technical_overdraft_interest_accrued: Int
+  technical_overdraft_interest_accrued: Float
 }
 
 # Type to define the balances o an account
 type Balances {
   # Amount available in the account
-  available_balance: Int
+  available_balance: Float
   # Amount blocked in the account
-  blocked_balance: Int
+  blocked_balance: Float
   # Due date of the fees
-  fees_due: Int
+  fees_due: Float
   # Forwarded available balance
-  forward_available_balance: Int
+  forward_available_balance: Float
   # Amount on hold in account
-  hold_balance: Int
+  hold_balance: Float
   # Locked ammount in account
-  locked_balance: Int
+  locked_balance: Float
   # Overdraft amount in account
-  overdraft_amount: Int
+  overdraft_amount: Float
   # Overdraft interest due date
-  overdraft_interest_due: Int
+  overdraft_interest_due: Float
   # Technical overdraft amount in account
-  technical_overdraft_amount: Int
+  technical_overdraft_amount: Float
   # Technical overdraft interest due date
-  technical_overdraft_interest_due: Int
+  technical_overdraft_interest_due: Float
   # Total account balance
-  total_balance: Int
+  total_balance: Float
 }
 
 # Type to define the interest payment settings
@@ -10719,7 +10719,8 @@ input ValidateUserInput {
   account_number: String!
   sort_code:String!
   device: DeviceInput!
-}`, BuiltIn: false},
+}
+`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
@@ -16038,9 +16039,9 @@ func (ec *executionContext) _AccruedAmounts_interest_accrued(ctx context.Context
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int64)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _AccruedAmounts_negative_interest_accrued(ctx context.Context, field graphql.CollectedField, obj *types.AccruedAmounts) (ret graphql.Marshaler) {
@@ -16070,9 +16071,9 @@ func (ec *executionContext) _AccruedAmounts_negative_interest_accrued(ctx contex
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int64)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _AccruedAmounts_overdraft_interest_accrued(ctx context.Context, field graphql.CollectedField, obj *types.AccruedAmounts) (ret graphql.Marshaler) {
@@ -16102,9 +16103,9 @@ func (ec *executionContext) _AccruedAmounts_overdraft_interest_accrued(ctx conte
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int64)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _AccruedAmounts_technical_overdraft_interest_accrued(ctx context.Context, field graphql.CollectedField, obj *types.AccruedAmounts) (ret graphql.Marshaler) {
@@ -16134,9 +16135,9 @@ func (ec *executionContext) _AccruedAmounts_technical_overdraft_interest_accrued
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int64)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Action_id(ctx context.Context, field graphql.CollectedField, obj *types.Action) (ret graphql.Marshaler) {
@@ -17826,9 +17827,9 @@ func (ec *executionContext) _Balances_available_balance(ctx context.Context, fie
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int64)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Balances_blocked_balance(ctx context.Context, field graphql.CollectedField, obj *types.Balances) (ret graphql.Marshaler) {
@@ -17858,9 +17859,9 @@ func (ec *executionContext) _Balances_blocked_balance(ctx context.Context, field
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int64)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Balances_fees_due(ctx context.Context, field graphql.CollectedField, obj *types.Balances) (ret graphql.Marshaler) {
@@ -17890,9 +17891,9 @@ func (ec *executionContext) _Balances_fees_due(ctx context.Context, field graphq
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int64)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Balances_forward_available_balance(ctx context.Context, field graphql.CollectedField, obj *types.Balances) (ret graphql.Marshaler) {
@@ -17922,9 +17923,9 @@ func (ec *executionContext) _Balances_forward_available_balance(ctx context.Cont
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int64)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Balances_hold_balance(ctx context.Context, field graphql.CollectedField, obj *types.Balances) (ret graphql.Marshaler) {
@@ -17954,9 +17955,9 @@ func (ec *executionContext) _Balances_hold_balance(ctx context.Context, field gr
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int64)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Balances_locked_balance(ctx context.Context, field graphql.CollectedField, obj *types.Balances) (ret graphql.Marshaler) {
@@ -17986,9 +17987,9 @@ func (ec *executionContext) _Balances_locked_balance(ctx context.Context, field 
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int64)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Balances_overdraft_amount(ctx context.Context, field graphql.CollectedField, obj *types.Balances) (ret graphql.Marshaler) {
@@ -18018,9 +18019,9 @@ func (ec *executionContext) _Balances_overdraft_amount(ctx context.Context, fiel
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int64)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Balances_overdraft_interest_due(ctx context.Context, field graphql.CollectedField, obj *types.Balances) (ret graphql.Marshaler) {
@@ -18050,9 +18051,9 @@ func (ec *executionContext) _Balances_overdraft_interest_due(ctx context.Context
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int64)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Balances_technical_overdraft_amount(ctx context.Context, field graphql.CollectedField, obj *types.Balances) (ret graphql.Marshaler) {
@@ -18082,9 +18083,9 @@ func (ec *executionContext) _Balances_technical_overdraft_amount(ctx context.Con
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int64)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Balances_technical_overdraft_interest_due(ctx context.Context, field graphql.CollectedField, obj *types.Balances) (ret graphql.Marshaler) {
@@ -18114,9 +18115,9 @@ func (ec *executionContext) _Balances_technical_overdraft_interest_due(ctx conte
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int64)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Balances_total_balance(ctx context.Context, field graphql.CollectedField, obj *types.Balances) (ret graphql.Marshaler) {
@@ -18146,9 +18147,9 @@ func (ec *executionContext) _Balances_total_balance(ctx context.Context, field g
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int64)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _CDD_id(ctx context.Context, field graphql.CollectedField, obj *types.Cdd) (ret graphql.Marshaler) {

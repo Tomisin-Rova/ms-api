@@ -121,11 +121,11 @@ message Reporter {
 }
 
 message Action {
-    string id = 1;
-    Reporter reporter = 2;
-    string notes= 3;
-    string status = 4;
-    int32 ts = 5;
+  string id = 1;
+  Reporter reporter = 2;
+  string notes = 3;
+  string status = 4;
+  int32 ts = 5;
 }
 
 // Kyc type
@@ -361,7 +361,7 @@ message Account {
   string image = 10;
   string organisation = 11;
   int32 ts = 12;
-  types.AccountDetails AccountDetails =13;
+  types.AccountDetails AccountDetails = 13;
 }
 
 message Tag {
@@ -371,41 +371,41 @@ message Tag {
 
 // AccountData type
 message AccountData {
-  string accountHolderKey =1;
-  string accountHolderType =2;
-  string accountState =3;
-  string accountType =4;
-  AccruedAmounts accruedAmounts =5;
-  int32 activationDate =6;
+  string accountHolderKey = 1;
+  string accountHolderType = 2;
+  string accountState = 3;
+  string accountType = 4;
+  AccruedAmounts accruedAmounts = 5;
+  int32 activationDate = 6;
   int32 approvedDate = 7;
-  string assignedBranchKey =8;
-  string assignedCentreKey =9;
-  string assignedUserKey =10;
+  string assignedBranchKey = 8;
+  string assignedCentreKey = 9;
+  string assignedUserKey = 10;
   Balances balances = 11;
   string closedDate = 12;
   string creationDate = 13;
-  string creditArrangementKey =14;
-  string currencyCode =15;
-  string encodedKey =16;
-  string id =17;
-  InterestSettings interestSettings =18;
-  InternalControls internalControls =19;
-  string lastAccountAppraisalDate =20;
-  string lastInterestCalculationDate =21;
+  string creditArrangementKey = 14;
+  string currencyCode = 15;
+  string encodedKey = 16;
+  string id = 17;
+  InterestSettings interestSettings = 18;
+  InternalControls internalControls = 19;
+  string lastAccountAppraisalDate = 20;
+  string lastInterestCalculationDate = 21;
   string lastInterestStoredDate = 22;
-  string lastModifiedDate =23;
+  string lastModifiedDate = 23;
   string lastOverdraftInterestReviewDate = 24;
   string lastSetToArrearsDate = 25;
-  repeated string linkedSettlementAccountKeys =26;
+  repeated string linkedSettlementAccountKeys = 26;
   string lockedDate = 27;
-  string maturityDate =28;
+  string maturityDate = 28;
   string migrationEventKey = 29;
-  string name =30;
-  string notes =31;
-  OverdraftInterestSettings overdraftInterestSettings =32;
+  string name = 30;
+  string notes = 31;
+  OverdraftInterestSettings overdraftInterestSettings = 32;
   OverdraftSettings overdraftSettings = 33;
-  string productTypeKey =34;
-  string withholdingTaxSourceKey =35;
+  string productTypeKey = 34;
+  string withholdingTaxSourceKey = 35;
 }
 
 // AccountDetails type
@@ -421,24 +421,24 @@ message AccountDetails {
 
 // AccruedAmounts type
 message AccruedAmounts  {
-  int32 interestAccrued = 1;
-  int32 overdraftInterestAccrued = 2;
-  int32 technicalOverdraftInterestAccrued = 3;
+  double interestAccrued = 1;
+  double overdraftInterestAccrued = 2;
+  double technicalOverdraftInterestAccrued = 3;
 }
 
 // Balances type
 message Balances {
-  int32 availableBalance = 1;
-  int32 blockedBalance = 2;
-  int32 feesDue = 3;
-  int32 forwardAvailableBalance = 4;
-  int32 holdBalance = 5;
-  int32 lockedBalance = 6;
-  int32 overdraftAmount = 7;
-  int32 overdraftInterestDue = 8;
-  int32 technicalOverdraftAmount = 9;
-  int32 technicalOverdraftInterestDue = 10;
-  int32 totalBalance = 11;
+  double availableBalance = 1;
+  double blockedBalance = 2;
+  double feesDue = 3;
+  double forwardAvailableBalance = 4;
+  double holdBalance = 5;
+  double lockedBalance = 6;
+  double overdraftAmount = 7;
+  double overdraftInterestDue = 8;
+  double technicalOverdraftAmount = 9;
+  double technicalOverdraftInterestDue = 10;
+  double totalBalance = 11;
 }
 
 // InterestSettings type
@@ -645,9 +645,9 @@ message AccountingRules {
 // Transaction type
 message Transaction {
   string id = 1;
-  Account account =2;
-  int32 ts =3;
-  TransactionData transactionData =4;
+  Account account = 2;
+  int32 ts = 3;
+  TransactionData transactionData = 4;
 }
 
 // TransactionData type
@@ -691,7 +691,7 @@ message AffectedAmounts {
 
 // TransferDetails type
 message TransferDetails {
-  string linkedLoanTransactionKey =1;
+  string linkedLoanTransactionKey = 1;
 }
 
 // TransactionFee type
