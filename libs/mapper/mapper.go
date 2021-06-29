@@ -306,26 +306,26 @@ func (G *GQLMapper) hydrateAccount(data *pb.Account, to interface{}) error {
 		// AccruedAmounts
 		if data.AccountData.AccruedAmounts != nil {
 			account.AccountData.AccruedAmounts = &types.AccruedAmounts{
-				InterestAccrued:                   Int64(int64(data.AccountData.AccruedAmounts.InterestAccrued)),
-				OverdraftInterestAccrued:          Int64(int64(data.AccountData.AccruedAmounts.OverdraftInterestAccrued)),
-				TechnicalOverdraftInterestAccrued: Int64(int64(data.AccountData.AccruedAmounts.TechnicalOverdraftInterestAccrued)),
+				InterestAccrued:                   &data.AccountData.AccruedAmounts.InterestAccrued,
+				OverdraftInterestAccrued:          &data.AccountData.AccruedAmounts.OverdraftInterestAccrued,
+				TechnicalOverdraftInterestAccrued: &data.AccountData.AccruedAmounts.TechnicalOverdraftInterestAccrued,
 			}
 		}
 
 		// Balances
 		if data.AccountData.Balances != nil {
 			account.AccountData.Balances = &types.Balances{
-				AvailableBalance:              Int64(int64(data.AccountData.Balances.AvailableBalance)),
-				BlockedBalance:                Int64(int64(data.AccountData.Balances.BlockedBalance)),
-				FeesDue:                       Int64(int64(data.AccountData.Balances.FeesDue)),
-				ForwardAvailableBalance:       Int64(int64(data.AccountData.Balances.ForwardAvailableBalance)),
-				HoldBalance:                   Int64(int64(data.AccountData.Balances.HoldBalance)),
-				LockedBalance:                 Int64(int64(data.AccountData.Balances.LockedBalance)),
-				OverdraftAmount:               Int64(int64(data.AccountData.Balances.OverdraftAmount)),
-				OverdraftInterestDue:          Int64(int64(data.AccountData.Balances.OverdraftInterestDue)),
-				TechnicalOverdraftAmount:      Int64(int64(data.AccountData.Balances.TechnicalOverdraftAmount)),
-				TechnicalOverdraftInterestDue: Int64(int64(data.AccountData.Balances.TechnicalOverdraftInterestDue)),
-				TotalBalance:                  Int64(int64(data.AccountData.Balances.TotalBalance)),
+				AvailableBalance:              &data.AccountData.Balances.AvailableBalance,
+				BlockedBalance:                &data.AccountData.Balances.BlockedBalance,
+				FeesDue:                       &data.AccountData.Balances.FeesDue,
+				ForwardAvailableBalance:       &data.AccountData.Balances.ForwardAvailableBalance,
+				HoldBalance:                   &data.AccountData.Balances.HoldBalance,
+				LockedBalance:                 &data.AccountData.Balances.LockedBalance,
+				OverdraftAmount:               &data.AccountData.Balances.OverdraftAmount,
+				OverdraftInterestDue:          &data.AccountData.Balances.OverdraftInterestDue,
+				TechnicalOverdraftAmount:      &data.AccountData.Balances.TechnicalOverdraftAmount,
+				TechnicalOverdraftInterestDue: &data.AccountData.Balances.TechnicalOverdraftInterestDue,
+				TotalBalance:                  &data.AccountData.Balances.TotalBalance,
 			}
 		}
 

@@ -2075,39 +2075,39 @@ type AccountData {
 # Type to define accrued amounts
 type AccruedAmounts {
   # Accrued interest amount
-  interest_accrued: Int
+  interest_accrued: Float
   # Negative interest amounts accrued
-  negative_interest_accrued: Int
+  negative_interest_accrued: Float
   # Overdraft interest accrued amount
-  overdraft_interest_accrued: Int
+  overdraft_interest_accrued: Float
   # Technical iverdraft interest accrued amount
-  technical_overdraft_interest_accrued: Int
+  technical_overdraft_interest_accrued: Float
 }
 
 # Type to define the balances o an account
 type Balances {
   # Amount available in the account
-  available_balance: Int
+  available_balance: Float
   # Amount blocked in the account
-  blocked_balance: Int
+  blocked_balance: Float
   # Due date of the fees
-  fees_due: Int
+  fees_due: Float
   # Forwarded available balance
-  forward_available_balance: Int
+  forward_available_balance: Float
   # Amount on hold in account
-  hold_balance: Int
+  hold_balance: Float
   # Locked ammount in account
-  locked_balance: Int
+  locked_balance: Float
   # Overdraft amount in account
-  overdraft_amount: Int
+  overdraft_amount: Float
   # Overdraft interest due date
-  overdraft_interest_due: Int
+  overdraft_interest_due: Float
   # Technical overdraft amount in account
-  technical_overdraft_amount: Int
+  technical_overdraft_amount: Float
   # Technical overdraft interest due date
-  technical_overdraft_interest_due: Int
+  technical_overdraft_interest_due: Float
   # Total account balance
-  total_balance: Int
+  total_balance: Float
 }
 
 # Type to define the interest payment settings
