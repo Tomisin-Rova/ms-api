@@ -128,6 +128,21 @@ message ApiPerson {
   string registrationCheckPoint = 7;
 }
 
+message ValidateEmailRequest {
+  string email = 1;
+  types.Device device = 2;
+}
+
+message ValidateUserRequest {
+  string email = 1;
+  string firstName = 2;
+  string lastName = 3;
+  string DOB = 4;
+  string accountNumber = 5;
+  string sortCode = 6;
+  types.Device device = 7;
+}
+
 service AuthService {
   rpc Login(LoginRequest) returns (AuthResponse) {}
   rpc LoginWithToken(LoginWithTokenRequest) returns (AuthResponse) {}
@@ -137,4 +152,6 @@ service AuthService {
   rpc ConfirmPasswordResetOtp(PasswordResetOtpRequest) returns (PasswordResetOtpResponse) {}
   rpc ResetPassword(PasswordResetRequest) returns (types.Response) {}
   rpc GetPerson(GetPersonRequest) returns (GetPersonResponse) {}
+  rpc ValidateEmail(ValidateEmailRequest) returns  (types.Response) {}
+  rpc ValidateUser(ValidateUserRequest) returns  (types.Response) {}
 }

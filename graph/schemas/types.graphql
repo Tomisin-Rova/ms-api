@@ -2480,3 +2480,14 @@ enum StaffStatus {
   INACTIVE
   EXITED
 }
+
+# Input used to validate the user data if the user has a GBP Account
+input ValidateUserInput {
+  email: String!
+  first_name: String!
+  last_name: String!
+  dob: String!
+  account_number: String!
+  sort_code:String!
+  device: DeviceInput!
+}

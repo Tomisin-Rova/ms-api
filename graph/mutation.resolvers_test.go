@@ -6,6 +6,7 @@ import (
 
 	"ms.api/mocks"
 	"ms.api/protos/pb/accountService"
+	"ms.api/protos/pb/authService"
 	identitySvc "ms.api/protos/pb/identityService"
 	"ms.api/protos/pb/onboardingService"
 	"ms.api/protos/pb/paymentService"
@@ -1036,6 +1037,204 @@ func TestMutationResolver_VerifyOtp(t *testing.T) {
 				response, err := resolver.Mutation().VerifyOtp(context.Background(), testCase.arg.target, testCase.arg.token)
 				assert.Error(t, err)
 				assert.Nil(t, response)
+			}
+		})
+	}
+}
+
+func TestMutationResolver_ValidateEmail(t *testing.T) {
+	const (
+		success = iota
+		errorValidateEmail
+	)
+
+	var tests = []struct {
+		name string
+		args struct {
+			email  string
+			device types.DeviceInput
+		}
+		testType int
+	}{
+		{
+			name: "Test validate email successfully",
+			args: struct {
+				email  string
+				device types.DeviceInput
+			}{
+				email: "johnsmith@gmail.com",
+				device: types.DeviceInput{
+					Identifier: "testIdentifier",
+					Brand:      "testBrand",
+					Os:         "testOs",
+				},
+			},
+			testType: success,
+		},
+		{
+			name: "Test error calling ValidateEmail",
+			args: struct {
+				email  string
+				device types.DeviceInput
+			}{
+				email: "johnsmith@gmail.com",
+				device: types.DeviceInput{
+					Identifier: "testIdentifier",
+					Brand:      "testBrand",
+					Os:         "testOs",
+				},
+			},
+			testType: errorValidateEmail,
+		},
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			// Mocks
+			authServiceMock := new(mocks.AuthServiceClient)
+			accountServiceMock := new(mocks.AccountServiceClient)
+			resolverOpts := &ResolverOpts{AuthService: authServiceMock, accountService: accountServiceMock}
+			resolver := NewResolver(resolverOpts, zaptest.NewLogger(t))
+
+			switch testCase.testType {
+			case success:
+				authServiceMock.On("ValidateEmail", context.Background(), &authService.ValidateEmailRequest{
+					Email: testCase.args.email,
+					Device: &protoTypes.Device{
+						Identifier: testCase.args.device.Identifier,
+						Brand:      testCase.args.device.Brand,
+						Os:         testCase.args.device.Os,
+					},
+				}).Return(&protoTypes.Response{
+					Success: true,
+					Message: "successful",
+				}, nil)
+				response, err := resolver.Mutation().ValidateEmail(context.Background(), testCase.args.email, testCase.args.device)
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+				assert.Equal(t, response.Message, "successful")
+				assert.Equal(t, response.Success, true)
+			case errorValidateEmail:
+				authServiceMock.On("ValidateEmail", context.Background(), &authService.ValidateEmailRequest{
+					Email: testCase.args.email,
+					Device: &protoTypes.Device{
+						Identifier: testCase.args.device.Identifier,
+						Brand:      testCase.args.device.Brand,
+						Os:         testCase.args.device.Os,
+					},
+				}).Return(&protoTypes.Response{
+					Success: false,
+					Message: "",
+				}, nil)
+				response, err := resolver.Mutation().ValidateEmail(context.Background(), testCase.args.email, testCase.args.device)
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+			}
+		})
+	}
+}
+
+func TestMutationResolver_ValidateUser(t *testing.T) {
+	const (
+		success = iota
+		errorValidateEmail
+	)
+
+	var tests = []struct {
+		name string
+		args struct {
+			email  string
+			device types.DeviceInput
+		}
+		testType int
+	}{
+		{
+			name: "Test validate email successfully",
+			args: struct {
+				email  string
+				device types.DeviceInput
+			}{
+				email: "johnsmith@gmail.com",
+				device: types.DeviceInput{
+					Identifier: "testIdentifier",
+					Brand:      "testBrand",
+					Os:         "testOs",
+				},
+			},
+			testType: success,
+		},
+		{
+			name: "Test error calling ValidateEmail",
+			args: struct {
+				email  string
+				device types.DeviceInput
+			}{
+				email: "johnsmith@gmail.com",
+				device: types.DeviceInput{
+					Identifier: "testIdentifier",
+					Brand:      "testBrand",
+					Os:         "testOs",
+				},
+			},
+			testType: errorValidateEmail,
+		},
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			// Mocks
+			authServiceMock := new(mocks.AuthServiceClient)
+			accountServiceMock := new(mocks.AccountServiceClient)
+			resolverOpts := &ResolverOpts{AuthService: authServiceMock, accountService: accountServiceMock}
+			resolver := NewResolver(resolverOpts, zaptest.NewLogger(t))
+
+			switch testCase.testType {
+			case success:
+				authServiceMock.On("ValidateUser", context.Background(), &authService.ValidateUserRequest{
+					Email: testCase.args.email,
+					Device: &protoTypes.Device{
+						Identifier: testCase.args.device.Identifier,
+						Brand:      testCase.args.device.Brand,
+						Os:         testCase.args.device.Os,
+					},
+				}).Return(&protoTypes.Response{
+					Success: true,
+					Message: "successful",
+				}, nil)
+				response, err := resolver.Mutation().ValidateUser(context.Background(), types.ValidateUserInput{
+					Email: testCase.args.email,
+					Device: &types.DeviceInput{
+						Identifier: testCase.args.device.Identifier,
+						Brand:      testCase.args.device.Brand,
+						Os:         testCase.args.device.Os,
+					},
+				})
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+				assert.Equal(t, response.Message, "successful")
+				assert.Equal(t, response.Success, true)
+			case errorValidateEmail:
+				authServiceMock.On("ValidateUser", context.Background(), &authService.ValidateUserRequest{
+					Email: testCase.args.email,
+					Device: &protoTypes.Device{
+						Identifier: testCase.args.device.Identifier,
+						Brand:      testCase.args.device.Brand,
+						Os:         testCase.args.device.Os,
+					},
+				}).Return(&protoTypes.Response{
+					Success: false,
+					Message: "",
+				}, nil)
+				response, err := resolver.Mutation().ValidateUser(context.Background(), types.ValidateUserInput{
+					Email: testCase.args.email,
+					Device: &types.DeviceInput{
+						Identifier: testCase.args.device.Identifier,
+						Brand:      testCase.args.device.Brand,
+						Os:         testCase.args.device.Os,
+					},
+				})
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
 			}
 		})
 	}
