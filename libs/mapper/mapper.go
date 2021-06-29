@@ -512,7 +512,10 @@ func (G *GQLMapper) hydratePayment(data *pb.Payment, to interface{}) error {
 
 	if data.Source != nil {
 		var sourceAccount types.Account
-		G.hydrateAccount(data.Source.Account, sourceAccount)
+		err := G.hydrateAccount(data.Source.Account, sourceAccount)
+		if err != nil {
+			return errors.New("invalid to type")
+		}
 		payment.Beneficiary = &types.Beneficiary{
 			Account: sourceAccount,
 			Currency: &types.Currency{
@@ -524,7 +527,10 @@ func (G *GQLMapper) hydratePayment(data *pb.Payment, to interface{}) error {
 
 	if data.Target != nil {
 		var targetAccount types.Account
-		G.hydrateAccount(data.Target.Account, targetAccount)
+		err := G.hydrateAccount(data.Target.Account, targetAccount)
+		if err != nil {
+			return errors.New("invalid to type")
+		}
 		payment.FundingSource = &targetAccount
 	}
 
