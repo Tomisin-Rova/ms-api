@@ -35,6 +35,12 @@ var (
 		})
 )
 
+const (
+	emailFound = iota
+	gbpAccountFound
+	emailNotFound
+)
+
 func TestMutationResolver_CreatePhone(t *testing.T) {
 	const (
 		success = iota
@@ -1046,6 +1052,7 @@ func TestMutationResolver_ValidateEmail(t *testing.T) {
 	const (
 		success = iota
 		errorValidateEmail
+		emailFoundOnly
 	)
 
 	var tests = []struct {
@@ -1086,6 +1093,21 @@ func TestMutationResolver_ValidateEmail(t *testing.T) {
 			},
 			testType: errorValidateEmail,
 		},
+		{
+			name: "Test email found only",
+			args: struct {
+				email  string
+				device types.DeviceInput
+			}{
+				email: "johnsmith@gmail.com",
+				device: types.DeviceInput{
+					Identifier: "testIdentifier",
+					Brand:      "testBrand",
+					Os:         "testOs",
+				},
+			},
+			testType: emailFoundOnly,
+		},
 	}
 
 	for _, testCase := range tests {
@@ -1108,12 +1130,14 @@ func TestMutationResolver_ValidateEmail(t *testing.T) {
 				}).Return(&protoTypes.Response{
 					Success: true,
 					Message: "successful",
+					Code:    gbpAccountFound,
 				}, nil)
 				response, err := resolver.Mutation().ValidateEmail(context.Background(), testCase.args.email, testCase.args.device)
 				assert.NoError(t, err)
 				assert.NotNil(t, response)
 				assert.Equal(t, response.Message, "successful")
 				assert.Equal(t, response.Success, true)
+				assert.Equal(t, *response.Code, int64(gbpAccountFound))
 			case errorValidateEmail:
 				authServiceMock.On("ValidateEmail", context.Background(), &authService.ValidateEmailRequest{
 					Email: testCase.args.email,
@@ -1124,11 +1148,29 @@ func TestMutationResolver_ValidateEmail(t *testing.T) {
 					},
 				}).Return(&protoTypes.Response{
 					Success: false,
-					Message: "",
+					Code:    emailNotFound,
 				}, nil)
 				response, err := resolver.Mutation().ValidateEmail(context.Background(), testCase.args.email, testCase.args.device)
 				assert.NoError(t, err)
 				assert.NotNil(t, response)
+				assert.Equal(t, response.Success, false)
+			case emailFoundOnly:
+				authServiceMock.On("ValidateEmail", context.Background(), &authService.ValidateEmailRequest{
+					Email: testCase.args.email,
+					Device: &protoTypes.Device{
+						Identifier: testCase.args.device.Identifier,
+						Brand:      testCase.args.device.Brand,
+						Os:         testCase.args.device.Os,
+					},
+				}).Return(&protoTypes.Response{
+					Success: true,
+					Code:    emailFound,
+				}, nil)
+				response, err := resolver.Mutation().ValidateEmail(context.Background(), testCase.args.email, testCase.args.device)
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+				assert.Equal(t, response.Success, true)
+				assert.Equal(t, *response.Code, int64(emailFound))
 			}
 		})
 	}
