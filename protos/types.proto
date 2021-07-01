@@ -736,3 +736,48 @@ message Fee {
   float upperBoundary = 2;
   float fee = 3;
 }
+
+// Payment type
+message Payment {
+  string id = 1;
+  string idempotency_key = 2;
+  Person owner = 3;
+  Source source = 4;
+  int64 charge = 5;
+  string reference =6;
+  string status = 7;
+  string image = 8;
+  string notes = 9;
+  repeated string tags = 10;
+  Target target = 11;
+  string currency = 12;
+  float funding_amount = 13;
+  string quote = 14;
+  int64 ts = 15;
+}
+
+// Payments type
+message Payments {
+  repeated Payment payment = 1;
+}
+
+message Source {
+  google.protobuf.Any account = 1;
+  string currency = 2;
+  double  amount = 3;
+}
+
+message Target {
+  google.protobuf.Any account = 1;
+  string currency = 2;
+  double  amount = 3;
+}
+
+message Quote {
+  string id = 1;
+  bool has_expiry = 2;
+  int64 expires = 3;
+  Fee fee = 4;
+  Fx fx = 5;
+  int64 ts = 6;
+}

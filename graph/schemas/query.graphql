@@ -2,7 +2,10 @@ type Query {
   # fetch person using JWT claims
   me: Person
   # fetch staff using JWT claims
-  meStaff: Staff @deprecated(reason: "Further updates will replace me with an Union of Person and Status")
+  meStaff: Staff
+    @deprecated(
+      reason: "Further updates will replace me with an Union of Person and Status"
+    )
   # fetch person by given ID
   person(
     # Unique roava ulid for the data record
@@ -11,13 +14,13 @@ type Query {
   # fetch a list of people
   people(
     # Keywords used to filter the persons
-    keywords: String,
+    keywords: String
     # Returns the first n elements from the list.
-    first: Int,
+    first: Int
     # Returns the elements in the list that come after the specified cursor.
-    after: String,
+    after: String
     # Returns the last n elements from the list.
-    last: Int,
+    last: Int
     # Returns the elements in the list that come before the specified cursor.
     before: String
     # Filter person by it's status. If empty, should ignore the field
@@ -45,13 +48,13 @@ type Query {
   # fetch an address by text in lookup services
   addressLookup(
     # Text to be used in the address lookup
-    text: String,
+    text: String
     # Returns the first n elements from the list.
-    first: Int,
+    first: Int
     # Returns the elements in the list that come after the specified cursor.
-    after: String,
+    after: String
     # Returns the last n elements from the list.
-    last: Int,
+    last: Int
     # Returns the elements in the list that come before the specified cursor.
     before: String
   ): AddressConnection
@@ -63,11 +66,11 @@ type Query {
   # fetch a list of devices
   devices(
     # Returns the first n elements from the list.
-    first: Int,
+    first: Int
     # Returns the elements in the list that come after the specified cursor.
-    after: String,
+    after: String
     # Returns the last n elements from the list.
-    last: Int,
+    last: Int
     # Returns the elements in the list that come before the specified cursor.
     before: String
   ): DeviceConnection
@@ -81,11 +84,11 @@ type Query {
   # fetch a list of organisations
   organisations(
     # Returns the first n elements from the list.
-    first: Int,
+    first: Int
     # Returns the elements in the list that come after the specified cursor.
-    after: String,
+    after: String
     # Returns the last n elements from the list.
-    last: Int,
+    last: Int
     # Returns the elements in the list that come before the specified cursor.
     before: String
   ): OrganisationConnection
@@ -97,11 +100,11 @@ type Query {
   # fetch a list of verifications and their state
   verifications(
     # Returns the first n elements from the list.
-    first: Int,
+    first: Int
     # Returns the elements in the list that come after the specified cursor.
-    after: String,
+    after: String
     # Returns the last n elements from the list.
-    last: Int,
+    last: Int
     # Returns the elements in the list that come before the specified cursor.
     before: String
   ): VerificationConnection
@@ -113,11 +116,11 @@ type Query {
   # fetch a list of countries
   countries(
     # Returns the first n elements from the list.
-    first: Int,
+    first: Int
     # Returns the elements in the list that come after the specified cursor.
-    after: String,
+    after: String
     # Returns the last n elements from the list.
-    last: Int,
+    last: Int
     # Returns the elements in the list that come before the specified cursor.
     before: String
   ): CountryConnection
@@ -129,13 +132,13 @@ type Query {
   # fetch a list of currencies in the ROAVA system including optional argument for supported currencies only
   currencies(
     # Boolean to define to filter for supported currencies or not
-    supported: Boolean,
+    supported: Boolean
     # Returns the first n elements from the list.
-    first: Int,
+    first: Int
     # Returns the elements in the list that come after the specified cursor.
-    after: String,
+    after: String
     # Returns the last n elements from the list.
-    last: Int,
+    last: Int
     # Returns the elements in the list that come before the specified cursor.
     before: String
   ): CurrencyConnection
@@ -147,11 +150,11 @@ type Query {
   # fetch a list of industry sectors an organisation can belong to
   industries(
     # Returns the first n elements from the list.
-    first: Int,
+    first: Int
     # Returns the elements in the list that come after the specified cursor.
-    after: String,
+    after: String
     # Returns the last n elements from the list.
-    last: Int,
+    last: Int
     # Returns the elements in the list that come before the specified cursor.
     before: String
   ): IndustryConnection
@@ -173,11 +176,11 @@ type Query {
   # fetch a list of messages in the platform
   messages(
     # Returns the first n elements from the list.
-    first: Int,
+    first: Int
     # Returns the elements in the list that come after the specified cursor.
-    after: String,
+    after: String
     # Returns the last n elements from the list.
-    last: Int,
+    last: Int
     # Returns the elements in the list that come before the specified cursor.
     before: String
   ): MessageConnection
@@ -189,11 +192,11 @@ type Query {
   # get a list of quotes
   quotes(
     # Returns the first n elements from the list.
-    first: Int,
+    first: Int
     # Returns the elements in the list that come after the specified cursor.
-    after: String,
+    after: String
     # Returns the last n elements from the list.
-    last: Int,
+    last: Int
     # Returns the elements in the list that come before the specified cursor.
     before: String
   ): QuoteConnection
@@ -202,11 +205,11 @@ type Query {
   # fetch list of prices for a currency pair by date descending (newest first)
   prices(
     # Returns the first n elements from the list.
-    first: Int,
+    first: Int
     # Returns the elements in the list that come after the specified cursor.
-    after: String,
+    after: String
     # Returns the last n elements from the list.
-    last: Int,
+    last: Int
     # Returns the elements in the list that come before the specified cursor.
     before: String
   ): FxConnection
@@ -218,11 +221,11 @@ type Query {
   # fet a list of tags
   tags(
     # Returns the first n elements from the list.
-    first: Int,
+    first: Int
     # Returns the elements in the list that come after the specified cursor.
-    after: String,
+    after: String
     # Returns the last n elements from the list.
-    last: Int,
+    last: Int
     # Returns the elements in the list that come before the specified cursor.
     before: String
   ): TagConnection
@@ -234,15 +237,15 @@ type Query {
   # fetch multiple customer cdd records by optional keywords
   cdds(
     # Keywords used to filter the cdds
-    keywords: String,
+    keywords: String
     # Filter CDDs by it's statuses
-    status: [State!],
+    status: [State!]
     # Returns the first n elements from the list.
-    first: Int,
+    first: Int
     # Returns the elements in the list that come after the specified cursor.
-    after: String,
+    after: String
     # Returns the last n elements from the list.
-    last: Int,
+    last: Int
     # Returns the elements in the list that come before the specified cursor.
     before: String
   ): CDDConnection
@@ -254,11 +257,11 @@ type Query {
   # fetch multiple KYC records
   validations(
     # Returns the first n elements from the list.
-    first: Int,
+    first: Int
     # Returns the elements in the list that come after the specified cursor.
-    after: String,
+    after: String
     # Returns the last n elements from the list.
-    last: Int,
+    last: Int
     # Returns the elements in the list that come before the specified cursor.
     before: String
   ): ValidationConnection
@@ -270,11 +273,11 @@ type Query {
   # fetch multiple KYC records
   checks(
     # Returns the first n elements from the list.
-    first: Int,
+    first: Int
     # Returns the elements in the list that come after the specified cursor.
-    after: String,
+    after: String
     # Returns the last n elements from the list.
-    last: Int,
+    last: Int
     # Returns the elements in the list that come before the specified cursor.
     before: String
   ): CheckConnection
@@ -286,11 +289,11 @@ type Query {
   # fetch multiple AML screening records
   screens(
     # Returns the first n elements from the list.
-    first: Int,
+    first: Int
     # Returns the elements in the list that come after the specified cursor.
-    after: String,
+    after: String
     # Returns the last n elements from the list.
-    last: Int,
+    last: Int
     # Returns the elements in the list that come before the specified cursor.
     before: String
   ): ScreenConnection
@@ -302,11 +305,11 @@ type Query {
   # fetch multiple onfido document reports
   reports(
     # Returns the first n elements from the list.
-    first: Int,
+    first: Int
     # Returns the elements in the list that come after the specified cursor.
-    after: String,
+    after: String
     # Returns the last n elements from the list.
-    last: Int,
+    last: Int
     # Returns the elements in the list that come before the specified cursor.
     before: String
   ): ReportConnection
@@ -318,11 +321,11 @@ type Query {
   # fetch multiple document proofs
   proofs(
     # Returns the first n elements from the list.
-    first: Int,
+    first: Int
     # Returns the elements in the list that come after the specified cursor.
-    after: String,
+    after: String
     # Returns the last n elements from the list.
-    last: Int,
+    last: Int
     # Returns the elements in the list that come before the specified cursor.
     before: String
   ): ProofConnection
@@ -334,11 +337,11 @@ type Query {
   # fetch a list of task of onboarding reviews processes & workflows
   tasks(
     # Returns the first n elements from the list.
-    first: Int,
+    first: Int
     # Returns the elements in the list that come after the specified cursor.
-    after: String,
+    after: String
     # Returns the last n elements from the list.
-    last: Int,
+    last: Int
     # Returns the elements in the list that come before the specified cursor.
     before: String
   ): TaskConnection
@@ -350,11 +353,11 @@ type Query {
   # fetch a list of commments
   comments(
     # Returns the first n elements from the list.
-    first: Int,
+    first: Int
     # Returns the elements in the list that come after the specified cursor.
-    after: String,
+    after: String
     # Returns the last n elements from the list.
-    last: Int,
+    last: Int
     # Returns the elements in the list that come before the specified cursor.
     before: String
   ): CommentConnection
@@ -366,11 +369,11 @@ type Query {
   # fetch a list of financial products available to ROAVA customers
   products(
     # Returns the first n elements from the list.
-    first: Int,
+    first: Int
     # Returns the elements in the list that come after the specified cursor.
-    after: String,
+    after: String
     # Returns the last n elements from the list.
-    last: Int,
+    last: Int
     # Returns the elements in the list that come before the specified cursor.
     before: String
   ): ProductConnection
@@ -382,11 +385,11 @@ type Query {
   # fetch a list of deposit account products
   accounts(
     # Returns the first n elements from the list.
-    first: Int,
+    first: Int
     # Returns the elements in the list that come after the specified cursor.
-    after: String,
+    after: String
     # Returns the last n elements from the list.
-    last: Int,
+    last: Int
     # Returns the elements in the list that come before the specified cursor.
     before: String
   ): AccountConnection
@@ -395,14 +398,27 @@ type Query {
   # fetch all payees for a given customer
   payees(
     # Returns the first n elements from the list.
-    first: Int,
+    first: Int
     # Returns the elements in the list that come after the specified cursor.
-    after: String,
+    after: String
     # Returns the last n elements from the list.
-    last: Int,
+    last: Int
     # Returns the elements in the list that come before the specified cursor.
     before: String
   ): PayeeConnection
+  # fetch an individual payment by ID
+  payment(id: ID!): Payment
+  # fetch all payments for a given customer
+  payments(
+    # Returns the first n elements from the list.
+    first: Int
+    # Returns the elements in the list that come after the specified cursor.
+    after: String
+    # Returns the last n elements from the list.
+    last: Int
+    # Returns the elements in the list that come before the specified cursor.
+    before: String
+  ): PaymentConnection
   # fetch an individual transaction by unique ID
   transaction(
     # The Ulid field for the transaction
@@ -411,11 +427,11 @@ type Query {
   # fetch a list of account transactions
   transactions(
     # Returns the first n elements from the list.
-    first: Int,
+    first: Int
     # Returns the elements in the list that come after the specified cursor.
-    after: String,
+    after: String
     # Returns the last n elements from the list.
-    last: Int,
+    last: Int
     # Returns the elements in the list that come before the specified cursor.
     before: String
     # Filter transactions by an account id
@@ -435,11 +451,11 @@ type Query {
   # get all document acceptances for all customers by ID
   acceptances(
     # Returns the first n elements from the list.
-    first: Int,
+    first: Int
     # Returns the elements in the list that come after the specified cursor.
-    after: String,
+    after: String
     # Returns the last n elements from the list.
-    last: Int,
+    last: Int
     # Returns the elements in the list that come before the specified cursor.
     before: String
   ): AcceptanceConnection

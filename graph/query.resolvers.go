@@ -1117,6 +1117,77 @@ func (r *queryResolver) Payees(ctx context.Context, first *int64, after *string,
 	return connections.PayeeConnectionCon(payeeRes, edger, conn, input)
 }
 
+func (r *queryResolver) Payment(ctx context.Context, id string) (*types.Payment, error) {
+	_, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+	payment, err := r.paymentService.GetPayment(ctx, &paymentService.GetPaymentRequest{PaymentId: id})
+	if err != nil {
+		r.logger.Error("failed to get payment details", zap.Error(err))
+		return nil, err
+	}
+
+	var paymentRes types.Payment
+	if err := r.mapper.Hydrate(payment, &paymentRes); err != nil {
+		err := mainErrors.Format(mainErrors.InternalErr, nil)
+		r.logger.Error("debug", zap.Error(err))
+		return nil, err
+	}
+	return &paymentRes, nil
+}
+
+func (r *queryResolver) Payments(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.PaymentConnection, error) {
+	claims, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+	payments, err := r.paymentService.GetPayments(ctx, &paymentService.GetPaymentsRequest{Owner: claims.IdentityId})
+	if err != nil {
+		r.logger.Error("failed to get payments", zap.Error(err))
+		return nil, err
+	}
+
+	input := models.ConnectionInput{
+		Before: before,
+		After:  after,
+		First:  first,
+		Last:   last,
+	}
+
+	edger := func(p *types.Payment, offset int) connections.Edge {
+		return types.PaymentEdge{
+			Node:   p,
+			Cursor: connections.OffsetToCursor(offset),
+		}
+	}
+
+	conn := func(edges []*types.PaymentEdge, nodes []*types.Payment, info *types.PageInfo, totalCount int) (*types.PaymentConnection, error) {
+		var paymentNodes []*types.Payment
+		paymentNodes = append(paymentNodes, nodes...)
+
+		return &types.PaymentConnection{
+			Edges:      edges,
+			Nodes:      paymentNodes,
+			PageInfo:   info,
+			TotalCount: Int64(int64(totalCount)),
+		}, nil
+	}
+
+	var paymentRes []*types.Payment
+	for _, p := range payments.Payment {
+		var payment types.Payment
+		if err := r.mapper.Hydrate(p, &payment); err != nil {
+			err := mainErrors.Format(mainErrors.InternalErr, nil)
+			r.logger.Error("debug", zap.Error(err))
+			return nil, err
+		}
+		paymentRes = append(paymentRes, &payment)
+	}
+
+	return connections.PaymentLookupCon(paymentRes, edger, conn, input)
+}
+
 func (r *queryResolver) Transaction(ctx context.Context, id string) (*types.Transaction, error) {
 	_, err := middlewares.GetAuthenticatedUser(ctx)
 	if err != nil {

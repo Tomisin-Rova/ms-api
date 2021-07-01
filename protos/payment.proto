@@ -83,6 +83,14 @@ message BeneficiaryInput {
   double  amount = 3;
 }
 
+message GetPaymentsRequest {
+  string owner =1;
+}
+
+message GetPaymentRequest {
+  string paymentId = 1;
+}
+
 service PaymentService {
   rpc CreatePayee(CreatePayeeRequest) returns (types.Response) {}
   rpc GetPayees(GetPayeesRequest) returns (types.Payees) {}
@@ -91,4 +99,6 @@ service PaymentService {
   rpc AddPayeeAccount(AddPayeeAccountRequest) returns (types.Response) {}
   rpc UpdatePayee(UpdatePayeeRequest) returns (types.Response) {}
   rpc CreatePayment(CreatePaymentRequest) returns (types.Response) {}
+  rpc GetPayment(GetPaymentRequest) returns (types.Payment) {}
+  rpc GetPayments(GetPaymentsRequest) returns (types.Payments) {}
 }

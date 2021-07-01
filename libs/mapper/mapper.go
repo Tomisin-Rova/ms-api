@@ -1,7 +1,9 @@
 package mapper
 
 import (
+	"encoding/json"
 	"errors"
+
 	coreError "github.com/roava/zebra/errors"
 	pb "ms.api/protos/pb/types"
 	"ms.api/types"
@@ -27,6 +29,8 @@ func (G *GQLMapper) Hydrate(from interface{}, to interface{}) error {
 		return G.hydrateTag(value, to)
 	case *pb.Transaction:
 		return G.hydrateTransaction(value, to)
+	case *pb.Payment:
+		return G.hydratePayment(value, to)
 	default:
 		return errors.New("could not handle type")
 	}
@@ -480,6 +484,92 @@ func (G *GQLMapper) hydrateTag(data *pb.Tag, to interface{}) error {
 	return nil
 }
 
+func (G *GQLMapper) hydratePayment(data *pb.Payment, to interface{}) error {
+	payment, ok := to.(*types.Payment)
+	if !ok {
+		return errors.New("invalid to type")
+	}
+	*payment = types.Payment{
+		ID:             &data.Id,
+		IdempotencyKey: data.IdempotencyKey,
+		Charge:         Float64(float64(data.Charge)),
+		Reference:      String(data.Reference),
+		Status:         (*types.State)(&data.Status),
+		Image:          String(data.Image),
+		Notes:          String(data.Notes),
+		Currency:       &types.Currency{},
+		FundingAmount:  float64(data.FundingAmount),
+	}
+
+	if data.Tags != nil {
+		tags := make([]*types.Tag, len(data.Tags))
+		for index, v := range data.Tags {
+			tags[index] = &types.Tag{
+				Name: String(v),
+			}
+		}
+		payment.Tags = tags
+	}
+
+	if data.Source != nil {
+		var sourceAccount types.Account
+		err := json.Unmarshal(data.Source.Account.Value, &sourceAccount)
+		if err != nil {
+			var sourcePayeeAccount types.PayeeAccount
+			err := json.Unmarshal(data.Source.Account.Value, &sourcePayeeAccount)
+			if err != nil {
+				return err
+			}
+			payment.Beneficiary = &types.Beneficiary{
+				Account: sourcePayeeAccount,
+				Currency: &types.Currency{
+					Name: data.Source.Currency,
+				},
+				Amount: data.Source.Amount,
+			}
+		} else {
+			payment.Beneficiary = &types.Beneficiary{
+				Account: sourceAccount,
+				Currency: &types.Currency{
+					Name: data.Source.Currency,
+				},
+				Amount: data.Source.Amount,
+			}
+		}
+	}
+
+	if data.Target != nil {
+		var targetAccount types.Account
+		err := json.Unmarshal(data.Target.Account.Value, &targetAccount)
+		if err != nil {
+			var targetPayeeAccount types.PayeeAccount
+			err := json.Unmarshal(data.Target.Account.Value, &targetPayeeAccount)
+			if err != nil {
+				return err
+			}
+			payment.FundingSource = &targetAccount
+		} else {
+			payment.FundingSource = &targetAccount
+		}
+		payment.FundingSource = &targetAccount
+	}
+
+	if data.Owner != nil {
+		payment.Owner = &types.Person{
+			ID:               data.Owner.Id,
+			Title:            &data.Owner.Title,
+			FirstName:        data.Owner.FirstName,
+			LastName:         data.Owner.LastName,
+			MiddleName:       &data.Owner.MiddleName,
+			Dob:              data.Owner.Dob,
+			Status:           (*types.PersonStatus)(&data.Owner.Status),
+			Ts:               data.Owner.Ts,
+			CountryResidence: &data.Owner.CountryResidence,
+		}
+	}
+	return nil
+}
+
 func String(s string) *string {
 	if s == "" {
 		return nil
@@ -488,6 +578,13 @@ func String(s string) *string {
 }
 
 func Int64(i int64) *int64 {
+	if i == 0 {
+		return nil
+	}
+	return &i
+}
+
+func Float64(i float64) *float64 {
 	if i == 0 {
 		return nil
 	}

@@ -180,6 +180,7 @@ func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) 
 	// Payment
 	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
+
 	connection, err = dialRPC(ctx, secrets.PaymentServiceURL)
 	if err != nil {
 		return nil, fmt.Errorf("%v: %s", err, secrets.PaymentServiceURL)

@@ -754,7 +754,7 @@ func (r *mutationResolver) CreatePayment(ctx context.Context, payment types.Paym
 		Tags:           p.Tags,
 		Beneficiary: &paymentService.BeneficiaryInput{
 			Account: p.Beneficiary.Account,
-			Amount:  *p.Beneficiary.Amount,
+			Amount:  p.Beneficiary.Amount,
 		},
 		FundingSource: p.FundingSource,
 		FundingAmount: p.FundingAmount,

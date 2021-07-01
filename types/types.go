@@ -8,6 +8,10 @@ import (
 	"strconv"
 )
 
+type BeneficiaryAccount interface {
+	IsBeneficiaryAccount()
+}
+
 type Entity interface {
 	IsEntity()
 }
@@ -66,6 +70,8 @@ type Account struct {
 	AccountData    *AccountData           `json:"account_data"`
 	AccountDetails *AccountDetails        `json:"account_details"`
 }
+
+func (Account) IsBeneficiaryAccount() {}
 
 type AccountBalances struct {
 	TotalBalance *float64 `json:"total_balance"`
@@ -274,10 +280,16 @@ type Balances struct {
 	TotalBalance                  *float64 `json:"total_balance"`
 }
 
+type Beneficiary struct {
+	Account  BeneficiaryAccount `json:"account"`
+	Currency *Currency          `json:"currency"`
+	Amount   float64            `json:"amount"`
+}
+
 type BeneficiaryInput struct {
-	Account  string   `json:"account"`
-	Currency *string  `json:"currency"`
-	Amount   *float64 `json:"amount"`
+	Account  string  `json:"account"`
+	Currency *string `json:"currency"`
+	Amount   float64 `json:"amount"`
 }
 
 type Cdd struct {
@@ -788,6 +800,8 @@ type PayeeAccount struct {
 	PhoneNumber   *string `json:"phone_number"`
 }
 
+func (PayeeAccount) IsBeneficiaryAccount() {}
+
 type PayeeAccountInput struct {
 	Name          *string `json:"name"`
 	Currency      *string `json:"currency"`
@@ -816,6 +830,35 @@ type PayeeInput struct {
 	Name     string               `json:"name"`
 	Avatar   *string              `json:"avatar"`
 	Accounts []*PayeeAccountInput `json:"accounts"`
+}
+
+type Payment struct {
+	ID             *string      `json:"id"`
+	IdempotencyKey string       `json:"idempotency_key"`
+	Owner          Owner        `json:"owner"`
+	Charge         *float64     `json:"charge"`
+	Reference      *string      `json:"reference"`
+	Status         *State       `json:"status"`
+	Image          *string      `json:"image"`
+	Notes          *string      `json:"notes"`
+	Quote          *Quote       `json:"quote"`
+	Tags           []*Tag       `json:"tags"`
+	Beneficiary    *Beneficiary `json:"beneficiary"`
+	FundingSource  *Account     `json:"funding_source"`
+	Currency       *Currency    `json:"currency"`
+	FundingAmount  float64      `json:"funding_amount"`
+}
+
+type PaymentConnection struct {
+	Edges      []*PaymentEdge `json:"edges"`
+	Nodes      []*Payment     `json:"nodes"`
+	PageInfo   *PageInfo      `json:"pageInfo"`
+	TotalCount *int64         `json:"totalCount"`
+}
+
+type PaymentEdge struct {
+	Node   *Payment `json:"node"`
+	Cursor string   `json:"cursor"`
 }
 
 type PaymentInput struct {
