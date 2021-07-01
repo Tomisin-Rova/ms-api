@@ -871,9 +871,11 @@ func (r *mutationResolver) ValidateEmail(ctx context.Context, email string, devi
 		r.logger.Error("error calling authService.ValidateEmail()", zap.Error(err))
 		return nil, err
 	}
+	code := int64(resp.Code)
 	return &types.Response{
 		Message: resp.Message,
 		Success: resp.Success,
+		Code:    &code,
 	}, nil
 }
 
