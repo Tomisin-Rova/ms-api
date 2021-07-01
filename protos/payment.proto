@@ -84,6 +84,7 @@ message BeneficiaryInput {
 }
 
 message GetPaymentsRequest {
+  string owner =1;
 }
 
 message GetPaymentRequest {

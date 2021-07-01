@@ -11022,7 +11022,7 @@ input ValidateUserInput {
   last_name: String!
   dob: String!
   account_number: String!
-  sort_code:String!
+  sort_code: String!
   device: DeviceInput!
 }
 `, BuiltIn: false},

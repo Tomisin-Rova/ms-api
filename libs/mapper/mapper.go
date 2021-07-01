@@ -1,6 +1,7 @@
 package mapper
 
 import (
+	"encoding/json"
 	"errors"
 
 	coreError "github.com/roava/zebra/errors"
@@ -512,24 +513,43 @@ func (G *GQLMapper) hydratePayment(data *pb.Payment, to interface{}) error {
 
 	if data.Source != nil {
 		var sourceAccount types.Account
-		err := G.hydrateAccount(data.Source.Account, sourceAccount)
+		err := json.Unmarshal(data.Source.Account.Value, &sourceAccount)
 		if err != nil {
-			return errors.New("invalid to type")
-		}
-		payment.Beneficiary = &types.Beneficiary{
-			Account: sourceAccount,
-			Currency: &types.Currency{
-				Name: data.Source.Currency,
-			},
-			Amount: data.Source.Amount,
+			var sourcePayeeAccount types.PayeeAccount
+			err := json.Unmarshal(data.Source.Account.Value, &sourcePayeeAccount)
+			if err != nil {
+				return err
+			}
+			payment.Beneficiary = &types.Beneficiary{
+				Account: sourcePayeeAccount,
+				Currency: &types.Currency{
+					Name: data.Source.Currency,
+				},
+				Amount: data.Source.Amount,
+			}
+		} else {
+			payment.Beneficiary = &types.Beneficiary{
+				Account: sourceAccount,
+				Currency: &types.Currency{
+					Name: data.Source.Currency,
+				},
+				Amount: data.Source.Amount,
+			}
 		}
 	}
 
 	if data.Target != nil {
 		var targetAccount types.Account
-		err := G.hydrateAccount(data.Target.Account, targetAccount)
+		err := json.Unmarshal(data.Target.Account.Value, &targetAccount)
 		if err != nil {
-			return errors.New("invalid to type")
+			var targetPayeeAccount types.PayeeAccount
+			err := json.Unmarshal(data.Target.Account.Value, &targetPayeeAccount)
+			if err != nil {
+				return err
+			}
+			payment.FundingSource = &targetAccount
+		} else {
+			payment.FundingSource = &targetAccount
 		}
 		payment.FundingSource = &targetAccount
 	}

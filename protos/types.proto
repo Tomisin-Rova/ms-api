@@ -762,13 +762,13 @@ message Payments {
 }
 
 message Source {
-  Account account = 1;
+  google.protobuf.Any account = 1;
   string currency = 2;
   double  amount = 3;
 }
 
 message Target {
-  Account account = 1;
+  google.protobuf.Any account = 1;
   string currency = 2;
   double  amount = 3;
 }

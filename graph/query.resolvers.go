@@ -1129,7 +1129,6 @@ func (r *queryResolver) Payment(ctx context.Context, id string) (*types.Payment,
 	}
 
 	var paymentRes types.Payment
-	fmt.Printf("Here are the payment details: %v", payment)
 	if err := r.mapper.Hydrate(payment, &paymentRes); err != nil {
 		err := mainErrors.Format(mainErrors.InternalErr, nil)
 		r.logger.Error("debug", zap.Error(err))
@@ -1139,11 +1138,11 @@ func (r *queryResolver) Payment(ctx context.Context, id string) (*types.Payment,
 }
 
 func (r *queryResolver) Payments(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.PaymentConnection, error) {
-	_, err := middlewares.GetAuthenticatedUser(ctx)
+	claims, err := middlewares.GetAuthenticatedUser(ctx)
 	if err != nil {
 		return nil, ErrUnAuthenticated
 	}
-	payments, err := r.paymentService.GetPayments(ctx, &paymentService.GetPaymentsRequest{})
+	payments, err := r.paymentService.GetPayments(ctx, &paymentService.GetPaymentsRequest{Owner: claims.IdentityId})
 	if err != nil {
 		r.logger.Error("failed to get payments", zap.Error(err))
 		return nil, err
