@@ -499,6 +499,7 @@ func (G *GQLMapper) hydratePayment(data *pb.Payment, to interface{}) error {
 		Notes:          String(data.Notes),
 		Currency:       &types.Currency{},
 		FundingAmount:  float64(data.FundingAmount),
+		Ts:             &data.Ts,
 	}
 
 	if data.Tags != nil {

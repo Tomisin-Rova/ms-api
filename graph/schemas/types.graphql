@@ -2445,6 +2445,8 @@ type Payment {
   currency: Currency
   # ammount to be debited from funding source/account
   funding_amount: Float!
+  # unix timestamp when payee created
+  ts: Int
 }
 
 # Type to define a beneficiary account

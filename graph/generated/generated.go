@@ -783,6 +783,7 @@ type ComplexityRoot struct {
 		Reference      func(childComplexity int) int
 		Status         func(childComplexity int) int
 		Tags           func(childComplexity int) int
+		Ts             func(childComplexity int) int
 	}
 
 	PaymentConnection struct {
@@ -5112,6 +5113,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Payment.Tags(childComplexity), true
+
+	case "Payment.ts":
+		if e.complexity.Payment.Ts == nil {
+			break
+		}
+
+		return e.complexity.Payment.Ts(childComplexity), true
 
 	case "PaymentConnection.edges":
 		if e.complexity.PaymentConnection.Edges == nil {
@@ -10946,6 +10954,8 @@ type Payment {
   currency: Currency
   # ammount to be debited from funding source/account
   funding_amount: Float!
+  # unix timestamp when payee created
+  ts: Int
 }
 
 # Type to define a beneficiary account
@@ -30895,6 +30905,38 @@ func (ec *executionContext) _Payment_funding_amount(ctx context.Context, field g
 	return ec.marshalNFloat2float64(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Payment_ts(ctx context.Context, field graphql.CollectedField, obj *types.Payment) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Payment",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Ts, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int64)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _PaymentConnection_edges(ctx context.Context, field graphql.CollectedField, obj *types.PaymentConnection) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -48314,6 +48356,8 @@ func (ec *executionContext) _Payment(ctx context.Context, sel ast.SelectionSet, 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "ts":
+			out.Values[i] = ec._Payment_ts(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
