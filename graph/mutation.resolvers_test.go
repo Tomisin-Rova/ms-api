@@ -1281,3 +1281,107 @@ func TestMutationResolver_ValidateUser(t *testing.T) {
 		})
 	}
 }
+
+func TestRequestTransactionPasscodeReset(t *testing.T) {
+	const (
+		success = iota
+		rpcError
+	)
+
+	tests := []struct {
+		name     string
+		email    string
+		testType int
+	}{
+		{
+			name:     "Test that RequestTransactionPasscodeReset call is successful.",
+			email:    "princewill@example.com",
+			testType: success,
+		},
+		{
+			name:     "Test that RequestTransactionPasscodeReset call fails and is handled properly.",
+			email:    "princewill@example.com",
+			testType: rpcError,
+		},
+	}
+
+	for _, testCase := range tests {
+		identityService := new(mocks.IdentityServiceClient)
+		resolver := NewResolver(&ResolverOpts{identityService: identityService}, zaptest.NewLogger(t))
+
+		t.Run(testCase.name, func(t *testing.T) {
+			switch testCase.testType {
+			case success:
+				identityService.On("RequestResetTransactionPassword", validUserCtx, &identitySvc.RequestResetTransactionPasswordRequest{
+					Email: testCase.email,
+				}).Return(&protoTypes.Response{
+					Message: "OTP Sent successfully.",
+					Success: true,
+				}, nil)
+
+				response, err := resolver.Mutation().RequestTransactionPasscodeReset(validUserCtx, testCase.email)
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+
+			case rpcError:
+				identityService.On("RequestResetTransactionPassword", validUserCtx, &identitySvc.RequestResetTransactionPasswordRequest{
+					Email: testCase.email,
+				}).Return(nil, errors.New(""))
+
+				response, err := resolver.Mutation().RequestTransactionPasscodeReset(validUserCtx, testCase.email)
+				assert.Error(t, err)
+				assert.Nil(t, response)
+			}
+		})
+	}
+}
+
+func TestResetTransactionPasscode(t *testing.T) {
+	const (
+		success = iota
+		rpcError
+	)
+
+	tests := []struct {
+		name     string
+		arg      *identitySvc.ResetTransactionPasswordRequest
+		testType int
+	}{
+		{
+			name: "Test that ResetTransactionPasscode call is successful.",
+			arg: &identitySvc.ResetTransactionPasswordRequest{
+				Email:           "princewill@example.com",
+				Token:           "1234567",
+				CurrentPasscode: "secret",
+				NewPasscode:     "new-secret",
+			},
+			testType: success,
+		},
+	}
+
+	for _, testCase := range tests {
+		identityService := new(mocks.IdentityServiceClient)
+		resolver := NewResolver(&ResolverOpts{identityService: identityService}, zaptest.NewLogger(t))
+
+		t.Run(testCase.name, func(t *testing.T) {
+			switch testCase.testType {
+			case success:
+				identityService.On("ResetTransactionPassword", validUserCtx, testCase.arg).Return(&protoTypes.Response{
+					Message: "Password reset successful.",
+					Success: true,
+				}, nil)
+
+				response, err := resolver.Mutation().ResetTransactionPasscode(validUserCtx, testCase.arg.Email, testCase.arg.Token, testCase.arg.CurrentPasscode, testCase.arg.NewPasscode)
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+
+			case rpcError:
+				identityService.On("ResetTransactionPassword", validUserCtx, testCase.arg).Return(nil, errors.New(""))
+
+				response, err := resolver.Mutation().ResetTransactionPasscode(validUserCtx, testCase.arg.Email, testCase.arg.Token, testCase.arg.CurrentPasscode, testCase.arg.NewPasscode)
+				assert.Error(t, err)
+				assert.Nil(t, response)
+			}
+		})
+	}
+}

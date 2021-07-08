@@ -910,6 +910,39 @@ func (r *mutationResolver) ValidateUser(ctx context.Context, user types.Validate
 	}, nil
 }
 
+func (r *mutationResolver) RequestTransactionPasscodeReset(ctx context.Context, email string) (*types.Response, error) {
+	res, err := r.identityService.RequestResetTransactionPassword(ctx, &identityService.RequestResetTransactionPasswordRequest{
+		Email: email,
+	})
+	if err != nil {
+		r.logger.Error("identity service request reset transaction password", zap.Error(err))
+		return nil, err
+	}
+
+	return &types.Response{
+		Message: res.Message,
+		Success: res.Success,
+	}, nil
+}
+
+func (r *mutationResolver) ResetTransactionPasscode(ctx context.Context, email string, token string, currentPasscode string, newPasscode string) (*types.Response, error) {
+	res, err := r.identityService.ResetTransactionPassword(ctx, &identityService.ResetTransactionPasswordRequest{
+		Email:           email, // TODO: Update GraphQL
+		Token:           token,
+		CurrentPasscode: currentPasscode,
+		NewPasscode:     newPasscode,
+	})
+	if err != nil {
+		r.logger.Error("identity service reset transaction password", zap.Error(err))
+		return nil, err
+	}
+
+	return &types.Response{
+		Message: res.Message,
+		Success: res.Success,
+	}, nil
+}
+
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 

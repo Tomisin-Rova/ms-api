@@ -625,40 +625,42 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		AcceptTerms               func(childComplexity int, documents []*string) int
-		AddPayeeAccount           func(childComplexity int, payee string, payeeAccount types.PayeeAccountInput) int
-		ConfirmPasscodeResetOtp   func(childComplexity int, email string, otp string) int
-		ConfirmPhone              func(childComplexity int, token string, code string) int
-		CreateAccount             func(childComplexity int, product types.ProductInput) int
-		CreateApplication         func(childComplexity int) int
-		CreatePayee               func(childComplexity int, payee types.PayeeInput, password string) int
-		CreatePayment             func(childComplexity int, payment types.PaymentInput, password string) int
-		CreatePhone               func(childComplexity int, phone string, device types.DeviceInput) int
-		CreateTransactionPassword func(childComplexity int, password string) int
-		DeletePayeeAccount        func(childComplexity int, payee string, payeeAccount string) int
-		IntendedActivities        func(childComplexity int, activities []string) int
-		Login                     func(childComplexity int, credentials types.AuthInput) int
-		LoginWithToken            func(childComplexity int, token string, authType types.AuthType) int
-		RefreshToken              func(childComplexity int, token string) int
-		Register                  func(childComplexity int, person types.PersonInput, address types.AddressInput) int
-		RequestOtp                func(childComplexity int, typeArg types.DeliveryMode, target string, expireTime *int64) int
-		RequestPasscodeReset      func(childComplexity int, email string, device types.DeviceInput) int
-		ResendEmailMagicLInk      func(childComplexity int, email string) int
-		ResendOtp                 func(childComplexity int, phone string) int
-		ResetPasscode             func(childComplexity int, token string, email string, passcode string) int
-		Resubmit                  func(childComplexity int, reports []*types.ReportInput, message *string) int
-		ResubmitReports           func(childComplexity int, reports []*types.ReportInput) int
-		Signup                    func(childComplexity int, token string, email string, passcode string) int
-		SubmitApplication         func(childComplexity int) int
-		SubmitProof               func(childComplexity int, proof types.SubmitProofInput) int
-		UpdateDeviceToken         func(childComplexity int, token []*types.DeviceTokenInput) int
-		UpdatePayee               func(childComplexity int, payee string, payeeInput *types.PayeeInput, password string) int
-		UpdateValidationStatus    func(childComplexity int, validation string, status types.State, message string) int
-		ValidateBvn               func(childComplexity int, bvn string, phone string) int
-		ValidateEmail             func(childComplexity int, email string, device types.DeviceInput) int
-		ValidateUser              func(childComplexity int, user types.ValidateUserInput) int
-		VerifyEmail               func(childComplexity int, email string, code string) int
-		VerifyOtp                 func(childComplexity int, target string, token string) int
+		AcceptTerms                     func(childComplexity int, documents []*string) int
+		AddPayeeAccount                 func(childComplexity int, payee string, payeeAccount types.PayeeAccountInput) int
+		ConfirmPasscodeResetOtp         func(childComplexity int, email string, otp string) int
+		ConfirmPhone                    func(childComplexity int, token string, code string) int
+		CreateAccount                   func(childComplexity int, product types.ProductInput) int
+		CreateApplication               func(childComplexity int) int
+		CreatePayee                     func(childComplexity int, payee types.PayeeInput, password string) int
+		CreatePayment                   func(childComplexity int, payment types.PaymentInput, password string) int
+		CreatePhone                     func(childComplexity int, phone string, device types.DeviceInput) int
+		CreateTransactionPassword       func(childComplexity int, password string) int
+		DeletePayeeAccount              func(childComplexity int, payee string, payeeAccount string) int
+		IntendedActivities              func(childComplexity int, activities []string) int
+		Login                           func(childComplexity int, credentials types.AuthInput) int
+		LoginWithToken                  func(childComplexity int, token string, authType types.AuthType) int
+		RefreshToken                    func(childComplexity int, token string) int
+		Register                        func(childComplexity int, person types.PersonInput, address types.AddressInput) int
+		RequestOtp                      func(childComplexity int, typeArg types.DeliveryMode, target string, expireTime *int64) int
+		RequestPasscodeReset            func(childComplexity int, email string, device types.DeviceInput) int
+		RequestTransactionPasscodeReset func(childComplexity int, email string) int
+		ResendEmailMagicLInk            func(childComplexity int, email string) int
+		ResendOtp                       func(childComplexity int, phone string) int
+		ResetPasscode                   func(childComplexity int, token string, email string, passcode string) int
+		ResetTransactionPasscode        func(childComplexity int, email string, token string, currentPasscode string, newPasscode string) int
+		Resubmit                        func(childComplexity int, reports []*types.ReportInput, message *string) int
+		ResubmitReports                 func(childComplexity int, reports []*types.ReportInput) int
+		Signup                          func(childComplexity int, token string, email string, passcode string) int
+		SubmitApplication               func(childComplexity int) int
+		SubmitProof                     func(childComplexity int, proof types.SubmitProofInput) int
+		UpdateDeviceToken               func(childComplexity int, token []*types.DeviceTokenInput) int
+		UpdatePayee                     func(childComplexity int, payee string, payeeInput *types.PayeeInput, password string) int
+		UpdateValidationStatus          func(childComplexity int, validation string, status types.State, message string) int
+		ValidateBvn                     func(childComplexity int, bvn string, phone string) int
+		ValidateEmail                   func(childComplexity int, email string, device types.DeviceInput) int
+		ValidateUser                    func(childComplexity int, user types.ValidateUserInput) int
+		VerifyEmail                     func(childComplexity int, email string, code string) int
+		VerifyOtp                       func(childComplexity int, target string, token string) int
 	}
 
 	OpeningBalance struct {
@@ -1334,6 +1336,8 @@ type MutationResolver interface {
 	VerifyOtp(ctx context.Context, target string, token string) (*types.Response, error)
 	ValidateEmail(ctx context.Context, email string, device types.DeviceInput) (*types.Response, error)
 	ValidateUser(ctx context.Context, user types.ValidateUserInput) (*types.Response, error)
+	RequestTransactionPasscodeReset(ctx context.Context, email string) (*types.Response, error)
+	ResetTransactionPasscode(ctx context.Context, email string, token string, currentPasscode string, newPasscode string) (*types.Response, error)
 }
 type QueryResolver interface {
 	Me(ctx context.Context) (*types.Person, error)
@@ -4338,6 +4342,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.RequestPasscodeReset(childComplexity, args["email"].(string), args["device"].(types.DeviceInput)), true
 
+	case "Mutation.requestTransactionPasscodeReset":
+		if e.complexity.Mutation.RequestTransactionPasscodeReset == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_requestTransactionPasscodeReset_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.RequestTransactionPasscodeReset(childComplexity, args["email"].(string)), true
+
 	case "Mutation.resendEmailMagicLInk":
 		if e.complexity.Mutation.ResendEmailMagicLInk == nil {
 			break
@@ -4373,6 +4389,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.ResetPasscode(childComplexity, args["token"].(string), args["email"].(string), args["passcode"].(string)), true
+
+	case "Mutation.resetTransactionPasscode":
+		if e.complexity.Mutation.ResetTransactionPasscode == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_resetTransactionPasscode_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.ResetTransactionPasscode(childComplexity, args["email"].(string), args["token"].(string), args["currentPasscode"].(string), args["newPasscode"].(string)), true
 
 	case "Mutation.resubmit":
 		if e.complexity.Mutation.Resubmit == nil {
@@ -7959,6 +7987,10 @@ var sources = []*ast.Source{
   validateEmail(email: String!, device: DeviceInput!): Response!
   # If the user has a GBP account, verify the additional required data from the user
   validateUser(user: ValidateUserInput!): Response!
+  # customer can make request to reset their passcode
+  requestTransactionPasscodeReset(email: String!): Response!
+  # reset user password
+  resetTransactionPasscode(email: String!, token: String!, currentPasscode: String!, newPasscode: String!): Response!
 }
 `, BuiltIn: false},
 	{Name: "graph/schemas/query.graphql", Input: `type Query {
@@ -11630,6 +11662,21 @@ func (ec *executionContext) field_Mutation_requestPasscodeReset_args(ctx context
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_requestTransactionPasscodeReset_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["email"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["email"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_resendEmailMagicLInk_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -11690,6 +11737,48 @@ func (ec *executionContext) field_Mutation_resetPasscode_args(ctx context.Contex
 		}
 	}
 	args["passcode"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_resetTransactionPasscode_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["email"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["email"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["token"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("token"))
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["token"] = arg1
+	var arg2 string
+	if tmp, ok := rawArgs["currentPasscode"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("currentPasscode"))
+		arg2, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["currentPasscode"] = arg2
+	var arg3 string
+	if tmp, ok := rawArgs["newPasscode"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("newPasscode"))
+		arg3, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["newPasscode"] = arg3
 	return args, nil
 }
 
@@ -28065,6 +28154,90 @@ func (ec *executionContext) _Mutation_validateUser(ctx context.Context, field gr
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().ValidateUser(rctx, args["user"].(types.ValidateUserInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.Response)
+	fc.Result = res
+	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_requestTransactionPasscodeReset(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_requestTransactionPasscodeReset_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().RequestTransactionPasscodeReset(rctx, args["email"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.Response)
+	fc.Result = res
+	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_resetTransactionPasscode(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_resetTransactionPasscode_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().ResetTransactionPasscode(rctx, args["email"].(string), args["token"].(string), args["currentPasscode"].(string), args["newPasscode"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -47579,6 +47752,16 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "validateUser":
 			out.Values[i] = ec._Mutation_validateUser(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "requestTransactionPasscodeReset":
+			out.Values[i] = ec._Mutation_requestTransactionPasscodeReset(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "resetTransactionPasscode":
+			out.Values[i] = ec._Mutation_resetTransactionPasscode(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
