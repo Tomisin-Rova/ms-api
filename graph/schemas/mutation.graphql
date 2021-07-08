@@ -63,4 +63,8 @@ type Mutation {
   validateEmail(email: String!, device: DeviceInput!): Response!
   # If the user has a GBP account, verify the additional required data from the user
   validateUser(user: ValidateUserInput!): Response!
+  # customer can make request to reset their passcode
+  requestTransactionPasscodeReset(email: String!): Response!
+  # reset user password
+  resetTransactionPasscode(email: String!, token: String!, currentPasscode: String!, newPasscode: String!): Response!
 }
