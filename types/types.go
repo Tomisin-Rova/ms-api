@@ -847,6 +847,7 @@ type Payment struct {
 	FundingSource  *Account     `json:"funding_source"`
 	Currency       *Currency    `json:"currency"`
 	FundingAmount  float64      `json:"funding_amount"`
+	Ts             *int64       `json:"ts"`
 }
 
 type PaymentConnection struct {
