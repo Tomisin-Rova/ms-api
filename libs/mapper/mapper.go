@@ -521,38 +521,38 @@ func (G *GQLMapper) hydratePayment(data *pb.Payment, to interface{}) error {
 			if err != nil {
 				return err
 			}
-			payment.Beneficiary = &types.Beneficiary{
-				Account: sourcePayeeAccount,
-				Currency: &types.Currency{
-					Name: data.Source.Currency,
-				},
-				Amount: data.Source.Amount,
-			}
+			payment.FundingSource = &sourceAccount
 		} else {
-			payment.Beneficiary = &types.Beneficiary{
-				Account: sourceAccount,
-				Currency: &types.Currency{
-					Name: data.Source.Currency,
-				},
-				Amount: data.Source.Amount,
-			}
+			payment.FundingSource = &sourceAccount
 		}
+		payment.FundingSource = &sourceAccount
 	}
 
 	if data.Target != nil {
-		var targetAccount types.Account
-		err := json.Unmarshal(data.Target.Account.Value, &targetAccount)
+		var targetPayeeAccount types.PayeeAccount
+		err := json.Unmarshal(data.Target.Account.Value, &targetPayeeAccount)
 		if err != nil {
-			var targetPayeeAccount types.PayeeAccount
-			err := json.Unmarshal(data.Target.Account.Value, &targetPayeeAccount)
+			var targetAccount types.Account
+			err := json.Unmarshal(data.Target.Account.Value, &targetAccount)
 			if err != nil {
 				return err
 			}
-			payment.FundingSource = &targetAccount
+			payment.Beneficiary = &types.Beneficiary{
+				Account: targetAccount,
+				Currency: &types.Currency{
+					Name: data.Target.Currency,
+				},
+				Amount: data.Target.Amount,
+			}
 		} else {
-			payment.FundingSource = &targetAccount
+			payment.Beneficiary = &types.Beneficiary{
+				Account: targetPayeeAccount,
+				Currency: &types.Currency{
+					Name: data.Target.Currency,
+				},
+				Amount: data.Target.Amount,
+			}
 		}
-		payment.FundingSource = &targetAccount
 	}
 
 	if data.Owner != nil {
