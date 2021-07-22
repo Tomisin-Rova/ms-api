@@ -9,7 +9,7 @@ env:
   GITHUB_SHA: ${{ github.sha }}
   GITHUB_REF: ${{ github.ref }}
   ORG: roava.io/services
-  IMAGE: ms.aml
+  IMAGE: ms.api
   REGISTRY_HOSTNAME: eu.gcr.io/${{ secrets.PROJECT_SHARED }}
 
 jobs:
