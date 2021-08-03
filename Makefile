@@ -18,7 +18,7 @@ proto:
 	@ # NOTE, to generate the protos, you have to have your local, vendor folder because of the magefile
 	@	if [[ ! -r "../zebra/protos/ms.api" ]]; \
 		then \
-			echo "Make sure the zebra project exists."; \
+			echo "Make sure the zebra project exists with the proto files."; \
 		else \
 			echo "Copying proto files..."; \
 			cp -r ../zebra/protos/ms.api/* ./protos; \
@@ -101,7 +101,14 @@ coverage:
 
 .PHONY: schema
 schema: proto
-	./libs/mage genSchema
+	@	if [[ ! -r "../zebra/graphql" ]]; \
+		then \
+			echo "Make sure the zebra project exists with the gql files."; \
+		else \
+			echo "Copying schema files..."; \
+			cp -r ../zebra/graphql/* ./graph/schemas; \
+			./libs/mage genSchema; \
+		fi
 
 docker-pulsar:
 	docker run -d \
