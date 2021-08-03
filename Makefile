@@ -15,9 +15,16 @@ GO_SOURCES_OWN := $(filter-out vendor/%, $(GO_SOURCES))
 
 .PHONY: proto
 proto:
-	# NOTE, to generate the protos, you have to have your local, vendor folder because of the magefile
-	./libs/mage genProto
-
+	@ # NOTE, to generate the protos, you have to have your local, vendor folder because of the magefile
+	@	if [[ ! -r "../zebra/protos/ms.api" ]]; \
+		then \
+			echo "Make sure the zebra project exists."; \
+		else \
+			echo "Copying proto files..."; \
+			cp -r ../zebra/protos/ms.api/* ./protos; \
+			./libs/mage genProto; \
+		fi
+	
 .PHONY: build
 build: proto
 	go build -o srv *.go
