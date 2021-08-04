@@ -719,8 +719,8 @@ message Staff {
 message Fx {
   string currency = 1;
   string baseCurrency = 2;
-  float buyRate = 3;
-  float sellRate = 4;
+  double buyRate = 3;
+  double sellRate = 4;
   int64 ts = 5;
 }
 
@@ -732,9 +732,9 @@ message TransferFees {
 }
 
 message Fee {
-  float lowerBoundary = 1;
-  float upperBoundary = 2;
-  float fee = 3;
+  double lowerBoundary = 1;
+  double upperBoundary = 2;
+  double fee = 3;
 }
 
 // Payment type
@@ -752,7 +752,7 @@ message Payment {
   Target target = 11;
   string currency = 12;
   float funding_amount = 13;
-  string quote = 14;
+  Quote quote = 14;
   int64 ts = 15;
 }
 
