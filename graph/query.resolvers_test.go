@@ -916,7 +916,7 @@ func TestQueryResolver_TransferFees(t *testing.T) {
 	assert.NotNil(t, fees)
 	assert.Equal(t, mockFee.Currency, fees.Currency)
 	assert.Equal(t, mockFee.BaseCurrency, fees.BaseCurrency)
-	assert.Equal(t, mockFee.Fees[0].Fee, float32(fees.Fees[0].Fee))
+	assert.Equal(t, mockFee.Fees[0].Fee, float64(fees.Fees[0].Fee))
 }
 
 func TestQueryResolver_Fx(t *testing.T) {
@@ -947,5 +947,5 @@ func TestQueryResolver_Fx(t *testing.T) {
 	assert.NotNil(t, fx)
 	assert.Equal(t, mockFx.Currency, fx.Currency)
 	assert.Equal(t, mockFx.BaseCurrency, fx.BaseCurrency)
-	assert.Equal(t, mockFx.BuyRate, float32(fx.BuyRate))
+	assert.Equal(t, mockFx.BuyRate, float64(fx.BuyRate))
 }
