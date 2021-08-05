@@ -19,7 +19,7 @@ require (
 	github.com/onsi/ginkgo v1.14.0 // indirect
 	github.com/ory/dockertest/v3 v3.6.3
 	github.com/pkg/errors v0.9.1
-	github.com/roava/zebra v0.0.0-20210520124023-b4a3de4c00a5
+	github.com/roava/zebra v0.0.0-20210804151354-a42f34ffafae
 	github.com/rs/cors v1.6.0
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sirupsen/logrus v1.8.1
