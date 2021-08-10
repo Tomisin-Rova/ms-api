@@ -468,8 +468,9 @@ func personWithCdd(from *pb.Person) (*types.Person, error) {
 	if from.Cdd != nil {
 		ts := int64(from.Cdd.Ts)
 		person.Cdd = &types.Cdd{
-			Status: types.State(from.Cdd.Status),
-			Ts:     &ts,
+			Status:  types.State(from.Cdd.Status),
+			Onboard: &from.Cdd.Onboard,
+			Ts:      &ts,
 		}
 	}
 	return person, nil
