@@ -178,14 +178,14 @@ func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) 
 	opts.accountService = accountService.NewAccountServiceClient(connection)
 
 	// Payment
-	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+	// ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
+	// defer cancel()
 
-	connection, err = dialRPC(ctx, secrets.PaymentServiceURL)
-	if err != nil {
-		return nil, fmt.Errorf("%v: %s", err, secrets.PaymentServiceURL)
-	}
-	opts.paymentService = paymentService.NewPaymentServiceClient(connection)
+	// connection, err = dialRPC(ctx, secrets.PaymentServiceURL)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("%v: %s", err, secrets.PaymentServiceURL)
+	// }
+	// opts.paymentService = paymentService.NewPaymentServiceClient(connection)
 
 	// Person
 	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
@@ -196,7 +196,7 @@ func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) 
 	}
 	opts.personService = personService.NewPersonServiceClient(connection)
 
-	// Identity
+	// // Identity
 	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	connection, err = dialRPC(ctx, secrets.IdentityServiceURL)
@@ -206,13 +206,13 @@ func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) 
 	opts.identityService = identityService.NewIdentityServiceClient(connection)
 
 	// Pricing
-	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	connection, err = dialRPC(ctx, secrets.PricingServiceURL)
-	if err != nil {
-		return nil, fmt.Errorf("%v: %s", err, secrets.PricingServiceURL)
-	}
-	opts.pricingService = pricingService.NewPricingServiceClient(connection)
+	// ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
+	// defer cancel()
+	// connection, err = dialRPC(ctx, secrets.PricingServiceURL)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("%v: %s", err, secrets.PricingServiceURL)
+	// }
+	// opts.pricingService = pricingService.NewPricingServiceClient(connection)
 
 	return opts, nil
 }

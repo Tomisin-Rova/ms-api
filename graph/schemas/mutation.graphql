@@ -66,5 +66,5 @@ type Mutation {
   # customer can make request to reset their passcode
   requestTransactionPasscodeReset(email: String!): Response!
   # reset user password
-  resetTransactionPasscode(email: String!, token: String!, currentPasscode: String!, newPasscode: String!): Response!
+  resetTransactionPasscode(email: String!, currentPasscode: String!, newPasscode: String!): Response!
 }
