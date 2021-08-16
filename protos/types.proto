@@ -61,13 +61,6 @@ message Device {
   string identifier = 1;
   string brand = 2;
   string os = 3;
-  repeated DeviceToken tokens = 4;
-}
-
-// Device token type
-message DeviceToken {
-  string type = 1;
-  string value = 2;
 }
 
 // Email type
