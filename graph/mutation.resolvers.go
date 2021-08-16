@@ -944,10 +944,9 @@ func (r *mutationResolver) RequestTransactionPasscodeReset(ctx context.Context, 
 	}, nil
 }
 
-func (r *mutationResolver) ResetTransactionPasscode(ctx context.Context, email string, token string, currentPasscode string, newPasscode string) (*types.Response, error) {
+func (r *mutationResolver) ResetTransactionPasscode(ctx context.Context, email string, currentPasscode string, newPasscode string) (*types.Response, error) {
 	res, err := r.identityService.ResetTransactionPassword(ctx, &identityService.ResetTransactionPasswordRequest{
 		Email:           email, // TODO: Update GraphQL
-		Token:           token,
 		CurrentPasscode: currentPasscode,
 		NewPasscode:     newPasscode,
 	})
