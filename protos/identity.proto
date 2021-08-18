@@ -34,8 +34,9 @@ message RequestResetTransactionPasswordRequest {
 
 message ResetTransactionPasswordRequest {
   string email = 1;
-  string currentPasscode = 2; 
-  string newPasscode = 3;
+  string token = 2;
+  string currentPasscode = 3; 
+  string newPasscode = 4;
 }
 
 service identityService {

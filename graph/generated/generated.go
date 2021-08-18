@@ -647,7 +647,7 @@ type ComplexityRoot struct {
 		ResendEmailMagicLInk            func(childComplexity int, email string) int
 		ResendOtp                       func(childComplexity int, phone string) int
 		ResetPasscode                   func(childComplexity int, token string, email string, passcode string) int
-		ResetTransactionPasscode        func(childComplexity int, email string, currentPasscode string, newPasscode string) int
+		ResetTransactionPasscode        func(childComplexity int, email string, token string, currentPasscode string, newPasscode string) int
 		Resubmit                        func(childComplexity int, reports []*types.ReportInput, message *string) int
 		ResubmitReports                 func(childComplexity int, reports []*types.ReportInput) int
 		Signup                          func(childComplexity int, token string, email string, passcode string) int
@@ -1338,7 +1338,7 @@ type MutationResolver interface {
 	ValidateEmail(ctx context.Context, email string, device types.DeviceInput) (*types.Response, error)
 	ValidateUser(ctx context.Context, user types.ValidateUserInput) (*types.Response, error)
 	RequestTransactionPasscodeReset(ctx context.Context, email string) (*types.Response, error)
-	ResetTransactionPasscode(ctx context.Context, email string, currentPasscode string, newPasscode string) (*types.Response, error)
+	ResetTransactionPasscode(ctx context.Context, email string, token string, currentPasscode string, newPasscode string) (*types.Response, error)
 }
 type QueryResolver interface {
 	Me(ctx context.Context) (*types.Person, error)
@@ -4401,7 +4401,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.ResetTransactionPasscode(childComplexity, args["email"].(string), args["currentPasscode"].(string), args["newPasscode"].(string)), true
+		return e.complexity.Mutation.ResetTransactionPasscode(childComplexity, args["email"].(string), args["token"].(string), args["currentPasscode"].(string), args["newPasscode"].(string)), true
 
 	case "Mutation.resubmit":
 		if e.complexity.Mutation.Resubmit == nil {
@@ -7998,7 +7998,7 @@ var sources = []*ast.Source{
   # customer can make request to reset their passcode
   requestTransactionPasscodeReset(email: String!): Response!
   # reset user password
-  resetTransactionPasscode(email: String!, currentPasscode: String!, newPasscode: String!): Response!
+  resetTransactionPasscode(email: String!, token: String!, currentPasscode: String!, newPasscode: String!): Response!
 }
 `, BuiltIn: false},
 	{Name: "graph/schemas/query.graphql", Input: `type Query {
@@ -11763,23 +11763,32 @@ func (ec *executionContext) field_Mutation_resetTransactionPasscode_args(ctx con
 	}
 	args["email"] = arg0
 	var arg1 string
-	if tmp, ok := rawArgs["currentPasscode"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("currentPasscode"))
+	if tmp, ok := rawArgs["token"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("token"))
 		arg1, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["currentPasscode"] = arg1
+	args["token"] = arg1
 	var arg2 string
-	if tmp, ok := rawArgs["newPasscode"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("newPasscode"))
+	if tmp, ok := rawArgs["currentPasscode"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("currentPasscode"))
 		arg2, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["newPasscode"] = arg2
+	args["currentPasscode"] = arg2
+	var arg3 string
+	if tmp, ok := rawArgs["newPasscode"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("newPasscode"))
+		arg3, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["newPasscode"] = arg3
 	return args, nil
 }
 
@@ -28238,7 +28247,7 @@ func (ec *executionContext) _Mutation_resetTransactionPasscode(ctx context.Conte
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().ResetTransactionPasscode(rctx, args["email"].(string), args["currentPasscode"].(string), args["newPasscode"].(string))
+		return ec.resolvers.Mutation().ResetTransactionPasscode(rctx, args["email"].(string), args["token"].(string), args["currentPasscode"].(string), args["newPasscode"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

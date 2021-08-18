@@ -117,10 +117,8 @@ docker-pulsar:
       --mount source=pulsardata,target=/pulsar/data \
       --mount source=pulsarconf,target=/pulsar/conf \
       --name pulsar-standalone \
-      apachepulsar/pulsar:2.7.2 \
+      apachepulsar/pulsar:2.6.1 \
       bin/pulsar standalone
-
-# 2.7.2
 
 docker-mongo:
 	docker run -d  \
