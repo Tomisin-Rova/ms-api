@@ -1381,7 +1381,6 @@ func TestResetTransactionPasscode(t *testing.T) {
 			name: "Test that ResetTransactionPasscode call is successful.",
 			arg: &identitySvc.ResetTransactionPasswordRequest{
 				Email:           "princewill@example.com",
-				Token:           "1234567",
 				CurrentPasscode: "secret",
 				NewPasscode:     "new-secret",
 			},
@@ -1401,14 +1400,14 @@ func TestResetTransactionPasscode(t *testing.T) {
 					Success: true,
 				}, nil)
 
-				response, err := resolver.Mutation().ResetTransactionPasscode(validUserCtx, testCase.arg.Email, testCase.arg.Token, testCase.arg.CurrentPasscode, testCase.arg.NewPasscode)
+				response, err := resolver.Mutation().ResetTransactionPasscode(validUserCtx, testCase.arg.Email, testCase.arg.CurrentPasscode, testCase.arg.NewPasscode)
 				assert.NoError(t, err)
 				assert.NotNil(t, response)
 
 			case rpcError:
 				identityService.On("ResetTransactionPassword", validUserCtx, testCase.arg).Return(nil, errors.New(""))
 
-				response, err := resolver.Mutation().ResetTransactionPasscode(validUserCtx, testCase.arg.Email, testCase.arg.Token, testCase.arg.CurrentPasscode, testCase.arg.NewPasscode)
+				response, err := resolver.Mutation().ResetTransactionPasscode(validUserCtx, testCase.arg.Email, testCase.arg.CurrentPasscode, testCase.arg.NewPasscode)
 				assert.Error(t, err)
 				assert.Nil(t, response)
 			}
