@@ -69,7 +69,7 @@ func MountServer(secrets *config.Secrets, logger *zap.Logger) *chi.Mux {
 		err := graphql.DefaultErrorPresenter(ctx, e)
 		return rerrors.FormatGqlTError(e, err)
 	})
-	// Configure WebSocket with CORS
+	// Configure WebSocket
 	server.AddTransport(&transport.Websocket{
 		Upgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool {
@@ -81,7 +81,13 @@ func MountServer(secrets *config.Secrets, logger *zap.Logger) *chi.Mux {
 		KeepAlivePingInterval: 10 * time.Second,
 	})
 
-	router.Handle("/graphql", server)
+	// Cors setup
+	corsSetup := cors.New(cors.Options{
+		AllowCredentials: true,
+		Debug:            false,
+	})
+
+	router.Handle("/graphql", corsSetup.Handler(server))
 	router.Get("/verify_email", httpHandlers.VerifyMagicLinkHandler)
 
 	return router
