@@ -67,6 +67,10 @@ func TestMutationResolver_CreatePhone(t *testing.T) {
 					Identifier: "testIdentifier",
 					Brand:      "testBrand",
 					Os:         "testOs",
+					Tokens: []*types.DeviceTokenInput{{
+						Type:  "firebase",
+						Value: "AHRFRR",
+					}},
 				},
 			},
 			testType: success,
@@ -82,6 +86,10 @@ func TestMutationResolver_CreatePhone(t *testing.T) {
 					Identifier: "testIdentifier",
 					Brand:      "testBrand",
 					Os:         "testOs",
+					Tokens: []*types.DeviceTokenInput{{
+						Type:  "firebase",
+						Value: "AHRFRR",
+					}},
 				},
 			},
 			testType: errorInvalidPhone,
@@ -97,6 +105,10 @@ func TestMutationResolver_CreatePhone(t *testing.T) {
 					Identifier: "testIdentifier",
 					Brand:      "testBrand",
 					Os:         "testOs",
+					Tokens: []*types.DeviceTokenInput{{
+						Type:  "firebase",
+						Value: "AHRFRR",
+					}},
 				},
 			},
 			testType: errorOnboardingSvcCreatePhone,
@@ -120,12 +132,21 @@ func TestMutationResolver_CreatePhone(t *testing.T) {
 				assert.Equal(t, 7010, err.(*coreErrors.Terror).Code())
 				assert.Nil(t, response)
 			case errorOnboardingSvcCreatePhone:
+				tokens := make([]*protoTypes.DeviceToken, len(testCase.args.device.Tokens))
+
+				for k, v := range testCase.args.device.Tokens {
+					tokens[k] = &protoTypes.DeviceToken{
+						Type:  string(v.Type),
+						Value: v.Value,
+					}
+				}
 				onBoardingServiceClient.On("CreatePhone", mock.Anything, &onboardingService.CreatePhoneRequest{
 					PhoneNumber: testCase.args.phone,
 					Device: &protoTypes.Device{
 						Identifier: testCase.args.device.Identifier,
 						Brand:      testCase.args.device.Brand,
 						Os:         testCase.args.device.Os,
+						Tokens:     tokens,
 					},
 				}).Return(nil, errors.New(""))
 
@@ -134,12 +155,21 @@ func TestMutationResolver_CreatePhone(t *testing.T) {
 				assert.Error(t, err)
 				assert.Nil(t, response)
 			case success:
+				tokens := make([]*protoTypes.DeviceToken, len(testCase.args.device.Tokens))
+
+				for k, v := range testCase.args.device.Tokens {
+					tokens[k] = &protoTypes.DeviceToken{
+						Type:  string(v.Type),
+						Value: v.Value,
+					}
+				}
 				onBoardingServiceClient.On("CreatePhone", mock.Anything, &onboardingService.CreatePhoneRequest{
 					PhoneNumber: testCase.args.phone,
 					Device: &protoTypes.Device{
 						Identifier: testCase.args.device.Identifier,
 						Brand:      testCase.args.device.Brand,
 						Os:         testCase.args.device.Os,
+						Tokens:     tokens,
 					},
 				}).Return(&onboardingService.CreatePhoneResponse{}, nil)
 
@@ -1351,7 +1381,6 @@ func TestResetTransactionPasscode(t *testing.T) {
 			name: "Test that ResetTransactionPasscode call is successful.",
 			arg: &identitySvc.ResetTransactionPasswordRequest{
 				Email:           "princewill@example.com",
-				Token:           "1234567",
 				CurrentPasscode: "secret",
 				NewPasscode:     "new-secret",
 			},
@@ -1371,14 +1400,14 @@ func TestResetTransactionPasscode(t *testing.T) {
 					Success: true,
 				}, nil)
 
-				response, err := resolver.Mutation().ResetTransactionPasscode(validUserCtx, testCase.arg.Email, testCase.arg.Token, testCase.arg.CurrentPasscode, testCase.arg.NewPasscode)
+				response, err := resolver.Mutation().ResetTransactionPasscode(validUserCtx, testCase.arg.Email, testCase.arg.CurrentPasscode, testCase.arg.NewPasscode)
 				assert.NoError(t, err)
 				assert.NotNil(t, response)
 
 			case rpcError:
 				identityService.On("ResetTransactionPassword", validUserCtx, testCase.arg).Return(nil, errors.New(""))
 
-				response, err := resolver.Mutation().ResetTransactionPasscode(validUserCtx, testCase.arg.Email, testCase.arg.Token, testCase.arg.CurrentPasscode, testCase.arg.NewPasscode)
+				response, err := resolver.Mutation().ResetTransactionPasscode(validUserCtx, testCase.arg.Email, testCase.arg.CurrentPasscode, testCase.arg.NewPasscode)
 				assert.Error(t, err)
 				assert.Nil(t, response)
 			}

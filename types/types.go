@@ -1488,6 +1488,45 @@ func (e DeliveryMode) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+type DevicePreferenceType string
+
+const (
+	DevicePreferenceTypePush DevicePreferenceType = "PUSH"
+)
+
+var AllDevicePreferenceType = []DevicePreferenceType{
+	DevicePreferenceTypePush,
+}
+
+func (e DevicePreferenceType) IsValid() bool {
+	switch e {
+	case DevicePreferenceTypePush:
+		return true
+	}
+	return false
+}
+
+func (e DevicePreferenceType) String() string {
+	return string(e)
+}
+
+func (e *DevicePreferenceType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = DevicePreferenceType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid DevicePreferenceType", str)
+	}
+	return nil
+}
+
+func (e DevicePreferenceType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 type DeviceTokenType string
 
 const (

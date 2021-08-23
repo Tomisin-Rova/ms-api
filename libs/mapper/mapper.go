@@ -489,8 +489,6 @@ func (G *GQLMapper) hydratePayment(data *pb.Payment, to interface{}) error {
 	if !ok {
 		return errors.New("invalid to type")
 	}
-	lowerBoundary := float64(data.Quote.Fee.LowerBoundary)
-	upperBoundary := float64(data.Quote.Fee.UpperBoundary)
 	*payment = types.Payment{
 		ID:             &data.Id,
 		IdempotencyKey: data.IdempotencyKey,
@@ -500,22 +498,8 @@ func (G *GQLMapper) hydratePayment(data *pb.Payment, to interface{}) error {
 		Image:          String(data.Image),
 		Notes:          String(data.Notes),
 		Currency:       &types.Currency{},
-		Quote: &types.Quote{
-			Fee: &types.Fee{
-				LowerBoundary: &lowerBoundary,
-				UpperBoundary: &upperBoundary,
-				Fee:           float64(data.Quote.Fee.Fee),
-			},
-			Fx: &types.Fx{
-				Currency:     data.Quote.Fx.Currency,
-				BaseCurrency: data.Quote.Fx.BaseCurrency,
-				BuyRate:      float64(data.Quote.Fx.BuyRate),
-				SellRate:     float64(data.Quote.Fx.SellRate),
-				Ts:           data.Quote.Fx.Ts,
-			},
-		},
-		FundingAmount: float64(data.FundingAmount),
-		Ts:            &data.Ts,
+		FundingAmount:  float64(data.FundingAmount),
+		Ts:             &data.Ts,
 	}
 
 	if data.Tags != nil {

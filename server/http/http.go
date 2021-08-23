@@ -3,11 +3,12 @@ package httpServer
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"time"
+
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/gorilla/websocket"
 	"ms.api/libs/db/mongo"
-	"net/http"
-	"time"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"

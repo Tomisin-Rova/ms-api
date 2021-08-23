@@ -647,9 +647,10 @@ type ComplexityRoot struct {
 		ResendEmailMagicLInk            func(childComplexity int, email string) int
 		ResendOtp                       func(childComplexity int, phone string) int
 		ResetPasscode                   func(childComplexity int, token string, email string, passcode string) int
-		ResetTransactionPasscode        func(childComplexity int, email string, token string, currentPasscode string, newPasscode string) int
+		ResetTransactionPasscode        func(childComplexity int, email string, currentPasscode string, newPasscode string) int
 		Resubmit                        func(childComplexity int, reports []*types.ReportInput, message *string) int
 		ResubmitReports                 func(childComplexity int, reports []*types.ReportInput) int
+		SetDevicePreference             func(childComplexity int, typeArg types.DevicePreferenceType, status bool) int
 		Signup                          func(childComplexity int, token string, email string, passcode string) int
 		SubmitApplication               func(childComplexity int) int
 		SubmitProof                     func(childComplexity int, proof types.SubmitProofInput) int
@@ -1338,7 +1339,8 @@ type MutationResolver interface {
 	ValidateEmail(ctx context.Context, email string, device types.DeviceInput) (*types.Response, error)
 	ValidateUser(ctx context.Context, user types.ValidateUserInput) (*types.Response, error)
 	RequestTransactionPasscodeReset(ctx context.Context, email string) (*types.Response, error)
-	ResetTransactionPasscode(ctx context.Context, email string, token string, currentPasscode string, newPasscode string) (*types.Response, error)
+	ResetTransactionPasscode(ctx context.Context, email string, currentPasscode string, newPasscode string) (*types.Response, error)
+	SetDevicePreference(ctx context.Context, typeArg types.DevicePreferenceType, status bool) (*types.Response, error)
 }
 type QueryResolver interface {
 	Me(ctx context.Context) (*types.Person, error)
@@ -4401,7 +4403,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.ResetTransactionPasscode(childComplexity, args["email"].(string), args["token"].(string), args["currentPasscode"].(string), args["newPasscode"].(string)), true
+		return e.complexity.Mutation.ResetTransactionPasscode(childComplexity, args["email"].(string), args["currentPasscode"].(string), args["newPasscode"].(string)), true
 
 	case "Mutation.resubmit":
 		if e.complexity.Mutation.Resubmit == nil {
@@ -4426,6 +4428,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.ResubmitReports(childComplexity, args["reports"].([]*types.ReportInput)), true
+
+	case "Mutation.setDevicePreference":
+		if e.complexity.Mutation.SetDevicePreference == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_setDevicePreference_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.SetDevicePreference(childComplexity, args["type"].(types.DevicePreferenceType), args["status"].(bool)), true
 
 	case "Mutation.signup":
 		if e.complexity.Mutation.Signup == nil {
@@ -7991,14 +8005,20 @@ var sources = []*ast.Source{
   requestOTP(type: DeliveryMode!, target: String!, expireTime: Int): Response!
   # verify the sent OTP
   verifyOTP(target: String!, token: String!): Response!
-   # Code XXXX represents that the user has a GBP account and more data from the user should be require
+  # Code XXXX represents that the user has a GBP account and more data from the user should be require
   validateEmail(email: String!, device: DeviceInput!): Response!
   # If the user has a GBP account, verify the additional required data from the user
   validateUser(user: ValidateUserInput!): Response!
   # customer can make request to reset their passcode
   requestTransactionPasscodeReset(email: String!): Response!
   # reset user password
-  resetTransactionPasscode(email: String!, token: String!, currentPasscode: String!, newPasscode: String!): Response!
+  resetTransactionPasscode(
+    email: String!
+    currentPasscode: String!
+    newPasscode: String!
+  ): Response!
+  # set push notification status
+  setDevicePreference(type: DevicePreferenceType!, status: Boolean!): Response!
 }
 `, BuiltIn: false},
 	{Name: "graph/schemas/query.graphql", Input: `type Query {
@@ -8630,6 +8650,11 @@ enum ValidationType {
   CHECK
   SCREEN
   PROOF
+}
+
+# enum to show device preference type
+enum DevicePreferenceType {
+  PUSH
 }
 
 # S C A L A R S
@@ -11763,32 +11788,23 @@ func (ec *executionContext) field_Mutation_resetTransactionPasscode_args(ctx con
 	}
 	args["email"] = arg0
 	var arg1 string
-	if tmp, ok := rawArgs["token"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("token"))
+	if tmp, ok := rawArgs["currentPasscode"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("currentPasscode"))
 		arg1, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["token"] = arg1
+	args["currentPasscode"] = arg1
 	var arg2 string
-	if tmp, ok := rawArgs["currentPasscode"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("currentPasscode"))
+	if tmp, ok := rawArgs["newPasscode"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("newPasscode"))
 		arg2, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["currentPasscode"] = arg2
-	var arg3 string
-	if tmp, ok := rawArgs["newPasscode"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("newPasscode"))
-		arg3, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["newPasscode"] = arg3
+	args["newPasscode"] = arg2
 	return args, nil
 }
 
@@ -11828,6 +11844,30 @@ func (ec *executionContext) field_Mutation_resubmit_args(ctx context.Context, ra
 		}
 	}
 	args["message"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_setDevicePreference_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 types.DevicePreferenceType
+	if tmp, ok := rawArgs["type"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
+		arg0, err = ec.unmarshalNDevicePreferenceType2msᚗapiᚋtypesᚐDevicePreferenceType(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["type"] = arg0
+	var arg1 bool
+	if tmp, ok := rawArgs["status"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
+		arg1, err = ec.unmarshalNBoolean2bool(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["status"] = arg1
 	return args, nil
 }
 
@@ -28247,7 +28287,49 @@ func (ec *executionContext) _Mutation_resetTransactionPasscode(ctx context.Conte
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().ResetTransactionPasscode(rctx, args["email"].(string), args["token"].(string), args["currentPasscode"].(string), args["newPasscode"].(string))
+		return ec.resolvers.Mutation().ResetTransactionPasscode(rctx, args["email"].(string), args["currentPasscode"].(string), args["newPasscode"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.Response)
+	fc.Result = res
+	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_setDevicePreference(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_setDevicePreference_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().SetDevicePreference(rctx, args["type"].(types.DevicePreferenceType), args["status"].(bool))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -47807,6 +47889,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "setDevicePreference":
+			out.Values[i] = ec._Mutation_setDevicePreference(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -52716,6 +52803,16 @@ func (ec *executionContext) unmarshalNDeviceInput2msᚗapiᚋtypesᚐDeviceInput
 func (ec *executionContext) unmarshalNDeviceInput2ᚖmsᚗapiᚋtypesᚐDeviceInput(ctx context.Context, v interface{}) (*types.DeviceInput, error) {
 	res, err := ec.unmarshalInputDeviceInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNDevicePreferenceType2msᚗapiᚋtypesᚐDevicePreferenceType(ctx context.Context, v interface{}) (types.DevicePreferenceType, error) {
+	var res types.DevicePreferenceType
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNDevicePreferenceType2msᚗapiᚋtypesᚐDevicePreferenceType(ctx context.Context, sel ast.SelectionSet, v types.DevicePreferenceType) graphql.Marshaler {
+	return v
 }
 
 func (ec *executionContext) marshalNDeviceToken2ᚕᚖmsᚗapiᚋtypesᚐDeviceToken(ctx context.Context, sel ast.SelectionSet, v []*types.DeviceToken) graphql.Marshaler {

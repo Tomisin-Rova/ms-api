@@ -123,6 +123,11 @@ enum ValidationType {
   PROOF
 }
 
+# enum to show device preference type
+enum DevicePreferenceType {
+  PUSH
+}
+
 # S C A L A R S
 
 # raw JSON value

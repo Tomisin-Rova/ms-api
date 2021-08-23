@@ -33,6 +33,15 @@ func (r *mutationResolver) CreatePhone(ctx context.Context, phone string, device
 		return nil, err
 	}
 
+	tokens := make([]*protoTypes.DeviceToken, len(device.Tokens))
+
+	for k, v := range device.Tokens {
+		tokens[k] = &protoTypes.DeviceToken{
+			Type:  string(v.Type),
+			Value: v.Value,
+		}
+	}
+
 	result, err := r.onBoardingService.CreatePhone(ctx,
 		&onboardingService.CreatePhoneRequest{
 			PhoneNumber: phone,
@@ -40,6 +49,7 @@ func (r *mutationResolver) CreatePhone(ctx context.Context, phone string, device
 				Identifier: device.Identifier,
 				Brand:      device.Brand,
 				Os:         device.Os,
+				Tokens:     tokens,
 			},
 		},
 	)
@@ -282,6 +292,14 @@ func (r *mutationResolver) Login(ctx context.Context, credentials types.AuthInpu
 		r.logger.Info("invalid email supplied", zap.String("email", credentials.Email))
 		return nil, err
 	}
+	tokens := make([]*protoTypes.DeviceToken, len(credentials.Device.Tokens))
+
+	for k, v := range credentials.Device.Tokens {
+		tokens[k] = &protoTypes.DeviceToken{
+			Type:  string(v.Type),
+			Value: v.Value,
+		}
+	}
 	// TODO: change authService.LoginRequest{}.Tokens to slice datatype
 	req := &authService.LoginRequest{
 		Email:    newEmail,
@@ -290,6 +308,7 @@ func (r *mutationResolver) Login(ctx context.Context, credentials types.AuthInpu
 			Os:         credentials.Device.Os,
 			Brand:      credentials.Device.Brand,
 			Identifier: credentials.Device.Identifier,
+			Tokens:     tokens,
 		}}
 	resp, err := r.authService.Login(ctx, req)
 	if err != nil {
@@ -925,10 +944,9 @@ func (r *mutationResolver) RequestTransactionPasscodeReset(ctx context.Context, 
 	}, nil
 }
 
-func (r *mutationResolver) ResetTransactionPasscode(ctx context.Context, email string, token string, currentPasscode string, newPasscode string) (*types.Response, error) {
+func (r *mutationResolver) ResetTransactionPasscode(ctx context.Context, email string, currentPasscode string, newPasscode string) (*types.Response, error) {
 	res, err := r.identityService.ResetTransactionPassword(ctx, &identityService.ResetTransactionPasswordRequest{
 		Email:           email, // TODO: Update GraphQL
-		Token:           token,
 		CurrentPasscode: currentPasscode,
 		NewPasscode:     newPasscode,
 	})
@@ -941,6 +959,10 @@ func (r *mutationResolver) ResetTransactionPasscode(ctx context.Context, email s
 		Message: res.Message,
 		Success: res.Success,
 	}, nil
+}
+
+func (r *mutationResolver) SetDevicePreference(ctx context.Context, typeArg types.DevicePreferenceType, status bool) (*types.Response, error) {
+	panic(fmt.Errorf("not implemented"))
 }
 
 // Mutation returns generated.MutationResolver implementation.
