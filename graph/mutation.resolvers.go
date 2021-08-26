@@ -962,7 +962,26 @@ func (r *mutationResolver) ResetTransactionPasscode(ctx context.Context, email s
 }
 
 func (r *mutationResolver) SetDevicePreference(ctx context.Context, typeArg types.DevicePreferenceType, status bool) (*types.Response, error) {
-	panic(fmt.Errorf("not implemented"))
+	claims, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, ErrUnAuthenticated
+	}
+
+	res, err := r.identityService.SetDevicePreference(ctx, &identityService.SetDevicePreferenceRequest{
+		IdentityId:           claims.IdentityId,
+		DeviceId:             claims.DeviceId,
+		DevicePreferenceType: string(typeArg),
+		Status:               status,
+	})
+	if err != nil {
+		r.logger.Error("identity service set device preference", zap.Error(err))
+		return nil, err
+	}
+
+	return &types.Response{
+		Message: res.Message,
+		Success: res.Success,
+	}, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

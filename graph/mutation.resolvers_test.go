@@ -1414,3 +1414,25 @@ func TestResetTransactionPasscode(t *testing.T) {
 		})
 	}
 }
+
+func TestSetDevicePreference(t *testing.T) {
+	identityService := new(mocks.IdentityServiceClient)
+	resolver := NewResolver(&ResolverOpts{identityService: identityService}, zaptest.NewLogger(t))
+
+	mockReq := &identitySvc.SetDevicePreferenceRequest{
+		IdentityId:           identityId,
+		DeviceId:             deviceId,
+		DevicePreferenceType: "firebase",
+		Status:               true,
+	}
+
+	identityService.On("SetDevicePreference", validUserCtx, mockReq).Return(&protoTypes.Response{
+		Message: "Successful",
+		Success: true,
+	}, nil)
+
+	response, err := resolver.Mutation().SetDevicePreference(validUserCtx, types.DevicePreferenceType(mockReq.DevicePreferenceType), mockReq.Status)
+	assert.NoError(t, err)
+	assert.NotNil(t, response)
+
+}
