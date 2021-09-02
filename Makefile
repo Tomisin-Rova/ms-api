@@ -11,7 +11,7 @@ ifeq ($(filter $(TAGS_SPLIT),bindata),bindata)
 endif
 
 GO_SOURCES_OWN := $(filter-out vendor/%, $(GO_SOURCES))
-
+environment ?= $(ENVIRONMENT)
 
 .PHONY: proto
 proto:
@@ -54,7 +54,8 @@ gen-mocks:
 local: schema proto gen-mocks lint test
 	go fmt ./...
 	go mod tidy
-	go run main.go
+	@echo "Running service with '${environment}' environment set..."; \
+	(export ENVIRONMENT=${environment}; go run main.go)	
 
 tools:
 	go get golang.org/x/tools/cmd/goimports
