@@ -1316,13 +1316,14 @@ func (r *queryResolver) TransferFees(ctx context.Context, currency string, baseC
 		Currency:     tfees.Currency,
 		BaseCurrency: tfees.BaseCurrency,
 		Fees: func() []*types.Fee {
-
 			fees := make([]*types.Fee, len(tfees.Fees))
 			for i, fee := range tfees.Fees {
+				lowerBoundary := fee.LowerBoundary
+				upperBoundary := fee.UpperBoundary
 				fees[i] = &types.Fee{
-					LowerBoundary: Float64(fee.LowerBoundary),
-					UpperBoundary: Float64(fee.UpperBoundary),
-					Fee:           float64(fee.Fee),
+					LowerBoundary: &lowerBoundary,
+					UpperBoundary: &upperBoundary,
+					Fee:           fee.Fee,
 				}
 			}
 			return fees
