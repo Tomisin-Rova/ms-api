@@ -24,3 +24,4 @@ local-docker-compose.yml
 .vscode
 
 .DS_Store
+local.yml
