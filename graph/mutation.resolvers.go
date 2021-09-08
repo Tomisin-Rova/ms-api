@@ -6,6 +6,7 @@ package graph
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"go.uber.org/zap"
 	"ms.api/graph/generated"
@@ -119,8 +120,8 @@ func (r *mutationResolver) Register(ctx context.Context, person types.PersonInpu
 	payload := onboardingService.UpdatePersonRequest{
 		PersonId:         personId.PersonId,
 		Address:          &onboardingService.InputAddress{},
-		FirstName:        person.FirstName,
-		LastName:         person.LastName,
+		FirstName:        strings.TrimSpace(person.FirstName),
+		LastName:         strings.TrimSpace(person.LastName),
 		Dob:              person.Dob,
 		CountryResidence: person.CountryResidence,
 	}
@@ -907,8 +908,8 @@ func (r *mutationResolver) ValidateUser(ctx context.Context, user types.Validate
 	resp, err := r.authService.ValidateUser(ctx,
 		&authService.ValidateUserRequest{
 			Email:         newEmail,
-			FirstName:     user.FirstName,
-			LastName:      user.LastName,
+			FirstName:     strings.TrimSpace(user.FirstName),
+			LastName:      strings.TrimSpace(user.LastName),
 			DOB:           user.Dob,
 			AccountNumber: user.AccountNumber,
 			SortCode:      user.SortCode,
