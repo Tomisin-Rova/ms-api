@@ -7,14 +7,16 @@ import (
 	"time"
 
 	"github.com/99designs/gqlgen/graphql/handler/transport"
-	"github.com/gorilla/websocket"
 	"ms.api/libs/db/mongo"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/99designs/gqlgen/graphql/handler/lru"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/gorilla/websocket"
 	"github.com/rs/cors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 	"go.uber.org/zap"
@@ -25,6 +27,41 @@ import (
 	"ms.api/server/http/handlers"
 	"ms.api/server/http/middlewares"
 )
+
+// A Websocket transport is already added when using the NewDefaultServer function.
+// So it's required to initialize the server by using almost the same implementation
+// but with a custom WebSocket transport.
+func NewCustomServer(es graphql.ExecutableSchema) *handler.Server {
+	srv := handler.New(es)
+
+	// Configure WebSocket
+	srv.AddTransport(transport.Websocket{
+		Upgrader: websocket.Upgrader{
+			CheckOrigin: func(r *http.Request) bool {
+				return true
+			},
+			ReadBufferSize:  1024,
+			WriteBufferSize: 1024,
+		},
+		InitFunc: func(ctx context.Context, initPayload transport.InitPayload) (context.Context, error) {
+			return ctx, nil
+		},
+		KeepAlivePingInterval: 10 * time.Second,
+	})
+	srv.AddTransport(transport.Options{})
+	srv.AddTransport(transport.GET{})
+	srv.AddTransport(transport.POST{})
+	srv.AddTransport(transport.MultipartForm{})
+
+	srv.SetQueryCache(lru.New(1000))
+
+	srv.Use(extension.Introspection{})
+	srv.Use(extension.AutomaticPersistedQuery{
+		Cache: lru.New(100),
+	})
+
+	return srv
+}
 
 func MountServer(secrets *config.Secrets, logger *zap.Logger) *chi.Mux {
 	router := chi.NewRouter()
@@ -65,21 +102,10 @@ func MountServer(secrets *config.Secrets, logger *zap.Logger) *chi.Mux {
 	resolvers := graph.NewResolver(opts, logger)
 	httpHandlers := handlers.New(opts.OnBoardingService, logger)
 	// API Server
-	server := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: resolvers}))
+	server := NewCustomServer(generated.NewExecutableSchema(generated.Config{Resolvers: resolvers}))
 	server.SetErrorPresenter(func(ctx context.Context, e error) *gqlerror.Error {
 		err := graphql.DefaultErrorPresenter(ctx, e)
 		return rerrors.FormatGqlTError(e, err)
-	})
-	// Configure WebSocket
-	server.AddTransport(&transport.Websocket{
-		Upgrader: websocket.Upgrader{
-			CheckOrigin: func(r *http.Request) bool {
-				return true
-			},
-			ReadBufferSize:  1024,
-			WriteBufferSize: 1024,
-		},
-		KeepAlivePingInterval: 10 * time.Second,
 	})
 
 	// Cors setup

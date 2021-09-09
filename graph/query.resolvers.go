@@ -718,7 +718,7 @@ func (r *queryResolver) Account(ctx context.Context, id string) (*types.Account,
 			transactionRes = append(transactionRes, &transaction)
 		}
 
-		transArgMap := r.preloader.GetArgMap(ctx, "Transactions")
+		transArgMap := r.preloader.GetArgMap(ctx, "transactions")
 		transConnInput := r.getConnInput(transArgMap)
 
 		edger := func(p *types.Transaction, offset int) connections.Edge {
@@ -898,8 +898,9 @@ func (r *queryResolver) Accounts(ctx context.Context, first *int64, after *strin
 				transactionRes = append(transactionRes, &transaction)
 			}
 
-			transArgMap := r.preloader.GetArgMap(ctx, "Transactions")
+			transArgMap := r.preloader.GetArgMap(ctx, "transactions")
 			transConnInput := r.getConnInput(transArgMap)
+			fmt.Println(transArgMap)
 
 			edger := func(p *types.Transaction, offset int) connections.Edge {
 				return types.TransactionEdge{

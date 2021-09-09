@@ -868,7 +868,7 @@ func TestQueryResolver_Accounts(t *testing.T) {
 		Return(&accountService.GetAccountsResponse{Accounts: mockAccounts}, nil)
 	preloader.On("GetPreloads", ctx).Return([]string{"nodes.transactions"})
 	var argMap = map[string]interface{}{}
-	preloader.On("GetArgMap", ctx, "Transactions").Return(argMap)
+	preloader.On("GetArgMap", ctx, "transactions").Return(argMap)
 
 	resolverOpts := &ResolverOpts{
 		accountService: accountServiceClient,
