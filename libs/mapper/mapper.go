@@ -568,6 +568,37 @@ func (G *GQLMapper) hydratePayment(data *pb.Payment, to interface{}) error {
 			CountryResidence: &data.Owner.CountryResidence,
 		}
 	}
+
+	if data.Quote != nil {
+		var fee *types.Fee
+		var fx *types.Fx
+
+		if data.Quote.Fee != nil {
+			fee = &types.Fee{
+				LowerBoundary: &data.Quote.Fee.LowerBoundary,
+				UpperBoundary: &data.Quote.Fee.UpperBoundary,
+				Fee:           data.Quote.Fee.Fee,
+			}
+		}
+		if data.Quote.Fx != nil {
+			fx = &types.Fx{
+				Currency:     data.Quote.Fx.Currency,
+				BaseCurrency: data.Quote.Fx.BaseCurrency,
+				BuyRate:      data.Quote.Fx.BuyRate,
+				SellRate:     data.Quote.Fx.SellRate,
+				Ts:           data.Quote.Fx.Ts,
+			}
+		}
+
+		payment.Quote = &types.Quote{
+			ID:        data.Quote.Id,
+			HasExpiry: &data.Quote.HasExpiry,
+			Expires:   &data.Quote.Expires,
+			Ts:        &data.Quote.Ts,
+			Fee:       fee,
+			Fx:        fx,
+		}
+	}
 	return nil
 }
 
