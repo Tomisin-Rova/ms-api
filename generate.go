@@ -5,12 +5,13 @@ package main
 
 import (
 	"fmt"
-	genSchema "github.com/99designs/gqlgen/cmd"
 	"os"
 	"os/exec"
 	"path"
 	"path/filepath"
 	"strings"
+
+	genSchema "github.com/99designs/gqlgen/cmd"
 )
 
 // Default target to run when none is specified

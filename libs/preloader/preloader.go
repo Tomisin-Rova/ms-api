@@ -2,6 +2,7 @@ package preloader
 
 import (
 	"context"
+
 	"github.com/99designs/gqlgen/graphql"
 )
 
@@ -23,10 +24,29 @@ func (g GQLPreloader) GetPreloads(ctx context.Context) []string {
 	)
 }
 
+func collectFields(ctx context.Context) []graphql.CollectedField {
+	var fields []graphql.CollectedField
+	if graphql.GetFieldContext(ctx) != nil {
+		fields = graphql.CollectFieldsCtx(ctx, nil)
+
+		octx := graphql.GetOperationContext(ctx)
+		for _, col := range fields {
+			if col.Name == "nodes" || col.Name == "edges" {
+				// This endpoint is using the cursor pattern; the columns we
+				// actually need to filter with are nested into the edges or nodes
+				// field.
+				fields = graphql.CollectFields(octx, col.SelectionSet, nil)
+				break
+			}
+		}
+	}
+	return fields
+}
+
 // getArgMap returns the argument map for a specified field from the gqlgen field collector
 func (g GQLPreloader) GetArgMap(ctx context.Context, field string) map[string]interface{} {
 	var argMap map[string]interface{}
-	for _, f := range graphql.CollectFieldsCtx(ctx, nil) {
+	for _, f := range collectFields(ctx) {
 		if f.Name == field {
 			argMap = f.ArgumentMap(nil)
 			break
