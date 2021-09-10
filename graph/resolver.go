@@ -59,6 +59,9 @@ func (r *mutationResolver) validateAddress(addr types.AddressInput) error {
 	if addr.Country == nil || *addr.Country == "" {
 		return errors.NewTerror(7013, "InvalidCountryData", "country data is missing from address", "")
 	}
+	if *addr.Country == "UK" && addr.Postcode == nil {
+		return errors.NewTerror(7016, "InvalidPostCodeData", "postcode required for address", "")
+	}
 	if addr.City == nil || *addr.City == "" {
 		return errors.NewTerror(7014, "InvalidCityData", "city data is missing from address", "")
 	}
