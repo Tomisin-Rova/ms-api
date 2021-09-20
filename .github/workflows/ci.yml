@@ -61,6 +61,28 @@ jobs:
       - name: Run unit tests
         run: make test
 
+  sonarcloud:
+    name: SonarCloud
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ^1.15 # The Go version to download (if necessary) and use.
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+        # Set credentials to get zebra library
+      - name: Setup credentials to access private repo
+        run: git config --global url."https://${{ secrets.PAT }}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
+      - name: Generate test cover report
+        run:  go test -race -covermode=atomic -coverprofile=coverage.out -json ./... > report.json
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
   build:
     name: Build
     # The type of runner that the job will run on
