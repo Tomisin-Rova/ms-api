@@ -5,6 +5,8 @@ import (
 	"errors"
 
 	coreError "github.com/roava/zebra/errors"
+	zaplogger "github.com/roava/zebra/logger"
+	"go.uber.org/zap"
 	pb "ms.api/protos/pb/types"
 	"ms.api/types"
 )
@@ -14,9 +16,13 @@ type Mapper interface {
 }
 
 // GQLMapper a mapper that returns Graphql types
-type GQLMapper struct{}
+type GQLMapper struct {
+	logger *zap.Logger
+}
 
-var _ Mapper = &GQLMapper{}
+var _ Mapper = &GQLMapper{
+	logger: zaplogger.New(),
+}
 
 // Hydrate converts between types
 func (G *GQLMapper) Hydrate(from interface{}, to interface{}) error {
@@ -516,10 +522,11 @@ func (G *GQLMapper) hydratePayment(data *pb.Payment, to interface{}) error {
 		var sourceAccount types.Account
 		err := json.Unmarshal(data.Source.Account.Value, &sourceAccount)
 		if err != nil {
+			G.logger.Error("unmarshal source account", zap.Error(err))
 			var sourcePayeeAccount types.PayeeAccount
 			err := json.Unmarshal(data.Source.Account.Value, &sourcePayeeAccount)
 			if err != nil {
-				return err
+				G.logger.Error("unmarshal source payee account", zap.Error(err))
 			}
 			payment.FundingSource = &sourceAccount
 		} else {
@@ -532,10 +539,11 @@ func (G *GQLMapper) hydratePayment(data *pb.Payment, to interface{}) error {
 		var targetPayeeAccount types.PayeeAccount
 		err := json.Unmarshal(data.Target.Account.Value, &targetPayeeAccount)
 		if err != nil {
+			G.logger.Error("unmarshal target account", zap.Error(err))
 			var targetAccount types.Account
 			err := json.Unmarshal(data.Target.Account.Value, &targetAccount)
 			if err != nil {
-				return err
+				G.logger.Error("unmarshal target payee account", zap.Error(err))
 			}
 			payment.Beneficiary = &types.Beneficiary{
 				Account: targetAccount,
@@ -566,6 +574,7 @@ func (G *GQLMapper) hydratePayment(data *pb.Payment, to interface{}) error {
 			Status:           (*types.PersonStatus)(&data.Owner.Status),
 			Ts:               data.Owner.Ts,
 			CountryResidence: &data.Owner.CountryResidence,
+			Bvn:              &data.Owner.Bvn,
 		}
 	}
 
