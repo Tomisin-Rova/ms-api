@@ -519,7 +519,8 @@ func (G *GQLMapper) hydratePayment(data *pb.Payment, to interface{}) error {
 			var sourcePayeeAccount types.PayeeAccount
 			err := json.Unmarshal(data.Source.Account.Value, &sourcePayeeAccount)
 			if err != nil {
-				return err
+				// TODO: Disabling this until a proper solution for source/target account is implemented
+				// return err
 			}
 			payment.FundingSource = &sourceAccount
 		} else {
@@ -535,7 +536,8 @@ func (G *GQLMapper) hydratePayment(data *pb.Payment, to interface{}) error {
 			var targetAccount types.Account
 			err := json.Unmarshal(data.Target.Account.Value, &targetAccount)
 			if err != nil {
-				return err
+				// TODO: Disabling this until a proper solution for source/target account is implemented
+				// return err
 			}
 			payment.Beneficiary = &types.Beneficiary{
 				Account: targetAccount,
@@ -566,6 +568,7 @@ func (G *GQLMapper) hydratePayment(data *pb.Payment, to interface{}) error {
 			Status:           (*types.PersonStatus)(&data.Owner.Status),
 			Ts:               data.Owner.Ts,
 			CountryResidence: &data.Owner.CountryResidence,
+			Bvn:              &data.Owner.Bvn,
 		}
 	}
 

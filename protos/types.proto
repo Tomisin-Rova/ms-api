@@ -32,6 +32,7 @@ message Person {
   repeated Activity activities = 16;
   string status = 17;
   string objectId = 18;
+  string bvn = 19;
 }
 
 // Persons type
@@ -751,7 +752,7 @@ message Payment {
   Person owner = 3;
   Source source = 4;
   int64 charge = 5;
-  string reference =6;
+  string reference = 6;
   string status = 7;
   string image = 8;
   string notes = 9;
