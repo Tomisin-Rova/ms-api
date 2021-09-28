@@ -3,13 +3,15 @@ package mongo
 import (
 	"context"
 	"fmt"
+	"log"
+	"os"
+	"testing"
+	"time"
+
 	"github.com/ory/dockertest/v3"
 	"github.com/roava/zebra/models"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap/zaptest"
-	"log"
-	"os"
-	"testing"
 )
 
 var mongoDbPort = ""
@@ -50,26 +52,24 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-func TestMongoStore_GetCDDs(t *testing.T) {
-	connectUri := "mongodb://localhost:" + mongoDbPort
+func TestIdentityRepository_GetIdentityById(t *testing.T) {
+	connectUri := fmt.Sprintf("mongodb://localhost:%s", mongoDbPort)
 	repo, client, err := New(connectUri, "roava", zaptest.NewLogger(t))
 	assert.Nil(t, err)
-	assert.NotNil(t, repo)
+	assert.NotNil(t, client)
 
-	cdd := &models.CDD{
-		ID:        "id",
+	identity := &models.Identity{
+		ID:        "identityId",
 		Owner:     "owner",
-		Watchlist: false,
-		Validations: []models.Validation{{
-			Applicant: models.Person{ID: "personId"},
-		}},
+		Timestamp: time.Now(),
 	}
-	newId, err := client.Database("roava").Collection("cdds").InsertOne(context.Background(), cdd)
+	r, err := client.Database("roava").Collection(identityCollection).
+		InsertOne(context.Background(), identity)
 	assert.Nil(t, err)
-	assert.NotNil(t, newId)
+	assert.NotNil(t, r.InsertedID)
 
-	values, err := repo.GetCDDs(1, 100)
+	id, err := repo.GetIdentityById(identity.ID)
 	assert.Nil(t, err)
-	assert.NotNil(t, values)
-	assert.Equal(t, 1, len(values))
+	assert.NotNil(t, id)
+	assert.Equal(t, id.ID, identity.ID)
 }

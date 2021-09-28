@@ -34,16 +34,41 @@ interface Entity {
 # E N U M S
 
 # list of items that can be verified
-enum VerifiableType { EMAIL PHONE DEVICE }
+enum VerifiableType {
+  EMAIL
+  PHONE
+  DEVICE
+}
 
 # message delivery modes supported
-enum DeliveryMode { EMAIL SMS PUSH }
+enum DeliveryMode {
+  EMAIL
+  SMS
+  PUSH
+}
 
 # list of person states
-enum PersonStatus { ACTIVE INACTIVE EXITED BLACKLIST REJECTED }
+enum PersonStatus {
+  # signed up with email & passcode
+  SIGNEDUP
+  # enter personal info
+  REGISTERED
+  # finished ID & verification captured
+  VERIFIED
+  # already onboarded
+  ONBOARDED
+  # onboarding process rejected
+  REJECTED
+  # person exited
+  EXITED
+}
 
 # list of customer identity states
-enum IdentityStatus { ACTIVE INACTIVE FROZEN }
+enum IdentityStatus {
+  ACTIVE
+  INACTIVE
+  FROZEN
+}
 
 # list of content types
 enum ContentType {
@@ -72,22 +97,36 @@ enum State {
   # workflows
   APPROVED
   REJECTED
+  DECLINED
+  MANUAL_REVIEW
 }
 
 # enum of possible device tokens
-enum DeviceTokenType { FIREBASE BIOMETRIC }
+enum DeviceTokenType {
+  FIREBASE
+  BIOMETRIC
+}
 
 # onboarding checkpoints - a frontend concern
 enum OnboardingCheckPoint {
-  SIGNUP        # enter personal info
-  VERIFICATION  # provide ID, Video
-  ACTIVITIES    # provide reasons for using ROAVA
-  TERMS         # accept terms
-  COMPLETE      # submit application
+  SIGNUP # enter personal info
+  VERIFICATION # provide ID, Video
+  ACTIVITIES # provide reasons for using ROAVA
+  TERMS # accept terms
+  COMPLETE # submit application
 }
 
 # enum to represent the validation type
-enum ValidationType { CHECK SCREEN PROOF }
+enum ValidationType {
+  CHECK
+  SCREEN
+  PROOF
+}
+
+# enum to show device preference type
+enum DevicePreferenceType {
+  PUSH
+}
 
 # S C A L A R S
 
@@ -265,7 +304,7 @@ type Identity {
   # The Ulid field for the identity
   id: ID!
   # Reference to the person or organisation who owns this identity (customer relationship)
-  owner: Entity!
+  owner: Owner!
   # The nickname of the owner of identity wishes to be addressed as
   nickname: String
   # Context of the identity. Ulid of the organisation that this identity is for e.g. ROAVA, Onfido, Twitter, Nubank
@@ -977,6 +1016,8 @@ type CDD {
   validations(
     # Filter validations by it's type
     validation_type: ValidationType
+    # Filter CDD validations by it's statuses
+    status: [State!]
   ): [Validation!]!
   # Boolean to indicate if this is the most current or active CDD file for the customer
   active: Boolean @deprecated(reason: "Customers now only have single CDD")
@@ -1010,7 +1051,7 @@ type Validation {
   # type of validation being supplied
   validation_type: ValidationType!
   # the Person or Organisation validation is for
-  applicant: Entity!
+  applicant: Owner!
   # the validation result which can be a check, screen or proof
   data: ValidationData!
   # Organisation id for the company/vendor providing the KYC service
@@ -1021,10 +1062,64 @@ type Validation {
   approved: Boolean
   # Unix timestamp when the record was created
   ts: Int
+  # Reference for the actions taken in a Validation
+  actions: [Action!]!
 }
+
+# Actions taken, such as an onboarding case review
+type Action {
+  # Unique roava ulid for the data record
+  id: ID!
+  # Person who created the task
+  reporter: Staff!
+  ## Person whom task is assigned to
+  #assignee: Person!
+  ## Person who task is referred to approve the task
+  #approver: Person
+  # Notes for the task
+  notes: String!
+  ## ROAVA operations workflow stage
+  #stage: String @examples(values: "some_workflow_stage")
+  ## Approval status of the task
+  #approved: Boolean @examples(values: [true, false])
+  # The action type of this action
+  status: String!
+  ## Version of the task
+  #version: Int
+  # Unix timestamp when the record was created
+  ts: Int!
+  ## Array of comments associated to this task
+  #comments(
+  #  # Returns the first n elements from the list.
+  #  first: Int,
+  #  # Returns the elements in the list that come after the specified cursor.
+  #  after: String,
+  #  # Returns the last n elements from the list.
+  #  last: Int,
+  #  # Returns the elements in the list that come before the specified cursor.
+  #  before: String
+  #): CommentConnection
+  ## Array of tags associated to this task
+  #tags(
+  #  # Returns the first n elements from the list.
+  #  first: Int,
+  #  # Returns the elements in the list that come after the specified cursor.
+  #  after: String,
+  #  # Returns the last n elements from the list.
+  #  last: Int,
+  #  # Returns the elements in the list that come before the specified cursor.
+  #  before: String
+  #): TagConnection
+}
+
+# union type representing owner of an entity
+union Owner = Person | Organisation
 
 # union type representing a validation result which can be a kyc CHECK, aml SCREEN or doucment PROOF
 union ValidationData = Check | Screen | Proof
+
+# Type to define a beneficiary - can be payee account or customer account
+union BeneficiaryAccount = Account | PayeeAccount
 
 # The connection type for Validation
 type ValidationConnection {
@@ -1052,6 +1147,8 @@ type ValidationEdge {
 type Check {
   # Unique roava ulid for the data record
   id: ID!
+  # Reference for customer or organization who owns the Check Validation
+  owner: Owner!
   # Organisation id for the company/vendor providing the KYC service
   organisation: Organisation!
   # The status of the check
@@ -1115,11 +1212,11 @@ type CheckData {
   # Array of Tags related to this check
   tags(
     # Returns the first n elements from the list.
-    first: Int,
+    first: Int
     # Returns the elements in the list that come after the specified cursor.
-    after: String,
+    after: String
     # Returns the last n elements from the list.
-    last: Int,
+    last: Int
     # Returns the elements in the list that come before the specified cursor.
     before: String
   ): TagConnection
@@ -1226,7 +1323,14 @@ type Proof {
 }
 
 # enum representing types of document proofs
-enum ProofType { ADDRESS }
+enum ProofType {
+  ADDRESS
+}
+
+# enum representing types of third party available auths
+enum AuthType {
+  GOOGLE
+}
 
 # The connection type for Proof
 type ProofConnection {
@@ -1273,22 +1377,22 @@ type Task {
   # Array of comments associated to this task
   comments(
     # Returns the first n elements from the list.
-    first: Int,
+    first: Int
     # Returns the elements in the list that come after the specified cursor.
-    after: String,
+    after: String
     # Returns the last n elements from the list.
-    last: Int,
+    last: Int
     # Returns the elements in the list that come before the specified cursor.
     before: String
   ): CommentConnection
   # Array of tags associated to this task
   tags(
     # Returns the first n elements from the list.
-    first: Int,
+    first: Int
     # Returns the elements in the list that come after the specified cursor.
-    after: String,
+    after: String
     # Returns the last n elements from the list.
-    last: Int,
+    last: Int
     # Returns the elements in the list that come before the specified cursor.
     before: String
   ): TagConnection
@@ -1341,22 +1445,22 @@ type Content {
   # Array of Comments made in the Content
   comments(
     # Returns the first n elements from the list.
-    first: Int,
+    first: Int
     # Returns the elements in the list that come after the specified cursor.
-    after: String,
+    after: String
     # Returns the last n elements from the list.
-    last: Int,
+    last: Int
     # Returns the elements in the list that come before the specified cursor.
     before: String
   ): CommentConnection
   # Array of Tags assiciated to the content
   tags(
     # Returns the first n elements from the list.
-    first: Int,
+    first: Int
     # Returns the elements in the list that come after the specified cursor.
-    after: String,
+    after: String
     # Returns the last n elements from the list.
-    last: Int,
+    last: Int
     # Returns the elements in the list that come before the specified cursor.
     before: String
   ): TagConnection
@@ -1440,20 +1544,11 @@ type AcceptanceEdge {
 
 # FX rates (prices) for currency pairs
 type Fx {
-  # The first listed currency of a currency pair is called the base currency, and the second currency is called the quote currency e.g. GBP_NGNin the format of sold_bought or base_quote currency.
-  pair: String
-  # Opening price for the day’s trading in the given currency pair
-  open: Int
-  # 24hr (day)high for the currency pair - highest price in the past 24hrs (or for that day)
-  high: Int
-  # 24hr low for the currency pair
-  low: Int
-  # Closing price for day’s trading in the given currency pair
-  close: Int
-  # Unix timestamp when the record was created
-  ts: Int
-  # Name (or unique id reference to an organisation) for the feed, company or source of the price
-  source: String
+  currency: String!
+  base_currency: String!
+  buy_rate: Float!
+  sell_rate: Float!
+  ts: Int!
 }
 
 # The connection type for Fx
@@ -1474,6 +1569,20 @@ type FxEdge {
   node: Fx!
   # A cursor for use in pagination
   cursor: String!
+}
+
+# Type to define the fees of a transfer
+type TransferFees {
+  currency: String!
+  base_currency: String!
+  fees: [Fee!]!
+  ts: Int!
+}
+
+type Fee {
+  lowerBoundary: Float
+  upperBoundary: Float
+  fee: Float!
 }
 
 # https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/983400449/roava+quote
@@ -1512,14 +1621,6 @@ type QuoteEdge {
   node: Quote!
   # A cursor for use in pagination
   cursor: String!
-}
-
-# Fee type
-type Fee {
-  # Value of the fixed fee in base currency
-  fixed_fee: Int
-  # Variable component of the fee quote
-  variable_fee: VariableFee!
 }
 
 # Variable Fee type
@@ -1601,7 +1702,7 @@ type ProductDetails {
   # Refers to the overdraft settings used in the Product
   overdraft_setting: OverdraftSetting
   # Refers to the intereset settings used in the Product
-  interest_setting: InterestSetting
+  interest_setting: ProductInterestSetting
   # Refers to the product settings used in the Product
   product_setting: ProductSetting
 }
@@ -1619,11 +1720,11 @@ type AccountingRules {
 # Type to define the opening balance
 type OpeningBalance {
   # The default value used in the opening balance
-  default_value: Int
+  default_value: Float
   # Max value allowed in the opening balance
-  max: Int
+  max: Float
   # Min value allowed in the opening balance
-  min: Int
+  min: Float
 }
 
 # Type to define Product Controls
@@ -1653,11 +1754,11 @@ type ProductMaturity {
 # Type to define the interest rates
 type InterestRate {
   # Default value for the interest Rate
-  default_value: Int
+  default_value: Float
   # Max value for the interest Rate
-  max_value: Int
+  max_value: Float
   # Min value for the interest Rate
-  min_value: Int
+  min_value: Float
 }
 
 # Type to define the settings of interest rates
@@ -1743,7 +1844,7 @@ type InterestPaymentDates {
 }
 
 # Type to define an interest setting
-type InterestSetting {
+type ProductInterestSetting {
   # Boolean to define if interests can be collected from a locked account
   collect_interest_when_locked: Boolean
   # String representating the amount of the days in a year
@@ -1755,7 +1856,7 @@ type InterestSetting {
   # String representating the interest payment point
   interest_payment_point: String
   # Interest maxumim balance amount
-  maximum_balance: Int
+  maximum_balance: Float
   # Reference for rate setting
   rate_setting: RateSetting
   # Array of Interest Payment Dates
@@ -1819,7 +1920,7 @@ type Account {
   # Unique roava ulid for the data record
   id: ID!
   # Reference for customer or organization who owns account
-  owner: Entity!
+  owner: Owner!
   # Reference for the financial product linked to the account
   product: Product
   # Friendly name given to account by owner
@@ -1831,33 +1932,35 @@ type Account {
   # Image background for an account
   image: String
   # Reference for the organization of this account
-  organisation: String
+  organisation: Organisation
   # Unix timestamp when the record was created
   ts: Int
   # Array of tags
   tags(
     # Returns the first n elements from the list.
-    first: Int,
+    first: Int
     # Returns the elements in the list that come after the specified cursor.
-    after: String,
+    after: String
     # Returns the last n elements from the list.
-    last: Int,
+    last: Int
     # Returns the elements in the list that come before the specified cursor.
     before: String
   ): TagConnection
   # Account can have array of 0..n transactions
   transactions(
     # Returns the first n elements from the list.
-    first: Int,
+    first: Int
     # Returns the elements in the list that come after the specified cursor.
-    after: String,
+    after: String
     # Returns the last n elements from the list.
-    last: Int,
+    last: Int
     # Returns the elements in the list that come before the specified cursor.
     before: String
   ): TransactionConnection
   # Reference data of an account
   account_data: AccountData
+  # Account details suchs as IBAN, number and sort codes
+  account_details: AccountDetails
 }
 
 # The connection type for Account
@@ -1878,6 +1981,29 @@ type AccountEdge {
   node: Account!
   # A cursor for use in pagination
   cursor: String!
+}
+
+# Type to define optional inputs when creating an account
+input AccountInput {
+  # Friendly name given to account by owner
+  name: String
+}
+# Type to define account details
+type AccountDetails {
+  # virtual account id from clearbank
+  virtual_account_id: String
+  # account iban number
+  iban: String
+  # account number
+  account_number: String
+  # sort code for the account
+  sort_code: String
+  # swift/bic code for the account
+  swift_bic: String
+  # the bank code for the account servicer
+  bank_code: String
+  # account routing number required in US and Canada
+  routing_number: String
 }
 
 # Type to define the data of an account
@@ -1954,26 +2080,68 @@ type AccountData {
   accrued_amounts: AccruedAmounts
 }
 
-# Type to define the settings of an overdraft
-type OverdraftSettings {
-  # Boolean to define if overdraft is allowed
-  allow_overdraft: Boolean
-  # Date when the overdraft will expire
-  overdraft_expiry_date: String
-  # Overdraft Limit amount
-  overdraft_limit: Int
+# Type to define accrued amounts
+type AccruedAmounts {
+  # Accrued interest amount
+  interest_accrued: Float
+  # Negative interest amounts accrued
+  negative_interest_accrued: Float
+  # Overdraft interest accrued amount
+  overdraft_interest_accrued: Float
+  # Technical iverdraft interest accrued amount
+  technical_overdraft_interest_accrued: Float
 }
 
-# Type to define the tiers of an interest rate
-type InterestRateTiers {
-  # Encoded key of the Interest Rate Tier
-  encoded_key: String
-  # Ending balance of the tier
-  ending_balance: Int
-  # Ending day of the tier
-  ending_day: Int
-  # Interest rate amount
-  interest_rate: Int
+# Type to define the balances o an account
+type Balances {
+  # Amount available in the account
+  available_balance: Float
+  # Amount blocked in the account
+  blocked_balance: Float
+  # Due date of the fees
+  fees_due: Float
+  # Forwarded available balance
+  forward_available_balance: Float
+  # Amount on hold in account
+  hold_balance: Float
+  # Locked ammount in account
+  locked_balance: Float
+  # Overdraft amount in account
+  overdraft_amount: Float
+  # Overdraft interest due date
+  overdraft_interest_due: Float
+  # Technical overdraft amount in account
+  technical_overdraft_amount: Float
+  # Technical overdraft interest due date
+  technical_overdraft_interest_due: Float
+  # Total account balance
+  total_balance: Float
+}
+
+# Type to define the interest payment settings
+type InterestPaymentSettings {
+  # The point of payment of the interest
+  interest_payment_point: String
+  # Array of interest payment dates
+  interest_payment_dates: [InterestPaymentDates]
+}
+
+# Type to define the internal controls of an account
+type InternalControls {
+  # Maximum deposit balance amount
+  max_deposit_balance: Float
+  # Maximum available amount to withdrawal
+  max_withdrawal_amount: Float
+  # Amount recommended to deposint in the account
+  recommended_deposit_amount: Float
+  # Targeted amount of an account
+  target_amount: Float
+}
+
+# Type to define the settings of an interest overdraft
+type OverdraftInterestSettings {
+  # Reference to the Interest Rate Settings
+  interest_rate_settings: InterestRateSettings
 }
 
 # Type to define the settings of an interest rate
@@ -2000,64 +2168,26 @@ type InterestRateSettings {
   interest_rate_tiers: [InterestRateTiers]
 }
 
-# Type to define the settings of an interest overdraft
-type OverdraftInterestSettings {
-  # Reference to the Interest Rate Settings
-  interest_rate_settings: InterestRateSettings
+# Type to define the tiers of an interest rate
+type InterestRateTiers {
+  # Encoded key of the Interest Rate Tier
+  encoded_key: String
+  # Ending balance of the tier
+  ending_balance: Float
+  # Ending day of the tier
+  ending_day: Int
+  # Interest rate amount
+  interest_rate: Float
 }
 
-# Type to define the internal controls of an account
-type InternalControls {
-  # Maximum available amount to withdrawal
-  max_withdrawal_amount: Int
-  # Amount recommended to deposint in the account
-  recommended_deposit_amount: Int
-  # Targeted amount of an account
-  target_amount: Int
-}
-
-# Type to define the interest payment settings
-type InterestPaymentSettings {
-  # The point of payment of the interest
-  interest_payment_point: String
-  # Array of interest payment dates
-  interest_payment_dates: [InterestPaymentDates]
-}
-
-# Type to define the balances o an account
-type Balances {
-  # Amount available in the account
-  available_balance: Int
-  # Amount blocked in the account
-  blocked_balance: Int
-  # Due date of the fees
-  fees_due: Int
-  # Forwarded available balance
-  forward_available_balance: Int
-  # Amount on hold in account
-  hold_balance: Int
-  # Locked ammount in account
-  locked_balance: Int
-  # Overdraft amount in account
-  overdraft_amount: Int
-  # Overdraft interest due date
-  overdraft_interest_due: Int
-  # Technical overdraft amount in account
-  technical_overdraft_amount: Int
-  # Technical overdraft interest due date
-  technical_overdraft_interest_due: Int
-  # Total account balance
-  total_balance: Int
-}
-
-# Type to define accrued amounts
-type AccruedAmounts {
-  # Accrued interest amount
-  interest_accrued: Int
-  # Overdraft interest accrued amount
-  overdraft_interest_accrued: Int
-  # Technical iverdraft interest accrued amount
-  technical_overdraft_interest_accrued: Int
+# Type to define the settings of an overdraft
+type OverdraftSettings {
+  # Boolean to define if overdraft is allowed
+  allow_overdraft: Boolean
+  # Date when the overdraft will expire
+  overdraft_expiry_date: String
+  # Overdraft Limit amount
+  overdraft_limit: Int
 }
 
 # https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/977600522/roava+transaction
@@ -2067,7 +2197,7 @@ type Transaction {
   # Unique roava ulid for the data record
   id: ID!
   # Reference to the account that the transaction is happening
-  account: String
+  account: Account!
   # Unix timestamp when the record was created
   ts: Int
   # Reference to the data of the Transaction
@@ -2099,7 +2229,7 @@ type TransactionData {
   # Unique roava ulid for the data record
   id: ID!
   # Amount involved in the transaction
-  amount: Int
+  amount: Float
   # Scheduled day that the transaction will happen
   booking_date: String
   # Date when the transaction has been created
@@ -2125,39 +2255,47 @@ type TransactionData {
   # Reference to the details of the transaction
   transfer_details: TransferDetails
   # Array of fees applied to this transaction
-  fees: [String]
+  fees: [TransactionFee]
   # The values involved in the transaction calcule
   affected_amounts: AffectedAmounts
   # The balance of the account involved in the transaction
   account_balances: AccountBalances
 }
 
+type TransactionFee {
+  Amount: Int
+  Name: String
+  PredefinedFeeKey: String
+  TaxAmount: Int
+  Trigger: String
+}
+
 # Type to define an account balance in a Transaction
 type AccountBalances {
   # Total balance of the account
-  total_balance: Int
+  total_balance: Float
 }
 
 # Type to define an account balance in a Transaction
 type AffectedAmounts {
   # Total amount of fees applied to the transaction
-  fees_amount: Int
+  fees_amount: Float
   # Fraction of the transaction
-  fraction_amount: Int
+  fraction_amount: Float
   # Total amount of funds used in the transaction
-  funds_amount: Int
+  funds_amount: Float
   # Interest applied to the transaction
-  interest_amount: Int
+  interest_amount: Float
   # Overdraft amount applied to the transaction
-  overdraft_amount: Int
+  overdraft_amount: Float
   # Overdraft fees applied to the transaction
-  overdraft_fees_amount: Int
+  overdraft_fees_amount: Float
   # Overdraft interest rate applied to the transaction
-  overdraft_interest_amount: Int
+  overdraft_interest_amount: Float
   # Thecnical overdraft amount applied to the transaction
-  technical_overdraft_amount: Int
+  technical_overdraft_amount: Float
   # Thecnical overdraft interest rate applied to the transaction
-  technical_overdraft_interest_amount: Int
+  technical_overdraft_interest_amount: Float
 }
 
 # Type to define the details of a transfer
@@ -2174,3 +2312,254 @@ input SubmitProofInput {
   status: State
 }
 
+# Product input required for opening accounts
+input ProductInput {
+  # Unique roava ulid for the data record
+  id: ID!
+  # Udentification assigned by an institution
+  identification: String
+  # Name of the identification scheme
+  scheme: String
+}
+
+# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1282539527/roava+payee
+
+# Type to define a payee
+type Payee {
+  # Unique roava ulid for the data record
+  id: ID!
+  # identity that owns the payee
+  owner: Identity!
+  # name of payee
+  name: String!
+  # avatar (optional) for the payee
+  avatar: String
+  # unix timestamp when payee created
+  ts: Int
+  # beneficiary/payee accounts created by customer
+  accounts: [PayeeAccount]!
+}
+
+# Type to define a payee/beneficiary account features
+type PayeeAccount {
+  # unique id of the payee account
+  id: ID!
+  # nickname of beneficiary account assigned by customer
+  name: String
+  # currency code for the currency
+  currency: String
+  # optional payee account account_number
+  account_number: String
+  # optional payee account sort_code
+  sort_code: String
+  # optional payee account iban
+  iban: String
+  # optional payee account swift_bic
+  swift_bic: String
+  # optional payee account bank_code
+  bank_code: String
+  # optional payee account routing_number
+  routing_number: String
+  # optional payee phone_number
+  phone_number: String
+}
+
+# Type for creating a new payee
+input PayeeInput {
+  # name of payee/beneficiariy
+  name: String!
+  # avatar (optional) for the payee
+  avatar: String
+  # account information provided when creating payee
+  accounts: [PayeeAccountInput]!
+}
+
+input PayeeAccountInput {
+  # nickname of beneficiary account assigned by customer
+  name: String
+  # currency code for the currency
+  currency: String
+  # optional payee account account_number
+  account_number: String
+  # optional payee account sort_code
+  sort_code: String
+  # optional payee account iban
+  iban: String
+  # optional payee account swift_bic
+  swift_bic: String
+  # optional payee account bank_code
+  bank_code: String
+  # optional payee account routing_number
+  routing_number: String
+  # optional payee phone_number
+  phone_number: String
+}
+
+# The connection type for Payee
+type PayeeConnection {
+  # A list of edges
+  edges: [PayeeEdge!]!
+  # A list of nodes
+  nodes: [Payee!]!
+  # Information to aid in pagination
+  pageInfo: PageInfo!
+  # Identifies the total count of items in the connection
+  totalCount: Int
+}
+
+# An edge in a connection
+type PayeeEdge {
+  # The item at the end of the edge.
+  node: Payee!
+  # A cursor for use in pagination
+  cursor: String!
+}
+
+# Report input required to ask for a resubmit
+input ReportInput {
+  id: ID!
+}
+
+# Type to define a payment
+type Payment {
+  # unique roava ulid for the payment
+  id: String
+  # unique value generated by the client which the server uses to recognize subsequent retries of the same request
+  idempotency_key: String!
+  # the owner (person|organisation) providing payment instruction
+  owner: Owner!
+  # total fee and charges applicable to payment
+  charge: Float
+  # reference string provided by the customer
+  reference: String
+  # status of the payment - default=PENDING
+  status: State
+  # optional image (base64 string) provided by the customer
+  image: String
+  # notes attahed to the payment by the customer
+  notes: String
+  # quote for international payments
+  quote: Quote
+  # optional tags applied to the payment
+  tags: [Tag]
+  # beneficiary account receiving the payment
+  beneficiary: Beneficiary!
+  # source account from which moneies will be debited
+  funding_source: Account!
+  # currency of the payment instruction
+  currency: Currency
+  # ammount to be debited from funding source/account
+  funding_amount: Float!
+  # unix timestamp when payee created
+  ts: Int
+}
+
+# Type to define a beneficiary account
+type Beneficiary {
+  # beneficiary (Payee Account | Account) for this payment
+  account: BeneficiaryAccount!
+  # currency of the beneficiary account
+  currency: Currency
+  # amount to be credited to beneficiary account
+  amount: Float!
+}
+
+# The connection type for Payment
+type PaymentConnection {
+  # A list of edges
+  edges: [PaymentEdge!]!
+  # A list of nodes
+  nodes: [Payment!]!
+  # Information to aid in pagination
+  pageInfo: PageInfo!
+  # Identifies the total count of items in the connection
+  totalCount: Int
+}
+
+# An edge in a connection
+type PaymentEdge {
+  # The item at the end of the edge.
+  node: Payment!
+  # A cursor for use in pagination
+  cursor: String!
+}
+
+# Input type for creating new payments
+input PaymentInput {
+  # unique value generated by the client which the server uses to recognize subsequent retries of the same request
+  idempotency_key: String!
+  # the owner (person|organisation) providing payment instruction
+  owner: ID!
+  # total fee and charges applicable to payment
+  charge: Float
+  # reference string provided by the customer
+  reference: String
+  # status of the payment - default=PENDING
+  status: State
+  # optional image (base64 string) provided by the customer
+  image: String
+  # notes attahed to the payment by the customer
+  notes: String
+  # unique ulid for the quote international payments
+  quote: String
+  # optional tags applied to the payment
+  tags: [ID!]
+  # beneficiary account receiving the payment
+  beneficiary: BeneficiaryInput!
+  # unique id of source account from which moneies will be debited
+  funding_source: String!
+  # 3 letter ISO currency code of the funding account for payment
+  currency: String
+  # ammount to be debited from funding source/account
+  funding_amount: Float!
+}
+
+# Type to input a beneficiary account for a payment
+input BeneficiaryInput {
+  # id of beneficiary (Payee Account | Account) for this payment
+  account: String!
+  # 3 letter ISO currency code of the beneficiary account
+  currency: String
+  # amount to be credited to beneficiary account
+  amount: Float!
+}
+
+# Type to define a staff member account
+type Staff {
+  # unique ulid for the staff member
+  id: ID!
+  # First name of the Staff member
+  first_name: String!
+  # Last name of the Staff member
+  last_name: String!
+  # Current status of the Staff member
+  status: StaffStatus!
+  # Array of email addresses the staff member
+  emails: [Email]!
+  # Array of phone numbersof the staff member
+  phones: [Phone]!
+  # Role of the Staff Member in Roava
+  # role: [Role!]
+  # Array of identities for the staff member
+  identities: [Identity]!
+  # Unix timestamp when the record was created
+  ts: Int!
+}
+
+# list of Staff states
+enum StaffStatus {
+  ACTIVE
+  INACTIVE
+  EXITED
+}
+
+# Input used to validate the user data if the user has a GBP Account
+input ValidateUserInput {
+  email: String!
+  first_name: String!
+  last_name: String!
+  dob: String!
+  account_number: String!
+  sort_code: String!
+  device: DeviceInput!
+}

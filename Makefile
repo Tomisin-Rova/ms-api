@@ -11,13 +11,20 @@ ifeq ($(filter $(TAGS_SPLIT),bindata),bindata)
 endif
 
 GO_SOURCES_OWN := $(filter-out vendor/%, $(GO_SOURCES))
-
+environment ?= $(ENVIRONMENT)
 
 .PHONY: proto
 proto:
-	# NOTE, to generate the protos, you have to have your local, vendor folder because of the magefile
-	./libs/mage genProto
-
+	@ # NOTE, to generate the protos, you have to have your local, vendor folder because of the magefile
+	@	if [[ ! -r "../zebra/protos/ms.api" ]]; \
+		then \
+			echo "Make sure the zebra project exists with the proto files."; \
+		else \
+			echo "Copying proto files..."; \
+			cp -r ../zebra/protos/ms.api/* ./protos; \
+			./libs/mage genProto; \
+		fi
+	
 .PHONY: build
 build: proto
 	go build -o srv *.go
@@ -34,12 +41,21 @@ gen-mocks:
 	mockery --name=IdentityServiceClient --recursive
 	mockery --name=OnBoardingServiceClient --recursive
 	mockery --name=PersonServiceClient --recursive
+	mockery --name=PaymentServiceClient --recursive
+	mockery --name=CddServiceClient --recursive
+	mockery --name=AuthServiceClient --recursive
+	mockery --name=AccountServiceClient --recursive
+	mockery --name=ProductServiceClient --recursive
+	mockery --name=VerifyServiceClient --recursive
+	mockery --name=PricingServiceClient --recursive
+	mockery --name=Preloader --recursive
 	go generate ./...
 
 local: schema proto gen-mocks lint test
 	go fmt ./...
 	go mod tidy
-	go run main.go
+	@echo "Running service with '${environment}' environment set..."; \
+	(export ENVIRONMENT=${environment}; go run main.go)	
 
 tools:
 	go get golang.org/x/tools/cmd/goimports
@@ -86,16 +102,26 @@ coverage:
 
 .PHONY: schema
 schema: proto
-	./libs/mage genSchema
+	@	if [[ ! -r "../zebra/graphql" ]]; \
+		then \
+			echo "Make sure the zebra project exists with the gql files."; \
+		else \
+			echo "Copying schema files..."; \
+			cp -r ../zebra/graphql/* ./graph/schemas; \
+			./libs/mage genSchema; \
+		fi
 
 docker-pulsar:
 	docker run -d \
       -p 6650:6650 \
       -p 8080:8080 \
-      --mount source=pulsardata,target=/var/pulsar/data \
-      --mount source=pulsarconf,target=/var/pulsar/conf \
-      apachepulsar/pulsar:2.6.1 \
+      --mount source=pulsardata,target=/pulsar/data \
+      --mount source=pulsarconf,target=/pulsar/conf \
+      --name pulsar-standalone \
+      apachepulsar/pulsar:2.7.2 \
       bin/pulsar standalone
+
+# 2.7.2
 
 docker-mongo:
 	docker run -d  \

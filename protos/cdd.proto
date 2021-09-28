@@ -25,7 +25,31 @@ message cdd_summary_document {
   repeated string reasons = 3;
 }
 
+message GetCDDByOwnerRequest {
+  string personId = 1;
+}
+
+message GetValidationByIdRequest {
+  string validationId = 1;
+}
+
+message CDDSRequest {
+  int64 page = 1;
+  int64 perPage = 2;
+  repeated string status = 3;
+  string keywords = 4;
+  int64 first = 5;
+  int64 last = 6;
+  string after = 7;
+  string before = 8;
+}
+
 service CddService{
   rpc GetCDDSummaryReport(PersonIdRequest) returns(Cddsummary){}
   rpc GetCDDById(CddIdRequest) returns(types.Cdd){}
+  rpc GetCDDByOwner(GetCDDByOwnerRequest) returns(types.Cdd){}
+  rpc GetValidationById(GetValidationByIdRequest) returns(types.Validation){}
+  rpc CDDS(CDDSRequest) returns (types.Cdds){}
+  rpc CDDSStreamed(CDDSRequest) returns (stream types.Cdds){}
+  rpc CDDByIdStreamed(CddIdRequest) returns(stream types.Cdd){}
 }

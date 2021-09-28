@@ -2,24 +2,26 @@ package mongo
 
 import (
 	"context"
+	"time"
+
 	"github.com/pkg/errors"
 	"github.com/roava/zebra/models"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 	"go.uber.org/zap"
 	"ms.api/libs/db"
-	"time"
 )
 
 const (
-	cddsCollection    = "cdds"
-	checksCollection  = "checks"
-	screensCollection = "screens"
-	proofsCollection  = "proofs"
-	personCollection  = "person"
-	orgsCollection    = "organizations"
+	checksCollection   = "checks"
+	screensCollection  = "screen"
+	proofsCollection   = "proofs"
+	personCollection   = "person"
+	orgsCollection     = "organizations"
+	identityCollection = "identities"
 )
 
 func New(connectURI, databaseName string, logger *zap.Logger) (db.DataStore, *mongo.Client, error) {
@@ -44,14 +46,35 @@ type mongoStore struct {
 }
 
 func (s *mongoStore) GetCheck(id string) (*models.Check, error) {
-	check := &models.Check{}
-	err := s.col(checksCollection).FindOne(context.Background(), bson.M{
-		"id": id,
-	}).Decode(check)
+	check := models.Check{}
+	ctx := context.Background()
+	matchStage := bson.D{primitive.E{Key: "$match", Value: bson.D{primitive.E{Key: "id", Value: id}}}}
+	lookupReportsStage := bson.D{primitive.E{
+		Key: "$lookup",
+		Value: bson.D{
+			primitive.E{Key: "from", Value: "reports"},
+			primitive.E{Key: "localField", Value: "data.reports"},
+			primitive.E{Key: "foreignField", Value: "id"},
+			primitive.E{Key: "as", Value: "data.reports"},
+		},
+	}}
+	lookupTagsStage := bson.D{primitive.E{
+		Key:   "$unset",
+		Value: "data.tags",
+	}}
+	cursor, err := s.col(checksCollection).Aggregate(ctx, mongo.Pipeline{matchStage, lookupReportsStage, lookupTagsStage})
 	if err != nil {
 		return nil, err
 	}
-	return check, nil
+	defer cursor.Close(ctx)
+	if cursor.Next(ctx) {
+		if err := cursor.Decode(&check); err != nil {
+			return nil, errors.Wrap(err, "failed to decode a single Validation")
+		}
+		return &check, nil
+	}
+
+	return nil, errors.New("failed to find check")
 }
 
 func (s *mongoStore) GetScreen(id string) (*models.Screen, error) {
@@ -76,26 +99,6 @@ func (s *mongoStore) GetProof(id string) (*models.Proof, error) {
 	return proof, nil
 }
 
-func (s *mongoStore) GetCDDs(page, perPage int64) ([]*models.CDD, error) {
-	opts := &options.FindOptions{}
-	opts.SetSkip((page - 1) * perPage)
-	opts.SetLimit(perPage)
-
-	cursor, err := s.col(cddsCollection).Find(context.Background(), bson.M{}, opts)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to query CDDs")
-	}
-	cdds := make([]*models.CDD, 0)
-	for cursor.Next(context.Background()) {
-		cdd := &models.CDD{}
-		if err := cursor.Decode(cdd); err != nil {
-			return nil, errors.Wrap(err, "failed to decode a single CDD")
-		}
-		cdds = append(cdds, cdd)
-	}
-	return cdds, nil
-}
-
 func (s *mongoStore) GetPerson(id string) (*models.Person, error) {
 	person := &models.Person{}
 	err := s.col(personCollection).FindOne(context.Background(), bson.M{
@@ -105,6 +108,16 @@ func (s *mongoStore) GetPerson(id string) (*models.Person, error) {
 		return nil, err
 	}
 	return person, nil
+}
+
+func (repo *mongoStore) GetIdentityById(identityId string) (*models.Identity, error) {
+	identity := &models.Identity{}
+	filter := bson.M{"id": identityId}
+	err := repo.col(identityCollection).FindOne(context.Background(), filter).Decode(identity)
+	if err != nil {
+		return nil, err
+	}
+	return identity, nil
 }
 
 func (s *mongoStore) GetOrganization(id string) (*models.Organization, error) {

@@ -51,3 +51,18 @@ func (f *FakeAuthClient) GetPerson(ctx context.Context, req *authService.GetPers
 	opts ...grpc.CallOption) (*authService.GetPersonResponse, error) {
 	return &authService.GetPersonResponse{}, f.err
 }
+
+func (f *FakeAuthClient) LoginWithToken(ctx context.Context, req *authService.LoginWithTokenRequest,
+	opts ...grpc.CallOption) (*authService.AuthResponse, error) {
+	return &authService.AuthResponse{}, f.err
+}
+
+func (f *FakeAuthClient) ValidateEmail(ctx context.Context, req *authService.ValidateEmailRequest,
+	opts ...grpc.CallOption) (*types.Response, error) {
+	return &types.Response{}, f.err
+}
+
+func (f *FakeAuthClient) ValidateUser(ctx context.Context, req *authService.ValidateUserRequest,
+	opts ...grpc.CallOption) (*types.Response, error) {
+	return &types.Response{}, f.err
+}

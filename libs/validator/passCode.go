@@ -3,6 +3,7 @@ package validator
 import (
 	coreErrors "github.com/roava/zebra/errors"
 	"regexp"
+	"strings"
 )
 
 var (
@@ -13,6 +14,7 @@ var (
 )
 
 func IsValidPassCode(passCode string) error {
+	passCode = strings.TrimSpace(passCode)
 	if ok := passCodeRegex.MatchString(passCode); !ok {
 		return errInvalidPassCode
 	}

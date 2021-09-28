@@ -28,7 +28,27 @@ message CreateTransactionPasswordRequest {
   string pin = 2;
 }
 
+message RequestResetTransactionPasswordRequest {
+  string email = 1;
+}
+
+message ResetTransactionPasswordRequest {
+  string email = 1;
+  string currentPasscode = 2; 
+  string newPasscode = 3;
+}
+
+message SetDevicePreferenceRequest {
+  string identityId=1;
+  string deviceId=2;
+  string devicePreferenceType=3;
+  bool status=4;
+}
+
 service identityService {
   rpc updateDeviceTokens(updateDeviceTokensRequest) returns (types.Response) {}
   rpc CreateTransactionPassword(CreateTransactionPasswordRequest) returns (types.Response) {}
+  rpc RequestResetTransactionPassword(RequestResetTransactionPasswordRequest) returns (types.Response) {}
+  rpc ResetTransactionPassword(ResetTransactionPasswordRequest) returns (types.Response) {}
+  rpc SetDevicePreference(SetDevicePreferenceRequest) returns (types.Response) {}
 }

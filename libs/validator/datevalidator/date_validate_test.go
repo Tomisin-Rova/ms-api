@@ -2,8 +2,9 @@ package datevalidator
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestValidateDob(t *testing.T) {
@@ -22,7 +23,8 @@ func TestValidateDob(t *testing.T) {
 		{dob: "01/15/1990", err: ErrInvalidFormat},
 		{dob: "01/11/19b0", err: ErrInvalidFormat},
 		{dob: "01/01/2020", err: ErrInvalidAge},
-		{dob: "01/01/2004", err: nil},
+		{dob: "01/01/2004", err: ErrInvalidAge},
+		{dob: "01/01/2003", err: nil},
 	}
 	for idx, c := range cases {
 		t.Run(fmt.Sprintf("case-%d", idx), func(t *testing.T) {

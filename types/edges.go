@@ -12,3 +12,27 @@ func (p PersonEdge) GetCursor() string {
 func (c CDDEdge) GetCursor() string {
 	return c.Cursor
 }
+
+func (ac AccountEdge) GetCursor() string {
+	return ac.Cursor
+}
+
+func (ac TagEdge) GetCursor() string {
+	return ac.Cursor
+}
+
+func (p PayeeEdge) GetCursor() string {
+	return p.Cursor
+}
+
+func (p ProductEdge) GetCursor() string {
+	return p.Cursor
+}
+
+func (t TransactionEdge) GetCursor() string {
+	return t.Cursor
+}
+
+func (t PaymentEdge) GetCursor() string {
+	return t.Cursor
+}

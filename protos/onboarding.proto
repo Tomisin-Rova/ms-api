@@ -10,16 +10,6 @@ message CreatePhoneRequest {
   types.Device device = 2;
 }
 
-message InputAddress {
-  string country = 1;
-  string street = 2;
-  string city = 3;
-  string postcode = 4;
-  string country2 = 5;
-  string state = 6;
-  string county = 7;
-}
-
 message CreatePhoneResponse {
   string message = 1;
   string token = 2;
@@ -45,6 +35,16 @@ message UpdatePersonRequest {
   string dob = 5;
   string countryResidence = 6;
   string bvn = 7;
+}
+
+message InputAddress {
+  string country = 1;
+  string street = 2;
+  string city = 3;
+  string postcode = 4;
+  string country2 = 5;
+  string state = 6;
+  string county = 7;
 }
 
 message RoavaReasonsRequest {
@@ -111,11 +111,6 @@ message FetchCountriesResponse {
   repeated types.Country Countries = 2;
 }
 
-message FetchReasonsRequest {
-  bool supported = 1;
-}
-
-
 message Reasons {
   string Id = 1;
   string Description = 2;
@@ -143,6 +138,10 @@ message AddressLookupResponse {
   repeated types.AddressLookup addresses = 1;
 }
 
+message FetchReasonsRequest {
+  bool supported = 1;
+}
+
 message SubmitApplicationRequest {
   string personId = 1;
 }
@@ -154,10 +153,31 @@ message SubmitProofRequest {
   string status = 6;
 }
 
+message UpdateValidationStatusRequest {
+  string validation = 1;
+  string status = 2;
+  string message = 3;
+  string owner = 4;
+}
+
+message ResubmitRequest {
+  repeated string reportIds = 1;
+  string message = 2;
+}
+
+message ResubmitReportRequest {
+  string personId = 1;
+  repeated ReportInput reports = 2;
+}
+
+message ReportInput {
+  string id = 1;
+}
+
 service OnBoardingService{
   rpc CreatePhone(CreatePhoneRequest) returns (CreatePhoneResponse) {}
   rpc CreatePerson(CreatePersonRequest) returns (CreatePersonResponse) {}
-  rpc UpdatePersonBiodata(UpdatePersonRequest) returns (types.Person) {}
+  rpc UpdatePersonBioData(UpdatePersonRequest) returns (types.Person) {}
   rpc AddReasonsForUsingRoava(RoavaReasonsRequest) returns (types.Response) {}
   rpc CheckEmailExistence(CheckEmailExistenceRequest) returns (CheckEmailExistenceResponse) {}
   rpc VerifySmsOtp(OtpVerificationRequest) returns (OtpVerificationResponse) {}
@@ -174,4 +194,7 @@ service OnBoardingService{
   rpc AddressLookup(AddressLookupRequest) returns (AddressLookupResponse) {}
   rpc SubmitApplication(SubmitApplicationRequest) returns (types.Response) {}
   rpc SubmitProof(SubmitProofRequest) returns (types.Response) {}
+  rpc UpdateValidationStatus(UpdateValidationStatusRequest) returns (types.Response) {}
+  rpc Resubmit(ResubmitRequest) returns(types.Response){}
+  rpc ResubmitReport(ResubmitReportRequest) returns (types.Response) {}
 }

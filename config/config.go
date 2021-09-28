@@ -1,8 +1,11 @@
 package config
 
 import (
+	"strings"
+
 	"github.com/go-redis/redis/v7"
 	"github.com/roava/zebra/secrets"
+	"github.com/roava/zebra/secrets/config"
 )
 
 const (
@@ -11,48 +14,63 @@ const (
 )
 
 // Ensure interface implementation
-var _ secrets.SecretGroup = &Secrets{}
+var _ config.SecretGroup = &Secrets{}
 
 // Secrets model
 type Secrets struct {
-	secrets.DecoratedSecrets `mapstructure:",squash"`
-	CddServiceURL            string        `mapstructure:"CDD_SERVICE_URL"`
-	OnfidoServiceURL         string        `mapstructure:"ONFIDO_SERVICE_URL"`
-	KYCServiceURL            string        `mapstructure:"KYC_SERVICE_URL"`
-	OnboardingServiceURL     string        `mapstructure:"ONBOARDING_SERVICE_URL"`
-	VerifyServiceURL         string        `mapstructure:"VERIFY_SERVICE_URL"`
-	AuthServiceURL           string        `mapstructure:"AUTH_SERVICE_URL"`
-	ProductServiceURL        string        `mapstructure:"PRODUCT_SERVICE_URL"`
-	PayeeServiceURL          string        `mapstructure:"PAYEE_SERVICE_URL"`
-	PersonServiceURL         string        `mapstructure:"PERSON_SERVICE_URL"`
-	PaymentServiceURL        string        `mapstructure:"PAYMENT_SERVICE_URL"`
-	IdentityServiceURL       string        `mapstructure:"IDENTITY_SERVICE_URL"`
-	JWTSecrets               string        `json:"jwt_secrets" mapstructure:"JWT_SECRETS"`
-	RedisURL                 string        `json:"redis_url" mapstructure:"REDIS_URL"`
-	RedisPassword            string        `json:"redis_password" mapstructure:"REDIS_PASSWORD"`
-	RedisClient              *redis.Client `json:"redis_client"`
+	config.DecoratedSecrets `mapstructure:",squash"`
+	DatabaseURL             string        `mapstructure:"mongodb_uri"`
+	PulsarURL               string        `mapstructure:"pulsar_url"`
+	PulsarCert              string        `mapstructure:"pulsar_cert"`
+	CddServiceURL           string        `mapstructure:"cdd_service_url"`
+	OnfidoServiceURL        string        `mapstructure:"onfido_service_url"`
+	KYCServiceURL           string        `mapstructure:"kyc_service_url"`
+	OnboardingServiceURL    string        `mapstructure:"onboarding_service_url"`
+	VerifyServiceURL        string        `mapstructure:"verify_service_url"`
+	AuthServiceURL          string        `mapstructure:"auth_service_url"`
+	AccountServiceURL       string        `mapstructure:"account_service_url"`
+	PayeeServiceURL         string        `mapstructure:"payee_service_url"`
+	PersonServiceURL        string        `mapstructure:"person_service_url"`
+	PaymentServiceURL       string        `mapstructure:"payment_service_url"`
+	IdentityServiceURL      string        `mapstructure:"identity_service_url"`
+	PricingServiceURL       string        `mapstructure:"pricing_service_url"`
+	JWTSecrets              string        `json:"jwt_secrets" mapstructure:"JWT_SECRETS"`
+	RedisURL                string        `json:"redis_url" mapstructure:"redis_url"`
+	RedisPassword           string        `json:"redis_password" mapstructure:"redis_password"`
+	RedisClient             *redis.Client `json:"redis_client"`
 }
-
-// PostProcess secrets post process logic
-func (s Secrets) PostProcess() error { return nil }
 
 // LoadSecrets loads up Secrets from the .env file once.
 // If an env file is present, Secrets will be loaded, else it'll be ignored.
 func LoadSecrets() (*Secrets, error) {
-	// Load secrets service
-	secretsService := secrets.New(".env")
-	// Set secret vars
-	var _secrets Secrets
-	err := secretsService.Unmarshal(&_secrets)
+	cfg := &Secrets{}
+	// Load secrets
+	err := secrets.UnmarshalMergedConfig(cfg, ".env", secrets.AllVaultSubPaths()...)
 	if err != nil {
 		return nil, err
 	}
-	if _secrets.Service.Port == "" {
-		_secrets.Service.Port = "20002"
+
+	return cfg, nil
+}
+
+// PostProcess ...
+func (s *Secrets) PostProcess() error {
+	s.Database.URL = strings.Trim(s.Database.URL, "\n")
+	if s.Service.Port == "" {
+		s.Service.Port = "20002"
 	}
-	if _secrets.Database.Name == "" {
-		_secrets.Database.Name = "roava"
+	if s.Database.Name == "" {
+		s.Database.Name = "roava"
+	}
+	if len(s.DatabaseURL) > 0 {
+		s.Database.URL = s.DatabaseURL
+	}
+	if len(s.PulsarURL) > 0 {
+		s.Pulsar.URL = s.PulsarURL
+	}
+	if len(s.PulsarCert) > 0 {
+		s.Pulsar.TLSCert = s.PulsarCert
 	}
 
-	return &_secrets, nil
+	return nil
 }

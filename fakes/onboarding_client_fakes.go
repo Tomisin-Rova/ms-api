@@ -30,7 +30,7 @@ func (f *FakeOnBoardingClient) CreatePhone(ctx context.Context,
 	return f.createPhoneResp, f.err
 }
 
-func (f *FakeOnBoardingClient) UpdatePersonBiodata(ctx context.Context, in *onboardingService.UpdatePersonRequest, opts ...grpc.CallOption) (*types.Person, error) {
+func (f *FakeOnBoardingClient) UpdatePersonBioData(ctx context.Context, in *onboardingService.UpdatePersonRequest, opts ...grpc.CallOption) (*types.Person, error) {
 	return &types.Person{}, f.err
 }
 
@@ -117,6 +117,21 @@ func (f *FakeOnBoardingClient) SubmitApplication(ctx context.Context, in *onboar
 }
 
 func (f *FakeOnBoardingClient) SubmitProof(ctx context.Context, in *onboardingService.SubmitProofRequest,
+	opts ...grpc.CallOption) (*types.Response, error) {
+	return &types.Response{}, f.err
+}
+
+func (f *FakeOnBoardingClient) UpdateValidationStatus(ctx context.Context, in *onboardingService.UpdateValidationStatusRequest,
+	opts ...grpc.CallOption) (*types.Response, error) {
+	return &types.Response{}, f.err
+}
+
+func (f *FakeOnBoardingClient) Resubmit(ctx context.Context, in *onboardingService.ResubmitRequest,
+	opts ...grpc.CallOption) (*types.Response, error) {
+	return &types.Response{}, f.err
+}
+
+func (f *FakeOnBoardingClient) ResubmitReport(ctx context.Context, in *onboardingService.ResubmitReportRequest,
 	opts ...grpc.CallOption) (*types.Response, error) {
 	return &types.Response{}, f.err
 }

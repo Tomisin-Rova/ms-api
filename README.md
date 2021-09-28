@@ -47,3 +47,13 @@ $ make docker
 
 $ make build 
 ```
+
+If custom secrets are required, please ensure that *local.yml* file exists in the root path and the environment variable is set with the *local* value.
+
+It's possible to force the environment by using the below command:
+
+```shell script
+# Force environment
+
+$ make local environment=local
+```

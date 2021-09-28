@@ -1,203 +1,208 @@
 version: "3.0"
 
 services:
-  #eventstore:
-  #  image: apachepulsar/pulsar:2.6.1
-  #  container_name: eventstore
-  #  restart: on-failure
-  #  volumes:
-  #    - "${HOME}/fresh/events/streaming/tests:/pulsar/data"
-  #  ports:
-  #    - 6650:6650
-  #    - 8090:8080
-  #  command: bin/pulsar standalone
-
-  mongodb:
-    image: mongo:4.2.9
-    container_name: mongo
-    restart: always
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: root
-      MONGO_INITDB_DATABASE: roava
-    volumes:
-      - "${HOME}/mnt/datastore/mongo:/data/db"
-    ports:
-      - 27018:27017
-
-  ms.verify:
-    container_name: ms.verify
-    image: gcr.io/labs-271617/roava.io/services/ms.verify #localhost:15000/ms.verify
+  eventstore:
+    image: apachepulsar/pulsar:2.6.1
+    container_name: eventstore
     restart: on-failure
-    environment:
-      PORT: 2000
-      DATABASE_URL: mongodb://root:root@mongodb:27017
-      PULSAR_URL: pulsar+ssl://pulsar.roava.io:6651
-      PULSAR_TLS_CERT: ${PULSAR_TLS_CERT}
-      DATABASE_NAME: roava
-      SERVICE_NAME: ms.verify
-      ENVIRONMENT: local
-    depends_on:
-      - mongodb
-      #- eventstore
     ports:
-      - 2000:2000
+      - 6650:6650
+      - 8090:8080
+    command: bin/pulsar standalone
+
+    mongodb:
+      image: mongo:4.2.9
+      container_name: mongo
+      restart: always
+      environment:
+        MONGO_INITDB_ROOT_USERNAME: root
+        MONGO_INITDB_ROOT_PASSWORD: root
+        MONGO_INITDB_DATABASE: roava
+      volumes:
+        - "${HOME}/mnt/datastore/mongo:/data/db"
+      ports:
+        - 27018:27017
 
   ms.onboarding:
     container_name: ms.onboarding
-    image: gcr.io/labs-271617/roava.io/services/ms.onboarding #localhost:15000/ms.onboarding
+    image: eu.gcr.io/roava-io/roava.io/services/ms.onboarding:0.4.8
     restart: on-failure
     environment:
-      PORT: 2001
-      DATABASE_URL: mongodb://root:root@mongodb:27017
-      PULSAR_URL: pulsar+ssl://pulsar.roava.io:6651
-      PULSAR_TLS_CERT: ${PULSAR_TLS_CERT}
-      DATABASE_NAME: roava
+      #PULSAR_TLS_CERT: `cat ./pulsar.pem`
       SERVICE_NAME: ms.onboarding
+      PORT: 2000
+      DATABASE_URL: mongodb://root:root@host.docker.internal:27018
+      DATABASE_NAME: roava
+      ENVIRONMENT: local
+      PULSAR_URL: pulsar://host.docker.internal:6650
+      JWT_SECRET: localSecret
     depends_on:
-      #- eventstore
-      - mongodb
+      #- mongodb
+      - eventstore
+    ports:
+      - 2000:2000
+
+  ms.cdd:
+    container_name: ms.aml
+    image: eu.gcr.io/roava-io/roava.io/services/ms.cdd:0.3.1
+    restart: on-failure
+    environment:
+      SERVICE_NAME: ms.cdd
+      PORT: 2001
+      DATABASE_URL: mongodb://root:root@host.docker.internal:27018
+      DATABASE_NAME: roava
+      ENVIRONMENT: local
+      PULSAR_URL: pulsar://host.docker.internal:6650
+    depends_on:
+      #- mongodb
+      - eventstore
     ports:
       - 2001:2001
 
-  ms.identity:
-    container_name: ms.identity
-    image: gcr.io/labs-271617/roava.io/services/ms.identity
+  ms.verify:
+    container_name: ms.verify
+    image: eu.gcr.io/roava-io/roava.io/services/ms.verify:0.1.9
     restart: on-failure
     environment:
       PORT: 2002
-      DATABASE_URL: mongodb://root:root@mongodb:27017
-      PULSAR_URL: pulsar+ssl://pulsar.roava.io:6651
-      PULSAR_TLS_CERT: ${PULSAR_TLS_CERT}
+      DATABASE_URL: mongodb://root:root@host.docker.internal:27018
       DATABASE_NAME: roava
-      SERVICE_NAME: ms.identity
+      ENVIRONMENT: local
+      PULSAR_URL: pulsar://host.docker.internal:6650
+      # PULSAR_TLS_CERT=`cat ./pulsar.pem`
+      SERVICE_NAME: ms.verify
     depends_on:
-      #- eventstore
-      - mongodb
+      #- mongodb
+      - eventstore
     ports:
       - 2002:2002
 
-  ms.person:
-    container_name: ms.person
-    image: gcr.io/labs-271617/roava.io/services/ms.person #localhost:15000/ms.person
-    restart: on-failure
-    environment:
-      PORT: 2003
-      DATABASE_URL: mongodb://root:root@mongodb:27017
-      PULSAR_URL: pulsar+ssl://pulsar.roava.io:6651
-      PULSAR_TLS_CERT: ${PULSAR_TLS_CERT}
-      DATABASE_NAME: roava
-      SERVICE_NAME: ms.person
-    depends_on:
-      #- eventstore
-      - mongodb
-    ports:
-      - 2003:2003
-  ms.kyc:
-    container_name: ms.kyc
-    image: gcr.io/labs-271617/roava.io/services/ms.kyc
-    restart: on-failure
-    environment:
-      PORT: 2006
-      DATABASE_URL: mongodb://root:root@mongodb:27017
-      PULSAR_URL: pulsar+ssl://pulsar.roava.io:6651
-      PULSAR_TLS_CERT: ${PULSAR_TLS_CERT}
-      DATABASE_NAME: roava
-      SERVICE_NAME: ms.kyc
-      ENVIRONMENT: staging
-    depends_on:
-      - mongodb
-      #- eventstore
-    ports:
-      - 2006:2006
-
   ms.auth:
     container_name: ms.auth
-    image: gcr.io/labs-271617/roava.io/services/ms.auth #localhost:15000/ms.auth #
+    image: eu.gcr.io/roava-io/roava.io/services/ms.auth:0.2.3
     restart: on-failure
     environment:
-      PORT: 2005
-      DATABASE_URL: mongodb://root:root@mongodb:27017
-      PULSAR_URL: pulsar+ssl://pulsar.roava.io:6651
-      PULSAR_TLS_CERT: ${PULSAR_TLS_CERT}
-      DATABASE_NAME: roava
       SERVICE_NAME: ms.auth
+      PORT: 2003
+      DATABASE_URL: mongodb://root:root@host.docker.internal:27018
+      DATABASE_NAME: roava
+      ENVIRONMENT: local
+      PULSAR_URL: pulsar://host.docker.internal:6650
+      JWT_SECRET: localSecret
     depends_on:
-      #- eventstore
-      - mongodb
+      #- mongodb
+      - eventstore
+    ports:
+      - 2003:2003
+
+  accounts:
+    container_name: accounts
+    image: eu.gcr.io/roava-io/roava.io/services/accounts:0.3.0
+    restart: on-failure
+    environment:
+      SERVICE_NAME: accounts
+      PORT: 2004
+      DATABASE_URL: mongodb://root:root@host.docker.internal:27018
+      DATABASE_NAME: roava
+      ENVIRONMENT: dev
+      PULSAR_URL: pulsar://host.docker.internal:6650
+      MAMBU_BASE_URL: https://roava.sandbox.mambu.com/api
+      MAMBU_API_KEY: ezQqvMOuSCH4oHh9WtJGi4AAZyyYAqSx
+      NGN_PRODUCT_ID:
+      GBP_PRODUCT_ID:
+      ASSIGNED_BRANCH_ID:
+      HTTPPORT: 20004
+      BVN_BASE_URL: https://api.fcmb.com/fcmb/test/v1
+      BVN_KEY: e28b0b19-19da-4672-9168-40c263e1a02d
+      FCMB_BASE_URL: https://uat.firstcitygrouponline.com/onlineaccountopeningservice/api
+      FCMB_KEY: 123456
+      FCMB_ID: 12345
+      FCMB_SCHEME:
+    depends_on:
+      #- mongodb
+      - eventstore
+    ports:
+      - 2004:2004
+
+  payments:
+    container_name: payments
+    image: eu.gcr.io/roava-io/roava.io/services/ms.payment:0.1.5
+    restart: on-failure
+    environment:
+      SERVICE_NAME: payments
+      PORT: 2005
+      DATABASE_URL: mongodb://root:root@host.docker.internal:27018
+      DATABASE_NAME: roava
+      ENVIRONMENT: local
+      PULSAR_URL: pulsar://host.docker.internal:6650
+    depends_on:
+      #- mongodb
+      - eventstore
     ports:
       - 2005:2005
 
-  ms.onfido:
-    container_name: ms.onfido
-    image: gcr.io/labs-271617/roava.io/services/ms.onfido
+  ms.person:
+    container_name: ms.person
+    image: eu.gcr.io/roava-io/roava.io/services/ms.person:0.3.6
     restart: on-failure
     environment:
+      SERVICE_NAME: ms.person
+      PORT: 2006
+      DATABASE_URL: mongodb://root:root@host.docker.internal:27018
+      DATABASE_NAME: roava
+      ENVIRONMENT: local
+      PULSAR_URL: pulsar://host.docker.internal:6650
+    depends_on:
+      #- mongodb
+      - eventstore
+    ports:
+      - 2006:2006
+
+  ms.identity:
+    container_name: ms.identity
+    image: eu.gcr.io/roava-io/roava.io/services/ms.identity:0.2.5
+    restart: on-failure
+    environment:
+      SERVICE_NAME: ms.identity
       PORT: 2007
-      PULSAR_URL: pulsar+ssl://pulsar.roava.io:6651
-      PULSAR_TLS_CERT: ${PULSAR_TLS_CERT}
-      SERVICE_NAME: ms.onfido
-      ONFIDO_API_TOKEN: api_sandbox.KvH4KL7hNtd.PRVpelPdt6fpZmYmfEcf8BvUNjRoyfrB
-      ONFIDO_APPLICATION_ID: com.roava.app
-      ENVIRONMENT: staging
+      DATABASE_URL: mongodb://root:root@host.docker.internal:27018
+      DATABASE_NAME: roava
+      ENVIRONMENT: local
+      PULSAR_URL: pulsar://host.docker.internal:6650
+    depends_on:
+      #- mongodb
+      - eventstore
     ports:
       - 2007:2007
-
-  ms.notify:
-    container_name: ms.notify
-    image: gcr.io/labs-271617/roava.io/services/ms.notify:0.1.0
-    restart: on-failure
-    environment:
-      PORT: 2008
-      DATABASE_URL: mongodb://root:root@mongodb:27017
-      PULSAR_URL: pulsar+ssl://pulsar.roava.io:6651
-      PULSAR_TLS_CERT: ${PULSAR_TLS_CERT}
-      DATABASE_NAME: roava
-      SERVICE_NAME: ms.notify
-      TWILIO_ACCOUNT_SID: ${TW_SID}
-      TWILIO_ACCOUNT_TOKEN: ${TW_TOKEN}
-    depends_on:
-      #- eventstore
-      - mongodb
-    ports:
-      - 2008:2008
-
-  ms.messaging:
-    container_name: ms.messaging
-    image: gcr.io/labs-271617/roava.io/services/ms.messaging:0.2.0
-    restart: on-failure
-    environment:
-      PORT: 2009
-      DATABASE_URL: mongodb://root:root@mongodb:27017
-      PULSAR_URL: pulsar+ssl://pulsar.roava.io:6651
-      PULSAR_TLS_CERT: ${PULSAR_TLS_CERT}
-      DATABASE_NAME: roava
-      SERVICE_NAME: ms.messaging
-    depends_on:
-      #- eventstore
-      - mongodb
-    ports:
-      - 2009:2009
 
   api:
     container_name: api
     build:
       context: ./
     environment:
-      PORT: 9000
-      ONBOARDING_SERVICE_URL: ms.onboarding:2001
-      VERIFY_SERVICE_URL: ms.verify:2000
-      AUTH_SERVICE_URL: ms.auth:2005
-      ONFIDO_SERVICE_URL: ms.onfido:2007
-      KYC_SERVICE_URL: ms.kyc:2006
       SERVICE_NAME: ms.api
+      PORT: 9000
+      DATABASE_URL: mongodb://root:root@host.docker.internal:27018
+      DATABASE_NAME: roava
       ENVIRONMENT: local
+      PULSAR_URL: pulsar://host.docker.internal:6650
+      ONBOARDING_SERVICE_URL: ms.onboarding:2000
+      CDD_SERVICE_URL: ms.cdd:2001
+      VERIFY_SERVICE_URL: ms.verify:2002
+      AUTH_SERVICE_URL: ms.auth:2003
+      ACCOUNT_SERVICE_URL: accounts:2004
+      PAYMENT_SERVICE_URL: payments:2005
+      PERSON_SERVICE_URL: ms.person:2006
+      IDENTITY_SERVICE_URL: ms.identity:2007
     depends_on:
       - ms.onboarding
+      - ms.cdd
       - ms.verify
       - ms.auth
-      - ms.onfido
-      - ms.kyc
+      - accounts
+      - payments
+      - ms.person
+      - ms.identity
     ports:
       - 9000:9000
     restart: on-failure
