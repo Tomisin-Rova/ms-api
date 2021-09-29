@@ -436,6 +436,8 @@ type Query {
     before: String
     # Filter transactions by an account id
     account: ID!
+    # Filter transactions by a payment list
+    payments: [ID!]
   ): TransactionConnection
   # Get fx value from a currency pair
   fx(currency: String!, base_currency: String!): Fx

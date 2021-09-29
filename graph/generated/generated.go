@@ -1016,7 +1016,7 @@ type ComplexityRoot struct {
 		Task              func(childComplexity int, id string) int
 		Tasks             func(childComplexity int, first *int64, after *string, last *int64, before *string) int
 		Transaction       func(childComplexity int, id string) int
-		Transactions      func(childComplexity int, first *int64, after *string, last *int64, before *string, account string) int
+		Transactions      func(childComplexity int, first *int64, after *string, last *int64, before *string, account string, payments []string) int
 		TransferFees      func(childComplexity int, currency string, baseCurrency string) int
 		Validation        func(childComplexity int, id string) int
 		Validations       func(childComplexity int, first *int64, after *string, last *int64, before *string) int
@@ -1401,7 +1401,7 @@ type QueryResolver interface {
 	Payment(ctx context.Context, id string) (*types.Payment, error)
 	Payments(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.PaymentConnection, error)
 	Transaction(ctx context.Context, id string) (*types.Transaction, error)
-	Transactions(ctx context.Context, first *int64, after *string, last *int64, before *string, account string) (*types.TransactionConnection, error)
+	Transactions(ctx context.Context, first *int64, after *string, last *int64, before *string, account string, payments []string) (*types.TransactionConnection, error)
 	Fx(ctx context.Context, currency string, baseCurrency string) (*types.Fx, error)
 	TransferFees(ctx context.Context, currency string, baseCurrency string) (*types.TransferFees, error)
 	Acceptance(ctx context.Context, id string) (*types.Acceptance, error)
@@ -6607,7 +6607,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Transactions(childComplexity, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string), args["account"].(string)), true
+		return e.complexity.Query.Transactions(childComplexity, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string), args["account"].(string), args["payments"].([]string)), true
 
 	case "Query.transferFees":
 		if e.complexity.Query.TransferFees == nil {
@@ -8459,6 +8459,8 @@ var sources = []*ast.Source{
     before: String
     # Filter transactions by an account id
     account: ID!
+    # Filter transactions by a payment list
+    payments: [ID!]
   ): TransactionConnection
   # Get fx value from a currency pair
   fx(currency: String!, base_currency: String!): Fx
@@ -13662,6 +13664,15 @@ func (ec *executionContext) field_Query_transactions_args(ctx context.Context, r
 		}
 	}
 	args["account"] = arg4
+	var arg5 []string
+	if tmp, ok := rawArgs["payments"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("payments"))
+		arg5, err = ec.unmarshalOID2ᚕstringᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["payments"] = arg5
 	return args, nil
 }
 
@@ -36993,7 +37004,7 @@ func (ec *executionContext) _Query_transactions(ctx context.Context, field graph
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Transactions(rctx, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string), args["account"].(string))
+		return ec.resolvers.Query().Transactions(rctx, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string), args["account"].(string), args["payments"].([]string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

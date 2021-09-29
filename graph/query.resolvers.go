@@ -1219,14 +1219,19 @@ func (r *queryResolver) Transaction(ctx context.Context, id string) (*types.Tran
 	return &transactionRes, nil
 }
 
-func (r *queryResolver) Transactions(ctx context.Context, first *int64, after *string, last *int64, before *string, account string) (*types.TransactionConnection, error) {
+func (r *queryResolver) Transactions(ctx context.Context, first *int64, after *string, last *int64, before *string, account string, payments []string) (*types.TransactionConnection, error) {
 	claims, err := middlewares.GetAuthenticatedUser(ctx)
 	if err != nil {
 		return nil, ErrUnAuthenticated
 	}
+	paymentsFilter := make([]string, 0)
+	if len(payments) > 0 {
+		paymentsFilter = payments
+	}
 	transactions, err := r.accountService.GetTransactions(ctx, &accountService.GetTransactionsRequest{
 		IdentityId: claims.IdentityId,
 		Account:    account,
+		Payments:   paymentsFilter,
 	})
 	if err != nil {
 		r.logger.Error("failed to get transaction", zap.Error(err))
