@@ -685,7 +685,7 @@ func (r *Resolver) getAccountsResponse(ctx context.Context, first *int64, after 
 				transactionRes = append(transactionRes, &transaction)
 			}
 
-			transArgMap := r.preloader.GetArgMap(ctx, "Transactions")
+			transArgMap := r.preloader.GetArgMap(ctx, "transactions")
 			transConnInput := r.getConnInput(transArgMap)
 
 			edger := func(p *types.Transaction, offset int) connections.Edge {
@@ -730,7 +730,7 @@ func (r *Resolver) getAccountsResponse(ctx context.Context, first *int64, after 
 				tagsRes = append(tagsRes, &tag)
 			}
 
-			tagsArgMap := r.preloader.GetArgMap(ctx, "Tags")
+			tagsArgMap := r.preloader.GetArgMap(ctx, "tags")
 			tagsConnInput := r.getConnInput(tagsArgMap)
 
 			edger := func(p *types.Tag, offset int) connections.Edge {
