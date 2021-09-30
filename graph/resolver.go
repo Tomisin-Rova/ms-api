@@ -133,7 +133,7 @@ func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) 
 	const LOCAL_DEV_ENVIRONMENT = "local"
 	opts := &ResolverOpts{
 		preloader: preloader.GQLPreloader{},
-		mapper:    &mapper.GQLMapper{},
+		mapper:    mapper.NewMapper(),
 	}
 	localDevEnvironment := secrets.Service.Environment == LOCAL_DEV_ENVIRONMENT
 	// OnBoarding

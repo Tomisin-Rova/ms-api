@@ -631,3 +631,9 @@ func Float64(i float64) *float64 {
 	}
 	return &i
 }
+
+func NewMapper() *GQLMapper {
+	return &GQLMapper{
+		logger: zaplogger.New(),
+	}
+}
