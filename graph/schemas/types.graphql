@@ -2570,3 +2570,13 @@ enum PaymentStatus {
   APPROVED
 }
 
+# Filter for Payments
+input PaymentFilter {
+  # id from payee
+  payee_id: String
+  # status of payment
+  status: PaymentStatus
+  # limit of returned data
+  limit: Int
+}
+
