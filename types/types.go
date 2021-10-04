@@ -862,6 +862,12 @@ type PaymentEdge struct {
 	Cursor string   `json:"cursor"`
 }
 
+type PaymentFilter struct {
+	PayeeID *string        `json:"payee_id"`
+	Status  *PaymentStatus `json:"status"`
+	Limit   *int64         `json:"limit"`
+}
+
 type PaymentInput struct {
 	IdempotencyKey string            `json:"idempotency_key"`
 	Owner          string            `json:"owner"`
@@ -1655,6 +1661,47 @@ func (e *OnboardingCheckPoint) UnmarshalGQL(v interface{}) error {
 }
 
 func (e OnboardingCheckPoint) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type PaymentStatus string
+
+const (
+	PaymentStatusPending  PaymentStatus = "PENDING"
+	PaymentStatusApproved PaymentStatus = "APPROVED"
+)
+
+var AllPaymentStatus = []PaymentStatus{
+	PaymentStatusPending,
+	PaymentStatusApproved,
+}
+
+func (e PaymentStatus) IsValid() bool {
+	switch e {
+	case PaymentStatusPending, PaymentStatusApproved:
+		return true
+	}
+	return false
+}
+
+func (e PaymentStatus) String() string {
+	return string(e)
+}
+
+func (e *PaymentStatus) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = PaymentStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid PaymentStatus", str)
+	}
+	return nil
+}
+
+func (e PaymentStatus) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

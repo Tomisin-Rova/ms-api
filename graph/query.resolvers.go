@@ -1138,7 +1138,7 @@ func (r *queryResolver) Payment(ctx context.Context, id string) (*types.Payment,
 	return &paymentRes, nil
 }
 
-func (r *queryResolver) Payments(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.PaymentConnection, error) {
+func (r *queryResolver) Payments(ctx context.Context, first *int64, after *string, last *int64, before *string, filter *types.PaymentFilter) (*types.PaymentConnection, error) {
 	claims, err := middlewares.GetAuthenticatedUser(ctx)
 	if err != nil {
 		return nil, ErrUnAuthenticated
