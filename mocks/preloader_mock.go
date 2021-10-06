@@ -6,48 +6,35 @@ package mocks
 
 import (
 	context "context"
-	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
+
+	gomock "github.com/golang/mock/gomock"
 )
 
-// MockPreloader is a mock of Preloader interface
+// MockPreloader is a mock of Preloader interface.
 type MockPreloader struct {
 	ctrl     *gomock.Controller
 	recorder *MockPreloaderMockRecorder
 }
 
-// MockPreloaderMockRecorder is the mock recorder for MockPreloader
+// MockPreloaderMockRecorder is the mock recorder for MockPreloader.
 type MockPreloaderMockRecorder struct {
 	mock *MockPreloader
 }
 
-// NewMockPreloader creates a new mock instance
+// NewMockPreloader creates a new mock instance.
 func NewMockPreloader(ctrl *gomock.Controller) *MockPreloader {
 	mock := &MockPreloader{ctrl: ctrl}
 	mock.recorder = &MockPreloaderMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockPreloader) EXPECT() *MockPreloaderMockRecorder {
 	return m.recorder
 }
 
-// GetPreloads mocks base method
-func (m *MockPreloader) GetPreloads(ctx context.Context) []string {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetPreloads", ctx)
-	ret0, _ := ret[0].([]string)
-	return ret0
-}
-
-// GetPreloads indicates an expected call of GetPreloads
-func (mr *MockPreloaderMockRecorder) GetPreloads(ctx interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPreloads", reflect.TypeOf((*MockPreloader)(nil).GetPreloads), ctx)
-}
-
-// GetArgMap mocks base method
+// GetArgMap mocks base method.
 func (m *MockPreloader) GetArgMap(ctx context.Context, field string) map[string]interface{} {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetArgMap", ctx, field)
@@ -55,8 +42,22 @@ func (m *MockPreloader) GetArgMap(ctx context.Context, field string) map[string]
 	return ret0
 }
 
-// GetArgMap indicates an expected call of GetArgMap
+// GetArgMap indicates an expected call of GetArgMap.
 func (mr *MockPreloaderMockRecorder) GetArgMap(ctx, field interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetArgMap", reflect.TypeOf((*MockPreloader)(nil).GetArgMap), ctx, field)
+}
+
+// GetPreloads mocks base method.
+func (m *MockPreloader) GetPreloads(ctx context.Context) []string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPreloads", ctx)
+	ret0, _ := ret[0].([]string)
+	return ret0
+}
+
+// GetPreloads indicates an expected call of GetPreloads.
+func (mr *MockPreloaderMockRecorder) GetPreloads(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPreloads", reflect.TypeOf((*MockPreloader)(nil).GetPreloads), ctx)
 }

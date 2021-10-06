@@ -11111,9 +11111,7 @@ input PaymentFilter {
   status: PaymentStatus
   # limit of returned data
   limit: Int
-}
-
-`, BuiltIn: false},
+}`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 

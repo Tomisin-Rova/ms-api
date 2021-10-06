@@ -23,6 +23,7 @@ import (
 	"ms.api/protos/pb/paymentService"
 	"ms.api/protos/pb/personService"
 	"ms.api/protos/pb/pricingService"
+	pb "ms.api/protos/pb/types"
 	"ms.api/server/http/middlewares"
 	"ms.api/types"
 )
@@ -1143,7 +1144,15 @@ func (r *queryResolver) Payments(ctx context.Context, first *int64, after *strin
 	if err != nil {
 		return nil, ErrUnAuthenticated
 	}
-	payments, err := r.paymentService.GetPayments(ctx, &paymentService.GetPaymentsRequest{Owner: claims.IdentityId})
+	var paymentFilter *pb.PaymentFilter
+	if filter != nil {
+		paymentFilter = &pb.PaymentFilter{
+			PayeeId: *filter.PayeeID,
+			Status:  filter.Status.String(),
+			Limit:   int32(*filter.Limit),
+		}
+	}
+	payments, err := r.paymentService.GetPayments(ctx, &paymentService.GetPaymentsRequest{Owner: claims.IdentityId, Filter: paymentFilter})
 	if err != nil {
 		r.logger.Error("failed to get payments", zap.Error(err))
 		return nil, err

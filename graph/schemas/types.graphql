@@ -2579,4 +2579,3 @@ input PaymentFilter {
   # limit of returned data
   limit: Int
 }
-
