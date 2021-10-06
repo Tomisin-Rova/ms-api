@@ -1144,15 +1144,28 @@ func (r *queryResolver) Payments(ctx context.Context, first *int64, after *strin
 	if err != nil {
 		return nil, ErrUnAuthenticated
 	}
-	var paymentFilter *pb.PaymentFilter
+	var paymentFilter pb.PaymentFilter
 	if filter != nil {
-		paymentFilter = &pb.PaymentFilter{
-			PayeeId: *filter.PayeeID,
-			Status:  filter.Status.String(),
-			Limit:   int32(*filter.Limit),
+		payeeId := ""
+		if filter.PayeeID != nil {
+			payeeId = *filter.PayeeID
+		}
+		status := ""
+		if filter.Status != nil {
+			status = filter.Status.String()
+		}
+		var limit int32
+		if filter.Limit != nil {
+			limit = int32(*filter.Limit)
+		}
+
+		paymentFilter = pb.PaymentFilter{
+			PayeeId: payeeId,
+			Status:  status,
+			Limit:   limit,
 		}
 	}
-	payments, err := r.paymentService.GetPayments(ctx, &paymentService.GetPaymentsRequest{Owner: claims.IdentityId, Filter: paymentFilter})
+	payments, err := r.paymentService.GetPayments(ctx, &paymentService.GetPaymentsRequest{Owner: claims.IdentityId, Filter: &paymentFilter})
 	if err != nil {
 		r.logger.Error("failed to get payments", zap.Error(err))
 		return nil, err
