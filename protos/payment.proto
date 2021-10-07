@@ -84,7 +84,8 @@ message BeneficiaryInput {
 }
 
 message GetPaymentsRequest {
-  string owner =1;
+  string owner = 1;
+  types.PaymentFilter filter = 2;
 }
 
 message GetPaymentRequest {

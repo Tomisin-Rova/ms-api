@@ -418,6 +418,8 @@ type Query {
     last: Int
     # Returns the elements in the list that come before the specified cursor.
     before: String
+    # Filter payments
+    filter: PaymentFilter
   ): PaymentConnection
   # fetch an individual transaction by unique ID
   transaction(

@@ -789,3 +789,9 @@ message Quote {
   Fx fx = 5;
   int64 ts = 6;
 }
+
+message PaymentFilter {
+  string status = 1;
+  string payee_id = 2;
+  int32 limit = 3;
+}

@@ -23,6 +23,7 @@ import (
 	"ms.api/protos/pb/paymentService"
 	"ms.api/protos/pb/personService"
 	"ms.api/protos/pb/pricingService"
+	pb "ms.api/protos/pb/types"
 	"ms.api/server/http/middlewares"
 	"ms.api/types"
 )
@@ -1138,12 +1139,33 @@ func (r *queryResolver) Payment(ctx context.Context, id string) (*types.Payment,
 	return &paymentRes, nil
 }
 
-func (r *queryResolver) Payments(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.PaymentConnection, error) {
+func (r *queryResolver) Payments(ctx context.Context, first *int64, after *string, last *int64, before *string, filter *types.PaymentFilter) (*types.PaymentConnection, error) {
 	claims, err := middlewares.GetAuthenticatedUser(ctx)
 	if err != nil {
 		return nil, ErrUnAuthenticated
 	}
-	payments, err := r.paymentService.GetPayments(ctx, &paymentService.GetPaymentsRequest{Owner: claims.IdentityId})
+	var paymentFilter pb.PaymentFilter
+	if filter != nil {
+		payeeId := ""
+		if filter.PayeeID != nil {
+			payeeId = *filter.PayeeID
+		}
+		status := ""
+		if filter.Status != nil {
+			status = filter.Status.String()
+		}
+		var limit int32
+		if filter.Limit != nil {
+			limit = int32(*filter.Limit)
+		}
+
+		paymentFilter = pb.PaymentFilter{
+			PayeeId: payeeId,
+			Status:  status,
+			Limit:   limit,
+		}
+	}
+	payments, err := r.paymentService.GetPayments(ctx, &paymentService.GetPaymentsRequest{Owner: claims.IdentityId, Filter: &paymentFilter})
 	if err != nil {
 		r.logger.Error("failed to get payments", zap.Error(err))
 		return nil, err

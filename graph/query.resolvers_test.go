@@ -4,18 +4,19 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"testing"
 	"time"
 
 	"ms.api/libs/mapper"
 	"ms.api/protos/pb/accountService"
 	"ms.api/protos/pb/pricingService"
-
-	"ms.api/protos/pb/paymentService"
+	apiTypes "ms.api/types"
 
 	"ms.api/mocks"
 	cddService "ms.api/protos/pb/cddService"
 	"ms.api/protos/pb/onboardingService"
+	pbPaymentService "ms.api/protos/pb/paymentService"
 	"ms.api/protos/pb/personService"
 	protoTypes "ms.api/protos/pb/types"
 	"ms.api/server/http/middlewares"
@@ -25,6 +26,8 @@ import (
 	"github.com/roava/zebra/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	"go.uber.org/zap/zaptest"
 	"google.golang.org/protobuf/types/known/anypb"
 )
@@ -692,7 +695,7 @@ func TestQueryResolver_Payee(t *testing.T) {
 			DeviceId:   "deviceId",
 		})
 
-	paymentClient.On("GetPayee", ctx, &paymentService.GetPayeeRequest{
+	paymentClient.On("GetPayee", ctx, &pbPaymentService.GetPayeeRequest{
 		PayeeId:    "payeeId",
 		IdentityId: "identityId",
 	}).Return(mockPayee, nil)
@@ -948,4 +951,155 @@ func TestQueryResolver_Fx(t *testing.T) {
 	assert.Equal(t, mockFx.Currency, fx.Currency)
 	assert.Equal(t, mockFx.BaseCurrency, fx.BaseCurrency)
 	assert.Equal(t, mockFx.BuyRate, fx.BuyRate)
+}
+
+func TestQueryResolver_Payments(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	const (
+		success = iota
+		failToGetAuhtenticatedUser
+		failToGetPayments
+		paymentFilter
+	)
+
+	timestamp := time.Now()
+	ownerIdentityId := "ownerIdentityId"
+	mockPayments := &protoTypes.Payments{
+		Payment: []*protoTypes.Payment{
+			{
+				Id: "first-payment-id",
+				Owner: &protoTypes.Person{
+					Id: ownerIdentityId,
+				},
+				Status: "APPROVED",
+				Ts:     timestamp.Add(time.Second * 3).Unix(),
+			},
+			{
+				Id: "second-payment-id",
+				Owner: &protoTypes.Person{
+					Id: ownerIdentityId,
+				},
+				Status: "PENDING",
+				Ts:     timestamp.Add(time.Second * 2).Unix(),
+			},
+			{
+				Id: "third-payment-id",
+				Owner: &protoTypes.Person{
+					Id: ownerIdentityId,
+				},
+				Status: "APPROVED",
+				Ts:     timestamp.Add(time.Second).Unix(),
+			},
+		},
+	}
+
+	payeeId := "PayeeId"
+	var status apiTypes.PaymentStatus = "APPROVED"
+	var limit int64 = 10
+	var tests = []struct {
+		name     string
+		args     *apiTypes.PaymentFilter
+		testType int
+	}{
+		{
+			name:     "Successful call without filter",
+			args:     nil,
+			testType: success,
+		},
+		{
+			name:     "Fail to get authenticated user",
+			args:     nil,
+			testType: failToGetAuhtenticatedUser,
+		},
+		{
+			name:     "Fail to get payments",
+			args:     nil,
+			testType: failToGetPayments,
+		},
+		{
+			name: "Successful call with filter",
+			args: &apiTypes.PaymentFilter{
+				PayeeID: &payeeId,
+				Status:  &status,
+				Limit:   &limit,
+			},
+			testType: paymentFilter,
+		},
+	}
+
+	ctx := context.WithValue(context.Background(), middlewares.AuthenticatedUserContextKey,
+		models.Claims{
+			PersonId:   "personId",
+			IdentityId: ownerIdentityId,
+			DeviceId:   "deviceId",
+		})
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			switch testCase.testType {
+			case success:
+				paymentService := &mocks.PaymentServiceClient{}
+				paymentService.On("GetPayments", ctx, &pbPaymentService.GetPaymentsRequest{Owner: ownerIdentityId, Filter: &protoTypes.PaymentFilter{}}).Return(mockPayments, nil)
+				resolverOpts := &ResolverOpts{
+					paymentService: paymentService,
+					mapper:         mapper.NewMapper(),
+				}
+				resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Query()
+				res, err := resolver.Payments(ctx, nil, nil, nil, nil, nil)
+				assert.Nil(t, err)
+				assert.NotNil(t, res)
+				assert.Len(t, res.Nodes, len(mockPayments.Payment))
+				assert.Equal(t, len(mockPayments.Payment), int(*res.TotalCount))
+			case failToGetAuhtenticatedUser:
+				faultyContext := context.Background()
+				paymentService := &mocks.PaymentServiceClient{}
+				resolverOpts := &ResolverOpts{
+					paymentService: paymentService,
+					mapper:         mapper.NewMapper(),
+				}
+				resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Query()
+				res, err := resolver.Payments(faultyContext, nil, nil, nil, nil, nil)
+				assert.NotNil(t, err)
+				assert.Nil(t, res)
+				assert.Equal(t, err, ErrUnAuthenticated)
+			case failToGetPayments:
+				paymentService := &mocks.PaymentServiceClient{}
+				paymentService.On("GetPayments", ctx, &pbPaymentService.GetPaymentsRequest{Owner: ownerIdentityId, Filter: &protoTypes.PaymentFilter{}}).Return(nil, errors.New(""))
+				logService := zaptest.NewLogger(t, zaptest.WrapOptions(zap.Hooks(func(e zapcore.Entry) error {
+					expectedMessages := "failed to get payments"
+					if !strings.Contains(expectedMessages, e.Message) {
+						t.Fatalf("Log with one of this messages: '%s' should happen", expectedMessages)
+					}
+					return nil
+				})))
+				resolverOpts := &ResolverOpts{
+					paymentService: paymentService,
+					mapper:         mapper.NewMapper(),
+				}
+				resolver := NewResolver(resolverOpts, logService).Query()
+				res, err := resolver.Payments(ctx, nil, nil, nil, nil, nil)
+				assert.NotNil(t, err)
+				assert.Nil(t, res)
+			case paymentFilter:
+				paymentService := &mocks.PaymentServiceClient{}
+				paymentService.On("GetPayments", ctx, &pbPaymentService.GetPaymentsRequest{Owner: ownerIdentityId, Filter: &protoTypes.PaymentFilter{
+					PayeeId: "PayeeId",
+					Status:  "APPROVED",
+					Limit:   10,
+				}}).Return(mockPayments, nil)
+				resolverOpts := &ResolverOpts{
+					paymentService: paymentService,
+					mapper:         mapper.NewMapper(),
+				}
+				resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Query()
+				res, err := resolver.Payments(ctx, nil, nil, nil, nil, testCase.args)
+				assert.Nil(t, err)
+				assert.NotNil(t, res)
+				assert.Len(t, res.Nodes, len(mockPayments.Payment))
+				assert.Equal(t, len(mockPayments.Payment), int(*res.TotalCount))
+			}
+		})
+	}
 }
