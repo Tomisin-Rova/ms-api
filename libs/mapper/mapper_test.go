@@ -1,10 +1,13 @@
 package mapper
 
 import (
+	"math/rand"
+	"testing"
+	"time"
+
 	"github.com/stretchr/testify/assert"
 	pb "ms.api/protos/pb/types"
 	"ms.api/types"
-	"testing"
 )
 
 func TestGQLMapper_HydrateProduct(t *testing.T) {
@@ -113,4 +116,98 @@ func TestGQLMapper_HydrateTag(t *testing.T) {
 	assert.NotNil(t, tag)
 	assert.Equal(t, from.Id, tag.ID)
 	assert.Equal(t, from.Name, *tag.Name)
+}
+
+func TestGQLMapper_HydratePayment(t *testing.T) {
+	mapper := &GQLMapper{}
+
+	accountId := generateID()
+	payeeAccountId := generateID()
+	paymentId := generateID()
+	idempotencyKey := generateID()
+	ownerId := generateID()
+	dob := "1994-01-01"
+	identityId := generateID()
+	ts := time.Now().Add(time.Second)
+	from := &pb.Payment{
+		Id:             paymentId,
+		IdempotencyKey: idempotencyKey,
+		Owner: &pb.Person{
+			Id:          ownerId,
+			FirstName:   "First",
+			LastName:    "Last",
+			Dob:         dob,
+			Ts:          ts.Unix(),
+			Nationality: []string{"UK", "NG"},
+			Emails: []*pb.Email{
+				{
+					Value:    "firstemail@email.com",
+					Verified: true,
+				},
+				{
+					Value:    "secondemail@email.com",
+					Verified: true,
+				},
+			},
+			Phones: []*pb.PhoneNumber{
+				{
+					Number:   "+447911123456",
+					Verified: true,
+				},
+				{
+					Number:   "+23410701234",
+					Verified: true,
+				},
+			},
+			Identities: []*pb.Identity{
+				{
+					Id:    identityId,
+					Owner: ownerId,
+					Ts:    ts.Add(time.Second).Unix(),
+				},
+			},
+			Cdd: &pb.Cdd{
+				Status:  "ONBOARDED",
+				Onboard: true,
+				Ts:      int32(ts.Unix()),
+			},
+		},
+		Charge:    0.0,
+		Reference: "test reference",
+		Status:    "APPROVED",
+		Source: &pb.PaymentAccount{
+			Accounts: &pb.PaymentAccount_Account{
+				Account: &pb.Account{
+					Id:             accountId,
+					AccountData:    new(pb.AccountData),
+					AccountDetails: new(pb.AccountDetails),
+				},
+			},
+			Currency: "GBP",
+			Amount:   1000.0,
+		},
+		Target: &pb.PaymentAccount{
+			Accounts: &pb.PaymentAccount_PayeeAccount{
+				PayeeAccount: &pb.PayeeAccount{
+					Id: payeeAccountId,
+				},
+			},
+			Currency: "GBP",
+			Amount:   1000.0,
+		},
+	}
+
+	var payment types.Payment
+	err := mapper.Hydrate(from, &payment)
+	assert.Nil(t, err)
+}
+
+const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+func generateID() string {
+	b := make([]byte, 23)
+	for i := range b {
+		b[i] = letterBytes[rand.Int63()%int64(len(letterBytes))]
+	}
+	return string(b) + "roava"
 }
