@@ -340,7 +340,7 @@ func (G *GQLMapper) hydrateAccount(data *pb.Account, to interface{}) error {
 		}
 
 		// InternalControls
-		if data.AccountData.AccruedAmounts != nil {
+		if data.AccountData.InternalControls != nil {
 			account.AccountData.InternalControls = &types.InternalControls{
 				MaxWithdrawalAmount:      &data.AccountData.InternalControls.MaxWithdrawalAmount,
 				RecommendedDepositAmount: &data.AccountData.InternalControls.RecommendedDepositAmount,
