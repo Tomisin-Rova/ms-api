@@ -602,7 +602,7 @@ func (G *GQLMapper) hydratePayment(data *pb.Payment, to interface{}) error {
 			if sourceAccount.Account == nil {
 				G.logger.Error("source account decoding", zap.String("payment_id", data.Id))
 				payment.FundingSource = nil
-				break
+				return errors.New("invalid source account")
 			}
 			err := G.hydrateAccount(sourceAccount.Account, payment.FundingSource)
 			if err != nil {
@@ -623,7 +623,7 @@ func (G *GQLMapper) hydratePayment(data *pb.Payment, to interface{}) error {
 				if targetAccount.Account == nil {
 					G.logger.Error("target account decoding", zap.String("payment_id", data.Id))
 					payment.Beneficiary.Account = nil
-					break
+					return errors.New("undefined target account")
 				}
 
 				account := types.Account{}
@@ -637,9 +637,9 @@ func (G *GQLMapper) hydratePayment(data *pb.Payment, to interface{}) error {
 			case *pb.PaymentAccount_PayeeAccount:
 				targetPayeeAccount := data.Target.Accounts.(*pb.PaymentAccount_PayeeAccount)
 				if targetPayeeAccount.PayeeAccount == nil {
-					G.logger.Error("target account decoding", zap.String("payment_id", data.Id))
+					G.logger.Error("target payee account decoding", zap.String("payment_id", data.Id))
 					payment.Beneficiary.Account = nil
-					break
+					return errors.New("undefined target account")
 				}
 				payeeAccount := types.PayeeAccount{}
 				err := G.hydratePayeeAccount(targetPayeeAccount.PayeeAccount, &payeeAccount)
