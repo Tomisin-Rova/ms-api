@@ -1,5 +1,6 @@
 syntax = "proto3";
 package payment;
+// If the go_package is changed, change the sed in payments
 option go_package = "ms.api/protos/pb/paymentService";
 
 // Import types
