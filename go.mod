@@ -36,7 +36,7 @@ require (
 	github.com/ory/dockertest/v3 v3.6.3
 	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
 	github.com/pkg/errors v0.9.1
-	github.com/roava/zebra v0.0.0-20211021151331-7a95c5a9884a
+	github.com/roava/zebra v0.0.0-20211116133814-e983e62eb817
 	github.com/rs/cors v1.8.0
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cast v1.4.0 // indirect
