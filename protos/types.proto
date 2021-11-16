@@ -27,7 +27,7 @@ message Person {
   repeated string nationality = 10;
   repeated Address addresses = 11;
   string employer = 12;
-  repeated Identity identities = 13;
+  repeated ExtendedIdentity identities = 13;
   int64 ts = 14;
   Cdd cdd = 15;
   repeated Activity activities = 16;
