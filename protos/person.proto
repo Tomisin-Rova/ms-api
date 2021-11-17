@@ -4,7 +4,6 @@ option go_package = "ms.api/protos/pb/personService";
 
 // Import types
 import "types.proto";
-import "google/protobuf/empty.proto";
 
 // Request type for person by ID
 message PersonRequest {
@@ -20,17 +19,6 @@ message PeopleRequest {
   string onboarded = 6;
 }
 
-// Request type for endpoint requiring JWT token
-message TokenRequest{
-  string token = 1;
-}
-
-// Request type for person by ID
-message TransactionPinRequest {
-  string identity = 1;
-  string pin = 2;
-}
-
 // Request type for staff by ID
 message StaffRequest {
   string id = 1;
@@ -38,11 +26,7 @@ message StaffRequest {
 
 service PersonService{
   // Q U E R I E S
-  rpc Me(TokenRequest) returns (types.Response) {}
   rpc Person(PersonRequest) returns (types.Person) {}
   rpc People(PeopleRequest) returns (types.Persons) {}
   rpc GetStaffById(StaffRequest) returns (types.Staff) {}
-
-  // M U T A T I O N S
-  rpc SetTransactionPin(TransactionPinRequest) returns (types.Response) {}
 }

@@ -159,10 +159,10 @@ func TestGQLMapper_HydratePayment(t *testing.T) {
 				Verified: true,
 			},
 		},
-		Identities: []*pb.Identity{
+		Identities: []*pb.ExtendedIdentity{
 			{
 				Id:    generateID(),
-				Owner: generateID(),
+				Owner: &pb.Person{Id: generateID()},
 				Ts:    ts.Add(time.Second).Unix(),
 			},
 		},
