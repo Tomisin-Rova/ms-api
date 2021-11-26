@@ -996,7 +996,7 @@ type ComplexityRoot struct {
 		Payee             func(childComplexity int, id string) int
 		Payees            func(childComplexity int, first *int64, after *string, last *int64, before *string) int
 		Payment           func(childComplexity int, id string) int
-		Payments          func(childComplexity int, first *int64, after *string, last *int64, before *string) int
+		Payments          func(childComplexity int, first *int64, after *string, last *int64, before *string, filter *types.PaymentFilter) int
 		People            func(childComplexity int, keywords *string, first *int64, after *string, last *int64, before *string, onboarded *bool) int
 		Person            func(childComplexity int, id string) int
 		Price             func(childComplexity int, pair *string, ts *int64) int
@@ -1016,7 +1016,7 @@ type ComplexityRoot struct {
 		Task              func(childComplexity int, id string) int
 		Tasks             func(childComplexity int, first *int64, after *string, last *int64, before *string) int
 		Transaction       func(childComplexity int, id string) int
-		Transactions      func(childComplexity int, first *int64, after *string, last *int64, before *string, account string) int
+		Transactions      func(childComplexity int, first *int64, after *string, last *int64, before *string, account string, payments []string) int
 		TransferFees      func(childComplexity int, currency string, baseCurrency string) int
 		Validation        func(childComplexity int, id string) int
 		Validations       func(childComplexity int, first *int64, after *string, last *int64, before *string) int
@@ -1399,9 +1399,9 @@ type QueryResolver interface {
 	Payee(ctx context.Context, id string) (*types.Payee, error)
 	Payees(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.PayeeConnection, error)
 	Payment(ctx context.Context, id string) (*types.Payment, error)
-	Payments(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.PaymentConnection, error)
+	Payments(ctx context.Context, first *int64, after *string, last *int64, before *string, filter *types.PaymentFilter) (*types.PaymentConnection, error)
 	Transaction(ctx context.Context, id string) (*types.Transaction, error)
-	Transactions(ctx context.Context, first *int64, after *string, last *int64, before *string, account string) (*types.TransactionConnection, error)
+	Transactions(ctx context.Context, first *int64, after *string, last *int64, before *string, account string, payments []string) (*types.TransactionConnection, error)
 	Fx(ctx context.Context, currency string, baseCurrency string) (*types.Fx, error)
 	TransferFees(ctx context.Context, currency string, baseCurrency string) (*types.TransferFees, error)
 	Acceptance(ctx context.Context, id string) (*types.Acceptance, error)
@@ -6367,7 +6367,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Payments(childComplexity, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string)), true
+		return e.complexity.Query.Payments(childComplexity, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string), args["filter"].(*types.PaymentFilter)), true
 
 	case "Query.people":
 		if e.complexity.Query.People == nil {
@@ -6607,7 +6607,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Transactions(childComplexity, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string), args["account"].(string)), true
+		return e.complexity.Query.Transactions(childComplexity, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string), args["account"].(string), args["payments"].([]string)), true
 
 	case "Query.transferFees":
 		if e.complexity.Query.TransferFees == nil {
@@ -8441,6 +8441,8 @@ var sources = []*ast.Source{
     last: Int
     # Returns the elements in the list that come before the specified cursor.
     before: String
+    # Filter payments
+    filter: PaymentFilter
   ): PaymentConnection
   # fetch an individual transaction by unique ID
   transaction(
@@ -8459,6 +8461,8 @@ var sources = []*ast.Source{
     before: String
     # Filter transactions by an account id
     account: ID!
+    # Filter transactions by a payment list
+    payments: [ID!]
   ): TransactionConnection
   # Get fx value from a currency pair
   fx(currency: String!, base_currency: String!): Fx
@@ -11092,7 +11096,22 @@ input ValidateUserInput {
   sort_code: String!
   device: DeviceInput!
 }
-`, BuiltIn: false},
+
+# Possible status for Payments
+enum PaymentStatus {
+  PENDING,
+  APPROVED
+}
+
+# Filter for Payments
+input PaymentFilter {
+  # id from payee
+  payee_id: String
+  # status of payment
+  status: PaymentStatus
+  # limit of returned data
+  limit: Int
+}`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
@@ -13056,6 +13075,15 @@ func (ec *executionContext) field_Query_payments_args(ctx context.Context, rawAr
 		}
 	}
 	args["before"] = arg3
+	var arg4 *types.PaymentFilter
+	if tmp, ok := rawArgs["filter"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
+		arg4, err = ec.unmarshalOPaymentFilter2ᚖmsᚗapiᚋtypesᚐPaymentFilter(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["filter"] = arg4
 	return args, nil
 }
 
@@ -13662,6 +13690,15 @@ func (ec *executionContext) field_Query_transactions_args(ctx context.Context, r
 		}
 	}
 	args["account"] = arg4
+	var arg5 []string
+	if tmp, ok := rawArgs["payments"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("payments"))
+		arg5, err = ec.unmarshalOID2ᚕstringᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["payments"] = arg5
 	return args, nil
 }
 
@@ -36915,7 +36952,7 @@ func (ec *executionContext) _Query_payments(ctx context.Context, field graphql.C
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Payments(rctx, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string))
+		return ec.resolvers.Query().Payments(rctx, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string), args["filter"].(*types.PaymentFilter))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -36993,7 +37030,7 @@ func (ec *executionContext) _Query_transactions(ctx context.Context, field graph
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Transactions(rctx, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string), args["account"].(string))
+		return ec.resolvers.Query().Transactions(rctx, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string), args["account"].(string), args["payments"].([]string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -44496,6 +44533,42 @@ func (ec *executionContext) unmarshalInputPayeeInput(ctx context.Context, obj in
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("accounts"))
 			it.Accounts, err = ec.unmarshalNPayeeAccountInput2ᚕᚖmsᚗapiᚋtypesᚐPayeeAccountInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputPaymentFilter(ctx context.Context, obj interface{}) (types.PaymentFilter, error) {
+	var it types.PaymentFilter
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "payee_id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("payee_id"))
+			it.PayeeID, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "status":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
+			it.Status, err = ec.unmarshalOPaymentStatus2ᚖmsᚗapiᚋtypesᚐPaymentStatus(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "limit":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("limit"))
+			it.Limit, err = ec.unmarshalOInt2ᚖint64(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -56317,6 +56390,30 @@ func (ec *executionContext) marshalOPaymentConnection2ᚖmsᚗapiᚋtypesᚐPaym
 		return graphql.Null
 	}
 	return ec._PaymentConnection(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOPaymentFilter2ᚖmsᚗapiᚋtypesᚐPaymentFilter(ctx context.Context, v interface{}) (*types.PaymentFilter, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputPaymentFilter(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOPaymentStatus2ᚖmsᚗapiᚋtypesᚐPaymentStatus(ctx context.Context, v interface{}) (*types.PaymentStatus, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(types.PaymentStatus)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOPaymentStatus2ᚖmsᚗapiᚋtypesᚐPaymentStatus(ctx context.Context, sel ast.SelectionSet, v *types.PaymentStatus) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
 }
 
 func (ec *executionContext) marshalOPerson2ᚖmsᚗapiᚋtypesᚐPerson(ctx context.Context, sel ast.SelectionSet, v *types.Person) graphql.Marshaler {

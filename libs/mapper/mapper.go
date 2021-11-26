@@ -1,7 +1,6 @@
 package mapper
 
 import (
-	"encoding/json"
 	"errors"
 
 	coreError "github.com/roava/zebra/errors"
@@ -340,7 +339,7 @@ func (G *GQLMapper) hydrateAccount(data *pb.Account, to interface{}) error {
 		}
 
 		// InternalControls
-		if data.AccountData.AccruedAmounts != nil {
+		if data.AccountData.InternalControls != nil {
 			account.AccountData.InternalControls = &types.InternalControls{
 				MaxWithdrawalAmount:      &data.AccountData.InternalControls.MaxWithdrawalAmount,
 				RecommendedDepositAmount: &data.AccountData.InternalControls.RecommendedDepositAmount,
@@ -490,6 +489,74 @@ func (G *GQLMapper) hydrateTag(data *pb.Tag, to interface{}) error {
 	return nil
 }
 
+func (G *GQLMapper) hydrateOwner(data *pb.Person, to interface{}) error {
+	owner, ok := to.(*types.Owner)
+	if !ok {
+		return errors.New("invalid to type")
+	}
+
+	person := data
+	*owner = types.Person{
+		ID:               person.Id,
+		Title:            &person.Title,
+		FirstName:        person.FirstName,
+		LastName:         person.LastName,
+		MiddleName:       &person.MiddleName,
+		Dob:              person.Dob,
+		Status:           (*types.PersonStatus)(&person.Status),
+		Ts:               person.Ts,
+		CountryResidence: &person.CountryResidence,
+		Bvn:              &person.Bvn,
+		Phones:           phonesFromProto(person.Phones),
+		Emails:           emailsFromProto(person.Emails),
+	}
+	return nil
+}
+
+func (G *GQLMapper) hydratePayeeAccount(data *pb.PayeeAccount, to interface{}) error {
+	payeeAccount, ok := to.(*types.PayeeAccount)
+	if !ok {
+		return errors.New("invalid to type")
+	}
+	*payeeAccount = types.PayeeAccount{
+		ID:            data.Id,
+		Name:          &data.Name,
+		Currency:      &data.Currency,
+		AccountNumber: &data.AccountNumber,
+		SortCode:      &data.SortCode,
+		Iban:          &data.Iban,
+		SwiftBic:      &data.SwiftBic,
+		BankCode:      &data.BankCode,
+		RoutingNumber: &data.RoutingNumber,
+		PhoneNumber:   &data.PhoneNumber,
+	}
+	return nil
+}
+
+func emailsFromProto(protoEmails []*pb.Email) []*types.Email {
+	emails := []*types.Email{}
+	for _, protoEmail := range protoEmails {
+		email := &types.Email{
+			Value:    protoEmail.Value,
+			Verified: protoEmail.Verified,
+		}
+		emails = append(emails, email)
+	}
+	return emails
+}
+
+func phonesFromProto(protoEmails []*pb.PhoneNumber) []*types.Phone {
+	phones := []*types.Phone{}
+	for _, protoPhone := range protoEmails {
+		phone := &types.Phone{
+			Value:    protoPhone.Number,
+			Verified: protoPhone.Verified,
+		}
+		phones = append(phones, phone)
+	}
+	return phones
+}
+
 func (G *GQLMapper) hydratePayment(data *pb.Payment, to interface{}) error {
 	payment, ok := to.(*types.Payment)
 	if !ok {
@@ -506,6 +573,8 @@ func (G *GQLMapper) hydratePayment(data *pb.Payment, to interface{}) error {
 		Currency:       &types.Currency{},
 		FundingAmount:  float64(data.FundingAmount),
 		Ts:             &data.Ts,
+		Beneficiary:    new(types.Beneficiary),
+		FundingSource:  new(types.Account),
 	}
 
 	if data.Tags != nil {
@@ -518,63 +587,72 @@ func (G *GQLMapper) hydratePayment(data *pb.Payment, to interface{}) error {
 		payment.Tags = tags
 	}
 
-	if data.Source != nil {
-		var sourceAccount types.Account
-		err := json.Unmarshal(data.Source.Account.Value, &sourceAccount)
+	if data.Owner != nil {
+		err := G.hydrateOwner(data.Owner, &payment.Owner)
 		if err != nil {
-			G.logger.Error("unmarshal source account", zap.Error(err))
-			var sourcePayeeAccount types.PayeeAccount
-			err := json.Unmarshal(data.Source.Account.Value, &sourcePayeeAccount)
-			if err != nil {
-				G.logger.Error("unmarshal source payee account", zap.Error(err))
-			}
-			payment.FundingSource = &sourceAccount
-		} else {
-			payment.FundingSource = &sourceAccount
+			G.logger.Error("hydrate owner", zap.String("payment_id", data.Id), zap.Error(err))
+			return err
 		}
-		payment.FundingSource = &sourceAccount
+	}
+
+	if data.Source != nil && data.Source.Accounts != nil {
+		switch data.Source.Accounts.(type) {
+		case *pb.PaymentAccount_Account:
+			sourceAccount := data.Source.Accounts.(*pb.PaymentAccount_Account)
+			if sourceAccount.Account == nil {
+				G.logger.Error("source account decoding", zap.String("payment_id", data.Id))
+				payment.FundingSource = nil
+				return errors.New("invalid source account")
+			}
+			err := G.hydrateAccount(sourceAccount.Account, payment.FundingSource)
+			if err != nil {
+				G.logger.Error("hydrate source account", zap.String("payment_id", data.Id))
+				return err
+			}
+			payment.FundingSource.Owner = payment.Owner
+		case *pb.PaymentAccount_PayeeAccount:
+			payment.FundingSource = nil
+		}
 	}
 
 	if data.Target != nil {
-		var targetPayeeAccount types.PayeeAccount
-		err := json.Unmarshal(data.Target.Account.Value, &targetPayeeAccount)
-		if err != nil {
-			G.logger.Error("unmarshal target account", zap.Error(err))
-			var targetAccount types.Account
-			err := json.Unmarshal(data.Target.Account.Value, &targetAccount)
-			if err != nil {
-				G.logger.Error("unmarshal target payee account", zap.Error(err))
-			}
-			payment.Beneficiary = &types.Beneficiary{
-				Account: targetAccount,
-				Currency: &types.Currency{
-					Name: data.Target.Currency,
-				},
-				Amount: data.Target.Amount,
-			}
-		} else {
-			payment.Beneficiary = &types.Beneficiary{
-				Account: targetPayeeAccount,
-				Currency: &types.Currency{
-					Name: data.Target.Currency,
-				},
-				Amount: data.Target.Amount,
+		if data.Target.Accounts != nil {
+			switch data.Target.Accounts.(type) {
+			case *pb.PaymentAccount_Account:
+				targetAccount := data.Target.Accounts.(*pb.PaymentAccount_Account)
+				if targetAccount.Account == nil {
+					G.logger.Error("target account decoding", zap.String("payment_id", data.Id))
+					payment.Beneficiary.Account = nil
+					return errors.New("undefined target account")
+				}
+
+				account := types.Account{}
+				err := G.hydrateAccount(targetAccount.Account, &account)
+				if err != nil {
+					G.logger.Error("hydrate target account", zap.String("payment_id", data.Id))
+					return err
+				}
+				account.Owner = payment.Owner
+				payment.Beneficiary.Account = &account
+			case *pb.PaymentAccount_PayeeAccount:
+				targetPayeeAccount := data.Target.Accounts.(*pb.PaymentAccount_PayeeAccount)
+				if targetPayeeAccount.PayeeAccount == nil {
+					G.logger.Error("target payee account decoding", zap.String("payment_id", data.Id))
+					payment.Beneficiary.Account = nil
+					return errors.New("undefined target account")
+				}
+				payeeAccount := types.PayeeAccount{}
+				err := G.hydratePayeeAccount(targetPayeeAccount.PayeeAccount, &payeeAccount)
+				if err != nil {
+					G.logger.Error("hydrate target payee account", zap.String("payment_id", data.Id))
+					return err
+				}
+				payment.Beneficiary.Account = &payeeAccount
 			}
 		}
-	}
-
-	if data.Owner != nil {
-		payment.Owner = &types.Person{
-			ID:               data.Owner.Id,
-			Title:            &data.Owner.Title,
-			FirstName:        data.Owner.FirstName,
-			LastName:         data.Owner.LastName,
-			MiddleName:       &data.Owner.MiddleName,
-			Dob:              data.Owner.Dob,
-			Status:           (*types.PersonStatus)(&data.Owner.Status),
-			Ts:               data.Owner.Ts,
-			CountryResidence: &data.Owner.CountryResidence,
-			Bvn:              &data.Owner.Bvn,
+		payment.Beneficiary.Amount = data.Target.Amount
+		payment.Beneficiary.Currency = &types.Currency{
+			Code: data.Target.Currency,
 		}
 	}
 
@@ -630,4 +708,10 @@ func Float64(i float64) *float64 {
 		return nil
 	}
 	return &i
+}
+
+func NewMapper() *GQLMapper {
+	return &GQLMapper{
+		logger: zaplogger.New(),
+	}
 }

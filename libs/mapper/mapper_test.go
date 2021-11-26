@@ -1,10 +1,17 @@
 package mapper
 
 import (
+	"math/rand"
+	"strings"
+	"testing"
+	"time"
+
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+	"go.uber.org/zap/zaptest"
 	pb "ms.api/protos/pb/types"
 	"ms.api/types"
-	"testing"
 )
 
 func TestGQLMapper_HydrateProduct(t *testing.T) {
@@ -113,4 +120,241 @@ func TestGQLMapper_HydrateTag(t *testing.T) {
 	assert.NotNil(t, tag)
 	assert.Equal(t, from.Id, tag.ID)
 	assert.Equal(t, from.Name, *tag.Name)
+}
+
+func TestGQLMapper_HydratePayment(t *testing.T) {
+	const (
+		successPayeeAccountAsTarget = iota
+		successAccountAsTarget
+		failNilTargetAccount
+		failNilTargetPayeeAccount
+	)
+
+	ts := time.Now()
+	dob := "1994-01-01"
+	paymentOwner := &pb.Person{
+		Id:          generateID(),
+		FirstName:   "First",
+		LastName:    "Last",
+		Dob:         dob,
+		Ts:          ts.Unix(),
+		Nationality: []string{"UK", "NG"},
+		Emails: []*pb.Email{
+			{
+				Value:    "firstemail@email.com",
+				Verified: true,
+			},
+			{
+				Value:    "secondemail@email.com",
+				Verified: true,
+			},
+		},
+		Phones: []*pb.PhoneNumber{
+			{
+				Number:   "+447911123456",
+				Verified: true,
+			},
+			{
+				Number:   "+23410701234",
+				Verified: true,
+			},
+		},
+		Identities: []*pb.ExtendedIdentity{
+			{
+				Id:    generateID(),
+				Owner: &pb.Person{Id: generateID()},
+				Ts:    ts.Add(time.Second).Unix(),
+			},
+		},
+		Cdd: &pb.Cdd{
+			Status:  "ONBOARDED",
+			Onboard: true,
+			Ts:      int32(ts.Unix()),
+		},
+	}
+
+	var tests = []struct {
+		testType int
+		name     string
+		args     *pb.Payment
+	}{
+		{
+			testType: successPayeeAccountAsTarget,
+			name:     "Succesful hydrate payment with target payee account",
+			args: &pb.Payment{
+				Id:             generateID(),
+				IdempotencyKey: generateID(),
+				Owner:          paymentOwner,
+				Charge:         0.0,
+				Reference:      "test reference",
+				Status:         "APPROVED",
+				Source: &pb.PaymentAccount{
+					Accounts: &pb.PaymentAccount_Account{
+						Account: &pb.Account{
+							Id:             generateID(),
+							AccountData:    new(pb.AccountData),
+							AccountDetails: new(pb.AccountDetails),
+						},
+					},
+					Currency: "GBP",
+					Amount:   1000.0,
+				},
+				Target: &pb.PaymentAccount{
+					Accounts: &pb.PaymentAccount_PayeeAccount{
+						PayeeAccount: &pb.PayeeAccount{
+							Id: generateID(),
+						},
+					},
+					Currency: "GBP",
+					Amount:   1000.0,
+				},
+			},
+		},
+		{
+			testType: successAccountAsTarget,
+			name:     "Succesful hydrate payment with target account",
+			args: &pb.Payment{
+				Id:             generateID(),
+				IdempotencyKey: generateID(),
+				Owner:          paymentOwner,
+				Charge:         0.0,
+				Reference:      "test reference",
+				Status:         "APPROVED",
+				Source: &pb.PaymentAccount{
+					Accounts: &pb.PaymentAccount_Account{
+						Account: &pb.Account{
+							Id:             generateID(),
+							AccountData:    new(pb.AccountData),
+							AccountDetails: new(pb.AccountDetails),
+						},
+					},
+					Currency: "GBP",
+					Amount:   1000.0,
+				},
+				Target: &pb.PaymentAccount{
+					Accounts: &pb.PaymentAccount_Account{
+						Account: &pb.Account{
+							Id:             generateID(),
+							AccountData:    new(pb.AccountData),
+							AccountDetails: new(pb.AccountDetails),
+						},
+					},
+					Currency: "GBP",
+					Amount:   1000.0,
+				},
+			},
+		},
+		{
+			testType: failNilTargetAccount,
+			name:     "Fail if target account is nil",
+			args: &pb.Payment{
+				Id:             generateID(),
+				IdempotencyKey: generateID(),
+				Owner:          paymentOwner,
+				Charge:         0.0,
+				Reference:      "test reference",
+				Status:         "APPROVED",
+				Source: &pb.PaymentAccount{
+					Accounts: &pb.PaymentAccount_Account{
+						Account: &pb.Account{
+							Id:             generateID(),
+							AccountData:    new(pb.AccountData),
+							AccountDetails: new(pb.AccountDetails),
+						},
+					},
+					Currency: "GBP",
+					Amount:   1000.0,
+				},
+				Target: &pb.PaymentAccount{
+					Accounts: &pb.PaymentAccount_Account{
+						Account: nil,
+					},
+					Currency: "GBP",
+					Amount:   1000.0,
+				},
+			},
+		},
+		{
+			testType: failNilTargetPayeeAccount,
+			name:     "Fail if target account is nil",
+			args: &pb.Payment{
+				Id:             generateID(),
+				IdempotencyKey: generateID(),
+				Owner:          paymentOwner,
+				Charge:         0.0,
+				Reference:      "test reference",
+				Status:         "APPROVED",
+				Source: &pb.PaymentAccount{
+					Accounts: &pb.PaymentAccount_Account{
+						Account: &pb.Account{
+							Id:             generateID(),
+							AccountData:    new(pb.AccountData),
+							AccountDetails: new(pb.AccountDetails),
+						},
+					},
+					Currency: "GBP",
+					Amount:   1000.0,
+				},
+				Target: &pb.PaymentAccount{
+					Accounts: &pb.PaymentAccount_PayeeAccount{
+						PayeeAccount: nil,
+					},
+					Currency: "GBP",
+					Amount:   1000.0,
+				},
+			},
+		},
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			switch testCase.testType {
+			case successPayeeAccountAsTarget:
+				mapper := &GQLMapper{}
+				var payment types.Payment
+				err := mapper.Hydrate(testCase.args, &payment)
+				assert.Nil(t, err)
+			case successAccountAsTarget:
+				mapper := &GQLMapper{}
+				var payment types.Payment
+				err := mapper.Hydrate(testCase.args, &payment)
+				assert.Nil(t, err)
+			case failNilTargetAccount:
+				logger := zaptest.NewLogger(t, zaptest.WrapOptions(zap.Hooks(func(e zapcore.Entry) error {
+					expectedMessages := "target account decoding"
+					if !strings.Contains(expectedMessages, e.Message) {
+						t.Fatalf("Log with one of this messages: '%s' should happen", expectedMessages)
+					}
+					return nil
+				})))
+				mapper := &GQLMapper{logger: logger}
+				var payment types.Payment
+				err := mapper.Hydrate(testCase.args, &payment)
+				assert.NotNil(t, err)
+			case failNilTargetPayeeAccount:
+				logger := zaptest.NewLogger(t, zaptest.WrapOptions(zap.Hooks(func(e zapcore.Entry) error {
+					expectedMessages := "target payee account decoding"
+					if !strings.Contains(expectedMessages, e.Message) {
+						t.Fatalf("Log with one of this messages: '%s' should happen", expectedMessages)
+					}
+					return nil
+				})))
+				mapper := &GQLMapper{logger: logger}
+				var payment types.Payment
+				err := mapper.Hydrate(testCase.args, &payment)
+				assert.NotNil(t, err)
+			}
+		})
+	}
+
+}
+
+const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+func generateID() string {
+	b := make([]byte, 23)
+	for i := range b {
+		b[i] = letterBytes[rand.Int63()%int64(len(letterBytes))]
+	}
+	return string(b)
 }

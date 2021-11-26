@@ -53,6 +53,7 @@ message GetTransactionRequest {
 message GetTransactionsRequest {
   string identityId = 1;
   string account = 2;
+  repeated string payments = 3;
 }
 
 message GetTransactionsResponse {

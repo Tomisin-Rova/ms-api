@@ -418,6 +418,8 @@ type Query {
     last: Int
     # Returns the elements in the list that come before the specified cursor.
     before: String
+    # Filter payments
+    filter: PaymentFilter
   ): PaymentConnection
   # fetch an individual transaction by unique ID
   transaction(
@@ -436,6 +438,8 @@ type Query {
     before: String
     # Filter transactions by an account id
     account: ID!
+    # Filter transactions by a payment list
+    payments: [ID!]
   ): TransactionConnection
   # Get fx value from a currency pair
   fx(currency: String!, base_currency: String!): Fx
