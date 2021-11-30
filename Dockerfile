@@ -1,4 +1,4 @@
-FROM golang:latest AS builder
+FROM golang:1.15.15 AS builder
 
 RUN mkdir -p /go/src/ms.api
 
