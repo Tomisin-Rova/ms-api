@@ -16,12 +16,12 @@ environment ?= $(ENVIRONMENT)
 .PHONY: proto
 proto:
 	@ # NOTE, to generate the protos, you have to have your local, vendor folder because of the magefile
-	@	if [[ ! -r "../zebra/protos/ms.api" ]]; \
+	@	if [[ ! -r "../zebra/protos" ]]; \
 		then \
 			echo "Make sure the zebra project exists with the proto files."; \
 		else \
 			echo "Copying proto files..."; \
-			cp -r ../zebra/protos/ms.api/* ./protos; \
+			cp -r ../zebra/protos/* ./protos; \
 			./libs/mage genProto; \
 		fi
 	
@@ -38,16 +38,13 @@ docker: proto gen-mocks
 	docker build . -t ms.notify:alpine
 
 gen-mocks:
-	mockery --name=IdentityServiceClient --recursive
-	mockery --name=OnBoardingServiceClient --recursive
-	mockery --name=PersonServiceClient --recursive
-	mockery --name=PaymentServiceClient --recursive
-	mockery --name=CddServiceClient --recursive
 	mockery --name=AuthServiceClient --recursive
 	mockery --name=AccountServiceClient --recursive
-	mockery --name=ProductServiceClient --recursive
-	mockery --name=VerifyServiceClient --recursive
+	mockery --name=CustomerServiceClient --recursive
+	mockery --name=PaymentServiceClient --recursive
+	mockery --name=OnboardingServiceClient --recursive
 	mockery --name=PricingServiceClient --recursive
+	mockery --name=VerificationServiceClient --recursive
 	mockery --name=Preloader --recursive
 	go generate ./...
 

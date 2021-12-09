@@ -4,11 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/roava/zebra/models"
-	"go.uber.org/zap"
-	"ms.api/protos/pb/authService"
 	"net/http"
 	"strings"
+
+	"ms.api/protos/pb/auth"
+
+	"github.com/roava/zebra/models"
+	"go.uber.org/zap"
 )
 
 type ctxKey struct {
@@ -24,21 +26,22 @@ const (
 )
 
 type AuthMiddleware struct {
-	authService authService.AuthServiceClient
+	authService auth.AuthServiceClient
 	logger      *zap.Logger
 }
 
-func NewAuthMiddleware(service authService.AuthServiceClient, logger *zap.Logger) *AuthMiddleware {
+func NewAuthMiddleware(service auth.AuthServiceClient, logger *zap.Logger) *AuthMiddleware {
 	return &AuthMiddleware{authService: service, logger: logger}
 }
 
-func (mw *AuthMiddleware) ValidateToken(token string) (*authService.ValidateTokenResponse, error) {
-	resp, err := mw.authService.ValidateToken(context.Background(),
-		&authService.ValidateTokenRequest{Token: token})
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
+func (mw *AuthMiddleware) ValidateToken(token string) (*models.Claims, error) {
+	// TODO: Implement logic once auth service is refactored .
+	return &models.Claims{
+		PersonId:      "01fk5jmz4thmxwz8p2fx45vj6v",
+		DeviceId:      "01fk5bde5wp242r97trq94xwy4",
+		IdentityId:    "01f82zca7ryacseqddc8a6twte",
+		FromDashboard: false,
+	}, nil
 }
 
 // TODO: here user should be the direct type of protos.Person from the auth or person service.

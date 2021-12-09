@@ -1,795 +1,647 @@
 syntax = "proto3";
+
 package types;
-// If the go_package is changed, change the sed in payments
-option go_package = "ms.api/protos/pb/types";
 
-import "google/protobuf/any.proto";
+import "google/protobuf/timestamp.proto";
+option go_package = "protos/pb/types";
 
-// GraphQL API response
-message Response {
-  string message = 1;
-  bool success = 2;
-  int32 code = 3;
-  string token = 4;
-}
+// ############# USER GROUP #############
 
-// Person type
-message Person {
+message Customer {
   string id = 1;
-  string title = 2;
-  string first_name = 3;
-  string last_name = 4;
-  string middle_name = 5;
-  repeated PhoneNumber phones = 6;
-  repeated Email emails = 7;
-  string dob = 8;
-  string country_residence = 9;
-  repeated string nationality = 10;
-  repeated Address addresses = 11;
-  string employer = 12;
-  repeated ExtendedIdentity identities = 13;
-  int64 ts = 14;
-  Cdd cdd = 15;
-  repeated Activity activities = 16;
-  string status = 17;
-  string objectId = 18;
-  string bvn = 19;
+  string first_name = 2;
+  string last_name = 3;
+  // String format DD-MM-YYYY
+  string dob = 4;
+  string bvn = 5;
+  repeated Address addresses = 6;
+  repeated Phone phones = 7;
+  Email email = 8;
+  enum CustomerStatuses {
+    SIGNEDUP = 0;
+    REGISTERED = 1;
+    VERIFIED = 2;
+    ONBOARDED = 3;
+    REJECTED = 4;
+    EXITED = 5;
+  }
+  CustomerStatuses status = 9;
+  google.protobuf.Timestamp status_ts = 10;
+  google.protobuf.Timestamp ts = 11;
 }
 
-// Persons type
-message Persons {
-  repeated Person persons = 1;
-  int64 totalCount = 2;
-  bool hasNextPage = 3;
-  bool hasPreviousPage = 4;
+message Email {
+  string address = 1;
+  bool verified = 2;
 }
 
-// Address type
+message Phone {
+  bool primary = 1;
+  string number = 2;
+  bool verified = 3;
+}
+
 message Address {
-  string name = 1;
-  bool primary = 2;
-  string street = 3;
+  bool primary = 1;
+  Country country = 2;
+  string state = 3;
   string city = 4;
-  string county = 5;
-  string state = 6;
-  string postcode = 7;
-  string country = 8;
-  string address_type = 10;
-  repeated double coordinate = 11;
+  string street = 5;
+  string postcode = 6;
+  Coordinates coordinates = 7;
 }
 
-// Device type
-message Device {
-  string identifier = 1;
-  string brand = 2;
-  string os = 3;
-  repeated DeviceToken tokens = 4;
+message Coordinates {
+  float latitude = 1;
+  float longitude = 2;
 }
 
-// Device token type
-message DeviceToken {
-  string type = 1;
+message Identity {
+  string id = 1;
+  Customer customer = 2;
+  Organization organization = 3;
+  IdentityCredentials credentials = 4;
+  enum IdentityStatuses {
+    ACTIVE = 0;
+    INACTIVE = 1;
+  }
+  IdentityStatuses status = 5;
+  google.protobuf.Timestamp status_ts = 6;
+  google.protobuf.Timestamp ts = 7;
+}
+
+message IdentityCredentials {
+  enum IdentityCredentialsTypes {
+    LOGIN = 0;
+    PIN = 1;
+  }
+  IdentityCredentialsTypes type = 1;
+  string password = 2;
+  enum IdentityCredentialsStatuses {
+    ACTIVE = 0;
+    INACTIVE = 1;
+  }
+  IdentityCredentialsStatuses status = 3;
+  google.protobuf.Timestamp status_ts = 4;
+  google.protobuf.Timestamp ts = 5;
+  google.protobuf.Timestamp update_ts = 6;
+}
+
+message Organization {
+  string id = 1;
+  string name = 2;
+  enum OrganisationStatuses {
+    ACTIVE = 0;
+    INACTIVE = 1;
+  }
+  OrganisationStatuses status = 3;
+  google.protobuf.Timestamp status_ts = 4;
+  google.protobuf.Timestamp ts = 5;
+}
+
+message Staff {
+  string id = 1;
+  string name = 2;
+  string lastName = 3;
+  // String format DD-MM-YYYY
+  string dob = 4;
+  repeated Address addresses = 5;
+  repeated Phone phones = 6;
+  string email = 7;
+  enum StaffStatuses {
+    ACTIVE = 0;
+    INACTIVE = 1;
+  }
+  StaffStatuses status = 8;
+  google.protobuf.Timestamp status_ts = 9;
+  google.protobuf.Timestamp ts = 10;
+}
+
+message Acceptance {
+  string id = 1;
+  Content content = 2;
+  Customer customer = 3;
+  google.protobuf.Timestamp ts = 4;
+}
+
+message Questionary {
+  string id = 1;
+  enum QuestionaryTypes {
+    REASONS = 0;
+  }
+  QuestionaryTypes type = 2;
+  repeated QuestionaryQuestion questions = 3;
+  enum QuestionaryStatuses {
+    ACTIVE = 0;
+    INACTIVE = 1;
+  }
+  QuestionaryStatuses status = 4;
+  google.protobuf.Timestamp status_ts = 5;
+  google.protobuf.Timestamp ts = 6;
+}
+
+message QuestionaryQuestion {
+  string id = 1;
   string value = 2;
 }
 
-// Email type
-message Email {
-  string Value = 1;
-  bool Verified = 2;
-}
-
-// PhoneNumber type
-message PhoneNumber {
-  string Number = 1;
-  bool Verified = 2;
-}
-
-// Cdd type
-message Cdd {
+message QuestionaryAnswer {
   string id = 1;
-  Person owner = 2;
-  bool watchlist = 3;
-  string details = 4;
-  string status = 5;
-  bool onboard = 6;
-  int64 version = 7;
-  repeated Validation validations = 8;
-  bool active = 9;
-  int32 ts = 10;
-  string objectId = 11;
+  string questionary_id = 2;
+  string customer_id = 3;
+  repeated QuestionaryAnswerQuestion questions = 4;
+  google.protobuf.Timestamp ts = 7;
 }
 
-message Cdds {
-  repeated Cdd results = 1;
-  int64 totalCount = 2;
-  bool hasNextPage = 3;
-  bool hasPreviousPage = 4;
-}
-// Validation type
-message Validation {
+message QuestionaryAnswerQuestion {
   string id = 1;
-  string validation_type = 2;
-  string applicant = 3;
-  google.protobuf.Any data = 4;
-  Organisation organisation = 5;
-  string status = 6;
-  bool approved = 7;
-  int32 ts = 8;
-  repeated Action actions = 9;
+  string answer = 2;
 }
 
-// Staff type without identities Reporter type
-message Reporter {
+message Device {
   string id = 1;
-  string first_name = 2;
-  string last_name = 3;
-  string status = 4;
-  repeated Email emails = 5;
-  repeated PhoneNumber phones = 6;
-  int64 ts = 7;
+  Customer customer = 2;
+  string identifier = 3;
+  string os = 4;
+  string brand = 5;
+  repeated DeviceToken tokens = 6;
+  repeated DevicePreferences preferences = 7;
+  enum DeviceStatuses {
+    ACTIVE = 0;
+    INACTIVE = 1;
+  }
+  DeviceStatuses status = 8;
+  google.protobuf.Timestamp status_ts = 9;
+  google.protobuf.Timestamp ts = 10;
 }
 
-message Action {
-  string id = 1;
-  Reporter reporter = 2;
-  string notes = 3;
-  string status = 4;
-  int32 ts = 5;
+message DevicePreferences {
+  enum DevicePreferencesTypes {
+    PUSH = 0;
+    BIOMETRICS = 1;
+  }
+  DevicePreferencesTypes type = 1;
+  string value = 2;
 }
 
-// Kyc type
-message Kyc {
-  string id = 1;
-  Applicant applicant = 2;
-  string status = 3;
-  string vendor = 4;
-  string created_at = 5;
-  string updated_at = 6;
+message DeviceToken {
+  enum DeviceTokenTypes {
+    FIREBASE = 0;
+  }
+  DeviceTokenTypes type = 1;
+  string value = 2;
 }
 
+// ############# END USER GROUP #############
 
-message Aml {
-  string created_at = 1;
-  string updated_at = 2;
-  string title = 3;
-  string person_id = 4;
-  string first_name = 5;
-  string last_name = 6;
-  string middle_name = 7;
-  string date_of_birth = 8;
-  string email = 9;
-  string nationality = 10;
-  google.protobuf.Any reports = 11; // Excluded from customers on the public graph.
-  string status = 12;
-}
+// ############# ACCOUNTS GROUP #############
 
-// Roava type
-message Roava {}
-
-// Cra type
-message Cra {}
-
-message Applicant {
-  string application_id = 1;
-  string applicant_id = 2;
-  string first_name = 3;
-  string last_name = 4;
-  string email = 5;
-  string dob = 6;
-  Address address = 7;
-  string vendor = 8;
-}
-
-// Country type
-message Country {
-  string countryId = 1;
-  string capital = 2;
-  string countryName = 3;
-  string continent = 4;
-  string dial = 5;
-  string geoNameId = 6;
-  string ISO4217CurrencyAlphabeticCode = 7;
-  int32 ISO4217CurrencyNumericCode = 8;
-  string isIndependent = 9;
-  string languages = 10;
-  string officialNameEnglish = 11;
-  string deviceId = 12;
-}
-
-// Payee type
-message Payee {
-  string id = 1;
-  string owner = 2;
-  string name = 3;
-  string avatar = 4;
-  repeated PayeeAccount accounts = 5;
-  int64 ts = 6;
-}
-
-// Payees type
-message Payees {
-  repeated Payee payee = 1;
-}
-
-message PayeeAccount {
-  string id = 1;
-  string name = 2;
-  string currency = 3;
-  string accountNumber = 4;
-  string sortCode = 5;
-  string iban = 6;
-  string swiftBic = 7;
-  string bankCode = 8;
-  string routingNumber = 9;
-  string phoneNumber = 10;
-}
-
-// Identity type
-message Identity {
-  string id = 1;
-  string owner = 2;
-  string nickname = 3;
-  Organisation organisation = 4;
-  string status = 5;
-  bool active = 6;
-  bool authentication = 7;
-  repeated Device devices = 8;
-  Credentials credentials = 9;
-  int64 ts = 10;
-}
-
-// Identity type
-message ExtendedIdentity {
-  string id = 1;
-  Person owner = 2;
-  string nickname = 3;
-  Organisation organisation = 4;
-  string status = 5;
-  bool active = 6;
-  bool authentication = 7;
-  repeated Device devices = 8;
-  Credentials credentials = 9;
-  int64 ts = 10;
-}
-
-
-// Credentials type
-message Credentials {
-  string identifier = 1;
-  string refresh_token = 2;
-}
-
-// Organisation type
-message Organisation {
-  string id = 1;
-  string name = 2;
-  string keywords = 3;
-  string description = 4;
-  string domain = 5;
-  string banner = 6;
-  float revenue = 7;
-  string language = 8;
-  float raised = 9;
-  string employees = 10;
-  string email = 11;
-  repeated Address addresses = 12;
-  OrgLocation location = 13;
-  repeated Industry industries = 14;
-  Social social = 15;
-  repeated ImageAssets image_assets = 16;
-  repeated Identity identities = 17;
-}
-
-// OrgLocation type
-message OrgLocation {
-  string continent = 1;
-  string country = 2;
-  string state = 3;
-  string city = 4;
-  string country_code = 5;
-}
-
-// Industry type
-message Industry {
-  string id = 1;
-  int64 code = 2;
-  float score = 3;
-  string  section = 4;
-  string description = 5;
-  string source = 6;
-}
-
-// Social type
-message Social {
-  string youtube = 1;
-  string github = 2;
-  string facebook = 3;
-  string pinterest = 4;
-  string instagram = 5;
-  string linkedin = 6;
-  string medium = 7;
-  string crunchbase = 8;
-  string twitter = 9;
-}
-
-// ImageAssets type
-message ImageAssets {
-  bool safe = 1;
-  string type = 2;
-  string image = 3;
-  string svg = 4;
-}
-
-// AddressLookup type
-message AddressLookup {
-  string addressline1 = 1;
-  string addressline2 = 2;
-  string summaryline = 3;
-  string organisation = 4;
-  string buildingname = 5;
-  string premise = 6;
-  string street = 7;
-  string dependentlocality = 8;
-  string posttown = 9;
-  string county = 10;
-  string postcode = 11;
-  string latitude = 12;
-  string longitude = 13;
-  string grideasting = 14;
-  string gridnorthing = 15;
-}
-
-// Activity type
-message Activity {
-  string id = 1;
-  string description = 2;
-  int64 risk_weighting = 3;
-  bool supported = 4;
-  int64 archived = 5;
-  int64 ts = 6;
-}
-
-// Product type
-message ProductInput {
-  string id = 1;
-  string identification = 2;
-  string scheme = 3;
-}
-
-// Roava Account type
 message Account {
   string id = 1;
-  string owner = 2;
-  string product = 3;
+  Customer customer = 2;
+  Product product = 3;
   string name = 4;
-  types.AccountData accountData = 5;
-  repeated types.Transaction transactions = 6;
-  bool active = 7;
-  string status = 8;
-  repeated Tag tags = 9;
-  string image = 10;
-  string organisation = 11;
-  int32 ts = 12;
-  types.AccountDetails AccountDetails = 13;
+  string iban = 5;
+  string account_number = 6;
+  string code = 7;
+  // String format DD-MM-YYYY
+  string maturity_date = 8;
+  AccountBalances balances = 9;
+  AccountMambu mambu = 10;
+  AccountFCMB fcmb = 11;
+  enum AccountStatuses {
+    ACTIVE = 0;
+    INACTIVE = 1;
+  }
+  AccountStatuses status = 12;
+  google.protobuf.Timestamp status_ts = 13;
+  google.protobuf.Timestamp ts = 14;
 }
 
-message Tag {
-  string id = 1;
-  string name = 2;
+message AccountFCMB {
+  string ngn_account_number = 1;
+  string cif_id = 2;
 }
 
-// AccountData type
-message AccountData {
-  string accountHolderKey = 1;
-  string accountHolderType = 2;
-  string accountState = 3;
-  string accountType = 4;
-  AccruedAmounts accruedAmounts = 5;
-  int32 activationDate = 6;
-  int32 approvedDate = 7;
-  string assignedBranchKey = 8;
-  string assignedCentreKey = 9;
-  string assignedUserKey = 10;
-  Balances balances = 11;
-  string closedDate = 12;
-  string creationDate = 13;
-  string creditArrangementKey = 14;
-  string currencyCode = 15;
-  string encodedKey = 16;
-  string id = 17;
-  InterestSettings interestSettings = 18;
-  InternalControls internalControls = 19;
-  string lastAccountAppraisalDate = 20;
-  string lastInterestCalculationDate = 21;
-  string lastInterestStoredDate = 22;
-  string lastModifiedDate = 23;
-  string lastOverdraftInterestReviewDate = 24;
-  string lastSetToArrearsDate = 25;
-  repeated string linkedSettlementAccountKeys = 26;
-  string lockedDate = 27;
-  string maturityDate = 28;
-  string migrationEventKey = 29;
-  string name = 30;
-  string notes = 31;
-  OverdraftInterestSettings overdraftInterestSettings = 32;
-  OverdraftSettings overdraftSettings = 33;
-  string productTypeKey = 34;
-  string withholdingTaxSourceKey = 35;
+message AccountMambu {
+  string encoded_key = 1;
+  string branch_key = 2;
 }
 
-// AccountDetails type
-message AccountDetails {
-  string VirtualAccountID = 1;
-  string Iban = 2;
-  string AccountNumber = 3;
-  string SortCode = 4;
-  string SwiftBic = 5;
-  string BankCode = 6;
-  string RoutingNumber = 7;
+message AccountBalances {
+  float total_balance = 1;
 }
 
-// AccruedAmounts type
-message AccruedAmounts  {
-  double interestAccrued = 1;
-  double overdraftInterestAccrued = 2;
-  double technicalOverdraftInterestAccrued = 3;
-}
-
-// Balances type
-message Balances {
-  double availableBalance = 1;
-  double blockedBalance = 2;
-  double feesDue = 3;
-  double forwardAvailableBalance = 4;
-  double holdBalance = 5;
-  double lockedBalance = 6;
-  double overdraftAmount = 7;
-  double overdraftInterestDue = 8;
-  double technicalOverdraftAmount = 9;
-  double technicalOverdraftInterestDue = 10;
-  double totalBalance = 11;
-}
-
-// InterestSettings type
-message InterestSettings {
-  InterestPaymentSettings interestPaymentSettings = 1;
-  InterestRateSettings interestRateSettings = 2;
-  string daysInYear = 3;
-  string interestCalculationBalance = 4;
-  string indexSourceKey = 5;
-  string chargeFrequency = 6;
-  int32 chargeFrequencyCount = 7;
-  int32 rateReviewCount = 8;
-  string interestRateReviewUnit = 9;
-  string rateSource = 10;
-  string rateTerms = 11;
-  InterestRate interestRate = 12;
-  repeated RateTiers rateTiers = 13;
-}
-
-// InterestPaymentSettings type
-message InterestPaymentSettings {
-  repeated InterestPaymentDate interestPaymentDates = 1;
-  string interestPaymentPoint = 2;
-}
-
-// InterestPaymentDate type
-message InterestPaymentDate {
-  int32 day = 1;
-  int32 month = 2;
-}
-
-// InternalControls type
-message InternalControls {
-  double maxWithdrawalAmount = 1;
-  double recommendedDepositAmount = 2;
-  double targetAmount = 3;
-}
-
-// OverdraftInterestSettings type
-message OverdraftInterestSettings {
-  InterestRateSettings interestRateSettings = 1;
-}
-
-// InterestRateSettings type
-message InterestRateSettings {
-  string encodedKey = 1;
-  string interestChargeFrequency = 2;
-  int32 interestChargeFrequencyCount = 3;
-  int32 interestRate = 4;
-  int32 interestRateReviewCount = 5;
-  string interestRateReviewUnit = 6;
-  string interestRateSource = 7;
-  string interestRateTerms = 8;
-  repeated InterestRateTier interestRateTiers = 9;
-  int32 interestSpread = 10;
-}
-
-// OverdraftSettings type
-message OverdraftSettings {
-  bool allowOverdraft = 1;
-  int32 overdraftExpiryDate = 2;
-  int32 overdraftLimit = 3;
-}
-
-// InterestRateTier type
-message InterestRateTier {
-  string encodedKey = 1;
-  double endingBalance = 2;
-  int32 endingDay = 3;
-  double interestRate = 4;
-}
-
-// Product type
 message Product {
   string id = 1;
-  string identification = 2;
-  string scheme = 3;
-  ProductDetails details = 4;
+  enum ProductTypes {
+    FIXED_DEPOSIT = 0;
+    CURRENT_ACCOUNT = 1;
+  }
+  ProductTypes type = 2;
+  Currency currency = 3;
+  string name = 4;
+  int32 term_length = 5;
+  float interest_rate = 6;
+  float minimum_opening_balance = 7;
+  ProductMambu mambu = 8;
+  enum ProductStatuses {
+    ACTIVE = 0;
+    INACTIVE = 1;
+  }
+  ProductStatuses status = 9;
+  google.protobuf.Timestamp status_ts = 10;
+  google.protobuf.Timestamp ts = 11;
 }
 
-// ProductDetails type
-message ProductDetails {
-  string category = 1;
-  string type = 2;
-  string name = 3;
-  string state = 4;
-  string currency = 5;
-  string notes = 6;
-  string creditRequirement = 7;
-  bool withholdingTaxEnabled = 8;
-  bool allowOffset = 9;
-  repeated ProductTemplates productTemplates = 10;
-  repeated ProductFees productFees = 11;
-  ProductControl productControl = 12;
-  ProductMaturity productMaturity = 13;
-  OverdraftSetting overdraftSetting = 14;
-  ProductInterestSetting interestSetting = 15;
-  ProductSetting productSetting = 16;
-}
-
-// ProductControl type
-message ProductControl {
-  int64 dormancyPeriodDays = 1;
-  int64 maxWithdrawalAmount = 2;
-  int64 recommendedDepositAmount = 3;
-  OpeningBalance openingBalance = 4;
-}
-
-// OpeningBalance type
-message OpeningBalance {
-  double defaultValue = 1;
-  double max = 2;
-  double min = 3;
-}
-
-// ProductFees type
-message ProductFees {
-  int64 amount = 1;
-  string name = 2;
-  string state = 3;
-  string creationDate = 4;
-  string encodedKey = 5;
-  string feeApplication = 6;
-  string lastModified = 7;
-  string calculationMethod = 8;
-  string applyDateMethod = 9;
-  string trigger = 10;
-  repeated AccountingRules accountingRules = 11;
-}
-
-// ProductTemplates type
-message ProductTemplates {
-  string name = 1;
-  string type = 2;
-  string creationDate = 3;
-  string encodedKey = 4;
-  string lastModifiedDate = 5;
-}
-
-// ProductMaturity type
-message ProductMaturity {
-  string unit = 1;
-  int64 defaultValue = 2;
-  int64 max = 3;
-  int64 min = 4;
-}
-
-// OverdraftSetting type
-message OverdraftSetting {
-  bool allowOverdraft = 1;
-  bool allowTechnicalOverdraft = 2;
-  int64 maxLimit = 3;
-  InterestSettings interestSettings = 4;
-}
-
-message ProductInterestSetting {
-  bool collectInterestWhenLocked = 1;
-  string daysInYear = 2;
-  string interestCalculationBalance = 3;
-  bool interestPaidIntoAccount = 4;
-  string interestPaymentPoint = 5;
-  double maximumBalance = 6;
-  RateSetting rateSetting = 7;
-  repeated InterestPaymentDate interestPaymentDates = 8;
-}
-
-message RateSetting {
-  bool accrueAfterMaturity = 1;
-  string indexSourceKey = 2;
-  string chargeFrequency = 3;
-  int64 chargeFrequencyCount = 4;
-  string rateSource = 5;
-  string rateTerms = 6;
-  repeated RateTiers rateTiers = 7;
-  InterestRate interestRate = 8;
-}
-
-message RateTiers {
-  string encodedKey = 1;
-  int64 endingBalance = 2;
-  int64 endingDay = 3;
-  int64 interestRate = 4;
-}
-
-
-message InterestRate {
-  double defaultValue = 1;
-  double maxValue = 2;
-  double minValue = 3;
-}
-
-message ProductSetting {
-  string accountingMethod = 1;
-  string interestAccounting = 2;
-  repeated AccountingRules accountingRules = 3;
-}
-
-message AccountingRules {
+message ProductMambu {
   string encoded_key = 1;
-  string financialResource = 2;
-  string glKey = 3;
 }
 
-// Transaction type
+// ############# END ACCOUNTS GROUP #############
+
+// ############# CDD GROUP #############
+
+message CDD {
+  string id = 1;
+  Customer customer = 2;
+  repeated AML amls = 3;
+  repeated KYC kycs = 4;
+  repeated POA poas = 5;
+  enum CDDStatuses {
+    PENDING = 0;
+    MANUAL_REVIEW = 1;
+    APPROVED = 2;
+    DECLINED = 3;
+  }
+  CDDStatuses status = 6;
+  google.protobuf.Timestamp status_ts = 7;
+  google.protobuf.Timestamp ts = 8;
+}
+
+message AML {
+  Organization organization = 1;
+  string identifier = 2;
+  string file = 3;
+  string result = 4;
+  string public_url = 5;
+  repeated AMLAction actions = 6;
+  enum AMLStatuses {
+    PENDING = 0;
+    MANUAL_REVIEW = 1;
+    APPROVED = 2;
+    DECLINED = 3;
+  }
+  AMLStatuses status = 7;
+  google.protobuf.Timestamp status_ts = 8;
+  google.protobuf.Timestamp ts = 9;
+}
+
+message KYC {
+  Organization organization = 1;
+  string identifier = 2;
+  string public_url = 3;
+  Reports reports = 4;
+  repeated KYCAction actions = 5;
+  enum KYCStatuses {
+    PENDING = 0;
+    MANUAL_REVIEW = 1;
+    APPROVED = 2;
+    DECLINED = 3;
+  }
+  KYCStatuses status = 6;
+  google.protobuf.Timestamp status_ts = 7;
+  google.protobuf.Timestamp ts = 8;
+}
+
+message Reports {
+  enum KYCTypes {
+    FACIAL_VIDEO = 0;
+    DOCUMENT = 1;
+  }
+  KYCTypes type = 1;
+  string file = 2;
+  string result = 3;
+  string sub_result = 4;
+  string public_url = 5;
+  Review review = 6;
+  enum ReportStatuses {
+    PENDING = 0;
+    MANUAL_REVIEW = 1;
+    APPROVED = 2;
+    DECLINED = 3;
+  }
+  ReportStatuses status = 7;
+  google.protobuf.Timestamp status_ts = 8;
+  google.protobuf.Timestamp ts = 9;
+}
+
+message Review {
+  bool resubmit = 1;
+  string message = 2;
+  google.protobuf.Timestamp ts = 3;
+}
+
+message POA {
+  Organization organization = 1;
+  string identifier = 2;
+  string file = 3;
+  string result = 4;
+  Review review = 5;
+  repeated POAAction actions = 6;
+  enum POAStatuses {
+    PENDING = 0;
+    MANUAL_REVIEW = 1;
+    APPROVED = 2;
+    DECLINED = 3;
+  }
+  POAStatuses status = 7;
+  google.protobuf.Timestamp status_ts = 8;
+  google.protobuf.Timestamp ts = 9;
+}
+
+message POAAction {
+  enum POAActionTypes {
+    CHANGE_STATUS = 0;
+  }
+  POAActionTypes type = 1;
+  Staff reporter = 2;
+  enum POAStatuses {
+    PENDING = 0;
+    MANUAL_REVIEW = 1;
+    APPROVED = 2;
+    DECLINED = 3;
+  }
+  POAStatuses target_status = 3;
+  string message = 4;
+  google.protobuf.Timestamp ts = 5;
+}
+
+message AMLAction {
+  enum AMLActionTypes {
+    CHANGE_STATUS = 0;
+  }
+  AMLActionTypes type = 1;
+  Staff reporter = 2;
+  enum AMLStatuses {
+    PENDING = 0;
+    MANUAL_REVIEW = 1;
+    APPROVED = 2;
+    DECLINED = 3;
+  }
+  AMLStatuses target_status = 3;
+  string message = 4;
+  google.protobuf.Timestamp ts = 5;
+}
+
+message KYCAction {
+  enum KYCActionTypes {
+    CHANGE_STATUS = 0;
+  }
+  KYCActionTypes type = 1;
+  Staff reporter = 2;
+  enum KYCStatuses {
+    PENDING = 0;
+    MANUAL_REVIEW = 1;
+    APPROVED = 2;
+    DECLINED = 3;
+  }
+  KYCStatuses target_status = 3;
+  string message = 4;
+  google.protobuf.Timestamp ts = 5;
+}
+
+// ############# END CDD GROUP #############
+
+// ############# TRANSACTIONS GROUP #############
+
 message Transaction {
   string id = 1;
+  TransactionType transaction_type = 2;
+  string reference = 3;
+  repeated TransactionFee fees = 4;
+  ExchangeRate exchange_rate = 5;
+  TransactionSource source = 6;
+  TransactionTarget target = 7;
+  string idempotency_key = 8;
+  repeated LinkedTransaction linked_transactions = 9;
+  enum TransactionStatuses {
+    PENDING = 0;
+    APPROVED = 1;
+    REJECTED = 2;
+  }
+  TransactionStatuses status = 10;
+  google.protobuf.Timestamp status_ts = 11;
+  google.protobuf.Timestamp ts = 12;
+}
+
+message TransactionTarget {
+  Customer customer = 1;
+  Beneficiary beneficiary = 2;
+  Account account = 3;
+  BeneficiaryAccount beneficiary_account = 4;
+  float amount = 5;
+  float balance_after_transaction = 6;
+}
+
+message TransactionSource {
+  Customer customer = 1;
   Account account = 2;
-  int32 ts = 3;
-  TransactionData transactionData = 4;
+  float amount = 3;
+  float balance_after_transaction = 4;
 }
 
-// TransactionData type
-message TransactionData {
-  string id = 1;
-  double amount = 2;
-  string bookingDate = 3;
-  string creationDate = 4;
-  string currencyCode = 5;
-  string encodedKey = 6;
-  string externalID = 7;
-  string notes = 8;
-  string parentAccountKey = 9;
-  string paymentOrderID = 10;
-  string type = 11;
-  string userKey = 12;
-  string valueDate = 13;
-  TransferDetails transferDetails = 14;
-  repeated TransactionFee fees = 15;
-  AffectedAmounts affectedAmounts = 16;
-  AccountBalances accountBalances = 17;
-}
-
-// AccountBalances type
-message AccountBalances  {
-  double totalBalance = 1;
-}
-
-// AffectedAmounts type
-message AffectedAmounts {
-  double feesAmount = 1;
-  double fractionAmount = 2;
-  double fundsAmount = 3;
-  double interestAmount = 4;
-  double overdraftAmount = 5;
-  double overdraftFeesAmount = 6;
-  double overdraftInterestAmount = 7;
-  double technicalOverdraftAmount = 8;
-  double technicalOverdraftInterestAmount = 9;
-}
-
-// TransferDetails type
-message TransferDetails {
-  string linkedLoanTransactionKey = 1;
-}
-
-// TransactionFee type
 message TransactionFee {
-  int32 Amount = 1;
-  string Name = 2;
-  string PredefinedFeeKey = 3;
-  int32 TaxAmount = 4;
-  string Trigger = 5;
-}
-
-
-// Staff type
-message Staff {
   string id = 1;
-  string first_name = 2;
-  string last_name = 3;
-  string status = 4;
-  repeated Email emails = 5;
-  repeated PhoneNumber phones = 6;
-  repeated ExtendedIdentity identities = 7;
-  int64 ts = 8;
+  float amount = 2;
 }
 
-message Fx {
-  string currency = 1;
-  string baseCurrency = 2;
-  double buyRate = 3;
-  double sellRate = 4;
-  int64 ts = 5;
+message LinkedTransaction {
+  string id = 1;
+  enum LinkedTransactionTypes {
+    DEPOSIT = 0;
+    WITHDRAWAL = 1;
+    APPLY_FEE = 2;
+  }
+  LinkedTransactionTypes type = 2;
+  Currency currency = 3;
+  float amount = 4;
+  LinkedTransactionSource source = 5;
+  LinkedTransactionTarget target = 6;
+  LinkedTransactionMambu mambu = 7;
+  LinkedTransactionFCMB fcmb = 8;
+  enum LinkedTransactionStatuses {
+    PENDING = 0;
+    APPROVED = 1;
+    REJECTED = 2;
+  }
+  LinkedTransactionStatuses status = 9;
+  google.protobuf.Timestamp status_ts = 10;
+  google.protobuf.Timestamp ts = 11;
 }
 
-message TransferFees {
-  string currency = 1;
-  string baseCurrency = 2;
-  repeated Fee fees = 3;
-  int64 ts = 4;
+message LinkedTransactionFCMB {
+  string transaction_identifier = 1;
+}
+
+message LinkedTransactionMambu {
+  string transaction_encoded_key = 1;
+}
+
+message LinkedTransactionTarget {
+  Account account = 1;
+  BeneficiaryAccount beneficiaryAccount = 2;
+  string account_data = 3;
+}
+
+message LinkedTransactionSource {
+  Customer customer = 1;
+  Account account = 2;
+  string account_data = 3;
+}
+
+message TransactionType {
+  string id = 1;
+  string name = 2;
+  enum TransactionTypeStatuses {
+    ACTIVE = 0;
+    INACTIVE = 1;
+  }
+  TransactionTypeStatuses status = 3;
+  google.protobuf.Timestamp status_ts = 4;
+  google.protobuf.Timestamp ts = 5;
 }
 
 message Fee {
-  double lowerBoundary = 1;
-  double upperBoundary = 2;
-  double fee = 3;
-}
-
-// Payment type
-message Payment {
   string id = 1;
-  string idempotency_key = 2;
-  Person owner = 3;
-  PaymentAccount source = 4;
-  int64 charge = 5;
-  string reference = 6;
-  string status = 7;
-  string image = 8;
-  string notes = 9;
-  repeated string tags = 10;
-  PaymentAccount target = 11;
-  string currency = 12;
-  float funding_amount = 13;
-  Quote quote = 14;
-  int64 ts = 15;
-}
-
-// Payments type
-message Payments {
-  repeated Payment payment = 1;
-}
-
-message PaymentAccount {
-  oneof accounts {
-    Account account = 5;
-    PayeeAccount payee_account = 6;
+  TransactionType transaction_type = 2;
+  enum FeeTypes {
+    FIXED = 0;
+    VARIABLE = 1;
   }
-  string currency = 2;
-  double  amount = 3;
+  FeeTypes type = 3;
+  repeated FeeBoundaries boundaries = 4;
+  enum FeeStatuses {
+    ACTIVE = 0;
+    INACTIVE = 1;
+  }
+  FeeStatuses status = 5;
+  google.protobuf.Timestamp status_ts = 6;
+  google.protobuf.Timestamp ts = 7;
 }
 
-message Quote {
+message FeeBoundaries {
+  float lower = 1;
+  float upper = 2;
+  float amount = 3;
+  float percentage = 4;
+}
+
+message ExchangeRate {
   string id = 1;
-  bool has_expiry = 2;
-  int64 expires = 3;
-  Fee fee = 4;
-  Fx fx = 5;
-  int64 ts = 6;
+  Currency base_currency = 2;
+  Currency target_currency = 3;
+  float buy_price = 4;
+  float sale_price = 5;
+  google.protobuf.Timestamp ts = 6;
 }
 
-message PaymentFilter {
-  string status = 1;
-  string payee_id = 2;
-  int32 limit = 3;
+// ############# END TRANSACTIONS GROUP #############
+
+// ############# BENEFICIARIES GROUP #############
+
+message Beneficiary {
+  string id = 1;
+  Customer customer = 2;
+  string name = 3;
+  repeated BeneficiaryAccount accounts = 4;
+  enum BeneficiaryStatuses {
+    ACTIVE = 0;
+    INACTIVE = 1;
+  }
+  BeneficiaryStatuses status = 5;
+  google.protobuf.Timestamp status_ts = 6;
+  google.protobuf.Timestamp ts = 7;
 }
+
+message BeneficiaryAccount {
+  string id = 1;
+  Beneficiary beneficiary = 2;
+  string name = 3;
+  Account account = 4;
+  Currency currency = 5;
+  string account_number = 6;
+  string code = 7;
+  enum BeneficiaryAccountStatuses {
+    ACTIVE = 0;
+    INACTIVE = 1;
+  }
+  BeneficiaryAccountStatuses status = 8;
+  google.protobuf.Timestamp status_ts = 9;
+  google.protobuf.Timestamp ts = 10;
+}
+
+// ############# END BENEFICIARIES GROUP #############
+
+// ############# OTHERS GROUP #############
+
+message Currency {
+  string id = 1;
+  string symbol = 2;
+  string code = 3;
+  string name = 4;
+}
+
+message Country {
+  string id = 1;
+  string code_alpha2 = 2;
+  string code_alpha3 = 3;
+  string name = 4;
+}
+
+message Content {
+  string id = 1;
+  enum ContentType {
+    GENERAL_TC = 0;
+    GBP_ACCOUNT_TC = 1;
+    NGN_ACCOUNT_TC = 2;
+    VAULT_ACCOUNT_TC = 3;
+    PRIVACY_NOTICE = 4;
+    FEES_LIMITS = 5;
+  }
+  ContentType type = 2;
+  string link = 3;
+  google.protobuf.Timestamp ts = 4;
+}
+
+message DefaultResponse {
+  bool success = 1;
+  int32 code = 2;
+}
+
+message DeviceInput {
+  string identifier = 1;
+  string os = 2;
+  string brand = 3;
+  repeated DeviceTokenInput tokens = 4;
+  repeated DevicePreferencesInput preferences = 5;
+}
+
+message DeviceTokenInput {
+  types.DeviceToken.DeviceTokenTypes type = 1;
+  string value = 2;
+}
+
+message DevicePreferencesInput {
+  types.DevicePreferences.DevicePreferencesTypes type = 1;
+  string value = 2;
+}
+
+message PaginationInfo {
+  bool has_next_page = 1;
+  bool has_previous_page = 2;
+  string start_cursor = 3;
+  string end_cursor = 4;
+}
+
+// ############# END OTHERS GROUP #############

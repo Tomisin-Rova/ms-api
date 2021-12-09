@@ -1,106 +1,116 @@
 syntax = "proto3";
+
 package payment;
-// If the go_package is changed, change the sed in payments
-option go_package = "ms.api/protos/pb/paymentService";
 
-// Import types
 import "types.proto";
+import "google/protobuf/timestamp.proto";
+option go_package = "protos/pb/payment";
 
-message CreatePayeeRequest {
-  string identityId = 1;
-  string transactionPin = 2;
-  string name = 3;
-  string AccountName = 4;
-  string accountNumber = 5;
-  string sortCode = 6;
-  string bankCode = 7;
-  string iban = 8;
-  string swiftBic = 9;
-  string routingNumber = 11;
-  string phoneNumber = 12;
-  string currency = 13;
-  string avatar = 14;
-}
-
-message GetPayeesRequest {
-  string identityId = 1;
-}
-
-message GetPayeeRequest {
-  string PayeeId = 1;
-  string IdentityId = 2;
-}
-
-
-message DeletePayeeAccountRequest {
-  string PayeeId = 1;
-  string IdentityId = 2;
-  string payeeAccountId = 3;
-}
-
-message AddPayeeAccountRequest {
-  string identityId = 1;
-  string PayeeId = 2;
-  string AccountName = 4;
-  string accountNumber = 5;
-  string sortCode = 6;
-  string bankCode = 7;
-  string iban = 8;
-  string swiftBic = 9;
-  string routingNumber = 11;
-  string phoneNumber = 12;
-  string currency = 13;
-}
-
-message UpdatePayeeRequest {
-  string IdentityId = 1;
-  string Name = 2;
-  string Avatar = 3;
-  string payeeId = 4;
-  string transactionPin = 5;
-}
-
-message CreatePaymentRequest {
-  string identity_id = 1;
-  string transaction_pin = 2;
-  string idempotency_key = 3;
-  string owner = 4;
-  double charge = 5;
-  string reference = 6;
-  string state = 7;
-  string image = 8;
-  string notes = 9;
-  string quote = 10;
-  repeated string tags = 11;
-  BeneficiaryInput beneficiary = 12;
-  string funding_source = 13;
-  string currency = 14;
-  double funding_amount = 15;
+message CreateBeneficiaryRequest {
+  BeneficiaryInput beneficiary = 1;
+  string transaction_password = 2;
 }
 
 message BeneficiaryInput {
-  string account = 1;
-  string currency = 2;
-  double  amount = 3;
+  string name = 1;
+  BeneficiaryAccountInput account = 2;
 }
 
-message GetPaymentsRequest {
-  string owner = 1;
-  types.PaymentFilter filter = 2;
+message BeneficiaryAccountInput {
+  string name = 1;
+  string currency_id = 2;
+  string account_number = 3;
+  string code = 4;
 }
 
-message GetPaymentRequest {
-  string paymentId = 1;
+message AddBeneficiaryAccountRequest {
+  BeneficiaryAccountInput account = 1;
+  string transaction_password = 2;
+}
+
+message DeleteBeneficiaryAccountRequest {
+  string beneficiary_id = 1;
+  string account_id = 2;
+  string transaction_password = 3;
+}
+
+message CreateTransferRequest {
+  TransactionInput tranfer = 1;
+  string transaction_password = 2;
+}
+
+message TransactionInput {
+  string transaction_type_id = 1;
+  string reference = 2;
+  repeated string fee_ids = 3;
+  string exchange_rate_id = 4;
+  float amount = 5;
+  string source_account_id = 6;
+  string target_account_id = 7;
+  string idempotency_key = 8;
+}
+
+message GetTransactionRequest {
+  string id = 1;
+}
+
+message GetTransactionsRequest {
+  int32 first = 1;
+  string after = 2;
+  int32 last = 3;
+  string before = 4;
+  repeated types.Transaction.TransactionStatuses statuses = 5;
+  repeated string account_ids = 6;
+  repeated string beneficiary_ids = 7;
+}
+
+message GetTransactionsResponse {
+  repeated types.Transaction nodes = 1;
+  types.PaginationInfo pagination_info = 2;
+  int32 total_count = 3;
+}
+
+message GetBeneficiaryRequest {
+  string id = 1;
+}
+
+message GetBeneficiariesRequest {
+  string keywords = 1;
+  int32 first = 2;
+  string after = 3;
+  int32 last = 4;
+  string before = 5;
+  repeated types.Beneficiary.BeneficiaryStatuses statuses = 6;
+}
+
+message GetBeneficiariesResponse {
+  repeated types.Beneficiary nodes = 1;
+  types.PaginationInfo pagination_info = 2;
+  int32 total_count = 3;
+}
+
+message GetTransactionTypesRequest {
+  int32 first = 2;
+  string after = 3;
+  int32 last = 4;
+  string before = 5;
+  repeated types.TransactionType.TransactionTypeStatuses statuses = 6;
+}
+
+message GetTransactionTypesResponse {
+  repeated types.TransactionType nodes = 1;
+  types.PaginationInfo pagination_info = 2;
+  int32 total_count = 3;
 }
 
 service PaymentService {
-  rpc CreatePayee(CreatePayeeRequest) returns (types.Response) {}
-  rpc GetPayees(GetPayeesRequest) returns (types.Payees) {}
-  rpc GetPayee(GetPayeeRequest) returns (types.Payee) {}
-  rpc DeletePayeeAccount(DeletePayeeAccountRequest) returns (types.Response) {}
-  rpc AddPayeeAccount(AddPayeeAccountRequest) returns (types.Response) {}
-  rpc UpdatePayee(UpdatePayeeRequest) returns (types.Response) {}
-  rpc CreatePayment(CreatePaymentRequest) returns (types.Response) {}
-  rpc GetPayment(GetPaymentRequest) returns (types.Payment) {}
-  rpc GetPayments(GetPaymentsRequest) returns (types.Payments) {}
+  rpc CreateBeneficiary(CreateBeneficiaryRequest) returns (types.Beneficiary);
+  rpc AddBeneficiaryAccount(AddBeneficiaryAccountRequest) returns (types.BeneficiaryAccount);
+  rpc DeleteBeneficiaryAccount(DeleteBeneficiaryAccountRequest) returns (types.DefaultResponse);
+  rpc GetBeneficiary(GetBeneficiaryRequest) returns (types.Beneficiary);
+  rpc GetBeneficiaries(GetBeneficiariesRequest) returns (GetBeneficiariesResponse);
+  rpc CreateTransfer(CreateTransferRequest) returns (types.Transaction);
+  rpc GetTransaction(GetTransactionRequest) returns (types.Transaction);
+  rpc GetTransactions(GetTransactionsRequest) returns (GetTransactionsResponse);
+  rpc GetTransactionTypes(GetTransactionTypesRequest) returns (GetTransactionTypesResponse);
 }

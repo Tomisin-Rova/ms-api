@@ -24,7 +24,6 @@ import (
 	"ms.api/graph"
 	"ms.api/graph/generated"
 	rerrors "ms.api/libs/errors"
-	"ms.api/server/http/handlers"
 	"ms.api/server/http/middlewares"
 )
 
@@ -100,7 +99,6 @@ func MountServer(secrets *config.Secrets, logger *zap.Logger) *chi.Mux {
 	}
 
 	resolvers := graph.NewResolver(opts, logger)
-	httpHandlers := handlers.New(opts.OnBoardingService, logger)
 	// API Server
 	server := NewCustomServer(generated.NewExecutableSchema(generated.Config{Resolvers: resolvers}))
 	server.SetErrorPresenter(func(ctx context.Context, e error) *gqlerror.Error {
@@ -115,7 +113,6 @@ func MountServer(secrets *config.Secrets, logger *zap.Logger) *chi.Mux {
 	})
 
 	router.Handle("/graphql", corsSetup.Handler(server))
-	router.Get("/verify_email", httpHandlers.VerifyMagicLinkHandler)
 
 	return router
 }
