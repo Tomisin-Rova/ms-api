@@ -8,767 +8,478 @@ import (
 	"strconv"
 )
 
-type BeneficiaryAccount interface {
-	IsBeneficiaryAccount()
-}
-
-type Entity interface {
-	IsEntity()
-}
-
 type GraphQLResponse interface {
 	IsGraphQLResponse()
 }
 
-type Node interface {
-	IsNode()
+type MeResult interface {
+	IsMeResult()
 }
 
-type Owner interface {
-	IsOwner()
+type Aml struct {
+	Organization *Organization `json:"organization"`
+	Identifier   string        `json:"identifier"`
+	File         *string       `json:"file"`
+	Result       string        `json:"result"`
+	PublicURL    *string       `json:"publicUrl"`
+	Actions      []*AMLAction  `json:"actions"`
+	Status       AMLStatuses   `json:"status"`
+	StatusTs     int64         `json:"statusTs"`
+	Ts           int64         `json:"ts"`
 }
 
-type ValidationData interface {
-	IsValidationData()
-}
-
-type Verifiable interface {
-	IsVerifiable()
+type AMLAction struct {
+	Type         AMLActionTypes `json:"type"`
+	Reporter     *Staff         `json:"reporter"`
+	TargetStatus AMLStatuses    `json:"targetStatus"`
+	Message      string         `json:"message"`
+	Ts           int64          `json:"ts"`
 }
 
 type Acceptance struct {
 	ID       string    `json:"id"`
-	Identity *Identity `json:"identity"`
 	Content  *Content  `json:"content"`
-	Ts       *int64    `json:"ts"`
-}
-
-type AcceptanceConnection struct {
-	Edges      []*AcceptanceEdge `json:"edges"`
-	Nodes      []*Acceptance     `json:"nodes"`
-	PageInfo   *PageInfo         `json:"pageInfo"`
-	TotalCount *int64            `json:"totalCount"`
-}
-
-type AcceptanceEdge struct {
-	Node   *Acceptance `json:"node"`
-	Cursor string      `json:"cursor"`
+	Customer *Customer `json:"customer"`
+	Ts       int64     `json:"ts"`
 }
 
 type Account struct {
-	ID             string                 `json:"id"`
-	Owner          Owner                  `json:"owner"`
-	Product        *Product               `json:"product"`
-	Name           *string                `json:"name"`
-	Active         *bool                  `json:"active"`
-	Status         *string                `json:"status"`
-	Image          *string                `json:"image"`
-	Organisation   *Organisation          `json:"organisation"`
-	Ts             *int64                 `json:"ts"`
-	Tags           *TagConnection         `json:"tags"`
-	Transactions   *TransactionConnection `json:"transactions"`
-	AccountData    *AccountData           `json:"account_data"`
-	AccountDetails *AccountDetails        `json:"account_details"`
+	ID            string           `json:"id"`
+	Customer      *Customer        `json:"customer"`
+	Product       *Product         `json:"product"`
+	Name          string           `json:"name"`
+	Iban          *string          `json:"iban"`
+	AccountNumber *string          `json:"accountNumber"`
+	Code          *string          `json:"code"`
+	MaturityDate  *string          `json:"maturityDate"`
+	Balances      *AccountBalances `json:"balances"`
+	Mambu         *AccountMambu    `json:"mambu"`
+	Fcmb          *AccountFcmb     `json:"fcmb"`
+	Status        AccountStatuses  `json:"status"`
+	StatusTs      int64            `json:"statusTs"`
+	Ts            int64            `json:"ts"`
 }
 
-func (Account) IsBeneficiaryAccount() {}
-
 type AccountBalances struct {
-	TotalBalance *float64 `json:"total_balance"`
+	TotalBalance float64 `json:"totalBalance"`
 }
 
 type AccountConnection struct {
-	Edges      []*AccountEdge `json:"edges"`
-	Nodes      []*Account     `json:"nodes"`
-	PageInfo   *PageInfo      `json:"pageInfo"`
-	TotalCount *int64         `json:"totalCount"`
+	Nodes      []*Account `json:"nodes"`
+	PageInfo   *PageInfo  `json:"pageInfo"`
+	TotalCount int64      `json:"totalCount"`
 }
 
-type AccountData struct {
-	ID                              string                     `json:"id"`
-	AccountHolderKey                *string                    `json:"account_holder_key"`
-	AccountHolderType               *string                    `json:"account_holder_type"`
-	AccountState                    *string                    `json:"account_state"`
-	AccountType                     *string                    `json:"account_type"`
-	ActivationDate                  *string                    `json:"activation_date"`
-	ApprovedDate                    *string                    `json:"approved_date"`
-	AssignedBranchKey               *string                    `json:"assigned_branch_key"`
-	AssignedCentreKey               *string                    `json:"assigned_centre_key"`
-	AssignedUserKey                 *string                    `json:"assigned_user_key"`
-	ClosedDate                      *string                    `json:"closed_date"`
-	CreationDate                    *string                    `json:"creation_date"`
-	CreditArrangementKey            *string                    `json:"credit_arrangement_key"`
-	CurrencyCode                    *string                    `json:"currency_code"`
-	EncodedKey                      *string                    `json:"encoded_key"`
-	LastAccountAppraisalDate        *string                    `json:"last_account_appraisal_date"`
-	LastInterestCalculationDate     *string                    `json:"last_interest_calculation_date"`
-	LastInterestStoredDate          *string                    `json:"last_interest_stored_date"`
-	LastModifiedDate                *string                    `json:"last_modified_date"`
-	LastOverdraftInterestReviewDate *string                    `json:"last_overdraft_interest_review_date"`
-	LastSetToArrearsDate            *string                    `json:"last_set_to_arrears_date"`
-	LockedDate                      *string                    `json:"locked_date"`
-	MaturityDate                    *string                    `json:"maturity_date"`
-	MigrationEventKey               *string                    `json:"migration_event_key"`
-	Name                            *string                    `json:"name"`
-	Notes                           *string                    `json:"notes"`
-	ProductTypeKey                  *string                    `json:"product_type_key"`
-	WithholdingTaxSourceKey         *string                    `json:"withholding_tax_source_key"`
-	OverdraftSettings               *OverdraftSettings         `json:"overdraft_settings"`
-	OverdraftInterestSettings       *OverdraftInterestSettings `json:"overdraft_interest_settings"`
-	LinkedSettlementAccountKeys     []*string                  `json:"linked_settlement_account_keys"`
-	InternalControls                *InternalControls          `json:"internal_controls"`
-	InterestSettings                *InterestSettings          `json:"interest_settings"`
-	Balances                        *Balances                  `json:"balances"`
-	AccruedAmounts                  *AccruedAmounts            `json:"accrued_amounts"`
-}
-
-type AccountDetails struct {
-	VirtualAccountID *string `json:"virtual_account_id"`
-	Iban             *string `json:"iban"`
-	AccountNumber    *string `json:"account_number"`
-	SortCode         *string `json:"sort_code"`
-	SwiftBic         *string `json:"swift_bic"`
-	BankCode         *string `json:"bank_code"`
-	RoutingNumber    *string `json:"routing_number"`
-}
-
-type AccountEdge struct {
-	Node   *Account `json:"node"`
-	Cursor string   `json:"cursor"`
+type AccountFcmb struct {
+	NgnAccountNumber *string `json:"ngnAccountNumber"`
+	CifID            *string `json:"cifId"`
 }
 
 type AccountInput struct {
-	Name *string `json:"name"`
+	ProductID string `json:"productId"`
 }
 
-type AccountingRules struct {
-	EncodedKey        *string `json:"encoded_key"`
-	FinancialResource *string `json:"financial_resource"`
-	GlKey             *string `json:"gl_key"`
-}
-
-type AccruedAmounts struct {
-	InterestAccrued                   *float64 `json:"interest_accrued"`
-	NegativeInterestAccrued           *float64 `json:"negative_interest_accrued"`
-	OverdraftInterestAccrued          *float64 `json:"overdraft_interest_accrued"`
-	TechnicalOverdraftInterestAccrued *float64 `json:"technical_overdraft_interest_accrued"`
-}
-
-type Action struct {
-	ID       string `json:"id"`
-	Reporter *Staff `json:"reporter"`
-	Notes    string `json:"notes"`
-	Status   string `json:"status"`
-	Ts       int64  `json:"ts"`
-}
-
-type Activity struct {
-	ID            string `json:"id"`
-	Description   string `json:"description"`
-	RiskWeighting int64  `json:"risk_weighting"`
-	Supported     *bool  `json:"supported"`
-	Archived      *int64 `json:"archived"`
-	Ts            *int64 `json:"ts"`
-}
-
-type ActivityInput struct {
-	Description   string `json:"description"`
-	RiskWeighting int64  `json:"risk_weighting"`
-	Supported     *bool  `json:"supported"`
-	Archived      *int64 `json:"archived"`
+type AccountMambu struct {
+	EncodedKey *string `json:"encodedKey"`
+	BranchKey  *string `json:"branchKey"`
 }
 
 type Address struct {
-	ID       string    `json:"id"`
-	Owner    Entity    `json:"owner"`
-	Name     *string   `json:"name"`
-	Primary  *bool     `json:"primary"`
-	Street   *string   `json:"street"`
-	City     *string   `json:"city"`
-	County   *string   `json:"county"`
-	State    *string   `json:"state"`
-	Postcode *string   `json:"postcode"`
-	Country  *Country  `json:"country"`
-	Ts       *int64    `json:"ts"`
-	Location *Location `json:"location"`
-}
-
-type AddressConnection struct {
-	Edges      []*AddressEdge `json:"edges"`
-	Nodes      []*Address     `json:"nodes"`
-	PageInfo   *PageInfo      `json:"pageInfo"`
-	TotalCount *int64         `json:"totalCount"`
-}
-
-type AddressEdge struct {
-	Node   *Address `json:"node"`
-	Cursor string   `json:"cursor"`
+	Primary    bool        `json:"primary"`
+	Country    *Country    `json:"country"`
+	State      *string     `json:"state"`
+	City       *string     `json:"city"`
+	Street     string      `json:"street"`
+	Postcode   string      `json:"postcode"`
+	Cordinates *Cordinates `json:"cordinates"`
 }
 
 type AddressInput struct {
-	Street   *string `json:"street"`
-	City     *string `json:"city"`
-	County   *string `json:"county"`
-	State    *string `json:"state"`
-	Postcode *string `json:"postcode"`
-	Country  *string `json:"country"`
-	Country2 *string `json:"country_2"`
+	CountryID  string           `json:"countryId"`
+	State      *string          `json:"state"`
+	City       *string          `json:"city"`
+	Street     string           `json:"street"`
+	Postcode   string           `json:"postcode"`
+	Cordinates *CordinatesInput `json:"cordinates"`
 }
 
-type AffectedAmounts struct {
-	FeesAmount                       *float64 `json:"fees_amount"`
-	FractionAmount                   *float64 `json:"fraction_amount"`
-	FundsAmount                      *float64 `json:"funds_amount"`
-	InterestAmount                   *float64 `json:"interest_amount"`
-	OverdraftAmount                  *float64 `json:"overdraft_amount"`
-	OverdraftFeesAmount              *float64 `json:"overdraft_fees_amount"`
-	OverdraftInterestAmount          *float64 `json:"overdraft_interest_amount"`
-	TechnicalOverdraftAmount         *float64 `json:"technical_overdraft_amount"`
-	TechnicalOverdraftInterestAmount *float64 `json:"technical_overdraft_interest_amount"`
-}
-
-type ApplicantInput struct {
-	ApplicantID *string       `json:"applicant_id"`
-	FirstName   string        `json:"first_name"`
-	LastName    string        `json:"last_name"`
-	Email       string        `json:"email"`
-	Dob         string        `json:"dob"`
-	Address     *AddressInput `json:"address"`
-	Vendor      *string       `json:"vendor"`
-}
-
-type Auth struct {
-	ID       string      `json:"id"`
-	Session  *string     `json:"session"`
-	Identity []*Identity `json:"identity"`
-	Success  *bool       `json:"success"`
-	Attempts *int64      `json:"attempts"`
-	Ts       *int64      `json:"ts"`
+type AnswerInput struct {
+	ID     string `json:"id"`
+	Answer string `json:"answer"`
 }
 
 type AuthInput struct {
-	Email    string       `json:"email"`
-	Passcode string       `json:"passcode"`
-	Device   *DeviceInput `json:"device"`
+	Email            string `json:"email"`
+	Password         string `json:"password"`
+	DeviceIdentifier string `json:"deviceIdentifier"`
 }
 
 type AuthResponse struct {
-	Message string      `json:"message"`
+	Message *string     `json:"message"`
 	Success bool        `json:"success"`
-	Code    *int64      `json:"code"`
+	Code    int64       `json:"code"`
 	Tokens  *AuthTokens `json:"tokens"`
 }
 
 func (AuthResponse) IsGraphQLResponse() {}
 
 type AuthTokens struct {
-	Auth    string `json:"auth"`
-	Refresh string `json:"refresh"`
+	Auth    string  `json:"auth"`
+	Refresh *string `json:"refresh"`
 }
 
-type Balances struct {
-	AvailableBalance              *float64 `json:"available_balance"`
-	BlockedBalance                *float64 `json:"blocked_balance"`
-	FeesDue                       *float64 `json:"fees_due"`
-	ForwardAvailableBalance       *float64 `json:"forward_available_balance"`
-	HoldBalance                   *float64 `json:"hold_balance"`
-	LockedBalance                 *float64 `json:"locked_balance"`
-	OverdraftAmount               *float64 `json:"overdraft_amount"`
-	OverdraftInterestDue          *float64 `json:"overdraft_interest_due"`
-	TechnicalOverdraftAmount      *float64 `json:"technical_overdraft_amount"`
-	TechnicalOverdraftInterestDue *float64 `json:"technical_overdraft_interest_due"`
-	TotalBalance                  *float64 `json:"total_balance"`
+type Bank struct {
+	ID            string `json:"id"`
+	BankCode      string `json:"bankCode"`
+	BankName      string `json:"bankName"`
+	BankShortName string `json:"bankShortName"`
+	Active        bool   `json:"active"`
+	Ts            int64  `json:"ts"`
+}
+
+type BankConnection struct {
+	Nodes      []*Bank   `json:"nodes"`
+	PageInfo   *PageInfo `json:"pageInfo"`
+	TotalCount int64     `json:"totalCount"`
 }
 
 type Beneficiary struct {
-	Account  BeneficiaryAccount `json:"account"`
-	Currency *Currency          `json:"currency"`
-	Amount   float64            `json:"amount"`
+	ID       string                `json:"id"`
+	Customer *Customer             `json:"customer"`
+	Name     string                `json:"name"`
+	Accounts []*BeneficiaryAccount `json:"accounts"`
+	Status   BeneficiaryStatuses   `json:"status"`
+	StatusTs int64                 `json:"statusTs"`
+	Ts       int64                 `json:"ts"`
+}
+
+type BeneficiaryAccount struct {
+	ID            string                     `json:"id"`
+	Beneficiary   *Beneficiary               `json:"beneficiary"`
+	Name          *string                    `json:"name"`
+	Account       *Account                   `json:"account"`
+	Currency      *Currency                  `json:"currency"`
+	AccountNumber string                     `json:"accountNumber"`
+	Code          string                     `json:"code"`
+	Status        BeneficiaryAccountStatuses `json:"status"`
+	StatusTs      int64                      `json:"statusTs"`
+	Ts            int64                      `json:"ts"`
+}
+
+type BeneficiaryAccountInput struct {
+	Name          *string `json:"name"`
+	CurrencyID    string  `json:"currencyId"`
+	AccountNumber string  `json:"accountNumber"`
+	Code          string  `json:"code"`
+}
+
+type BeneficiaryConnection struct {
+	Nodes      []*Beneficiary `json:"nodes"`
+	PageInfo   *PageInfo      `json:"pageInfo"`
+	TotalCount int64          `json:"totalCount"`
 }
 
 type BeneficiaryInput struct {
-	Account  string  `json:"account"`
-	Currency *string `json:"currency"`
-	Amount   float64 `json:"amount"`
+	Name    string                   `json:"name"`
+	Account *BeneficiaryAccountInput `json:"account"`
 }
 
 type Cdd struct {
-	ID          string        `json:"id"`
-	Owner       *Person       `json:"owner"`
-	Watchlist   *bool         `json:"watchlist"`
-	Details     *string       `json:"details"`
-	Status      State         `json:"status"`
-	Onboard     *bool         `json:"onboard"`
-	Version     *int64        `json:"version"`
-	Validations []*Validation `json:"validations"`
-	Active      *bool         `json:"active"`
-	Ts          *int64        `json:"ts"`
+	ID       string      `json:"id"`
+	Customer *Customer   `json:"customer"`
+	Amls     []*Aml      `json:"amls"`
+	Kycs     []*Kyc      `json:"kycs"`
+	Poas     []*Poa      `json:"poas"`
+	Status   CDDStatuses `json:"status"`
+	StatusTs int64       `json:"statusTs"`
+	Ts       int64       `json:"ts"`
 }
 
 type CDDConnection struct {
-	Edges      []*CDDEdge `json:"edges"`
-	Nodes      []*Cdd     `json:"nodes"`
-	PageInfo   *PageInfo  `json:"pageInfo"`
-	TotalCount *int64     `json:"totalCount"`
+	Nodes      []*Cdd    `json:"nodes"`
+	PageInfo   *PageInfo `json:"pageInfo"`
+	TotalCount int64     `json:"totalCount"`
 }
 
-type CDDEdge struct {
-	Node   *Cdd   `json:"node"`
-	Cursor string `json:"cursor"`
+type CDDInput struct {
+	Kyc *KYCInput `json:"kyc"`
+	Aml bool      `json:"aml"`
+	Poa *POAInput `json:"poa"`
 }
 
-type Check struct {
-	ID           string        `json:"id"`
-	Owner        Owner         `json:"owner"`
-	Organisation *Organisation `json:"organisation"`
-	Status       State         `json:"status"`
-	Ts           *int64        `json:"ts"`
-	Data         *CheckData    `json:"data"`
+type CheckCustomerDataInput struct {
+	Email            string `json:"email"`
+	FirstName        string `json:"firstName"`
+	LastName         string `json:"lastName"`
+	Dob              string `json:"dob"`
+	AccountNumber    string `json:"accountNumber"`
+	SortCode         string `json:"sortCode"`
+	DeviceIdentifier string `json:"deviceIdentifier"`
 }
 
-func (Check) IsValidationData() {}
-
-type CheckConnection struct {
-	Edges      []*CheckEdge `json:"edges"`
-	Nodes      []*Check     `json:"nodes"`
-	PageInfo   *PageInfo    `json:"pageInfo"`
-	TotalCount *int64       `json:"totalCount"`
-}
-
-type CheckData struct {
-	ID                    string         `json:"id"`
-	CreatedAt             *string        `json:"created_at"`
-	Status                State          `json:"status"`
-	RedirectURI           *string        `json:"redirect_uri"`
-	Result                *string        `json:"result"`
-	Sandbox               *bool          `json:"sandbox"`
-	ResultsURI            *string        `json:"results_uri"`
-	FormURI               *string        `json:"form_uri"`
-	Paused                *bool          `json:"paused"`
-	Version               *string        `json:"version"`
-	Href                  *string        `json:"href"`
-	ApplicantID           *string        `json:"applicant_id"`
-	ApplicantProvidesData *bool          `json:"applicant_provides_data"`
-	Reports               []*Report      `json:"reports"`
-	Tags                  *TagConnection `json:"tags"`
-}
-
-type CheckEdge struct {
-	Node   *Check `json:"node"`
-	Cursor string `json:"cursor"`
-}
-
-type Comment struct {
-	ID     string  `json:"id"`
-	Author *Person `json:"author"`
-	Type   *string `json:"type"`
-	Body   *string `json:"body"`
-	Ts     *int64  `json:"ts"`
-	Tags   []*Tag  `json:"tags"`
-}
-
-type CommentConnection struct {
-	Edges      []*CommentEdge `json:"edges"`
-	Nodes      []*Comment     `json:"nodes"`
-	PageInfo   *PageInfo      `json:"pageInfo"`
-	TotalCount *int64         `json:"totalCount"`
-}
-
-type CommentEdge struct {
-	Node   *Comment `json:"node"`
-	Cursor string   `json:"cursor"`
+type CommonQueryFilterInput struct {
+	ID         *string `json:"id"`
+	CustomerID *string `json:"customerId"`
+	Last       *bool   `json:"last"`
 }
 
 type Content struct {
-	ID       string             `json:"id"`
-	Source   Entity             `json:"source"`
-	Type     *string            `json:"type"`
-	Title    *string            `json:"title"`
-	Abstract *string            `json:"abstract"`
-	Body     *string            `json:"body"`
-	URL      *string            `json:"url"`
-	Current  *bool              `json:"current"`
-	Version  *int64             `json:"version"`
-	Ts       *int64             `json:"ts"`
-	Comments *CommentConnection `json:"comments"`
-	Tags     *TagConnection     `json:"tags"`
-	Keywords []*string          `json:"keywords"`
+	ID   string      `json:"id"`
+	Type ContentType `json:"type"`
+	Link *string     `json:"link"`
+	Ts   int64       `json:"ts"`
+}
+
+type ContentConnection struct {
+	Nodes      []*Content `json:"nodes"`
+	PageInfo   *PageInfo  `json:"pageInfo"`
+	TotalCount int64      `json:"totalCount"`
+}
+
+type Cordinates struct {
+	Latitude  float64 `json:"latitude"`
+	Longitude float64 `json:"longitude"`
+}
+
+type CordinatesInput struct {
+	Latitude  float64 `json:"latitude"`
+	Longitude float64 `json:"longitude"`
 }
 
 type Country struct {
-	Capital                       string `json:"Capital"`
-	Continent                     string `json:"Continent"`
-	CountryName                   string `json:"Country_Name"`
-	Ds                            string `json:"DS"`
-	Dial                          string `json:"Dial"`
-	Edgar                         string `json:"EDGAR"`
-	Fifa                          string `json:"FIFA"`
-	Fips                          string `json:"FIPS"`
-	Gaul                          string `json:"GAUL"`
-	GeoNameID                     string `json:"Geo_Name_ID"`
-	Ioc                           string `json:"IOC"`
-	Iso3166_1Alpha2               string `json:"ISO3166_1_Alpha_2"`
-	Iso3166_1Alpha3               string `json:"ISO3166_1_Alpha_3"`
-	Iso4217CurrencyAlphabeticCode string `json:"ISO4217_Currency_Alphabetic_Code"`
-	Iso4217CurrencyCountryName    string `json:"ISO4217_Currency_Country_Name"`
-	Iso4217CurrencyMinorUnit      int64  `json:"ISO4217_Currency_Minor_Unit"`
-	Iso4217CurrencyName           string `json:"ISO4217_Currency_Name"`
-	Iso4217CurrencyNumericCode    int64  `json:"ISO4217_Currency_Numeric_Code"`
-	Itu                           string `json:"ITU"`
-	IsIndependent                 string `json:"Is_Independent"`
-	Languages                     string `json:"Languages"`
-	M49                           int64  `json:"M49"`
-	Marc                          string `json:"MARC"`
-	OfficialNameEnglish           string `json:"Official_Name_English"`
-	Tld                           string `json:"TLD"`
-	Wmo                           string `json:"WMO"`
-}
-
-type CountryConnection struct {
-	Edges      []*CountryEdge `json:"edges"`
-	Nodes      []*Country     `json:"nodes"`
-	PageInfo   *PageInfo      `json:"pageInfo"`
-	TotalCount *int64         `json:"totalCount"`
-}
-
-type CountryEdge struct {
-	Node   *Country `json:"node"`
-	Cursor string   `json:"cursor"`
-}
-
-type Credentials struct {
-	Identifier   string  `json:"identifier"`
-	RefreshToken *string `json:"refresh_token"`
+	ID         string `json:"id"`
+	CodeAlpha2 string `json:"codeAlpha2"`
+	CodeAlpha3 string `json:"codeAlpha3"`
+	Name       string `json:"name"`
 }
 
 type Currency struct {
-	Symbol        string `json:"symbol"`
-	Name          string `json:"name"`
-	SymbolNative  string `json:"symbol_native"`
-	DecimalDigits int64  `json:"decimal_digits"`
-	Rounding      int64  `json:"rounding"`
-	Code          string `json:"code"`
-	NamePlural    string `json:"name_plural"`
+	ID     string `json:"id"`
+	Symbol string `json:"symbol"`
+	Code   string `json:"code"`
+	Name   string `json:"name"`
 }
 
 type CurrencyConnection struct {
-	Edges      []*CurrencyEdge `json:"edges"`
-	Nodes      []*Currency     `json:"nodes"`
-	PageInfo   *PageInfo       `json:"pageInfo"`
-	TotalCount *int64          `json:"totalCount"`
+	Nodes      []*Currency `json:"nodes"`
+	PageInfo   *PageInfo   `json:"pageInfo"`
+	TotalCount int64       `json:"totalCount"`
 }
 
-type CurrencyEdge struct {
-	Node   *Currency `json:"node"`
-	Cursor string    `json:"cursor"`
+type Customer struct {
+	ID        string           `json:"id"`
+	FirstName string           `json:"firstName"`
+	LastName  string           `json:"lastName"`
+	Dob       string           `json:"dob"`
+	Bvn       *string          `json:"bvn"`
+	Addresses []*Address       `json:"addresses"`
+	Phones    []*Phone         `json:"phones"`
+	Email     *Email           `json:"email"`
+	Status    CustomerStatuses `json:"status"`
+	StatusTs  int64            `json:"statusTs"`
+	Ts        int64            `json:"ts"`
+}
+
+func (Customer) IsMeResult() {}
+
+type CustomerConnection struct {
+	Nodes      []*Customer `json:"nodes"`
+	PageInfo   *PageInfo   `json:"pageInfo"`
+	TotalCount int64       `json:"totalCount"`
+}
+
+type CustomerDetailsInput struct {
+	FirstName string        `json:"firstName"`
+	LastName  string        `json:"lastName"`
+	Dob       string        `json:"dob"`
+	Address   *AddressInput `json:"address"`
+}
+
+type CustomerInput struct {
+	Phone         string       `json:"phone"`
+	Email         string       `json:"email"`
+	LoginPassword string       `json:"loginPassword"`
+	Device        *DeviceInput `json:"device"`
 }
 
 type Device struct {
-	ID         string         `json:"id"`
-	Name       *string        `json:"name"`
-	Primary    *bool          `json:"primary"`
-	Type       VerifiableType `json:"type"`
-	Identifier string         `json:"identifier"`
-	Owner      *Person        `json:"owner"`
-	Brand      string         `json:"brand"`
-	Os         string         `json:"os"`
-	Active     *bool          `json:"active"`
-	Verified   *bool          `json:"verified"`
-	Tokens     []*DeviceToken `json:"tokens"`
-	Ts         *int64         `json:"ts"`
-}
-
-func (Device) IsVerifiable() {}
-
-type DeviceConnection struct {
-	Edges      []*DeviceEdge `json:"edges"`
-	Nodes      []*Device     `json:"nodes"`
-	PageInfo   *PageInfo     `json:"pageInfo"`
-	TotalCount *int64        `json:"totalCount"`
-}
-
-type DeviceEdge struct {
-	Node   *Device `json:"node"`
-	Cursor string  `json:"cursor"`
+	ID          string               `json:"id"`
+	Customer    *Customer            `json:"customer"`
+	Identifier  string               `json:"identifier"`
+	Os          string               `json:"os"`
+	Brand       string               `json:"brand"`
+	Tokens      []*DeviceToken       `json:"tokens"`
+	Preferences []*DevicePreferences `json:"preferences"`
+	Status      DeviceStatuses       `json:"status"`
+	StatusTs    int64                `json:"statusTs"`
+	Ts          int64                `json:"ts"`
 }
 
 type DeviceInput struct {
-	Identifier string              `json:"identifier"`
-	Brand      string              `json:"brand"`
-	Os         string              `json:"os"`
-	Tokens     []*DeviceTokenInput `json:"tokens"`
+	Identifier  string                    `json:"identifier"`
+	Os          string                    `json:"os"`
+	Brand       string                    `json:"brand"`
+	Tokens      []*DeviceTokenInput       `json:"tokens"`
+	Preferences []*DevicePreferencesInput `json:"preferences"`
+}
+
+type DevicePreferences struct {
+	Type  DevicePreferencesTypes `json:"type"`
+	Value string                 `json:"value"`
+}
+
+type DevicePreferencesInput struct {
+	Type  DevicePreferencesTypes `json:"type"`
+	Value string                 `json:"value"`
 }
 
 type DeviceToken struct {
-	Type  *DeviceTokenType `json:"type"`
-	Value *string          `json:"value"`
-	Ts    *int64           `json:"ts"`
+	Type  DeviceTokenTypes `json:"type"`
+	Value string           `json:"value"`
 }
 
 type DeviceTokenInput struct {
-	Type  DeviceTokenType `json:"type"`
-	Value string          `json:"value"`
+	Type  DeviceTokenTypes `json:"type"`
+	Value string           `json:"value"`
 }
 
 type Email struct {
-	Name     *string        `json:"name"`
-	Primary  *bool          `json:"primary"`
-	Type     VerifiableType `json:"type"`
-	Value    string         `json:"value"`
-	Verified bool           `json:"verified"`
-	Alias    *string        `json:"alias"`
+	Address  string `json:"address"`
+	Verified bool   `json:"verified"`
 }
 
-func (Email) IsVerifiable() {}
+type ExchangeRate struct {
+	ID             string    `json:"id"`
+	BaseCurrency   *Currency `json:"baseCurrency"`
+	TargetCurrency *Currency `json:"targetCurrency"`
+	BuyPrice       float64   `json:"buyPrice"`
+	SalePrice      float64   `json:"salePrice"`
+	Ts             int64     `json:"ts"`
+}
 
 type Fee struct {
-	LowerBoundary *float64 `json:"lowerBoundary"`
-	UpperBoundary *float64 `json:"upperBoundary"`
-	Fee           float64  `json:"fee"`
+	ID              string           `json:"id"`
+	TransactionType *TransactionType `json:"transactionType"`
+	Type            FeeTypes         `json:"type"`
+	Boundaries      []*FeeBoundaries `json:"boundaries"`
+	Status          FeeStatuses      `json:"status"`
+	StatusTs        int64            `json:"statusTs"`
+	Ts              int64            `json:"ts"`
 }
 
-type Fx struct {
-	Currency     string  `json:"currency"`
-	BaseCurrency string  `json:"base_currency"`
-	BuyRate      float64 `json:"buy_rate"`
-	SellRate     float64 `json:"sell_rate"`
-	Ts           int64   `json:"ts"`
-}
-
-type FxConnection struct {
-	Edges      []*FxEdge `json:"edges"`
-	Nodes      []*Fx     `json:"nodes"`
-	PageInfo   *PageInfo `json:"pageInfo"`
-	TotalCount *int64    `json:"totalCount"`
-}
-
-type FxEdge struct {
-	Node   *Fx    `json:"node"`
-	Cursor string `json:"cursor"`
+type FeeBoundaries struct {
+	Lower      *float64 `json:"lower"`
+	Upper      *float64 `json:"upper"`
+	Amount     *float64 `json:"amount"`
+	Percentage *float64 `json:"percentage"`
 }
 
 type Identity struct {
-	ID             string          `json:"id"`
-	Owner          Owner           `json:"owner"`
-	Nickname       *string         `json:"nickname"`
-	Organisation   *Organisation   `json:"organisation"`
-	Status         *IdentityStatus `json:"status"`
-	Active         *bool           `json:"active"`
-	Authentication *bool           `json:"authentication"`
-	Devices        []*Device       `json:"devices"`
-	Ts             int64           `json:"ts"`
-	Credentials    *Credentials    `json:"credentials"`
+	ID           string                 `json:"id"`
+	Customer     *Customer              `json:"customer"`
+	Organization *Organization          `json:"organization"`
+	Credentials  []*IdentityCredentials `json:"credentials"`
+	Status       IdentityStatuses       `json:"status"`
+	StatusTs     int64                  `json:"statusTs"`
+	Ts           int64                  `json:"ts"`
 }
 
-type ImageAssets struct {
-	Safe  *bool   `json:"safe"`
-	Type  *string `json:"type"`
-	Image *string `json:"image"`
-	Svg   *string `json:"svg"`
+type IdentityCredentials struct {
+	Type     IdentityCredentialsTypes    `json:"type"`
+	Password string                      `json:"password"`
+	Status   IdentityCredentialsStatuses `json:"status"`
+	StatusTs int64                       `json:"statusTs"`
+	Ts       int64                       `json:"ts"`
+	UpdateTs int64                       `json:"updateTs"`
 }
 
-type Industry struct {
-	ID          string   `json:"id"`
-	Code        int64    `json:"code"`
-	Score       *float64 `json:"score"`
-	Section     *string  `json:"section"`
-	Description *string  `json:"description"`
-	Source      *string  `json:"source"`
+type Kyc struct {
+	Organization *Organization `json:"organization"`
+	Identifier   string        `json:"identifier"`
+	PublicURL    *string       `json:"publicUrl"`
+	Reports      *Reports      `json:"reports"`
+	Actions      []*KYCAction  `json:"actions"`
+	Status       KYCStatuses   `json:"status"`
+	StatusTs     int64         `json:"statusTs"`
+	Ts           int64         `json:"ts"`
 }
 
-type IndustryConnection struct {
-	Edges      []*IndustryEdge `json:"edges"`
-	Nodes      []*Industry     `json:"nodes"`
-	PageInfo   *PageInfo       `json:"pageInfo"`
-	TotalCount *int64          `json:"totalCount"`
+type KYCAction struct {
+	Type         KYCActionTypes `json:"type"`
+	Reporter     *Staff         `json:"reporter"`
+	TargetStatus KYCStatuses    `json:"targetStatus"`
+	Message      string         `json:"message"`
+	Ts           int64          `json:"ts"`
 }
 
-type IndustryEdge struct {
-	Node   *Industry `json:"node"`
-	Cursor string    `json:"cursor"`
+type KYCInput struct {
+	ReportTypes []KYCTypes `json:"reportTypes"`
 }
 
-type InterestPaymentDates struct {
-	Day   *int64 `json:"day"`
-	Month *int64 `json:"month"`
+type LinkedTransaction struct {
+	ID       string                    `json:"id"`
+	Type     LinkedTransactionTypes    `json:"type"`
+	Currency *Currency                 `json:"currency"`
+	Amount   float64                   `json:"amount"`
+	Source   *LinkedTransactionSource  `json:"source"`
+	Target   *LinkedTransactionTarget  `json:"target"`
+	Mambu    *LinkedTransactionMambu   `json:"mambu"`
+	Fcmb     *LinkedTransactionFcmb    `json:"fcmb"`
+	Status   LinkedTransactionStatuses `json:"status"`
+	StatusTs int64                     `json:"statusTs"`
+	Ts       int64                     `json:"ts"`
 }
 
-type InterestPaymentSettings struct {
-	InterestPaymentPoint *string                 `json:"interest_payment_point"`
-	InterestPaymentDates []*InterestPaymentDates `json:"interest_payment_dates"`
+type LinkedTransactionFcmb struct {
+	TransactionIdentifier string `json:"transactionIdentifier"`
 }
 
-type InterestRate struct {
-	DefaultValue *float64 `json:"default_value"`
-	MaxValue     *float64 `json:"max_value"`
-	MinValue     *float64 `json:"min_value"`
+type LinkedTransactionMambu struct {
+	TransactionEncodedKey string `json:"transactionEncodedKey"`
 }
 
-type InterestRateSettings struct {
-	EncodedKey                   *string              `json:"encoded_key"`
-	InterestChargeFrequency      *string              `json:"interest_charge_frequency"`
-	InterestChargeFrequencyCount *int64               `json:"interest_charge_frequency_count"`
-	InterestRate                 *int64               `json:"interest_rate"`
-	InterestRateReviewCount      *int64               `json:"interest_rate_review_count"`
-	InterestRateReviewUnit       *string              `json:"interest_rate_review_unit"`
-	InterestRateSource           *string              `json:"interest_rate_source"`
-	InterestRateTerms            *string              `json:"interest_rate_terms"`
-	InterestSpread               *int64               `json:"interest_spread"`
-	InterestRateTiers            []*InterestRateTiers `json:"interest_rate_tiers"`
+type LinkedTransactionSource struct {
+	Customer    *Customer `json:"customer"`
+	Account     *Account  `json:"account"`
+	AccountData string    `json:"accountData"`
 }
 
-type InterestRateTiers struct {
-	EncodedKey    *string  `json:"encoded_key"`
-	EndingBalance *float64 `json:"ending_balance"`
-	EndingDay     *int64   `json:"ending_day"`
-	InterestRate  *float64 `json:"interest_rate"`
+type LinkedTransactionTarget struct {
+	Account            *Account            `json:"account"`
+	BeneficiaryAccount *BeneficiaryAccount `json:"beneficiaryAccount"`
+	AccountData        string              `json:"accountData"`
 }
 
-type InterestSettings struct {
-	DaysInYear                 *string                  `json:"days_in_year"`
-	InterestCalculationBalance *string                  `json:"interest_calculation_balance"`
-	IndexSourceKey             *string                  `json:"index_source_key"`
-	ChargeFrequency            *string                  `json:"charge_frequency"`
-	ChargeFrequencyCount       *int64                   `json:"charge_frequency_count"`
-	RateReviewCount            *int64                   `json:"rate_review_count"`
-	InterestRateReviewUnit     *string                  `json:"interest_rate_review_unit"`
-	RateSource                 *string                  `json:"rate_source"`
-	RateTerms                  *string                  `json:"rate_terms"`
-	RateTiers                  []*RateTiers             `json:"rate_tiers"`
-	InterestRate               *InterestRate            `json:"interest_rate"`
-	InterestRateSettings       *InterestRateSettings    `json:"interest_rate_settings"`
-	InterestPaymentSettings    *InterestPaymentSettings `json:"interest_payment_settings"`
+type Organization struct {
+	ID       string               `json:"id"`
+	Name     string               `json:"name"`
+	Status   OrganisationStatuses `json:"status"`
+	StatusTs int64                `json:"statusTs"`
+	Ts       int64                `json:"ts"`
 }
 
-type InternalControls struct {
-	MaxDepositBalance        *float64 `json:"max_deposit_balance"`
-	MaxWithdrawalAmount      *float64 `json:"max_withdrawal_amount"`
-	RecommendedDepositAmount *float64 `json:"recommended_deposit_amount"`
-	TargetAmount             *float64 `json:"target_amount"`
+type Poa struct {
+	Organization *Organization `json:"organization"`
+	Identifier   string        `json:"identifier"`
+	File         *string       `json:"file"`
+	Result       *string       `json:"result"`
+	Review       *Review       `json:"review"`
+	Actions      []*POAAction  `json:"actions"`
+	Status       POAStatuses   `json:"status"`
+	StatusTs     int64         `json:"statusTs"`
+	Ts           int64         `json:"ts"`
 }
 
-type Location struct {
-	Longitude *float64 `json:"longitude"`
-	Latitude  *float64 `json:"latitude"`
+type POAAction struct {
+	Type         POAActionTypes `json:"type"`
+	Reporter     *Staff         `json:"reporter"`
+	TargetStatus POAStatuses    `json:"targetStatus"`
+	Message      string         `json:"message"`
+	Ts           int64          `json:"ts"`
 }
 
-type Message struct {
-	ID    string `json:"id"`
-	Owner Entity `json:"owner"`
-	// This is the message title which varies by delivery mode / type of message
-	//
-	// - Email - the full HTML template populated to be sent
-	//
-	// - Push - the  content of message card to be displayed in feed
-	//
-	// - SMS - the sms content
-	Title *string `json:"title"`
-	// Message body which varies by delivery mode / type of message
-	//
-	// - email - the full HTML template populated to be sent
-	//
-	// - push - the  content of message card to be displayed in feed
-	//
-	// - SMS - the sms content
-	Body         *string      `json:"body"`
-	Status       *string      `json:"status"`
-	HasRead      *bool        `json:"has_read"`
-	DeliveryMode DeliveryMode `json:"delivery_mode"`
-	// The information for the sender based on message type
-	//
-	// - email - sender’s email address
-	//
-	// - sms | push - not required
-	Sender *string `json:"sender"`
-	// The information for the intended recipient of the message based on  type
-	//
-	// - email - target's email address
-	//
-	// - sms - phone number
-	//
-	// - push - device or phone number
-	Target Verifiable `json:"target"`
-	Sent   *int64     `json:"sent"`
-	Ts     *int64     `json:"ts"`
-}
-
-type MessageConnection struct {
-	Edges      []*MessageEdge `json:"edges"`
-	Nodes      []*Message     `json:"nodes"`
-	PageInfo   *PageInfo      `json:"pageInfo"`
-	TotalCount *int64         `json:"totalCount"`
-}
-
-type MessageEdge struct {
-	Node   *Message `json:"node"`
-	Cursor string   `json:"cursor"`
-}
-
-type OpeningBalance struct {
-	DefaultValue *float64 `json:"default_value"`
-	Max          *float64 `json:"max"`
-	Min          *float64 `json:"min"`
-}
-
-type OrgLocation struct {
-	Continent   *string `json:"continent"`
-	Country     *string `json:"country"`
-	State       *string `json:"state"`
-	City        *string `json:"city"`
-	CountryCode *string `json:"country_code"`
-}
-
-type Organisation struct {
-	ID          string         `json:"id"`
-	Name        *string        `json:"name"`
-	Keywords    *string        `json:"keywords"`
-	Description *string        `json:"description"`
-	Domain      *string        `json:"domain"`
-	Banner      *string        `json:"banner"`
-	Revenue     *float64       `json:"revenue"`
-	Language    *string        `json:"language"`
-	Raised      *float64       `json:"raised"`
-	Employees   *string        `json:"employees"`
-	Email       *string        `json:"email"`
-	Ts          *int64         `json:"ts"`
-	Addresses   []*Address     `json:"addresses"`
-	Location    *OrgLocation   `json:"location"`
-	Industries  []*Industry    `json:"industries"`
-	Social      *Social        `json:"social"`
-	ImageAssets []*ImageAssets `json:"image_assets"`
-	Identities  []*Identity    `json:"identities"`
-}
-
-func (Organisation) IsEntity() {}
-func (Organisation) IsOwner()  {}
-
-type OrganisationConnection struct {
-	Edges      []*OrganisationEdge `json:"edges"`
-	Nodes      []*Organisation     `json:"nodes"`
-	PageInfo   *PageInfo           `json:"pageInfo"`
-	TotalCount *int64              `json:"totalCount"`
-}
-
-type OrganisationEdge struct {
-	Node   *Organisation `json:"node"`
-	Cursor string        `json:"cursor"`
-}
-
-type OverdraftInterestSettings struct {
-	InterestRateSettings *InterestRateSettings `json:"interest_rate_settings"`
-}
-
-type OverdraftSetting struct {
-	AllowOverdraft          *bool             `json:"allow_overdraft"`
-	AllowTechnicalOverdraft *bool             `json:"allow_technical_overdraft"`
-	MaxLimit                *int64            `json:"max_limit"`
-	InterestSettings        *InterestSettings `json:"interest_settings"`
-}
-
-type OverdraftSettings struct {
-	AllowOverdraft      *bool   `json:"allow_overdraft"`
-	OverdraftExpiryDate *string `json:"overdraft_expiry_date"`
-	OverdraftLimit      *int64  `json:"overdraft_limit"`
+type POAInput struct {
+	Data string `json:"data"`
 }
 
 type PageInfo struct {
@@ -778,581 +489,321 @@ type PageInfo struct {
 	EndCursor       *string `json:"endCursor"`
 }
 
-type Payee struct {
-	ID       string          `json:"id"`
-	Owner    *Identity       `json:"owner"`
-	Name     string          `json:"name"`
-	Avatar   *string         `json:"avatar"`
-	Ts       *int64          `json:"ts"`
-	Accounts []*PayeeAccount `json:"accounts"`
-}
-
-type PayeeAccount struct {
-	ID            string  `json:"id"`
-	Name          *string `json:"name"`
-	Currency      *string `json:"currency"`
-	AccountNumber *string `json:"account_number"`
-	SortCode      *string `json:"sort_code"`
-	Iban          *string `json:"iban"`
-	SwiftBic      *string `json:"swift_bic"`
-	BankCode      *string `json:"bank_code"`
-	RoutingNumber *string `json:"routing_number"`
-	PhoneNumber   *string `json:"phone_number"`
-}
-
-func (PayeeAccount) IsBeneficiaryAccount() {}
-
-type PayeeAccountInput struct {
-	Name          *string `json:"name"`
-	Currency      *string `json:"currency"`
-	AccountNumber *string `json:"account_number"`
-	SortCode      *string `json:"sort_code"`
-	Iban          *string `json:"iban"`
-	SwiftBic      *string `json:"swift_bic"`
-	BankCode      *string `json:"bank_code"`
-	RoutingNumber *string `json:"routing_number"`
-	PhoneNumber   *string `json:"phone_number"`
-}
-
-type PayeeConnection struct {
-	Edges      []*PayeeEdge `json:"edges"`
-	Nodes      []*Payee     `json:"nodes"`
-	PageInfo   *PageInfo    `json:"pageInfo"`
-	TotalCount *int64       `json:"totalCount"`
-}
-
-type PayeeEdge struct {
-	Node   *Payee `json:"node"`
-	Cursor string `json:"cursor"`
-}
-
-type PayeeInput struct {
-	Name     string               `json:"name"`
-	Avatar   *string              `json:"avatar"`
-	Accounts []*PayeeAccountInput `json:"accounts"`
-}
-
-type Payment struct {
-	ID             *string      `json:"id"`
-	IdempotencyKey string       `json:"idempotency_key"`
-	Owner          Owner        `json:"owner"`
-	Charge         *float64     `json:"charge"`
-	Reference      *string      `json:"reference"`
-	Status         *State       `json:"status"`
-	Image          *string      `json:"image"`
-	Notes          *string      `json:"notes"`
-	Quote          *Quote       `json:"quote"`
-	Tags           []*Tag       `json:"tags"`
-	Beneficiary    *Beneficiary `json:"beneficiary"`
-	FundingSource  *Account     `json:"funding_source"`
-	Currency       *Currency    `json:"currency"`
-	FundingAmount  float64      `json:"funding_amount"`
-	Ts             *int64       `json:"ts"`
-}
-
-type PaymentConnection struct {
-	Edges      []*PaymentEdge `json:"edges"`
-	Nodes      []*Payment     `json:"nodes"`
-	PageInfo   *PageInfo      `json:"pageInfo"`
-	TotalCount *int64         `json:"totalCount"`
-}
-
-type PaymentEdge struct {
-	Node   *Payment `json:"node"`
-	Cursor string   `json:"cursor"`
-}
-
-type PaymentFilter struct {
-	PayeeID *string        `json:"payee_id"`
-	Status  *PaymentStatus `json:"status"`
-	Limit   *int64         `json:"limit"`
-}
-
-type PaymentInput struct {
-	IdempotencyKey string            `json:"idempotency_key"`
-	Owner          string            `json:"owner"`
-	Charge         *float64          `json:"charge"`
-	Reference      *string           `json:"reference"`
-	Status         *State            `json:"status"`
-	Image          *string           `json:"image"`
-	Notes          *string           `json:"notes"`
-	Quote          *string           `json:"quote"`
-	Tags           []string          `json:"tags"`
-	Beneficiary    *BeneficiaryInput `json:"beneficiary"`
-	FundingSource  string            `json:"funding_source"`
-	Currency       *string           `json:"currency"`
-	FundingAmount  float64           `json:"funding_amount"`
-}
-
-type Person struct {
-	ID               string                `json:"id"`
-	Title            *string               `json:"title"`
-	FirstName        string                `json:"first_name"`
-	LastName         string                `json:"last_name"`
-	MiddleName       *string               `json:"middle_name"`
-	Dob              string                `json:"dob"`
-	Status           *PersonStatus         `json:"status"`
-	Employer         *Organisation         `json:"employer"`
-	Bvn              *string               `json:"bvn"`
-	Ts               int64                 `json:"ts"`
-	CountryResidence *string               `json:"country_residence"`
-	Nationality      []*string             `json:"nationality"`
-	Emails           []*Email              `json:"emails"`
-	Phones           []*Phone              `json:"phones"`
-	Identities       []*Identity           `json:"identities"`
-	Addresses        []*Address            `json:"addresses"`
-	Activities       []*Activity           `json:"activities"`
-	Cdd              *Cdd                  `json:"cdd"`
-	OnboardingStatus *OnboardingCheckPoint `json:"onboarding_status"`
-}
-
-func (Person) IsEntity() {}
-func (Person) IsOwner()  {}
-
-type PersonConnection struct {
-	Edges      []*PersonEdge `json:"edges"`
-	Nodes      []*Person     `json:"nodes"`
-	PageInfo   *PageInfo     `json:"pageInfo"`
-	TotalCount *int64        `json:"totalCount"`
-}
-
-type PersonEdge struct {
-	Node   *Person `json:"node"`
-	Cursor string  `json:"cursor"`
-}
-
-type PersonInput struct {
-	FirstName        string  `json:"first_name"`
-	LastName         string  `json:"last_name"`
-	Dob              string  `json:"dob"`
-	CountryResidence string  `json:"country_residence"`
-	Bvn              *string `json:"bvn"`
-}
-
 type Phone struct {
-	Name     *string        `json:"name"`
-	Primary  *bool          `json:"primary"`
-	Type     VerifiableType `json:"type"`
-	Value    string         `json:"value"`
-	Verified bool           `json:"verified"`
-	Carrier  *string        `json:"carrier"`
+	Primary  bool   `json:"primary"`
+	Number   string `json:"number"`
+	Verified bool   `json:"verified"`
 }
-
-func (Phone) IsVerifiable() {}
 
 type Product struct {
-	ID             string          `json:"id"`
-	Identification *string         `json:"identification"`
-	Scheme         *string         `json:"scheme"`
-	Ts             *int64          `json:"ts"`
-	Details        *ProductDetails `json:"details"`
+	ID                    string          `json:"id"`
+	Type                  ProductTypes    `json:"type"`
+	Currency              *Currency       `json:"currency"`
+	Name                  *string         `json:"name"`
+	TermLength            *int64          `json:"termLength"`
+	InterestRate          *float64        `json:"interestRate"`
+	MinimumOpeningBalance *float64        `json:"minimumOpeningBalance"`
+	Mambu                 *ProductMambu   `json:"mambu"`
+	Status                ProductStatuses `json:"status"`
+	StatusTs              int64           `json:"statusTs"`
+	Ts                    int64           `json:"ts"`
 }
 
 type ProductConnection struct {
-	Edges      []*ProductEdge `json:"edges"`
-	Nodes      []*Product     `json:"nodes"`
+	Nodes      []*Product `json:"nodes"`
+	PageInfo   *PageInfo  `json:"pageInfo"`
+	TotalCount int64      `json:"totalCount"`
+}
+
+type ProductMambu struct {
+	EncodedKey *string `json:"encodedKey"`
+}
+
+type Questionary struct {
+	ID        string                 `json:"id"`
+	Type      QuestionaryTypes       `json:"type"`
+	Questions []*QuestionaryQuestion `json:"questions"`
+	Status    QuestionaryStatuses    `json:"status"`
+	StatusTs  int64                  `json:"statusTs"`
+	Ts        int64                  `json:"ts"`
+}
+
+type QuestionaryAnswer struct {
+	ID            string                       `json:"id"`
+	QuestionaryID string                       `json:"questionaryId"`
+	CustomerID    string                       `json:"customerId"`
+	Questions     []*QuestionaryAnswerQuestion `json:"questions"`
+	Ts            int64                        `json:"ts"`
+}
+
+type QuestionaryAnswerInput struct {
+	ID      string         `json:"id"`
+	Answers []*AnswerInput `json:"answers"`
+}
+
+type QuestionaryAnswerQuestion struct {
+	ID     string `json:"id"`
+	Answer string `json:"answer"`
+}
+
+type QuestionaryConnection struct {
+	Nodes      []*Questionary `json:"nodes"`
 	PageInfo   *PageInfo      `json:"pageInfo"`
-	TotalCount *int64         `json:"totalCount"`
+	TotalCount int64          `json:"totalCount"`
 }
 
-type ProductControl struct {
-	DormancyPeriodDays       *int64          `json:"dormancy_period_days"`
-	MaxWithdrawalAmount      *int64          `json:"max_withdrawal_amount"`
-	RecommendedDepositAmount *int64          `json:"recommended_deposit_amount"`
-	OpeningBalance           *OpeningBalance `json:"opening_balance"`
+type QuestionaryQuestion struct {
+	ID    string `json:"id"`
+	Value string `json:"value"`
 }
 
-type ProductDetails struct {
-	Category              *string                 `json:"category"`
-	Type                  *string                 `json:"type"`
-	Name                  *string                 `json:"name"`
-	State                 *string                 `json:"state"`
-	Currency              *string                 `json:"currency"`
-	Notes                 *string                 `json:"notes"`
-	CreditRequirement     *string                 `json:"credit_requirement"`
-	WithholdingTaxEnabled *bool                   `json:"withholding_tax_enabled"`
-	AllowOffset           *bool                   `json:"allow_offset"`
-	ProductTemplates      []*ProductTemplates     `json:"product_templates"`
-	ProductFees           []*ProductFees          `json:"product_fees"`
-	ProductControl        *ProductControl         `json:"product_control"`
-	ProductMaturity       *ProductMaturity        `json:"product_maturity"`
-	OverdraftSetting      *OverdraftSetting       `json:"overdraft_setting"`
-	InterestSetting       *ProductInterestSetting `json:"interest_setting"`
-	ProductSetting        *ProductSetting         `json:"product_setting"`
-}
-
-type ProductEdge struct {
-	Node   *Product `json:"node"`
-	Cursor string   `json:"cursor"`
-}
-
-type ProductFees struct {
-	Amount            *int64             `json:"amount"`
-	CalculationMethod *string            `json:"calculation_method"`
-	ApplyDateMethod   *string            `json:"apply_date_method"`
-	CreationDate      *string            `json:"creation_date"`
-	EncodedKey        *string            `json:"encoded_key"`
-	FeeApplication    *string            `json:"fee_application"`
-	LastModified      *string            `json:"last_modified"`
-	Name              *string            `json:"name"`
-	State             *string            `json:"state"`
-	Trigger           *string            `json:"trigger"`
-	AccountingRules   []*AccountingRules `json:"accounting_rules"`
-}
-
-type ProductInput struct {
-	ID             string  `json:"id"`
-	Identification *string `json:"identification"`
-	Scheme         *string `json:"scheme"`
-}
-
-type ProductInterestSetting struct {
-	CollectInterestWhenLocked  *bool                   `json:"collect_interest_when_locked"`
-	DaysInYear                 *string                 `json:"days_in_year"`
-	InterestCalculationBalance *string                 `json:"interest_calculation_balance"`
-	InterestPaidIntoAccount    *bool                   `json:"interest_paid_into_account"`
-	InterestPaymentPoint       *string                 `json:"interest_payment_point"`
-	MaximumBalance             *float64                `json:"maximum_balance"`
-	RateSetting                *RateSetting            `json:"rate_setting"`
-	InterestPaymentDates       []*InterestPaymentDates `json:"interest_payment_dates"`
-}
-
-type ProductMaturity struct {
-	Unit         *string `json:"unit"`
-	DefaultValue *int64  `json:"default_value"`
-	Max          *int64  `json:"max"`
-	Min          *int64  `json:"min"`
-}
-
-type ProductSetting struct {
-	AccountingMethod   *string            `json:"accounting_method"`
-	InterestAccounting *string            `json:"interest_accounting"`
-	AccountingRules    []*AccountingRules `json:"accounting_rules"`
-}
-
-type ProductTemplates struct {
-	CreationDate     *string `json:"creation_date"`
-	EncodedKey       *string `json:"encoded_key"`
-	LastModifiedDate *string `json:"last_modified_date"`
-	Name             *string `json:"name"`
-	Type             *string `json:"type"`
-}
-
-type Proof struct {
-	ID           string              `json:"id"`
-	Type         ProofType           `json:"type"`
-	Data         string              `json:"data"`
-	Review       *ReportReviewStatus `json:"review"`
-	Organisation *Organisation       `json:"organisation"`
-	Status       State               `json:"status"`
-	Ts           *int64              `json:"ts"`
-}
-
-func (Proof) IsValidationData() {}
-
-type ProofConnection struct {
-	Edges      []*ProofEdge `json:"edges"`
-	Nodes      []*Proof     `json:"nodes"`
-	PageInfo   *PageInfo    `json:"pageInfo"`
-	TotalCount *int64       `json:"totalCount"`
-}
-
-type ProofEdge struct {
-	Node   *Proof `json:"node"`
-	Cursor string `json:"cursor"`
-}
-
-type Quote struct {
-	ID        string `json:"id"`
-	HasExpiry *bool  `json:"has_expiry"`
-	Expires   *int64 `json:"expires"`
-	Ts        *int64 `json:"ts"`
-	Fee       *Fee   `json:"fee"`
-	Fx        *Fx    `json:"fx"`
-}
-
-type QuoteConnection struct {
-	Edges      []*QuoteEdge `json:"edges"`
-	Nodes      []*Quote     `json:"nodes"`
-	PageInfo   *PageInfo    `json:"pageInfo"`
-	TotalCount *int64       `json:"totalCount"`
-}
-
-type QuoteEdge struct {
-	Node   *Quote `json:"node"`
-	Cursor string `json:"cursor"`
-}
-
-type RateSetting struct {
-	AccrueAfterMaturity  *bool         `json:"accrue_after_maturity"`
-	IndexSourceKey       *string       `json:"index_source_key"`
-	ChargeFrequency      *string       `json:"charge_frequency"`
-	ChargeFrequencyCount *int64        `json:"charge_frequency_count"`
-	RateSource           *string       `json:"rate_source"`
-	RateTerms            *string       `json:"rate_terms"`
-	RateTiers            []*RateTiers  `json:"rate_tiers"`
-	InterestRate         *InterestRate `json:"interest_rate"`
-}
-
-type RateTiers struct {
-	EncodedKey    *string `json:"encoded_key"`
-	EndingBalance *int64  `json:"ending_balance"`
-	EndingDay     *int64  `json:"ending_day"`
-	InterestRate  *int64  `json:"interest_rate"`
-}
-
-type Report struct {
-	ID           string              `json:"id"`
-	Data         string              `json:"data"`
-	Status       State               `json:"status"`
-	Organisation *Organisation       `json:"organisation"`
-	Ts           *int64              `json:"ts"`
-	Review       *ReportReviewStatus `json:"review"`
-}
-
-type ReportConnection struct {
-	Edges      []*ReportEdge `json:"edges"`
-	Nodes      []*Report     `json:"nodes"`
-	PageInfo   *PageInfo     `json:"pageInfo"`
-	TotalCount *int64        `json:"totalCount"`
-}
-
-type ReportEdge struct {
-	Node   *Report `json:"node"`
-	Cursor string  `json:"cursor"`
-}
-
-type ReportInput struct {
-	ID string `json:"id"`
-}
-
-type ReportReviewStatus struct {
-	Resubmit *bool   `json:"resubmit"`
-	Message  *string `json:"message"`
+type Reports struct {
+	Type      KYCTypes       `json:"type"`
+	File      *string        `json:"file"`
+	Result    *string        `json:"result"`
+	SubResult *string        `json:"subResult"`
+	PublicURL *string        `json:"publicUrl"`
+	Review    *Review        `json:"review"`
+	Status    ReportStatuses `json:"status"`
+	StatusTs  int64          `json:"statusTs"`
+	Ts        int64          `json:"ts"`
 }
 
 type Response struct {
-	Message string  `json:"message"`
+	Message *string `json:"message"`
 	Success bool    `json:"success"`
-	Code    *int64  `json:"code"`
-	Token   *string `json:"token"`
+	Code    int64   `json:"code"`
 }
 
 func (Response) IsGraphQLResponse() {}
 
-type Screen struct {
-	ID           string        `json:"id"`
-	Data         string        `json:"data"`
-	Organisation *Organisation `json:"organisation"`
-	Status       State         `json:"status"`
-	Ts           *int64        `json:"ts"`
-}
-
-func (Screen) IsValidationData() {}
-
-type ScreenConnection struct {
-	Edges      []*ScreenEdge `json:"edges"`
-	Nodes      []*Screen     `json:"nodes"`
-	PageInfo   *PageInfo     `json:"pageInfo"`
-	TotalCount *int64        `json:"totalCount"`
-}
-
-type ScreenEdge struct {
-	Node   *Screen `json:"node"`
-	Cursor string  `json:"cursor"`
-}
-
-type Social struct {
-	Youtube    *string `json:"youtube"`
-	Github     *string `json:"github"`
-	Facebook   *string `json:"facebook"`
-	Pinterest  *string `json:"pinterest"`
-	Instagram  *string `json:"instagram"`
-	Linkedin   *string `json:"linkedin"`
-	Medium     *string `json:"medium"`
-	Crunchbase *string `json:"crunchbase"`
-	Twitter    *string `json:"twitter"`
+type Review struct {
+	Resubmit bool    `json:"resubmit"`
+	Message  *string `json:"message"`
+	Ts       int64   `json:"ts"`
 }
 
 type Staff struct {
-	ID         string      `json:"id"`
-	FirstName  string      `json:"first_name"`
-	LastName   string      `json:"last_name"`
-	Status     StaffStatus `json:"status"`
-	Emails     []*Email    `json:"emails"`
-	Phones     []*Phone    `json:"phones"`
-	Identities []*Identity `json:"identities"`
-	Ts         int64       `json:"ts"`
+	ID        string        `json:"id"`
+	Name      string        `json:"name"`
+	LastName  string        `json:"lastName"`
+	Dob       *string       `json:"dob"`
+	Addresses []*Address    `json:"addresses"`
+	Phones    []*Phone      `json:"phones"`
+	Email     string        `json:"email"`
+	Status    StaffStatuses `json:"status"`
+	StatusTs  int64         `json:"statusTs"`
+	Ts        int64         `json:"ts"`
 }
 
-type SubmitProofInput struct {
-	Type   ProofType `json:"type"`
-	Data   string    `json:"data"`
-	Status *State    `json:"status"`
+func (Staff) IsMeResult() {}
+
+type TokenResponse struct {
+	Message *string `json:"message"`
+	Success bool    `json:"success"`
+	Code    int64   `json:"code"`
+	Token   string  `json:"token"`
 }
 
-type Tag struct {
-	ID   string  `json:"id"`
-	Name *string `json:"name"`
-	Ts   *int64  `json:"ts"`
-}
-
-type TagConnection struct {
-	Edges      []*TagEdge `json:"edges"`
-	Nodes      []*Tag     `json:"nodes"`
-	PageInfo   *PageInfo  `json:"pageInfo"`
-	TotalCount *int64     `json:"totalCount"`
-}
-
-type TagEdge struct {
-	Node   *Tag   `json:"node"`
-	Cursor string `json:"cursor"`
-}
-
-type Task struct {
-	ID       string             `json:"id"`
-	Reporter *Person            `json:"reporter"`
-	Assignee *Person            `json:"assignee"`
-	Approver *Person            `json:"approver"`
-	Notes    *string            `json:"notes"`
-	Stage    *string            `json:"stage"`
-	Approved *bool              `json:"approved"`
-	Version  *int64             `json:"version"`
-	Ts       *int64             `json:"ts"`
-	Comments *CommentConnection `json:"comments"`
-	Tags     *TagConnection     `json:"tags"`
-}
-
-type TaskConnection struct {
-	Edges      []*TaskEdge `json:"edges"`
-	Nodes      []*Task     `json:"nodes"`
-	PageInfo   *PageInfo   `json:"pageInfo"`
-	TotalCount *int64      `json:"totalCount"`
-}
-
-type TaskEdge struct {
-	Node   *Task  `json:"node"`
-	Cursor string `json:"cursor"`
-}
+func (TokenResponse) IsGraphQLResponse() {}
 
 type Transaction struct {
-	ID              string           `json:"id"`
-	Account         *Account         `json:"account"`
-	Ts              *int64           `json:"ts"`
-	TransactionData *TransactionData `json:"transaction_data"`
+	ID                 string               `json:"id"`
+	TransactionType    *TransactionType     `json:"transactionType"`
+	Reference          string               `json:"reference"`
+	Fees               []*TransactionFee    `json:"fees"`
+	ExchangeRate       *ExchangeRate        `json:"exchangeRate"`
+	Source             *TransactionSource   `json:"source"`
+	Target             *TransactionTarget   `json:"target"`
+	IdempotencyKey     string               `json:"idempotencyKey"`
+	LinkedTransactions []*LinkedTransaction `json:"linkedTransactions"`
+	Status             TransactionStatuses  `json:"status"`
+	StatusTs           int64                `json:"statusTs"`
+	Ts                 int64                `json:"ts"`
 }
 
 type TransactionConnection struct {
-	Edges      []*TransactionEdge `json:"edges"`
-	Nodes      []*Transaction     `json:"nodes"`
-	PageInfo   *PageInfo          `json:"pageInfo"`
-	TotalCount *int64             `json:"totalCount"`
-}
-
-type TransactionData struct {
-	ID               string            `json:"id"`
-	Amount           *float64          `json:"amount"`
-	BookingDate      *string           `json:"booking_date"`
-	CreationDate     *string           `json:"creation_date"`
-	CurrencyCode     *string           `json:"currency_code"`
-	EncodedKey       *string           `json:"encoded_key"`
-	ExternalID       *string           `json:"external_id"`
-	Notes            *string           `json:"notes"`
-	ParentAccountKey *string           `json:"parent_account_key"`
-	PaymentOrderID   *string           `json:"payment_order_id"`
-	Type             *string           `json:"type"`
-	UserKey          *string           `json:"user_key"`
-	ValueDate        *string           `json:"value_date"`
-	TransferDetails  *TransferDetails  `json:"transfer_details"`
-	Fees             []*TransactionFee `json:"fees"`
-	AffectedAmounts  *AffectedAmounts  `json:"affected_amounts"`
-	AccountBalances  *AccountBalances  `json:"account_balances"`
-}
-
-type TransactionEdge struct {
-	Node   *Transaction `json:"node"`
-	Cursor string       `json:"cursor"`
+	Nodes      []*Transaction `json:"nodes"`
+	PageInfo   *PageInfo      `json:"pageInfo"`
+	TotalCount int64          `json:"totalCount"`
 }
 
 type TransactionFee struct {
-	Amount           *int64  `json:"Amount"`
-	Name             *string `json:"Name"`
-	PredefinedFeeKey *string `json:"PredefinedFeeKey"`
-	TaxAmount        *int64  `json:"TaxAmount"`
-	Trigger          *string `json:"Trigger"`
+	ID     string  `json:"id"`
+	Amount float64 `json:"amount"`
 }
 
-type TransferDetails struct {
-	LinkedLoanTransactionKey *string `json:"linked_loan_transaction_key"`
+type TransactionInput struct {
+	TransactionTypeID string   `json:"transactionTypeId"`
+	Reference         *string  `json:"reference"`
+	FeeIds            []string `json:"feeIds"`
+	ExchangeRateID    *string  `json:"exchangeRateId"`
+	Amount            float64  `json:"amount"`
+	SourceAccountID   string   `json:"sourceAccountId"`
+	TargetAccountID   string   `json:"targetAccountId"`
+	IdempotencyKey    string   `json:"idempotencyKey"`
 }
 
-type TransferFees struct {
-	Currency     string `json:"currency"`
-	BaseCurrency string `json:"base_currency"`
-	Fees         []*Fee `json:"fees"`
-	Ts           int64  `json:"ts"`
+type TransactionSource struct {
+	Customer                *Customer `json:"customer"`
+	Account                 *Account  `json:"account"`
+	Amount                  float64   `json:"amount"`
+	BalanceAfterTransaction float64   `json:"balanceAfterTransaction"`
 }
 
-type ValidateUserInput struct {
-	Email         string       `json:"email"`
-	FirstName     string       `json:"first_name"`
-	LastName      string       `json:"last_name"`
-	Dob           string       `json:"dob"`
-	AccountNumber string       `json:"account_number"`
-	SortCode      string       `json:"sort_code"`
-	Device        *DeviceInput `json:"device"`
+type TransactionTarget struct {
+	Customer                *Customer           `json:"customer"`
+	Beneficiary             *Beneficiary        `json:"beneficiary"`
+	Account                 *Account            `json:"account"`
+	BeneficiaryAccount      *BeneficiaryAccount `json:"beneficiaryAccount"`
+	Amount                  float64             `json:"amount"`
+	BalanceAfterTransaction float64             `json:"balanceAfterTransaction"`
 }
 
-type Validation struct {
-	ID             string         `json:"id"`
-	ValidationType ValidationType `json:"validation_type"`
-	Applicant      Owner          `json:"applicant"`
-	Data           ValidationData `json:"data"`
-	Organisation   *Organisation  `json:"organisation"`
-	Status         State          `json:"status"`
-	Approved       *bool          `json:"approved"`
-	Ts             *int64         `json:"ts"`
-	Actions        []*Action      `json:"actions"`
+type TransactionType struct {
+	ID       string                  `json:"id"`
+	Name     string                  `json:"name"`
+	Status   TransactionTypeStatuses `json:"status"`
+	StatusTs int64                   `json:"statusTs"`
+	Ts       int64                   `json:"ts"`
 }
 
-type ValidationConnection struct {
-	Edges      []*ValidationEdge `json:"edges"`
-	Nodes      []*Validation     `json:"nodes"`
-	PageInfo   *PageInfo         `json:"pageInfo"`
-	TotalCount *int64            `json:"totalCount"`
+type TransactionTypeConnection struct {
+	Nodes      []*TransactionType `json:"nodes"`
+	PageInfo   *PageInfo          `json:"pageInfo"`
+	TotalCount int64              `json:"totalCount"`
 }
 
-type ValidationEdge struct {
-	Node   *Validation `json:"node"`
-	Cursor string      `json:"cursor"`
+type VaultAccountInput struct {
+	ProductID     string  `json:"productId"`
+	SourceAccount string  `json:"sourceAccount"`
+	Amount        float64 `json:"amount"`
+	Name          *string `json:"name"`
 }
 
-type VariableFee struct {
-	BaseRate    *float64 `json:"base_rate"`
-	Discount    *float64 `json:"discount"`
-	AppliedRate *float64 `json:"applied_rate"`
-	Partner     *int64   `json:"partner"`
+type AMLActionTypes string
+
+const (
+	AMLActionTypesChangeStatus AMLActionTypes = "CHANGE_STATUS"
+)
+
+var AllAMLActionTypes = []AMLActionTypes{
+	AMLActionTypesChangeStatus,
 }
 
-type Verification struct {
-	ID        string     `json:"id"`
-	Code      *string    `json:"code"`
-	Target    Verifiable `json:"target"`
-	Type      *string    `json:"type"`
-	Validated *bool      `json:"validated"`
-	Ts        *int64     `json:"ts"`
+func (e AMLActionTypes) IsValid() bool {
+	switch e {
+	case AMLActionTypesChangeStatus:
+		return true
+	}
+	return false
 }
 
-type VerificationConnection struct {
-	Edges      []*VerificationEdge `json:"edges"`
-	Nodes      []*Verification     `json:"nodes"`
-	PageInfo   *PageInfo           `json:"pageInfo"`
-	TotalCount *int64              `json:"totalCount"`
+func (e AMLActionTypes) String() string {
+	return string(e)
 }
 
-type VerificationEdge struct {
-	Node   *Verification `json:"node"`
-	Cursor string        `json:"cursor"`
+func (e *AMLActionTypes) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AMLActionTypes(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AMLActionTypes", str)
+	}
+	return nil
+}
+
+func (e AMLActionTypes) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type AMLStatuses string
+
+const (
+	AMLStatusesPending      AMLStatuses = "PENDING"
+	AMLStatusesManualReview AMLStatuses = "MANUAL_REVIEW"
+	AMLStatusesApproved     AMLStatuses = "APPROVED"
+	AMLStatusesDeclined     AMLStatuses = "DECLINED"
+)
+
+var AllAMLStatuses = []AMLStatuses{
+	AMLStatusesPending,
+	AMLStatusesManualReview,
+	AMLStatusesApproved,
+	AMLStatusesDeclined,
+}
+
+func (e AMLStatuses) IsValid() bool {
+	switch e {
+	case AMLStatusesPending, AMLStatusesManualReview, AMLStatusesApproved, AMLStatusesDeclined:
+		return true
+	}
+	return false
+}
+
+func (e AMLStatuses) String() string {
+	return string(e)
+}
+
+func (e *AMLStatuses) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AMLStatuses(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AMLStatuses", str)
+	}
+	return nil
+}
+
+func (e AMLStatuses) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type AccountStatuses string
+
+const (
+	AccountStatusesActive   AccountStatuses = "ACTIVE"
+	AccountStatusesInactive AccountStatuses = "INACTIVE"
+)
+
+var AllAccountStatuses = []AccountStatuses{
+	AccountStatusesActive,
+	AccountStatusesInactive,
+}
+
+func (e AccountStatuses) IsValid() bool {
+	switch e {
+	case AccountStatusesActive, AccountStatusesInactive:
+		return true
+	}
+	return false
+}
+
+func (e AccountStatuses) String() string {
+	return string(e)
+}
+
+func (e *AccountStatuses) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AccountStatuses(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AccountStatuses", str)
+	}
+	return nil
+}
+
+func (e AccountStatuses) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 type AuthType string
@@ -1394,37 +845,156 @@ func (e AuthType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+type BeneficiaryAccountStatuses string
+
+const (
+	BeneficiaryAccountStatusesActive   BeneficiaryAccountStatuses = "ACTIVE"
+	BeneficiaryAccountStatusesInactive BeneficiaryAccountStatuses = "INACTIVE"
+)
+
+var AllBeneficiaryAccountStatuses = []BeneficiaryAccountStatuses{
+	BeneficiaryAccountStatusesActive,
+	BeneficiaryAccountStatusesInactive,
+}
+
+func (e BeneficiaryAccountStatuses) IsValid() bool {
+	switch e {
+	case BeneficiaryAccountStatusesActive, BeneficiaryAccountStatusesInactive:
+		return true
+	}
+	return false
+}
+
+func (e BeneficiaryAccountStatuses) String() string {
+	return string(e)
+}
+
+func (e *BeneficiaryAccountStatuses) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = BeneficiaryAccountStatuses(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid BeneficiaryAccountStatuses", str)
+	}
+	return nil
+}
+
+func (e BeneficiaryAccountStatuses) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type BeneficiaryStatuses string
+
+const (
+	BeneficiaryStatusesActive   BeneficiaryStatuses = "ACTIVE"
+	BeneficiaryStatusesInactive BeneficiaryStatuses = "INACTIVE"
+)
+
+var AllBeneficiaryStatuses = []BeneficiaryStatuses{
+	BeneficiaryStatusesActive,
+	BeneficiaryStatusesInactive,
+}
+
+func (e BeneficiaryStatuses) IsValid() bool {
+	switch e {
+	case BeneficiaryStatusesActive, BeneficiaryStatusesInactive:
+		return true
+	}
+	return false
+}
+
+func (e BeneficiaryStatuses) String() string {
+	return string(e)
+}
+
+func (e *BeneficiaryStatuses) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = BeneficiaryStatuses(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid BeneficiaryStatuses", str)
+	}
+	return nil
+}
+
+func (e BeneficiaryStatuses) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type CDDStatuses string
+
+const (
+	CDDStatusesPending      CDDStatuses = "PENDING"
+	CDDStatusesManualReview CDDStatuses = "MANUAL_REVIEW"
+	CDDStatusesApproved     CDDStatuses = "APPROVED"
+	CDDStatusesDeclined     CDDStatuses = "DECLINED"
+)
+
+var AllCDDStatuses = []CDDStatuses{
+	CDDStatusesPending,
+	CDDStatusesManualReview,
+	CDDStatusesApproved,
+	CDDStatusesDeclined,
+}
+
+func (e CDDStatuses) IsValid() bool {
+	switch e {
+	case CDDStatusesPending, CDDStatusesManualReview, CDDStatusesApproved, CDDStatusesDeclined:
+		return true
+	}
+	return false
+}
+
+func (e CDDStatuses) String() string {
+	return string(e)
+}
+
+func (e *CDDStatuses) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = CDDStatuses(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid CDDStatuses", str)
+	}
+	return nil
+}
+
+func (e CDDStatuses) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 type ContentType string
 
 const (
-	ContentTypeArticle      ContentType = "ARTICLE"
-	ContentTypePost         ContentType = "POST"
-	ContentTypeComment      ContentType = "COMMENT"
-	ContentTypeDocument     ContentType = "DOCUMENT"
-	ContentTypeVideo        ContentType = "VIDEO"
-	ContentTypePhoto        ContentType = "PHOTO"
-	ContentTypeTermsGeneral ContentType = "TERMS_GENERAL"
-	ContentTypeTermsAccount ContentType = "TERMS_ACCOUNT"
-	ContentTypeTermsFee     ContentType = "TERMS_FEE"
-	ContentTypePrivacy      ContentType = "PRIVACY"
+	ContentTypeGeneralTc      ContentType = "GENERAL_TC"
+	ContentTypeGbpAccountTc   ContentType = "GBP_ACCOUNT_TC"
+	ContentTypeNgnAccountTc   ContentType = "NGN_ACCOUNT_TC"
+	ContentTypeVaultAccountTc ContentType = "VAULT_ACCOUNT_TC"
+	ContentTypePrivacyNotice  ContentType = "PRIVACY_NOTICE"
+	ContentTypeFeesLimits     ContentType = "FEES_LIMITS"
 )
 
 var AllContentType = []ContentType{
-	ContentTypeArticle,
-	ContentTypePost,
-	ContentTypeComment,
-	ContentTypeDocument,
-	ContentTypeVideo,
-	ContentTypePhoto,
-	ContentTypeTermsGeneral,
-	ContentTypeTermsAccount,
-	ContentTypeTermsFee,
-	ContentTypePrivacy,
+	ContentTypeGeneralTc,
+	ContentTypeGbpAccountTc,
+	ContentTypeNgnAccountTc,
+	ContentTypeVaultAccountTc,
+	ContentTypePrivacyNotice,
+	ContentTypeFeesLimits,
 }
 
 func (e ContentType) IsValid() bool {
 	switch e {
-	case ContentTypeArticle, ContentTypePost, ContentTypeComment, ContentTypeDocument, ContentTypeVideo, ContentTypePhoto, ContentTypeTermsGeneral, ContentTypeTermsAccount, ContentTypeTermsFee, ContentTypePrivacy:
+	case ContentTypeGeneralTc, ContentTypeGbpAccountTc, ContentTypeNgnAccountTc, ContentTypeVaultAccountTc, ContentTypePrivacyNotice, ContentTypeFeesLimits:
 		return true
 	}
 	return false
@@ -1448,6 +1018,55 @@ func (e *ContentType) UnmarshalGQL(v interface{}) error {
 }
 
 func (e ContentType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type CustomerStatuses string
+
+const (
+	CustomerStatusesSignedup   CustomerStatuses = "SIGNEDUP"
+	CustomerStatusesRegistered CustomerStatuses = "REGISTERED"
+	CustomerStatusesVerified   CustomerStatuses = "VERIFIED"
+	CustomerStatusesOnboarded  CustomerStatuses = "ONBOARDED"
+	CustomerStatusesRejected   CustomerStatuses = "REJECTED"
+	CustomerStatusesExited     CustomerStatuses = "EXITED"
+)
+
+var AllCustomerStatuses = []CustomerStatuses{
+	CustomerStatusesSignedup,
+	CustomerStatusesRegistered,
+	CustomerStatusesVerified,
+	CustomerStatusesOnboarded,
+	CustomerStatusesRejected,
+	CustomerStatusesExited,
+}
+
+func (e CustomerStatuses) IsValid() bool {
+	switch e {
+	case CustomerStatusesSignedup, CustomerStatusesRegistered, CustomerStatusesVerified, CustomerStatusesOnboarded, CustomerStatusesRejected, CustomerStatusesExited:
+		return true
+	}
+	return false
+}
+
+func (e CustomerStatuses) String() string {
+	return string(e)
+}
+
+func (e *CustomerStatuses) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = CustomerStatuses(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid CustomerStatuses", str)
+	}
+	return nil
+}
+
+func (e CustomerStatuses) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
@@ -1494,489 +1113,996 @@ func (e DeliveryMode) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
-type DevicePreferenceType string
+type DevicePreferencesTypes string
 
 const (
-	DevicePreferenceTypePush DevicePreferenceType = "PUSH"
+	DevicePreferencesTypesPush       DevicePreferencesTypes = "PUSH"
+	DevicePreferencesTypesBiometrics DevicePreferencesTypes = "BIOMETRICS"
 )
 
-var AllDevicePreferenceType = []DevicePreferenceType{
-	DevicePreferenceTypePush,
+var AllDevicePreferencesTypes = []DevicePreferencesTypes{
+	DevicePreferencesTypesPush,
+	DevicePreferencesTypesBiometrics,
 }
 
-func (e DevicePreferenceType) IsValid() bool {
+func (e DevicePreferencesTypes) IsValid() bool {
 	switch e {
-	case DevicePreferenceTypePush:
+	case DevicePreferencesTypesPush, DevicePreferencesTypesBiometrics:
 		return true
 	}
 	return false
 }
 
-func (e DevicePreferenceType) String() string {
+func (e DevicePreferencesTypes) String() string {
 	return string(e)
 }
 
-func (e *DevicePreferenceType) UnmarshalGQL(v interface{}) error {
+func (e *DevicePreferencesTypes) UnmarshalGQL(v interface{}) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
 	}
 
-	*e = DevicePreferenceType(str)
+	*e = DevicePreferencesTypes(str)
 	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid DevicePreferenceType", str)
+		return fmt.Errorf("%s is not a valid DevicePreferencesTypes", str)
 	}
 	return nil
 }
 
-func (e DevicePreferenceType) MarshalGQL(w io.Writer) {
+func (e DevicePreferencesTypes) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
-type DeviceTokenType string
+type DeviceStatuses string
 
 const (
-	DeviceTokenTypeFirebase  DeviceTokenType = "FIREBASE"
-	DeviceTokenTypeBiometric DeviceTokenType = "BIOMETRIC"
+	DeviceStatusesActive   DeviceStatuses = "ACTIVE"
+	DeviceStatusesInactive DeviceStatuses = "INACTIVE"
 )
 
-var AllDeviceTokenType = []DeviceTokenType{
-	DeviceTokenTypeFirebase,
-	DeviceTokenTypeBiometric,
+var AllDeviceStatuses = []DeviceStatuses{
+	DeviceStatusesActive,
+	DeviceStatusesInactive,
 }
 
-func (e DeviceTokenType) IsValid() bool {
+func (e DeviceStatuses) IsValid() bool {
 	switch e {
-	case DeviceTokenTypeFirebase, DeviceTokenTypeBiometric:
+	case DeviceStatusesActive, DeviceStatusesInactive:
 		return true
 	}
 	return false
 }
 
-func (e DeviceTokenType) String() string {
+func (e DeviceStatuses) String() string {
 	return string(e)
 }
 
-func (e *DeviceTokenType) UnmarshalGQL(v interface{}) error {
+func (e *DeviceStatuses) UnmarshalGQL(v interface{}) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
 	}
 
-	*e = DeviceTokenType(str)
+	*e = DeviceStatuses(str)
 	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid DeviceTokenType", str)
+		return fmt.Errorf("%s is not a valid DeviceStatuses", str)
 	}
 	return nil
 }
 
-func (e DeviceTokenType) MarshalGQL(w io.Writer) {
+func (e DeviceStatuses) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
-type IdentityStatus string
+type DeviceTokenTypes string
 
 const (
-	IdentityStatusActive   IdentityStatus = "ACTIVE"
-	IdentityStatusInactive IdentityStatus = "INACTIVE"
-	IdentityStatusFrozen   IdentityStatus = "FROZEN"
+	DeviceTokenTypesFirebase DeviceTokenTypes = "FIREBASE"
 )
 
-var AllIdentityStatus = []IdentityStatus{
-	IdentityStatusActive,
-	IdentityStatusInactive,
-	IdentityStatusFrozen,
+var AllDeviceTokenTypes = []DeviceTokenTypes{
+	DeviceTokenTypesFirebase,
 }
 
-func (e IdentityStatus) IsValid() bool {
+func (e DeviceTokenTypes) IsValid() bool {
 	switch e {
-	case IdentityStatusActive, IdentityStatusInactive, IdentityStatusFrozen:
+	case DeviceTokenTypesFirebase:
 		return true
 	}
 	return false
 }
 
-func (e IdentityStatus) String() string {
+func (e DeviceTokenTypes) String() string {
 	return string(e)
 }
 
-func (e *IdentityStatus) UnmarshalGQL(v interface{}) error {
+func (e *DeviceTokenTypes) UnmarshalGQL(v interface{}) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
 	}
 
-	*e = IdentityStatus(str)
+	*e = DeviceTokenTypes(str)
 	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid IdentityStatus", str)
+		return fmt.Errorf("%s is not a valid DeviceTokenTypes", str)
 	}
 	return nil
 }
 
-func (e IdentityStatus) MarshalGQL(w io.Writer) {
+func (e DeviceTokenTypes) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
-type OnboardingCheckPoint string
+type FeeStatuses string
 
 const (
-	OnboardingCheckPointSignup       OnboardingCheckPoint = "SIGNUP"
-	OnboardingCheckPointVerification OnboardingCheckPoint = "VERIFICATION"
-	OnboardingCheckPointActivities   OnboardingCheckPoint = "ACTIVITIES"
-	OnboardingCheckPointTerms        OnboardingCheckPoint = "TERMS"
-	OnboardingCheckPointComplete     OnboardingCheckPoint = "COMPLETE"
+	FeeStatusesActive   FeeStatuses = "ACTIVE"
+	FeeStatusesInactive FeeStatuses = "INACTIVE"
 )
 
-var AllOnboardingCheckPoint = []OnboardingCheckPoint{
-	OnboardingCheckPointSignup,
-	OnboardingCheckPointVerification,
-	OnboardingCheckPointActivities,
-	OnboardingCheckPointTerms,
-	OnboardingCheckPointComplete,
+var AllFeeStatuses = []FeeStatuses{
+	FeeStatusesActive,
+	FeeStatusesInactive,
 }
 
-func (e OnboardingCheckPoint) IsValid() bool {
+func (e FeeStatuses) IsValid() bool {
 	switch e {
-	case OnboardingCheckPointSignup, OnboardingCheckPointVerification, OnboardingCheckPointActivities, OnboardingCheckPointTerms, OnboardingCheckPointComplete:
+	case FeeStatusesActive, FeeStatusesInactive:
 		return true
 	}
 	return false
 }
 
-func (e OnboardingCheckPoint) String() string {
+func (e FeeStatuses) String() string {
 	return string(e)
 }
 
-func (e *OnboardingCheckPoint) UnmarshalGQL(v interface{}) error {
+func (e *FeeStatuses) UnmarshalGQL(v interface{}) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
 	}
 
-	*e = OnboardingCheckPoint(str)
+	*e = FeeStatuses(str)
 	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid OnboardingCheckPoint", str)
+		return fmt.Errorf("%s is not a valid FeeStatuses", str)
 	}
 	return nil
 }
 
-func (e OnboardingCheckPoint) MarshalGQL(w io.Writer) {
+func (e FeeStatuses) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
-type PaymentStatus string
+type FeeTypes string
 
 const (
-	PaymentStatusPending  PaymentStatus = "PENDING"
-	PaymentStatusApproved PaymentStatus = "APPROVED"
+	FeeTypesFixed    FeeTypes = "FIXED"
+	FeeTypesVariable FeeTypes = "VARIABLE"
 )
 
-var AllPaymentStatus = []PaymentStatus{
-	PaymentStatusPending,
-	PaymentStatusApproved,
+var AllFeeTypes = []FeeTypes{
+	FeeTypesFixed,
+	FeeTypesVariable,
 }
 
-func (e PaymentStatus) IsValid() bool {
+func (e FeeTypes) IsValid() bool {
 	switch e {
-	case PaymentStatusPending, PaymentStatusApproved:
+	case FeeTypesFixed, FeeTypesVariable:
 		return true
 	}
 	return false
 }
 
-func (e PaymentStatus) String() string {
+func (e FeeTypes) String() string {
 	return string(e)
 }
 
-func (e *PaymentStatus) UnmarshalGQL(v interface{}) error {
+func (e *FeeTypes) UnmarshalGQL(v interface{}) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
 	}
 
-	*e = PaymentStatus(str)
+	*e = FeeTypes(str)
 	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid PaymentStatus", str)
+		return fmt.Errorf("%s is not a valid FeeTypes", str)
 	}
 	return nil
 }
 
-func (e PaymentStatus) MarshalGQL(w io.Writer) {
+func (e FeeTypes) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
-type PersonStatus string
+type IdentityCredentialsStatuses string
 
 const (
-	PersonStatusSignedup   PersonStatus = "SIGNEDUP"
-	PersonStatusRegistered PersonStatus = "REGISTERED"
-	PersonStatusVerified   PersonStatus = "VERIFIED"
-	PersonStatusOnboarded  PersonStatus = "ONBOARDED"
-	PersonStatusRejected   PersonStatus = "REJECTED"
-	PersonStatusExited     PersonStatus = "EXITED"
+	IdentityCredentialsStatusesActive   IdentityCredentialsStatuses = "ACTIVE"
+	IdentityCredentialsStatusesInactive IdentityCredentialsStatuses = "INACTIVE"
 )
 
-var AllPersonStatus = []PersonStatus{
-	PersonStatusSignedup,
-	PersonStatusRegistered,
-	PersonStatusVerified,
-	PersonStatusOnboarded,
-	PersonStatusRejected,
-	PersonStatusExited,
+var AllIdentityCredentialsStatuses = []IdentityCredentialsStatuses{
+	IdentityCredentialsStatusesActive,
+	IdentityCredentialsStatusesInactive,
 }
 
-func (e PersonStatus) IsValid() bool {
+func (e IdentityCredentialsStatuses) IsValid() bool {
 	switch e {
-	case PersonStatusSignedup, PersonStatusRegistered, PersonStatusVerified, PersonStatusOnboarded, PersonStatusRejected, PersonStatusExited:
+	case IdentityCredentialsStatusesActive, IdentityCredentialsStatusesInactive:
 		return true
 	}
 	return false
 }
 
-func (e PersonStatus) String() string {
+func (e IdentityCredentialsStatuses) String() string {
 	return string(e)
 }
 
-func (e *PersonStatus) UnmarshalGQL(v interface{}) error {
+func (e *IdentityCredentialsStatuses) UnmarshalGQL(v interface{}) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
 	}
 
-	*e = PersonStatus(str)
+	*e = IdentityCredentialsStatuses(str)
 	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid PersonStatus", str)
+		return fmt.Errorf("%s is not a valid IdentityCredentialsStatuses", str)
 	}
 	return nil
 }
 
-func (e PersonStatus) MarshalGQL(w io.Writer) {
+func (e IdentityCredentialsStatuses) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
-type ProofType string
+type IdentityCredentialsTypes string
 
 const (
-	ProofTypeAddress ProofType = "ADDRESS"
+	IdentityCredentialsTypesLogin IdentityCredentialsTypes = "LOGIN"
+	IdentityCredentialsTypesPin   IdentityCredentialsTypes = "PIN"
 )
 
-var AllProofType = []ProofType{
-	ProofTypeAddress,
+var AllIdentityCredentialsTypes = []IdentityCredentialsTypes{
+	IdentityCredentialsTypesLogin,
+	IdentityCredentialsTypesPin,
 }
 
-func (e ProofType) IsValid() bool {
+func (e IdentityCredentialsTypes) IsValid() bool {
 	switch e {
-	case ProofTypeAddress:
+	case IdentityCredentialsTypesLogin, IdentityCredentialsTypesPin:
 		return true
 	}
 	return false
 }
 
-func (e ProofType) String() string {
+func (e IdentityCredentialsTypes) String() string {
 	return string(e)
 }
 
-func (e *ProofType) UnmarshalGQL(v interface{}) error {
+func (e *IdentityCredentialsTypes) UnmarshalGQL(v interface{}) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
 	}
 
-	*e = ProofType(str)
+	*e = IdentityCredentialsTypes(str)
 	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid ProofType", str)
+		return fmt.Errorf("%s is not a valid IdentityCredentialsTypes", str)
 	}
 	return nil
 }
 
-func (e ProofType) MarshalGQL(w io.Writer) {
+func (e IdentityCredentialsTypes) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
-type StaffStatus string
+type IdentityStatuses string
 
 const (
-	StaffStatusActive   StaffStatus = "ACTIVE"
-	StaffStatusInactive StaffStatus = "INACTIVE"
-	StaffStatusExited   StaffStatus = "EXITED"
+	IdentityStatusesActive   IdentityStatuses = "ACTIVE"
+	IdentityStatusesInactive IdentityStatuses = "INACTIVE"
 )
 
-var AllStaffStatus = []StaffStatus{
-	StaffStatusActive,
-	StaffStatusInactive,
-	StaffStatusExited,
+var AllIdentityStatuses = []IdentityStatuses{
+	IdentityStatusesActive,
+	IdentityStatusesInactive,
 }
 
-func (e StaffStatus) IsValid() bool {
+func (e IdentityStatuses) IsValid() bool {
 	switch e {
-	case StaffStatusActive, StaffStatusInactive, StaffStatusExited:
+	case IdentityStatusesActive, IdentityStatusesInactive:
 		return true
 	}
 	return false
 }
 
-func (e StaffStatus) String() string {
+func (e IdentityStatuses) String() string {
 	return string(e)
 }
 
-func (e *StaffStatus) UnmarshalGQL(v interface{}) error {
+func (e *IdentityStatuses) UnmarshalGQL(v interface{}) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
 	}
 
-	*e = StaffStatus(str)
+	*e = IdentityStatuses(str)
 	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid StaffStatus", str)
+		return fmt.Errorf("%s is not a valid IdentityStatuses", str)
 	}
 	return nil
 }
 
-func (e StaffStatus) MarshalGQL(w io.Writer) {
+func (e IdentityStatuses) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
-type State string
+type KYCActionTypes string
 
 const (
-	StateActive       State = "ACTIVE"
-	StateInactive     State = "INACTIVE"
-	StateBlocked      State = "BLOCKED"
-	StateExited       State = "EXITED"
-	StateDraft        State = "DRAFT"
-	StatePending      State = "PENDING"
-	StateCompleted    State = "COMPLETED"
-	StateApproved     State = "APPROVED"
-	StateRejected     State = "REJECTED"
-	StateDeclined     State = "DECLINED"
-	StateManualReview State = "MANUAL_REVIEW"
+	KYCActionTypesChangeStatus KYCActionTypes = "CHANGE_STATUS"
 )
 
-var AllState = []State{
-	StateActive,
-	StateInactive,
-	StateBlocked,
-	StateExited,
-	StateDraft,
-	StatePending,
-	StateCompleted,
-	StateApproved,
-	StateRejected,
-	StateDeclined,
-	StateManualReview,
+var AllKYCActionTypes = []KYCActionTypes{
+	KYCActionTypesChangeStatus,
 }
 
-func (e State) IsValid() bool {
+func (e KYCActionTypes) IsValid() bool {
 	switch e {
-	case StateActive, StateInactive, StateBlocked, StateExited, StateDraft, StatePending, StateCompleted, StateApproved, StateRejected, StateDeclined, StateManualReview:
+	case KYCActionTypesChangeStatus:
 		return true
 	}
 	return false
 }
 
-func (e State) String() string {
+func (e KYCActionTypes) String() string {
 	return string(e)
 }
 
-func (e *State) UnmarshalGQL(v interface{}) error {
+func (e *KYCActionTypes) UnmarshalGQL(v interface{}) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
 	}
 
-	*e = State(str)
+	*e = KYCActionTypes(str)
 	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid State", str)
+		return fmt.Errorf("%s is not a valid KYCActionTypes", str)
 	}
 	return nil
 }
 
-func (e State) MarshalGQL(w io.Writer) {
+func (e KYCActionTypes) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
-type ValidationType string
+type KYCStatuses string
 
 const (
-	ValidationTypeCheck  ValidationType = "CHECK"
-	ValidationTypeScreen ValidationType = "SCREEN"
-	ValidationTypeProof  ValidationType = "PROOF"
+	KYCStatusesPending      KYCStatuses = "PENDING"
+	KYCStatusesManualReview KYCStatuses = "MANUAL_REVIEW"
+	KYCStatusesApproved     KYCStatuses = "APPROVED"
+	KYCStatusesDeclined     KYCStatuses = "DECLINED"
 )
 
-var AllValidationType = []ValidationType{
-	ValidationTypeCheck,
-	ValidationTypeScreen,
-	ValidationTypeProof,
+var AllKYCStatuses = []KYCStatuses{
+	KYCStatusesPending,
+	KYCStatusesManualReview,
+	KYCStatusesApproved,
+	KYCStatusesDeclined,
 }
 
-func (e ValidationType) IsValid() bool {
+func (e KYCStatuses) IsValid() bool {
 	switch e {
-	case ValidationTypeCheck, ValidationTypeScreen, ValidationTypeProof:
+	case KYCStatusesPending, KYCStatusesManualReview, KYCStatusesApproved, KYCStatusesDeclined:
 		return true
 	}
 	return false
 }
 
-func (e ValidationType) String() string {
+func (e KYCStatuses) String() string {
 	return string(e)
 }
 
-func (e *ValidationType) UnmarshalGQL(v interface{}) error {
+func (e *KYCStatuses) UnmarshalGQL(v interface{}) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
 	}
 
-	*e = ValidationType(str)
+	*e = KYCStatuses(str)
 	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid ValidationType", str)
+		return fmt.Errorf("%s is not a valid KYCStatuses", str)
 	}
 	return nil
 }
 
-func (e ValidationType) MarshalGQL(w io.Writer) {
+func (e KYCStatuses) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
-type VerifiableType string
+type KYCTypes string
 
 const (
-	VerifiableTypeEmail  VerifiableType = "EMAIL"
-	VerifiableTypePhone  VerifiableType = "PHONE"
-	VerifiableTypeDevice VerifiableType = "DEVICE"
+	KYCTypesFacialVideo KYCTypes = "FACIAL_VIDEO"
+	KYCTypesDocument    KYCTypes = "DOCUMENT"
 )
 
-var AllVerifiableType = []VerifiableType{
-	VerifiableTypeEmail,
-	VerifiableTypePhone,
-	VerifiableTypeDevice,
+var AllKYCTypes = []KYCTypes{
+	KYCTypesFacialVideo,
+	KYCTypesDocument,
 }
 
-func (e VerifiableType) IsValid() bool {
+func (e KYCTypes) IsValid() bool {
 	switch e {
-	case VerifiableTypeEmail, VerifiableTypePhone, VerifiableTypeDevice:
+	case KYCTypesFacialVideo, KYCTypesDocument:
 		return true
 	}
 	return false
 }
 
-func (e VerifiableType) String() string {
+func (e KYCTypes) String() string {
 	return string(e)
 }
 
-func (e *VerifiableType) UnmarshalGQL(v interface{}) error {
+func (e *KYCTypes) UnmarshalGQL(v interface{}) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
 	}
 
-	*e = VerifiableType(str)
+	*e = KYCTypes(str)
 	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid VerifiableType", str)
+		return fmt.Errorf("%s is not a valid KYCTypes", str)
 	}
 	return nil
 }
 
-func (e VerifiableType) MarshalGQL(w io.Writer) {
+func (e KYCTypes) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type LinkedTransactionStatuses string
+
+const (
+	LinkedTransactionStatusesPending  LinkedTransactionStatuses = "PENDING"
+	LinkedTransactionStatusesApproved LinkedTransactionStatuses = "APPROVED"
+	LinkedTransactionStatusesRejected LinkedTransactionStatuses = "REJECTED"
+)
+
+var AllLinkedTransactionStatuses = []LinkedTransactionStatuses{
+	LinkedTransactionStatusesPending,
+	LinkedTransactionStatusesApproved,
+	LinkedTransactionStatusesRejected,
+}
+
+func (e LinkedTransactionStatuses) IsValid() bool {
+	switch e {
+	case LinkedTransactionStatusesPending, LinkedTransactionStatusesApproved, LinkedTransactionStatusesRejected:
+		return true
+	}
+	return false
+}
+
+func (e LinkedTransactionStatuses) String() string {
+	return string(e)
+}
+
+func (e *LinkedTransactionStatuses) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = LinkedTransactionStatuses(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid LinkedTransactionStatuses", str)
+	}
+	return nil
+}
+
+func (e LinkedTransactionStatuses) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type LinkedTransactionTypes string
+
+const (
+	LinkedTransactionTypesDeposit    LinkedTransactionTypes = "DEPOSIT"
+	LinkedTransactionTypesWithdrawal LinkedTransactionTypes = "WITHDRAWAL"
+	LinkedTransactionTypesApplyFee   LinkedTransactionTypes = "APPLY_FEE"
+)
+
+var AllLinkedTransactionTypes = []LinkedTransactionTypes{
+	LinkedTransactionTypesDeposit,
+	LinkedTransactionTypesWithdrawal,
+	LinkedTransactionTypesApplyFee,
+}
+
+func (e LinkedTransactionTypes) IsValid() bool {
+	switch e {
+	case LinkedTransactionTypesDeposit, LinkedTransactionTypesWithdrawal, LinkedTransactionTypesApplyFee:
+		return true
+	}
+	return false
+}
+
+func (e LinkedTransactionTypes) String() string {
+	return string(e)
+}
+
+func (e *LinkedTransactionTypes) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = LinkedTransactionTypes(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid LinkedTransactionTypes", str)
+	}
+	return nil
+}
+
+func (e LinkedTransactionTypes) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type OrganisationStatuses string
+
+const (
+	OrganisationStatusesActive   OrganisationStatuses = "ACTIVE"
+	OrganisationStatusesInactive OrganisationStatuses = "INACTIVE"
+)
+
+var AllOrganisationStatuses = []OrganisationStatuses{
+	OrganisationStatusesActive,
+	OrganisationStatusesInactive,
+}
+
+func (e OrganisationStatuses) IsValid() bool {
+	switch e {
+	case OrganisationStatusesActive, OrganisationStatusesInactive:
+		return true
+	}
+	return false
+}
+
+func (e OrganisationStatuses) String() string {
+	return string(e)
+}
+
+func (e *OrganisationStatuses) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = OrganisationStatuses(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid OrganisationStatuses", str)
+	}
+	return nil
+}
+
+func (e OrganisationStatuses) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type POAActionTypes string
+
+const (
+	POAActionTypesChangeStatus POAActionTypes = "CHANGE_STATUS"
+)
+
+var AllPOAActionTypes = []POAActionTypes{
+	POAActionTypesChangeStatus,
+}
+
+func (e POAActionTypes) IsValid() bool {
+	switch e {
+	case POAActionTypesChangeStatus:
+		return true
+	}
+	return false
+}
+
+func (e POAActionTypes) String() string {
+	return string(e)
+}
+
+func (e *POAActionTypes) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = POAActionTypes(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid POAActionTypes", str)
+	}
+	return nil
+}
+
+func (e POAActionTypes) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type POAStatuses string
+
+const (
+	POAStatusesPending      POAStatuses = "PENDING"
+	POAStatusesManualReview POAStatuses = "MANUAL_REVIEW"
+	POAStatusesApproved     POAStatuses = "APPROVED"
+	POAStatusesDeclined     POAStatuses = "DECLINED"
+)
+
+var AllPOAStatuses = []POAStatuses{
+	POAStatusesPending,
+	POAStatusesManualReview,
+	POAStatusesApproved,
+	POAStatusesDeclined,
+}
+
+func (e POAStatuses) IsValid() bool {
+	switch e {
+	case POAStatusesPending, POAStatusesManualReview, POAStatusesApproved, POAStatusesDeclined:
+		return true
+	}
+	return false
+}
+
+func (e POAStatuses) String() string {
+	return string(e)
+}
+
+func (e *POAStatuses) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = POAStatuses(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid POAStatuses", str)
+	}
+	return nil
+}
+
+func (e POAStatuses) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type ProductStatuses string
+
+const (
+	ProductStatusesActive   ProductStatuses = "ACTIVE"
+	ProductStatusesInactive ProductStatuses = "INACTIVE"
+)
+
+var AllProductStatuses = []ProductStatuses{
+	ProductStatusesActive,
+	ProductStatusesInactive,
+}
+
+func (e ProductStatuses) IsValid() bool {
+	switch e {
+	case ProductStatusesActive, ProductStatusesInactive:
+		return true
+	}
+	return false
+}
+
+func (e ProductStatuses) String() string {
+	return string(e)
+}
+
+func (e *ProductStatuses) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ProductStatuses(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ProductStatuses", str)
+	}
+	return nil
+}
+
+func (e ProductStatuses) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type ProductTypes string
+
+const (
+	ProductTypesFixedDeposit   ProductTypes = "FIXED_DEPOSIT"
+	ProductTypesCurrentAccount ProductTypes = "CURRENT_ACCOUNT"
+)
+
+var AllProductTypes = []ProductTypes{
+	ProductTypesFixedDeposit,
+	ProductTypesCurrentAccount,
+}
+
+func (e ProductTypes) IsValid() bool {
+	switch e {
+	case ProductTypesFixedDeposit, ProductTypesCurrentAccount:
+		return true
+	}
+	return false
+}
+
+func (e ProductTypes) String() string {
+	return string(e)
+}
+
+func (e *ProductTypes) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ProductTypes(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ProductTypes", str)
+	}
+	return nil
+}
+
+func (e ProductTypes) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type QuestionaryStatuses string
+
+const (
+	QuestionaryStatusesActive   QuestionaryStatuses = "ACTIVE"
+	QuestionaryStatusesInactive QuestionaryStatuses = "INACTIVE"
+)
+
+var AllQuestionaryStatuses = []QuestionaryStatuses{
+	QuestionaryStatusesActive,
+	QuestionaryStatusesInactive,
+}
+
+func (e QuestionaryStatuses) IsValid() bool {
+	switch e {
+	case QuestionaryStatusesActive, QuestionaryStatusesInactive:
+		return true
+	}
+	return false
+}
+
+func (e QuestionaryStatuses) String() string {
+	return string(e)
+}
+
+func (e *QuestionaryStatuses) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = QuestionaryStatuses(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid QuestionaryStatuses", str)
+	}
+	return nil
+}
+
+func (e QuestionaryStatuses) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type QuestionaryTypes string
+
+const (
+	QuestionaryTypesReasons QuestionaryTypes = "REASONS"
+)
+
+var AllQuestionaryTypes = []QuestionaryTypes{
+	QuestionaryTypesReasons,
+}
+
+func (e QuestionaryTypes) IsValid() bool {
+	switch e {
+	case QuestionaryTypesReasons:
+		return true
+	}
+	return false
+}
+
+func (e QuestionaryTypes) String() string {
+	return string(e)
+}
+
+func (e *QuestionaryTypes) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = QuestionaryTypes(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid QuestionaryTypes", str)
+	}
+	return nil
+}
+
+func (e QuestionaryTypes) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type ReportStatuses string
+
+const (
+	ReportStatusesPending      ReportStatuses = "PENDING"
+	ReportStatusesManualReview ReportStatuses = "MANUAL_REVIEW"
+	ReportStatusesApproved     ReportStatuses = "APPROVED"
+	ReportStatusesDeclined     ReportStatuses = "DECLINED"
+)
+
+var AllReportStatuses = []ReportStatuses{
+	ReportStatusesPending,
+	ReportStatusesManualReview,
+	ReportStatusesApproved,
+	ReportStatusesDeclined,
+}
+
+func (e ReportStatuses) IsValid() bool {
+	switch e {
+	case ReportStatusesPending, ReportStatusesManualReview, ReportStatusesApproved, ReportStatusesDeclined:
+		return true
+	}
+	return false
+}
+
+func (e ReportStatuses) String() string {
+	return string(e)
+}
+
+func (e *ReportStatuses) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ReportStatuses(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ReportStatuses", str)
+	}
+	return nil
+}
+
+func (e ReportStatuses) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type StaffStatuses string
+
+const (
+	StaffStatusesActive   StaffStatuses = "ACTIVE"
+	StaffStatusesInactive StaffStatuses = "INACTIVE"
+)
+
+var AllStaffStatuses = []StaffStatuses{
+	StaffStatusesActive,
+	StaffStatusesInactive,
+}
+
+func (e StaffStatuses) IsValid() bool {
+	switch e {
+	case StaffStatusesActive, StaffStatusesInactive:
+		return true
+	}
+	return false
+}
+
+func (e StaffStatuses) String() string {
+	return string(e)
+}
+
+func (e *StaffStatuses) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = StaffStatuses(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid StaffStatuses", str)
+	}
+	return nil
+}
+
+func (e StaffStatuses) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type TransactionStatuses string
+
+const (
+	TransactionStatusesPending  TransactionStatuses = "PENDING"
+	TransactionStatusesApproved TransactionStatuses = "APPROVED"
+	TransactionStatusesRejected TransactionStatuses = "REJECTED"
+)
+
+var AllTransactionStatuses = []TransactionStatuses{
+	TransactionStatusesPending,
+	TransactionStatusesApproved,
+	TransactionStatusesRejected,
+}
+
+func (e TransactionStatuses) IsValid() bool {
+	switch e {
+	case TransactionStatusesPending, TransactionStatusesApproved, TransactionStatusesRejected:
+		return true
+	}
+	return false
+}
+
+func (e TransactionStatuses) String() string {
+	return string(e)
+}
+
+func (e *TransactionStatuses) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = TransactionStatuses(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid TransactionStatuses", str)
+	}
+	return nil
+}
+
+func (e TransactionStatuses) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type TransactionTypeStatuses string
+
+const (
+	TransactionTypeStatusesActive   TransactionTypeStatuses = "ACTIVE"
+	TransactionTypeStatusesInactive TransactionTypeStatuses = "INACTIVE"
+)
+
+var AllTransactionTypeStatuses = []TransactionTypeStatuses{
+	TransactionTypeStatusesActive,
+	TransactionTypeStatusesInactive,
+}
+
+func (e TransactionTypeStatuses) IsValid() bool {
+	switch e {
+	case TransactionTypeStatusesActive, TransactionTypeStatusesInactive:
+		return true
+	}
+	return false
+}
+
+func (e TransactionTypeStatuses) String() string {
+	return string(e)
+}
+
+func (e *TransactionTypeStatuses) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = TransactionTypeStatuses(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid TransactionTypeStatuses", str)
+	}
+	return nil
+}
+
+func (e TransactionTypeStatuses) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }

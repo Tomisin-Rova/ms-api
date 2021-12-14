@@ -1,36 +1,25 @@
 syntax = "proto3";
+
 package account;
-option go_package = "ms.api/protos/pb/accountService";
 
-// Import types
 import "types.proto";
-
-message SuccessResponse {
-  string message = 1;
-}
+import "google/protobuf/timestamp.proto";
+option go_package = "protos/pb/account";
 
 message CreateAccountRequest {
-  string identityId = 1;
-  types.ProductInput product = 2;
+  string product_id = 1;
 }
 
-message GetAccountRequest {
-  string id = 1;
-  string identityId = 2;
+message CreateVaultAccountRequest {
+  VaultAccountInput vaultAccountInput = 1;
+  string transactionPassword = 2;
 }
 
-message GetAccountsRequest {
-  string identityId = 1;
-}
-
-message GetAccountsResponse {
-  repeated types.Account accounts = 1;
-}
-
-message ValidateBVNRequest {
-  string personId = 1;
-  string bvn = 2;
-  string phone = 3;
+message VaultAccountInput {
+  string product_id = 1;
+  string source_account = 2;
+  float amount = 3;
+  string name = 4;
 }
 
 message GetProductRequest {
@@ -38,36 +27,43 @@ message GetProductRequest {
 }
 
 message GetProductsRequest {
-  int64 page = 1;
-  int64 perPage = 2;
+  int32 first = 1;
+  string after = 2;
+  int32 last = 3;
+  string before = 4;
+  repeated types.Product.ProductStatuses statuses = 5;
 }
 
 message GetProductsResponse {
-  repeated types.Product products = 1;
+  repeated types.Product nodes = 1;
+  types.PaginationInfo pagination_info = 2;
+  int32 total_count = 3;
 }
 
-message GetTransactionRequest {
-  string id = 2;
+message GetAccountRequest {
+  string id = 1;
 }
 
-message GetTransactionsRequest {
-  string identityId = 1;
-  string account = 2;
-  repeated string payments = 3;
+message GetAccountsRequest {
+  int32 first = 1;
+  string after = 2;
+  int32 last = 3;
+  string before = 4;
+  repeated types.Account.AccountStatuses statuses = 5;
+  repeated types.Product.ProductTypes product_types = 6;
 }
 
-message GetTransactionsResponse {
-  repeated types.Transaction transactions = 1;
+message GetAccountsResponse {
+  repeated types.Account nodes = 1;
+  types.PaginationInfo pagination_info = 2;
+  int32 total_count = 3;
 }
 
 service AccountService {
-  rpc CreateAccount(CreateAccountRequest) returns (types.Response) {}
-  rpc GetAccount(GetAccountRequest) returns (types.Account) {}
-  rpc GetAccounts(GetAccountsRequest) returns (GetAccountsResponse) {}
-  rpc GetAccountsStream(GetAccountsRequest) returns (stream GetAccountsResponse) {}
-  rpc ValidateBVN(ValidateBVNRequest) returns (types.Response) {}
-  rpc GetProduct(GetProductRequest) returns (types.Product) {}
-  rpc GetProducts(GetProductsRequest) returns (GetProductsResponse) {}
-  rpc GetTransaction(GetTransactionRequest) returns (types.Transaction) {}
-  rpc GetTransactions(GetTransactionsRequest) returns (GetTransactionsResponse) {}
+  rpc CreateAccount(CreateAccountRequest) returns (types.Account);
+  rpc CreateVaultAccount(CreateVaultAccountRequest) returns (types.Account);
+  rpc GetAccount(GetAccountRequest) returns (types.Account);
+  rpc GetAccounts(GetAccountsRequest) returns (GetAccountsResponse);
+  rpc GetProduct(GetProductRequest) returns (types.Product);
+  rpc GetProducts(GetProductsRequest) returns (GetProductsResponse);
 }

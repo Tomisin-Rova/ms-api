@@ -22,17 +22,12 @@ type Secrets struct {
 	DatabaseURL             string        `mapstructure:"mongodb_uri"`
 	PulsarURL               string        `mapstructure:"pulsar_url"`
 	PulsarCert              string        `mapstructure:"pulsar_cert"`
-	CddServiceURL           string        `mapstructure:"cdd_service_url"`
-	OnfidoServiceURL        string        `mapstructure:"onfido_service_url"`
-	KYCServiceURL           string        `mapstructure:"kyc_service_url"`
 	OnboardingServiceURL    string        `mapstructure:"onboarding_service_url"`
-	VerifyServiceURL        string        `mapstructure:"verify_service_url"`
+	VerificationServiceURL  string        `mapstructure:"verification_service_url"`
 	AuthServiceURL          string        `mapstructure:"auth_service_url"`
 	AccountServiceURL       string        `mapstructure:"account_service_url"`
-	PayeeServiceURL         string        `mapstructure:"payee_service_url"`
-	PersonServiceURL        string        `mapstructure:"person_service_url"`
+	CustomerServiceURL      string        `mapstructure:"customer_service_url"`
 	PaymentServiceURL       string        `mapstructure:"payment_service_url"`
-	IdentityServiceURL      string        `mapstructure:"identity_service_url"`
 	PricingServiceURL       string        `mapstructure:"pricing_service_url"`
 	JWTSecrets              string        `json:"jwt_secrets" mapstructure:"JWT_SECRETS"`
 	RedisURL                string        `json:"redis_url" mapstructure:"redis_url"`

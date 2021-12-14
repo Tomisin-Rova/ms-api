@@ -1,0 +1,180 @@
+syntax = "proto3";
+
+package customer;
+
+import "types.proto";
+import "google/protobuf/timestamp.proto";
+option go_package = "protos/pb/customer";
+
+message ResetLoginPasswordRequest {
+  string otp_token = 1;
+  string email = 2;
+  string login_password = 3;
+}
+
+message CheckCustomerEmailRequest {
+  string email = 1;
+  types.DeviceInput device = 2;
+}
+
+message CheckCustomerDataRequest {
+  string email = 1;
+  string first_name = 2;
+  string last_name = 3;
+  string dob = 4;
+  string account_number = 5;
+  string sort_code = 6;
+  string device_identifier = 7;
+}
+
+message RegisterRequest {
+  string first_name = 1;
+  string lastName = 2;
+  string dob = 3;
+  AddressInput address = 4;
+}
+
+message AddressInput {
+  string country_id = 1;
+  string state = 2;
+  string city = 3;
+  string street = 4;
+  string postcode = 5;
+  CordinatesInput cordinates = 6;
+}
+
+message CordinatesInput {
+  float latitude = 1;
+  float longitude = 2;
+}
+
+message SetTransactionPasswordRequest {
+  string password = 1;
+}
+
+message ResetTransactionPasswordRequest {
+  string otp_token = 1;
+  string email = 2;
+  string new_password = 3;
+  string current_password = 4;
+}
+
+message SetDeviceTokenRequest {
+  repeated types.DeviceTokenInput tokens = 1;
+}
+
+message SetDevicePreferencesRequest {
+  repeated types.DevicePreferencesInput preferences = 1;
+}
+
+message CheckBVNRequest {
+  string bvn = 1;
+  string phone = 2;
+}
+
+message CheckEmailRequest {
+  string email = 1;
+}
+
+message MeRequest {}
+
+message MeResponse {
+  oneof data {
+    types.Customer customer = 1;
+    types.Staff staff = 2;
+  }
+}
+
+message GetCustomerRequest {
+  string id = 1;
+}
+
+message GetCustomersRequest {
+  string keywords = 1;
+  int32 first = 2;
+  string after = 3;
+  int32 last = 4;
+  string before = 5;
+  repeated types.Customer.CustomerStatuses statuses = 6;
+}
+
+message GetCustomersResponse {
+  repeated types.Customer nodes = 1;
+  types.PaginationInfo pagination_info = 2;
+  int32 total_count = 3;
+}
+
+message GetContentRequest {
+  string id = 1;
+}
+
+message GetContentsRequest {
+  int32 first = 1;
+  string after = 2;
+  int32 last = 3;
+  string before = 4;
+}
+
+message GetContentsResponse {
+  repeated types.Content nodes = 1;
+  types.PaginationInfo pagination_info = 2;
+  int32 total_count = 3;
+}
+
+message SetAcceptanceRequest {
+  string content_id = 1;
+}
+
+message GetQuestionaryRequest {
+  string id = 1;
+}
+
+message GetQuestionariesRequest {
+  string keywords = 1;
+  int32 first = 2;
+  string after = 3;
+  int32 last = 4;
+  string before = 5;
+  repeated types.Questionary.QuestionaryStatuses statuses = 6;
+  repeated types.Questionary.QuestionaryTypes types = 7;
+}
+
+message GetQuestionariesResponse {
+  repeated types.Questionary nodes = 1;
+  types.PaginationInfo pagination_info = 2;
+  int32 total_count = 3;
+}
+
+message AnswerQuestionaryRequest {
+  string id = 1;
+  repeated AnswerInput answers = 2;
+}
+
+message AnswerInput {
+  string id = 1;
+  string answer = 2;
+}
+
+service CustomerService {
+  rpc ResetLoginPassword(ResetLoginPasswordRequest) returns (types.DefaultResponse);
+  // Returns valid response and code depending of type of user (0 - Customer exist, 1 - Customer exist and has GBP account)
+  rpc CheckCustomerEmail(CheckCustomerEmailRequest) returns (types.DefaultResponse);
+  rpc CheckCustomerData(CheckCustomerDataRequest) returns (types.DefaultResponse);
+  // Register for the fist time the details of the customer logged in
+  rpc Register(RegisterRequest) returns (types.Customer);
+  rpc SetTransactionPassword(SetTransactionPasswordRequest) returns (types.DefaultResponse);
+  rpc ResetTransactionPassword(ResetTransactionPasswordRequest) returns (types.DefaultResponse);
+  rpc SetDeviceToken(SetDeviceTokenRequest) returns (types.DefaultResponse);
+  rpc SetDevicePreferences(SetDevicePreferencesRequest) returns (types.Device);
+  rpc CheckBVN(CheckBVNRequest) returns (types.DefaultResponse);
+  rpc CheckEmail(CheckEmailRequest) returns (types.DefaultResponse);
+  rpc Me (MeRequest) returns (MeResponse);
+  rpc GetCustomer(GetCustomerRequest) returns (types.Customer);
+  rpc GetCustomers(GetCustomersRequest) returns (GetCustomersResponse);
+  rpc GetContent(GetContentRequest) returns (types.Content);
+  rpc GetContents(GetContentsRequest) returns (GetContentsResponse);
+  rpc SetAcceptance(SetAcceptanceRequest) returns (types.DefaultResponse);
+  rpc GetQuestionary(GetQuestionaryRequest) returns (types.Customer);
+  rpc GetQuestionaries(GetQuestionariesRequest) returns (GetQuestionariesResponse);
+  rpc AnswerQuestionary(AnswerQuestionaryRequest) returns (types.DefaultResponse);
+}

@@ -1,2581 +1,633 @@
-# I N T E R F A C E S
+# Date scalar format DD-MM-YYYY
+scalar Date
 
-# Interface for relay
-interface Node {
-  # Unique identifier of a node
-  id: ID!
+############# USER GROUP #############
+
+type Customer {
+    id: ID!
+    firstName: String!
+    lastName: String!
+    dob: Date!
+    bvn: String
+    addresses: [Address!]!
+    phones: [Phone!]
+    email: Email!
+    status: CustomerStatuses!
+    statusTs: Int!
+    ts: Int!
 }
 
-# API response interface
-interface GraphQLResponse {
-  # Response message
-  message: String!
-  # Boolean to represent if a response is a success
-  success: Boolean!
-  # Response code
-  code: Int
+enum CustomerStatuses {
+    SIGNEDUP
+    REGISTERED
+    VERIFIED
+    ONBOARDED
+    REJECTED
+    EXITED
 }
 
-# something verified via OTP e.g. email | phone
-interface Verifiable {
-  name: String
-  primary: Boolean
-  type: VerifiableType!
+type Email {
+    address: String!
+    verified: Boolean!
 }
 
-# authors - can be person or organisation
-interface Entity {
-  # Unique identifier of the entity
-  id: ID!
-  # Array of identities of an Entity
-  identities: [Identity]
+type Phone {
+    primary: Boolean!
+    number: String!
+    verified: Boolean!
 }
 
-# E N U M S
-
-# list of items that can be verified
-enum VerifiableType {
-  EMAIL
-  PHONE
-  DEVICE
-}
-
-# message delivery modes supported
-enum DeliveryMode {
-  EMAIL
-  SMS
-  PUSH
-}
-
-# list of person states
-enum PersonStatus {
-  # signed up with email & passcode
-  SIGNEDUP
-  # enter personal info
-  REGISTERED
-  # finished ID & verification captured
-  VERIFIED
-  # already onboarded
-  ONBOARDED
-  # onboarding process rejected
-  REJECTED
-  # person exited
-  EXITED
-}
-
-# list of customer identity states
-enum IdentityStatus {
-  ACTIVE
-  INACTIVE
-  FROZEN
-}
-
-# list of content types
-enum ContentType {
-  ARTICLE
-  POST
-  COMMENT
-  DOCUMENT
-  VIDEO
-  PHOTO
-  TERMS_GENERAL
-  TERMS_ACCOUNT
-  TERMS_FEE
-  PRIVACY
-}
-
-# list of data states
-enum State {
-  ACTIVE
-  INACTIVE
-  BLOCKED
-  EXITED
-  # writings, applications
-  DRAFT
-  PENDING
-  COMPLETED
-  # workflows
-  APPROVED
-  REJECTED
-  DECLINED
-  MANUAL_REVIEW
-}
-
-# enum of possible device tokens
-enum DeviceTokenType {
-  FIREBASE
-  BIOMETRIC
-}
-
-# onboarding checkpoints - a frontend concern
-enum OnboardingCheckPoint {
-  SIGNUP # enter personal info
-  VERIFICATION # provide ID, Video
-  ACTIVITIES # provide reasons for using ROAVA
-  TERMS # accept terms
-  COMPLETE # submit application
-}
-
-# enum to represent the validation type
-enum ValidationType {
-  CHECK
-  SCREEN
-  PROOF
-}
-
-# enum to show device preference type
-enum DevicePreferenceType {
-  PUSH
-}
-
-# S C A L A R S
-
-# raw JSON value
-scalar JSON
-
-# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1001193868/roava+screen#Schema
-
-# represents the Comply Advantage AML result
-# scalar ComplyAdvantageReport
-
-# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1014956259/roava+report#Schema
-
-# represents the Onfido kyc report
-# scalar OnfidoReport
-
-# T Y P E S
-
-# GraphQL cursor page info type
-type PageInfo {
-  # When paginating forwards, are there more items?
-  hasNextPage: Boolean!
-  # When paginating backwards, are there more items?
-  hasPreviousPage: Boolean!
-  # When paginating backwards, the cursor to continue
-  startCursor: String
-  # When paginating forwards, the cursor to continue
-  endCursor: String
-}
-
-# API response result
-type Response implements GraphQLResponse {
-  # Response message
-  message: String!
-  # Boolean to represent if a response is a success
-  success: Boolean!
-  # Response code
-  code: Int
-  # Response token
-  token: String
-}
-
-# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/983105548/roava+person
-
-# Person represents an individual including staff or end customer
-type Person implements Entity {
-  # Roava person identity generated
-  id: ID!
-  # Person’s title and designation
-  title: String
-  # Person’s first name
-  first_name: String!
-  # Person’s last name
-  last_name: String!
-  # Optional middle name
-  middle_name: String
-  # Person’s date of birth
-  dob: String!
-  # Person’s status in ROAVA - rejected implies ROAVA never onboarded the customer. All other statuses are for onboarded customers
-  status: PersonStatus
-  # Person’s employer
-  employer: Organisation
-  # Nigerian Bank verification number
-  bvn: String
-  # Unix timestamp when the record was created
-  ts: Int!
-  #	Country of residence - 3 letter ISO code for the country
-  country_residence: String
-  # Array of country codes
-  nationality: [String]!
-  # Array of email addresses captured for the customer and their verification status
-  emails: [Email]!
-  # Array of phone numbers captured for the customer and their verification status
-  phones: [Phone]!
-  # Array of identities for the customer
-  identities: [Identity]!
-  # Array of addresses for the customer
-  addresses: [Address]!
-  # Array of activities (reasons for using Roava) captured for the customer
-  activities: [Activity]!
-  # Customer due diligence record for the person
-  cdd: CDD
-  # Sets where in the onboarding process Person is
-  onboarding_status: OnboardingCheckPoint
-}
-
-# The connection type for Person.
-type PersonConnection {
-  # A list of edges
-  edges: [PersonEdge!]!
-  # A list of nodes
-  nodes: [Person!]!
-  # Information to aid in pagination
-  pageInfo: PageInfo!
-  # Identifies the total count of items in the connection
-  totalCount: Int
-}
-
-# An edge in a connection
-type PersonEdge {
-  # A cursor for use in pagination.
-  node: Person!
-  # The item at the end of the edge.
-  cursor: String!
-}
-
-# Input type to for an individual
-input PersonInput {
-  # Person’s first name
-  first_name: String!
-  # Person’s last name
-  last_name: String!
-  # Person’s date of birth
-  dob: String!
-  #	Country of residence - 3 letter ISO code for the country
-  country_residence: String!
-  # Nigerian Bank verification number
-  bvn: String
-}
-
-# Input type to for applicant being onboarded
-input ApplicantInput {
-  # Applicant's ID
-  applicant_id: String
-  # Applicant's first name
-  first_name: String!
-  # Applicant's last name
-  last_name: String!
-  # Applicant's email
-  email: String!
-  # Applicant's date of birth
-  dob: String!
-  #	 Applicant's Address Input
-  address: AddressInput!
-  #	Vendor **
-  vendor: String
-}
-
-# Email type including verified status
-type Email implements Verifiable {
-  # Name of the Email - home, work, etc...
-  name: String
-  # Sets if this is the primary Email
-  primary: Boolean
-  # Type of Verification
-  type: VerifiableType!
-  # Value of the email entry supplied by the customer
-  value: String!
-  # Boolean to capture if the input has been verified via OTP
-  verified: Boolean!
-  # Alias of the Email
-  alias: String
-}
-
-# Phone type including verified status
-type Phone implements Verifiable {
-  # Name of the Phone - home, work, etc...
-  name: String
-  # Sets if this is the primary Phone
-  primary: Boolean
-  # Type of Verification
-  type: VerifiableType!
-  # Value of the phone entry supplied by the customer
-  value: String!
-  # Boolean to capture if the input has been verified via OTP
-  verified: Boolean!
-  # Carries of the Phone
-  carrier: String
-}
-
-# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/983236644/roava+identity
-
-# Identity is how ROAVA represents a customer relationship and can be for a person or organisation
-type Identity {
-  # The Ulid field for the identity
-  id: ID!
-  # Reference to the person or organisation who owns this identity (customer relationship)
-  owner: Owner!
-  # The nickname of the owner of identity wishes to be addressed as
-  nickname: String
-  # Context of the identity. Ulid of the organisation that this identity is for e.g. ROAVA, Onfido, Twitter, Nubank
-  organisation: Organisation!
-  # Status of customer identity e.g. ACTIVE, INACTIVE, FROZEN etc
-  status: IdentityStatus
-  # Set if account is active
-  active: Boolean
-  # To indicate if the identity is used for authentication. If true, the identifier can contain a username or email and should be hashed
-  authentication: Boolean
-  # Array of devices for the identity
-  devices: [Device]!
-  # Unix timestamp when the record was created
-  ts: Int!
-  # Object creating the details of credentials stored in the identity
-  credentials: Credentials!
-}
-
-# Credentials object in a person identity; excludes passwords and pins
-type Credentials {
-  # HASH value of the identifier for the credential - e.g. a username, a client_id for that service. The value is hashed so we don’t leak sensitive information (like usernames, emails) which could contain PII into logs
-  identifier: String!
-  # Token to refresh authentication
-  refresh_token: String
-}
-
-# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1014956383/roava+device
-
-# Device (smartphone or tablet) type
-type Device implements Verifiable {
-  # Roava unique identifier - Ulid
-  id: ID!
-  # Device's name
-  name: String
-  # Defines if Device is primary
-  primary: Boolean
-  # Type of Verification
-  type: VerifiableType!
-  # Unique device identifier
-  identifier: String!
-  # Owner of the Device
-  owner: Person!
-  # Device's Brand
-  brand: String!
-  # Device's OS
-  os: String!
-  # Customer can set their device as in-active with ROAVA e.g. if lost
-  active: Boolean
-  # Boolean to capture if the device has been verified
-  verified: Boolean
-  # Array of Device specific tokens
-  tokens: [DeviceToken]!
-  # Unix timestamp when the record was created
-  ts: Int
-}
-
-# The connection type for Device
-type DeviceConnection {
-  # A list of edges
-  edges: [DeviceEdge!]!
-  # A list of nodes
-  nodes: [Device!]!
-  # Information to aid in pagination
-  pageInfo: PageInfo!
-  # Identifies the total count of items in the connection
-  totalCount: Int
-}
-
-# An edge in a connection
-type DeviceEdge {
-  # The item at the end of the edge.
-  node: Device!
-  # A cursor for use in pagination
-  cursor: String!
-}
-
-# device specific token e.g. firebase
-type DeviceToken {
-  # Device token enum - BIOMETRIC FIREBASE OTHER
-  type: DeviceTokenType
-  # Value of the token
-  value: String
-  # Unix timestamp when the record was created
-  ts: Int
-}
-
-# the input type for devices
-input DeviceInput {
-  # Unique device identifier
-  identifier: String!
-  # Device's Brand
-  brand: String!
-  # Device's OS
-  os: String!
-  # Array of Device specific tokens input
-  tokens: [DeviceTokenInput]!
-}
-
-# device specific tokens e.g. firebase
-input DeviceTokenInput {
-  # Device token enum - BIOMETRIC FIREBASE OTHER
-  type: DeviceTokenType!
-  # Value of the token
-  value: String!
-}
-
-# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1103757335/roava+address
-
-# Type to represent an address including geo location details
 type Address {
-  # The Ulid field for the address
-  id: ID!
-  # The person or organisation or thing that has the address
-  owner: Entity
-  # Nickname of address given by customer e.g. home
-  name: String
-  # Defines if Address is primary
-  primary: Boolean
-  # Street location of address
-  street: String
-  # City of the address
-  city: String
-  # Address county
-  county: String
-  # State in which address is located
-  state: String
-  # Post code, zip code etc
-  postcode: String
-  # Address Country Object
-  country: Country
-  # Unix timestamp when the record was created
-  ts: Int
-  # Geolocation coordinates for the address
-  location: Location
+    primary: Boolean!
+    country: Country!
+    state: String
+    city: String
+    street: String!
+    postcode: String!
+    cordinates: Cordinates!
 }
 
-# The connection type for Address
-type AddressConnection {
-  # A list of edges
-  edges: [AddressEdge!]!
-  # A list of nodes
-  nodes: [Address!]!
-  # Information to aid in pagination
-  pageInfo: PageInfo!
-  # Identifies the total count of items in the connection
-  totalCount: Int
+type Cordinates {
+    latitude: Float!
+    longitude: Float!
 }
 
-# An edge in a connection
-type AddressEdge {
-  # The item at the end of the edge.
-  node: Address!
-  # A cursor for use in pagination
-  cursor: String!
+type Identity {
+    id: ID!
+    customer: Customer
+    organization: Organization!
+    credentials: [IdentityCredentials!]
+    status: IdentityStatuses!
+    statusTs: Int!
+    ts: Int!
 }
 
-# Geolocation (lng, lat) details of an address
-type Location {
-  # Longitude value of the address
-  longitude: Float
-  # Latitude value of the address
-  latitude: Float
+enum IdentityStatuses {
+    ACTIVE
+    INACTIVE
 }
 
-# Input type and fields required to create new address
-input AddressInput {
-  # Street location of address
-  street: String
-  # City of the address
-  city: String
-  # Address county
-  county: String
-  # State in which address is located
-  state: String
-  # Post code, zip code etc
-  postcode: String
-  # 3 Char ISO standard for the country
-  country: String
-  # Optional 2 Char ISO codes for country e.g "GB"
-  # Used in the AML screen with vendor
-  country_2: String
+type IdentityCredentials {
+    type: IdentityCredentialsTypes!
+    password: String!
+    status: IdentityCredentialsStatuses!
+    statusTs: Int!
+    ts: Int!
+    updateTs: Int!
 }
 
-# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1001193682/roava+country
-
-# Type to represent a list of comprehensive data about (International Organization for Standardization)ISO-3166 Country Codes in English, (International Telecommunications Union) ITU Dialing Codes, ISO Currency Codes and the other related data with geographic information for different countries around the world. The list consists of 251 countries and islands.
-type Country {
-  # Represents the Capital city of the specific country from Geonames.
-  Capital: String!
-  # Refers to the Continent in which specific countries are located from Geonames.
-  Continent: String!
-  # Refers to the full name of country.
-  Country_Name: String!
-  # Indicates the Distinguishing Signs (DS) of the place of registration of vehicles in international traffic.
-  DS: String!
-  # Country code from International Telecommunication Union - Telecommunication Standardization Sector (ITU-T) recommendation E.164, sometimes followed by area code.
-  Dial: String!
-  # Refers to the Electronic Data Gathering, Analysis, and Retrieval system (EDGAR) that performs automated collection, validation, indexing, acceptance, and forwarding of submissions by companies and others who are required by law to file forms with the U.S. Securities and Exchange Commission (the "SEC").
-  EDGAR: String!
-  # Refers to the codes assigned by the Fédération Internationale de Football Association (FIFA).
-  FIFA: String!
-  # Indicates the codes from the U.S. Federal Information Processing Standard Publication (FIPS PUB) 10-4.
-  FIPS: String!
-  # Specifies the Global Administrative Unit Layers (GAUL) from the Food and Agriculture Organization.
-  GAUL: String!
-  # Represents the identity of a country's Geographic Name.
-  Geo_Name_ID: String!
-  # Refers to the codes assigned by the International Olympics Committee (IOC).
-  IOC: String!
-  # Refers to Alpha-2 (two letter) codes from ISO 3166-1.
-  ISO3166_1_Alpha_2: String!
-  # Refers to Alpha-3 (three letter) codes from ISO 3166-1. These codes are synonymous with World Bank Codes.
-  ISO3166_1_Alpha_3: String!
-  # Represents a three-letter alphabetic code for currency. The alphabetic code is based on another ISO standard, ISO 3166, which lists the codes for country names. The first two letters of the ISO 4217 three-letter code are the same as the code for the country name, and where possible the third letter corresponds to the first letter of the currency name. For example: the US dollar is represented as USD - the US coming from the ISO 3166 country code and the D for dollar. The Swiss franc is represented by CHF - the CH being the code for Switzerland in the ISO 3166 code and F for franc.
-  ISO4217_Currency_Alphabetic_Code: String!
-  # Refers to the name of the country against their ISO 4217 currency alphabetical code.
-  ISO4217_Currency_Country_Name: String!
-  # Indicates the ISO 4217 currency number of minor units.
-  ISO4217_Currency_Minor_Unit: Int!
-  # Represents the name of currency as per ISO 4217.
-  ISO4217_Currency_Name: String!
-  # Refers to the three-digit numeric code is useful when currency codes need to be understood in countries that do not use Latin scripts and for computerised systems. Where possible the 3 digit numeric code is the same as the numeric country code.
-  ISO4217_Currency_Numeric_Code: Int!
-  # Indicates the codes assigned by the International Telecommunications Union (ITU).
-  ITU: String!
-  # Indicates the Country status, based on the Central Intelligence Agency (CIA) World Factbook.
-  Is_Independent: String!
-  # This column lists the languages spoken in a country ordered by the number of speakers. The language code is a 'locale' where any two-letter primary-tag is an ISO-639 language abbreviation and any two-letter initial subtag is an ISO-3166 country code.
-  Languages: String!
-  # Indicates United Nations Statistics Division M49 numeric codes (nearly synonymous with ISO 3166-1 numeric codes, which are based on UN M49. ISO 3166-1 does not include Channel Islands or Sark). These are also prepared by the United Nations Secretariat primarily for use in its publications and databases.
-  M49: Int!
-  # Refers to the MAchine-Readable Cataloging (MARC) codes from the Library of Congress. It is a standard for encoding bibliographic materials in electronic form. In general, MARC country codes are two letters. For three countries, MARC provides three-letter subdivision codes. In these cases, the first two letters represent the state or province, and the third letter indicates the country. If the first two letters are xx, the code represents a location in an unspecified subdivision of that country. There are five MARC codes that represent parts of United States Minor Outlying Islands: ji Johnston Atoll, xf Midway Islands, wk Wake Island, uc United States Misc. Caribbean Islands, and up United States Misc. Pacific Islands.
-  MARC: String!
-  # Indicates the Country's official English name.
-  Official_Name_English: String!
-  # Indicates the Top Level Domain (TLD) from Geonames.
-  TLD: String!
-  # Specifies the Country abbreviations by the World Meteorological Organization (WMO) used in weather reports.
-  WMO: String!
-}
-
-# The connection type for Country
-type CountryConnection {
-  # A list of edges
-  edges: [CountryEdge!]!
-  # A list of nodes
-  nodes: [Country!]!
-  # Information to aid in pagination
-  pageInfo: PageInfo!
-  # Identifies the total count of items in the connection
-  totalCount: Int
-}
-
-# An edge in a connection
-type CountryEdge {
-  # The item at the end of the edge.
-  node: Country!
-  # A cursor for use in pagination
-  cursor: String!
-}
-
-# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1001193706/roava+currency
-
-# Type to represent currencies
-type Currency {
-  # Official symbol of currency
-  symbol: String!
-  # Official name of  currency
-  name: String!
-  # Native character of symbol e.g. $ , £ etc
-  symbol_native: String!
-  # Number of decimal digits
-  decimal_digits: Int!
-  # Number of digits rounding
-  rounding: Int!
-  # 3 letter ISO code for currency
-  code: String!
-  # Plural description of the currency name
-  name_plural: String!
-}
-
-# The connection type for Currency
-type CurrencyConnection {
-  # A list of edges
-  edges: [CurrencyEdge!]!
-  # A list of nodes
-  nodes: [Currency!]!
-  # Information to aid in pagination
-  pageInfo: PageInfo!
-  # Identifies the total count of items in the connection
-  totalCount: Int
-}
-
-# An edge in a connection
-type CurrencyEdge {
-  # The item at the end of the edge.
-  node: Currency!
-  # A cursor for use in pagination
-  cursor: String!
-}
-
-# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1084588117/roava+organisation
-
-# Organisations (companies) in the ROAVA universe
-type Organisation implements Entity {
-  # The Ulid field for the Organisation
-  id: ID!
-  # The Organisation name
-  name: String
-  # Keywords related to the Organisation
-  keywords: String
-  # Short description about the Organisation
-  description: String
-  # Organisation's website url
-  domain: String
-  # Organisation's banner image
-  banner: String
-  # Organisation's revenue
-  revenue: Float
-  # Organisation's website url
-  language: String
-  # Organisation's raised money
-  raised: Float
-  # Quantity of employees of the Organisation
-  employees: String
-  # Organisation's email
-  email: String
-  # Unix timestamp when the record was created
-  ts: Int
-  # Organisation's Addresses
-  addresses: [Address]!
-  # Organisation's Location Object
-  location: OrgLocation
-  # Array of Industry of the Organisation
-  industries: [Industry]!
-  # Organisation's social links
-  social: Social
-  # Array of image assets from an Organisation
-  image_assets: [ImageAssets]!
-  # Array of identities from an Organisation
-  identities: [Identity]!
-}
-
-# The connection type for Organisation
-type OrganisationConnection {
-  # A list of edges
-  edges: [OrganisationEdge!]!
-  # A list of nodes
-  nodes: [Organisation!]!
-  # Information to aid in pagination
-  pageInfo: PageInfo!
-  # Identifies the total count of items in the connection
-  totalCount: Int
-}
-
-# An edge in a connection
-type OrganisationEdge {
-  # The item at the end of the edge.
-  node: Organisation!
-  # A cursor for use in pagination
-  cursor: String!
-}
-
-# Type to represent social links
-type Social {
-  # YouTube url
-  youtube: String
-  # GitHub url
-  github: String
-  # Facebook url
-  facebook: String
-  # Pinterest url
-  pinterest: String
-  # Instagram url
-  instagram: String
-  # Linkedin url
-  linkedin: String
-  # Medium url
-  medium: String
-  # Crunchbase url
-  crunchbase: String
-  # Twitter url
-  twitter: String
-}
-
-# Type to represent ImageAssets
-type ImageAssets {
-  # Defines is an ImageAsset is safe
-  safe: Boolean
-  # Defines the type of the ImageAsset
-  type: String
-  # The url of the Image
-  image: String
-  # Image in SVG
-  svg: String
-}
-
-# Type to represent a location of an Organization
-type OrgLocation {
-  # Refers to the continent in which the Organisation is located
-  continent: String
-  # Country in which organisation is located
-  country: String
-  # State in which organisation is located
-  state: String
-  # City of the Organisation
-  city: String
-  # Country Code of the Organisation
-  country_code: String
-}
-
-# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1014923419/roava+industry
-
-# Industry represents an industry including Standard Industry Classification (SIC) codes
-type Industry {
-  # The Ulid field for the Industry
-  id: ID!
-  # SIC code for an industry or sector
-  code: Int!
-  # Industry score
-  score: Float
-  # Section category within the full SIC code list
-  section: String
-  # Description of industry or sector
-  description: String
-  # Industry source
-  source: String
-}
-
-# The connection type for Industry
-type IndustryConnection {
-  # A list of edges
-  edges: [IndustryEdge!]!
-  # A list of nodes
-  nodes: [Industry!]!
-  # Information to aid in pagination
-  pageInfo: PageInfo!
-  # Identifies the total count of items in the connection
-  totalCount: Int
-}
-
-# An edge in a connection
-type IndustryEdge {
-  # The item at the end of the edge.
-  node: Industry!
-  # A cursor for use in pagination
-  cursor: String!
-}
-
-# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/998572196/roava+auth
-
-# Type to represent Auth
-type Auth {
-  # Unique roava ulid for the data record
-  id: ID!
-  # Session id
-  session: String
-  # Identity trying to authenticate
-  identity: [Identity]!
-  # Boolean to determine if authentication successful
-  success: Boolean
-  # Count of login attempts
-  attempts: Int
-  # Unix timestamp when the record was created
-  ts: Int
-}
-
-# Input type of Auth
-input AuthInput {
-  # User email to use in the auth
-  email: String!
-  # User passcode
-  passcode: String!
-  # The device that is attemping to auth
-  device: DeviceInput!
-}
-
-type AuthResponse implements GraphQLResponse {
-  message: String!
-  success: Boolean!
-  code: Int
-  tokens: AuthTokens
-}
-
-type AuthTokens {
-  # Unique identifier for the auth token
-  auth: String!
-  # Token to refresh authentication
-  refresh: String!
-}
-
-# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1014956358/roava+verifications
-
-# OTPs and email magic links to verify identity
-type Verification {
-  # Unique roava ulid for the data record
-  id: ID!
-  # OTP or email magic link that is sent to the customer
-  code: String
-  # Target of the verification based on type
-  target: Verifiable!
-  # Type of verification being performed email or sms
-  type: String
-  # Defines if the Verification is validated
-  validated: Boolean
-  # Unix timestamp when the record was created
-  ts: Int
-}
-
-# The connection type for Verification
-type VerificationConnection {
-  # A list of edges
-  edges: [VerificationEdge!]!
-  # A list of nodes
-  nodes: [Verification!]!
-  # Information to aid in pagination
-  pageInfo: PageInfo!
-  # Identifies the total count of items in the connection
-  totalCount: Int
-}
-
-# An edge in a connection
-type VerificationEdge {
-  # The item at the end of the edge.
-  node: Verification!
-  # A cursor for use in pagination
-  cursor: String!
-}
-
-# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1017839830/roava+activity
-
-# A list of potential activities for customers expect to utilise ROAVA
-type Activity {
-  # Unique roava ulid for the data record
-  id: ID!
-  # A short description of the activity
-  description: String!
-  # Expected risk weighting of the activity - 1 (low) to 5 (high risk)
-  risk_weighting: Int!
-  # Determines if the activity is still supported in ROAVA
-  supported: Boolean
-  # Unix time stamp indicating when the activity was archived or no longer supported
-  archived: Int
-  # Unix timestamp when the record was created
-  ts: Int
-}
-
-# # The connection type for Activity
-# type ActivityConnection {
-#   # A list of edges
-#   edges: [ActivityEdge!]!
-#   # A list of nodes
-#   nodes: [Activity!]!
-#   # Information to aid in pagination
-#   pageInfo: PageInfo!
-#   # Identifies the total count of items in the connection
-#   totalCount: Int
-# }
-
-# # An edge in a connection
-# type ActivityEdge {
-#   # The item at the end of the edge.
-#   node: Activity!
-#   # A cursor for use in pagination
-#   cursor: String!
-# }
-
-# Input type of Activity
-input ActivityInput {
-  # A short description of the activity
-  description: String!
-  # Expected risk weighting of the activity - 1 (low) to 5 (high risk)
-  risk_weighting: Int!
-  # Determines if the activity is still supported in ROAVA
-  supported: Boolean
-  # Unix time stamp indicating when the activity was archived or no longer supported
-  archived: Int
-}
-
-# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1001193923/roava%3A+message
-
-# Messages in ROAVA - SMS|Push|Email
-type Message {
-  # Unique roava ulid for the data record
-  id: ID!
-  # Reference to the entity who owns this message
-  owner: Entity!
-  """
-  This is the message title which varies by delivery mode / type of message
-
-  - Email - the full HTML template populated to be sent
-
-  - Push - the  content of message card to be displayed in feed
-
-  - SMS - the sms content
-  """
-  title: String
-  """
-  Message body which varies by delivery mode / type of message
-
-  - email - the full HTML template populated to be sent
-
-  - push - the  content of message card to be displayed in feed
-
-  - SMS - the sms content
-  """
-  body: String
-  # This field indicates an enumerated status for the message
-  status: String
-  # A boolean field indicating the message has been read
-  has_read: Boolean
-  # The delivery mode for the message
-  delivery_mode: DeliveryMode!
-  """
-  The information for the sender based on message type
-
-  - email - sender’s email address
-
-  - sms | push - not required
-  """
-  sender: String
-  """
-  The information for the intended recipient of the message based on  type
-
-  - email - target's email address
-
-  - sms - phone number
-
-  - push - device or phone number
-  """
-  target: Verifiable!
-  # Unix timestamp representing data & time the message was dispatched
-  sent: Int
-  # Unix timestamp when the record was created
-  ts: Int
-}
-
-# The connection type for Message
-type MessageConnection {
-  # A list of edges
-  edges: [MessageEdge!]!
-  # A list of nodes
-  nodes: [Message!]!
-  # Information to aid in pagination
-  pageInfo: PageInfo!
-  # Identifies the total count of items in the connection
-  totalCount: Int
-}
-
-# An edge in a connection
-type MessageEdge {
-  # The item at the end of the edge.
-  node: Message!
-  # A cursor for use in pagination
-  cursor: String!
-}
-
-# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1103856061/roava+tag
-
-# Tag defined as data model for referential checks
-type Tag {
-  # Unique roava ulid for the data record
-  id: ID!
-  # Tag name
-  name: String
-  # Unix timestamp when the record was created
-  ts: Int
-}
-
-# The connection type for Tag
-type TagConnection {
-  # A list of edges
-  edges: [TagEdge!]!
-  # A list of nodes
-  nodes: [Tag!]!
-  # Information to aid in pagination
-  pageInfo: PageInfo!
-  # Identifies the total count of items in the connection
-  totalCount: Int
-}
-
-# An edge in a connection
-type TagEdge {
-  # The item at the end of the edge.
-  node: Tag!
-  # A cursor for use in pagination
-  cursor: String!
-}
-
-# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1001193885/roava+cdd
-
-# CDD that combines KYC(roava: check) and AML(roava: screen) results
-type CDD {
-  # Unique roava ulid for the data record
-  id: ID!
-  # ROAVA person for which the CDD is being conducted
-  owner: Person!
-  # Result of any internal screening or watchlists
-  watchlist: Boolean
-  # Detailed message to customer
-  details: String @deprecated(reason: "Description is not necessary here")
-  # Status of the CDD record
-  status: State!
-  # Boolean decision if roava should onboard this customer or not; supplied by staff team
-  onboard: Boolean
-  # Version number for the cdd record; increment by 1 on each update
-  version: Int @deprecated(reason: "Customers now only have single CDD")
-  # list of validations performed on a customer
-  validations(
-    # Filter validations by it's type
-    validation_type: ValidationType
-    # Filter CDD validations by it's statuses
-    status: [State!]
-  ): [Validation!]!
-  # Boolean to indicate if this is the most current or active CDD file for the customer
-  active: Boolean @deprecated(reason: "Customers now only have single CDD")
-  # Unix timestamp when the record was created
-  ts: Int
-}
-
-# The connection type for CDD
-type CDDConnection {
-  # A list of edges
-  edges: [CDDEdge!]!
-  # A list of nodes
-  nodes: [CDD!]!
-  # Information to aid in pagination
-  pageInfo: PageInfo!
-  # Identifies the total count of items in the connection
-  totalCount: Int
-}
-
-# An edge in a connection
-type CDDEdge {
-  # The item at the end of the edge.
-  node: CDD!
-  # A cursor for use in pagination
-  cursor: String!
-}
-
-type Validation {
-  # Unique roava ulid for the data record
-  id: ID!
-  # type of validation being supplied
-  validation_type: ValidationType!
-  # the Person or Organisation validation is for
-  applicant: Owner!
-  # the validation result which can be a check, screen or proof
-  data: ValidationData!
-  # Organisation id for the company/vendor providing the KYC service
-  organisation: Organisation!
-  # The status of the check
-  status: State!
-  # approval decision made by ROAVA risk team for this validation
-  approved: Boolean
-  # Unix timestamp when the record was created
-  ts: Int
-  # Reference for the actions taken in a Validation
-  actions: [Action!]!
-}
-
-# Actions taken, such as an onboarding case review
-type Action {
-  # Unique roava ulid for the data record
-  id: ID!
-  # Person who created the task
-  reporter: Staff!
-  ## Person whom task is assigned to
-  #assignee: Person!
-  ## Person who task is referred to approve the task
-  #approver: Person
-  # Notes for the task
-  notes: String!
-  ## ROAVA operations workflow stage
-  #stage: String @examples(values: "some_workflow_stage")
-  ## Approval status of the task
-  #approved: Boolean @examples(values: [true, false])
-  # The action type of this action
-  status: String!
-  ## Version of the task
-  #version: Int
-  # Unix timestamp when the record was created
-  ts: Int!
-  ## Array of comments associated to this task
-  #comments(
-  #  # Returns the first n elements from the list.
-  #  first: Int,
-  #  # Returns the elements in the list that come after the specified cursor.
-  #  after: String,
-  #  # Returns the last n elements from the list.
-  #  last: Int,
-  #  # Returns the elements in the list that come before the specified cursor.
-  #  before: String
-  #): CommentConnection
-  ## Array of tags associated to this task
-  #tags(
-  #  # Returns the first n elements from the list.
-  #  first: Int,
-  #  # Returns the elements in the list that come after the specified cursor.
-  #  after: String,
-  #  # Returns the last n elements from the list.
-  #  last: Int,
-  #  # Returns the elements in the list that come before the specified cursor.
-  #  before: String
-  #): TagConnection
-}
-
-# union type representing owner of an entity
-union Owner = Person | Organisation
-
-# union type representing a validation result which can be a kyc CHECK, aml SCREEN or doucment PROOF
-union ValidationData = Check | Screen | Proof
-
-# Type to define a beneficiary - can be payee account or customer account
-union BeneficiaryAccount = Account | PayeeAccount
-
-# The connection type for Validation
-type ValidationConnection {
-  # A list of edges
-  edges: [ValidationEdge!]!
-  # A list of nodes
-  nodes: [Validation!]!
-  # Information to aid in pagination
-  pageInfo: PageInfo!
-  # Identifies the total count of items in the connection
-  totalCount: Int
-}
-
-# An edge in a connection
-type ValidationEdge {
-  # The item at the end of the edge.
-  node: Validation!
-  # A cursor for use in pagination
-  cursor: String!
-}
-
-# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/990871725/roava+check
-
-# Checks are performed on an applicant (pereson) and consist of one or more reports
-type Check {
-  # Unique roava ulid for the data record
-  id: ID!
-  # Reference for customer or organization who owns the Check Validation
-  owner: Owner!
-  # Organisation id for the company/vendor providing the KYC service
-  organisation: Organisation!
-  # The status of the check
-  status: State!
-  # Unix timestamp when the record was created
-  ts: Int
-  # Full vendor (onfido) check data payload
-  data: CheckData!
-}
-
-# The connection type for Check
-type CheckConnection {
-  # A list of edges
-  edges: [CheckEdge!]!
-  # A list of nodes
-  nodes: [Check!]!
-  # Information to aid in pagination
-  pageInfo: PageInfo!
-  # Identifies the total count of items in the connection
-  totalCount: Int
-}
-
-# An edge in a connection
-type CheckEdge {
-  # The item at the end of the edge.
-  node: Check!
-  # A cursor for use in pagination
-  cursor: String!
+enum IdentityCredentialsStatuses {
+    ACTIVE
+    INACTIVE
 }
 
-# Data type for onfido check payload
-type CheckData {
-  # Unique roava ulid for the data record
-  id: ID!
-  # DateTime when the record was created
-  created_at: String
-  # The status of the check
-  status: State!
-  # Check uri address
-  redirect_uri: String
-  # The result of the check
-  result: String
-  # Boolean to indicate if this check was made in sandbox mode
-  sandbox: Boolean
-  # The url from the results
-  results_uri: String
-  # The url of the form
-  form_uri: String
-  # Boolean to indicate if this check is paused
-  paused: Boolean
-  # Version number for the check
-  version: String
-  # Href for the check
-  href: String
-  # Id of the Applicant
-  applicant_id: String
-  # Boolean to indicate if applicant provides data
-  applicant_provides_data: Boolean
-  # Array of Report for this Check
-  reports: [Report]!
-  # Array of Tags related to this check
-  tags(
-    # Returns the first n elements from the list.
-    first: Int
-    # Returns the elements in the list that come after the specified cursor.
-    after: String
-    # Returns the last n elements from the list.
-    last: Int
-    # Returns the elements in the list that come before the specified cursor.
-    before: String
-  ): TagConnection
+enum IdentityCredentialsTypes {
+    LOGIN
+    PIN
 }
 
-# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1014956259/roava+report
-
-# Models an onfido kyc report
-type Report {
-  # Unique id for the report
-  id: String!
-  # Data from Onfido
-  data: JSON!
-  # The status of the report
-  status: State!
-  # Organisation id for the company/vendor providing the report
-  organisation: Organisation
-  # Unix timestamp when the record was created
-  ts: Int
-  # The status of the report review
-  review: ReportReviewStatus
-}
-
-# Describes the Review Status of a Report
-type ReportReviewStatus {
-  # Boolean to indicate if the review was submitted
-  resubmit: Boolean
-  # Message used in the review
-  message: String
-}
-
-# The connection type for Report
-type ReportConnection {
-  # A list of edges
-  edges: [ReportEdge!]!
-  # A list of nodes
-  nodes: [Report!]!
-  # Information to aid in pagination
-  pageInfo: PageInfo!
-  # Identifies the total count of items in the connection
-  totalCount: Int
-}
-
-# An edge in a connection
-type ReportEdge {
-  # The item at the end of the edge.
-  node: Report!
-  # A cursor for use in pagination
-  cursor: String!
-}
-
-# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1001193868/roava+screen
-
-# Describes the AML screen result using comply advantage
-type Screen {
-  # Unique roava ulid for the data record
-  id: ID!
-  # Full vendor (comply advantage) screen data payload
-  data: JSON!
-  # Organisation for the company/vendor providing the AML service
-  organisation: Organisation
-  # The status of the report
-  status: State!
-  # Unix timestamp when the record was created
-  ts: Int
-}
-
-# The connection type for Screen
-type ScreenConnection {
-  # A list of edges
-  edges: [ScreenEdge!]!
-  # A list of nodes
-  nodes: [Screen!]!
-  # Information to aid in pagination
-  pageInfo: PageInfo!
-  # Identifies the total count of items in the connection
-  totalCount: Int
-}
-
-# An edge in a connection
-type ScreenEdge {
-  # The item at the end of the edge.
-  node: Screen!
-  # A cursor for use in pagination
-  cursor: String!
-}
-
-# Document proofs to be supplied
-type Proof {
-  # Unique roava ulid for the data record
-  id: ID!
-  # type of document proof
-  type: ProofType!
-  # Full data payload for document Proofs
-  data: JSON!
-  # The status of the report review
-  review: ReportReviewStatus
-  # Organisation for the company/vendor providing the AML service
-  organisation: Organisation
-  # The status of the report
-  status: State!
-  # Unix timestamp when the record was created
-  ts: Int
-}
-
-# enum representing types of document proofs
-enum ProofType {
-  ADDRESS
+type Organization {
+    id: ID!
+    name: String!
+    status: OrganisationStatuses!
+    statusTs: Int!
+    ts: Int!
 }
 
-# enum representing types of third party available auths
-enum AuthType {
-  GOOGLE
+enum OrganisationStatuses {
+    ACTIVE
+    INACTIVE
 }
 
-# The connection type for Proof
-type ProofConnection {
-  # A list of edges
-  edges: [ProofEdge!]!
-  # A list of nodes
-  nodes: [Proof!]!
-  # Information to aid in pagination
-  pageInfo: PageInfo!
-  # Identifies the total count of items in the connection
-  totalCount: Int
+type Staff {
+    id: ID!
+    name: String!
+    lastName: String!
+    dob: Date
+    addresses: [Address!]!
+    phones: [Phone!]
+    email: String!
+    status: StaffStatuses!
+    statusTs: Int!
+    ts: Int!
 }
 
-# An edge in a connection
-type ProofEdge {
-  # The item at the end of the edge.
-  node: Proof!
-  # A cursor for use in pagination
-  cursor: String!
+enum StaffStatuses {
+    ACTIVE
+    INACTIVE
 }
-
-# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1103855717/roava+task
-
-# Task to be completed such as an onboarding case review
-type Task {
-  # Unique roava ulid for the data record
-  id: ID!
-  # Person who created the task
-  reporter: Person!
-  # Person whom task is assigned to
-  assignee: Person!
-  # Person who task is referred to approve the task
-  approver: Person
-  # Notes for the task
-  notes: String
-  # ROAVA operations workflow stage
-  stage: String
-  # Approval status of the task
-  approved: Boolean
-  # Version of the task
-  version: Int
-  # Unix timestamp when the record was created
-  ts: Int
-  # Array of comments associated to this task
-  comments(
-    # Returns the first n elements from the list.
-    first: Int
-    # Returns the elements in the list that come after the specified cursor.
-    after: String
-    # Returns the last n elements from the list.
-    last: Int
-    # Returns the elements in the list that come before the specified cursor.
-    before: String
-  ): CommentConnection
-  # Array of tags associated to this task
-  tags(
-    # Returns the first n elements from the list.
-    first: Int
-    # Returns the elements in the list that come after the specified cursor.
-    after: String
-    # Returns the last n elements from the list.
-    last: Int
-    # Returns the elements in the list that come before the specified cursor.
-    before: String
-  ): TagConnection
-}
-
-# The connection type for Task'
-type TaskConnection {
-  # A list of edges
-  edges: [TaskEdge!]!
-  # A list of nodes
-  nodes: [Task!]!
-  # Information to aid in pagination
-  pageInfo: PageInfo!
-  # Identifies the total count of items in the connection
-  totalCount: Int
-}
-
-# An edge in a connection
-type TaskEdge {
-  # The item at the end of the edge.
-  node: Task!
-  # A cursor for use in pagination
-  cursor: String!
-}
-
-# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1097400336/roava+content
-
-#Roava documents, articles, fee statements, T&Cs, privacy etc
-type Content {
-  # Unique roava ulid for the data record
-  id: ID!
-  # Source of the comment
-  source: Entity!
-  # Type of content - @fee @terms @privacy @article @post @comment @document @photo @video
-  type: String
-  # Title of the content or document
-  title: String
-  # Abstract is short description that summarises the document/content
-  abstract: String
-  # The main body or content of the document. can be a base64 value of the content
-  body: String
-  # The location of the content
-  url: String
-  # Value indicating if latest version
-  current: Boolean
-  # Version number of the content
-  version: Int
-  # Unix timestamp when the record was created
-  ts: Int
-  # Array of Comments made in the Content
-  comments(
-    # Returns the first n elements from the list.
-    first: Int
-    # Returns the elements in the list that come after the specified cursor.
-    after: String
-    # Returns the last n elements from the list.
-    last: Int
-    # Returns the elements in the list that come before the specified cursor.
-    before: String
-  ): CommentConnection
-  # Array of Tags assiciated to the content
-  tags(
-    # Returns the first n elements from the list.
-    first: Int
-    # Returns the elements in the list that come after the specified cursor.
-    after: String
-    # Returns the last n elements from the list.
-    last: Int
-    # Returns the elements in the list that come before the specified cursor.
-    before: String
-  ): TagConnection
-  # Array of keywords of the document
-  keywords: [String]!
-}
-
-# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1103790208/roava+comment
-
-# Describes a comment that can be made by customer or staff
-type Comment {
-  # Unique roava ulid for the data record
-  id: ID!
-  # The comment creator/author
-  author: Person!
-  # Type of content - @comment
-  type: String
-  # The main body or content of the document. can be a base64 value of the content
-  body: String
-  # Unix timestamp when the record was created
-  ts: Int
-  # Array of Tags assiciated to the comment
-  tags: [Tag]!
-}
-
-# The connection type for Comment
-type CommentConnection {
-  # A list of edges
-  edges: [CommentEdge!]!
-  # A list of nodes
-  nodes: [Comment!]!
-  # Information to aid in pagination
-  pageInfo: PageInfo!
-  # Identifies the total count of items in the connection
-  totalCount: Int
-}
-
-# An edge in a connection
-type CommentEdge {
-  # The item at the end of the edge.
-  node: Comment!
-  # A cursor for use in pagination
-  cursor: String!
-}
-
-# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1099202579/roava+acceptance
 
-# Stores something the customer has accepted (like terms and conditions)
 type Acceptance {
-  # Unique roava ulid for the data record
-  id: ID!
-  # Reference to the identity  who accepted the item
-  identity: Identity!
-  # The content (fee, terms) that was accepted
-  content: Content!
-  # Unix timestamp when the record was created
-  ts: Int
+    id: ID!
+    content: Content!
+    customer: Customer!
+    ts: Int!
 }
 
-# The connection type for Acceptance
-type AcceptanceConnection {
-  # A list of edges
-  edges: [AcceptanceEdge!]!
-  # A list of nodes
-  nodes: [Acceptance!]!
-  # Information to aid in pagination
-  pageInfo: PageInfo!
-  # Identifies the total count of items in the connection
-  totalCount: Int
+type Questionary {
+    id: ID!
+    type: QuestionaryTypes!
+    questions: [QuestionaryQuestion!]!
+    status: QuestionaryStatuses!
+    statusTs: Int!
+    ts: Int!
 }
 
-# An edge in a connection
-type AcceptanceEdge {
-  # The item at the end of the edge.
-  node: Acceptance!
-  # A cursor for use in pagination
-  cursor: String!
+type QuestionaryQuestion {
+    id: ID!
+    value: String!
 }
 
-# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1001193652/roava+fx
-
-# FX rates (prices) for currency pairs
-type Fx {
-  currency: String!
-  base_currency: String!
-  buy_rate: Float!
-  sell_rate: Float!
-  ts: Int!
+type QuestionaryAnswer {
+    id: ID!
+    questionaryId: ID!
+    customerId: ID!
+    questions: [QuestionaryAnswerQuestion!]!
+    ts: Int!
 }
 
-# The connection type for Fx
-type FxConnection {
-  # A list of edges
-  edges: [FxEdge!]!
-  # A list of nodes
-  nodes: [Fx!]!
-  # Information to aid in pagination
-  pageInfo: PageInfo!
-  # Identifies the total count of items in the connection
-  totalCount: Int
+type QuestionaryAnswerQuestion {
+    id: ID!
+    answer: String!
 }
 
-# An edge in a connection
-type FxEdge {
-  # The item at the end of the edge.
-  node: Fx!
-  # A cursor for use in pagination
-  cursor: String!
+enum QuestionaryStatuses {
+    ACTIVE
+    INACTIVE
 }
 
-# Type to define the fees of a transfer
-type TransferFees {
-  currency: String!
-  base_currency: String!
-  fees: [Fee!]!
-  ts: Int!
+enum QuestionaryTypes {
+    REASONS
 }
 
-type Fee {
-  lowerBoundary: Float
-  upperBoundary: Float
-  fee: Float!
+type Device {
+    id: ID!
+    customer: Customer!
+    identifier: String!
+    os: String!
+    brand: String!
+    tokens: [DeviceToken!]
+    preferences: [DevicePreferences!]
+    status: DeviceStatuses!
+    statusTs: Int!
+    ts: Int!
 }
 
-# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/983400449/roava+quote
-
-# Subscription fees and quotes for Remittance or Account services
-type Quote {
-  # Unique roava ulid for the data record
-  id: ID!
-  # If the quote expires or not. If set, an expiry timestamp must be set
-  has_expiry: Boolean
-  # Unix timestamp representing the expirity the quote
-  expires: Int
-  # Unix timestamp when the record was created
-  ts: Int
-  # Represents the Fee in the Quote
-  fee: Fee!
-  # Represents the Fx value in the Quote
-  fx: Fx
+enum DeviceStatuses {
+    ACTIVE
+    INACTIVE
 }
 
-# The connection type for Quote
-type QuoteConnection {
-  # A list of edges
-  edges: [QuoteEdge!]!
-  # A list of nodes
-  nodes: [Quote!]!
-  # Information to aid in pagination
-  pageInfo: PageInfo!
-  # Identifies the total count of items in the connection
-  totalCount: Int
+type DevicePreferences {
+    type: DevicePreferencesTypes!
+    value: String!
 }
 
-# An edge in a connection
-type QuoteEdge {
-  # The item at the end of the edge.
-  node: Quote!
-  # A cursor for use in pagination
-  cursor: String!
+enum DevicePreferencesTypes {
+    PUSH
+    BIOMETRICS
 }
 
-# Variable Fee type
-type VariableFee {
-  # Percentage cost for the roava variable fee
-  base_rate: Float
-  # Percentage amount for the discount customer is entitled to
-  discount: Float
-  # Applied percentage rate for variable fee applied_rate = (rate - discount) for the roava variable fee
-  applied_rate: Float
-  # Percentage cost for the roava partner fee - default = 0
-  partner: Int
+type DeviceToken {
+    type: DeviceTokenTypes!
+    value: String!
 }
 
-# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1014956164/roava+product
-
-# A ROAVA product which defines the terms and constraints on customer accounts
-type Product {
-  # Unique roava ulid for the data record
-  id: ID!
-  # Udentification assigned by an institution
-  identification: String
-  # Name of the identification scheme
-  scheme: String
-  # Unix timestamp when the record was created
-  ts: Int
-  # Details of a Product
-  details: ProductDetails!
+enum DeviceTokenTypes {
+    FIREBASE
 }
 
-# The connection type for Product
-type ProductConnection {
-  # A list of edges
-  edges: [ProductEdge!]!
-  # A list of nodes
-  nodes: [Product!]!
-  # Information to aid in pagination
-  pageInfo: PageInfo!
-  # Identifies the total count of items in the connection
-  totalCount: Int
-}
+############# END USER GROUP #############
 
-# An edge in a connection
-type ProductEdge {
-  # The item at the end of the edge.
-  node: Product!
-  # A cursor for use in pagination
-  cursor: String!
-}
+############# ACCOUNTS GROUP #############
 
-# Type for the details of a product
-type ProductDetails {
-  # The category of the Product
-  category: String
-  # The type of the Product
-  type: String
-  # The name of the Product
-  name: String
-  # Defines the state of the product
-  state: String
-  # Refers to the currency used in the Product
-  currency: String
-  # Notes for the current Product
-  notes: String
-  # Defines the state of the credit requirement
-  credit_requirement: String
-  # Boolean to define if withholding tax is enabled
-  withholding_tax_enabled: Boolean
-  # Boolean to define if withholding tax is enabled
-  allow_offset: Boolean
-  # Array of product templates used in the Product
-  product_templates: [ProductTemplates]!
-  # Array of product fees used in the Product
-  product_fees: [ProductFees]!
-  # Refers to the product control used in the Product
-  product_control: ProductControl
-  # Refers to the product maturity of the Product
-  product_maturity: ProductMaturity
-  # Refers to the overdraft settings used in the Product
-  overdraft_setting: OverdraftSetting
-  # Refers to the intereset settings used in the Product
-  interest_setting: ProductInterestSetting
-  # Refers to the product settings used in the Product
-  product_setting: ProductSetting
-}
-
-# Type to define Accounting Rules
-type AccountingRules {
-  # Encoded key from the rule
-  encoded_key: String
-  # The financial resource used in the rule
-  financial_resource: String
-  # GL Account Key
-  gl_key: String
-}
-
-# Type to define the opening balance
-type OpeningBalance {
-  # The default value used in the opening balance
-  default_value: Float
-  # Max value allowed in the opening balance
-  max: Float
-  # Min value allowed in the opening balance
-  min: Float
-}
-
-# Type to define Product Controls
-type ProductControl {
-  # Number of days of dormancy period
-  dormancy_period_days: Int
-  # Maximum withdrawal amount allowed
-  max_withdrawal_amount: Int
-  # The recommended amount for a deposit
-  recommended_deposit_amount: Int
-  # Refers to the OpeningBalance
-  opening_balance: OpeningBalance
-}
-
-# Type to define Product Maturity
-type ProductMaturity {
-  # Temporal unity
-  unit: String
-  # The default value for the product maturity
-  default_value: Int
-  # Max value for the product maturity
-  max: Int
-  # Min value for the product maturity
-  min: Int
-}
-
-# Type to define the interest rates
-type InterestRate {
-  # Default value for the interest Rate
-  default_value: Float
-  # Max value for the interest Rate
-  max_value: Float
-  # Min value for the interest Rate
-  min_value: Float
-}
-
-# Type to define the settings of interest rates
-type InterestSettings {
-  # String representing the quantity of days in a year
-  days_in_year: String
-  # String representing the quantity of days in a year
-  interest_calculation_balance: String
-  # Index of the source key
-  index_source_key: String
-  # String representating the charge frequency of an interest
-  charge_frequency: String
-  # The charge frequency count of an interest
-  charge_frequency_count: Int
-  # Interest Rate Review Count
-  rate_review_count: Int
-  # String representating the review unit of an interest rate
-  interest_rate_review_unit: String
-  # String representating the interest rate source
-  rate_source: String
-  # String representating the interest rate terms
-  rate_terms: String
-  # Array of Interest Rate Tiers
-  rate_tiers: [RateTiers]!
-  # Interest rate amount
-  interest_rate: InterestRate
-  # Reference to Interest Rate Settings
-  interest_rate_settings: InterestRateSettings
-  # Reference to Interest Payment Settings
-  interest_payment_settings: InterestPaymentSettings
-}
-
-# Type to define the overdraft settings
-type OverdraftSetting {
-  # Boolean to define if an overdraft is allowed
-  allow_overdraft: Boolean
-  # Boolean to define if a technical overdraft is allowed
-  allow_technical_overdraft: Boolean
-  # Overdraft Limit amount
-  max_limit: Int
-  # Reference to the Interest Settings
-  interest_settings: InterestSettings
-}
-
-# Type to define the interest rate tiers
-type RateTiers {
-  # Encoded key from the rule
-  encoded_key: String
-  # Ending balance of the tier
-  ending_balance: Int
-  # Ending day of the tiuer
-  ending_day: Int
-  # Tier interest rate
-  interest_rate: Int
-}
-
-# Type to define rate settings
-type RateSetting {
-  # Accrue after maturity of the rate
-  accrue_after_maturity: Boolean
-  # Index source key of the rate setting
-  index_source_key: String
-  # String repesenting the charge frequency of the rate
-  charge_frequency: String
-  # Charge frequency count of the rate
-  charge_frequency_count: Int
-  # String repesenting the source of the rate
-  rate_source: String
-  # String repesenting the terms of the rate
-  rate_terms: String
-  # Array of rate tiers for this setting
-  rate_tiers: [RateTiers]!
-  # Reference to the Interest Rate
-  interest_rate: InterestRate
-}
-
-# Type to define the interest payment dates
-type InterestPaymentDates {
-  # Day to pay the interest
-  day: Int
-  # Month
-  month: Int
-}
-
-# Type to define an interest setting
-type ProductInterestSetting {
-  # Boolean to define if interests can be collected from a locked account
-  collect_interest_when_locked: Boolean
-  # String representating the amount of the days in a year
-  days_in_year: String
-  # The balance used to calculate an interest balance
-  interest_calculation_balance: String
-  # Boolean to represent if an interest is paid into account
-  interest_paid_into_account: Boolean
-  # String representating the interest payment point
-  interest_payment_point: String
-  # Interest maxumim balance amount
-  maximum_balance: Float
-  # Reference for rate setting
-  rate_setting: RateSetting
-  # Array of Interest Payment Dates
-  interest_payment_dates: [InterestPaymentDates]!
-}
-
-# Type to define a product setting
-type ProductSetting {
-  # String representanting the accounting method
-  accounting_method: String
-  # String representanting the interest accounting
-  interest_accounting: String
-  # Array of accounting rules
-  accounting_rules: [AccountingRules]!
-}
-
-# Type to define a product fees
-type ProductFees {
-  # Fee amount of a product
-  amount: Int
-  # # String representanting the calculation method
-  calculation_method: String
-  # String representanting the apply date method
-  apply_date_method: String
-  # The date when the product fee was created
-  creation_date: String
-  # Encoded key from the rule
-  encoded_key: String
-  # String representanting the application of the fee
-  fee_application: String
-  # Date when the fee was last updated
-  last_modified: String
-  # Name of the product fee
-  name: String
-  # State of the product fee
-  state: String
-  # String representanting how the fee is triggered
-  trigger: String
-  # Array of accounting rules for the product fee
-  accounting_rules: [AccountingRules]!
-}
-
-# Type to define a product templates
-type ProductTemplates {
-  # The date when the product template was created
-  creation_date: String
-  # Encoded key from the rule
-  encoded_key: String
-  # Date when the template was last updated
-  last_modified_date: String
-  # Name of the template
-  name: String
-  # Type of the template
-  type: String
-}
-
-# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1103790225/roava+account
-
-# Representation of a customer account (deposit, savings, loan, credit)
 type Account {
-  # Unique roava ulid for the data record
-  id: ID!
-  # Reference for customer or organization who owns account
-  owner: Owner!
-  # Reference for the financial product linked to the account
-  product: Product
-  # Friendly name given to account by owner
-  name: String
-  # Boolean flag to determine if account active
-  active: Boolean
-  # Account status
-  status: String
-  # Image background for an account
-  image: String
-  # Reference for the organization of this account
-  organisation: Organisation
-  # Unix timestamp when the record was created
-  ts: Int
-  # Array of tags
-  tags(
-    # Returns the first n elements from the list.
-    first: Int
-    # Returns the elements in the list that come after the specified cursor.
-    after: String
-    # Returns the last n elements from the list.
-    last: Int
-    # Returns the elements in the list that come before the specified cursor.
-    before: String
-  ): TagConnection
-  # Account can have array of 0..n transactions
-  transactions(
-    # Returns the first n elements from the list.
-    first: Int
-    # Returns the elements in the list that come after the specified cursor.
-    after: String
-    # Returns the last n elements from the list.
-    last: Int
-    # Returns the elements in the list that come before the specified cursor.
-    before: String
-  ): TransactionConnection
-  # Reference data of an account
-  account_data: AccountData
-  # Account details suchs as IBAN, number and sort codes
-  account_details: AccountDetails
+    id: ID!
+    customer: Customer!
+    product: Product!
+    name: String!
+    iban: String
+    accountNumber: String
+    code: String
+    maturityDate: Date
+    balances: AccountBalances
+    mambu: AccountMambu
+    fcmb: AccountFCMB
+    status: AccountStatuses!
+    statusTs: Int!
+    ts: Int!
 }
 
-# The connection type for Account
-type AccountConnection {
-  # A list of edges
-  edges: [AccountEdge!]!
-  # A list of nodes
-  nodes: [Account!]!
-  # Information to aid in pagination
-  pageInfo: PageInfo!
-  # Identifies the total count of items in the connection
-  totalCount: Int
+enum AccountStatuses {
+    ACTIVE
+    INACTIVE
 }
 
-# An edge in a connection
-type AccountEdge {
-  # The item at the end of the edge.
-  node: Account!
-  # A cursor for use in pagination
-  cursor: String!
+type AccountFCMB {
+    ngnAccountNumber: String
+    cifId: String
 }
 
-# Type to define optional inputs when creating an account
-input AccountInput {
-  # Friendly name given to account by owner
-  name: String
-}
-# Type to define account details
-type AccountDetails {
-  # virtual account id from clearbank
-  virtual_account_id: String
-  # account iban number
-  iban: String
-  # account number
-  account_number: String
-  # sort code for the account
-  sort_code: String
-  # swift/bic code for the account
-  swift_bic: String
-  # the bank code for the account servicer
-  bank_code: String
-  # account routing number required in US and Canada
-  routing_number: String
+type AccountMambu {
+    encodedKey: String
+    branchKey: String
 }
 
-# Type to define the data of an account
-type AccountData {
-  # Unique roava ulid for the data record
-  id: ID!
-  # Key of the account holder
-  account_holder_key: String
-  # Type of holder type of the account
-  account_holder_type: String
-  # State of the account
-  account_state: String
-  # Type of Aaccount
-  account_type: String
-  # Date that the account was activated
-  activation_date: String
-  # Date that the account was approved
-  approved_date: String
-  # Key of the branch associated to the account
-  assigned_branch_key: String
-  # Key of the centre associated to the account
-  assigned_centre_key: String
-  # Key of the user associated to the account
-  assigned_user_key: String
-  # Date when the account was closed
-  closed_date: String
-  # Date when the account was created
-  creation_date: String
-  # Key to the credit arragement
-  credit_arrangement_key: String
-  # 3 digit code of the currency
-  currency_code: String
-  # Encoded key of the account
-  encoded_key: String
-  # Last date when the account was evaluated
-  last_account_appraisal_date: String
-  # Last date when the interest was calculated
-  last_interest_calculation_date: String
-  # Last date when the interest was stored
-  last_interest_stored_date: String
-  # Last date when the account was modified
-  last_modified_date: String
-  # Last date when the overdraft interest was reviewed
-  last_overdraft_interest_review_date: String
-  # Last date when the interest payments was arreared
-  last_set_to_arrears_date: String
-  # Date when the account was locked
-  locked_date: String
-  # Date when the account was considered mature
-  maturity_date: String
-  # Key of the migration event
-  migration_event_key: String
-  # Account Name
-  name: String
-  # Notes about the account
-  notes: String
-  # Key of the product type of the account
-  product_type_key: String
-  # Key in the source of the withholding tax
-  withholding_tax_source_key: String
-  # Reference to overdraft settings of the account
-  overdraft_settings: OverdraftSettings
-  # Reference to overdraft interest settings of the account
-  overdraft_interest_settings: OverdraftInterestSettings
-  # Array of settlements of the account
-  linked_settlement_account_keys: [String]
-  # Reference to internal controls of the account
-  internal_controls: InternalControls
-  # Reference to interest settings of the account
-  interest_settings: InterestSettings
-  # Reference to the balances of the account
-  balances: Balances
-  # Reference to the accrued ammounts of the account
-  accrued_amounts: AccruedAmounts
+type AccountBalances {
+    totalBalance: Float!
 }
 
-# Type to define accrued amounts
-type AccruedAmounts {
-  # Accrued interest amount
-  interest_accrued: Float
-  # Negative interest amounts accrued
-  negative_interest_accrued: Float
-  # Overdraft interest accrued amount
-  overdraft_interest_accrued: Float
-  # Technical iverdraft interest accrued amount
-  technical_overdraft_interest_accrued: Float
+type Product {
+    id: ID!
+    type: ProductTypes!
+    currency: Currency!
+    name: String
+    termLength: Int
+    interestRate: Float
+    minimumOpeningBalance: Float
+    mambu: ProductMambu
+    status: ProductStatuses!
+    statusTs: Int!
+    ts: Int!
 }
 
-# Type to define the balances o an account
-type Balances {
-  # Amount available in the account
-  available_balance: Float
-  # Amount blocked in the account
-  blocked_balance: Float
-  # Due date of the fees
-  fees_due: Float
-  # Forwarded available balance
-  forward_available_balance: Float
-  # Amount on hold in account
-  hold_balance: Float
-  # Locked ammount in account
-  locked_balance: Float
-  # Overdraft amount in account
-  overdraft_amount: Float
-  # Overdraft interest due date
-  overdraft_interest_due: Float
-  # Technical overdraft amount in account
-  technical_overdraft_amount: Float
-  # Technical overdraft interest due date
-  technical_overdraft_interest_due: Float
-  # Total account balance
-  total_balance: Float
+enum ProductStatuses {
+    ACTIVE
+    INACTIVE
 }
 
-# Type to define the interest payment settings
-type InterestPaymentSettings {
-  # The point of payment of the interest
-  interest_payment_point: String
-  # Array of interest payment dates
-  interest_payment_dates: [InterestPaymentDates]
+enum ProductTypes {
+    FIXED_DEPOSIT
+    CURRENT_ACCOUNT
 }
 
-# Type to define the internal controls of an account
-type InternalControls {
-  # Maximum deposit balance amount
-  max_deposit_balance: Float
-  # Maximum available amount to withdrawal
-  max_withdrawal_amount: Float
-  # Amount recommended to deposint in the account
-  recommended_deposit_amount: Float
-  # Targeted amount of an account
-  target_amount: Float
+type ProductMambu {
+    encodedKey: String
 }
 
-# Type to define the settings of an interest overdraft
-type OverdraftInterestSettings {
-  # Reference to the Interest Rate Settings
-  interest_rate_settings: InterestRateSettings
+############# END ACCOUNTS GROUP #############
+
+############# CDD GROUP #############
+
+type CDD {
+    id: ID!
+    customer: Customer!
+    amls: [AML!]
+    kycs: [KYC!]
+    poas: [POA!]
+    status: CDDStatuses!
+    statusTs: Int!
+    ts: Int!
 }
 
-# Type to define the settings of an interest rate
-type InterestRateSettings {
-  # Interest Rate Settings encoded key
-  encoded_key: String
-  # String representating the frequency that the interest will be charged
-  interest_charge_frequency: String
-  # The charge frequency count of an interest
-  interest_charge_frequency_count: Int
-  # Interest rate amount
-  interest_rate: Int
-  # Interest Rate Review Count
-  interest_rate_review_count: Int
-  # String representating the review unit of an interest rate
-  interest_rate_review_unit: String
-  # String representating the interest rate source
-  interest_rate_source: String
-  # String representating the interest rate terms
-  interest_rate_terms: String
-  # The spread of the interes
-  interest_spread: Int
-  # Array of Interest Rate Tiers
-  interest_rate_tiers: [InterestRateTiers]
+enum CDDStatuses {
+    PENDING
+    MANUAL_REVIEW
+    APPROVED
+    DECLINED
 }
 
-# Type to define the tiers of an interest rate
-type InterestRateTiers {
-  # Encoded key of the Interest Rate Tier
-  encoded_key: String
-  # Ending balance of the tier
-  ending_balance: Float
-  # Ending day of the tier
-  ending_day: Int
-  # Interest rate amount
-  interest_rate: Float
+type AML {
+    organization: Organization!
+    identifier: String!
+    file: String
+    result: String!
+    publicUrl: String
+    actions: [AMLAction!]
+    status: AMLStatuses!
+    statusTs: Int!
+    ts: Int!
 }
 
-# Type to define the settings of an overdraft
-type OverdraftSettings {
-  # Boolean to define if overdraft is allowed
-  allow_overdraft: Boolean
-  # Date when the overdraft will expire
-  overdraft_expiry_date: String
-  # Overdraft Limit amount
-  overdraft_limit: Int
+enum AMLStatuses {
+    PENDING
+    MANUAL_REVIEW
+    APPROVED
+    DECLINED
 }
 
-# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/977600522/roava+transaction
+type KYC {
+    organization: Organization!
+    identifier: String!
+    publicUrl: String
+    reports: Reports
+    actions: [KYCAction!]
+    status: KYCStatuses!
+    statusTs: Int!
+    ts: Int!
+}
 
-# Transaction shows changes and activities on customer accounts
+enum KYCStatuses {
+    PENDING
+    MANUAL_REVIEW
+    APPROVED
+    DECLINED
+}
+
+type Reports {
+    type: KYCTypes!
+    file: String
+    result: String
+    subResult: String
+    publicUrl: String
+    review: Review
+    status: ReportStatuses!
+    statusTs: Int!
+    ts: Int!
+}
+
+enum ReportStatuses {
+    PENDING
+    MANUAL_REVIEW
+    APPROVED
+    DECLINED
+}
+
+type Review {
+    resubmit: Boolean!
+    message: String
+    ts: Int!
+}
+
+enum KYCTypes {
+    FACIAL_VIDEO
+    DOCUMENT
+}
+
+type POA {
+    organization: Organization!
+    identifier: String!
+    file: String
+    result: String
+    review: Review
+    actions: [POAAction!]
+    status: POAStatuses!
+    statusTs: Int!
+    ts: Int!
+}
+
+enum POAStatuses {
+    PENDING
+    MANUAL_REVIEW
+    APPROVED
+    DECLINED
+}
+
+type POAAction {
+    type: POAActionTypes!
+    reporter: Staff!
+    targetStatus: POAStatuses!
+    message: String!
+    ts: Int!
+}
+
+enum POAActionTypes {
+    CHANGE_STATUS
+}
+
+type AMLAction {
+    type: AMLActionTypes!
+    reporter: Staff!
+    targetStatus: AMLStatuses!
+    message: String!
+    ts: Int!
+}
+
+enum AMLActionTypes {
+    CHANGE_STATUS
+}
+
+type KYCAction {
+    type: KYCActionTypes!
+    reporter: Staff!
+    targetStatus: KYCStatuses!
+    message: String!
+    ts: Int!
+}
+
+enum KYCActionTypes {
+    CHANGE_STATUS
+}
+
+############# END CDD GROUP #############
+
+############# TRANSACTIONS GROUP #############
+
 type Transaction {
-  # Unique roava ulid for the data record
-  id: ID!
-  # Reference to the account that the transaction is happening
-  account: Account!
-  # Unix timestamp when the record was created
-  ts: Int
-  # Reference to the data of the Transaction
-  transaction_data: TransactionData
+    id: ID!
+    transactionType: TransactionType!
+    reference: String!
+    fees: [TransactionFee!]
+    exchangeRate: ExchangeRate!
+    source: TransactionSource!
+    target: TransactionTarget!
+    idempotencyKey: String!
+    linkedTransactions: [LinkedTransaction!]
+    status: TransactionStatuses!
+    statusTs: Int!
+    ts: Int!
 }
 
-# The connection type for Transaction
-type TransactionConnection {
-  # A list of edges
-  edges: [TransactionEdge!]!
-  # A list of nodes
-  nodes: [Transaction!]!
-  # Information to aid in pagination
-  pageInfo: PageInfo!
-  # Identifies the total count of items in the connection
-  totalCount: Int
+enum TransactionStatuses {
+    PENDING
+    APPROVED
+    REJECTED
 }
 
-# An edge in a connection
-type TransactionEdge {
-  # The item at the end of the edge.
-  node: Transaction!
-  # A cursor for use in pagination
-  cursor: String!
+type TransactionTarget {
+    customer: Customer!
+    beneficiary: Beneficiary!
+    account: Account
+    beneficiaryAccount: BeneficiaryAccount!
+    amount: Float!
+    balanceAfterTransaction: Float!
 }
 
-# Type to define the data of a transaction
-type TransactionData {
-  # Unique roava ulid for the data record
-  id: ID!
-  # Amount involved in the transaction
-  amount: Float
-  # Scheduled day that the transaction will happen
-  booking_date: String
-  # Date when the transaction has been created
-  creation_date: String
-  # 3 digit code of the currency used in the transaction
-  currency_code: String
-  # Transaction encoded key
-  encoded_key: String
-  # Key used in external services to identify this transaction
-  external_id: String
-  # Description of a transaction
-  notes: String
-  # Reference to the parent account
-  parent_account_key: String
-  # ID of a payment order
-  payment_order_id: String
-  # Type of a transaction
-  type: String
-  # Reference to the user creating the transaction
-  user_key: String
-  # Date of the value in the transaction
-  value_date: String
-  # Reference to the details of the transaction
-  transfer_details: TransferDetails
-  # Array of fees applied to this transaction
-  fees: [TransactionFee]
-  # The values involved in the transaction calcule
-  affected_amounts: AffectedAmounts
-  # The balance of the account involved in the transaction
-  account_balances: AccountBalances
+type TransactionSource {
+    customer: Customer!
+    account: Account!
+    amount: Float!
+    balanceAfterTransaction: Float!
 }
 
 type TransactionFee {
-  Amount: Int
-  Name: String
-  PredefinedFeeKey: String
-  TaxAmount: Int
-  Trigger: String
+    id: ID!
+    amount: Float!
 }
 
-# Type to define an account balance in a Transaction
-type AccountBalances {
-  # Total balance of the account
-  total_balance: Float
+type LinkedTransaction {
+    id: ID!
+    type: LinkedTransactionTypes!
+    currency: Currency!
+    amount: Float!
+    source: LinkedTransactionSource!
+    target: LinkedTransactionTarget!
+    mambu: LinkedTransactionMambu
+    fcmb: LinkedTransactionFCMB
+    status: LinkedTransactionStatuses!
+    statusTs: Int!
+    ts: Int!
 }
 
-# Type to define an account balance in a Transaction
-type AffectedAmounts {
-  # Total amount of fees applied to the transaction
-  fees_amount: Float
-  # Fraction of the transaction
-  fraction_amount: Float
-  # Total amount of funds used in the transaction
-  funds_amount: Float
-  # Interest applied to the transaction
-  interest_amount: Float
-  # Overdraft amount applied to the transaction
-  overdraft_amount: Float
-  # Overdraft fees applied to the transaction
-  overdraft_fees_amount: Float
-  # Overdraft interest rate applied to the transaction
-  overdraft_interest_amount: Float
-  # Thecnical overdraft amount applied to the transaction
-  technical_overdraft_amount: Float
-  # Thecnical overdraft interest rate applied to the transaction
-  technical_overdraft_interest_amount: Float
+enum LinkedTransactionStatuses {
+    PENDING
+    APPROVED
+    REJECTED
 }
 
-# Type to define the details of a transfer
-type TransferDetails {
-  # Reference the loan linked to the transfer
-  linked_loan_transaction_key: String
+type LinkedTransactionFCMB {
+    transactionIdentifier: String!
 }
 
-input SubmitProofInput {
-  type: ProofType!
-  # base64 string of the image captured
-  data: String!
-  # status = PENDING as default and is optional
-  status: State
+type LinkedTransactionMambu {
+    transactionEncodedKey: String!
 }
 
-# Product input required for opening accounts
-input ProductInput {
-  # Unique roava ulid for the data record
-  id: ID!
-  # Udentification assigned by an institution
-  identification: String
-  # Name of the identification scheme
-  scheme: String
+type LinkedTransactionTarget {
+    account: Account
+    beneficiaryAccount: BeneficiaryAccount
+    accountData: String!
 }
 
-# https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1282539527/roava+payee
-
-# Type to define a payee
-type Payee {
-  # Unique roava ulid for the data record
-  id: ID!
-  # identity that owns the payee
-  owner: Identity!
-  # name of payee
-  name: String!
-  # avatar (optional) for the payee
-  avatar: String
-  # unix timestamp when payee created
-  ts: Int
-  # beneficiary/payee accounts created by customer
-  accounts: [PayeeAccount]!
+type LinkedTransactionSource {
+    customer: Customer!
+    account: Account!
+    accountData: String!
 }
 
-# Type to define a payee/beneficiary account features
-type PayeeAccount {
-  # unique id of the payee account
-  id: ID!
-  # nickname of beneficiary account assigned by customer
-  name: String
-  # currency code for the currency
-  currency: String
-  # optional payee account account_number
-  account_number: String
-  # optional payee account sort_code
-  sort_code: String
-  # optional payee account iban
-  iban: String
-  # optional payee account swift_bic
-  swift_bic: String
-  # optional payee account bank_code
-  bank_code: String
-  # optional payee account routing_number
-  routing_number: String
-  # optional payee phone_number
-  phone_number: String
+enum LinkedTransactionTypes {
+    DEPOSIT
+    WITHDRAWAL
+    APPLY_FEE
 }
 
-# Type for creating a new payee
-input PayeeInput {
-  # name of payee/beneficiariy
-  name: String!
-  # avatar (optional) for the payee
-  avatar: String
-  # account information provided when creating payee
-  accounts: [PayeeAccountInput]!
+type TransactionType {
+    id: ID!
+    name: String!
+    status: TransactionTypeStatuses!
+    statusTs: Int!
+    ts: Int!
 }
 
-input PayeeAccountInput {
-  # nickname of beneficiary account assigned by customer
-  name: String
-  # currency code for the currency
-  currency: String
-  # optional payee account account_number
-  account_number: String
-  # optional payee account sort_code
-  sort_code: String
-  # optional payee account iban
-  iban: String
-  # optional payee account swift_bic
-  swift_bic: String
-  # optional payee account bank_code
-  bank_code: String
-  # optional payee account routing_number
-  routing_number: String
-  # optional payee phone_number
-  phone_number: String
+enum TransactionTypeStatuses {
+    ACTIVE
+    INACTIVE
 }
 
-# The connection type for Payee
-type PayeeConnection {
-  # A list of edges
-  edges: [PayeeEdge!]!
-  # A list of nodes
-  nodes: [Payee!]!
-  # Information to aid in pagination
-  pageInfo: PageInfo!
-  # Identifies the total count of items in the connection
-  totalCount: Int
+type Fee {
+    id: ID!
+    transactionType: TransactionType!
+    type: FeeTypes!
+    boundaries: [FeeBoundaries!]!
+    status: FeeStatuses!
+    statusTs: Int!
+    ts: Int!
 }
 
-# An edge in a connection
-type PayeeEdge {
-  # The item at the end of the edge.
-  node: Payee!
-  # A cursor for use in pagination
-  cursor: String!
+enum FeeStatuses {
+    ACTIVE
+    INACTIVE
 }
 
-# Report input required to ask for a resubmit
-input ReportInput {
-  id: ID!
+type FeeBoundaries {
+    lower: Float
+    upper: Float
+    amount: Float
+    percentage: Float
 }
 
-# Type to define a payment
-type Payment {
-  # unique roava ulid for the payment
-  id: String
-  # unique value generated by the client which the server uses to recognize subsequent retries of the same request
-  idempotency_key: String!
-  # the owner (person|organisation) providing payment instruction
-  owner: Owner!
-  # total fee and charges applicable to payment
-  charge: Float
-  # reference string provided by the customer
-  reference: String
-  # status of the payment - default=PENDING
-  status: State
-  # optional image (base64 string) provided by the customer
-  image: String
-  # notes attahed to the payment by the customer
-  notes: String
-  # quote for international payments
-  quote: Quote
-  # optional tags applied to the payment
-  tags: [Tag]
-  # beneficiary account receiving the payment
-  beneficiary: Beneficiary!
-  # source account from which moneies will be debited
-  funding_source: Account!
-  # currency of the payment instruction
-  currency: Currency
-  # ammount to be debited from funding source/account
-  funding_amount: Float!
-  # unix timestamp when payee created
-  ts: Int
+enum FeeTypes {
+    FIXED
+    VARIABLE
 }
 
-# Type to define a beneficiary account
+type ExchangeRate {
+    id: ID!
+    baseCurrency: Currency!
+    targetCurrency: Currency!
+    buyPrice: Float!
+    salePrice: Float!
+    ts: Int!
+}
+
+############# END TRANSACTIONS GROUP #############
+
+############# BENEFICIARIES GROUP #############
+
 type Beneficiary {
-  # beneficiary (Payee Account | Account) for this payment
-  account: BeneficiaryAccount!
-  # currency of the beneficiary account
-  currency: Currency
-  # amount to be credited to beneficiary account
-  amount: Float!
+    id: ID!
+    customer: Customer!
+    name: String!
+    accounts: [BeneficiaryAccount!]
+    status: BeneficiaryStatuses!
+    statusTs: Int!
+    ts: Int!
 }
 
-# The connection type for Payment
-type PaymentConnection {
-  # A list of edges
-  edges: [PaymentEdge!]!
-  # A list of nodes
-  nodes: [Payment!]!
-  # Information to aid in pagination
-  pageInfo: PageInfo!
-  # Identifies the total count of items in the connection
-  totalCount: Int
+enum BeneficiaryStatuses {
+    ACTIVE
+    INACTIVE
 }
 
-# An edge in a connection
-type PaymentEdge {
-  # The item at the end of the edge.
-  node: Payment!
-  # A cursor for use in pagination
-  cursor: String!
+type BeneficiaryAccount {
+    id: ID!
+    beneficiary: Beneficiary
+    name: String
+    account: Account
+    currency: Currency!
+    accountNumber: String!
+    code: String!
+    status: BeneficiaryAccountStatuses!
+    statusTs: Int!
+    ts: Int!
 }
 
-# Input type for creating new payments
-input PaymentInput {
-  # unique value generated by the client which the server uses to recognize subsequent retries of the same request
-  idempotency_key: String!
-  # the owner (person|organisation) providing payment instruction
-  owner: ID!
-  # total fee and charges applicable to payment
-  charge: Float
-  # reference string provided by the customer
-  reference: String
-  # status of the payment - default=PENDING
-  status: State
-  # optional image (base64 string) provided by the customer
-  image: String
-  # notes attahed to the payment by the customer
-  notes: String
-  # unique ulid for the quote international payments
-  quote: String
-  # optional tags applied to the payment
-  tags: [ID!]
-  # beneficiary account receiving the payment
-  beneficiary: BeneficiaryInput!
-  # unique id of source account from which moneies will be debited
-  funding_source: String!
-  # 3 letter ISO currency code of the funding account for payment
-  currency: String
-  # ammount to be debited from funding source/account
-  funding_amount: Float!
+enum BeneficiaryAccountStatuses {
+    ACTIVE
+    INACTIVE
 }
 
-# Type to input a beneficiary account for a payment
-input BeneficiaryInput {
-  # id of beneficiary (Payee Account | Account) for this payment
-  account: String!
-  # 3 letter ISO currency code of the beneficiary account
-  currency: String
-  # amount to be credited to beneficiary account
-  amount: Float!
+############# END BENEFICIARIES GROUP #############
+
+############# OTHERS GROUP #############
+
+type Currency {
+    id: ID!
+    symbol: String!
+    code: String!
+    name: String!
 }
 
-# Type to define a staff member account
-type Staff {
-  # unique ulid for the staff member
-  id: ID!
-  # First name of the Staff member
-  first_name: String!
-  # Last name of the Staff member
-  last_name: String!
-  # Current status of the Staff member
-  status: StaffStatus!
-  # Array of email addresses the staff member
-  emails: [Email]!
-  # Array of phone numbersof the staff member
-  phones: [Phone]!
-  # Role of the Staff Member in Roava
-  # role: [Role!]
-  # Array of identities for the staff member
-  identities: [Identity]!
-  # Unix timestamp when the record was created
-  ts: Int!
+type Country {
+    id: ID!
+    codeAlpha2: String!
+    codeAlpha3: String!
+    name: String!
 }
 
-# list of Staff states
-enum StaffStatus {
-  ACTIVE
-  INACTIVE
-  EXITED
+type Content {
+    id: ID!
+    type: ContentType!
+    link: String
+    ts: Int!
 }
 
-# Input used to validate the user data if the user has a GBP Account
-input ValidateUserInput {
-  email: String!
-  first_name: String!
-  last_name: String!
-  dob: String!
-  account_number: String!
-  sort_code: String!
-  device: DeviceInput!
+enum ContentType {
+    GENERAL_TC
+    GBP_ACCOUNT_TC
+    NGN_ACCOUNT_TC
+    VAULT_ACCOUNT_TC
+    PRIVACY_NOTICE
+    FEES_LIMITS
 }
 
-# Possible status for Payments
-enum PaymentStatus {
-  PENDING,
-  APPROVED
+type Bank {
+    id: ID!
+    bankCode: String!
+    bankName: String!
+    bankShortName: String!
+    active: Boolean!
+    ts: Int!
 }
 
-# Filter for Payments
-input PaymentFilter {
-  # id from payee
-  payee_id: String
-  # status of payment
-  status: PaymentStatus
-  # limit of returned data
-  limit: Int
-}
+############# END OTHERS GROUP #############

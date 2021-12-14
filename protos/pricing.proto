@@ -1,22 +1,48 @@
 syntax = "proto3";
 
 package pricing;
-option go_package = "ms.api/protos/pb/pricingService";
 
-// Import types
 import "types.proto";
+import "google/protobuf/timestamp.proto";
+option go_package = "protos/pb/pricing";
 
-message FxRequest {
-  string currency = 1;
-  string baseCurrency = 2;
+message GetCurrencyRequest {
+  string id = 1;
 }
 
-message TransferFeesRequest {
-  string currency = 1;
-  string baseCurrency = 2;
+message GetCurrenciesRequest {
+  string keywords = 1;
+  int32 first = 2;
+  string after = 3;
+  int32 last = 4;
+  string before = 5;
 }
 
-service pricingService {
-  rpc GetFxRates(FxRequest) returns (types.Fx) {}
-  rpc GetTransferFees(TransferFeesRequest) returns (types.TransferFees) {}
+message GetCurrenciesResponse {
+  repeated types.Currency nodes = 1;
+  types.PaginationInfo pagination_info = 2;
+  int32 total_count = 3;
+}
+
+message GetFeesRequest {
+  string transaction_type_id = 1;
+}
+
+message GetFeesResponse {
+  repeated types.Fee fees = 1;
+}
+
+message GetExchangeRateRequest {
+  string transaction_type_id = 1;
+}
+
+message GetExchangeRateResponse {
+  types.ExchangeRate exchange_rate = 1;
+}
+
+service PricingService {
+  rpc GetCurrency(GetCurrencyRequest) returns (types.Currency);
+  rpc GetCurrencies(GetCurrenciesRequest) returns (GetCurrenciesResponse);
+  rpc GetFees(GetFeesRequest) returns (GetFeesResponse);
+  rpc GetExchangeRate(GetExchangeRateRequest) returns (GetExchangeRateResponse);
 }
