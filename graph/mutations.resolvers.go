@@ -5,9 +5,13 @@ package graph
 
 import (
 	"context"
+	"errors"
 
 	"ms.api/graph/generated"
+	"ms.api/libs/validator/datevalidator"
 	"ms.api/protos/pb/customer"
+	pbTypes "ms.api/protos/pb/types"
+	"ms.api/server/http/middlewares"
 	"ms.api/types"
 )
 
@@ -55,10 +59,43 @@ func (r *mutationResolver) CheckCustomerData(ctx context.Context, customerData t
 }
 
 func (r *mutationResolver) Register(ctx context.Context, customerDetails types.CustomerDetailsInput) (*types.Response, error) {
-	msg := "Not implemented"
-	return &types.Response{
-		Message: &msg,
-	}, nil
+	var responseMessage string
+	_, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		responseMessage = "User authentication failed"
+		return &types.Response{Message: &responseMessage, Success: false, Code: int64(500)}, err
+	}
+
+	err = datevalidator.ValidateDob(customerDetails.Dob)
+	if err != nil {
+		responseMessage = "Dob validation failed"
+		return &types.Response{Message: &responseMessage, Success: false, Code: int64(500)}, err
+	}
+
+	customerReq := &customer.RegisterRequest{
+		FirstName: customerDetails.FirstName,
+		LastName:  customerDetails.LastName,
+		Dob:       customerDetails.Dob,
+		Address: &customer.AddressInput{
+			CountryId: customerDetails.Address.CountryID,
+			State:     *customerDetails.Address.State,
+			City:      *customerDetails.Address.City,
+			Street:    customerDetails.Address.Street,
+			Postcode:  customerDetails.Address.Postcode,
+			Cordinates: &customer.CordinatesInput{
+				Longitude: float32(customerDetails.Address.Cordinates.Longitude),
+				Latitude:  float32(customerDetails.Address.Cordinates.Latitude),
+			},
+		},
+	}
+	_, err = r.CustomerService.Register(ctx, customerReq)
+	if err != nil {
+		responseMessage = "Failed"
+		return &types.Response{Message: &responseMessage, Success: false, Code: int64(500)}, err
+	}
+
+	responseMessage = "Successful"
+	return &types.Response{Message: &responseMessage, Success: true, Code: int64(200)}, nil
 }
 
 func (r *mutationResolver) SubmitCdd(ctx context.Context, cdd types.CDDInput) (*types.Response, error) {
@@ -69,10 +106,39 @@ func (r *mutationResolver) SubmitCdd(ctx context.Context, cdd types.CDDInput) (*
 }
 
 func (r *mutationResolver) AnswerQuestionary(ctx context.Context, questionary types.QuestionaryAnswerInput) (*types.Response, error) {
-	msg := "Not implemented"
-	return &types.Response{
-		Message: &msg,
-	}, nil
+	var responseMessage string
+
+	_, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		responseMessage = "User authentication failed"
+		return &types.Response{Message: &responseMessage, Success: false, Code: int64(500)}, err
+	}
+
+	customerAnswers := make([]*customer.AnswerInput, len(questionary.Answers))
+	if len(questionary.Answers) < 1 {
+		// Should never happen .
+		responseMessage = "Questionary answers not found"
+		return &types.Response{Message: &responseMessage, Success: false, Code: int64(400)}, nil
+	}
+
+	for index, ans := range questionary.Answers {
+		answer := &customer.AnswerInput{Id: ans.ID, Answer: ans.Answer}
+		customerAnswers[index] = answer
+	}
+
+	req := &customer.AnswerQuestionaryRequest{
+		Id:      questionary.ID,
+		Answers: customerAnswers,
+	}
+
+	resp, err := r.CustomerService.AnswerQuestionary(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	responseMessage = "Success"
+
+	return &types.Response{Message: &responseMessage, Success: resp.Success, Code: int64(resp.Code)}, nil
 }
 
 func (r *mutationResolver) AcceptContent(ctx context.Context, contentID string) (*types.Response, error) {
@@ -120,17 +186,64 @@ func (r *mutationResolver) RefreshToken(ctx context.Context, token string) (*typ
 }
 
 func (r *mutationResolver) SetDeviceToken(ctx context.Context, tokens []*types.DeviceTokenInput) (*types.Response, error) {
-	msg := "Not implemented"
-	return &types.Response{
-		Message: &msg,
-	}, nil
+	var responseMessage string
+	_, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		responseMessage = "User authentication failed"
+		return &types.Response{Message: &responseMessage, Success: false, Code: int64(500)}, err
+	}
+	token_ := make([]*pbTypes.DeviceTokenInput, 0)
+	if len(tokens) < 1 {
+		responseMessage = "device token empty"
+		return &types.Response{Message: &responseMessage, Success: false, Code: int64(400)}, errors.New("device token empty")
+	}
+
+	for _, token := range tokens {
+		token_ = append(token_, &pbTypes.DeviceTokenInput{Value: token.Value, Type: pbTypes.DeviceToken_DeviceTokenTypes(pbTypes.DeviceToken_FIREBASE)})
+	}
+
+	resp, err := r.CustomerService.SetDeviceToken(ctx, &customer.SetDeviceTokenRequest{Tokens: token_})
+	if err != nil {
+		responseMessage = "set device token failed"
+		return &types.Response{Message: &responseMessage, Success: false, Code: int64(500)}, err
+	}
+
+	responseMessage = "Successful"
+	return &types.Response{Message: &responseMessage, Success: resp.Success, Code: int64(resp.Code)}, err
 }
 
 func (r *mutationResolver) SetDevicePreferences(ctx context.Context, preferences []*types.DevicePreferencesInput) (*types.Response, error) {
-	msg := "Not implemented"
-	return &types.Response{
-		Message: &msg,
-	}, nil
+	var responseMessage string
+	helpers := &helpersfactory{}
+	_, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		responseMessage = "User authentication failed"
+		return &types.Response{Message: &responseMessage, Success: false, Code: int64(500)}, err
+	}
+
+	preferences_ := make([]*pbTypes.DevicePreferencesInput, 0)
+	if len(preferences) < 1 {
+		responseMessage = "device preferences empty"
+		return &types.Response{Message: &responseMessage, Success: false, Code: int64(400)}, errors.New("device preferences empty")
+	}
+
+	for _, preference := range preferences {
+		preferences_ = append(preferences_, &pbTypes.DevicePreferencesInput{Type: pbTypes.DevicePreferences_DevicePreferencesTypes(helpers.GetDeveicePreferenceTypesIndex(preference.Type)), Value: preference.Value})
+	}
+
+	resp, err := r.CustomerService.SetDevicePreferences(ctx, &customer.SetDevicePreferencesRequest{Preferences: preferences_})
+	if err != nil {
+		responseMessage = "set device preferences failed"
+		return &types.Response{Message: &responseMessage, Success: false, Code: int64(500)}, err
+	}
+
+	if resp != nil {
+		responseMessage = "Successful"
+		return &types.Response{Message: &responseMessage, Success: true, Code: int64(200)}, err
+	}
+
+	responseMessage = "Unknown error occurred"
+	return &types.Response{Message: &responseMessage, Success: false, Code: int64(500)}, err
 }
 
 func (r *mutationResolver) CheckBvn(ctx context.Context, bvn string, phone string) (*types.Response, error) {

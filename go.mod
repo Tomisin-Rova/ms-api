@@ -26,14 +26,11 @@ require (
 	github.com/hashicorp/go-retryablehttp v0.7.0 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/hashicorp/vault/api v1.1.1 // indirect
-	github.com/klauspost/compress v1.13.3 // indirect
 	github.com/kr/pretty v0.2.1 // indirect
 	github.com/mattn/go-isatty v0.0.13 // indirect
 	github.com/onsi/ginkgo v1.14.0 // indirect
-	github.com/ory/dockertest/v3 v3.6.3
 	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
-	github.com/pkg/errors v0.9.1
-	github.com/roava/zebra v0.0.0-20211116133814-e983e62eb817
+	github.com/roava/zebra v0.0.0-20211214200811-45679fe27385
 	github.com/rs/cors v1.8.0
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cast v1.4.0 // indirect
@@ -42,8 +39,6 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/urfave/cli/v2 v2.3.0 // indirect
 	github.com/vektah/gqlparser/v2 v2.1.0
-	github.com/youmark/pkcs8 v0.0.0-20201027041543-1326539a0a0a // indirect
-	go.mongodb.org/mongo-driver v1.7.1
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.7.0 // indirect
 	go.uber.org/zap v1.18.1

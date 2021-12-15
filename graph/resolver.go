@@ -8,7 +8,6 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"ms.api/config"
-	"ms.api/libs/db"
 	"ms.api/libs/mapper"
 	"ms.api/libs/preloader"
 	"ms.api/protos/pb/account"
@@ -33,7 +32,6 @@ type ResolverOpts struct {
 	PaymentService      payment.PaymentServiceClient
 	PricingService      pricing.PricingServiceClient
 	VerificationService verification.VerificationServiceClient
-	DataStore           db.DataStore
 	preloader           preloader.Preloader
 	mapper              mapper.Mapper
 	AuthMw              *middlewares.AuthMiddleware
@@ -47,7 +45,6 @@ type Resolver struct {
 	PaymentService      payment.PaymentServiceClient
 	PricingService      pricing.PricingServiceClient
 	VerificationService verification.VerificationServiceClient
-	DataStore           db.DataStore
 	preloader           preloader.Preloader
 	mapper              mapper.Mapper
 	logger              *zap.Logger
@@ -62,7 +59,6 @@ func NewResolver(opt *ResolverOpts, logger *zap.Logger) *Resolver {
 		PaymentService:      opt.PaymentService,
 		PricingService:      opt.PricingService,
 		VerificationService: opt.VerificationService,
-		DataStore:           opt.DataStore,
 		preloader:           opt.preloader,
 		mapper:              opt.mapper,
 		logger:              logger,

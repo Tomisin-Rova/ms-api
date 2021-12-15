@@ -174,7 +174,7 @@ service CustomerService {
   rpc GetContent(GetContentRequest) returns (types.Content);
   rpc GetContents(GetContentsRequest) returns (GetContentsResponse);
   rpc SetAcceptance(SetAcceptanceRequest) returns (types.DefaultResponse);
-  rpc GetQuestionary(GetQuestionaryRequest) returns (types.Customer);
+  rpc GetQuestionary(GetQuestionaryRequest) returns (types.Questionary);
   rpc GetQuestionaries(GetQuestionariesRequest) returns (GetQuestionariesResponse);
   rpc AnswerQuestionary(AnswerQuestionaryRequest) returns (types.DefaultResponse);
 }

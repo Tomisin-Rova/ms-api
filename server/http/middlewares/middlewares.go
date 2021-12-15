@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/roava/zebra/models"
 	"ms.api/protos/pb/auth"
 
-	"github.com/roava/zebra/models"
 	"go.uber.org/zap"
 )
 
@@ -34,19 +34,19 @@ func NewAuthMiddleware(service auth.AuthServiceClient, logger *zap.Logger) *Auth
 	return &AuthMiddleware{authService: service, logger: logger}
 }
 
-func (mw *AuthMiddleware) ValidateToken(token string) (*models.Claims, error) {
+func (mw *AuthMiddleware) ValidateToken(token string) (*models.JWTClaims, error) {
 	// TODO: Implement logic once auth service is refactored .
-	return &models.Claims{
-		PersonId:      "01fk5jmz4thmxwz8p2fx45vj6v",
-		DeviceId:      "01fk5bde5wp242r97trq94xwy4",
-		IdentityId:    "01f82zca7ryacseqddc8a6twte",
-		FromDashboard: false,
+	return &models.JWTClaims{
+		Client:   models.ClientType(models.APP),
+		ID:       "01fk5jmz4thmxwz8p2fx45vj6v",
+		Email:    "fola@roava.app",
+		DeviceID: "01f82zca7ryacseqddc8a6twte",
 	}, nil
 }
 
 // TODO: here user should be the direct type of protos.Person from the auth or person service.
-func GetAuthenticatedUser(ctx context.Context) (*models.Claims, error) {
-	claims, ok := ctx.Value(AuthenticatedUserContextKey).(models.Claims)
+func GetAuthenticatedUser(ctx context.Context) (*models.JWTClaims, error) {
+	claims, ok := ctx.Value(AuthenticatedUserContextKey).(models.JWTClaims)
 	if !ok {
 		return nil, errors.New("unable to parse authenticated user")
 	}
@@ -82,10 +82,11 @@ func (mw *AuthMiddleware) Middeware(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), AuthenticatedUserContextKey, models.Claims{
-			PersonId:   resp.PersonId,
-			IdentityId: resp.IdentityId,
-			DeviceId:   resp.DeviceId,
+		ctx := context.WithValue(r.Context(), AuthenticatedUserContextKey, models.JWTClaims{
+			Client:   resp.Client,
+			ID:       resp.ID,
+			Email:    resp.Email,
+			DeviceID: resp.DeviceID,
 		})
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
