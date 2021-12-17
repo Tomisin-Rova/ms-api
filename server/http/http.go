@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/99designs/gqlgen/graphql/handler/transport"
-	"ms.api/libs/db/mongo"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
@@ -78,16 +77,10 @@ func MountServer(secrets *config.Secrets, logger *zap.Logger) *chi.Mux {
 		logger.Fatal(fmt.Sprintf("failed to setup service dependencies: %v", err))
 	}
 
-	store, _, err := mongo.New(secrets.Database.URL, secrets.Database.Name, logger)
-	if err != nil {
-		logger.Fatal("failed to open database", zap.Error(err))
-	}
-
 	mw := middlewares.NewAuthMiddleware(opts.AuthService, logger)
 	router.Use(mw.Middeware)
 
 	opts.AuthMw = mw
-	opts.DataStore = store
 
 	if secrets.Service.Environment != string(config.Production) {
 		router.Handle("/", playground.Handler("GraphQL playground", "/graphql"))

@@ -6,15 +6,30 @@ package graph
 import (
 	"context"
 	"errors"
-	"fmt"
 
+	"github.com/roava/zebra/models"
+	"go.uber.org/zap"
 	"ms.api/graph/generated"
+	emailvalidator "ms.api/libs/validator/email"
 	"ms.api/protos/pb/customer"
+	"ms.api/protos/pb/types"
+	"ms.api/server/http/middlewares"
 	apiTypes "ms.api/types"
 )
 
 func (r *queryResolver) CheckEmail(ctx context.Context, email string) (bool, error) {
-	return false, errors.New("not implemented")
+	_, err := emailvalidator.Validate(email)
+	if err != nil {
+		r.logger.Info("invalid email supplied", zap.String("email", email))
+		return false, err
+	}
+
+	resp, err := r.CustomerService.CheckEmail(ctx, &customer.CheckEmailRequest{Email: email})
+	if err != nil {
+		return false, err
+	}
+
+	return resp.Success, nil
 }
 
 func (r *queryResolver) OnfidoSDKToken(ctx context.Context) (*apiTypes.TokenResponse, error) {
@@ -35,6 +50,7 @@ func (r *queryResolver) Cdd(ctx context.Context, filter apiTypes.CommonQueryFilt
 func (r *queryResolver) Content(ctx context.Context, id string) (*apiTypes.Content, error) {
 	res, err := r.CustomerService.GetContent(ctx, &customer.GetContentRequest{Id: id})
 	if err != nil {
+		r.logger.Info("error fetching content", zap.String("id", id))
 		return nil, err
 	}
 	result := &apiTypes.Content{
@@ -52,6 +68,7 @@ func (r *queryResolver) Contents(ctx context.Context, first *int64, after *strin
 
 	res, err := r.CustomerService.GetContents(ctx, req)
 	if err != nil {
+		r.logger.Info("error fetching contents")
 		return nil, err
 	}
 
@@ -160,19 +177,96 @@ func (r *queryResolver) TransactionTypes(ctx context.Context, first *int64, afte
 }
 
 func (r *queryResolver) Questionary(ctx context.Context, id string) (*apiTypes.Questionary, error) {
+	resp, err := r.CustomerService.GetQuestionary(ctx, &customer.GetQuestionaryRequest{Id: id})
+	if err != nil {
+		return &apiTypes.Questionary{}, err
+	}
+
+	questions := make([]*apiTypes.QuestionaryQuestion, 0)
+	for _, q := range resp.Questions {
+		question := &apiTypes.QuestionaryQuestion{
+			ID:    q.Id,
+			Value: q.Value,
+		}
+		questions = append(questions, question)
+	}
+
 	return &apiTypes.Questionary{
-		ID: "n/a",
-	}, errors.New("not implemented")
+		ID:        resp.Id,
+		Type:      apiTypes.QuestionaryTypes(resp.Type),
+		Questions: questions,
+		Status:    apiTypes.QuestionaryStatuses(resp.Status),
+		StatusTs:  resp.StatusTs.AsTime().Unix(),
+		Ts:        resp.Ts.AsTime().Unix(),
+	}, nil
 }
 
 func (r *queryResolver) Questionaries(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string, statuses []apiTypes.QuestionaryStatuses, typeArg []apiTypes.QuestionaryTypes) (*apiTypes.QuestionaryConnection, error) {
+	helper := helpersfactory{}
+	questionaryStatuses := make([]types.Questionary_QuestionaryStatuses, 0)
+	questionaryTypes := make([]types.Questionary_QuestionaryTypes, 0)
+
+	if len(statuses) > 0 {
+		for _, state := range statuses {
+			questionaryStatuses = append(questionaryStatuses, types.Questionary_QuestionaryStatuses(helper.GetQuestionaryStatusIndex(state)))
+		}
+	}
+
+	if len(typeArg) > 0 {
+		for _, arg := range typeArg {
+			questionaryTypes = append(questionaryTypes, types.Questionary_QuestionaryTypes(helper.GetQuestionaryTypesIndex(arg)))
+		}
+	}
+
+	customerQuestionariesReq := customer.GetQuestionariesRequest{
+		Keywords: *keywords,
+		First:    int32(*first),
+		After:    *after,
+		Last:     int32(*last),
+		Statuses: questionaryStatuses,
+		Types:    questionaryTypes,
+	}
+
+	resp, err := r.CustomerService.GetQuestionaries(ctx, &customerQuestionariesReq)
+	if err != nil {
+		return nil, err
+	}
+
+	nodes := make([]*apiTypes.Questionary, 0)
+	for _, node := range resp.Nodes {
+		questions := make([]*apiTypes.QuestionaryQuestion, 0)
+		for _, q := range node.Questions {
+			question := &apiTypes.QuestionaryQuestion{
+				ID:    q.Id,
+				Value: q.Value,
+			}
+			questions = append(questions, question)
+		}
+
+		content := apiTypes.Questionary{
+			ID:        node.Id,
+			Type:      apiTypes.QuestionaryTypes(node.Type),
+			Questions: questions,
+			Status:    apiTypes.QuestionaryStatuses(node.Status),
+			StatusTs:  node.StatusTs.AsTime().Unix(),
+			Ts:        node.Ts.AsTime().Unix(),
+		}
+
+		nodes = append(nodes, &content)
+	}
+
+	pageInfo := apiTypes.PageInfo{
+		HasNextPage:     resp.PaginationInfo.HasNextPage,
+		HasPreviousPage: resp.PaginationInfo.HasPreviousPage,
+		StartCursor:     &resp.PaginationInfo.StartCursor,
+		EndCursor:       &resp.PaginationInfo.EndCursor,
+	}
+
 	return &apiTypes.QuestionaryConnection{
-		Nodes: []*apiTypes.Questionary{
-			{
-				ID: "n/a",
-			},
-		},
-	}, errors.New("not implemented")
+		Nodes:      nodes,
+		PageInfo:   &pageInfo,
+		TotalCount: int64(resp.TotalCount),
+	}, nil
 }
 
 func (r *queryResolver) Currency(ctx context.Context, id string) (*apiTypes.Currency, error) {
@@ -204,23 +298,255 @@ func (r *queryResolver) ExchangeRate(ctx context.Context, transactionTypeID stri
 }
 
 func (r *queryResolver) Me(ctx context.Context) (apiTypes.MeResult, error) {
-	panic(fmt.Errorf(panicMsg))
+	claims, err := middlewares.GetAuthenticatedUser(ctx)
+	if err != nil {
+		return apiTypes.Staff{}, err
+	}
+
+	addresses := make([]*apiTypes.Address, 0)
+	phones := make([]*apiTypes.Phone, 0)
+
+	resp, err := r.CustomerService.Me(ctx, &customer.MeRequest{})
+	if err != nil {
+		return apiTypes.Staff{}, err
+	}
+
+	switch claims.Client {
+
+	case models.DASHBOARD:
+		staff := resp.Data.(*customer.MeResponse_Staff).Staff
+
+		for _, addr := range staff.Addresses {
+			address := apiTypes.Address{
+				Primary: addr.Primary,
+				Country: &apiTypes.Country{
+					ID:         addr.Country.Id,
+					CodeAlpha2: addr.Country.CodeAlpha2,
+					CodeAlpha3: addr.Country.CodeAlpha3,
+					Name:       addr.Country.Name,
+				},
+				State:    &addr.State,
+				City:     &addr.City,
+				Street:   addr.Street,
+				Postcode: addr.Postcode,
+				Cordinates: &apiTypes.Cordinates{
+					Latitude:  float64(addr.Coordinates.Latitude),
+					Longitude: float64(addr.Coordinates.Longitude),
+				},
+			}
+			addresses = append(addresses, &address)
+		}
+
+		for _, phone := range staff.Phones {
+			phone := apiTypes.Phone{
+				Primary:  phone.Primary,
+				Number:   phone.Number,
+				Verified: phone.Verified,
+			}
+
+			phones = append(phones, &phone)
+		}
+
+		return apiTypes.Staff{
+			ID:        staff.Id,
+			Name:      staff.Name,
+			LastName:  staff.LastName,
+			Dob:       &staff.Dob,
+			Addresses: addresses,
+			Phones:    phones,
+			Email:     staff.Email,
+			Status:    apiTypes.StaffStatuses(staff.Status),
+			StatusTs:  staff.StatusTs.AsTime().Unix(),
+			Ts:        staff.Ts.AsTime().Unix(),
+		}, nil
+
+	case models.APP:
+		appCustomer := resp.Data.(*customer.MeResponse_Customer).Customer
+
+		for _, addr := range appCustomer.Addresses {
+			address := apiTypes.Address{
+				Primary: addr.Primary,
+				Country: &apiTypes.Country{
+					ID:         addr.Country.Id,
+					CodeAlpha2: addr.Country.CodeAlpha2,
+					CodeAlpha3: addr.Country.CodeAlpha3,
+					Name:       addr.Country.Name,
+				},
+				State:    &addr.State,
+				City:     &addr.City,
+				Street:   addr.Street,
+				Postcode: addr.Postcode,
+				Cordinates: &apiTypes.Cordinates{
+					Latitude:  float64(addr.Coordinates.Latitude),
+					Longitude: float64(addr.Coordinates.Longitude),
+				},
+			}
+			addresses = append(addresses, &address)
+		}
+
+		for _, phone := range appCustomer.Phones {
+			phone := apiTypes.Phone{
+				Primary:  phone.Primary,
+				Number:   phone.Number,
+				Verified: phone.Verified,
+			}
+
+			phones = append(phones, &phone)
+		}
+
+		return apiTypes.Customer{
+			ID:        appCustomer.Id,
+			FirstName: appCustomer.FirstName,
+			LastName:  appCustomer.LastName,
+			Dob:       appCustomer.Dob,
+			Bvn:       &appCustomer.Bvn,
+			Addresses: addresses,
+			Phones:    phones,
+			Email: &apiTypes.Email{
+				Address:  appCustomer.Email.Address,
+				Verified: appCustomer.Email.Verified,
+			},
+			Status:   apiTypes.CustomerStatuses(appCustomer.Status),
+			StatusTs: appCustomer.StatusTs.AsTime().Unix(),
+			Ts:       appCustomer.Ts.AsTime().Unix(),
+		}, nil
+	}
+
+	return apiTypes.Customer{}, errors.New("unknown error occurred")
 }
 
 func (r *queryResolver) Customer(ctx context.Context, id string) (*apiTypes.Customer, error) {
+	result, err := r.CustomerService.GetCustomer(ctx, &customer.GetCustomerRequest{Id: id})
+	if err != nil {
+		return &apiTypes.Customer{}, errors.New("not implemented")
+	}
+
+	addresses := make([]*apiTypes.Address, 0)
+	for _, addr := range result.Addresses {
+		address := apiTypes.Address{
+			Primary: addr.Primary,
+			Country: &apiTypes.Country{
+				ID:         addr.Country.Id,
+				CodeAlpha2: addr.Country.CodeAlpha2,
+				CodeAlpha3: addr.Country.CodeAlpha3,
+				Name:       addr.Country.Name,
+			},
+		}
+		addresses = append(addresses, &address)
+	}
+
+	phones := make([]*apiTypes.Phone, 0)
+	for _, phone := range result.Phones {
+		phone := apiTypes.Phone{
+			Primary:  phone.Primary,
+			Number:   phone.Number,
+			Verified: phone.Verified,
+		}
+
+		phones = append(phones, &phone)
+	}
+
+	helpers := &helpersfactory{}
+
 	return &apiTypes.Customer{
-		ID: "n/a",
-	}, errors.New("not implemented")
+		ID:        result.Id,
+		FirstName: result.FirstName,
+		LastName:  result.LastName,
+		Dob:       result.Dob,
+		Bvn:       &result.Bvn,
+		Addresses: addresses,
+		Phones:    phones,
+		Email: &apiTypes.Email{
+			Address:  result.Email.Address,
+			Verified: result.Email.Verified,
+		},
+		Status:   apiTypes.CustomerStatuses(helpers.GetCustomer_CustomerStatusIndex(result.Status)),
+		StatusTs: result.StatusTs.AsTime().Unix(),
+		Ts:       result.Ts.AsTime().Unix(),
+	}, nil
 }
 
 func (r *queryResolver) Customers(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string, statuses []apiTypes.CustomerStatuses) (*apiTypes.CustomerConnection, error) {
-	return &apiTypes.CustomerConnection{
-		Nodes: []*apiTypes.Customer{
-			{
-				ID: "n/a",
+	helper := helpersfactory{}
+	customerStatuses := make([]types.Customer_CustomerStatuses, 0)
+
+	if len(statuses) > 0 {
+		for _, state := range statuses {
+			customerStatuses = append(customerStatuses, types.Customer_CustomerStatuses(helper.GetCustomerStatusIndex(state)))
+		}
+	}
+
+	customerQuestionariesReq := customer.GetCustomersRequest{
+		Keywords: *keywords,
+		First:    int32(*first),
+		After:    *after,
+		Last:     int32(*last),
+		Statuses: customerStatuses,
+	}
+
+	resp, err := r.CustomerService.GetCustomers(ctx, &customerQuestionariesReq)
+	if err != nil {
+		return nil, err
+	}
+
+	nodes := make([]*apiTypes.Customer, 0)
+	for _, node := range resp.Nodes {
+
+		addresses := make([]*apiTypes.Address, 0)
+		for _, addr := range node.Addresses {
+			address := apiTypes.Address{
+				Primary: addr.Primary,
+				Country: &apiTypes.Country{
+					ID:         addr.Country.Id,
+					CodeAlpha2: addr.Country.CodeAlpha2,
+					CodeAlpha3: addr.Country.CodeAlpha3,
+					Name:       addr.Country.Name,
+				},
+			}
+			addresses = append(addresses, &address)
+		}
+
+		phones := make([]*apiTypes.Phone, 0)
+		for _, phone := range node.Phones {
+			phone := apiTypes.Phone{
+				Primary:  phone.Primary,
+				Number:   phone.Number,
+				Verified: phone.Verified,
+			}
+
+			phones = append(phones, &phone)
+		}
+
+		customer_ := apiTypes.Customer{
+			ID:        node.Id,
+			FirstName: node.FirstName,
+			LastName:  node.LastName,
+			Dob:       node.Dob,
+			Bvn:       &node.Bvn,
+			Addresses: addresses,
+			Phones:    phones,
+			Email: &apiTypes.Email{
+				Address:  node.Email.Address,
+				Verified: node.Email.Verified,
 			},
-		},
-	}, errors.New("not implemented")
+			Status:   apiTypes.CustomerStatuses(helper.GetCustomer_CustomerStatusIndex(node.Status)),
+			StatusTs: node.StatusTs.AsTime().Unix(),
+			Ts:       node.Ts.AsTime().Unix(),
+		}
+
+		nodes = append(nodes, &customer_)
+	}
+
+	pageInfo := apiTypes.PageInfo{
+		HasNextPage:     resp.PaginationInfo.HasNextPage,
+		HasPreviousPage: resp.PaginationInfo.HasPreviousPage,
+		StartCursor:     &resp.PaginationInfo.StartCursor,
+		EndCursor:       &resp.PaginationInfo.EndCursor,
+	}
+
+	return &apiTypes.CustomerConnection{
+		Nodes: nodes, PageInfo: &pageInfo,
+		TotalCount: int64(resp.TotalCount)}, nil
 }
 
 func (r *queryResolver) Cdds(ctx context.Context, first *int64, after *string, last *int64, before *string, statuses []apiTypes.CDDStatuses) (*apiTypes.CDDConnection, error) {

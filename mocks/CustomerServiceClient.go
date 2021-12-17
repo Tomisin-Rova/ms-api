@@ -319,7 +319,7 @@ func (_m *CustomerServiceClient) GetQuestionaries(ctx context.Context, in *custo
 }
 
 // GetQuestionary provides a mock function with given fields: ctx, in, opts
-func (_m *CustomerServiceClient) GetQuestionary(ctx context.Context, in *customer.GetQuestionaryRequest, opts ...grpc.CallOption) (*types.Customer, error) {
+func (_m *CustomerServiceClient) GetQuestionary(ctx context.Context, in *customer.GetQuestionaryRequest, opts ...grpc.CallOption) (*types.Questionary, error) {
 	_va := make([]interface{}, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
@@ -329,12 +329,12 @@ func (_m *CustomerServiceClient) GetQuestionary(ctx context.Context, in *custome
 	_ca = append(_ca, _va...)
 	ret := _m.Called(_ca...)
 
-	var r0 *types.Customer
-	if rf, ok := ret.Get(0).(func(context.Context, *customer.GetQuestionaryRequest, ...grpc.CallOption) *types.Customer); ok {
+	var r0 *types.Questionary
+	if rf, ok := ret.Get(0).(func(context.Context, *customer.GetQuestionaryRequest, ...grpc.CallOption) *types.Questionary); ok {
 		r0 = rf(ctx, in, opts...)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*types.Customer)
+			r0 = ret.Get(0).(*types.Questionary)
 		}
 	}
 
