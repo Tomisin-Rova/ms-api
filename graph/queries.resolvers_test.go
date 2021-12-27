@@ -3,17 +3,24 @@ package graph
 import (
 	"context"
 	"errors"
+	"net/http"
 	"testing"
 
+	"github.com/golang/mock/gomock"
 	"github.com/roava/zebra/models"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap/zaptest"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"ms.api/mocks"
 	"ms.api/protos/pb/customer"
+	"ms.api/protos/pb/onboarding"
 	pbTypes "ms.api/protos/pb/types"
 	"ms.api/server/http/middlewares"
 	"ms.api/types"
+)
+
+var (
+	emptyString = ""
 )
 
 var (
@@ -72,7 +79,9 @@ func Test_queryResolver_Content(t *testing.T) {
 		},
 	}
 
-	customerServiceClient := new(mocks.CustomerServiceClient)
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
 	resolverOpts := &ResolverOpts{
 		CustomerService: customerServiceClient,
 	}
@@ -89,8 +98,7 @@ func Test_queryResolver_Content(t *testing.T) {
 					Ts:   timestamppb.Now(),
 				}
 				serviceReq := &customer.GetContentRequest{Id: test.arg}
-				customerServiceClient.On("GetContent",
-					context.Background(),
+				customerServiceClient.EXPECT().GetContent(context.Background(),
 					serviceReq,
 				).Return(mockExpectedContent, nil)
 
@@ -101,8 +109,7 @@ func Test_queryResolver_Content(t *testing.T) {
 
 			case contentNotFound:
 				serviceReq := &customer.GetContentRequest{Id: test.arg}
-				customerServiceClient.On("GetContent",
-					context.Background(),
+				customerServiceClient.EXPECT().GetContent(context.Background(),
 					serviceReq,
 				).Return(nil, errors.New("contentNotfound"))
 
@@ -154,7 +161,9 @@ func Test_queryResolver_Contents(t *testing.T) {
 		},
 	}
 
-	customerServiceClient := new(mocks.CustomerServiceClient)
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
 	resolverOpts := &ResolverOpts{
 		CustomerService: customerServiceClient,
 	}
@@ -165,8 +174,7 @@ func Test_queryResolver_Contents(t *testing.T) {
 			switch test.testType {
 			case firstFiveContents:
 				serviceReq := &customer.GetContentsRequest{First: int32(*test.arg.first), After: test.arg.after, Last: int32(*test.arg.last), Before: test.arg.before}
-				customerServiceClient.On("GetContents",
-					context.Background(),
+				customerServiceClient.EXPECT().GetContents(context.Background(),
 					serviceReq,
 				).Return(mockExpectedContents, nil)
 
@@ -176,8 +184,7 @@ func Test_queryResolver_Contents(t *testing.T) {
 
 			case lastFiveContents:
 				serviceReq := &customer.GetContentsRequest{First: int32(*test.arg.first), After: test.arg.after, Last: int32(*test.arg.last), Before: test.arg.before}
-				customerServiceClient.On("GetContents",
-					context.Background(),
+				customerServiceClient.EXPECT().GetContents(context.Background(),
 					serviceReq,
 				).Return(mockExpectedContents, nil)
 
@@ -219,18 +226,19 @@ func Test_queryResolver_CheckEmail(t *testing.T) {
 		},
 	}
 
-	customerServiceClient := new(mocks.CustomerServiceClient)
-	resolverOpts := &ResolverOpts{
-		CustomerService: customerServiceClient,
-	}
-	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Query()
-
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
+			controller := gomock.NewController(t)
+			defer controller.Finish()
+			customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
+			resolverOpts := &ResolverOpts{
+				CustomerService: customerServiceClient,
+			}
+			resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Query()
+
 			switch test.testType {
 			case success:
-				customerServiceClient.On("CheckEmail",
-					context.Background(),
+				customerServiceClient.EXPECT().CheckEmail(context.Background(),
 					&customer.CheckEmailRequest{Email: test.arg},
 				).Return(&pbTypes.DefaultResponse{Success: true}, nil)
 
@@ -239,20 +247,14 @@ func Test_queryResolver_CheckEmail(t *testing.T) {
 				assert.Equal(t, resp, true)
 
 			case emailNotFound:
-				customerServiceClient.On("CheckEmail",
-					context.Background(),
-					customer.CheckEmailRequest{Email: test.arg},
+				customerServiceClient.EXPECT().CheckEmail(context.Background(),
+					&customer.CheckEmailRequest{Email: test.arg},
 				).Return(&pbTypes.DefaultResponse{Success: false}, errors.New("not found"))
 
 				_, err := resolver.CheckEmail(context.Background(), test.arg)
-				assert.NoError(t, err)
+				assert.Error(t, err)
 
 			case invalidEmail:
-				customerServiceClient.On("CheckEmail",
-					context.Background(),
-					customer.CheckEmailRequest{Email: test.arg},
-				).Return(&pbTypes.DefaultResponse{Success: false}, errors.New("invalid email"))
-
 				resp, err := resolver.CheckEmail(context.Background(), test.arg)
 				assert.Error(t, err)
 				assert.Equal(t, resp, false)
@@ -262,19 +264,82 @@ func Test_queryResolver_CheckEmail(t *testing.T) {
 }
 
 func Test_queryResolver_OnfidoSDKToken(t *testing.T) {
-	onboardingServiceClient := new(mocks.OnboardingServiceClient)
-	resolverOpts := &ResolverOpts{
-		OnboardingService: onboardingServiceClient,
-	}
-	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Query()
-	resp, err := resolver.OnfidoSDKToken(context.Background())
+	const (
+		success = iota
+		errorUnauthenticatedUser
+		errorGetOnfidoSDKToken
+	)
 
-	assert.Error(t, err)
-	assert.NotNil(t, resp)
+	var tests = []struct {
+		name     string
+		arg      context.Context
+		testType int
+	}{
+		{
+			name:     "Test success",
+			arg:      context.WithValue(context.Background(), middlewares.AuthenticatedUserContextKey, models.JWTClaims{}),
+			testType: success,
+		},
+		{
+			name:     "Test error unauthenticated user",
+			arg:      context.Background(),
+			testType: errorUnauthenticatedUser,
+		},
+		{
+			name:     "Test error calling getting sdk token",
+			arg:      context.WithValue(context.Background(), middlewares.AuthenticatedUserContextKey, models.JWTClaims{}),
+			testType: errorGetOnfidoSDKToken,
+		},
+	}
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			controller := gomock.NewController(t)
+			defer controller.Finish()
+			onboardingServiceClient := mocks.NewMockOnboardingServiceClient(controller)
+			resolverOpts := &ResolverOpts{
+				OnboardingService: onboardingServiceClient,
+			}
+			resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Query()
+
+			switch testCase.testType {
+			case success:
+				onboardingServiceClient.EXPECT().GetOnfidoSDKToken(testCase.arg, &onboarding.GetOnfidoSDKTokenRequest{}).
+					Return(&onboarding.GetOnfidoSDKTokenResponse{
+						Token: "validSDKToken",
+					}, nil)
+
+				resp, err := resolver.OnfidoSDKToken(testCase.arg)
+
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, &types.TokenResponse{
+					Success: true,
+					Code:    http.StatusOK,
+					Token:   "validSDKToken",
+				}, resp)
+			case errorUnauthenticatedUser:
+				resp, err := resolver.OnfidoSDKToken(testCase.arg)
+
+				assert.Error(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, &types.TokenResponse{Message: &authFailedMessage, Success: false, Code: http.StatusUnauthorized}, resp)
+			case errorGetOnfidoSDKToken:
+				onboardingServiceClient.EXPECT().GetOnfidoSDKToken(testCase.arg, &onboarding.GetOnfidoSDKTokenRequest{}).
+					Return(nil, errors.New(""))
+
+				resp, err := resolver.OnfidoSDKToken(testCase.arg)
+
+				assert.Error(t, err)
+				assert.Nil(t, resp)
+			}
+		})
+	}
 }
 
 func Test_queryResolver_Cdd(t *testing.T) {
-	onboardingServiceClient := new(mocks.OnboardingServiceClient)
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	onboardingServiceClient := mocks.NewMockOnboardingServiceClient(controller)
 	resolverOpts := &ResolverOpts{
 		OnboardingService: onboardingServiceClient,
 	}
@@ -327,8 +392,9 @@ func Test_queryResolver_Me(t *testing.T) {
 	}
 
 	for _, testCase := range tests {
-
-		customerServiceClient := new(mocks.CustomerServiceClient)
+		controller := gomock.NewController(t)
+		defer controller.Finish()
+		customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
 		resolverOpts := &ResolverOpts{
 			CustomerService: customerServiceClient,
 		}
@@ -341,7 +407,7 @@ func Test_queryResolver_Me(t *testing.T) {
 			ctx := context.WithValue(context.Background(),
 				middlewares.AuthenticatedUserContextKey, testCase.arg)
 
-			customerServiceClient.On("Me", ctx, &customer.MeRequest{}).
+			customerServiceClient.EXPECT().Me(ctx, &customer.MeRequest{}).
 				Return(&customer.MeResponse{
 					Data: &customer.MeResponse_Staff{
 						Staff: &pbTypes.Staff{
@@ -380,7 +446,7 @@ func Test_queryResolver_Me(t *testing.T) {
 			ctx := context.WithValue(context.Background(),
 				middlewares.AuthenticatedUserContextKey, testCase.arg)
 
-			customerServiceClient.On("Me", ctx, &customer.MeRequest{}).
+			customerServiceClient.EXPECT().Me(ctx, &customer.MeRequest{}).
 				Return(&customer.MeResponse{
 					Data: &customer.MeResponse_Customer{
 						Customer: &pbTypes.Customer{
@@ -433,7 +499,7 @@ func Test_queryResolver_Me(t *testing.T) {
 			ctx := context.WithValue(context.Background(),
 				middlewares.AuthenticatedUserContextKey, testCase.arg)
 
-			customerServiceClient.On("Me", ctx, &customer.MeRequest{}).Return(&customer.MeResponse{}, errors.New("auth problem"))
+			customerServiceClient.EXPECT().Me(ctx, &customer.MeRequest{}).Return(&customer.MeResponse{}, errors.New("auth problem"))
 
 			_, err := resolver.Me(ctx)
 			assert.Error(t, err)
@@ -443,7 +509,9 @@ func Test_queryResolver_Me(t *testing.T) {
 }
 
 func Test_queryResolver_Product(t *testing.T) {
-	accountServiceClient := new(mocks.AccountServiceClient)
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	accountServiceClient := mocks.NewMockAccountServiceClient(controller)
 	resolverOpts := &ResolverOpts{
 		AccountService: accountServiceClient,
 	}
@@ -455,7 +523,9 @@ func Test_queryResolver_Product(t *testing.T) {
 }
 
 func Test_queryResolver_Products(t *testing.T) {
-	accountServiceClient := new(mocks.AccountServiceClient)
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	accountServiceClient := mocks.NewMockAccountServiceClient(controller)
 	resolverOpts := &ResolverOpts{
 		AccountService: accountServiceClient,
 	}
@@ -472,7 +542,9 @@ func Test_queryResolver_Products(t *testing.T) {
 }
 
 func Test_queryResolver_Banks(t *testing.T) {
-	customerServiceClient := new(mocks.CustomerServiceClient)
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
 	resolverOpts := &ResolverOpts{
 		CustomerService: customerServiceClient,
 	}
@@ -489,7 +561,9 @@ func Test_queryResolver_Banks(t *testing.T) {
 }
 
 func Test_queryResolver_Account(t *testing.T) {
-	accountServiceClient := new(mocks.AccountServiceClient)
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	accountServiceClient := mocks.NewMockAccountServiceClient(controller)
 	resolverOpts := &ResolverOpts{
 		AccountService: accountServiceClient,
 	}
@@ -501,7 +575,9 @@ func Test_queryResolver_Account(t *testing.T) {
 }
 
 func Test_queryResolver_Transactions(t *testing.T) {
-	paymentServiceClient := new(mocks.PaymentServiceClient)
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	paymentServiceClient := mocks.NewMockPaymentServiceClient(controller)
 	resolverOpts := &ResolverOpts{
 		PaymentService: paymentServiceClient,
 	}
@@ -517,7 +593,9 @@ func Test_queryResolver_Transactions(t *testing.T) {
 }
 
 func Test_queryResolver_Beneficiary(t *testing.T) {
-	paymentServiceClient := new(mocks.PaymentServiceClient)
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	paymentServiceClient := mocks.NewMockPaymentServiceClient(controller)
 	resolverOpts := &ResolverOpts{
 		PaymentService: paymentServiceClient,
 	}
@@ -529,7 +607,9 @@ func Test_queryResolver_Beneficiary(t *testing.T) {
 }
 
 func Test_queryResolver_Beneficiaries(t *testing.T) {
-	paymentServiceClient := new(mocks.PaymentServiceClient)
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	paymentServiceClient := mocks.NewMockPaymentServiceClient(controller)
 	resolverOpts := &ResolverOpts{
 		PaymentService: paymentServiceClient,
 	}
@@ -546,7 +626,9 @@ func Test_queryResolver_Beneficiaries(t *testing.T) {
 }
 
 func Test_queryResolver_TransactionTypes(t *testing.T) {
-	paymentServiceClient := new(mocks.PaymentServiceClient)
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	paymentServiceClient := mocks.NewMockPaymentServiceClient(controller)
 	resolverOpts := &ResolverOpts{
 		PaymentService: paymentServiceClient,
 	}
@@ -584,7 +666,9 @@ func Test_queryResolver_Questionary(t *testing.T) {
 		},
 	}
 
-	customerServiceClient := new(mocks.CustomerServiceClient)
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
 	resolverOpts := &ResolverOpts{
 		CustomerService: customerServiceClient,
 	}
@@ -594,8 +678,7 @@ func Test_queryResolver_Questionary(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			switch test.testType {
 			case success:
-				customerServiceClient.On("GetQuestionary",
-					context.Background(),
+				customerServiceClient.EXPECT().GetQuestionary(context.Background(),
 					&customer.GetQuestionaryRequest{Id: test.arg},
 				).Return(&pbTypes.Questionary{
 					Id:   test.arg,
@@ -616,8 +699,7 @@ func Test_queryResolver_Questionary(t *testing.T) {
 				assert.NotNil(t, resp)
 
 			case questionaryNotFound:
-				customerServiceClient.On("GetQuestionary",
-					context.Background(),
+				customerServiceClient.EXPECT().GetQuestionary(context.Background(),
 					&customer.GetQuestionaryRequest{Id: test.arg},
 				).Return(&pbTypes.Questionary{}, errors.New("questionary not found"))
 
@@ -713,7 +795,9 @@ func Test_queryResolver_Questionaries(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		customerServiceClient := new(mocks.CustomerServiceClient)
+		controller := gomock.NewController(t)
+		defer controller.Finish()
+		customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
 		resolverOpts := &ResolverOpts{
 			CustomerService: customerServiceClient,
 		}
@@ -739,7 +823,7 @@ func Test_queryResolver_Questionaries(t *testing.T) {
 					}
 				}
 
-				customerServiceClient.On("GetQuestionaries", context.Background(),
+				customerServiceClient.EXPECT().GetQuestionaries(context.Background(),
 					&customer.GetQuestionariesRequest{
 						Keywords: test.args.keywords,
 						First:    int32(test.args.first),
@@ -821,7 +905,7 @@ func Test_queryResolver_Questionaries(t *testing.T) {
 					}
 				}
 
-				customerServiceClient.On("GetQuestionaries", context.Background(),
+				customerServiceClient.EXPECT().GetQuestionaries(context.Background(),
 					&customer.GetQuestionariesRequest{
 						Keywords: test.args.keywords,
 						First:    int32(test.args.first),
@@ -902,7 +986,7 @@ func Test_queryResolver_Questionaries(t *testing.T) {
 					}
 				}
 
-				customerServiceClient.On("GetQuestionaries", context.Background(),
+				customerServiceClient.EXPECT().GetQuestionaries(context.Background(),
 					&customer.GetQuestionariesRequest{
 						Keywords: test.args.keywords,
 						First:    int32(test.args.first),
@@ -972,7 +1056,9 @@ func Test_queryResolver_Questionaries(t *testing.T) {
 }
 
 func Test_queryResolver_Currency(t *testing.T) {
-	pricingServiceClient := new(mocks.PricingServiceClient)
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	pricingServiceClient := mocks.NewMockPricingServiceClient(controller)
 	resolverOpts := &ResolverOpts{
 		PricingService: pricingServiceClient,
 	}
@@ -984,7 +1070,9 @@ func Test_queryResolver_Currency(t *testing.T) {
 }
 
 func Test_queryResolver_Currencies(t *testing.T) {
-	pricingServiceClient := new(mocks.PricingServiceClient)
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	pricingServiceClient := mocks.NewMockPricingServiceClient(controller)
 	resolverOpts := &ResolverOpts{
 		PricingService: pricingServiceClient,
 	}
@@ -1001,7 +1089,9 @@ func Test_queryResolver_Currencies(t *testing.T) {
 }
 
 func Test_queryResolver_Fees(t *testing.T) {
-	pricingServiceClient := new(mocks.PricingServiceClient)
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	pricingServiceClient := mocks.NewMockPricingServiceClient(controller)
 	resolverOpts := &ResolverOpts{
 		PricingService: pricingServiceClient,
 	}
@@ -1013,7 +1103,9 @@ func Test_queryResolver_Fees(t *testing.T) {
 }
 
 func Test_queryResolver_ExchangeRate(t *testing.T) {
-	pricingServiceClient := new(mocks.PricingServiceClient)
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	pricingServiceClient := mocks.NewMockPricingServiceClient(controller)
 	resolverOpts := &ResolverOpts{
 		PricingService: pricingServiceClient,
 	}
@@ -1048,7 +1140,9 @@ func Test_queryResolver_Customer(t *testing.T) {
 		},
 	}
 
-	customerServiceClient := new(mocks.CustomerServiceClient)
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
 	resolverOpts := &ResolverOpts{
 		CustomerService: customerServiceClient,
 	}
@@ -1058,8 +1152,7 @@ func Test_queryResolver_Customer(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			switch test.testType {
 			case success:
-				customerServiceClient.On("GetCustomer",
-					context.Background(),
+				customerServiceClient.EXPECT().GetCustomer(context.Background(),
 					&customer.GetCustomerRequest{Id: test.arg},
 				).Return(&pbTypes.Customer{
 					Id:        test.arg,
@@ -1101,8 +1194,7 @@ func Test_queryResolver_Customer(t *testing.T) {
 				assert.Equal(t, resp.ID, test.arg)
 
 			case customerNotFound:
-				customerServiceClient.On("GetCustomer",
-					context.Background(),
+				customerServiceClient.EXPECT().GetCustomer(context.Background(),
 					&customer.GetCustomerRequest{Id: test.arg},
 				).Return(&pbTypes.Customer{}, errors.New("customer not found"))
 
@@ -1183,7 +1275,9 @@ func Test_queryResolver_Customers(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		customerServiceClient := new(mocks.CustomerServiceClient)
+		controller := gomock.NewController(t)
+		defer controller.Finish()
+		customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
 		resolverOpts := &ResolverOpts{
 			CustomerService: customerServiceClient,
 		}
@@ -1202,7 +1296,7 @@ func Test_queryResolver_Customers(t *testing.T) {
 					}
 				}
 
-				customerServiceClient.On("GetCustomers", context.Background(),
+				customerServiceClient.EXPECT().GetCustomers(context.Background(),
 					&customer.GetCustomersRequest{
 						Keywords: test.args.keywords,
 						First:    int32(test.args.first),
@@ -1304,7 +1398,7 @@ func Test_queryResolver_Customers(t *testing.T) {
 					}
 				}
 
-				customerServiceClient.On("GetCustomers", context.Background(),
+				customerServiceClient.EXPECT().GetCustomers(context.Background(),
 					&customer.GetCustomersRequest{
 						Keywords: test.args.keywords,
 						First:    int32(test.args.first),
@@ -1402,7 +1496,9 @@ func Test_queryResolver_Customers(t *testing.T) {
 }
 
 func Test_queryResolver_Cdds(t *testing.T) {
-	onboardingServiceClient := new(mocks.OnboardingServiceClient)
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	onboardingServiceClient := mocks.NewMockOnboardingServiceClient(controller)
 	resolverOpts := &ResolverOpts{
 		OnboardingService: onboardingServiceClient,
 	}
@@ -1413,6 +1509,1043 @@ func Test_queryResolver_Cdds(t *testing.T) {
 	before := "before"
 
 	resp, err := resolver.Cdds(context.Background(), &first, &after, &last, &before, []types.CDDStatuses{})
+	assert.Error(t, err)
+	assert.NotNil(t, resp)
+}
+
+func TestQueryResolver_Addresses(t *testing.T) {
+	const (
+		success = iota
+		successFirst
+		successAfter
+		successLast
+		successBefore
+		successPostCode
+		errorGetAddresses
+	)
+
+	var number = int64(5)
+	var stringArg = "someString"
+
+	type arg struct {
+		ctx      context.Context
+		first    *int64
+		after    *string
+		last     *int64
+		before   *string
+		postcode *string
+	}
+	var tests = []struct {
+		name     string
+		arg      arg
+		testType int
+	}{
+		{
+			name: "Test success",
+			arg: arg{
+				ctx: context.Background(),
+			},
+			testType: success,
+		},
+		{
+			name: "Test success first arg",
+			arg: arg{
+				ctx:   context.Background(),
+				first: &number,
+			},
+			testType: successFirst,
+		},
+		{
+			name: "Test success after arg",
+			arg: arg{
+				ctx:   context.Background(),
+				after: &stringArg,
+			},
+			testType: successAfter,
+		},
+		{
+			name: "Test success last arg",
+			arg: arg{
+				ctx:  context.Background(),
+				last: &number,
+			},
+			testType: successLast,
+		},
+		{
+			name: "Test success before arg",
+			arg: arg{
+				ctx:    context.Background(),
+				before: &stringArg,
+			},
+			testType: successBefore,
+		},
+		{
+			name: "Test success postcode arg",
+			arg: arg{
+				ctx:      context.Background(),
+				postcode: &stringArg,
+			},
+			testType: successPostCode,
+		},
+		{
+			name: "Test error getting addresses",
+			arg: arg{
+				ctx: context.Background(),
+			},
+			testType: errorGetAddresses,
+		},
+	}
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			controller := gomock.NewController(t)
+			defer controller.Finish()
+			customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
+			resolverOpts := &ResolverOpts{
+				CustomerService: customerServiceClient,
+			}
+			resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Query()
+
+			switch testCase.testType {
+			case success:
+				customerServiceClient.EXPECT().GetAddresses(testCase.arg.ctx, &customer.GetAddressesRequest{
+					First:    0,
+					After:    "",
+					Last:     0,
+					Before:   "",
+					Postcode: "",
+				}).Return(&customer.GetAddressesResponse{
+					Nodes: []*pbTypes.Address{
+						{
+							State: "State",
+							Country: &pbTypes.Country{
+								Name: "Country",
+							},
+							Coordinates: &pbTypes.Coordinates{
+								Latitude:  1,
+								Longitude: 1,
+							},
+						},
+						{
+							State: "State2",
+						},
+					},
+					PaginationInfo: &pbTypes.PaginationInfo{
+						HasNextPage:     false,
+						HasPreviousPage: false,
+						StartCursor:     "",
+						EndCursor:       "",
+					},
+					TotalCount: 2,
+				}, nil)
+
+				response, err := resolver.Addresses(testCase.arg.ctx, testCase.arg.first, testCase.arg.after,
+					testCase.arg.last, testCase.arg.before, testCase.arg.postcode)
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+				assert.Equal(t, &types.AddressConnection{
+					Nodes: []*types.Address{
+						{
+							Primary: false,
+							Country: &types.Country{
+								Name: "Country",
+							},
+							State: func() *string {
+								s := "State"
+								return &s
+							}(),
+							City:     &emptyString,
+							Street:   "",
+							Postcode: "",
+							Cordinates: &types.Cordinates{
+								Latitude:  1,
+								Longitude: 1,
+							},
+						},
+						{
+							Primary: false,
+							Country: nil,
+							State: func() *string {
+								s := "State2"
+								return &s
+
+							}(),
+							City:       &emptyString,
+							Street:     "",
+							Postcode:   "",
+							Cordinates: nil,
+						},
+					},
+					PageInfo: &types.PageInfo{
+						HasNextPage:     false,
+						HasPreviousPage: false,
+						StartCursor: func() *string {
+							s := ""
+							return &s
+						}(),
+						EndCursor: func() *string {
+							s := ""
+							return &s
+						}(),
+					},
+					TotalCount: 2,
+				}, response)
+			case successFirst:
+				customerServiceClient.EXPECT().GetAddresses(testCase.arg.ctx, &customer.GetAddressesRequest{
+					First:    int32(number),
+					After:    "",
+					Last:     0,
+					Before:   "",
+					Postcode: "",
+				}).Return(&customer.GetAddressesResponse{
+					Nodes: []*pbTypes.Address{
+						{
+							State: "State",
+						},
+						{
+							State: "State2",
+						},
+					},
+					PaginationInfo: &pbTypes.PaginationInfo{
+						HasNextPage:     false,
+						HasPreviousPage: false,
+						StartCursor:     "",
+						EndCursor:       "",
+					},
+					TotalCount: 2,
+				}, nil)
+
+				response, err := resolver.Addresses(testCase.arg.ctx, testCase.arg.first, testCase.arg.after,
+					testCase.arg.last, testCase.arg.before, testCase.arg.postcode)
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+				assert.Equal(t, &types.AddressConnection{
+					Nodes: []*types.Address{
+						{
+							Primary: false,
+							Country: nil,
+							State: func() *string {
+								s := "State"
+								return &s
+							}(),
+							City:       &emptyString,
+							Street:     "",
+							Postcode:   "",
+							Cordinates: nil,
+						},
+						{
+							Primary: false,
+							Country: nil,
+							State: func() *string {
+								s := "State2"
+								return &s
+
+							}(),
+							City:       &emptyString,
+							Street:     "",
+							Postcode:   "",
+							Cordinates: nil,
+						},
+					},
+					PageInfo: &types.PageInfo{
+						HasNextPage:     false,
+						HasPreviousPage: false,
+						StartCursor: func() *string {
+							s := ""
+							return &s
+						}(),
+						EndCursor: func() *string {
+							s := ""
+							return &s
+						}(),
+					},
+					TotalCount: 2,
+				}, response)
+			case successAfter:
+				customerServiceClient.EXPECT().GetAddresses(testCase.arg.ctx, &customer.GetAddressesRequest{
+					First:    0,
+					After:    stringArg,
+					Last:     0,
+					Before:   "",
+					Postcode: "",
+				}).Return(&customer.GetAddressesResponse{
+					Nodes: []*pbTypes.Address{
+						{
+							State: "State",
+						},
+						{
+							State: "State2",
+						},
+					},
+					PaginationInfo: &pbTypes.PaginationInfo{
+						HasNextPage:     false,
+						HasPreviousPage: false,
+						StartCursor:     "",
+						EndCursor:       "",
+					},
+					TotalCount: 2,
+				}, nil)
+
+				response, err := resolver.Addresses(testCase.arg.ctx, testCase.arg.first, testCase.arg.after,
+					testCase.arg.last, testCase.arg.before, testCase.arg.postcode)
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+				assert.Equal(t, &types.AddressConnection{
+					Nodes: []*types.Address{
+						{
+							Primary: false,
+							Country: nil,
+							State: func() *string {
+								s := "State"
+								return &s
+							}(),
+							City:       &emptyString,
+							Street:     "",
+							Postcode:   "",
+							Cordinates: nil,
+						},
+						{
+							Primary: false,
+							Country: nil,
+							State: func() *string {
+								s := "State2"
+								return &s
+
+							}(),
+							City:       &emptyString,
+							Street:     "",
+							Postcode:   "",
+							Cordinates: nil,
+						},
+					},
+					PageInfo: &types.PageInfo{
+						HasNextPage:     false,
+						HasPreviousPage: false,
+						StartCursor: func() *string {
+							s := ""
+							return &s
+						}(),
+						EndCursor: func() *string {
+							s := ""
+							return &s
+						}(),
+					},
+					TotalCount: 2,
+				}, response)
+			case successLast:
+				customerServiceClient.EXPECT().GetAddresses(testCase.arg.ctx, &customer.GetAddressesRequest{
+					First:    0,
+					After:    "",
+					Last:     int32(number),
+					Before:   "",
+					Postcode: "",
+				}).Return(&customer.GetAddressesResponse{
+					Nodes: []*pbTypes.Address{
+						{
+							State: "State",
+						},
+						{
+							State: "State2",
+						},
+					},
+					PaginationInfo: &pbTypes.PaginationInfo{
+						HasNextPage:     false,
+						HasPreviousPage: false,
+						StartCursor:     "",
+						EndCursor:       "",
+					},
+					TotalCount: 2,
+				}, nil)
+
+				response, err := resolver.Addresses(testCase.arg.ctx, testCase.arg.first, testCase.arg.after,
+					testCase.arg.last, testCase.arg.before, testCase.arg.postcode)
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+				assert.Equal(t, &types.AddressConnection{
+					Nodes: []*types.Address{
+						{
+							Primary: false,
+							Country: nil,
+							State: func() *string {
+								s := "State"
+								return &s
+							}(),
+							City:       &emptyString,
+							Street:     "",
+							Postcode:   "",
+							Cordinates: nil,
+						},
+						{
+							Primary: false,
+							Country: nil,
+							State: func() *string {
+								s := "State2"
+								return &s
+
+							}(),
+							City:       &emptyString,
+							Street:     "",
+							Postcode:   "",
+							Cordinates: nil,
+						},
+					},
+					PageInfo: &types.PageInfo{
+						HasNextPage:     false,
+						HasPreviousPage: false,
+						StartCursor: func() *string {
+							s := ""
+							return &s
+						}(),
+						EndCursor: func() *string {
+							s := ""
+							return &s
+						}(),
+					},
+					TotalCount: 2,
+				}, response)
+			case successBefore:
+				customerServiceClient.EXPECT().GetAddresses(testCase.arg.ctx, &customer.GetAddressesRequest{
+					First:    0,
+					After:    "",
+					Last:     0,
+					Before:   stringArg,
+					Postcode: "",
+				}).Return(&customer.GetAddressesResponse{
+					Nodes: []*pbTypes.Address{
+						{
+							State: "State",
+						},
+						{
+							State: "State2",
+						},
+					},
+					PaginationInfo: &pbTypes.PaginationInfo{
+						HasNextPage:     false,
+						HasPreviousPage: false,
+						StartCursor:     "",
+						EndCursor:       "",
+					},
+					TotalCount: 2,
+				}, nil)
+
+				response, err := resolver.Addresses(testCase.arg.ctx, testCase.arg.first, testCase.arg.after,
+					testCase.arg.last, testCase.arg.before, testCase.arg.postcode)
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+				assert.Equal(t, &types.AddressConnection{
+					Nodes: []*types.Address{
+						{
+							Primary: false,
+							Country: nil,
+							State: func() *string {
+								s := "State"
+								return &s
+							}(),
+							City:       &emptyString,
+							Street:     "",
+							Postcode:   "",
+							Cordinates: nil,
+						},
+						{
+							Primary: false,
+							Country: nil,
+							State: func() *string {
+								s := "State2"
+								return &s
+
+							}(),
+							City:       &emptyString,
+							Street:     "",
+							Postcode:   "",
+							Cordinates: nil,
+						},
+					},
+					PageInfo: &types.PageInfo{
+						HasNextPage:     false,
+						HasPreviousPage: false,
+						StartCursor: func() *string {
+							s := ""
+							return &s
+						}(),
+						EndCursor: func() *string {
+							s := ""
+							return &s
+						}(),
+					},
+					TotalCount: 2,
+				}, response)
+			case successPostCode:
+				customerServiceClient.EXPECT().GetAddresses(testCase.arg.ctx, &customer.GetAddressesRequest{
+					First:    0,
+					After:    "",
+					Last:     0,
+					Before:   "",
+					Postcode: stringArg,
+				}).Return(&customer.GetAddressesResponse{
+					Nodes: []*pbTypes.Address{
+						{
+							State: "State",
+						},
+						{
+							State: "State2",
+						},
+					},
+					PaginationInfo: &pbTypes.PaginationInfo{
+						HasNextPage:     false,
+						HasPreviousPage: false,
+						StartCursor:     "",
+						EndCursor:       "",
+					},
+					TotalCount: 2,
+				}, nil)
+
+				response, err := resolver.Addresses(testCase.arg.ctx, testCase.arg.first, testCase.arg.after,
+					testCase.arg.last, testCase.arg.before, testCase.arg.postcode)
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+				assert.Equal(t, &types.AddressConnection{
+					Nodes: []*types.Address{
+						{
+							Primary: false,
+							Country: nil,
+							State: func() *string {
+								s := "State"
+								return &s
+							}(),
+							City:       &emptyString,
+							Street:     "",
+							Postcode:   "",
+							Cordinates: nil,
+						},
+						{
+							Primary: false,
+							Country: nil,
+							State: func() *string {
+								s := "State2"
+								return &s
+
+							}(),
+							City:       &emptyString,
+							Street:     "",
+							Postcode:   "",
+							Cordinates: nil,
+						},
+					},
+					PageInfo: &types.PageInfo{
+						HasNextPage:     false,
+						HasPreviousPage: false,
+						StartCursor: func() *string {
+							s := ""
+							return &s
+						}(),
+						EndCursor: func() *string {
+							s := ""
+							return &s
+						}(),
+					},
+					TotalCount: 2,
+				}, response)
+			case errorGetAddresses:
+				customerServiceClient.EXPECT().GetAddresses(testCase.arg.ctx, &customer.GetAddressesRequest{
+					First:    0,
+					After:    "",
+					Last:     0,
+					Before:   "",
+					Postcode: "",
+				}).Return(nil, errors.New(""))
+
+				response, err := resolver.Addresses(testCase.arg.ctx, testCase.arg.first, testCase.arg.after,
+					testCase.arg.last, testCase.arg.before, testCase.arg.postcode)
+				assert.Error(t, err)
+				assert.Nil(t, response)
+			}
+		})
+	}
+}
+
+func TestQueryResolver_Countries(t *testing.T) {
+	const (
+		success = iota
+		successFirst
+		successAfter
+		successLast
+		successBefore
+		successKeywords
+		errorGetCountries
+	)
+
+	var number = int64(5)
+	var stringArg = "someString"
+
+	type arg struct {
+		ctx      context.Context
+		first    *int64
+		after    *string
+		last     *int64
+		before   *string
+		keywords *string
+	}
+	var tests = []struct {
+		name     string
+		arg      arg
+		testType int
+	}{
+		{
+			name: "Test success",
+			arg: arg{
+				ctx: context.Background(),
+			},
+			testType: success,
+		},
+		{
+			name: "Test success first arg",
+			arg: arg{
+				ctx:   context.Background(),
+				first: &number,
+			},
+			testType: successFirst,
+		},
+		{
+			name: "Test success after arg",
+			arg: arg{
+				ctx:   context.Background(),
+				after: &stringArg,
+			},
+			testType: successAfter,
+		},
+		{
+			name: "Test success last arg",
+			arg: arg{
+				ctx:  context.Background(),
+				last: &number,
+			},
+			testType: successLast,
+		},
+		{
+			name: "Test success before arg",
+			arg: arg{
+				ctx:    context.Background(),
+				before: &stringArg,
+			},
+			testType: successBefore,
+		},
+		{
+			name: "Test success keywords arg",
+			arg: arg{
+				ctx:      context.Background(),
+				keywords: &stringArg,
+			},
+			testType: successKeywords,
+		},
+		{
+			name: "Test error getting countries",
+			arg: arg{
+				ctx: context.Background(),
+			},
+			testType: errorGetCountries,
+		},
+	}
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			controller := gomock.NewController(t)
+			defer controller.Finish()
+			customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
+			resolverOpts := &ResolverOpts{
+				CustomerService: customerServiceClient,
+			}
+			resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Query()
+
+			switch testCase.testType {
+			case success:
+				customerServiceClient.EXPECT().GetCountries(testCase.arg.ctx, &customer.GetCountriesRequest{}).
+					Return(&customer.GetCountriesResponse{
+						Nodes: []*pbTypes.Country{
+							{
+								Id:         "01fq5gecnexyx72qbwzgkq0yab",
+								CodeAlpha2: "GB",
+								CodeAlpha3: "GBR",
+								Name:       "United Kingdom",
+							},
+							{
+								Id:         "01fq5gdynykttt7t1rytp9fy9c",
+								CodeAlpha2: "NG",
+								CodeAlpha3: "NGA",
+								Name:       "Nigeria",
+							},
+						},
+						PaginationInfo: &pbTypes.PaginationInfo{
+							HasNextPage:     false,
+							HasPreviousPage: false,
+							StartCursor:     "",
+							EndCursor:       "",
+						},
+						TotalCount: 2,
+					}, nil)
+
+				response, err := resolver.Countries(testCase.arg.ctx, testCase.arg.keywords, testCase.arg.first, testCase.arg.after,
+					testCase.arg.last, testCase.arg.before)
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+				assert.Equal(t, &types.CountryConnection{
+					Nodes: []*types.Country{
+						{
+							ID:         "01fq5gecnexyx72qbwzgkq0yab",
+							CodeAlpha2: "GB",
+							CodeAlpha3: "GBR",
+							Name:       "United Kingdom",
+						},
+						{
+							ID:         "01fq5gdynykttt7t1rytp9fy9c",
+							CodeAlpha2: "NG",
+							CodeAlpha3: "NGA",
+							Name:       "Nigeria",
+						},
+					},
+					PageInfo: &types.PageInfo{
+						HasNextPage:     false,
+						HasPreviousPage: false,
+						StartCursor: func() *string {
+							s := ""
+							return &s
+						}(),
+						EndCursor: func() *string {
+							s := ""
+							return &s
+						}(),
+					},
+					TotalCount: 2,
+				}, response)
+			case successFirst:
+				customerServiceClient.EXPECT().GetCountries(testCase.arg.ctx, &customer.GetCountriesRequest{
+					First: int32(number),
+				}).
+					Return(&customer.GetCountriesResponse{
+						Nodes: []*pbTypes.Country{
+							{
+								Id:         "01fq5gecnexyx72qbwzgkq0yab",
+								CodeAlpha2: "GB",
+								CodeAlpha3: "GBR",
+								Name:       "United Kingdom",
+							},
+							{
+								Id:         "01fq5gdynykttt7t1rytp9fy9c",
+								CodeAlpha2: "NG",
+								CodeAlpha3: "NGA",
+								Name:       "Nigeria",
+							},
+						},
+						PaginationInfo: &pbTypes.PaginationInfo{
+							HasNextPage:     false,
+							HasPreviousPage: false,
+							StartCursor:     "",
+							EndCursor:       "",
+						},
+						TotalCount: 2,
+					}, nil)
+
+				response, err := resolver.Countries(testCase.arg.ctx, testCase.arg.keywords, testCase.arg.first, testCase.arg.after,
+					testCase.arg.last, testCase.arg.before)
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+				assert.Equal(t, &types.CountryConnection{
+					Nodes: []*types.Country{
+						{
+							ID:         "01fq5gecnexyx72qbwzgkq0yab",
+							CodeAlpha2: "GB",
+							CodeAlpha3: "GBR",
+							Name:       "United Kingdom",
+						},
+						{
+							ID:         "01fq5gdynykttt7t1rytp9fy9c",
+							CodeAlpha2: "NG",
+							CodeAlpha3: "NGA",
+							Name:       "Nigeria",
+						},
+					},
+					PageInfo: &types.PageInfo{
+						HasNextPage:     false,
+						HasPreviousPage: false,
+						StartCursor: func() *string {
+							s := ""
+							return &s
+						}(),
+						EndCursor: func() *string {
+							s := ""
+							return &s
+						}(),
+					},
+					TotalCount: 2,
+				}, response)
+			case successAfter:
+				customerServiceClient.EXPECT().GetCountries(testCase.arg.ctx, &customer.GetCountriesRequest{
+					After: stringArg,
+				}).
+					Return(&customer.GetCountriesResponse{
+						Nodes: []*pbTypes.Country{
+							{
+								Id:         "01fq5gecnexyx72qbwzgkq0yab",
+								CodeAlpha2: "GB",
+								CodeAlpha3: "GBR",
+								Name:       "United Kingdom",
+							},
+							{
+								Id:         "01fq5gdynykttt7t1rytp9fy9c",
+								CodeAlpha2: "NG",
+								CodeAlpha3: "NGA",
+								Name:       "Nigeria",
+							},
+						},
+						PaginationInfo: &pbTypes.PaginationInfo{
+							HasNextPage:     false,
+							HasPreviousPage: false,
+							StartCursor:     "",
+							EndCursor:       "",
+						},
+						TotalCount: 2,
+					}, nil)
+
+				response, err := resolver.Countries(testCase.arg.ctx, testCase.arg.keywords, testCase.arg.first, testCase.arg.after,
+					testCase.arg.last, testCase.arg.before)
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+				assert.Equal(t, &types.CountryConnection{
+					Nodes: []*types.Country{
+						{
+							ID:         "01fq5gecnexyx72qbwzgkq0yab",
+							CodeAlpha2: "GB",
+							CodeAlpha3: "GBR",
+							Name:       "United Kingdom",
+						},
+						{
+							ID:         "01fq5gdynykttt7t1rytp9fy9c",
+							CodeAlpha2: "NG",
+							CodeAlpha3: "NGA",
+							Name:       "Nigeria",
+						},
+					},
+					PageInfo: &types.PageInfo{
+						HasNextPage:     false,
+						HasPreviousPage: false,
+						StartCursor: func() *string {
+							s := ""
+							return &s
+						}(),
+						EndCursor: func() *string {
+							s := ""
+							return &s
+						}(),
+					},
+					TotalCount: 2,
+				}, response)
+			case successLast:
+				customerServiceClient.EXPECT().GetCountries(testCase.arg.ctx, &customer.GetCountriesRequest{
+					Last: int32(number),
+				}).
+					Return(&customer.GetCountriesResponse{
+						Nodes: []*pbTypes.Country{
+							{
+								Id:         "01fq5gecnexyx72qbwzgkq0yab",
+								CodeAlpha2: "GB",
+								CodeAlpha3: "GBR",
+								Name:       "United Kingdom",
+							},
+							{
+								Id:         "01fq5gdynykttt7t1rytp9fy9c",
+								CodeAlpha2: "NG",
+								CodeAlpha3: "NGA",
+								Name:       "Nigeria",
+							},
+						},
+						PaginationInfo: &pbTypes.PaginationInfo{
+							HasNextPage:     false,
+							HasPreviousPage: false,
+							StartCursor:     "",
+							EndCursor:       "",
+						},
+						TotalCount: 2,
+					}, nil)
+
+				response, err := resolver.Countries(testCase.arg.ctx, testCase.arg.keywords, testCase.arg.first, testCase.arg.after,
+					testCase.arg.last, testCase.arg.before)
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+				assert.Equal(t, &types.CountryConnection{
+					Nodes: []*types.Country{
+						{
+							ID:         "01fq5gecnexyx72qbwzgkq0yab",
+							CodeAlpha2: "GB",
+							CodeAlpha3: "GBR",
+							Name:       "United Kingdom",
+						},
+						{
+							ID:         "01fq5gdynykttt7t1rytp9fy9c",
+							CodeAlpha2: "NG",
+							CodeAlpha3: "NGA",
+							Name:       "Nigeria",
+						},
+					},
+					PageInfo: &types.PageInfo{
+						HasNextPage:     false,
+						HasPreviousPage: false,
+						StartCursor: func() *string {
+							s := ""
+							return &s
+						}(),
+						EndCursor: func() *string {
+							s := ""
+							return &s
+						}(),
+					},
+					TotalCount: 2,
+				}, response)
+			case successBefore:
+				customerServiceClient.EXPECT().GetCountries(testCase.arg.ctx, &customer.GetCountriesRequest{
+					Before: stringArg,
+				}).
+					Return(&customer.GetCountriesResponse{
+						Nodes: []*pbTypes.Country{
+							{
+								Id:         "01fq5gecnexyx72qbwzgkq0yab",
+								CodeAlpha2: "GB",
+								CodeAlpha3: "GBR",
+								Name:       "United Kingdom",
+							},
+							{
+								Id:         "01fq5gdynykttt7t1rytp9fy9c",
+								CodeAlpha2: "NG",
+								CodeAlpha3: "NGA",
+								Name:       "Nigeria",
+							},
+						},
+						PaginationInfo: &pbTypes.PaginationInfo{
+							HasNextPage:     false,
+							HasPreviousPage: false,
+							StartCursor:     "",
+							EndCursor:       "",
+						},
+						TotalCount: 2,
+					}, nil)
+
+				response, err := resolver.Countries(testCase.arg.ctx, testCase.arg.keywords, testCase.arg.first, testCase.arg.after,
+					testCase.arg.last, testCase.arg.before)
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+				assert.Equal(t, &types.CountryConnection{
+					Nodes: []*types.Country{
+						{
+							ID:         "01fq5gecnexyx72qbwzgkq0yab",
+							CodeAlpha2: "GB",
+							CodeAlpha3: "GBR",
+							Name:       "United Kingdom",
+						},
+						{
+							ID:         "01fq5gdynykttt7t1rytp9fy9c",
+							CodeAlpha2: "NG",
+							CodeAlpha3: "NGA",
+							Name:       "Nigeria",
+						},
+					},
+					PageInfo: &types.PageInfo{
+						HasNextPage:     false,
+						HasPreviousPage: false,
+						StartCursor: func() *string {
+							s := ""
+							return &s
+						}(),
+						EndCursor: func() *string {
+							s := ""
+							return &s
+						}(),
+					},
+					TotalCount: 2,
+				}, response)
+			case successKeywords:
+				customerServiceClient.EXPECT().GetCountries(testCase.arg.ctx, &customer.GetCountriesRequest{
+					Keywords: stringArg,
+				}).
+					Return(&customer.GetCountriesResponse{
+						Nodes: []*pbTypes.Country{
+							{
+								Id:         "01fq5gecnexyx72qbwzgkq0yab",
+								CodeAlpha2: "GB",
+								CodeAlpha3: "GBR",
+								Name:       "United Kingdom",
+							},
+							{
+								Id:         "01fq5gdynykttt7t1rytp9fy9c",
+								CodeAlpha2: "NG",
+								CodeAlpha3: "NGA",
+								Name:       "Nigeria",
+							},
+						},
+						PaginationInfo: &pbTypes.PaginationInfo{
+							HasNextPage:     false,
+							HasPreviousPage: false,
+							StartCursor:     "",
+							EndCursor:       "",
+						},
+						TotalCount: 2,
+					}, nil)
+
+				response, err := resolver.Countries(testCase.arg.ctx, testCase.arg.keywords, testCase.arg.first, testCase.arg.after,
+					testCase.arg.last, testCase.arg.before)
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+				assert.Equal(t, &types.CountryConnection{
+					Nodes: []*types.Country{
+						{
+							ID:         "01fq5gecnexyx72qbwzgkq0yab",
+							CodeAlpha2: "GB",
+							CodeAlpha3: "GBR",
+							Name:       "United Kingdom",
+						},
+						{
+							ID:         "01fq5gdynykttt7t1rytp9fy9c",
+							CodeAlpha2: "NG",
+							CodeAlpha3: "NGA",
+							Name:       "Nigeria",
+						},
+					},
+					PageInfo: &types.PageInfo{
+						HasNextPage:     false,
+						HasPreviousPage: false,
+						StartCursor: func() *string {
+							s := ""
+							return &s
+						}(),
+						EndCursor: func() *string {
+							s := ""
+							return &s
+						}(),
+					},
+					TotalCount: 2,
+				}, response)
+			case errorGetCountries:
+				customerServiceClient.EXPECT().GetCountries(testCase.arg.ctx, &customer.GetCountriesRequest{}).
+					Return(nil, errors.New(""))
+
+				response, err := resolver.Countries(testCase.arg.ctx, testCase.arg.keywords, testCase.arg.first, testCase.arg.after,
+					testCase.arg.last, testCase.arg.before)
+				assert.Error(t, err)
+				assert.Nil(t, response)
+			}
+		})
+	}
+}
+
+func TestQueryResolver_Accounts(t *testing.T) {
+	resolverOpts := &ResolverOpts{}
+	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Query()
+
+	resp, err := resolver.Accounts(context.Background(), nil, nil, nil, nil, nil, nil)
+	assert.Error(t, err)
+	assert.NotNil(t, resp)
+}
+
+func TestQueryResolver_Transaction(t *testing.T) {
+	resolverOpts := &ResolverOpts{}
+	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Query()
+
+	resp, err := resolver.Transaction(context.Background(), "")
 	assert.Error(t, err)
 	assert.NotNil(t, resp)
 }

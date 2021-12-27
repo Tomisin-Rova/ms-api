@@ -9,6 +9,7 @@ import (
 
 	"github.com/roava/zebra/models"
 	"ms.api/protos/pb/auth"
+	"ms.api/protos/pb/types"
 
 	"go.uber.org/zap"
 )
@@ -35,17 +36,32 @@ func NewAuthMiddleware(service auth.AuthServiceClient, logger *zap.Logger) *Auth
 }
 
 func (mw *AuthMiddleware) ValidateToken(token string) (*models.JWTClaims, error) {
-	// TODO: Implement logic once auth service is refactored .
-	return &models.JWTClaims{
-		Client:   models.ClientType(models.APP),
-		ID:       "01fk5jmz4thmxwz8p2fx45vj6v",
-		Email:    "fola@roava.app",
-		DeviceID: "01f82zca7ryacseqddc8a6twte",
-	}, nil
+	// Execute RPC call
+	response, err := mw.authService.ValidateToken(context.Background(), &auth.ValidateTokenRequest{
+		Token: token,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// Build response
+	jwtClaims := models.JWTClaims{
+		ID:       response.Claims.Id,
+		Email:    response.Claims.Email,
+		DeviceID: response.Claims.DeviceId,
+	}
+	switch response.Claims.ClientType {
+	case types.JWTClaims_APP:
+		jwtClaims.Client = models.APP
+	case types.JWTClaims_DASHBOARD:
+		jwtClaims.Client = models.DASHBOARD
+	}
+
+	return &jwtClaims, nil
 }
 
-// TODO: here user should be the direct type of protos.Person from the auth or person service.
-func GetAuthenticatedUser(ctx context.Context) (*models.JWTClaims, error) {
+// GetClaimsFromCtx returns claims from an authenticated user
+func GetClaimsFromCtx(ctx context.Context) (*models.JWTClaims, error) {
 	claims, ok := ctx.Value(AuthenticatedUserContextKey).(models.JWTClaims)
 	if !ok {
 		return nil, errors.New("unable to parse authenticated user")

@@ -6,12 +6,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/99designs/gqlgen/graphql/handler/transport"
-
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/lru"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
@@ -22,7 +21,7 @@ import (
 	"ms.api/config"
 	"ms.api/graph"
 	"ms.api/graph/generated"
-	rerrors "ms.api/libs/errors"
+	serviceErrors "ms.api/libs/errors"
 	"ms.api/server/http/middlewares"
 )
 
@@ -76,15 +75,15 @@ func MountServer(secrets *config.Secrets, logger *zap.Logger) *chi.Mux {
 	if err != nil {
 		logger.Fatal(fmt.Sprintf("failed to setup service dependencies: %v", err))
 	}
-
 	mw := middlewares.NewAuthMiddleware(opts.AuthService, logger)
 	router.Use(mw.Middeware)
-
 	opts.AuthMw = mw
-
-	if secrets.Service.Environment != string(config.Production) {
-		router.Handle("/", playground.Handler("GraphQL playground", "/graphql"))
-	} else {
+	switch secrets.Service.Environment {
+	case config.LocalEnvironment, config.DevEnvironment:
+		router.Get("/", func(writer http.ResponseWriter, request *http.Request) {
+			router.Handle("/", playground.Handler("GraphQL playground", "/graphql"))
+		})
+	default:
 		router.Get("/", func(writer http.ResponseWriter, request *http.Request) {
 			writer.Header().Set("content-type", "text/html")
 			_, _ = writer.Write([]byte("Welcome to Roava API. Please use our APP for a better experience.</a>"))
@@ -96,7 +95,7 @@ func MountServer(secrets *config.Secrets, logger *zap.Logger) *chi.Mux {
 	server := NewCustomServer(generated.NewExecutableSchema(generated.Config{Resolvers: resolvers}))
 	server.SetErrorPresenter(func(ctx context.Context, e error) *gqlerror.Error {
 		err := graphql.DefaultErrorPresenter(ctx, e)
-		return rerrors.FormatGqlTError(e, err)
+		return serviceErrors.FormatGqlTError(e, err)
 	})
 
 	// Cors setup
