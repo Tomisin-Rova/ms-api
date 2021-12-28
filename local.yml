@@ -12,34 +12,3 @@ account_service_url: ""
 customer_service_url: ""
 payment_service_url: ""
 pricing_service_url: ""
-JWT_SECRETS: ""
-redis_url: ""
-redis_password: ""
-
-bvn:
-  key: ""
-  url: ""
-
-complyadvantage:
-  signed_branch_id: ""
-  key: ""
-  risk_profile_id: ""
-  url: ""
-
-mambu:
-  key: ""
-  url: ""
-
-onfido:
-  token: ""
-  application_id: ""
-
-postcoder:
-  key: ""
-
-postmark:
-  key: ""
-
-twilio:
-  sid: ""
-  token: ""

@@ -25,3 +25,7 @@ local-docker-compose.yml
 
 .DS_Store
 local.yml
+
+# Proto and Graohql schema files
+protos/*.proto
+graph/schemas/*.graphql

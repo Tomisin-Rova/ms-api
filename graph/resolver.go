@@ -66,12 +66,11 @@ func NewResolver(opt *ResolverOpts, logger *zap.Logger) *Resolver {
 }
 
 func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) {
-	const LOCAL_DEV_ENVIRONMENT = "local"
 	opts := &ResolverOpts{
 		preloader: preloader.GQLPreloader{},
 		mapper:    mapper.NewMapper(),
 	}
-	localDevEnvironment := secrets.Service.Environment == LOCAL_DEV_ENVIRONMENT
+	localDevEnvironment := secrets.Service.Environment == config.LocalEnvironment
 	// OnBoarding
 	if len(secrets.OnboardingServiceURL) > 0 || !localDevEnvironment {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)

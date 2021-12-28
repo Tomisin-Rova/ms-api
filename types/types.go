@@ -94,6 +94,12 @@ type Address struct {
 	Cordinates *Cordinates `json:"cordinates"`
 }
 
+type AddressConnection struct {
+	Nodes      []*Address `json:"nodes"`
+	PageInfo   *PageInfo  `json:"pageInfo"`
+	TotalCount int64      `json:"totalCount"`
+}
+
 type AddressInput struct {
 	CountryID  string           `json:"countryId"`
 	State      *string          `json:"state"`
@@ -253,6 +259,12 @@ type Country struct {
 	Name       string `json:"name"`
 }
 
+type CountryConnection struct {
+	Nodes      []*Country `json:"nodes"`
+	PageInfo   *PageInfo  `json:"pageInfo"`
+	TotalCount int64      `json:"totalCount"`
+}
+
 type Currency struct {
 	ID     string `json:"id"`
 	Symbol string `json:"symbol"`
@@ -325,12 +337,12 @@ type DeviceInput struct {
 
 type DevicePreferences struct {
 	Type  DevicePreferencesTypes `json:"type"`
-	Value string                 `json:"value"`
+	Value bool                   `json:"value"`
 }
 
 type DevicePreferencesInput struct {
 	Type  DevicePreferencesTypes `json:"type"`
-	Value string                 `json:"value"`
+	Value bool                   `json:"value"`
 }
 
 type DeviceToken struct {
@@ -453,7 +465,7 @@ type LinkedTransactionTarget struct {
 type Organization struct {
 	ID       string               `json:"id"`
 	Name     string               `json:"name"`
-	Status   OrganisationStatuses `json:"status"`
+	Status   OrganizationStatuses `json:"status"`
 	StatusTs int64                `json:"statusTs"`
 	Ts       int64                `json:"ts"`
 }
@@ -1650,44 +1662,44 @@ func (e LinkedTransactionTypes) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
-type OrganisationStatuses string
+type OrganizationStatuses string
 
 const (
-	OrganisationStatusesActive   OrganisationStatuses = "ACTIVE"
-	OrganisationStatusesInactive OrganisationStatuses = "INACTIVE"
+	OrganizationStatusesActive   OrganizationStatuses = "ACTIVE"
+	OrganizationStatusesInactive OrganizationStatuses = "INACTIVE"
 )
 
-var AllOrganisationStatuses = []OrganisationStatuses{
-	OrganisationStatusesActive,
-	OrganisationStatusesInactive,
+var AllOrganizationStatuses = []OrganizationStatuses{
+	OrganizationStatusesActive,
+	OrganizationStatusesInactive,
 }
 
-func (e OrganisationStatuses) IsValid() bool {
+func (e OrganizationStatuses) IsValid() bool {
 	switch e {
-	case OrganisationStatusesActive, OrganisationStatusesInactive:
+	case OrganizationStatusesActive, OrganizationStatusesInactive:
 		return true
 	}
 	return false
 }
 
-func (e OrganisationStatuses) String() string {
+func (e OrganizationStatuses) String() string {
 	return string(e)
 }
 
-func (e *OrganisationStatuses) UnmarshalGQL(v interface{}) error {
+func (e *OrganizationStatuses) UnmarshalGQL(v interface{}) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
 	}
 
-	*e = OrganisationStatuses(str)
+	*e = OrganizationStatuses(str)
 	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid OrganisationStatuses", str)
+		return fmt.Errorf("%s is not a valid OrganizationStatuses", str)
 	}
 	return nil
 }
 
-func (e OrganisationStatuses) MarshalGQL(w io.Writer) {
+func (e OrganizationStatuses) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

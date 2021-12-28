@@ -2,48 +2,44 @@ package main
 
 import (
 	"fmt"
+	"github.com/roava/zebra/logger"
+	"go.uber.org/zap"
+	"ms.api/config"
+	httpServer "ms.api/server/http"
 	"net/http"
 	"os"
 	"strings"
-
-	"ms.api/config"
-	httpServer "ms.api/server/http"
-
-	coreLogger "github.com/roava/zebra/logger"
-	"go.uber.org/zap"
 )
 
 func main() {
-	logger := setupLogger()
+	// Load secrets
+	logService := setupLogger()
 	secrets, err := config.LoadSecrets()
 	if err != nil {
-		logger.Fatal(fmt.Sprintf("failed to load config: %v", err))
+		logService.Fatal("load secrets", zap.Error(err))
 	}
 
-	address := fmt.Sprintf("0.0.0.0:%s", secrets.Service.Port)
-	logger.Info(fmt.Sprintf("Connect to http://%s/ for GraphQL playground", address))
-	if err := http.ListenAndServe(address, httpServer.MountServer(secrets, logger)); err != nil {
-		logger.Fatal(fmt.Sprintf("Could not start server on %s. Got error: %s", address, err.Error()))
+	address := fmt.Sprintf("localhost:%s", secrets.Service.Port)
+	logService.Info(fmt.Sprintf("Connect to http://%s/ for GraphQL playground", address))
+	if err := http.ListenAndServe(address, httpServer.MountServer(secrets, logService)); err != nil {
+		logService.Fatal(fmt.Sprintf("Could not start server on %s. Got error: %s", address, err.Error()))
 	}
 }
 
 func setupLogger() *zap.Logger {
-	var loggerConfigs = coreLogger.Config{
-		Name:       "ms.api",
+	var loggerConfigs = logger.Config{
+		Name:       config.ServiceName,
 		WithCaller: true,
 	}
 
 	switch strings.ToLower(os.Getenv("ENVIRONMENT")) {
-	case "dev", "local":
+	case config.DevEnvironment, config.LocalEnvironment:
 		loggerConfigs.Level = zap.DebugLevel
 		loggerConfigs.Debug = true
-	case "stg", "prod":
-		loggerConfigs.Level = zap.InfoLevel
 	default:
-		loggerConfigs.Level = zap.DebugLevel
-		loggerConfigs.Debug = true
+		loggerConfigs.Level = zap.InfoLevel
 	}
 
-	logger := coreLogger.New(loggerConfigs)
-	return logger
+	newLogger := logger.New(loggerConfigs)
+	return newLogger
 }

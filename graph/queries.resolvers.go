@@ -6,12 +6,14 @@ package graph
 import (
 	"context"
 	"errors"
+	"net/http"
 
 	"github.com/roava/zebra/models"
 	"go.uber.org/zap"
 	"ms.api/graph/generated"
 	emailvalidator "ms.api/libs/validator/email"
 	"ms.api/protos/pb/customer"
+	"ms.api/protos/pb/onboarding"
 	"ms.api/protos/pb/types"
 	"ms.api/server/http/middlewares"
 	apiTypes "ms.api/types"
@@ -32,13 +34,154 @@ func (r *queryResolver) CheckEmail(ctx context.Context, email string) (bool, err
 	return resp.Success, nil
 }
 
+func (r *queryResolver) Addresses(ctx context.Context, first *int64, after *string, last *int64, before *string, postcode *string) (*apiTypes.AddressConnection, error) {
+	// Build request
+	var request customer.GetAddressesRequest
+	if first != nil {
+		request.First = int32(*first)
+	}
+	if after != nil {
+		request.After = *after
+	}
+	if last != nil {
+		request.Last = int32(*last)
+	}
+	if before != nil {
+		request.Before = *before
+	}
+	if postcode != nil {
+		request.Postcode = *postcode
+	}
+
+	// Execute RPC call
+	response, err := r.CustomerService.GetAddresses(ctx, &request)
+	if err != nil {
+		return nil, err
+	}
+
+	// Build response
+	nodes := make([]*apiTypes.Address, len(response.Nodes))
+	for index, node := range response.Nodes {
+		address := apiTypes.Address{
+			Country: func() *apiTypes.Country {
+				if node.Country == nil {
+					return nil
+				}
+
+				return &apiTypes.Country{
+					ID:         node.Country.Id,
+					CodeAlpha2: node.Country.CodeAlpha2,
+					CodeAlpha3: node.Country.CodeAlpha3,
+					Name:       node.Country.Name,
+				}
+			}(),
+			State:    &node.State,
+			City:     &node.City,
+			Street:   node.Street,
+			Postcode: node.Postcode,
+			Cordinates: func() *apiTypes.Cordinates {
+				if node.Coordinates == nil {
+					return nil
+				}
+
+				return &apiTypes.Cordinates{
+					Latitude:  float64(node.Coordinates.Latitude),
+					Longitude: float64(node.Coordinates.Longitude),
+				}
+			}(),
+		}
+
+		nodes[index] = &address
+	}
+
+	pageInfo := apiTypes.PageInfo{
+		HasNextPage:     response.PaginationInfo.HasNextPage,
+		HasPreviousPage: response.PaginationInfo.HasPreviousPage,
+		StartCursor:     &response.PaginationInfo.StartCursor,
+		EndCursor:       &response.PaginationInfo.EndCursor,
+	}
+
+	result := &apiTypes.AddressConnection{
+		Nodes:      nodes,
+		PageInfo:   &pageInfo,
+		TotalCount: int64(response.TotalCount),
+	}
+
+	return result, nil
+}
+
+func (r *queryResolver) Countries(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string) (*apiTypes.CountryConnection, error) {
+	// Build request
+	var request customer.GetCountriesRequest
+	if first != nil {
+		request.First = int32(*first)
+	}
+	if after != nil {
+		request.After = *after
+	}
+	if last != nil {
+		request.Last = int32(*last)
+	}
+	if before != nil {
+		request.Before = *before
+	}
+	if keywords != nil {
+		request.Keywords = *keywords
+	}
+
+	// Execute RPC call
+	response, err := r.CustomerService.GetCountries(ctx, &request)
+	if err != nil {
+		return nil, err
+	}
+
+	// Build response
+	nodes := make([]*apiTypes.Country, len(response.Nodes))
+	for index, node := range response.Nodes {
+		address := apiTypes.Country{
+			ID:         node.Id,
+			CodeAlpha2: node.CodeAlpha2,
+			CodeAlpha3: node.CodeAlpha3,
+			Name:       node.Name,
+		}
+
+		nodes[index] = &address
+	}
+
+	pageInfo := apiTypes.PageInfo{
+		HasNextPage:     response.PaginationInfo.HasNextPage,
+		HasPreviousPage: response.PaginationInfo.HasPreviousPage,
+		StartCursor:     &response.PaginationInfo.StartCursor,
+		EndCursor:       &response.PaginationInfo.EndCursor,
+	}
+
+	result := &apiTypes.CountryConnection{
+		Nodes:      nodes,
+		PageInfo:   &pageInfo,
+		TotalCount: int64(response.TotalCount),
+	}
+
+	return result, nil
+}
+
 func (r *queryResolver) OnfidoSDKToken(ctx context.Context) (*apiTypes.TokenResponse, error) {
-	msg := "Not implemented"
+	// Get user claims
+	_, err := middlewares.GetClaimsFromCtx(ctx)
+	if err != nil {
+		return &apiTypes.TokenResponse{Message: &authFailedMessage, Success: false, Code: http.StatusUnauthorized}, err
+	}
+
+	// Execute RPC call
+	response, err := r.OnBoardingService.GetOnfidoSDKToken(ctx, &onboarding.GetOnfidoSDKTokenRequest{})
+	if err != nil {
+		return nil, err
+	}
+
 	return &apiTypes.TokenResponse{
-		Message: &msg,
-		Code:    int64(500),
-		Success: false,
-	}, errors.New("not implemented")
+		Success: true,
+		Code:    http.StatusOK,
+		Token:   response.Token,
+	}, nil
 }
 
 func (r *queryResolver) Cdd(ctx context.Context, filter apiTypes.CommonQueryFilterInput) (*apiTypes.Cdd, error) {
@@ -133,7 +276,9 @@ func (r *queryResolver) Account(ctx context.Context, id string) (*apiTypes.Accou
 }
 
 func (r *queryResolver) Accounts(ctx context.Context, first *int64, after *string, last *int64, before *string, statuses []apiTypes.AccountStatuses, types []apiTypes.ProductTypes) (*apiTypes.AccountConnection, error) {
-	panic(panicMsg)
+	return &apiTypes.AccountConnection{
+		TotalCount: 0,
+	}, errors.New("not implemented")
 }
 
 func (r *queryResolver) Transaction(ctx context.Context, id string) (*apiTypes.Transaction, error) {
@@ -298,7 +443,7 @@ func (r *queryResolver) ExchangeRate(ctx context.Context, transactionTypeID stri
 }
 
 func (r *queryResolver) Me(ctx context.Context) (apiTypes.MeResult, error) {
-	claims, err := middlewares.GetAuthenticatedUser(ctx)
+	claims, err := middlewares.GetClaimsFromCtx(ctx)
 	if err != nil {
 		return apiTypes.Staff{}, err
 	}
@@ -563,13 +708,3 @@ func (r *queryResolver) Cdds(ctx context.Context, first *int64, after *string, l
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
 type queryResolver struct{ *Resolver }
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//    it when you're done.
-//  - You have helper methods in this file. Move them out to keep these resolver files clean.
-const (
-	panicMsg = "not implemented"
-)

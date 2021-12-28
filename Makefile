@@ -11,23 +11,38 @@ ifeq ($(filter $(TAGS_SPLIT),bindata),bindata)
 endif
 
 GO_SOURCES_OWN := $(filter-out vendor/%, $(GO_SOURCES))
+PROTO_SRC_DIR := ${PWD}/protos
+PROTO_DST_DIR := ${PWD}/../
 environment ?= $(ENVIRONMENT)
 
 .PHONY: proto
 proto:
-	@ # NOTE, to generate the protos, you have to have your local, vendor folder because of the magefile
-	@	if [[ ! -r "../zebra/protos" ]]; \
-		then \
-			echo "Make sure the zebra project exists with the proto files."; \
-		else \
-			echo "Copying proto files..."; \
-			cp -r ../zebra/protos/* ./protos; \
-			./libs/mage genProto; \
-		fi
-	
+	@ if [[ ! -r "../zebra/protos" ]]; \
+	then \
+	  	echo "Zebra repository doesn't exist locally."; \
+	  	git clone git@github.com:roava/zebra.git ../zebra; \
+	fi; \
+	echo "Copying proto files..."; \
+	cp -v ../zebra/protos/*.proto ./protos/; \
+	echo "Generating proto..."; \
+	find ./protos -type f -name "*.proto" -print0 | xargs -0 sed -i '' -e 's/go_package = "protos/go_package = "ms.api\/protos/g';\
+	protoc -I=${PROTO_SRC_DIR} --go_out=plugins=grpc:${PROTO_DST_DIR} ${PROTO_SRC_DIR}/*.proto; \
+
 .PHONY: build
 build: proto
 	go build -o srv *.go
+
+.PHONY: schema
+schema:
+	@ if [[ ! -r "../zebra/graphql" ]]; \
+	then \
+		echo "Zebra repository doesn't exist locally."; \
+		git clone git@github.com:roava/zebra.git ../zebra; \
+  	fi; \
+  	echo "Copying schema files..."; \
+	cp -v ../zebra/graphql/* ./graph/schemas; \
+	echo "Generating graphql..."; \
+	go run github.com/99designs/gqlgen generate; \
 
 .PHONY: test
 test:
@@ -37,22 +52,24 @@ test:
 docker: proto gen-mocks
 	docker build . -t ms.notify:alpine
 
-gen-mocks:
-	mockery --name=AuthServiceClient --recursive
-	mockery --name=AccountServiceClient --recursive
-	mockery --name=CustomerServiceClient --recursive
-	mockery --name=PaymentServiceClient --recursive
-	mockery --name=OnboardingServiceClient --recursive
-	mockery --name=PricingServiceClient --recursive
-	mockery --name=VerificationServiceClient --recursive
-	mockery --name=Preloader --recursive
+gen-mocks: proto
+	mockgen -source=./protos/pb/account/account.pb.go -destination=./mocks/account_mock.go -package=mocks
+	mockgen -source=./protos/pb/auth/auth.pb.go -destination=./mocks/auth_mock.go -package=mocks
+	mockgen -source=./protos/pb/customer/customer.pb.go -destination=./mocks/customer_mock.go -package=mocks
+	mockgen -source=./protos/pb/onboarding/onboarding.pb.go -destination=./mocks/onboarding_mock.go -package=mocks
+	mockgen -source=./protos/pb/payment/payment.pb.go -destination=./mocks/payment_mock.go -package=mocks
+	mockgen -source=./protos/pb/pricing/pricing.pb.go -destination=./mocks/pricing_mock.go -package=mocks
+	mockgen -source=./protos/pb/verification/verification.pb.go -destination=./mocks/verification_mock.go -package=mocks
 	go generate ./...
 
-local: schema proto gen-mocks lint test
+local: update-dependencies schema proto gen-mocks lint test
 	go fmt ./...
 	go mod tidy
 	@echo "Running service with '${environment}' environment set..."; \
 	(export ENVIRONMENT=${environment}; go run main.go)	
+
+update-dependencies:
+	GOSUMDB=off go get -u github.com/roava/zebra@master
 
 tools:
 	go get golang.org/x/tools/cmd/goimports
@@ -97,17 +114,6 @@ coverage:
 	  fi; \
 	fi
 
-.PHONY: schema
-schema: proto
-	@	if [[ ! -r "../zebra/graphql" ]]; \
-		then \
-			echo "Make sure the zebra project exists with the gql files."; \
-		else \
-			echo "Copying schema files..."; \
-			cp -r ../zebra/graphql/* ./graph/schemas; \
-			./libs/mage genSchema; \
-		fi
-
 docker-pulsar:
 	docker run -d \
       -p 6650:6650 \
@@ -122,11 +128,11 @@ docker-pulsar:
 
 docker-mongo:
 	docker run -d  \
-	  -p 27017:27017 \
+	  -p 27018:27017 \
 	  --env MONGO_INITDB_ROOT_USERNAME=root \
 	  --env MONGO_INITDB_ROOT_PASSWORD=root \
 	  --env MONGO_INITDB_DATABASE=roava \
-	  mongo:4.2.9
+	  mongo:4.4.10
 
 build-local:
 	docker build -t ms.api --build-arg ACCESS_TOKEN=${GITHUB_TOKEN} .
