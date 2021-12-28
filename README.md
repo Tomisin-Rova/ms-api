@@ -37,10 +37,10 @@ $ make docker-mongo
 # Make sure that mongo & pulsar ports are the same here as in the docker-makefile command
 SERVICE_NAME: "ms.api"
 PORT: "2000"
-mongodb_uri: "mongodb://127.0.0.1:27017"
+mongodb_uri: "mongodb://root:root@localhost:27017"
 pulsar_url: "pulsar://127.0.0.1:6650"
 pulsar_cert: ""
-HTTP_PORT: 8000
+HTTP_PORT: "8000"
 
 onboarding_service_url: ""
 verification_service_url: ""
@@ -52,34 +52,6 @@ pricing_service_url: ""
 JWT_SECRETS: ""
 redis_url: ""
 redis_password: ""
-
-bvn:
-  key: ""
-  url: ""
-
-complyadvantage:
-  signed_branch_id: ""
-  key: ""
-  risk_profile_id: ""
-  url: ""
-
-mambu:
-  key: ""
-  url: ""
-
-onfido:
-  token: ""
-  application_id: ""
-
-postcoder:
-  key: ""
-
-postmark:
-  key: ""
-
-twilio:
-  sid: ""
-  token: ""
 ```
 
 2. Use those command to set up local environment.

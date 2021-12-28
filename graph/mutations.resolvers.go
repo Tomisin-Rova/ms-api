@@ -116,7 +116,7 @@ func (r *mutationResolver) AnswerQuestionary(ctx context.Context, questionary ty
 
 	customerAnswers := make([]*customer.AnswerInput, len(questionary.Answers))
 	if len(questionary.Answers) < 1 {
-		// Should never happen .
+		// Should never happen
 		responseMessage = "Questionary answers not found"
 		return &types.Response{Message: &responseMessage, Success: false, Code: int64(400)}, nil
 	}
