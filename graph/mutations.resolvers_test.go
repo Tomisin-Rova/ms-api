@@ -21,6 +21,7 @@ import (
 var (
 	state       = "lagos"
 	city        = "lagos"
+	answer      = "My lifestyle"
 	mockAddress = types.AddressInput{
 		CountryID: "111xcc",
 		State:     &state,
@@ -487,7 +488,7 @@ func TestMutationResolver_AnswerQuestionary(t *testing.T) {
 					Answers: []*types.AnswerInput{
 						{
 							ID:     "question_id",
-							Answer: "My lifestyle",
+							Answer: &answer,
 						},
 					},
 				}
@@ -505,7 +506,7 @@ func TestMutationResolver_AnswerQuestionary(t *testing.T) {
 					Answers: []*types.AnswerInput{
 						{
 							ID:     "question_id",
-							Answer: "My lifestyle",
+							Answer: &answer,
 						},
 					},
 				}
@@ -669,11 +670,7 @@ func TestMutationResolver_SetDevicePreferences(t *testing.T) {
 			args: []*types.DevicePreferencesInput{
 				{
 					Type:  types.DevicePreferencesTypesPush,
-<<<<<<< HEAD
 					Value: "123",
-=======
-					Value: true,
->>>>>>> develop
 				},
 			},
 			testType: success,
@@ -683,11 +680,7 @@ func TestMutationResolver_SetDevicePreferences(t *testing.T) {
 			args: []*types.DevicePreferencesInput{
 				{
 					Type:  types.DevicePreferencesTypesPush,
-<<<<<<< HEAD
-					Value: "123",
-=======
-					Value: true,
->>>>>>> develop
+					Value: "string type value",
 				},
 			},
 			testType: errUserAuthentication,
@@ -720,11 +713,7 @@ func TestMutationResolver_SetDevicePreferences(t *testing.T) {
 					Preferences: []*pbTypes.DevicePreferencesInput{
 						{
 							Type:  pbTypes.DevicePreferences_PUSH,
-<<<<<<< HEAD
-							Value: "123",
-=======
-							Value: true,
->>>>>>> develop
+							Value: "string type value",
 						},
 					},
 				},

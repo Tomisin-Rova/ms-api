@@ -344,7 +344,7 @@ type DevicePreferences struct {
 
 type DevicePreferencesInput struct {
 	Type  DevicePreferencesTypes `json:"type"`
-	Value bool                   `json:"value"`
+	Value string                 `json:"value"`
 }
 
 type DeviceToken struct {

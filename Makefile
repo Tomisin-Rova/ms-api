@@ -71,9 +71,6 @@ local: update-dependencies schema proto gen-mocks lint test
 update-dependencies:
 	GOSUMDB=off go get -u github.com/roava/zebra@master
 
-update-dependencies:
-	GOSUMDB=off go get -u github.com/roava/zebra@master
-
 tools:
 	go get golang.org/x/tools/cmd/goimports
 	go get github.com/kisielk/errcheck

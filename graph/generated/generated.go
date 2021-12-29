@@ -530,8 +530,9 @@ type ComplexityRoot struct {
 	}
 
 	QuestionaryAnswerQuestion struct {
-		Answer func(childComplexity int) int
-		ID     func(childComplexity int) int
+		Answer            func(childComplexity int) int
+		ID                func(childComplexity int) int
+		PredefinedAnswers func(childComplexity int) int
 	}
 
 	QuestionaryConnection struct {
@@ -540,9 +541,17 @@ type ComplexityRoot struct {
 		TotalCount func(childComplexity int) int
 	}
 
-	QuestionaryQuestion struct {
+	QuestionaryPredefinedAnswer struct {
 		ID    func(childComplexity int) int
 		Value func(childComplexity int) int
+	}
+
+	QuestionaryQuestion struct {
+		ID                func(childComplexity int) int
+		MultipleOptions   func(childComplexity int) int
+		PredefinedAnswers func(childComplexity int) int
+		Required          func(childComplexity int) int
+		Value             func(childComplexity int) int
 	}
 
 	Reports struct {
@@ -3213,6 +3222,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.QuestionaryAnswerQuestion.ID(childComplexity), true
 
+	case "QuestionaryAnswerQuestion.predefinedAnswers":
+		if e.complexity.QuestionaryAnswerQuestion.PredefinedAnswers == nil {
+			break
+		}
+
+		return e.complexity.QuestionaryAnswerQuestion.PredefinedAnswers(childComplexity), true
+
 	case "QuestionaryConnection.nodes":
 		if e.complexity.QuestionaryConnection.Nodes == nil {
 			break
@@ -3234,12 +3250,47 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.QuestionaryConnection.TotalCount(childComplexity), true
 
+	case "QuestionaryPredefinedAnswer.id":
+		if e.complexity.QuestionaryPredefinedAnswer.ID == nil {
+			break
+		}
+
+		return e.complexity.QuestionaryPredefinedAnswer.ID(childComplexity), true
+
+	case "QuestionaryPredefinedAnswer.value":
+		if e.complexity.QuestionaryPredefinedAnswer.Value == nil {
+			break
+		}
+
+		return e.complexity.QuestionaryPredefinedAnswer.Value(childComplexity), true
+
 	case "QuestionaryQuestion.id":
 		if e.complexity.QuestionaryQuestion.ID == nil {
 			break
 		}
 
 		return e.complexity.QuestionaryQuestion.ID(childComplexity), true
+
+	case "QuestionaryQuestion.multipleOptions":
+		if e.complexity.QuestionaryQuestion.MultipleOptions == nil {
+			break
+		}
+
+		return e.complexity.QuestionaryQuestion.MultipleOptions(childComplexity), true
+
+	case "QuestionaryQuestion.predefinedAnswers":
+		if e.complexity.QuestionaryQuestion.PredefinedAnswers == nil {
+			break
+		}
+
+		return e.complexity.QuestionaryQuestion.PredefinedAnswers(childComplexity), true
+
+	case "QuestionaryQuestion.required":
+		if e.complexity.QuestionaryQuestion.Required == nil {
+			break
+		}
+
+		return e.complexity.QuestionaryQuestion.Required(childComplexity), true
 
 	case "QuestionaryQuestion.value":
 		if e.complexity.QuestionaryQuestion.Value == nil {
@@ -3893,7 +3944,7 @@ input DeviceTokenInput {
 
 input DevicePreferencesInput {
     type: DevicePreferencesTypes!
-    value: Boolean!
+    value: String!
 }
 
 input CustomerDetailsInput {
@@ -3919,12 +3970,19 @@ input CordinatesInput {
 
 input QuestionaryAnswerInput {
     id: ID!
+    """
+    An array of the responses for the questions related to current questionary.
+    """
     answers: [AnswerInput!]!
 }
 
 input AnswerInput {
     id: ID!
-    answer: String!
+    answer: String
+    """
+    An array of IDs of the predefined answers chosen.
+    """
+    predefinedAnswers: [ID!]
 }
 
 input CDDInput {
@@ -4492,6 +4550,9 @@ type Acceptance {
 type Questionary {
     id: ID!
     type: QuestionaryTypes!
+    """
+    An array of different questions related to the current questionary.
+    """
     questions: [QuestionaryQuestion!]!
     status: QuestionaryStatuses!
     statusTs: Int!
@@ -4501,19 +4562,44 @@ type Questionary {
 type QuestionaryQuestion {
     id: ID!
     value: String!
+    """
+    An array of predefined answers for the current question.
+    *not required
+    """
+    predefinedAnswers: [QuestionaryPredefinedAnswer!]
+    """
+    If true the question must be answered.
+    """
+    required: Boolean!
+    """
+    If true the question can be answered with multiple values from the predefined answers.
+    """
+    multipleOptions: Boolean!
+}
+
+type QuestionaryPredefinedAnswer {
+    id: ID!
+    value: String!
 }
 
 type QuestionaryAnswer {
     id: ID!
     questionaryId: ID!
     customerId: ID!
+    """
+    An array of the responses for the questions related to current questionary.
+    """
     questions: [QuestionaryAnswerQuestion!]!
     ts: Int!
 }
 
 type QuestionaryAnswerQuestion {
     id: ID!
-    answer: String!
+    answer: String
+    """
+    An array of IDs of the predefined answers chosen.
+    """
+    predefinedAnswers: [ID!]
 }
 
 enum QuestionaryStatuses {
@@ -17984,14 +18070,43 @@ func (ec *executionContext) _QuestionaryAnswerQuestion_answer(ctx context.Contex
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _QuestionaryAnswerQuestion_predefinedAnswers(ctx context.Context, field graphql.CollectedField, obj *types.QuestionaryAnswerQuestion) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "QuestionaryAnswerQuestion",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PredefinedAnswers, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	fc.Result = res
+	return ec.marshalOID2ᚕstringᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _QuestionaryConnection_nodes(ctx context.Context, field graphql.CollectedField, obj *types.QuestionaryConnection) (ret graphql.Marshaler) {
@@ -18099,6 +18214,76 @@ func (ec *executionContext) _QuestionaryConnection_totalCount(ctx context.Contex
 	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _QuestionaryPredefinedAnswer_id(ctx context.Context, field graphql.CollectedField, obj *types.QuestionaryPredefinedAnswer) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "QuestionaryPredefinedAnswer",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _QuestionaryPredefinedAnswer_value(ctx context.Context, field graphql.CollectedField, obj *types.QuestionaryPredefinedAnswer) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "QuestionaryPredefinedAnswer",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Value, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _QuestionaryQuestion_id(ctx context.Context, field graphql.CollectedField, obj *types.QuestionaryQuestion) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -18167,6 +18352,108 @@ func (ec *executionContext) _QuestionaryQuestion_value(ctx context.Context, fiel
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _QuestionaryQuestion_predefinedAnswers(ctx context.Context, field graphql.CollectedField, obj *types.QuestionaryQuestion) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "QuestionaryQuestion",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PredefinedAnswers, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*types.QuestionaryPredefinedAnswer)
+	fc.Result = res
+	return ec.marshalOQuestionaryPredefinedAnswer2ᚕᚖmsᚗapiᚋtypesᚐQuestionaryPredefinedAnswerᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _QuestionaryQuestion_required(ctx context.Context, field graphql.CollectedField, obj *types.QuestionaryQuestion) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "QuestionaryQuestion",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Required, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _QuestionaryQuestion_multipleOptions(ctx context.Context, field graphql.CollectedField, obj *types.QuestionaryQuestion) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "QuestionaryQuestion",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.MultipleOptions, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Reports_type(ctx context.Context, field graphql.CollectedField, obj *types.Reports) (ret graphql.Marshaler) {
@@ -21599,7 +21886,15 @@ func (ec *executionContext) unmarshalInputAnswerInput(ctx context.Context, obj i
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("answer"))
-			it.Answer, err = ec.unmarshalNString2string(ctx, v)
+			it.Answer, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "predefinedAnswers":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("predefinedAnswers"))
+			it.PredefinedAnswers, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -22076,7 +22371,7 @@ func (ec *executionContext) unmarshalInputDevicePreferencesInput(ctx context.Con
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("value"))
-			it.Value, err = ec.unmarshalNBoolean2bool(ctx, v)
+			it.Value, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -25300,9 +25595,8 @@ func (ec *executionContext) _QuestionaryAnswerQuestion(ctx context.Context, sel 
 			}
 		case "answer":
 			out.Values[i] = ec._QuestionaryAnswerQuestion_answer(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
+		case "predefinedAnswers":
+			out.Values[i] = ec._QuestionaryAnswerQuestion_predefinedAnswers(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -25351,6 +25645,38 @@ func (ec *executionContext) _QuestionaryConnection(ctx context.Context, sel ast.
 	return out
 }
 
+var questionaryPredefinedAnswerImplementors = []string{"QuestionaryPredefinedAnswer"}
+
+func (ec *executionContext) _QuestionaryPredefinedAnswer(ctx context.Context, sel ast.SelectionSet, obj *types.QuestionaryPredefinedAnswer) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, questionaryPredefinedAnswerImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("QuestionaryPredefinedAnswer")
+		case "id":
+			out.Values[i] = ec._QuestionaryPredefinedAnswer_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "value":
+			out.Values[i] = ec._QuestionaryPredefinedAnswer_value(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var questionaryQuestionImplementors = []string{"QuestionaryQuestion"}
 
 func (ec *executionContext) _QuestionaryQuestion(ctx context.Context, sel ast.SelectionSet, obj *types.QuestionaryQuestion) graphql.Marshaler {
@@ -25369,6 +25695,18 @@ func (ec *executionContext) _QuestionaryQuestion(ctx context.Context, sel ast.Se
 			}
 		case "value":
 			out.Values[i] = ec._QuestionaryQuestion_value(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "predefinedAnswers":
+			out.Values[i] = ec._QuestionaryQuestion_predefinedAnswers(ctx, field, obj)
+		case "required":
+			out.Values[i] = ec._QuestionaryQuestion_required(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "multipleOptions":
+			out.Values[i] = ec._QuestionaryQuestion_multipleOptions(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -27876,6 +28214,16 @@ func (ec *executionContext) marshalNQuestionaryConnection2ᚖmsᚗapiᚋtypesᚐ
 	return ec._QuestionaryConnection(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNQuestionaryPredefinedAnswer2ᚖmsᚗapiᚋtypesᚐQuestionaryPredefinedAnswer(ctx context.Context, sel ast.SelectionSet, v *types.QuestionaryPredefinedAnswer) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._QuestionaryPredefinedAnswer(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNQuestionaryQuestion2ᚕᚖmsᚗapiᚋtypesᚐQuestionaryQuestionᚄ(ctx context.Context, sel ast.SelectionSet, v []*types.QuestionaryQuestion) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
@@ -29728,6 +30076,53 @@ func (ec *executionContext) marshalOProductTypes2ᚕmsᚗapiᚋtypesᚐProductTy
 				defer wg.Done()
 			}
 			ret[i] = ec.marshalNProductTypes2msᚗapiᚋtypesᚐProductTypes(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalOQuestionaryPredefinedAnswer2ᚕᚖmsᚗapiᚋtypesᚐQuestionaryPredefinedAnswerᚄ(ctx context.Context, sel ast.SelectionSet, v []*types.QuestionaryPredefinedAnswer) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNQuestionaryPredefinedAnswer2ᚖmsᚗapiᚋtypesᚐQuestionaryPredefinedAnswer(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
