@@ -4,7 +4,7 @@ package onboarding;
 
 import "types.proto";
 import "google/protobuf/timestamp.proto";
-option go_package = "protos/pb/onboarding";
+option go_package = "ms.api/protos/pb/onboarding";
 
 message SubmitCDDRequest {
   KYCInput kyc = 1;

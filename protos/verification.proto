@@ -4,7 +4,7 @@ package verification;
 
 import "types.proto";
 import "google/protobuf/timestamp.proto";
-option go_package = "protos/pb/verification";
+option go_package = "ms.api/protos/pb/verification";
 
 message RequestOTPRequest {
   enum DeliveryMode {

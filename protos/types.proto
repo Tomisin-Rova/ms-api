@@ -3,7 +3,7 @@ syntax = "proto3";
 package types;
 
 import "google/protobuf/timestamp.proto";
-option go_package = "protos/pb/types";
+option go_package = "ms.api/protos/pb/types";
 
 // ############# USER GROUP #############
 

@@ -1,251 +1,369 @@
-type Mutation {
-    # Create and send a new OTP
-    # expireTime is expresend in seconds
-    requestOTP(type: DeliveryMode!, target: String!, expireTimeInSeconds: Int): Response!
-    # Verify an OTP
-    verifyOTP(target: String!, otpToken: String!): Response!
-    # Creates a new ROAVA customer
-    signup(customer: CustomerInput!): AuthResponse!
-    # Reset a customer login password (OTP required)
-    resetLoginPassword(otpToken: String!, email: String!, loginPassword: String!): Response!
-    # Returns valid response and code depending of type of user (0 - Customer exist, 1 - Customer exist and has GBP account)
-    checkCustomerEmail(email: String!, device: DeviceInput!): Response!
-    # Validates customer data in order to proced with secure actions
-    checkCustomerData(customerData: CheckCustomerDataInput!): Response!
-    # Register for the fist time the details of the customer logged in
-    register(customerDetails: CustomerDetailsInput!): Response!
-    # Submit a CDD for a given customer
-    submitCDD(cdd: CDDInput!): Response!
-    # Creates a questionaryAnswer model for the current customer
-    answerQuestionary(questionary: QuestionaryAnswerInput!): Response!
-    # Creates a acceptance model for the current customer linked to the content requested
-    acceptContent(contentId: String!): Response!
-    # Creates a new transaction password (Only if customer doesn't set it up yet)
-    setTransactionPassword(password: String!): Response!
-    # Reset a customer transaction Password (OTP required)
-    resetTransactionPassword(otpToken: String!, email: String!, newTransactionPassword: String!, currentTransactionPassword: String!): Response!
-    # Generates a valid jwt token for the customer
-    login(credentials: AuthInput!): AuthResponse!
-    # Refresh the auth jwt token for the customer
-    refreshToken(token: String!): AuthResponse!
-    # Create|Updates the device token(s) given
-    setDeviceToken(tokens: [DeviceTokenInput]!): Response!
-    # Create|Update the device preference(s) given
-    setDevicePreferences(preferences: [DevicePreferencesInput!]): Response!
-    # Validate customer's BVN
-    checkBVN(bvn: String!, phone: String!): Response!
-    # Create account of type CURRENT_ACCOUNT product
-    createAccount(account: AccountInput!): Response!
-    # Create and fund account of type FIXED_DEPOSIT product
-    createVaultAccount(account: VaultAccountInput!, transactionPassword: String!): Response!
-    # Create a new Beneficiary
-    createBeneficiary(beneficiary: BeneficiaryInput!, transactionPassword: String!): Response!
-    # Add new account to existing beneficiary
-    addBeneficiaryAccount(beneficiaryId: ID!, account: BeneficiaryAccountInput!, transactionPassword: String!): Response!
-    # Delete an account from an existing beneficiary
-    deleteBeneficaryAccount(beneficiaryId: ID!, accountId: ID!, transactionPassword: String!): Response!
-    # Create a new transfer to a beneficiary account
-    createTransfer(transfer: TransactionInput!, transactionPassword: String!): Response!
+package graph
 
-    # ---- Dashboard -----
-    # Ask for a customer to resubmit a report
-    requestResubmit(customerId: String!, reportIds: [String!], message: String): Response!
-    # Generates a valid jwt token for the staff member
-    staffLogin(token: String!, authType: AuthType!): AuthResponse!
-    # Update KYC status
-    updateKYCStatus(id: ID!, status: KYCStatuses!,  message: String!): Response!
-    # Update AML status
-    updateAMLStatus(id: ID!, status: AMLStatuses!,  message: String!): Response!
+// This file will be automatically regenerated based on the schema, any resolver implementations
+// will be copied through when generating and any unknown code will be moved to the end.
+
+import (
+"context"
+"errors"
+"net/http"
+
+"ms.api/graph/generated"
+"ms.api/libs/validator/datevalidator"
+"ms.api/protos/pb/customer"
+"ms.api/protos/pb/onboarding"
+pbTypes "ms.api/protos/pb/types"
+"ms.api/server/http/middlewares"
+"ms.api/types"
+)
+
+func (r *mutationResolver) RequestOtp(ctx context.Context, typeArg types.DeliveryMode, target string, expireTimeInSeconds *int64) (*types.Response, error) {
+msg := "Not implemented"
+return &types.Response{
+Message: &msg,
+}, nil
 }
 
-# API response interface
-interface GraphQLResponse {
-    # Response message
-    message: String
-    # Boolean to represent if a response is a success
-    success: Boolean!
-    # Response code
-    code: Int!
+func (r *mutationResolver) VerifyOtp(ctx context.Context, target string, otpToken string) (*types.Response, error) {
+msg := "Not implemented"
+return &types.Response{
+Message: &msg,
+}, nil
 }
 
-# API response result
-type Response implements GraphQLResponse {
-    # Response message
-    message: String
-    # Boolean to represent if a response is a success
-    success: Boolean!
-    # Response code
-    code: Int!
+func (r *mutationResolver) Signup(ctx context.Context, customer types.CustomerInput) (*types.AuthResponse, error) {
+msg := "Not implemented"
+return &types.AuthResponse{
+Message: &msg,
+Code:    int64(500),
+}, nil
 }
 
-# API response with token
-type TokenResponse implements GraphQLResponse{
-    # Response message
-    message: String
-    # Boolean to represent if a response is a success
-    success: Boolean!
-    # Response code
-    code: Int!
-    # Token requested
-    token: String!
+func (r *mutationResolver) ResetLoginPassword(ctx context.Context, otpToken string, email string, loginPassword string) (*types.Response, error) {
+msg := "Not implemented"
+return &types.Response{
+Message: &msg,
+}, nil
 }
 
-type AuthResponse implements GraphQLResponse {
-    # Response message
-    message: String
-    # Boolean to represent if a response is a success
-    success: Boolean!
-    # Response code
-    code: Int!
-    # Authentication tokens
-    tokens: AuthTokens!
+func (r *mutationResolver) CheckCustomerEmail(ctx context.Context, email string, device types.DeviceInput) (*types.Response, error) {
+msg := "Not implemented"
+return &types.Response{
+Message: &msg,
+}, nil
 }
 
-type AuthTokens {
-    # JWT token
-    auth: String!
-    # Token to refresh the JWT token
-    refresh: String
+func (r *mutationResolver) CheckCustomerData(ctx context.Context, customerData types.CheckCustomerDataInput) (*types.Response, error) {
+msg := "Not implemented"
+return &types.Response{
+Message: &msg,
+}, nil
 }
 
-
-input CustomerInput {
-    phone: String!
-    email: String!
-    loginPassword: String!
-    device: DeviceInput
+func (r *mutationResolver) Register(ctx context.Context, customerDetails types.CustomerDetailsInput) (*types.Response, error) {
+var responseMessage string
+_, err := middlewares.GetClaimsFromCtx(ctx)
+if err != nil {
+responseMessage = "User authentication failed"
+return &types.Response{Message: &responseMessage, Success: false, Code: int64(500)}, err
 }
 
-input DeviceInput {
-    identifier: String!
-    os: String!
-    brand: String!
-    tokens: [DeviceTokenInput!]
-    preferences: [DevicePreferencesInput!]
+err = datevalidator.ValidateDob(customerDetails.Dob)
+if err != nil {
+responseMessage = "Dob validation failed"
+return &types.Response{Message: &responseMessage, Success: false, Code: int64(500)}, err
 }
 
-input DeviceTokenInput {
-    type: DeviceTokenTypes!
-    value: String!
+customerReq := &customer.RegisterRequest{
+FirstName: customerDetails.FirstName,
+LastName:  customerDetails.LastName,
+Dob:       customerDetails.Dob,
+Address: &customer.AddressInput{
+CountryId: customerDetails.Address.CountryID,
+State:     *customerDetails.Address.State,
+City:      *customerDetails.Address.City,
+Street:    customerDetails.Address.Street,
+Postcode:  customerDetails.Address.Postcode,
+Cordinates: &customer.CordinatesInput{
+Longitude: float32(customerDetails.Address.Cordinates.Longitude),
+Latitude:  float32(customerDetails.Address.Cordinates.Latitude),
+},
+},
+}
+_, err = r.CustomerService.Register(ctx, customerReq)
+if err != nil {
+responseMessage = "Failed"
+return &types.Response{Message: &responseMessage, Success: false, Code: int64(500)}, err
 }
 
-input DevicePreferencesInput {
-    type: DevicePreferencesTypes!
-    value: String!
+responseMessage = "Successful"
+return &types.Response{Message: &responseMessage, Success: true, Code: int64(200)}, nil
 }
 
-input CustomerDetailsInput {
-    firstName: String!
-    lastName: String!
-    dob: Date!
-    address: AddressInput!
+func (r *mutationResolver) SubmitCdd(ctx context.Context, cdd types.CDDInput) (*types.Response, error) {
+// Get user claims
+_, err := middlewares.GetClaimsFromCtx(ctx)
+if err != nil {
+return &types.Response{Message: &authFailedMessage, Success: false, Code: http.StatusUnauthorized}, err
 }
 
-input AddressInput {
-    countryId: ID!
-    state: String
-    city: String
-    street: String!
-    postcode: String!
-    cordinates: CordinatesInput
+// Build request
+var request onboarding.SubmitCDDRequest
+// KYC
+if cdd.Kyc != nil {
+var kycReportTypes = make([]pbTypes.Reports_KYCTypes, len(cdd.Kyc.ReportTypes))
+for index, value := range cdd.Kyc.ReportTypes {
+switch value {
+case types.KYCTypesDocument:
+kycReportTypes[index] = pbTypes.Reports_DOCUMENT
+case types.KYCTypesFacialVideo:
+kycReportTypes[index] = pbTypes.Reports_FACIAL_VIDEO
+}
+}
+request.Kyc = &onboarding.KYCInput{
+ReportTypes: kycReportTypes,
+}
+}
+// AML
+request.Aml = cdd.Aml
+// POA
+if cdd.Poa != nil {
+request.Poa = &onboarding.POAInput{
+Data: cdd.Poa.Data,
+}
+}
+// Execute RPC call
+response, err := r.OnBoardingService.SubmitCDD(ctx, &request)
+if err != nil {
+return nil, err
 }
 
-input CordinatesInput {
-    latitude: Float!
-    longitude: Float!
+return &types.Response{
+Success: response.Success,
+Code:    int64(response.Code),
+}, nil
 }
 
-input QuestionaryAnswerInput {
-    id: ID!
-    """
-    An array of the responses for the questions related to current questionary.
-    """
-    answers: [AnswerInput!]!
+func (r *mutationResolver) AnswerQuestionary(ctx context.Context, questionary types.QuestionaryAnswerInput) (*types.Response, error) {
+var responseMessage string
+
+_, err := middlewares.GetClaimsFromCtx(ctx)
+if err != nil {
+responseMessage = "User authentication failed"
+return &types.Response{Message: &responseMessage, Success: false, Code: int64(500)}, err
 }
 
-input AnswerInput {
-    id: ID!
-    answer: String
-    """
-    An array of IDs of the predefined answers chosen.
-    """
-    predefinedAnswers: [ID!]
+customerAnswers := make([]*customer.AnswerInput, len(questionary.Answers))
+if len(questionary.Answers) < 1 {
+// Should never happen .
+responseMessage = "Questionary answers not found"
+return &types.Response{Message: &responseMessage, Success: false, Code: int64(400)}, nil
 }
 
-input CDDInput {
-    kyc: KYCInput
-    aml: Boolean!
-    poa: POAInput
+for index, ans := range questionary.Answers {
+answer := &customer.AnswerInput{Id: ans.ID, Answer: ans.Answer}
+customerAnswers[index] = answer
 }
 
-input KYCInput {
-    reportTypes: [KYCTypes!]!
+req := &customer.AnswerQuestionaryRequest{
+Id:      questionary.ID,
+Answers: customerAnswers,
 }
 
-input POAInput {
-    data: String!
+resp, err := r.CustomerService.AnswerQuestionary(ctx, req)
+if err != nil {
+return nil, err
 }
 
-input AuthInput {
-    # User email to use in the auth
-    email: String!
-    # Customer login password
-    password: String!
-    # The device identifier of the customer
-    deviceIdentifier: String!
+responseMessage = "Success"
+
+return &types.Response{Message: &responseMessage, Success: resp.Success, Code: int64(resp.Code)}, nil
 }
 
-input CheckCustomerDataInput {
-    email: String!
-    firstName: String!
-    lastName: String!
-    dob: String!
-    accountNumber: String!
-    sortCode: String!
-    deviceIdentifier: String!
+func (r *mutationResolver) AcceptContent(ctx context.Context, contentID string) (*types.Response, error) {
+res, err := r.CustomerService.SetAcceptance(ctx, &customer.SetAcceptanceRequest{ContentId: contentID})
+if err != nil {
+return nil, err
 }
 
-input AccountInput {
-    productId: ID!
+message := "Successful"
+return &types.Response{
+Message: &message,
+Success: res.Success,
+Code:    int64(res.Code),
+}, nil
 }
 
-input VaultAccountInput {
-    productId: ID!
-    sourceAccount: ID!
-    amount: Float!
-    name: String
+func (r *mutationResolver) SetTransactionPassword(ctx context.Context, password string) (*types.Response, error) {
+msg := "Not implemented"
+return &types.Response{
+Message: &msg,
+}, nil
 }
 
-input BeneficiaryInput {
-    name: String!
-    account: BeneficiaryAccountInput!
+func (r *mutationResolver) ResetTransactionPassword(ctx context.Context, otpToken string, email string, newTransactionPassword string, currentTransactionPassword string) (*types.Response, error) {
+msg := "Not implemented"
+return &types.Response{
+Message: &msg,
+}, nil
 }
 
-input BeneficiaryAccountInput {
-    name: String
-    currencyId: ID!
-    accountNumber: String!
-    code: String!
+func (r *mutationResolver) Login(ctx context.Context, credentials types.AuthInput) (*types.AuthResponse, error) {
+msg := "Not implemented"
+return &types.AuthResponse{
+Message: &msg,
+Code:    int64(500),
+}, nil
 }
 
-input TransactionInput {
-    transactionTypeId: ID!
-    reference: String
-    feeIds: [ID!]
-    exchangeRateId: ID
-    amount: Float!
-    sourceAccountId: ID!
-    targetAccountId: ID!
-    idempotencyKey: String!
+func (r *mutationResolver) RefreshToken(ctx context.Context, token string) (*types.AuthResponse, error) {
+msg := "Not implemented"
+return &types.AuthResponse{
+Message: &msg,
+Code:    int64(500),
+}, nil
 }
 
-enum AuthType {
-    GOOGLE
+func (r *mutationResolver) SetDeviceToken(ctx context.Context, tokens []*types.DeviceTokenInput) (*types.Response, error) {
+var responseMessage string
+_, err := middlewares.GetClaimsFromCtx(ctx)
+if err != nil {
+responseMessage = "User authentication failed"
+return &types.Response{Message: &responseMessage, Success: false, Code: int64(500)}, err
+}
+token_ := make([]*pbTypes.DeviceTokenInput, 0)
+if len(tokens) < 1 {
+responseMessage = "device token empty"
+return &types.Response{Message: &responseMessage, Success: false, Code: int64(400)}, errors.New("device token empty")
 }
 
-# OTP delivery modes supported
-enum DeliveryMode {
-    EMAIL
-    SMS
-    PUSH
+for _, token := range tokens {
+token_ = append(token_, &pbTypes.DeviceTokenInput{Value: token.Value, Type: pbTypes.DeviceToken_DeviceTokenTypes(pbTypes.DeviceToken_FIREBASE)})
 }
+
+resp, err := r.CustomerService.SetDeviceToken(ctx, &customer.SetDeviceTokenRequest{Tokens: token_})
+if err != nil {
+responseMessage = "set device token failed"
+return &types.Response{Message: &responseMessage, Success: false, Code: int64(500)}, err
+}
+
+responseMessage = "Successful"
+return &types.Response{Message: &responseMessage, Success: resp.Success, Code: int64(resp.Code)}, err
+}
+
+func (r *mutationResolver) SetDevicePreferences(ctx context.Context, preferences []*types.DevicePreferencesInput) (*types.Response, error) {
+var responseMessage string
+helpers := &helpersfactory{}
+_, err := middlewares.GetClaimsFromCtx(ctx)
+if err != nil {
+responseMessage = "User authentication failed"
+return &types.Response{Message: &responseMessage, Success: false, Code: int64(500)}, err
+}
+
+preferences_ := make([]*pbTypes.DevicePreferencesInput, 0)
+if len(preferences) < 1 {
+responseMessage = "device preferences empty"
+return &types.Response{Message: &responseMessage, Success: false, Code: int64(400)}, errors.New("device preferences empty")
+}
+
+for _, preference := range preferences {
+preferences_ = append(preferences_, &pbTypes.DevicePreferencesInput{Type: pbTypes.DevicePreferences_DevicePreferencesTypes(helpers.GetDeveicePreferenceTypesIndex(preference.Type)), Value: preference.Value})
+}
+
+resp, err := r.CustomerService.SetDevicePreferences(ctx, &customer.SetDevicePreferencesRequest{Preferences: preferences_})
+if err != nil {
+responseMessage = "set device preferences failed"
+return &types.Response{Message: &responseMessage, Success: false, Code: int64(500)}, err
+}
+
+if resp != nil {
+responseMessage = "Successful"
+return &types.Response{Message: &responseMessage, Success: true, Code: int64(200)}, err
+}
+
+responseMessage = "Unknown error occurred"
+return &types.Response{Message: &responseMessage, Success: false, Code: int64(500)}, err
+}
+
+func (r *mutationResolver) CheckBvn(ctx context.Context, bvn string, phone string) (*types.Response, error) {
+msg := "Not implemented"
+return &types.Response{
+Message: &msg,
+}, nil
+}
+
+func (r *mutationResolver) CreateAccount(ctx context.Context, account types.AccountInput) (*types.Response, error) {
+msg := "Not implemented"
+return &types.Response{
+Message: &msg,
+}, nil
+}
+
+func (r *mutationResolver) CreateVaultAccount(ctx context.Context, account types.VaultAccountInput, transactionPassword string) (*types.Response, error) {
+msg := "Not implemented"
+return &types.Response{
+Message: &msg,
+}, nil
+}
+
+func (r *mutationResolver) CreateBeneficiary(ctx context.Context, beneficiary types.BeneficiaryInput, transactionPassword string) (*types.Response, error) {
+msg := "Not implemented"
+return &types.Response{
+Message: &msg,
+}, nil
+}
+
+func (r *mutationResolver) AddBeneficiaryAccount(ctx context.Context, beneficiaryID string, account types.BeneficiaryAccountInput, transactionPassword string) (*types.Response, error) {
+msg := "Not implemented"
+return &types.Response{
+Message: &msg,
+}, nil
+}
+
+func (r *mutationResolver) DeleteBeneficaryAccount(ctx context.Context, beneficiaryID string, accountID string, transactionPassword string) (*types.Response, error) {
+msg := "Not implemented"
+return &types.Response{
+Message: &msg,
+}, nil
+}
+
+func (r *mutationResolver) CreateTransfer(ctx context.Context, transfer types.TransactionInput, transactionPassword string) (*types.Response, error) {
+msg := "Not implemented"
+return &types.Response{
+Message: &msg,
+}, nil
+}
+
+func (r *mutationResolver) RequestResubmit(ctx context.Context, customerID string, reportIds []string, message *string) (*types.Response, error) {
+msg := "Not implemented"
+return &types.Response{
+Message: &msg,
+}, nil
+}
+
+func (r *mutationResolver) StaffLogin(ctx context.Context, token string, authType types.AuthType) (*types.AuthResponse, error) {
+msg := "Not implemented"
+return &types.AuthResponse{
+Message: &msg,
+Code:    int64(500),
+}, nil
+}
+
+func (r *mutationResolver) UpdateKYCStatus(ctx context.Context, id string, status types.KYCStatuses, message string) (*types.Response, error) {
+msg := "Not implemented"
+return &types.Response{
+Message: &msg,
+}, nil
+}
+
+func (r *mutationResolver) UpdateAMLStatus(ctx context.Context, id string, status types.AMLStatuses, message string) (*types.Response, error) {
+msg := "Not implemented"
+return &types.Response{
+Message: &msg,
+}, nil
+}
+
+// Mutation returns generated.MutationResolver implementation.
+func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
+
+type mutationResolver struct{ *Resolver }

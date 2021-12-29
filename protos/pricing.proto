@@ -4,7 +4,7 @@ package pricing;
 
 import "types.proto";
 import "google/protobuf/timestamp.proto";
-option go_package = "protos/pb/pricing";
+option go_package = "ms.api/protos/pb/pricing";
 
 message GetCurrencyRequest {
   string id = 1;

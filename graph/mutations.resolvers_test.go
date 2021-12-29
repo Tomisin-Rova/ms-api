@@ -3,15 +3,17 @@ package graph
 import (
 	"context"
 	"errors"
+	"net/http"
 	"testing"
 
-	pbTypes "ms.api/protos/pb/types"
-
+	"github.com/golang/mock/gomock"
 	"github.com/roava/zebra/models"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap/zaptest"
 	"ms.api/mocks"
 	"ms.api/protos/pb/customer"
+	"ms.api/protos/pb/onboarding"
+	pbTypes "ms.api/protos/pb/types"
 	"ms.api/server/http/middlewares"
 	"ms.api/types"
 )
@@ -19,7 +21,6 @@ import (
 var (
 	state       = "lagos"
 	city        = "lagos"
-	answer      = "My lifestyle"
 	mockAddress = types.AddressInput{
 		CountryID: "111xcc",
 		State:     &state,
@@ -40,7 +41,9 @@ var (
 )
 
 func TestMutationResolver_RequestOtp(t *testing.T) {
-	verificationServiceClient := new(mocks.VerificationServiceClient)
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	verificationServiceClient := mocks.NewMockVerificationServiceClient(controller)
 	resolverOpts := &ResolverOpts{
 		VerificationService: verificationServiceClient,
 	}
@@ -54,7 +57,9 @@ func TestMutationResolver_RequestOtp(t *testing.T) {
 }
 
 func TestMutationResolver_VerifyOtp(t *testing.T) {
-	verificationServiceClient := new(mocks.VerificationServiceClient)
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	verificationServiceClient := mocks.NewMockVerificationServiceClient(controller)
 	resolverOpts := &ResolverOpts{
 		VerificationService: verificationServiceClient,
 	}
@@ -65,7 +70,9 @@ func TestMutationResolver_VerifyOtp(t *testing.T) {
 }
 
 func TestMutationResolver_Signup(t *testing.T) {
-	authServiceClient := new(mocks.AuthServiceClient)
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	authServiceClient := mocks.NewMockAuthServiceClient(controller)
 	resolverOpts := &ResolverOpts{
 		AuthService: authServiceClient,
 	}
@@ -77,7 +84,9 @@ func TestMutationResolver_Signup(t *testing.T) {
 }
 
 func TestMutationResolver_ResetLoginPassword(t *testing.T) {
-	customerServiceClient := new(mocks.CustomerServiceClient)
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
 	resolverOpts := &ResolverOpts{
 		CustomerService: customerServiceClient,
 	}
@@ -88,7 +97,9 @@ func TestMutationResolver_ResetLoginPassword(t *testing.T) {
 }
 
 func TestMutationResolver_CheckCustomerEmail(t *testing.T) {
-	customerServiceClient := new(mocks.CustomerServiceClient)
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
 	resolverOpts := &ResolverOpts{
 		CustomerService: customerServiceClient,
 	}
@@ -101,7 +112,9 @@ func TestMutationResolver_CheckCustomerEmail(t *testing.T) {
 }
 
 func TestMutationResolver_CheckCustomerData(t *testing.T) {
-	customerServiceClient := new(mocks.CustomerServiceClient)
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
 	resolverOpts := &ResolverOpts{
 		CustomerService: customerServiceClient,
 	}
@@ -137,20 +150,21 @@ func TestMutationResolver_Register(t *testing.T) {
 		},
 	}
 
-	customerServiceClient := new(mocks.CustomerServiceClient)
-	resolverOpts := &ResolverOpts{
-		CustomerService: customerServiceClient,
-	}
-	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
-
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {
+			controller := gomock.NewController(t)
+			defer controller.Finish()
+			customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
+			resolverOpts := &ResolverOpts{
+				CustomerService: customerServiceClient,
+			}
+			resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
 
 			switch testCase.testType {
 			case success:
 				ctx := context.WithValue(context.Background(), middlewares.AuthenticatedUserContextKey, models.JWTClaims{Client: models.APP, ID: "123456", Email: "f@roava.app", DeviceID: "129594533fsdd"})
 
-				customerServiceClient.On("Register", ctx, &customer.RegisterRequest{
+				customerServiceClient.EXPECT().Register(ctx, &customer.RegisterRequest{
 					FirstName: "roava",
 					LastName:  "app",
 					Dob:       "18/05/1994",
@@ -176,43 +190,11 @@ func TestMutationResolver_Register(t *testing.T) {
 				ctx := context.WithValue(context.Background(), middlewares.AuthenticatedUserContextKey, models.JWTClaims{Client: models.APP, ID: "123456", Email: "f@roava.app", DeviceID: "129594533fsdd"})
 				mockRegisterReq.Dob = "1994-10-02"
 
-				customerServiceClient.On("AnswerQuestionary", ctx, &customer.RegisterRequest{
-					FirstName: "roava",
-					LastName:  "app",
-					Dob:       mockRegisterReq.Dob,
-					Address: &customer.AddressInput{
-						CountryId: "111xcc",
-						State:     state,
-						City:      city,
-						Street:    "vi",
-						Postcode:  "23401",
-						Cordinates: &customer.CordinatesInput{
-							Latitude:  3.15669,
-							Longitude: 3.99244,
-						},
-					},
-				}).Return(nil, nil).Times(1)
 				_, err := resolver.Register(ctx, mockRegisterReq)
 
 				assert.Error(t, err)
 
 			case errUserAuthentication:
-				customerServiceClient.On("Register", context.Background(), &customer.RegisterRequest{
-					FirstName: "roava",
-					LastName:  "app",
-					Dob:       "18/05/1994",
-					Address: &customer.AddressInput{
-						CountryId: "111xcc",
-						State:     state,
-						City:      city,
-						Street:    "vi",
-						Postcode:  "23401",
-						Cordinates: &customer.CordinatesInput{
-							Latitude:  3.15669,
-							Longitude: 3.99244,
-						},
-					},
-				}).Return(nil, nil).Times(1)
 				_, err := resolver.Register(context.Background(), mockRegisterReq)
 
 				assert.Error(t, err)
@@ -224,15 +206,225 @@ func TestMutationResolver_Register(t *testing.T) {
 }
 
 func TestMutationResolver_SubmitCdd(t *testing.T) {
-	onboardingServiceClient := new(mocks.OnboardingServiceClient)
-	resolverOpts := &ResolverOpts{
-		OnboardingService: onboardingServiceClient,
-	}
-	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
-	resp, err := resolver.SubmitCdd(context.Background(), types.CDDInput{})
+	const (
+		success = iota
+		successNoKYC
+		successNoAML
+		successNoPOA
+		errorUnauthenticatedUser
+		errorSubmitCDD
+	)
 
-	assert.NoError(t, err)
-	assert.NotNil(t, resp)
+	type arg struct {
+		ctx      context.Context
+		cddInput types.CDDInput
+	}
+	var tests = []struct {
+		name     string
+		arg      arg
+		testType int
+	}{
+		{
+			name: "Test success all validations",
+			arg: arg{
+				ctx: context.WithValue(context.Background(), middlewares.AuthenticatedUserContextKey, models.JWTClaims{}),
+				cddInput: types.CDDInput{
+					Kyc: &types.KYCInput{
+						ReportTypes: []types.KYCTypes{types.KYCTypesDocument, types.KYCTypesFacialVideo},
+					},
+					Aml: true,
+					Poa: &types.POAInput{
+						Data: "base64Image",
+					},
+				},
+			},
+			testType: success,
+		},
+		{
+			name: "Test success no KYC validation",
+			arg: arg{
+				ctx: context.WithValue(context.Background(), middlewares.AuthenticatedUserContextKey, models.JWTClaims{}),
+				cddInput: types.CDDInput{
+					Kyc: nil,
+					Aml: true,
+					Poa: &types.POAInput{
+						Data: "base64Image",
+					},
+				},
+			},
+			testType: successNoKYC,
+		},
+		{
+			name: "Test success no aml validation",
+			arg: arg{
+				ctx: context.WithValue(context.Background(), middlewares.AuthenticatedUserContextKey, models.JWTClaims{}),
+				cddInput: types.CDDInput{
+					Kyc: &types.KYCInput{
+						ReportTypes: []types.KYCTypes{types.KYCTypesDocument, types.KYCTypesFacialVideo},
+					},
+					Aml: false,
+					Poa: &types.POAInput{
+						Data: "base64Image",
+					},
+				},
+			},
+			testType: successNoAML,
+		},
+		{
+			name: "Test success no POA validation",
+			arg: arg{
+				ctx: context.WithValue(context.Background(), middlewares.AuthenticatedUserContextKey, models.JWTClaims{}),
+				cddInput: types.CDDInput{
+					Kyc: &types.KYCInput{
+						ReportTypes: []types.KYCTypes{types.KYCTypesDocument, types.KYCTypesFacialVideo},
+					},
+					Aml: true,
+					Poa: nil,
+				},
+			},
+			testType: successNoPOA,
+		},
+		{
+			name: "Test error unauthenticated user",
+			arg: arg{
+				ctx: context.Background(),
+			},
+			testType: errorUnauthenticatedUser,
+		},
+		{
+			name: "Test error submitting CDD",
+			arg: arg{
+				ctx: context.WithValue(context.Background(), middlewares.AuthenticatedUserContextKey, models.JWTClaims{}),
+				cddInput: types.CDDInput{
+					Kyc: &types.KYCInput{
+						ReportTypes: []types.KYCTypes{types.KYCTypesDocument, types.KYCTypesFacialVideo},
+					},
+					Aml: true,
+					Poa: &types.POAInput{
+						Data: "base64Image",
+					},
+				},
+			},
+			testType: errorSubmitCDD,
+		},
+	}
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			controller := gomock.NewController(t)
+			defer controller.Finish()
+			onboardingServiceClient := mocks.NewMockOnboardingServiceClient(controller)
+			resolverOpts := &ResolverOpts{
+				OnboardingService: onboardingServiceClient,
+			}
+			resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
+
+			switch testCase.testType {
+			case success:
+				onboardingServiceClient.EXPECT().SubmitCDD(testCase.arg.ctx, &onboarding.SubmitCDDRequest{
+					Kyc: &onboarding.KYCInput{
+						ReportTypes: []pbTypes.Reports_KYCTypes{pbTypes.Reports_DOCUMENT, pbTypes.Reports_FACIAL_VIDEO},
+					},
+					Aml: true,
+					Poa: &onboarding.POAInput{
+						Data: testCase.arg.cddInput.Poa.Data,
+					},
+				}).Return(&pbTypes.DefaultResponse{
+					Success: true,
+					Code:    http.StatusOK,
+				}, nil)
+
+				resp, err := resolver.SubmitCdd(testCase.arg.ctx, testCase.arg.cddInput)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, &types.Response{
+					Success: true,
+					Code:    http.StatusOK,
+				}, resp)
+			case successNoKYC:
+				onboardingServiceClient.EXPECT().SubmitCDD(testCase.arg.ctx, &onboarding.SubmitCDDRequest{
+					Kyc: nil,
+					Aml: true,
+					Poa: &onboarding.POAInput{
+						Data: testCase.arg.cddInput.Poa.Data,
+					},
+				}).Return(&pbTypes.DefaultResponse{
+					Success: true,
+					Code:    http.StatusOK,
+				}, nil)
+
+				resp, err := resolver.SubmitCdd(testCase.arg.ctx, testCase.arg.cddInput)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, &types.Response{
+					Success: true,
+					Code:    http.StatusOK,
+				}, resp)
+			case successNoAML:
+				onboardingServiceClient.EXPECT().SubmitCDD(testCase.arg.ctx, &onboarding.SubmitCDDRequest{
+					Kyc: &onboarding.KYCInput{
+						ReportTypes: []pbTypes.Reports_KYCTypes{pbTypes.Reports_DOCUMENT, pbTypes.Reports_FACIAL_VIDEO},
+					},
+					Aml: false,
+					Poa: &onboarding.POAInput{
+						Data: testCase.arg.cddInput.Poa.Data,
+					},
+				}).Return(&pbTypes.DefaultResponse{
+					Success: true,
+					Code:    http.StatusOK,
+				}, nil)
+
+				resp, err := resolver.SubmitCdd(testCase.arg.ctx, testCase.arg.cddInput)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, &types.Response{
+					Success: true,
+					Code:    http.StatusOK,
+				}, resp)
+			case successNoPOA:
+				onboardingServiceClient.EXPECT().SubmitCDD(testCase.arg.ctx, &onboarding.SubmitCDDRequest{
+					Kyc: &onboarding.KYCInput{
+						ReportTypes: []pbTypes.Reports_KYCTypes{pbTypes.Reports_DOCUMENT, pbTypes.Reports_FACIAL_VIDEO},
+					},
+					Aml: true,
+					Poa: nil,
+				}).Return(&pbTypes.DefaultResponse{
+					Success: true,
+					Code:    http.StatusOK,
+				}, nil)
+
+				resp, err := resolver.SubmitCdd(testCase.arg.ctx, testCase.arg.cddInput)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, &types.Response{
+					Success: true,
+					Code:    http.StatusOK,
+				}, resp)
+			case errorUnauthenticatedUser:
+				resp, err := resolver.SubmitCdd(testCase.arg.ctx, testCase.arg.cddInput)
+				assert.Error(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, &types.Response{
+					Message: &authFailedMessage,
+					Success: false,
+					Code:    http.StatusUnauthorized,
+				}, resp)
+			case errorSubmitCDD:
+				onboardingServiceClient.EXPECT().SubmitCDD(testCase.arg.ctx, &onboarding.SubmitCDDRequest{
+					Kyc: &onboarding.KYCInput{
+						ReportTypes: []pbTypes.Reports_KYCTypes{pbTypes.Reports_DOCUMENT, pbTypes.Reports_FACIAL_VIDEO},
+					},
+					Aml: true,
+					Poa: &onboarding.POAInput{
+						Data: testCase.arg.cddInput.Poa.Data,
+					},
+				}).Return(nil, errors.New(""))
+
+				resp, err := resolver.SubmitCdd(testCase.arg.ctx, testCase.arg.cddInput)
+				assert.Error(t, err)
+				assert.Nil(t, resp)
+			}
+		})
+	}
 }
 
 func TestMutationResolver_AnswerQuestionary(t *testing.T) {
@@ -257,8 +449,9 @@ func TestMutationResolver_AnswerQuestionary(t *testing.T) {
 
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {
-
-			customerServiceClient := new(mocks.CustomerServiceClient)
+			controller := gomock.NewController(t)
+			defer controller.Finish()
+			customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
 			resolverOpts := &ResolverOpts{
 				CustomerService: customerServiceClient,
 			}
@@ -274,7 +467,7 @@ func TestMutationResolver_AnswerQuestionary(t *testing.T) {
 						Email:    "f@roava.app",
 						DeviceID: "129594533fsdd"})
 
-				customerServiceClient.On("AnswerQuestionary", ctx,
+				customerServiceClient.EXPECT().AnswerQuestionary(ctx,
 					&customer.AnswerQuestionaryRequest{
 						Id: "questionaire_id",
 						Answers: []*customer.AnswerInput{
@@ -293,9 +486,8 @@ func TestMutationResolver_AnswerQuestionary(t *testing.T) {
 					ID: "questionaire_id",
 					Answers: []*types.AnswerInput{
 						{
-							ID:                "question_id",
-							Answer:            &answer,
-							PredefinedAnswers: []string{"predefined answer 1", "predefined answer 2"},
+							ID:     "question_id",
+							Answer: "My lifestyle",
 						},
 					},
 				}
@@ -307,28 +499,13 @@ func TestMutationResolver_AnswerQuestionary(t *testing.T) {
 
 			case errUserAuthentication:
 				ctx := context.Background()
-				customerServiceClient.On("AnswerQuestionary", ctx,
-					&customer.AnswerQuestionaryRequest{
-						Id: "questionaire_id",
-						Answers: []*customer.AnswerInput{
-							{
-								Id:     "question_id",
-								Answer: "My lifestyle",
-							},
-						},
-					},
-				).Return(&pbTypes.DefaultResponse{
-					Success: false,
-					Code:    500,
-				}, nil)
 
 				req := types.QuestionaryAnswerInput{
 					ID: "questionaire_id",
 					Answers: []*types.AnswerInput{
 						{
-							ID:                "question_id",
-							Answer:            &answer,
-							PredefinedAnswers: []string{"predefined answer 1", "predefined answer 2"},
+							ID:     "question_id",
+							Answer: "My lifestyle",
 						},
 					},
 				}
@@ -344,7 +521,9 @@ func TestMutationResolver_AnswerQuestionary(t *testing.T) {
 }
 
 func TestMutationResolver_SetTransactionPassword(t *testing.T) {
-	customerServiceClient := new(mocks.CustomerServiceClient)
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
 	resolverOpts := &ResolverOpts{
 		CustomerService: customerServiceClient,
 	}
@@ -356,7 +535,9 @@ func TestMutationResolver_SetTransactionPassword(t *testing.T) {
 }
 
 func TestMutationResolver_ResetTransactionPassword(t *testing.T) {
-	customerServiceClient := new(mocks.CustomerServiceClient)
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
 	resolverOpts := &ResolverOpts{
 		CustomerService: customerServiceClient,
 	}
@@ -368,7 +549,9 @@ func TestMutationResolver_ResetTransactionPassword(t *testing.T) {
 }
 
 func TestMutationResolver_Login(t *testing.T) {
-	authServiceClient := new(mocks.AuthServiceClient)
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	authServiceClient := mocks.NewMockAuthServiceClient(controller)
 	resolverOpts := &ResolverOpts{
 		AuthService: authServiceClient,
 	}
@@ -380,7 +563,9 @@ func TestMutationResolver_Login(t *testing.T) {
 }
 
 func TestMutationResolver_RefreshToken(t *testing.T) {
-	authServiceClient := new(mocks.AuthServiceClient)
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	authServiceClient := mocks.NewMockAuthServiceClient(controller)
 	resolverOpts := &ResolverOpts{
 		AuthService: authServiceClient,
 	}
@@ -420,8 +605,9 @@ func TestMutationResolver_SetDeviceToken(t *testing.T) {
 	}
 
 	for _, testCase := range tests {
-
-		customerServiceClient := new(mocks.CustomerServiceClient)
+		controller := gomock.NewController(t)
+		defer controller.Finish()
+		customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
 		resolverOpts := &ResolverOpts{
 			CustomerService: customerServiceClient,
 		}
@@ -439,7 +625,7 @@ func TestMutationResolver_SetDeviceToken(t *testing.T) {
 					Email:    "f@roava.app",
 					DeviceID: "129594533fsdd"})
 
-			customerServiceClient.On("SetDeviceToken", ctx,
+			customerServiceClient.EXPECT().SetDeviceToken(ctx,
 				&customer.SetDeviceTokenRequest{
 					Tokens: []*pbTypes.DeviceTokenInput{
 						{
@@ -459,19 +645,6 @@ func TestMutationResolver_SetDeviceToken(t *testing.T) {
 
 		case errUserAuthentication:
 			ctx := context.Background()
-			customerServiceClient.On("SetDeviceToken", ctx,
-				&customer.SetDeviceTokenRequest{
-					Tokens: []*pbTypes.DeviceTokenInput{
-						{
-							Type:  pbTypes.DeviceToken_FIREBASE,
-							Value: "hjhfwifwr83283r9nvow9r8r731nvpo1391_=38238r",
-						},
-					},
-				},
-			).Return(&pbTypes.DefaultResponse{
-				Success: false,
-				Code:    500,
-			}, nil)
 
 			resp, err := resolver.SetDeviceToken(ctx, testCase.args)
 			assert.Error(t, err)
@@ -496,7 +669,7 @@ func TestMutationResolver_SetDevicePreferences(t *testing.T) {
 			args: []*types.DevicePreferencesInput{
 				{
 					Type:  types.DevicePreferencesTypesPush,
-					Value: "84734khjhfwifwr832831nvpo1391_=38238r",
+					Value: "123",
 				},
 			},
 			testType: success,
@@ -506,7 +679,7 @@ func TestMutationResolver_SetDevicePreferences(t *testing.T) {
 			args: []*types.DevicePreferencesInput{
 				{
 					Type:  types.DevicePreferencesTypesPush,
-					Value: "84734khjhfwifwr832831nvpo1391_=38238r",
+					Value: "123",
 				},
 			},
 			testType: errUserAuthentication,
@@ -514,8 +687,9 @@ func TestMutationResolver_SetDevicePreferences(t *testing.T) {
 	}
 
 	for _, testCase := range tests {
-
-		customerServiceClient := new(mocks.CustomerServiceClient)
+		controller := gomock.NewController(t)
+		defer controller.Finish()
+		customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
 		resolverOpts := &ResolverOpts{
 			CustomerService: customerServiceClient,
 		}
@@ -533,12 +707,12 @@ func TestMutationResolver_SetDevicePreferences(t *testing.T) {
 					Email:    "f@roava.app",
 					DeviceID: "129594533fsdd"})
 
-			customerServiceClient.On("SetDevicePreferences", ctx,
+			customerServiceClient.EXPECT().SetDevicePreferences(ctx,
 				&customer.SetDevicePreferencesRequest{
 					Preferences: []*pbTypes.DevicePreferencesInput{
 						{
 							Type:  pbTypes.DevicePreferences_PUSH,
-							Value: "84734khjhfwifwr832831nvpo1391_=38238r",
+							Value: "123",
 						},
 					},
 				},
@@ -550,16 +724,6 @@ func TestMutationResolver_SetDevicePreferences(t *testing.T) {
 
 		case errUserAuthentication:
 			ctx := context.Background()
-			customerServiceClient.On("SetDevicePreferences", ctx,
-				&customer.SetDevicePreferencesRequest{
-					Preferences: []*pbTypes.DevicePreferencesInput{
-						{
-							Type:  pbTypes.DevicePreferences_PUSH,
-							Value: "84734khjhfwifwr832831nvpo1391_=38238r",
-						},
-					},
-				},
-			).Return(&pbTypes.Device{}, errors.New("user auth failed"))
 
 			resp, err := resolver.SetDevicePreferences(ctx, testCase.args)
 			assert.Error(t, err)
@@ -569,7 +733,9 @@ func TestMutationResolver_SetDevicePreferences(t *testing.T) {
 }
 
 func TestMutationResolver_CheckBvn(t *testing.T) {
-	customerServiceClient := new(mocks.CustomerServiceClient)
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
 	resolverOpts := &ResolverOpts{
 		CustomerService: customerServiceClient,
 	}
@@ -581,7 +747,9 @@ func TestMutationResolver_CheckBvn(t *testing.T) {
 }
 
 func TestMutationResolver_CreateAccount(t *testing.T) {
-	accountServiceClient := new(mocks.AccountServiceClient)
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	accountServiceClient := mocks.NewMockAccountServiceClient(controller)
 	resolverOpts := &ResolverOpts{
 		AccountService: accountServiceClient,
 	}
@@ -593,7 +761,9 @@ func TestMutationResolver_CreateAccount(t *testing.T) {
 }
 
 func TestMutationResolver_CreateVaultAccount(t *testing.T) {
-	accountServiceClient := new(mocks.AccountServiceClient)
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	accountServiceClient := mocks.NewMockAccountServiceClient(controller)
 	resolverOpts := &ResolverOpts{
 		AccountService: accountServiceClient,
 	}
@@ -605,7 +775,9 @@ func TestMutationResolver_CreateVaultAccount(t *testing.T) {
 }
 
 func TestMutationResolver_CreateBeneficiary(t *testing.T) {
-	customerServiceClient := new(mocks.CustomerServiceClient)
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
 	resolverOpts := &ResolverOpts{
 		CustomerService: customerServiceClient,
 	}
@@ -617,7 +789,9 @@ func TestMutationResolver_CreateBeneficiary(t *testing.T) {
 }
 
 func TestMutationResolver_AddBeneficiaryAccount(t *testing.T) {
-	customerServiceClient := new(mocks.CustomerServiceClient)
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
 	resolverOpts := &ResolverOpts{
 		CustomerService: customerServiceClient,
 	}
@@ -629,7 +803,9 @@ func TestMutationResolver_AddBeneficiaryAccount(t *testing.T) {
 }
 
 func TestMutationResolver_DeleteBeneficaryAccount(t *testing.T) {
-	customerServiceClient := new(mocks.CustomerServiceClient)
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
 	resolverOpts := &ResolverOpts{
 		CustomerService: customerServiceClient,
 	}
@@ -641,7 +817,9 @@ func TestMutationResolver_DeleteBeneficaryAccount(t *testing.T) {
 }
 
 func TestMutationResolver_CreateTransfer(t *testing.T) {
-	paymentServiceClient := new(mocks.PaymentServiceClient)
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	paymentServiceClient := mocks.NewMockPaymentServiceClient(controller)
 	resolverOpts := &ResolverOpts{
 		PaymentService: paymentServiceClient,
 	}
@@ -653,7 +831,9 @@ func TestMutationResolver_CreateTransfer(t *testing.T) {
 }
 
 func TestMutationResolver_RequestResubmit(t *testing.T) {
-	onboardingServiceClient := new(mocks.OnboardingServiceClient)
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	onboardingServiceClient := mocks.NewMockOnboardingServiceClient(controller)
 	resolverOpts := &ResolverOpts{
 		OnboardingService: onboardingServiceClient,
 	}
@@ -668,7 +848,9 @@ func TestMutationResolver_RequestResubmit(t *testing.T) {
 }
 
 func TestMutationResolver_StaffLogin(t *testing.T) {
-	authServiceClient := new(mocks.AuthServiceClient)
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	authServiceClient := mocks.NewMockAuthServiceClient(controller)
 	resolverOpts := &ResolverOpts{
 		AuthService: authServiceClient,
 	}
@@ -680,7 +862,9 @@ func TestMutationResolver_StaffLogin(t *testing.T) {
 }
 
 func TestMutationResolver_UpdateKYCStatus(t *testing.T) {
-	onboardingServiceClient := new(mocks.OnboardingServiceClient)
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	onboardingServiceClient := mocks.NewMockOnboardingServiceClient(controller)
 	resolverOpts := &ResolverOpts{
 		OnboardingService: onboardingServiceClient,
 	}
@@ -692,7 +876,9 @@ func TestMutationResolver_UpdateKYCStatus(t *testing.T) {
 }
 
 func TestMutationResolver_UpdateAMLStatus(t *testing.T) {
-	onboardingServiceClient := new(mocks.OnboardingServiceClient)
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	onboardingServiceClient := mocks.NewMockOnboardingServiceClient(controller)
 	resolverOpts := &ResolverOpts{
 		OnboardingService: onboardingServiceClient,
 	}

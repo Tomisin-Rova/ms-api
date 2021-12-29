@@ -4,7 +4,7 @@ package account;
 
 import "types.proto";
 import "google/protobuf/timestamp.proto";
-option go_package = "protos/pb/account";
+option go_package = "ms.api/protos/pb/account";
 
 message CreateAccountRequest {
   string product_id = 1;

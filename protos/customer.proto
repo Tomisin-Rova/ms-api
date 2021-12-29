@@ -4,7 +4,7 @@ package customer;
 
 import "types.proto";
 import "google/protobuf/timestamp.proto";
-option go_package = "protos/pb/customer";
+option go_package = "ms.api/protos/pb/customer";
 
 message ResetLoginPasswordRequest {
   string otp_token = 1;
