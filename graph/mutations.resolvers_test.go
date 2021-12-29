@@ -473,8 +473,9 @@ func TestMutationResolver_AnswerQuestionary(t *testing.T) {
 						Id: "questionaire_id",
 						Answers: []*customer.AnswerInput{
 							{
-								Id:     "question_id",
-								Answer: "My lifestyle",
+								Id:                "question_id",
+								Answer:            "My lifestyle",
+								PredefinedAnswers: []string{"a", "b", "c"},
 							},
 						},
 					},
@@ -487,8 +488,9 @@ func TestMutationResolver_AnswerQuestionary(t *testing.T) {
 					ID: "questionaire_id",
 					Answers: []*types.AnswerInput{
 						{
-							ID:     "question_id",
-							Answer: &answer,
+							ID:                "question_id",
+							Answer:            &answer,
+							PredefinedAnswers: []string{"a", "b", "c"},
 						},
 					},
 				}
@@ -505,8 +507,9 @@ func TestMutationResolver_AnswerQuestionary(t *testing.T) {
 					ID: "questionaire_id",
 					Answers: []*types.AnswerInput{
 						{
-							ID:     "question_id",
-							Answer: &answer,
+							ID:                "question_id",
+							Answer:            &answer,
+							PredefinedAnswers: []string{"a", "b", "c"},
 						},
 					},
 				}
