@@ -604,6 +604,18 @@ func Test_queryResolver_Questionary(t *testing.T) {
 						{
 							Id:    "questionId",
 							Value: "Question text",
+							PredefinedAnswers: []*pbTypes.QuestionaryPredefinedAnswer{
+								{
+									Id:    "predefinedAnswer Id 1",
+									Value: "predefinedAnswer Value 1",
+								},
+								{
+									Id:    "predefinedAnswer Id 2",
+									Value: "predefinedAnswer Value 2",
+								},
+							},
+							Required:        true,
+							MultipleOptions: true,
 						},
 					},
 					Status:   pbTypes.Questionary_ACTIVE,
@@ -757,11 +769,35 @@ func Test_queryResolver_Questionaries(t *testing.T) {
 								{
 									Id:    "1",
 									Value: "Do you have criminal record",
+									PredefinedAnswers: []*pbTypes.QuestionaryPredefinedAnswer{
+										{
+											Id:    "predefinedAnswer Id 1",
+											Value: "predefinedAnswer Value 1",
+										},
+										{
+											Id:    "predefinedAnswer Id 2",
+											Value: "predefinedAnswer Value 2",
+										},
+									},
+									Required:        true,
+									MultipleOptions: true,
 								},
 
 								{
 									Id:    "2",
 									Value: "Do you have an existing foreign account",
+									PredefinedAnswers: []*pbTypes.QuestionaryPredefinedAnswer{
+										{
+											Id:    "predefinedAnswer Id 1",
+											Value: "predefinedAnswer Value 1",
+										},
+										{
+											Id:    "predefinedAnswer Id 2",
+											Value: "predefinedAnswer Value 2",
+										},
+									},
+									Required:        true,
+									MultipleOptions: true,
 								},
 							},
 							Status:   pbTypes.Questionary_ACTIVE,
@@ -775,11 +811,35 @@ func Test_queryResolver_Questionaries(t *testing.T) {
 								{
 									Id:    "1",
 									Value: "Do you have medical record",
+									PredefinedAnswers: []*pbTypes.QuestionaryPredefinedAnswer{
+										{
+											Id:    "predefinedAnswer Id 1",
+											Value: "predefinedAnswer Value 1",
+										},
+										{
+											Id:    "predefinedAnswer Id 2",
+											Value: "predefinedAnswer Value 2",
+										},
+									},
+									Required:        true,
+									MultipleOptions: true,
 								},
 
 								{
 									Id:    "2",
 									Value: "Would you want to own foreign account",
+									PredefinedAnswers: []*pbTypes.QuestionaryPredefinedAnswer{
+										{
+											Id:    "predefinedAnswer Id 1",
+											Value: "predefinedAnswer Value 1",
+										},
+										{
+											Id:    "predefinedAnswer Id 2",
+											Value: "predefinedAnswer Value 2",
+										},
+									},
+									Required:        true,
+									MultipleOptions: true,
 								},
 							},
 							Status:   pbTypes.Questionary_ACTIVE,
@@ -839,11 +899,35 @@ func Test_queryResolver_Questionaries(t *testing.T) {
 								{
 									Id:    "1",
 									Value: "Do you have medical record",
+									PredefinedAnswers: []*pbTypes.QuestionaryPredefinedAnswer{
+										{
+											Id:    "predefinedAnswer Id 1",
+											Value: "predefinedAnswer Value 1",
+										},
+										{
+											Id:    "predefinedAnswer Id 2",
+											Value: "predefinedAnswer Value 2",
+										},
+									},
+									Required:        true,
+									MultipleOptions: true,
 								},
 
 								{
 									Id:    "2",
 									Value: "Would you want to own foreign account",
+									PredefinedAnswers: []*pbTypes.QuestionaryPredefinedAnswer{
+										{
+											Id:    "predefinedAnswer Id 1",
+											Value: "predefinedAnswer Value 1",
+										},
+										{
+											Id:    "predefinedAnswer Id 2",
+											Value: "predefinedAnswer Value 2",
+										},
+									},
+									Required:        true,
+									MultipleOptions: true,
 								},
 							},
 							Status:   pbTypes.Questionary_ACTIVE,
@@ -857,11 +941,35 @@ func Test_queryResolver_Questionaries(t *testing.T) {
 								{
 									Id:    "1",
 									Value: "Do you have criminal record",
+									PredefinedAnswers: []*pbTypes.QuestionaryPredefinedAnswer{
+										{
+											Id:    "predefinedAnswer Id 1",
+											Value: "predefinedAnswer Value 1",
+										},
+										{
+											Id:    "predefinedAnswer Id 2",
+											Value: "predefinedAnswer Value 2",
+										},
+									},
+									Required:        true,
+									MultipleOptions: true,
 								},
 
 								{
 									Id:    "2",
 									Value: "Do you have an existing foreign account",
+									PredefinedAnswers: []*pbTypes.QuestionaryPredefinedAnswer{
+										{
+											Id:    "predefinedAnswer Id 1",
+											Value: "predefinedAnswer Value 1",
+										},
+										{
+											Id:    "predefinedAnswer Id 2",
+											Value: "predefinedAnswer Value 2",
+										},
+									},
+									Required:        true,
+									MultipleOptions: true,
 								},
 							},
 							Status:   pbTypes.Questionary_ACTIVE,
@@ -920,11 +1028,35 @@ func Test_queryResolver_Questionaries(t *testing.T) {
 								{
 									Id:    "1",
 									Value: "Do you have medical record",
+									PredefinedAnswers: []*pbTypes.QuestionaryPredefinedAnswer{
+										{
+											Id:    "predefinedAnswer Id 1",
+											Value: "predefinedAnswer Value 1",
+										},
+										{
+											Id:    "predefinedAnswer Id 2",
+											Value: "predefinedAnswer Value 2",
+										},
+									},
+									Required:        true,
+									MultipleOptions: true,
 								},
 
 								{
 									Id:    "2",
 									Value: "Would you want to own foreign account",
+									PredefinedAnswers: []*pbTypes.QuestionaryPredefinedAnswer{
+										{
+											Id:    "predefinedAnswer Id 1",
+											Value: "predefinedAnswer Value 1",
+										},
+										{
+											Id:    "predefinedAnswer Id 2",
+											Value: "predefinedAnswer Value 2",
+										},
+									},
+									Required:        true,
+									MultipleOptions: true,
 								},
 							},
 							Status:   pbTypes.Questionary_ACTIVE,
@@ -938,11 +1070,35 @@ func Test_queryResolver_Questionaries(t *testing.T) {
 								{
 									Id:    "1",
 									Value: "Do you have criminal record",
+									PredefinedAnswers: []*pbTypes.QuestionaryPredefinedAnswer{
+										{
+											Id:    "predefinedAnswer Id 1",
+											Value: "predefinedAnswer Value 1",
+										},
+										{
+											Id:    "predefinedAnswer Id 2",
+											Value: "predefinedAnswer Value 2",
+										},
+									},
+									Required:        true,
+									MultipleOptions: true,
 								},
 
 								{
 									Id:    "2",
 									Value: "Do you have an existing foreign account",
+									PredefinedAnswers: []*pbTypes.QuestionaryPredefinedAnswer{
+										{
+											Id:    "predefinedAnswer Id 1",
+											Value: "predefinedAnswer Value 1",
+										},
+										{
+											Id:    "predefinedAnswer Id 2",
+											Value: "predefinedAnswer Value 2",
+										},
+									},
+									Required:        true,
+									MultipleOptions: true,
 								},
 							},
 							Status:   pbTypes.Questionary_ACTIVE,

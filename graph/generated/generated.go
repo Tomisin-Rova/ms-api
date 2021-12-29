@@ -118,6 +118,12 @@ type ComplexityRoot struct {
 		Street     func(childComplexity int) int
 	}
 
+	AddressConnection struct {
+		Nodes      func(childComplexity int) int
+		PageInfo   func(childComplexity int) int
+		TotalCount func(childComplexity int) int
+	}
+
 	AuthResponse struct {
 		Code    func(childComplexity int) int
 		Message func(childComplexity int) int
@@ -214,6 +220,12 @@ type ComplexityRoot struct {
 		CodeAlpha3 func(childComplexity int) int
 		ID         func(childComplexity int) int
 		Name       func(childComplexity int) int
+	}
+
+	CountryConnection struct {
+		Nodes      func(childComplexity int) int
+		PageInfo   func(childComplexity int) int
+		TotalCount func(childComplexity int) int
 	}
 
 	Currency struct {
@@ -473,6 +485,7 @@ type ComplexityRoot struct {
 	Query struct {
 		Account          func(childComplexity int, id string) int
 		Accounts         func(childComplexity int, first *int64, after *string, last *int64, before *string, statuses []types.AccountStatuses, types []types.ProductTypes) int
+		Addresses        func(childComplexity int, first *int64, after *string, last *int64, before *string, postcode *string) int
 		Banks            func(childComplexity int, first *int64, after *string, last *int64, before *string) int
 		Beneficiaries    func(childComplexity int, keywords *string, first *int64, after *string, last *int64, before *string, statuses []types.BeneficiaryStatuses) int
 		Beneficiary      func(childComplexity int, id string) int
@@ -481,6 +494,7 @@ type ComplexityRoot struct {
 		CheckEmail       func(childComplexity int, email string) int
 		Content          func(childComplexity int, id string) int
 		Contents         func(childComplexity int, first *int64, after *string, last *int64, before *string) int
+		Countries        func(childComplexity int, keywords *string, first *int64, after *string, last *int64, before *string) int
 		Currencies       func(childComplexity int, keywords *string, first *int64, after *string, last *int64, before *string) int
 		Currency         func(childComplexity int, id string) int
 		Customer         func(childComplexity int, id string) int
@@ -516,8 +530,9 @@ type ComplexityRoot struct {
 	}
 
 	QuestionaryAnswerQuestion struct {
-		Answer func(childComplexity int) int
-		ID     func(childComplexity int) int
+		Answer            func(childComplexity int) int
+		ID                func(childComplexity int) int
+		PredefinedAnswers func(childComplexity int) int
 	}
 
 	QuestionaryConnection struct {
@@ -526,9 +541,17 @@ type ComplexityRoot struct {
 		TotalCount func(childComplexity int) int
 	}
 
-	QuestionaryQuestion struct {
+	QuestionaryPredefinedAnswer struct {
 		ID    func(childComplexity int) int
 		Value func(childComplexity int) int
+	}
+
+	QuestionaryQuestion struct {
+		ID                func(childComplexity int) int
+		MultipleOptions   func(childComplexity int) int
+		PredefinedAnswers func(childComplexity int) int
+		Required          func(childComplexity int) int
+		Value             func(childComplexity int) int
 	}
 
 	Reports struct {
@@ -663,6 +686,8 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	CheckEmail(ctx context.Context, email string) (bool, error)
+	Addresses(ctx context.Context, first *int64, after *string, last *int64, before *string, postcode *string) (*types.AddressConnection, error)
+	Countries(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string) (*types.CountryConnection, error)
 	OnfidoSDKToken(ctx context.Context) (*types.TokenResponse, error)
 	Cdd(ctx context.Context, filter types.CommonQueryFilterInput) (*types.Cdd, error)
 	Content(ctx context.Context, id string) (*types.Content, error)
@@ -1032,6 +1057,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Address.Street(childComplexity), true
+
+	case "AddressConnection.nodes":
+		if e.complexity.AddressConnection.Nodes == nil {
+			break
+		}
+
+		return e.complexity.AddressConnection.Nodes(childComplexity), true
+
+	case "AddressConnection.pageInfo":
+		if e.complexity.AddressConnection.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.AddressConnection.PageInfo(childComplexity), true
+
+	case "AddressConnection.totalCount":
+		if e.complexity.AddressConnection.TotalCount == nil {
+			break
+		}
+
+		return e.complexity.AddressConnection.TotalCount(childComplexity), true
 
 	case "AuthResponse.code":
 		if e.complexity.AuthResponse.Code == nil {
@@ -1445,6 +1491,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Country.Name(childComplexity), true
+
+	case "CountryConnection.nodes":
+		if e.complexity.CountryConnection.Nodes == nil {
+			break
+		}
+
+		return e.complexity.CountryConnection.Nodes(childComplexity), true
+
+	case "CountryConnection.pageInfo":
+		if e.complexity.CountryConnection.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.CountryConnection.PageInfo(childComplexity), true
+
+	case "CountryConnection.totalCount":
+		if e.complexity.CountryConnection.TotalCount == nil {
+			break
+		}
+
+		return e.complexity.CountryConnection.TotalCount(childComplexity), true
 
 	case "Currency.code":
 		if e.complexity.Currency.Code == nil {
@@ -2774,6 +2841,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Accounts(childComplexity, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string), args["statuses"].([]types.AccountStatuses), args["types"].([]types.ProductTypes)), true
 
+	case "Query.addresses":
+		if e.complexity.Query.Addresses == nil {
+			break
+		}
+
+		args, err := ec.field_Query_addresses_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Addresses(childComplexity, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string), args["postcode"].(*string)), true
+
 	case "Query.banks":
 		if e.complexity.Query.Banks == nil {
 			break
@@ -2869,6 +2948,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Contents(childComplexity, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string)), true
+
+	case "Query.countries":
+		if e.complexity.Query.Countries == nil {
+			break
+		}
+
+		args, err := ec.field_Query_countries_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Countries(childComplexity, args["keywords"].(*string), args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string)), true
 
 	case "Query.currencies":
 		if e.complexity.Query.Currencies == nil {
@@ -3131,6 +3222,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.QuestionaryAnswerQuestion.ID(childComplexity), true
 
+	case "QuestionaryAnswerQuestion.predefinedAnswers":
+		if e.complexity.QuestionaryAnswerQuestion.PredefinedAnswers == nil {
+			break
+		}
+
+		return e.complexity.QuestionaryAnswerQuestion.PredefinedAnswers(childComplexity), true
+
 	case "QuestionaryConnection.nodes":
 		if e.complexity.QuestionaryConnection.Nodes == nil {
 			break
@@ -3152,12 +3250,47 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.QuestionaryConnection.TotalCount(childComplexity), true
 
+	case "QuestionaryPredefinedAnswer.id":
+		if e.complexity.QuestionaryPredefinedAnswer.ID == nil {
+			break
+		}
+
+		return e.complexity.QuestionaryPredefinedAnswer.ID(childComplexity), true
+
+	case "QuestionaryPredefinedAnswer.value":
+		if e.complexity.QuestionaryPredefinedAnswer.Value == nil {
+			break
+		}
+
+		return e.complexity.QuestionaryPredefinedAnswer.Value(childComplexity), true
+
 	case "QuestionaryQuestion.id":
 		if e.complexity.QuestionaryQuestion.ID == nil {
 			break
 		}
 
 		return e.complexity.QuestionaryQuestion.ID(childComplexity), true
+
+	case "QuestionaryQuestion.multipleOptions":
+		if e.complexity.QuestionaryQuestion.MultipleOptions == nil {
+			break
+		}
+
+		return e.complexity.QuestionaryQuestion.MultipleOptions(childComplexity), true
+
+	case "QuestionaryQuestion.predefinedAnswers":
+		if e.complexity.QuestionaryQuestion.PredefinedAnswers == nil {
+			break
+		}
+
+		return e.complexity.QuestionaryQuestion.PredefinedAnswers(childComplexity), true
+
+	case "QuestionaryQuestion.required":
+		if e.complexity.QuestionaryQuestion.Required == nil {
+			break
+		}
+
+		return e.complexity.QuestionaryQuestion.Required(childComplexity), true
 
 	case "QuestionaryQuestion.value":
 		if e.complexity.QuestionaryQuestion.Value == nil {
@@ -3837,12 +3970,19 @@ input CordinatesInput {
 
 input QuestionaryAnswerInput {
     id: ID!
+    """
+    An array of the responses for the questions related to current questionary.
+    """
     answers: [AnswerInput!]!
 }
 
 input AnswerInput {
     id: ID!
-    answer: String!
+    answer: String
+    """
+    An array of IDs of the predefined answers chosen.
+    """
+    predefinedAnswers: [ID!]
 }
 
 input CDDInput {
@@ -3925,6 +4065,31 @@ enum DeliveryMode {
 	{Name: "graph/schemas/queries.graphql", Input: `type Query {
     # Check if there's a customer with the email given
     checkEmail(email: String!): Boolean!
+    # Fetch a list of addresses related to the filters given
+    addresses(
+        # Returns the first n elements from the list.
+        first: Int
+        # Returns the elements in the list that come after the specified cursor.
+        after: String
+        # Returns the last n elements from the list.
+        last: Int
+        # Returns the elements in the list that come before the specified cursor.
+        before: String
+        # Filter address by it's postcode. If empty, should ignore the field
+        postcode: String
+    ): AddressConnection!
+    countries(
+        # Keywords used to filter the countries
+        keywords: String
+        # Returns the first n elements from the list.
+        first: Int
+        # Returns the elements in the list that come after the specified cursor.
+        after: String
+        # Returns the last n elements from the list.
+        last: Int
+        # Returns the elements in the list that come before the specified cursor.
+        before: String
+    ): CountryConnection!
     # Get an Onfido SDK token to capture photo, selfie
     onfidoSDKToken: TokenResponse!
     # Fetch the cdd by ID given
@@ -4235,6 +4400,26 @@ type BankConnection {
     pageInfo: PageInfo!
     # Identifies the total count of items in the connection
     totalCount: Int!
+}
+
+# The connection type for Address.
+type AddressConnection {
+    # A list of nodes
+    nodes: [Address!]!
+    # Information to aid in pagination
+    pageInfo: PageInfo!
+    # Identifies the total count of items in the connection
+    totalCount: Int!
+}
+
+# The connection type for Country.
+type CountryConnection {
+    # A list of nodes
+    nodes: [Country!]!
+    # Information to aid in pagination
+    pageInfo: PageInfo!
+    # Identifies the total count of items in the connection
+    totalCount: Int!
 }`, BuiltIn: false},
 	{Name: "graph/schemas/types.graphql", Input: `# Date scalar format DD-MM-YYYY
 scalar Date
@@ -4327,12 +4512,12 @@ enum IdentityCredentialsTypes {
 type Organization {
     id: ID!
     name: String!
-    status: OrganisationStatuses!
+    status: OrganizationStatuses!
     statusTs: Int!
     ts: Int!
 }
 
-enum OrganisationStatuses {
+enum OrganizationStatuses {
     ACTIVE
     INACTIVE
 }
@@ -4365,6 +4550,9 @@ type Acceptance {
 type Questionary {
     id: ID!
     type: QuestionaryTypes!
+    """
+    An array of different questions related to the current questionary.
+    """
     questions: [QuestionaryQuestion!]!
     status: QuestionaryStatuses!
     statusTs: Int!
@@ -4374,19 +4562,44 @@ type Questionary {
 type QuestionaryQuestion {
     id: ID!
     value: String!
+    """
+    An array of predefined answers for the current question.
+    *not required
+    """
+    predefinedAnswers: [QuestionaryPredefinedAnswer!]
+    """
+    If true the question must be answered.
+    """
+    required: Boolean!
+    """
+    If true the question can be answered with multiple values from the predefined answers.
+    """
+    multipleOptions: Boolean!
+}
+
+type QuestionaryPredefinedAnswer {
+    id: ID!
+    value: String!
 }
 
 type QuestionaryAnswer {
     id: ID!
     questionaryId: ID!
     customerId: ID!
+    """
+    An array of the responses for the questions related to current questionary.
+    """
     questions: [QuestionaryAnswerQuestion!]!
     ts: Int!
 }
 
 type QuestionaryAnswerQuestion {
     id: ID!
-    answer: String!
+    answer: String
+    """
+    An array of IDs of the predefined answers chosen.
+    """
+    predefinedAnswers: [ID!]
 }
 
 enum QuestionaryStatuses {
@@ -5587,6 +5800,57 @@ func (ec *executionContext) field_Query_accounts_args(ctx context.Context, rawAr
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_addresses_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *int64
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg0, err = ec.unmarshalOInt2ᚖint64(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+		arg1, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg1
+	var arg2 *int64
+	if tmp, ok := rawArgs["last"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("last"))
+		arg2, err = ec.unmarshalOInt2ᚖint64(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["last"] = arg2
+	var arg3 *string
+	if tmp, ok := rawArgs["before"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("before"))
+		arg3, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["before"] = arg3
+	var arg4 *string
+	if tmp, ok := rawArgs["postcode"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("postcode"))
+		arg4, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["postcode"] = arg4
+	return args, nil
+}
+
 func (ec *executionContext) field_Query_banks_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -5839,6 +6103,57 @@ func (ec *executionContext) field_Query_contents_args(ctx context.Context, rawAr
 		}
 	}
 	args["before"] = arg3
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_countries_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *string
+	if tmp, ok := rawArgs["keywords"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("keywords"))
+		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["keywords"] = arg0
+	var arg1 *int64
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg1, err = ec.unmarshalOInt2ᚖint64(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg1
+	var arg2 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+		arg2, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg2
+	var arg3 *int64
+	if tmp, ok := rawArgs["last"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("last"))
+		arg3, err = ec.unmarshalOInt2ᚖint64(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["last"] = arg3
+	var arg4 *string
+	if tmp, ok := rawArgs["before"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("before"))
+		arg4, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["before"] = arg4
 	return args, nil
 }
 
@@ -7933,6 +8248,111 @@ func (ec *executionContext) _Address_cordinates(ctx context.Context, field graph
 	return ec.marshalNCordinates2ᚖmsᚗapiᚋtypesᚐCordinates(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _AddressConnection_nodes(ctx context.Context, field graphql.CollectedField, obj *types.AddressConnection) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "AddressConnection",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Nodes, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*types.Address)
+	fc.Result = res
+	return ec.marshalNAddress2ᚕᚖmsᚗapiᚋtypesᚐAddressᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _AddressConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *types.AddressConnection) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "AddressConnection",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PageInfo, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.PageInfo)
+	fc.Result = res
+	return ec.marshalNPageInfo2ᚖmsᚗapiᚋtypesᚐPageInfo(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _AddressConnection_totalCount(ctx context.Context, field graphql.CollectedField, obj *types.AddressConnection) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "AddressConnection",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalCount, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int64)
+	fc.Result = res
+	return ec.marshalNInt2int64(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _AuthResponse_message(ctx context.Context, field graphql.CollectedField, obj *types.AuthResponse) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -9966,6 +10386,111 @@ func (ec *executionContext) _Country_name(ctx context.Context, field graphql.Col
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _CountryConnection_nodes(ctx context.Context, field graphql.CollectedField, obj *types.CountryConnection) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "CountryConnection",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Nodes, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*types.Country)
+	fc.Result = res
+	return ec.marshalNCountry2ᚕᚖmsᚗapiᚋtypesᚐCountryᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _CountryConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *types.CountryConnection) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "CountryConnection",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PageInfo, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.PageInfo)
+	fc.Result = res
+	return ec.marshalNPageInfo2ᚖmsᚗapiᚋtypesᚐPageInfo(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _CountryConnection_totalCount(ctx context.Context, field graphql.CollectedField, obj *types.CountryConnection) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "CountryConnection",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalCount, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int64)
+	fc.Result = res
+	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Currency_id(ctx context.Context, field graphql.CollectedField, obj *types.Currency) (ret graphql.Marshaler) {
@@ -14616,9 +15141,9 @@ func (ec *executionContext) _Organization_status(ctx context.Context, field grap
 		}
 		return graphql.Null
 	}
-	res := resTmp.(types.OrganisationStatuses)
+	res := resTmp.(types.OrganizationStatuses)
 	fc.Result = res
-	return ec.marshalNOrganisationStatuses2msᚗapiᚋtypesᚐOrganisationStatuses(ctx, field.Selections, res)
+	return ec.marshalNOrganizationStatuses2msᚗapiᚋtypesᚐOrganizationStatuses(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Organization_statusTs(ctx context.Context, field graphql.CollectedField, obj *types.Organization) (ret graphql.Marshaler) {
@@ -15955,6 +16480,90 @@ func (ec *executionContext) _Query_checkEmail(ctx context.Context, field graphql
 	res := resTmp.(bool)
 	fc.Result = res
 	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_addresses(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_addresses_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Addresses(rctx, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string), args["postcode"].(*string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.AddressConnection)
+	fc.Result = res
+	return ec.marshalNAddressConnection2ᚖmsᚗapiᚋtypesᚐAddressConnection(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_countries(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_countries_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Countries(rctx, args["keywords"].(*string), args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.CountryConnection)
+	fc.Result = res
+	return ec.marshalNCountryConnection2ᚖmsᚗapiᚋtypesᚐCountryConnection(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_onfidoSDKToken(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -17461,14 +18070,43 @@ func (ec *executionContext) _QuestionaryAnswerQuestion_answer(ctx context.Contex
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _QuestionaryAnswerQuestion_predefinedAnswers(ctx context.Context, field graphql.CollectedField, obj *types.QuestionaryAnswerQuestion) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "QuestionaryAnswerQuestion",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PredefinedAnswers, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	fc.Result = res
+	return ec.marshalOID2ᚕstringᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _QuestionaryConnection_nodes(ctx context.Context, field graphql.CollectedField, obj *types.QuestionaryConnection) (ret graphql.Marshaler) {
@@ -17576,6 +18214,76 @@ func (ec *executionContext) _QuestionaryConnection_totalCount(ctx context.Contex
 	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _QuestionaryPredefinedAnswer_id(ctx context.Context, field graphql.CollectedField, obj *types.QuestionaryPredefinedAnswer) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "QuestionaryPredefinedAnswer",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _QuestionaryPredefinedAnswer_value(ctx context.Context, field graphql.CollectedField, obj *types.QuestionaryPredefinedAnswer) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "QuestionaryPredefinedAnswer",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Value, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _QuestionaryQuestion_id(ctx context.Context, field graphql.CollectedField, obj *types.QuestionaryQuestion) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -17644,6 +18352,108 @@ func (ec *executionContext) _QuestionaryQuestion_value(ctx context.Context, fiel
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _QuestionaryQuestion_predefinedAnswers(ctx context.Context, field graphql.CollectedField, obj *types.QuestionaryQuestion) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "QuestionaryQuestion",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PredefinedAnswers, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*types.QuestionaryPredefinedAnswer)
+	fc.Result = res
+	return ec.marshalOQuestionaryPredefinedAnswer2ᚕᚖmsᚗapiᚋtypesᚐQuestionaryPredefinedAnswerᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _QuestionaryQuestion_required(ctx context.Context, field graphql.CollectedField, obj *types.QuestionaryQuestion) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "QuestionaryQuestion",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Required, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _QuestionaryQuestion_multipleOptions(ctx context.Context, field graphql.CollectedField, obj *types.QuestionaryQuestion) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "QuestionaryQuestion",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.MultipleOptions, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Reports_type(ctx context.Context, field graphql.CollectedField, obj *types.Reports) (ret graphql.Marshaler) {
@@ -21032,7 +21842,15 @@ func (ec *executionContext) unmarshalInputAnswerInput(ctx context.Context, obj i
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("answer"))
-			it.Answer, err = ec.unmarshalNString2string(ctx, v)
+			it.Answer, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "predefinedAnswers":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("predefinedAnswers"))
+			it.PredefinedAnswers, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -22148,6 +22966,43 @@ func (ec *executionContext) _Address(ctx context.Context, sel ast.SelectionSet, 
 	return out
 }
 
+var addressConnectionImplementors = []string{"AddressConnection"}
+
+func (ec *executionContext) _AddressConnection(ctx context.Context, sel ast.SelectionSet, obj *types.AddressConnection) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, addressConnectionImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("AddressConnection")
+		case "nodes":
+			out.Values[i] = ec._AddressConnection_nodes(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "pageInfo":
+			out.Values[i] = ec._AddressConnection_pageInfo(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "totalCount":
+			out.Values[i] = ec._AddressConnection_totalCount(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var authResponseImplementors = []string{"AuthResponse", "GraphQLResponse"}
 
 func (ec *executionContext) _AuthResponse(ctx context.Context, sel ast.SelectionSet, obj *types.AuthResponse) graphql.Marshaler {
@@ -22685,6 +23540,43 @@ func (ec *executionContext) _Country(ctx context.Context, sel ast.SelectionSet, 
 			}
 		case "name":
 			out.Values[i] = ec._Country_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var countryConnectionImplementors = []string{"CountryConnection"}
+
+func (ec *executionContext) _CountryConnection(ctx context.Context, sel ast.SelectionSet, obj *types.CountryConnection) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, countryConnectionImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("CountryConnection")
+		case "nodes":
+			out.Values[i] = ec._CountryConnection_nodes(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "pageInfo":
+			out.Values[i] = ec._CountryConnection_pageInfo(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "totalCount":
+			out.Values[i] = ec._CountryConnection_totalCount(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -24118,6 +25010,34 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				return res
 			})
+		case "addresses":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_addresses(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "countries":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_countries(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "onfidoSDKToken":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -24580,9 +25500,8 @@ func (ec *executionContext) _QuestionaryAnswerQuestion(ctx context.Context, sel 
 			}
 		case "answer":
 			out.Values[i] = ec._QuestionaryAnswerQuestion_answer(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
+		case "predefinedAnswers":
+			out.Values[i] = ec._QuestionaryAnswerQuestion_predefinedAnswers(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -24631,6 +25550,38 @@ func (ec *executionContext) _QuestionaryConnection(ctx context.Context, sel ast.
 	return out
 }
 
+var questionaryPredefinedAnswerImplementors = []string{"QuestionaryPredefinedAnswer"}
+
+func (ec *executionContext) _QuestionaryPredefinedAnswer(ctx context.Context, sel ast.SelectionSet, obj *types.QuestionaryPredefinedAnswer) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, questionaryPredefinedAnswerImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("QuestionaryPredefinedAnswer")
+		case "id":
+			out.Values[i] = ec._QuestionaryPredefinedAnswer_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "value":
+			out.Values[i] = ec._QuestionaryPredefinedAnswer_value(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var questionaryQuestionImplementors = []string{"QuestionaryQuestion"}
 
 func (ec *executionContext) _QuestionaryQuestion(ctx context.Context, sel ast.SelectionSet, obj *types.QuestionaryQuestion) graphql.Marshaler {
@@ -24649,6 +25600,18 @@ func (ec *executionContext) _QuestionaryQuestion(ctx context.Context, sel ast.Se
 			}
 		case "value":
 			out.Values[i] = ec._QuestionaryQuestion_value(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "predefinedAnswers":
+			out.Values[i] = ec._QuestionaryQuestion_predefinedAnswers(ctx, field, obj)
+		case "required":
+			out.Values[i] = ec._QuestionaryQuestion_required(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "multipleOptions":
+			out.Values[i] = ec._QuestionaryQuestion_multipleOptions(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -25620,6 +26583,20 @@ func (ec *executionContext) marshalNAddress2ᚖmsᚗapiᚋtypesᚐAddress(ctx co
 	return ec._Address(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNAddressConnection2msᚗapiᚋtypesᚐAddressConnection(ctx context.Context, sel ast.SelectionSet, v types.AddressConnection) graphql.Marshaler {
+	return ec._AddressConnection(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNAddressConnection2ᚖmsᚗapiᚋtypesᚐAddressConnection(ctx context.Context, sel ast.SelectionSet, v *types.AddressConnection) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._AddressConnection(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNAddressInput2ᚖmsᚗapiᚋtypesᚐAddressInput(ctx context.Context, v interface{}) (*types.AddressInput, error) {
 	res, err := ec.unmarshalInputAddressInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
@@ -26037,6 +27014,43 @@ func (ec *executionContext) marshalNCordinates2ᚖmsᚗapiᚋtypesᚐCordinates(
 	return ec._Cordinates(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNCountry2ᚕᚖmsᚗapiᚋtypesᚐCountryᚄ(ctx context.Context, sel ast.SelectionSet, v []*types.Country) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNCountry2ᚖmsᚗapiᚋtypesᚐCountry(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
 func (ec *executionContext) marshalNCountry2ᚖmsᚗapiᚋtypesᚐCountry(ctx context.Context, sel ast.SelectionSet, v *types.Country) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -26045,6 +27059,20 @@ func (ec *executionContext) marshalNCountry2ᚖmsᚗapiᚋtypesᚐCountry(ctx co
 		return graphql.Null
 	}
 	return ec._Country(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNCountryConnection2msᚗapiᚋtypesᚐCountryConnection(ctx context.Context, sel ast.SelectionSet, v types.CountryConnection) graphql.Marshaler {
+	return ec._CountryConnection(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNCountryConnection2ᚖmsᚗapiᚋtypesᚐCountryConnection(ctx context.Context, sel ast.SelectionSet, v *types.CountryConnection) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._CountryConnection(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNCurrency2msᚗapiᚋtypesᚐCurrency(ctx context.Context, sel ast.SelectionSet, v types.Currency) graphql.Marshaler {
@@ -26699,16 +27727,6 @@ func (ec *executionContext) marshalNMeResult2msᚗapiᚋtypesᚐMeResult(ctx con
 	return ec._MeResult(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNOrganisationStatuses2msᚗapiᚋtypesᚐOrganisationStatuses(ctx context.Context, v interface{}) (types.OrganisationStatuses, error) {
-	var res types.OrganisationStatuses
-	err := res.UnmarshalGQL(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNOrganisationStatuses2msᚗapiᚋtypesᚐOrganisationStatuses(ctx context.Context, sel ast.SelectionSet, v types.OrganisationStatuses) graphql.Marshaler {
-	return v
-}
-
 func (ec *executionContext) marshalNOrganization2ᚖmsᚗapiᚋtypesᚐOrganization(ctx context.Context, sel ast.SelectionSet, v *types.Organization) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -26717,6 +27735,16 @@ func (ec *executionContext) marshalNOrganization2ᚖmsᚗapiᚋtypesᚐOrganizat
 		return graphql.Null
 	}
 	return ec._Organization(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNOrganizationStatuses2msᚗapiᚋtypesᚐOrganizationStatuses(ctx context.Context, v interface{}) (types.OrganizationStatuses, error) {
+	var res types.OrganizationStatuses
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNOrganizationStatuses2msᚗapiᚋtypesᚐOrganizationStatuses(ctx context.Context, sel ast.SelectionSet, v types.OrganizationStatuses) graphql.Marshaler {
+	return v
 }
 
 func (ec *executionContext) marshalNPOA2ᚖmsᚗapiᚋtypesᚐPoa(ctx context.Context, sel ast.SelectionSet, v *types.Poa) graphql.Marshaler {
@@ -26979,6 +28007,16 @@ func (ec *executionContext) marshalNQuestionaryConnection2ᚖmsᚗapiᚋtypesᚐ
 		return graphql.Null
 	}
 	return ec._QuestionaryConnection(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNQuestionaryPredefinedAnswer2ᚖmsᚗapiᚋtypesᚐQuestionaryPredefinedAnswer(ctx context.Context, sel ast.SelectionSet, v *types.QuestionaryPredefinedAnswer) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._QuestionaryPredefinedAnswer(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNQuestionaryQuestion2ᚕᚖmsᚗapiᚋtypesᚐQuestionaryQuestionᚄ(ctx context.Context, sel ast.SelectionSet, v []*types.QuestionaryQuestion) graphql.Marshaler {
@@ -28659,6 +29697,46 @@ func (ec *executionContext) marshalOProductTypes2ᚕmsᚗapiᚋtypesᚐProductTy
 				defer wg.Done()
 			}
 			ret[i] = ec.marshalNProductTypes2msᚗapiᚋtypesᚐProductTypes(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalOQuestionaryPredefinedAnswer2ᚕᚖmsᚗapiᚋtypesᚐQuestionaryPredefinedAnswerᚄ(ctx context.Context, sel ast.SelectionSet, v []*types.QuestionaryPredefinedAnswer) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNQuestionaryPredefinedAnswer2ᚖmsᚗapiᚋtypesᚐQuestionaryPredefinedAnswer(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)

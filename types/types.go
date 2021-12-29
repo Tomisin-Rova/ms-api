@@ -94,6 +94,12 @@ type Address struct {
 	Cordinates *Cordinates `json:"cordinates"`
 }
 
+type AddressConnection struct {
+	Nodes      []*Address `json:"nodes"`
+	PageInfo   *PageInfo  `json:"pageInfo"`
+	TotalCount int64      `json:"totalCount"`
+}
+
 type AddressInput struct {
 	CountryID  string           `json:"countryId"`
 	State      *string          `json:"state"`
@@ -104,8 +110,10 @@ type AddressInput struct {
 }
 
 type AnswerInput struct {
-	ID     string `json:"id"`
-	Answer string `json:"answer"`
+	ID     string  `json:"id"`
+	Answer *string `json:"answer"`
+	// An array of IDs of the predefined answers chosen.
+	PredefinedAnswers []string `json:"predefinedAnswers"`
 }
 
 type AuthInput struct {
@@ -251,6 +259,12 @@ type Country struct {
 	CodeAlpha2 string `json:"codeAlpha2"`
 	CodeAlpha3 string `json:"codeAlpha3"`
 	Name       string `json:"name"`
+}
+
+type CountryConnection struct {
+	Nodes      []*Country `json:"nodes"`
+	PageInfo   *PageInfo  `json:"pageInfo"`
+	TotalCount int64      `json:"totalCount"`
 }
 
 type Currency struct {
@@ -453,7 +467,7 @@ type LinkedTransactionTarget struct {
 type Organization struct {
 	ID       string               `json:"id"`
 	Name     string               `json:"name"`
-	Status   OrganisationStatuses `json:"status"`
+	Status   OrganizationStatuses `json:"status"`
 	StatusTs int64                `json:"statusTs"`
 	Ts       int64                `json:"ts"`
 }
@@ -520,8 +534,9 @@ type ProductMambu struct {
 }
 
 type Questionary struct {
-	ID        string                 `json:"id"`
-	Type      QuestionaryTypes       `json:"type"`
+	ID   string           `json:"id"`
+	Type QuestionaryTypes `json:"type"`
+	// An array of different questions related to the current questionary.
 	Questions []*QuestionaryQuestion `json:"questions"`
 	Status    QuestionaryStatuses    `json:"status"`
 	StatusTs  int64                  `json:"statusTs"`
@@ -529,21 +544,25 @@ type Questionary struct {
 }
 
 type QuestionaryAnswer struct {
-	ID            string                       `json:"id"`
-	QuestionaryID string                       `json:"questionaryId"`
-	CustomerID    string                       `json:"customerId"`
-	Questions     []*QuestionaryAnswerQuestion `json:"questions"`
-	Ts            int64                        `json:"ts"`
+	ID            string `json:"id"`
+	QuestionaryID string `json:"questionaryId"`
+	CustomerID    string `json:"customerId"`
+	// An array of the responses for the questions related to current questionary.
+	Questions []*QuestionaryAnswerQuestion `json:"questions"`
+	Ts        int64                        `json:"ts"`
 }
 
 type QuestionaryAnswerInput struct {
-	ID      string         `json:"id"`
+	ID string `json:"id"`
+	// An array of the responses for the questions related to current questionary.
 	Answers []*AnswerInput `json:"answers"`
 }
 
 type QuestionaryAnswerQuestion struct {
-	ID     string `json:"id"`
-	Answer string `json:"answer"`
+	ID     string  `json:"id"`
+	Answer *string `json:"answer"`
+	// An array of IDs of the predefined answers chosen.
+	PredefinedAnswers []string `json:"predefinedAnswers"`
 }
 
 type QuestionaryConnection struct {
@@ -552,9 +571,21 @@ type QuestionaryConnection struct {
 	TotalCount int64          `json:"totalCount"`
 }
 
+type QuestionaryPredefinedAnswer struct {
+	ID    string `json:"id"`
+	Value string `json:"value"`
+}
+
 type QuestionaryQuestion struct {
 	ID    string `json:"id"`
 	Value string `json:"value"`
+	// An array of predefined answers for the current question.
+	// *not required
+	PredefinedAnswers []*QuestionaryPredefinedAnswer `json:"predefinedAnswers"`
+	// If true the question must be answered.
+	Required bool `json:"required"`
+	// If true the question can be answered with multiple values from the predefined answers.
+	MultipleOptions bool `json:"multipleOptions"`
 }
 
 type Reports struct {
@@ -1650,44 +1681,44 @@ func (e LinkedTransactionTypes) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
-type OrganisationStatuses string
+type OrganizationStatuses string
 
 const (
-	OrganisationStatusesActive   OrganisationStatuses = "ACTIVE"
-	OrganisationStatusesInactive OrganisationStatuses = "INACTIVE"
+	OrganizationStatusesActive   OrganizationStatuses = "ACTIVE"
+	OrganizationStatusesInactive OrganizationStatuses = "INACTIVE"
 )
 
-var AllOrganisationStatuses = []OrganisationStatuses{
-	OrganisationStatusesActive,
-	OrganisationStatusesInactive,
+var AllOrganizationStatuses = []OrganizationStatuses{
+	OrganizationStatusesActive,
+	OrganizationStatusesInactive,
 }
 
-func (e OrganisationStatuses) IsValid() bool {
+func (e OrganizationStatuses) IsValid() bool {
 	switch e {
-	case OrganisationStatusesActive, OrganisationStatusesInactive:
+	case OrganizationStatusesActive, OrganizationStatusesInactive:
 		return true
 	}
 	return false
 }
 
-func (e OrganisationStatuses) String() string {
+func (e OrganizationStatuses) String() string {
 	return string(e)
 }
 
-func (e *OrganisationStatuses) UnmarshalGQL(v interface{}) error {
+func (e *OrganizationStatuses) UnmarshalGQL(v interface{}) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
 	}
 
-	*e = OrganisationStatuses(str)
+	*e = OrganizationStatuses(str)
 	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid OrganisationStatuses", str)
+		return fmt.Errorf("%s is not a valid OrganizationStatuses", str)
 	}
 	return nil
 }
 
-func (e OrganisationStatuses) MarshalGQL(w io.Writer) {
+func (e OrganizationStatuses) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

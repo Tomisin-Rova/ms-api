@@ -39,9 +39,19 @@ message StaffLoginRequest {
   AuthType auth_type = 2;
 }
 
+message ValidateTokenRequest {
+  string token = 1;
+}
+
+message ValidateTokenResponse {
+  bool isValid = 1;
+  types.JWTClaims claims = 2;
+}
+
 service AuthService {
   rpc Signup(SignupRequest) returns (TokenPairResponse);
   rpc Login(LoginRequest) returns (TokenPairResponse);
   rpc StaffLogin(StaffLoginRequest) returns (TokenPairResponse);
   rpc RefreshToken(RefreshTokenRequest) returns (TokenPairResponse);
+  rpc ValidateToken(ValidateTokenRequest) returns (ValidateTokenResponse);
 }

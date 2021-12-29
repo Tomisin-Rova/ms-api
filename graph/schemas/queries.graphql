@@ -1,6 +1,31 @@
 type Query {
     # Check if there's a customer with the email given
     checkEmail(email: String!): Boolean!
+    # Fetch a list of addresses related to the filters given
+    addresses(
+        # Returns the first n elements from the list.
+        first: Int
+        # Returns the elements in the list that come after the specified cursor.
+        after: String
+        # Returns the last n elements from the list.
+        last: Int
+        # Returns the elements in the list that come before the specified cursor.
+        before: String
+        # Filter address by it's postcode. If empty, should ignore the field
+        postcode: String
+    ): AddressConnection!
+    countries(
+        # Keywords used to filter the countries
+        keywords: String
+        # Returns the first n elements from the list.
+        first: Int
+        # Returns the elements in the list that come after the specified cursor.
+        after: String
+        # Returns the last n elements from the list.
+        last: Int
+        # Returns the elements in the list that come before the specified cursor.
+        before: String
+    ): CountryConnection!
     # Get an Onfido SDK token to capture photo, selfie
     onfidoSDKToken: TokenResponse!
     # Fetch the cdd by ID given
@@ -307,6 +332,26 @@ type ContentConnection {
 type BankConnection {
     # A list of nodes
     nodes: [Bank!]!
+    # Information to aid in pagination
+    pageInfo: PageInfo!
+    # Identifies the total count of items in the connection
+    totalCount: Int!
+}
+
+# The connection type for Address.
+type AddressConnection {
+    # A list of nodes
+    nodes: [Address!]!
+    # Information to aid in pagination
+    pageInfo: PageInfo!
+    # Identifies the total count of items in the connection
+    totalCount: Int!
+}
+
+# The connection type for Country.
+type CountryConnection {
+    # A list of nodes
+    nodes: [Country!]!
     # Information to aid in pagination
     pageInfo: PageInfo!
     # Identifies the total count of items in the connection

@@ -6,6 +6,7 @@ package graph
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/roava/zebra/models"
 	"go.uber.org/zap"
@@ -30,6 +31,14 @@ func (r *queryResolver) CheckEmail(ctx context.Context, email string) (bool, err
 	}
 
 	return resp.Success, nil
+}
+
+func (r *queryResolver) Addresses(ctx context.Context, first *int64, after *string, last *int64, before *string, postcode *string) (*apiTypes.AddressConnection, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *queryResolver) Countries(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string) (*apiTypes.CountryConnection, error) {
+	panic(fmt.Errorf("not implemented"))
 }
 
 func (r *queryResolver) OnfidoSDKToken(ctx context.Context) (*apiTypes.TokenResponse, error) {
@@ -184,9 +193,21 @@ func (r *queryResolver) Questionary(ctx context.Context, id string) (*apiTypes.Q
 
 	questions := make([]*apiTypes.QuestionaryQuestion, 0)
 	for _, q := range resp.Questions {
+
+		predefinedAnswers := make([]*apiTypes.QuestionaryPredefinedAnswer, 0)
+		for _, pa := range q.PredefinedAnswers {
+			predefinedAnswers = append(predefinedAnswers, &apiTypes.QuestionaryPredefinedAnswer{
+				ID:    pa.Id,
+				Value: pa.Value,
+			})
+		}
+
 		question := &apiTypes.QuestionaryQuestion{
-			ID:    q.Id,
-			Value: q.Value,
+			ID:                q.Id,
+			Value:             q.Value,
+			PredefinedAnswers: predefinedAnswers,
+			Required:          q.Required,
+			MultipleOptions:   q.MultipleOptions,
 		}
 		questions = append(questions, question)
 	}

@@ -19,6 +19,7 @@ import (
 var (
 	state       = "lagos"
 	city        = "lagos"
+	answer      = "My lifestyle"
 	mockAddress = types.AddressInput{
 		CountryID: "111xcc",
 		State:     &state,
@@ -292,8 +293,9 @@ func TestMutationResolver_AnswerQuestionary(t *testing.T) {
 					ID: "questionaire_id",
 					Answers: []*types.AnswerInput{
 						{
-							ID:     "question_id",
-							Answer: "My lifestyle",
+							ID:                "question_id",
+							Answer:            &answer,
+							PredefinedAnswers: []string{"predefined answer 1", "predefined answer 2"},
 						},
 					},
 				}
@@ -324,8 +326,9 @@ func TestMutationResolver_AnswerQuestionary(t *testing.T) {
 					ID: "questionaire_id",
 					Answers: []*types.AnswerInput{
 						{
-							ID:     "question_id",
-							Answer: "My lifestyle",
+							ID:                "question_id",
+							Answer:            &answer,
+							PredefinedAnswers: []string{"predefined answer 1", "predefined answer 2"},
 						},
 					},
 				}

@@ -122,7 +122,7 @@ func (r *mutationResolver) AnswerQuestionary(ctx context.Context, questionary ty
 	}
 
 	for index, ans := range questionary.Answers {
-		answer := &customer.AnswerInput{Id: ans.ID, Answer: ans.Answer}
+		answer := &customer.AnswerInput{Id: ans.ID, Answer: *ans.Answer}
 		customerAnswers[index] = answer
 	}
 

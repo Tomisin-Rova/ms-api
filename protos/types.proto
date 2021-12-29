@@ -90,11 +90,11 @@ message IdentityCredentials {
 message Organization {
   string id = 1;
   string name = 2;
-  enum OrganisationStatuses {
+  enum OrganizationStatuses {
     ACTIVE = 0;
     INACTIVE = 1;
   }
-  OrganisationStatuses status = 3;
+  OrganizationStatuses status = 3;
   google.protobuf.Timestamp status_ts = 4;
   google.protobuf.Timestamp ts = 5;
 }
@@ -143,6 +143,14 @@ message Questionary {
 message QuestionaryQuestion {
   string id = 1;
   string value = 2;
+  repeated QuestionaryPredefinedAnswer predefined_answers = 3;
+  bool required = 4;
+  bool multiple_options = 5;
+}
+
+message QuestionaryPredefinedAnswer {
+  string id = 1;
+  string value = 2;
 }
 
 message QuestionaryAnswer {
@@ -156,6 +164,7 @@ message QuestionaryAnswer {
 message QuestionaryAnswerQuestion {
   string id = 1;
   string answer = 2;
+  repeated string predefined_answers = 3;
 }
 
 message Device {
@@ -181,7 +190,7 @@ message DevicePreferences {
     BIOMETRICS = 1;
   }
   DevicePreferencesTypes type = 1;
-  string value = 2;
+  bool value = 2;
 }
 
 message DeviceToken {
@@ -642,6 +651,17 @@ message PaginationInfo {
   bool has_previous_page = 2;
   string start_cursor = 3;
   string end_cursor = 4;
+}
+
+message JWTClaims {
+  enum ClientType {
+    APP = 0;
+    DASHBOARD = 1;
+  }
+  ClientType clientType = 1;
+  string id = 2;
+  string email = 3;
+  string device_id = 4;
 }
 
 // ############# END OTHERS GROUP #############

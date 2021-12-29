@@ -157,12 +157,19 @@ input CordinatesInput {
 
 input QuestionaryAnswerInput {
     id: ID!
+    """
+    An array of the responses for the questions related to current questionary.
+    """
     answers: [AnswerInput!]!
 }
 
 input AnswerInput {
     id: ID!
-    answer: String!
+    answer: String
+    """
+    An array of IDs of the predefined answers chosen.
+    """
+    predefinedAnswers: [ID!]
 }
 
 input CDDInput {

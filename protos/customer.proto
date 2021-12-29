@@ -153,6 +153,35 @@ message AnswerQuestionaryRequest {
 message AnswerInput {
   string id = 1;
   string answer = 2;
+  repeated string predefined_answers = 3;
+}
+
+message GetAddressesRequest {
+  int32 first = 1;
+  string after = 2;
+  int32 last = 3;
+  string before = 4;
+  string postcode = 5;
+}
+
+message GetAddressesResponse {
+  repeated types.Address nodes = 1;
+  types.PaginationInfo pagination_info = 2;
+  int32 total_count = 3;
+}
+
+message GetCountriesRequest {
+  string keywords = 1;
+  int32 first = 2;
+  string after = 3;
+  int32 last = 4;
+  string before = 5;
+}
+
+message GetCountriesResponse {
+  repeated types.Country nodes = 1;
+  types.PaginationInfo pagination_info = 2;
+  int32 total_count = 3;
 }
 
 service CustomerService {
@@ -177,4 +206,6 @@ service CustomerService {
   rpc GetQuestionary(GetQuestionaryRequest) returns (types.Questionary);
   rpc GetQuestionaries(GetQuestionariesRequest) returns (GetQuestionariesResponse);
   rpc AnswerQuestionary(AnswerQuestionaryRequest) returns (types.DefaultResponse);
+  rpc GetAddresses(GetAddressesRequest) returns (GetAddressesResponse);
+  rpc GetCountries(GetCountriesRequest) returns (GetCountriesResponse);
 }

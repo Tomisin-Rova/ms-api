@@ -89,12 +89,12 @@ enum IdentityCredentialsTypes {
 type Organization {
     id: ID!
     name: String!
-    status: OrganisationStatuses!
+    status: OrganizationStatuses!
     statusTs: Int!
     ts: Int!
 }
 
-enum OrganisationStatuses {
+enum OrganizationStatuses {
     ACTIVE
     INACTIVE
 }
@@ -127,6 +127,9 @@ type Acceptance {
 type Questionary {
     id: ID!
     type: QuestionaryTypes!
+    """
+    An array of different questions related to the current questionary.
+    """
     questions: [QuestionaryQuestion!]!
     status: QuestionaryStatuses!
     statusTs: Int!
@@ -136,19 +139,44 @@ type Questionary {
 type QuestionaryQuestion {
     id: ID!
     value: String!
+    """
+    An array of predefined answers for the current question.
+    *not required
+    """
+    predefinedAnswers: [QuestionaryPredefinedAnswer!]
+    """
+    If true the question must be answered.
+    """
+    required: Boolean!
+    """
+    If true the question can be answered with multiple values from the predefined answers.
+    """
+    multipleOptions: Boolean!
+}
+
+type QuestionaryPredefinedAnswer {
+    id: ID!
+    value: String!
 }
 
 type QuestionaryAnswer {
     id: ID!
     questionaryId: ID!
     customerId: ID!
+    """
+    An array of the responses for the questions related to current questionary.
+    """
     questions: [QuestionaryAnswerQuestion!]!
     ts: Int!
 }
 
 type QuestionaryAnswerQuestion {
     id: ID!
-    answer: String!
+    answer: String
+    """
+    An array of IDs of the predefined answers chosen.
+    """
+    predefinedAnswers: [ID!]
 }
 
 enum QuestionaryStatuses {
