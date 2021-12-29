@@ -713,7 +713,7 @@ func TestMutationResolver_SetDevicePreferences(t *testing.T) {
 					Preferences: []*pbTypes.DevicePreferencesInput{
 						{
 							Type:  pbTypes.DevicePreferences_PUSH,
-							Value: "string type value",
+							Value: "123",
 						},
 					},
 				},
