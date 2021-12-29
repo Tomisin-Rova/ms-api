@@ -669,7 +669,11 @@ func TestMutationResolver_SetDevicePreferences(t *testing.T) {
 			args: []*types.DevicePreferencesInput{
 				{
 					Type:  types.DevicePreferencesTypesPush,
+<<<<<<< HEAD
 					Value: "123",
+=======
+					Value: true,
+>>>>>>> develop
 				},
 			},
 			testType: success,
@@ -679,7 +683,11 @@ func TestMutationResolver_SetDevicePreferences(t *testing.T) {
 			args: []*types.DevicePreferencesInput{
 				{
 					Type:  types.DevicePreferencesTypesPush,
+<<<<<<< HEAD
 					Value: "123",
+=======
+					Value: true,
+>>>>>>> develop
 				},
 			},
 			testType: errUserAuthentication,
@@ -712,7 +720,11 @@ func TestMutationResolver_SetDevicePreferences(t *testing.T) {
 					Preferences: []*pbTypes.DevicePreferencesInput{
 						{
 							Type:  pbTypes.DevicePreferences_PUSH,
+<<<<<<< HEAD
 							Value: "123",
+=======
+							Value: true,
+>>>>>>> develop
 						},
 					},
 				},

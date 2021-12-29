@@ -339,12 +339,12 @@ type DeviceInput struct {
 
 type DevicePreferences struct {
 	Type  DevicePreferencesTypes `json:"type"`
-	Value string                 `json:"value"`
+	Value bool                   `json:"value"`
 }
 
 type DevicePreferencesInput struct {
 	Type  DevicePreferencesTypes `json:"type"`
-	Value string                 `json:"value"`
+	Value bool                   `json:"value"`
 }
 
 type DeviceToken struct {

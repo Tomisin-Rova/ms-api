@@ -6,10 +6,12 @@ package graph
 import (
 	"context"
 	"errors"
+	"net/http"
 
 	"ms.api/graph/generated"
 	"ms.api/libs/validator/datevalidator"
 	"ms.api/protos/pb/customer"
+	"ms.api/protos/pb/onboarding"
 	pbTypes "ms.api/protos/pb/types"
 	"ms.api/server/http/middlewares"
 	"ms.api/types"
@@ -60,7 +62,7 @@ func (r *mutationResolver) CheckCustomerData(ctx context.Context, customerData t
 
 func (r *mutationResolver) Register(ctx context.Context, customerDetails types.CustomerDetailsInput) (*types.Response, error) {
 	var responseMessage string
-	_, err := middlewares.GetAuthenticatedUser(ctx)
+	_, err := middlewares.GetClaimsFromCtx(ctx)
 	if err != nil {
 		responseMessage = "User authentication failed"
 		return &types.Response{Message: &responseMessage, Success: false, Code: int64(500)}, err
@@ -99,16 +101,53 @@ func (r *mutationResolver) Register(ctx context.Context, customerDetails types.C
 }
 
 func (r *mutationResolver) SubmitCdd(ctx context.Context, cdd types.CDDInput) (*types.Response, error) {
-	msg := "Not implemented"
+	// Get user claims
+	_, err := middlewares.GetClaimsFromCtx(ctx)
+	if err != nil {
+		return &types.Response{Message: &authFailedMessage, Success: false, Code: http.StatusUnauthorized}, err
+	}
+
+	// Build request
+	var request onboarding.SubmitCDDRequest
+	// KYC
+	if cdd.Kyc != nil {
+		var kycReportTypes = make([]pbTypes.Reports_KYCTypes, len(cdd.Kyc.ReportTypes))
+		for index, value := range cdd.Kyc.ReportTypes {
+			switch value {
+			case types.KYCTypesDocument:
+				kycReportTypes[index] = pbTypes.Reports_DOCUMENT
+			case types.KYCTypesFacialVideo:
+				kycReportTypes[index] = pbTypes.Reports_FACIAL_VIDEO
+			}
+		}
+		request.Kyc = &onboarding.KYCInput{
+			ReportTypes: kycReportTypes,
+		}
+	}
+	// AML
+	request.Aml = cdd.Aml
+	// POA
+	if cdd.Poa != nil {
+		request.Poa = &onboarding.POAInput{
+			Data: cdd.Poa.Data,
+		}
+	}
+	// Execute RPC call
+	response, err := r.OnBoardingService.SubmitCDD(ctx, &request)
+	if err != nil {
+		return nil, err
+	}
+
 	return &types.Response{
-		Message: &msg,
+		Success: response.Success,
+		Code:    int64(response.Code),
 	}, nil
 }
 
 func (r *mutationResolver) AnswerQuestionary(ctx context.Context, questionary types.QuestionaryAnswerInput) (*types.Response, error) {
 	var responseMessage string
 
-	_, err := middlewares.GetAuthenticatedUser(ctx)
+	_, err := middlewares.GetClaimsFromCtx(ctx)
 	if err != nil {
 		responseMessage = "User authentication failed"
 		return &types.Response{Message: &responseMessage, Success: false, Code: int64(500)}, err
@@ -187,7 +226,7 @@ func (r *mutationResolver) RefreshToken(ctx context.Context, token string) (*typ
 
 func (r *mutationResolver) SetDeviceToken(ctx context.Context, tokens []*types.DeviceTokenInput) (*types.Response, error) {
 	var responseMessage string
-	_, err := middlewares.GetAuthenticatedUser(ctx)
+	_, err := middlewares.GetClaimsFromCtx(ctx)
 	if err != nil {
 		responseMessage = "User authentication failed"
 		return &types.Response{Message: &responseMessage, Success: false, Code: int64(500)}, err
@@ -215,7 +254,7 @@ func (r *mutationResolver) SetDeviceToken(ctx context.Context, tokens []*types.D
 func (r *mutationResolver) SetDevicePreferences(ctx context.Context, preferences []*types.DevicePreferencesInput) (*types.Response, error) {
 	var responseMessage string
 	helpers := &helpersfactory{}
-	_, err := middlewares.GetAuthenticatedUser(ctx)
+	_, err := middlewares.GetClaimsFromCtx(ctx)
 	if err != nil {
 		responseMessage = "User authentication failed"
 		return &types.Response{Message: &responseMessage, Success: false, Code: int64(500)}, err

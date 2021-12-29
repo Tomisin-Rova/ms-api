@@ -5,6 +5,11 @@ import (
 	"ms.api/types"
 )
 
+var (
+	// Response messages
+	authFailedMessage = "User authentication failed"
+)
+
 type helpersfactory struct{}
 
 func (h *helpersfactory) GetQuestionaryStatusIndex(val types.QuestionaryStatuses) int32 {
