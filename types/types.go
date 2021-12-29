@@ -110,8 +110,10 @@ type AddressInput struct {
 }
 
 type AnswerInput struct {
-	ID     string `json:"id"`
-	Answer string `json:"answer"`
+	ID     string  `json:"id"`
+	Answer *string `json:"answer"`
+	// An array of IDs of the predefined answers chosen.
+	PredefinedAnswers []string `json:"predefinedAnswers"`
 }
 
 type AuthInput struct {
@@ -342,7 +344,7 @@ type DevicePreferences struct {
 
 type DevicePreferencesInput struct {
 	Type  DevicePreferencesTypes `json:"type"`
-	Value bool                   `json:"value"`
+	Value string                 `json:"value"`
 }
 
 type DeviceToken struct {
@@ -532,8 +534,9 @@ type ProductMambu struct {
 }
 
 type Questionary struct {
-	ID        string                 `json:"id"`
-	Type      QuestionaryTypes       `json:"type"`
+	ID   string           `json:"id"`
+	Type QuestionaryTypes `json:"type"`
+	// An array of different questions related to the current questionary.
 	Questions []*QuestionaryQuestion `json:"questions"`
 	Status    QuestionaryStatuses    `json:"status"`
 	StatusTs  int64                  `json:"statusTs"`
@@ -541,21 +544,25 @@ type Questionary struct {
 }
 
 type QuestionaryAnswer struct {
-	ID            string                       `json:"id"`
-	QuestionaryID string                       `json:"questionaryId"`
-	CustomerID    string                       `json:"customerId"`
-	Questions     []*QuestionaryAnswerQuestion `json:"questions"`
-	Ts            int64                        `json:"ts"`
+	ID            string `json:"id"`
+	QuestionaryID string `json:"questionaryId"`
+	CustomerID    string `json:"customerId"`
+	// An array of the responses for the questions related to current questionary.
+	Questions []*QuestionaryAnswerQuestion `json:"questions"`
+	Ts        int64                        `json:"ts"`
 }
 
 type QuestionaryAnswerInput struct {
-	ID      string         `json:"id"`
+	ID string `json:"id"`
+	// An array of the responses for the questions related to current questionary.
 	Answers []*AnswerInput `json:"answers"`
 }
 
 type QuestionaryAnswerQuestion struct {
-	ID     string `json:"id"`
-	Answer string `json:"answer"`
+	ID     string  `json:"id"`
+	Answer *string `json:"answer"`
+	// An array of IDs of the predefined answers chosen.
+	PredefinedAnswers []string `json:"predefinedAnswers"`
 }
 
 type QuestionaryConnection struct {
@@ -564,9 +571,21 @@ type QuestionaryConnection struct {
 	TotalCount int64          `json:"totalCount"`
 }
 
+type QuestionaryPredefinedAnswer struct {
+	ID    string `json:"id"`
+	Value string `json:"value"`
+}
+
 type QuestionaryQuestion struct {
 	ID    string `json:"id"`
 	Value string `json:"value"`
+	// An array of predefined answers for the current question.
+	// *not required
+	PredefinedAnswers []*QuestionaryPredefinedAnswer `json:"predefinedAnswers"`
+	// If true the question must be answered.
+	Required bool `json:"required"`
+	// If true the question can be answered with multiple values from the predefined answers.
+	MultipleOptions bool `json:"multipleOptions"`
 }
 
 type Reports struct {

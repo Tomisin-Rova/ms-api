@@ -66,7 +66,7 @@ local: update-dependencies schema proto gen-mocks lint test
 	go fmt ./...
 	go mod tidy
 	@echo "Running service with '${environment}' environment set..."; \
-	(export ENVIRONMENT=${environment}; go run main.go)	
+	(export ENVIRONMENT=${environment}; go run main.go)
 
 update-dependencies:
 	GOSUMDB=off go get -u github.com/roava/zebra@master

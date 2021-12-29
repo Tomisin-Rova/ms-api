@@ -78,15 +78,15 @@ $ make local environment=local
 ---
 
 ## ❌ Errors
-| Name | Payload | Message |
-| ----------- | ----------- | ---------- |
-| InvalidEmailError | 1100 | invalid email address |
-| InvalidPhoneNumberException | 7010 | phone number is not valid |
-| InvalidPassword | 7010 | Your transaction password must have at least one number and at least one letter and must be at least 8-characters long. |
-| InvalidPayeeDetails | 7011 | Invalid payee account details |
-| InvalidPaymentDetails | 7012 | Invalid payment details |
-| InvalidPassCode | 7011 | invalid pass code |
-| InternalErr | 7021 | failed to process the request, please try again later. |
-| ErrInvalidDateFormat | 7007 | invalid date format. Date format must be dd/mm/yyyy |
-| ErrInvalidType | 7008 | not a valid date |
-| ErrInvalidAge | 7009 | minimum age requirement for using Roava is 18years |
+| Name                        | Payload | Message                                                                                                                 |
+|-----------------------------|---------|-------------------------------------------------------------------------------------------------------------------------|
+| InvalidEmailError           | 1100    | invalid email address                                                                                                   |
+| InvalidPhoneNumberException | 7010    | phone number is not valid                                                                                               |
+| InvalidPassword             | 7010    | Your transaction password must have at least one number and at least one letter and must be at least 8-characters long. |
+| InvalidPayeeDetails         | 7011    | Invalid payee account details                                                                                           |
+| InvalidPaymentDetails       | 7012    | Invalid payment details                                                                                                 |
+| InvalidPassCode             | 7011    | invalid pass code                                                                                                       |
+| InternalErr                 | 7021    | failed to process the request, please try again later.                                                                  |
+| ErrInvalidDateFormat        | 7007    | invalid date format. Date format must be dd/mm/yyyy                                                                     |
+| ErrInvalidType              | 7008    | not a valid date                                                                                                        |
+| ErrInvalidAge               | 7009    | minimum age requirement for using Roava is 18years                                                                      |

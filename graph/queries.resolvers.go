@@ -329,9 +329,20 @@ func (r *queryResolver) Questionary(ctx context.Context, id string) (*apiTypes.Q
 
 	questions := make([]*apiTypes.QuestionaryQuestion, 0)
 	for _, q := range resp.Questions {
+		predefinedAnswers := make([]*apiTypes.QuestionaryPredefinedAnswer, 0)
+		for _, pa := range q.PredefinedAnswers {
+			predefinedAnswers = append(predefinedAnswers, &apiTypes.QuestionaryPredefinedAnswer{
+				ID:    pa.Id,
+				Value: pa.Value,
+			})
+		}
+
 		question := &apiTypes.QuestionaryQuestion{
-			ID:    q.Id,
-			Value: q.Value,
+			ID:                q.Id,
+			Value:             q.Value,
+			PredefinedAnswers: predefinedAnswers,
+			Required:          q.Required,
+			MultipleOptions:   q.MultipleOptions,
 		}
 		questions = append(questions, question)
 	}

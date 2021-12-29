@@ -21,6 +21,7 @@ import (
 var (
 	state       = "lagos"
 	city        = "lagos"
+	answer      = "My lifestyle"
 	mockAddress = types.AddressInput{
 		CountryID: "111xcc",
 		State:     &state,
@@ -472,8 +473,9 @@ func TestMutationResolver_AnswerQuestionary(t *testing.T) {
 						Id: "questionaire_id",
 						Answers: []*customer.AnswerInput{
 							{
-								Id:     "question_id",
-								Answer: "My lifestyle",
+								Id:                "question_id",
+								Answer:            "My lifestyle",
+								PredefinedAnswers: []string{"a", "b", "c"},
 							},
 						},
 					},
@@ -486,8 +488,9 @@ func TestMutationResolver_AnswerQuestionary(t *testing.T) {
 					ID: "questionaire_id",
 					Answers: []*types.AnswerInput{
 						{
-							ID:     "question_id",
-							Answer: "My lifestyle",
+							ID:                "question_id",
+							Answer:            &answer,
+							PredefinedAnswers: []string{"a", "b", "c"},
 						},
 					},
 				}
@@ -504,8 +507,9 @@ func TestMutationResolver_AnswerQuestionary(t *testing.T) {
 					ID: "questionaire_id",
 					Answers: []*types.AnswerInput{
 						{
-							ID:     "question_id",
-							Answer: "My lifestyle",
+							ID:                "question_id",
+							Answer:            &answer,
+							PredefinedAnswers: []string{"a", "b", "c"},
 						},
 					},
 				}
@@ -669,7 +673,7 @@ func TestMutationResolver_SetDevicePreferences(t *testing.T) {
 			args: []*types.DevicePreferencesInput{
 				{
 					Type:  types.DevicePreferencesTypesPush,
-					Value: true,
+					Value: "123",
 				},
 			},
 			testType: success,
@@ -679,7 +683,7 @@ func TestMutationResolver_SetDevicePreferences(t *testing.T) {
 			args: []*types.DevicePreferencesInput{
 				{
 					Type:  types.DevicePreferencesTypesPush,
-					Value: true,
+					Value: "string type value",
 				},
 			},
 			testType: errUserAuthentication,
@@ -712,7 +716,7 @@ func TestMutationResolver_SetDevicePreferences(t *testing.T) {
 					Preferences: []*pbTypes.DevicePreferencesInput{
 						{
 							Type:  pbTypes.DevicePreferences_PUSH,
-							Value: true,
+							Value: "123",
 						},
 					},
 				},
