@@ -116,7 +116,8 @@ func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) 
 	}
 
 	// Payment
-	if len(secrets.PaymentServiceURL) > 0 || !localDevEnvironment {
+	// TODO: Return local validation once payments service it's refactored
+	if len(secrets.PaymentServiceURL) > 0 {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 		connection, err := dialRPC(ctx, secrets.PaymentServiceURL)
@@ -138,7 +139,8 @@ func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) 
 	}
 
 	// Pricing
-	if len(secrets.PricingServiceURL) > 0 || !localDevEnvironment {
+	// TODO: Return local validation once pricing service it's refactored
+	if len(secrets.PricingServiceURL) > 0 {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 		connection, err := dialRPC(ctx, secrets.PricingServiceURL)
