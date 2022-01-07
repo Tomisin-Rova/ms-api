@@ -40,6 +40,7 @@ schema:
 		git clone git@github.com:roava/zebra.git ../zebra; \
   	fi; \
   	echo "Copying schema files..."; \
+  	mkdir ./graph/schemas; \
 	cp -v ../zebra/graphql/* ./graph/schemas; \
 	echo "Generating graphql..."; \
 	go run github.com/99designs/gqlgen generate; \

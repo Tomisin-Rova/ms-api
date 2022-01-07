@@ -344,7 +344,7 @@ type DevicePreferences struct {
 
 type DevicePreferencesInput struct {
 	Type  DevicePreferencesTypes `json:"type"`
-	Value string                 `json:"value"`
+	Value bool                   `json:"value"`
 }
 
 type DeviceToken struct {
@@ -589,15 +589,16 @@ type QuestionaryQuestion struct {
 }
 
 type Reports struct {
-	Type      KYCTypes       `json:"type"`
-	File      *string        `json:"file"`
-	Result    *string        `json:"result"`
-	SubResult *string        `json:"subResult"`
-	PublicURL *string        `json:"publicUrl"`
-	Review    *Review        `json:"review"`
-	Status    ReportStatuses `json:"status"`
-	StatusTs  int64          `json:"statusTs"`
-	Ts        int64          `json:"ts"`
+	Identifier string         `json:"identifier"`
+	Type       KYCTypes       `json:"type"`
+	File       *string        `json:"file"`
+	Result     *string        `json:"result"`
+	SubResult  *string        `json:"subResult"`
+	PublicURL  *string        `json:"publicUrl"`
+	Review     *Review        `json:"review"`
+	Status     ReportStatuses `json:"status"`
+	StatusTs   int64          `json:"statusTs"`
+	Ts         int64          `json:"ts"`
 }
 
 type Response struct {

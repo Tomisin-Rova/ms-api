@@ -13,21 +13,57 @@ import (
 	"ms.api/protos/pb/customer"
 	"ms.api/protos/pb/onboarding"
 	pbTypes "ms.api/protos/pb/types"
+	"ms.api/protos/pb/verification"
 	"ms.api/server/http/middlewares"
 	"ms.api/types"
 )
 
 func (r *mutationResolver) RequestOtp(ctx context.Context, typeArg types.DeliveryMode, target string, expireTimeInSeconds *int64) (*types.Response, error) {
-	msg := "Not implemented"
+	const defaultExpirationTime = 60
+	// Build request
+	request := verification.RequestOTPRequest{
+		Target:              target,
+		ExpireTimeInSeconds: defaultExpirationTime,
+	}
+	if expireTimeInSeconds != nil {
+		request.ExpireTimeInSeconds = int32(*expireTimeInSeconds)
+	}
+	switch typeArg {
+	case types.DeliveryModeEmail:
+		request.Type = verification.RequestOTPRequest_EMAIL
+	case types.DeliveryModeSms:
+		request.Type = verification.RequestOTPRequest_SMS
+	case types.DeliveryModePush:
+		request.Type = verification.RequestOTPRequest_PUSH
+	}
+
+	// Execute RPC call
+	response, err := r.VerificationService.RequestOTP(ctx, &request)
+	if err != nil {
+		return nil, err
+	}
+
 	return &types.Response{
-		Message: &msg,
+		Success: response.Success,
+		Code:    int64(response.Code),
 	}, nil
 }
 
 func (r *mutationResolver) VerifyOtp(ctx context.Context, target string, otpToken string) (*types.Response, error) {
-	msg := "Not implemented"
+	// Build request
+	request := verification.VerifyOTPRequest{
+		Target:   target,
+		OtpToken: otpToken,
+	}
+	// Execute RPC call
+	response, err := r.VerificationService.VerifyOTP(ctx, &request)
+	if err != nil {
+		return nil, err
+	}
+
 	return &types.Response{
-		Message: &msg,
+		Success: response.Success,
+		Code:    int64(response.Code),
 	}, nil
 }
 
@@ -104,20 +140,20 @@ func (r *mutationResolver) SubmitCdd(ctx context.Context, cdd types.CDDInput) (*
 	// Get user claims
 	_, err := middlewares.GetClaimsFromCtx(ctx)
 	if err != nil {
-		return &types.Response{Message: &authFailedMessage, Success: false, Code: http.StatusUnauthorized}, err
+		return &types.Response{Message: &authFailedMessage, Success: false, Code: http.StatusUnauthorized}, nil
 	}
 
 	// Build request
 	var request onboarding.SubmitCDDRequest
 	// KYC
 	if cdd.Kyc != nil {
-		var kycReportTypes = make([]pbTypes.Reports_KYCTypes, len(cdd.Kyc.ReportTypes))
+		var kycReportTypes = make([]onboarding.KYCInput_ReportTypes, len(cdd.Kyc.ReportTypes))
 		for index, value := range cdd.Kyc.ReportTypes {
 			switch value {
 			case types.KYCTypesDocument:
-				kycReportTypes[index] = pbTypes.Reports_DOCUMENT
+				kycReportTypes[index] = onboarding.KYCInput_DOCUMENT
 			case types.KYCTypesFacialVideo:
-				kycReportTypes[index] = pbTypes.Reports_FACIAL_VIDEO
+				kycReportTypes[index] = onboarding.KYCInput_FACIAL_VIDEO
 			}
 		}
 		request.Kyc = &onboarding.KYCInput{
@@ -242,7 +278,7 @@ func (r *mutationResolver) SetDeviceToken(ctx context.Context, tokens []*types.D
 	}
 
 	for _, token := range tokens {
-		token_ = append(token_, &pbTypes.DeviceTokenInput{Value: token.Value, Type: pbTypes.DeviceToken_DeviceTokenTypes(pbTypes.DeviceToken_FIREBASE)})
+		token_ = append(token_, &pbTypes.DeviceTokenInput{Value: token.Value, Type: pbTypes.DeviceToken_FIREBASE})
 	}
 
 	resp, err := r.CustomerService.SetDeviceToken(ctx, &customer.SetDeviceTokenRequest{Tokens: token_})
