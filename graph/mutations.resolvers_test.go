@@ -14,6 +14,7 @@ import (
 	"ms.api/protos/pb/customer"
 	"ms.api/protos/pb/onboarding"
 	pbTypes "ms.api/protos/pb/types"
+	"ms.api/protos/pb/verification"
 	"ms.api/server/http/middlewares"
 	"ms.api/types"
 )
@@ -42,32 +43,236 @@ var (
 )
 
 func TestMutationResolver_RequestOtp(t *testing.T) {
-	controller := gomock.NewController(t)
-	defer controller.Finish()
-	verificationServiceClient := mocks.NewMockVerificationServiceClient(controller)
-	resolverOpts := &ResolverOpts{
-		VerificationService: verificationServiceClient,
+	const (
+		success = iota
+		successWithExpireTime
+		successSMS
+		successPUSH
+		errorCallingRPC
+	)
+
+	expireTime := int64(120)
+
+	type arg struct {
+		typeArg             types.DeliveryMode
+		target              string
+		expireTimeInSeconds *int64
 	}
-	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
-	expire := int64(3600)
+	var tests = []struct {
+		name string
+		arg
+		testType int
+	}{
+		{
+			name: "Test success",
+			arg: arg{
+				typeArg:             types.DeliveryModeEmail,
+				target:              "email@roava.app",
+				expireTimeInSeconds: nil,
+			},
+			testType: success,
+		},
+		{
+			name: "Test success with expire time",
+			arg: arg{
+				typeArg:             types.DeliveryModeEmail,
+				target:              "email@roava.app",
+				expireTimeInSeconds: &expireTime,
+			},
+			testType: successWithExpireTime,
+		},
+		{
+			name: "Test success SMS",
+			arg: arg{
+				typeArg:             types.DeliveryModeSms,
+				target:              "1234567891",
+				expireTimeInSeconds: nil,
+			},
+			testType: successSMS,
+		},
+		{
+			name: "Test success",
+			arg: arg{
+				typeArg:             types.DeliveryModePush,
+				target:              "1234567891",
+				expireTimeInSeconds: nil,
+			},
+			testType: successPUSH,
+		},
+		{
+			name: "Test error calling rpc function",
+			arg: arg{
+				typeArg:             types.DeliveryModeEmail,
+				target:              "email@roava.app",
+				expireTimeInSeconds: nil,
+			},
+			testType: errorCallingRPC,
+		},
+	}
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			controller := gomock.NewController(t)
+			defer controller.Finish()
+			verificationServiceClient := mocks.NewMockVerificationServiceClient(controller)
+			resolverOpts := &ResolverOpts{
+				VerificationService: verificationServiceClient,
+			}
+			resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
 
-	resp, err := resolver.RequestOtp(context.Background(), types.DeliveryMode(""), "", &expire)
+			switch testCase.testType {
+			case success:
+				verificationServiceClient.EXPECT().RequestOTP(context.Background(), &verification.RequestOTPRequest{
+					Type:                verification.RequestOTPRequest_EMAIL,
+					Target:              testCase.arg.target,
+					ExpireTimeInSeconds: 60,
+				}).Return(&pbTypes.DefaultResponse{
+					Success: true,
+					Code:    http.StatusOK,
+				}, nil)
 
-	assert.NoError(t, err)
-	assert.NotNil(t, resp)
+				response, err := resolver.RequestOtp(context.Background(), testCase.arg.typeArg, testCase.arg.target, testCase.arg.expireTimeInSeconds)
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+				assert.Equal(t, &types.Response{
+					Success: response.Success,
+					Code:    int64(response.Code),
+				}, response)
+			case successWithExpireTime:
+				verificationServiceClient.EXPECT().RequestOTP(context.Background(), &verification.RequestOTPRequest{
+					Type:                verification.RequestOTPRequest_EMAIL,
+					Target:              testCase.arg.target,
+					ExpireTimeInSeconds: int32(*testCase.arg.expireTimeInSeconds),
+				}).Return(&pbTypes.DefaultResponse{
+					Success: true,
+					Code:    http.StatusOK,
+				}, nil)
+
+				response, err := resolver.RequestOtp(context.Background(), testCase.arg.typeArg, testCase.arg.target, testCase.arg.expireTimeInSeconds)
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+				assert.Equal(t, &types.Response{
+					Success: response.Success,
+					Code:    int64(response.Code),
+				}, response)
+			case successSMS:
+				verificationServiceClient.EXPECT().RequestOTP(context.Background(), &verification.RequestOTPRequest{
+					Type:                verification.RequestOTPRequest_SMS,
+					Target:              testCase.arg.target,
+					ExpireTimeInSeconds: 60,
+				}).Return(&pbTypes.DefaultResponse{
+					Success: true,
+					Code:    http.StatusOK,
+				}, nil)
+
+				response, err := resolver.RequestOtp(context.Background(), testCase.arg.typeArg, testCase.arg.target, testCase.arg.expireTimeInSeconds)
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+				assert.Equal(t, &types.Response{
+					Success: response.Success,
+					Code:    int64(response.Code),
+				}, response)
+			case successPUSH:
+				verificationServiceClient.EXPECT().RequestOTP(context.Background(), &verification.RequestOTPRequest{
+					Type:                verification.RequestOTPRequest_PUSH,
+					Target:              testCase.arg.target,
+					ExpireTimeInSeconds: 60,
+				}).Return(&pbTypes.DefaultResponse{
+					Success: true,
+					Code:    http.StatusOK,
+				}, nil)
+
+				response, err := resolver.RequestOtp(context.Background(), testCase.arg.typeArg, testCase.arg.target, testCase.arg.expireTimeInSeconds)
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+				assert.Equal(t, &types.Response{
+					Success: response.Success,
+					Code:    int64(response.Code),
+				}, response)
+			case errorCallingRPC:
+				verificationServiceClient.EXPECT().RequestOTP(context.Background(), &verification.RequestOTPRequest{
+					Type:                verification.RequestOTPRequest_EMAIL,
+					Target:              testCase.arg.target,
+					ExpireTimeInSeconds: 60,
+				}).Return(nil, errors.New(""))
+
+				response, err := resolver.RequestOtp(context.Background(), testCase.arg.typeArg, testCase.arg.target, testCase.arg.expireTimeInSeconds)
+				assert.Error(t, err)
+				assert.Nil(t, response)
+			}
+		})
+	}
 }
 
 func TestMutationResolver_VerifyOtp(t *testing.T) {
-	controller := gomock.NewController(t)
-	defer controller.Finish()
-	verificationServiceClient := mocks.NewMockVerificationServiceClient(controller)
-	resolverOpts := &ResolverOpts{
-		VerificationService: verificationServiceClient,
+	const (
+		success = iota
+		errorCallingRPC
+	)
+
+	type arg struct {
+		target   string
+		otpToken string
 	}
-	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
-	resp, err := resolver.VerifyOtp(context.Background(), "", "")
-	assert.NoError(t, err)
-	assert.NotNil(t, resp)
+	var tests = []struct {
+		name     string
+		arg      arg
+		testType int
+	}{
+		{
+			name: "Test success",
+			arg: arg{
+				target:   "email@roava.app",
+				otpToken: "12345",
+			},
+			testType: success,
+		},
+		{
+			name: "Test error calling rpc function",
+			arg: arg{
+				target:   "email@roava.app",
+				otpToken: "12345",
+			},
+			testType: errorCallingRPC,
+		},
+	}
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			controller := gomock.NewController(t)
+			defer controller.Finish()
+			verificationServiceClient := mocks.NewMockVerificationServiceClient(controller)
+			resolverOpts := &ResolverOpts{
+				VerificationService: verificationServiceClient,
+			}
+			resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
+			switch testCase.testType {
+			case success:
+				verificationServiceClient.EXPECT().VerifyOTP(context.Background(), &verification.VerifyOTPRequest{
+					Target:   testCase.arg.target,
+					OtpToken: testCase.arg.otpToken,
+				}).Return(&pbTypes.DefaultResponse{
+					Success: true,
+					Code:    http.StatusOK,
+				}, nil)
+
+				response, err := resolver.VerifyOtp(context.Background(), testCase.arg.target, testCase.arg.otpToken)
+				assert.NoError(t, err)
+				assert.NotNil(t, resolver)
+				assert.Equal(t, &types.Response{
+					Success: response.Success,
+					Code:    int64(response.Code),
+				}, response)
+			case errorCallingRPC:
+				verificationServiceClient.EXPECT().VerifyOTP(context.Background(), &verification.VerifyOTPRequest{
+					Target:   testCase.arg.target,
+					OtpToken: testCase.arg.otpToken,
+				}).Return(nil, errors.New(""))
+
+				response, err := resolver.VerifyOtp(context.Background(), testCase.arg.target, testCase.arg.otpToken)
+				assert.Error(t, err)
+				assert.Nil(t, response)
+			}
+		})
+	}
 }
 
 func TestMutationResolver_Signup(t *testing.T) {
@@ -323,7 +528,7 @@ func TestMutationResolver_SubmitCdd(t *testing.T) {
 			case success:
 				onboardingServiceClient.EXPECT().SubmitCDD(testCase.arg.ctx, &onboarding.SubmitCDDRequest{
 					Kyc: &onboarding.KYCInput{
-						ReportTypes: []pbTypes.Reports_KYCTypes{pbTypes.Reports_DOCUMENT, pbTypes.Reports_FACIAL_VIDEO},
+						ReportTypes: []onboarding.KYCInput_ReportTypes{onboarding.KYCInput_DOCUMENT, onboarding.KYCInput_FACIAL_VIDEO},
 					},
 					Aml: true,
 					Poa: &onboarding.POAInput{
@@ -363,7 +568,7 @@ func TestMutationResolver_SubmitCdd(t *testing.T) {
 			case successNoAML:
 				onboardingServiceClient.EXPECT().SubmitCDD(testCase.arg.ctx, &onboarding.SubmitCDDRequest{
 					Kyc: &onboarding.KYCInput{
-						ReportTypes: []pbTypes.Reports_KYCTypes{pbTypes.Reports_DOCUMENT, pbTypes.Reports_FACIAL_VIDEO},
+						ReportTypes: []onboarding.KYCInput_ReportTypes{onboarding.KYCInput_DOCUMENT, onboarding.KYCInput_FACIAL_VIDEO},
 					},
 					Aml: false,
 					Poa: &onboarding.POAInput{
@@ -384,7 +589,7 @@ func TestMutationResolver_SubmitCdd(t *testing.T) {
 			case successNoPOA:
 				onboardingServiceClient.EXPECT().SubmitCDD(testCase.arg.ctx, &onboarding.SubmitCDDRequest{
 					Kyc: &onboarding.KYCInput{
-						ReportTypes: []pbTypes.Reports_KYCTypes{pbTypes.Reports_DOCUMENT, pbTypes.Reports_FACIAL_VIDEO},
+						ReportTypes: []onboarding.KYCInput_ReportTypes{onboarding.KYCInput_DOCUMENT, onboarding.KYCInput_FACIAL_VIDEO},
 					},
 					Aml: true,
 					Poa: nil,
@@ -402,7 +607,7 @@ func TestMutationResolver_SubmitCdd(t *testing.T) {
 				}, resp)
 			case errorUnauthenticatedUser:
 				resp, err := resolver.SubmitCdd(testCase.arg.ctx, testCase.arg.cddInput)
-				assert.Error(t, err)
+				assert.NoError(t, err)
 				assert.NotNil(t, resp)
 				assert.Equal(t, &types.Response{
 					Message: &authFailedMessage,
@@ -412,7 +617,7 @@ func TestMutationResolver_SubmitCdd(t *testing.T) {
 			case errorSubmitCDD:
 				onboardingServiceClient.EXPECT().SubmitCDD(testCase.arg.ctx, &onboarding.SubmitCDDRequest{
 					Kyc: &onboarding.KYCInput{
-						ReportTypes: []pbTypes.Reports_KYCTypes{pbTypes.Reports_DOCUMENT, pbTypes.Reports_FACIAL_VIDEO},
+						ReportTypes: []onboarding.KYCInput_ReportTypes{onboarding.KYCInput_DOCUMENT, onboarding.KYCInput_FACIAL_VIDEO},
 					},
 					Aml: true,
 					Poa: &onboarding.POAInput{
@@ -673,7 +878,7 @@ func TestMutationResolver_SetDevicePreferences(t *testing.T) {
 			args: []*types.DevicePreferencesInput{
 				{
 					Type:  types.DevicePreferencesTypesPush,
-					Value: "123",
+					Value: true,
 				},
 			},
 			testType: success,
@@ -683,7 +888,7 @@ func TestMutationResolver_SetDevicePreferences(t *testing.T) {
 			args: []*types.DevicePreferencesInput{
 				{
 					Type:  types.DevicePreferencesTypesPush,
-					Value: "string type value",
+					Value: true,
 				},
 			},
 			testType: errUserAuthentication,
@@ -716,7 +921,7 @@ func TestMutationResolver_SetDevicePreferences(t *testing.T) {
 					Preferences: []*pbTypes.DevicePreferencesInput{
 						{
 							Type:  pbTypes.DevicePreferences_PUSH,
-							Value: "123",
+							Value: true,
 						},
 					},
 				},

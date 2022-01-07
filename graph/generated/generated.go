@@ -555,15 +555,16 @@ type ComplexityRoot struct {
 	}
 
 	Reports struct {
-		File      func(childComplexity int) int
-		PublicURL func(childComplexity int) int
-		Result    func(childComplexity int) int
-		Review    func(childComplexity int) int
-		Status    func(childComplexity int) int
-		StatusTs  func(childComplexity int) int
-		SubResult func(childComplexity int) int
-		Ts        func(childComplexity int) int
-		Type      func(childComplexity int) int
+		File       func(childComplexity int) int
+		Identifier func(childComplexity int) int
+		PublicURL  func(childComplexity int) int
+		Result     func(childComplexity int) int
+		Review     func(childComplexity int) int
+		Status     func(childComplexity int) int
+		StatusTs   func(childComplexity int) int
+		SubResult  func(childComplexity int) int
+		Ts         func(childComplexity int) int
+		Type       func(childComplexity int) int
 	}
 
 	Response struct {
@@ -3306,6 +3307,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Reports.File(childComplexity), true
 
+	case "Reports.identifier":
+		if e.complexity.Reports.Identifier == nil {
+			break
+		}
+
+		return e.complexity.Reports.Identifier(childComplexity), true
+
 	case "Reports.publicUrl":
 		if e.complexity.Reports.PublicURL == nil {
 			break
@@ -3944,7 +3952,7 @@ input DeviceTokenInput {
 
 input DevicePreferencesInput {
     type: DevicePreferencesTypes!
-    value: String!
+    value: Boolean!
 }
 
 input CustomerDetailsInput {
@@ -4776,6 +4784,7 @@ enum KYCStatuses {
 }
 
 type Reports {
+    identifier: String!
     type: KYCTypes!
     file: String
     result: String
@@ -18456,6 +18465,41 @@ func (ec *executionContext) _QuestionaryQuestion_multipleOptions(ctx context.Con
 	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Reports_identifier(ctx context.Context, field graphql.CollectedField, obj *types.Reports) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Reports",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Identifier, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Reports_type(ctx context.Context, field graphql.CollectedField, obj *types.Reports) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -22371,7 +22415,7 @@ func (ec *executionContext) unmarshalInputDevicePreferencesInput(ctx context.Con
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("value"))
-			it.Value, err = ec.unmarshalNString2string(ctx, v)
+			it.Value, err = ec.unmarshalNBoolean2bool(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -25732,6 +25776,11 @@ func (ec *executionContext) _Reports(ctx context.Context, sel ast.SelectionSet, 
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Reports")
+		case "identifier":
+			out.Values[i] = ec._Reports_identifier(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "type":
 			out.Values[i] = ec._Reports_type(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
