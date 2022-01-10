@@ -12,26 +12,46 @@ var (
 
 type helpersfactory struct{}
 
-func (h *helpersfactory) GetQuestionaryStatusIndex(val types.QuestionaryStatuses) int32 {
+func (h *helpersfactory) MapQuestionaryStatus(val types.QuestionaryStatuses) customerTypes.Questionary_QuestionaryStatuses {
 	switch val {
 	case types.QuestionaryStatusesActive:
-		return 0
+		return customerTypes.Questionary_ACTIVE
 	case types.QuestionaryStatusesInactive:
-		return 1
+		return customerTypes.Questionary_INACTIVE
 	default:
 		// should never happen
 		return -1
 	}
 }
 
-func (h *helpersfactory) GetQuestionaryTypesIndex(val types.QuestionaryTypes) int32 {
+func (h *helpersfactory) MapQuestionaryType(val types.QuestionaryTypes) customerTypes.Questionary_QuestionaryTypes {
 	switch val {
 	case types.QuestionaryTypesReasons:
-		return 0
+		return customerTypes.Questionary_REASONS
 	default:
 		// should never happen
 		return -1
 	}
+}
+
+func (h *helpersfactory) MapProtoQuesionaryStatus(val customerTypes.Questionary_QuestionaryStatuses) types.QuestionaryStatuses {
+	switch val {
+	case customerTypes.Questionary_ACTIVE:
+		return types.QuestionaryStatusesActive
+	case customerTypes.Questionary_INACTIVE:
+		return types.QuestionaryStatusesInactive
+	}
+
+	return ""
+}
+
+func (h *helpersfactory) MapProtoQuestionaryType(val customerTypes.Questionary_QuestionaryTypes) types.QuestionaryTypes {
+	switch val {
+	case customerTypes.Questionary_REASONS:
+		return types.QuestionaryTypesReasons
+	}
+
+	return ""
 }
 
 func (h *helpersfactory) GetDeveicePreferenceTypesIndex(val types.DevicePreferencesTypes) int32 {
