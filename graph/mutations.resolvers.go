@@ -68,6 +68,7 @@ func (r *mutationResolver) VerifyOtp(ctx context.Context, target string, otpToke
 }
 
 func (r *mutationResolver) Signup(ctx context.Context, customer types.CustomerInput) (*types.AuthResponse, error) {
+	// Initial Commit
 	msg := "Not implemented"
 	return &types.AuthResponse{
 		Message: &msg,
