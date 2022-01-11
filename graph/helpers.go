@@ -10,6 +10,18 @@ var (
 	authFailedMessage = "User authentication failed"
 )
 
+type Helper interface {
+	MapQuestionaryStatus(val types.QuestionaryStatuses) customerTypes.Questionary_QuestionaryStatuses
+	MapQuestionaryType(val types.QuestionaryTypes) customerTypes.Questionary_QuestionaryTypes
+	MapProtoQuesionaryStatus(val customerTypes.Questionary_QuestionaryStatuses) types.QuestionaryStatuses
+	MapProtoQuestionaryType(val customerTypes.Questionary_QuestionaryTypes) types.QuestionaryTypes
+	GetDeveicePreferenceTypesIndex(val types.DevicePreferencesTypes) int32
+	GetCustomer_CustomerStatusIndex(val customerTypes.Customer_CustomerStatuses) int32
+	GetCustomerStatusIndex(val types.CustomerStatuses) int32
+	DeviceTokenInputFromModel(tokenType types.DeviceTokenTypes) customerTypes.DeviceToken_DeviceTokenTypes
+	PreferenceInputFromModel(input types.DevicePreferencesTypes) customerTypes.DevicePreferences_DevicePreferencesTypes
+}
+
 type helpersfactory struct{}
 
 func (h *helpersfactory) MapQuestionaryStatus(val types.QuestionaryStatuses) customerTypes.Questionary_QuestionaryStatuses {
@@ -103,5 +115,23 @@ func (h *helpersfactory) GetCustomerStatusIndex(val types.CustomerStatuses) int3
 	default:
 		// should never happen
 		return -1
+	}
+}
+
+func (h *helpersfactory) DeviceTokenInputFromModel(tokenType types.DeviceTokenTypes) customerTypes.DeviceToken_DeviceTokenTypes {
+	switch tokenType {
+	default:
+		return customerTypes.DeviceToken_FIREBASE
+	}
+}
+
+func (h *helpersfactory) PreferenceInputFromModel(input types.DevicePreferencesTypes) customerTypes.DevicePreferences_DevicePreferencesTypes {
+	switch input {
+	case types.DevicePreferencesTypesPush:
+		return customerTypes.DevicePreferences_PUSH
+	case types.DevicePreferencesTypesBiometrics:
+		return customerTypes.DevicePreferences_BIOMETRICS
+	default:
+		return customerTypes.DevicePreferences_PUSH
 	}
 }

@@ -10,6 +10,9 @@ import (
 	"ms.api/config"
 	"ms.api/libs/mapper"
 	"ms.api/libs/preloader"
+	devicevalidator "ms.api/libs/validator/device"
+	emailvalidator "ms.api/libs/validator/email"
+	"ms.api/libs/validator/phonenumbervalidator"
 	"ms.api/protos/pb/account"
 	"ms.api/protos/pb/auth"
 	"ms.api/protos/pb/customer"
@@ -35,6 +38,10 @@ type ResolverOpts struct {
 	preloader           preloader.Preloader
 	mapper              mapper.Mapper
 	AuthMw              *middlewares.AuthMiddleware
+	EmailValidator      emailvalidator.EmailValidator
+	DeviceValidator     devicevalidator.DeviceValidator
+	PhoneValidator      phonenumbervalidator.PhoneNumberValidator
+	Helper              Helper
 }
 
 type Resolver struct {
@@ -48,9 +55,17 @@ type Resolver struct {
 	preloader           preloader.Preloader
 	mapper              mapper.Mapper
 	logger              *zap.Logger
+	emailValidator      emailvalidator.EmailValidator
+	deviceValidator     devicevalidator.DeviceValidator
+	phoneValidator      phonenumbervalidator.PhoneNumberValidator
+	helper              Helper
 }
 
 func NewResolver(opt *ResolverOpts, logger *zap.Logger) *Resolver {
+	helper := opt.Helper
+	if helper == nil {
+		helper = &helpersfactory{}
+	}
 	return &Resolver{
 		AccountService:      opt.AccountService,
 		AuthService:         opt.AuthService,
@@ -62,6 +77,10 @@ func NewResolver(opt *ResolverOpts, logger *zap.Logger) *Resolver {
 		preloader:           opt.preloader,
 		mapper:              opt.mapper,
 		logger:              logger,
+		emailValidator:      startEmailValidator(opt.EmailValidator),
+		deviceValidator:     startDeviceValidator(opt.DeviceValidator),
+		phoneValidator:      startPhoneValidator(opt.PhoneValidator),
+		helper:              helper,
 	}
 }
 
@@ -159,4 +178,25 @@ func dialRPC(ctx context.Context, address string) (*grpc.ClientConn, error) {
 		return nil, err
 	}
 	return connection, nil
+}
+
+func startEmailValidator(validator emailvalidator.EmailValidator) emailvalidator.EmailValidator {
+	if validator == nil {
+		return &emailvalidator.Validator{}
+	}
+	return validator
+}
+
+func startDeviceValidator(validator devicevalidator.DeviceValidator) devicevalidator.DeviceValidator {
+	if validator == nil {
+		return &devicevalidator.Validator{}
+	}
+	return validator
+}
+
+func startPhoneValidator(validator phonenumbervalidator.PhoneNumberValidator) phonenumbervalidator.PhoneNumberValidator {
+	if validator == nil {
+		return &phonenumbervalidator.Validator{}
+	}
+	return validator
 }

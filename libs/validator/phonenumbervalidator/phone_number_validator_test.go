@@ -2,8 +2,9 @@ package phonenumbervalidator
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestValidatePhoneNumber(t *testing.T) {
@@ -20,9 +21,10 @@ func TestValidatePhoneNumber(t *testing.T) {
 		{phoneNumber: "+234703545230745", err: ErrInvalidPhoneNumber},
 		{phoneNumber: "+23490", err: ErrInvalidPhoneNumber},
 	}
+	validator := new(Validator)
 	for idx, next := range cases {
 		t.Run(fmt.Sprintf("case-%d", idx), func(t *testing.T) {
-			err := ValidatePhoneNumber(next.phoneNumber)
+			err := validator.ValidatePhoneNumber(next.phoneNumber)
 			assert.Equal(t, err, next.err)
 		})
 	}

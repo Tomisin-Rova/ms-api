@@ -16,11 +16,17 @@ var (
 	)
 )
 
-func ValidatePhoneNumber(phoneNumber string) error {
-	if ok := phoneRegex.MatchString(phoneNumber); !ok {
+type PhoneNumberValidator interface {
+	ValidatePhoneNumber(phoneNumber string) error
+}
+
+type Validator struct{}
+
+func (v *Validator) ValidatePhoneNumber(phoneNumber string) error {
+	if len(phoneNumber) > 15 || len(phoneNumber) < 7 {
 		return ErrInvalidPhoneNumber
 	}
-	if len(phoneNumber) > 15 || len(phoneNumber) < 7 {
+	if ok := phoneRegex.MatchString(phoneNumber); !ok {
 		return ErrInvalidPhoneNumber
 	}
 	return nil
