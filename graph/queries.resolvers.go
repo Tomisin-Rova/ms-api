@@ -207,9 +207,22 @@ func (r *queryResolver) Content(ctx context.Context, id string) (*apiTypes.Conte
 }
 
 func (r *queryResolver) Contents(ctx context.Context, first *int64, after *string, last *int64, before *string) (*apiTypes.ContentConnection, error) {
-	req := &customer.GetContentsRequest{First: int32(*first), After: *after, Last: int32(*last), Before: *before}
+	// Build request
+	var request customer.GetContentsRequest
+	if first != nil {
+		request.First = int32(*first)
+	}
+	if after != nil {
+		request.After = *after
+	}
+	if last != nil {
+		request.Last = int32(*last)
+	}
+	if before != nil {
+		request.Before = *before
+	}
 
-	res, err := r.CustomerService.GetContents(ctx, req)
+	res, err := r.CustomerService.GetContents(ctx, &request)
 	if err != nil {
 		r.logger.Info("error fetching contents")
 		return nil, err
@@ -347,14 +360,27 @@ func (r *queryResolver) Questionary(ctx context.Context, id string) (*apiTypes.Q
 		questions = append(questions, question)
 	}
 
-	return &apiTypes.Questionary{
+	// Build response
+	response := apiTypes.Questionary{
 		ID:        resp.Id,
 		Type:      apiTypes.QuestionaryTypes(resp.Type),
 		Questions: questions,
 		Status:    apiTypes.QuestionaryStatuses(resp.Status),
 		StatusTs:  resp.StatusTs.AsTime().Unix(),
 		Ts:        resp.Ts.AsTime().Unix(),
-	}, nil
+	}
+	switch resp.Type {
+	case types.Questionary_REASONS:
+		response.Type = apiTypes.QuestionaryTypesReasons
+	}
+	switch resp.Status {
+	case types.Questionary_ACTIVE:
+		response.Status = apiTypes.QuestionaryStatusesActive
+	case types.Questionary_INACTIVE:
+		response.Status = apiTypes.QuestionaryStatusesInactive
+	}
+
+	return &response, nil
 }
 
 func (r *queryResolver) Questionaries(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string, statuses []apiTypes.QuestionaryStatuses, typeArg []apiTypes.QuestionaryTypes) (*apiTypes.QuestionaryConnection, error) {
@@ -364,26 +390,35 @@ func (r *queryResolver) Questionaries(ctx context.Context, keywords *string, fir
 
 	if len(statuses) > 0 {
 		for _, state := range statuses {
-			questionaryStatuses = append(questionaryStatuses, types.Questionary_QuestionaryStatuses(helper.GetQuestionaryStatusIndex(state)))
+			questionaryStatuses = append(questionaryStatuses, helper.MapQuestionaryStatus(state))
 		}
 	}
 
 	if len(typeArg) > 0 {
 		for _, arg := range typeArg {
-			questionaryTypes = append(questionaryTypes, types.Questionary_QuestionaryTypes(helper.GetQuestionaryTypesIndex(arg)))
+			questionaryTypes = append(questionaryTypes, helper.MapQuestionaryType(arg))
 		}
 	}
 
-	customerQuestionariesReq := customer.GetQuestionariesRequest{
-		Keywords: *keywords,
-		First:    int32(*first),
-		After:    *after,
-		Last:     int32(*last),
+	// Build request
+	request := customer.GetQuestionariesRequest{
 		Statuses: questionaryStatuses,
 		Types:    questionaryTypes,
 	}
+	if first != nil {
+		request.First = int32(*first)
+	}
+	if after != nil {
+		request.After = *after
+	}
+	if last != nil {
+		request.Last = int32(*last)
+	}
+	if before != nil {
+		request.Before = *before
+	}
 
-	resp, err := r.CustomerService.GetQuestionaries(ctx, &customerQuestionariesReq)
+	resp, err := r.CustomerService.GetQuestionaries(ctx, &request)
 	if err != nil {
 		return nil, err
 	}
@@ -392,18 +427,29 @@ func (r *queryResolver) Questionaries(ctx context.Context, keywords *string, fir
 	for _, node := range resp.Nodes {
 		questions := make([]*apiTypes.QuestionaryQuestion, 0)
 		for _, q := range node.Questions {
+			predefinedAnswers := make([]*apiTypes.QuestionaryPredefinedAnswer, 0)
+			for _, pa := range q.PredefinedAnswers {
+				predefinedAnswers = append(predefinedAnswers, &apiTypes.QuestionaryPredefinedAnswer{
+					ID:    pa.Id,
+					Value: pa.Value,
+				})
+			}
+
 			question := &apiTypes.QuestionaryQuestion{
-				ID:    q.Id,
-				Value: q.Value,
+				ID:                q.Id,
+				Value:             q.Value,
+				PredefinedAnswers: predefinedAnswers,
+				Required:          q.Required,
+				MultipleOptions:   q.MultipleOptions,
 			}
 			questions = append(questions, question)
 		}
 
 		content := apiTypes.Questionary{
 			ID:        node.Id,
-			Type:      apiTypes.QuestionaryTypes(node.Type),
+			Type:      helper.MapProtoQuestionaryType(node.Type),
 			Questions: questions,
-			Status:    apiTypes.QuestionaryStatuses(node.Status),
+			Status:    helper.MapProtoQuesionaryStatus(node.Status),
 			StatusTs:  node.StatusTs.AsTime().Unix(),
 			Ts:        node.Ts.AsTime().Unix(),
 		}
