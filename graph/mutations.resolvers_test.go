@@ -10,7 +10,13 @@ import (
 	"github.com/roava/zebra/models"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap/zaptest"
+	errorvalues "ms.api/libs/errors"
+	"ms.api/libs/mapper"
+	devicevalidator "ms.api/libs/validator/device"
+	emailvalidator "ms.api/libs/validator/email"
+	phonenumbervalidator "ms.api/libs/validator/phonenumbervalidator"
 	"ms.api/mocks"
+	"ms.api/protos/pb/auth"
 	"ms.api/protos/pb/customer"
 	"ms.api/protos/pb/onboarding"
 	pbTypes "ms.api/protos/pb/types"
@@ -276,17 +282,185 @@ func TestMutationResolver_VerifyOtp(t *testing.T) {
 }
 
 func TestMutationResolver_Signup(t *testing.T) {
+	const (
+		failInvalidPhone = iota
+		failInvalidEmail
+		failInvalidDevice
+		failAuthServiceError
+		successWithNilDeviceTokensAndPreferences
+		success
+	)
+
+	defaultPayload := types.CustomerInput{
+		Phone:         "+1122233334444",
+		Email:         "EMAIL@user.org",
+		LoginPassword: "123456",
+		Device: &types.DeviceInput{
+			Identifier: "device-identifier",
+			Os:         "device-os",
+			Brand:      "device-brand",
+			Tokens: []*types.DeviceTokenInput{
+				{
+					Type:  types.DeviceTokenTypesFirebase,
+					Value: "firebase-token",
+				},
+			},
+			Preferences: []*types.DevicePreferencesInput{
+				{
+					Type:  types.DevicePreferencesTypesPush,
+					Value: true,
+				},
+				{
+					Type:  types.DevicePreferencesTypesBiometrics,
+					Value: true,
+				},
+			},
+		},
+	}
+
+	authServiceResponse := &auth.TokenPairResponse{
+		AuthToken:    "auth-token",
+		RefreshToken: "refresh-token",
+	}
+
+	testCases := []struct {
+		name     string
+		input    types.CustomerInput
+		testType int
+	}{
+		{
+			name:     "Fail if invalid phone",
+			input:    defaultPayload,
+			testType: failInvalidPhone,
+		},
+		{
+			name:     "Fail if invalid e-mail",
+			input:    defaultPayload,
+			testType: failInvalidEmail,
+		},
+		{
+			name:     "Fail if invalid device input",
+			input:    defaultPayload,
+			testType: failInvalidDevice,
+		},
+		{
+			name:     "Fail on auth service error",
+			input:    defaultPayload,
+			testType: failAuthServiceError,
+		},
+		{
+			name: "Success request despite empty device tokens and preferences",
+			input: types.CustomerInput{
+				Phone:         "+1122233334444",
+				Email:         "EMAIL@user.org",
+				LoginPassword: "123456",
+				Device: &types.DeviceInput{
+					Identifier: "device-identifier",
+					Os:         "device-os",
+					Brand:      "device-brand",
+				},
+			},
+			testType: successWithNilDeviceTokensAndPreferences,
+		},
+		{
+			name:     "Success request",
+			input:    defaultPayload,
+			testType: success,
+		},
+	}
+
 	controller := gomock.NewController(t)
 	defer controller.Finish()
 	authServiceClient := mocks.NewMockAuthServiceClient(controller)
+	phoneNumberValidator := mocks.NewMockPhoneNumberValidator(controller)
+	emailValidator := mocks.NewMockEmailValidator(controller)
+	deviceValidator := mocks.NewMockDeviceValidator(controller)
 	resolverOpts := &ResolverOpts{
-		AuthService: authServiceClient,
+		AuthService:     authServiceClient,
+		PhoneValidator:  phoneNumberValidator,
+		EmailValidator:  emailValidator,
+		DeviceValidator: deviceValidator,
+		mapper:          mapper.NewMapper(),
 	}
-	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
 
-	resp, err := resolver.Signup(context.Background(), types.CustomerInput{})
-	assert.NoError(t, err)
-	assert.NotNil(t, resp)
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			switch testCase.testType {
+			case failInvalidPhone:
+				phoneNumberValidator.EXPECT().ValidatePhoneNumber(testCase.input.Phone).Return(errors.New("")).Times(1)
+				resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
+				resp, err := resolver.Signup(context.Background(), testCase.input)
+				assert.Error(t, err)
+				assert.NotNil(t, resp)
+				assert.False(t, resp.Success)
+				assert.NotNil(t, resp.Message)
+				assert.Equal(t, phonenumbervalidator.ErrInvalidPhoneNumber.Message(), *resp.Message)
+				assert.Equal(t, int64(http.StatusBadRequest), resp.Code)
+			case failInvalidEmail:
+				phoneNumberValidator.EXPECT().ValidatePhoneNumber(testCase.input.Phone).Return(nil).Times(1)
+				emailValidator.EXPECT().Validate(testCase.input.Email).Return("", errors.New("")).Times(1)
+				resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
+				resp, err := resolver.Signup(context.Background(), testCase.input)
+				assert.Error(t, err)
+				assert.NotNil(t, resp)
+				assert.False(t, resp.Success)
+				assert.NotNil(t, resp.Message)
+				assert.Equal(t, emailvalidator.ErrInvalidEmail.Message(), *resp.Message)
+				assert.Equal(t, int64(http.StatusBadRequest), resp.Code)
+			case failInvalidDevice:
+				phoneNumberValidator.EXPECT().ValidatePhoneNumber(defaultPayload.Phone).Return(nil).Times(1)
+				emailValidator.EXPECT().Validate(testCase.input.Email).Return("email@user.org", nil).Times(1)
+				deviceValidator.EXPECT().Validate(testCase.input.Device).Return(errors.New("")).Times(1)
+				resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
+				resp, err := resolver.Signup(context.Background(), testCase.input)
+				assert.Error(t, err)
+				assert.NotNil(t, resp)
+				assert.False(t, resp.Success)
+				assert.NotNil(t, resp.Message)
+				assert.Equal(t, devicevalidator.ErrInvalidDevice.Message(), *resp.Message)
+				assert.Equal(t, int64(http.StatusBadRequest), resp.Code)
+			case failAuthServiceError:
+				phoneNumberValidator.EXPECT().ValidatePhoneNumber(testCase.input.Phone).Return(nil).Times(1)
+				emailValidator.EXPECT().Validate(testCase.input.Email).Return("email@user.org", nil).Times(1)
+				deviceValidator.EXPECT().Validate(testCase.input.Device).Return(nil).Times(1)
+				authServiceClient.EXPECT().Signup(gomock.Any(), gomock.Any()).Return(nil, errors.New("")).Times(1)
+				resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
+				resp, err := resolver.Signup(context.Background(), testCase.input)
+				assert.Error(t, err)
+				assert.NotNil(t, resp)
+				assert.False(t, resp.Success)
+				assert.NotNil(t, resp.Message)
+				assert.Equal(t, errorvalues.Message(errorvalues.InternalErr), *resp.Message)
+				assert.Equal(t, int64(http.StatusInternalServerError), resp.Code)
+			case successWithNilDeviceTokensAndPreferences:
+				phoneNumberValidator.EXPECT().ValidatePhoneNumber(testCase.input.Phone).Return(nil).Times(1)
+				emailValidator.EXPECT().Validate(testCase.input.Email).Return("email@user.org", nil).Times(1)
+				deviceValidator.EXPECT().Validate(testCase.input.Device).Return(nil).Times(1)
+				authServiceClient.EXPECT().Signup(gomock.Any(), gomock.Any()).Return(authServiceResponse, nil).Times(1)
+				resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
+				resp, err := resolver.Signup(context.Background(), testCase.input)
+				assert.Nil(t, err)
+				assert.NotNil(t, resp)
+				assert.True(t, resp.Success)
+				assert.NotNil(t, resp.Message)
+				assert.Equal(t, "Success", *resp.Message)
+				assert.Equal(t, int64(http.StatusOK), resp.Code)
+			case success:
+				phoneNumberValidator.EXPECT().ValidatePhoneNumber(testCase.input.Phone).Return(nil).Times(1)
+				emailValidator.EXPECT().Validate(testCase.input.Email).Return("email@user.org", nil).Times(1)
+				deviceValidator.EXPECT().Validate(testCase.input.Device).Return(nil).Times(1)
+				authServiceClient.EXPECT().Signup(gomock.Any(), gomock.Any()).Return(authServiceResponse, nil).Times(1)
+				resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
+				resp, err := resolver.Signup(context.Background(), testCase.input)
+				assert.Nil(t, err)
+				assert.NotNil(t, resp)
+				assert.True(t, resp.Success)
+				assert.NotNil(t, resp.Message)
+				assert.Equal(t, "Success", *resp.Message)
+				assert.Equal(t, int64(http.StatusOK), resp.Code)
+			}
+		})
+	}
 }
 
 func TestMutationResolver_ResetLoginPassword(t *testing.T) {

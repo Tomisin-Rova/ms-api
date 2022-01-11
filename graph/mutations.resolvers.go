@@ -9,7 +9,12 @@ import (
 	"net/http"
 
 	"ms.api/graph/generated"
+	errorvalues "ms.api/libs/errors"
 	"ms.api/libs/validator/datevalidator"
+	devicevalidator "ms.api/libs/validator/device"
+	emailvalidator "ms.api/libs/validator/email"
+	phonenumbervalidator "ms.api/libs/validator/phonenumbervalidator"
+	"ms.api/protos/pb/auth"
 	"ms.api/protos/pb/customer"
 	"ms.api/protos/pb/onboarding"
 	pbTypes "ms.api/protos/pb/types"
@@ -67,12 +72,88 @@ func (r *mutationResolver) VerifyOtp(ctx context.Context, target string, otpToke
 	}, nil
 }
 
-func (r *mutationResolver) Signup(ctx context.Context, customer types.CustomerInput) (*types.AuthResponse, error) {
-	// Initial Commit
-	msg := "Not implemented"
+func (r *mutationResolver) Signup(ctx context.Context, customerInput types.CustomerInput) (*types.AuthResponse, error) {
+	err := r.phoneValidator.ValidatePhoneNumber(customerInput.Phone)
+	if err != nil {
+		invalidMsg := phonenumbervalidator.ErrInvalidPhoneNumber.Message()
+		return &types.AuthResponse{
+			Message: &invalidMsg,
+			Success: false,
+			Code:    http.StatusBadRequest,
+		}, err
+	}
+	email, err := r.emailValidator.Validate(customerInput.Email)
+	if err != nil {
+		invalidMsg := emailvalidator.ErrInvalidEmail.Message()
+		return &types.AuthResponse{
+			Message: &invalidMsg,
+			Success: false,
+			Code:    http.StatusBadRequest,
+		}, err
+	}
+	err = r.deviceValidator.Validate(customerInput.Device)
+	if err != nil {
+		invalidMsg := devicevalidator.ErrInvalidDevice.Message()
+		return &types.AuthResponse{
+			Message: &invalidMsg,
+			Success: false,
+			Code:    http.StatusBadRequest,
+		}, err
+	}
+	customerInputTokens := customerInput.Device.Tokens
+	if customerInputTokens == nil {
+		customerInputTokens = []*types.DeviceTokenInput{}
+	}
+	deviceTokenInputs := make([]*pbTypes.DeviceTokenInput, len(customerInputTokens))
+	for _, tokenInput := range customerInputTokens {
+		deviceTokenInputs = append(deviceTokenInputs, &pbTypes.DeviceTokenInput{
+			Value: tokenInput.Value,
+			Type:  r.mapper.DeviceTokenInputFromModel(tokenInput.Type),
+		})
+	}
+	customerInputPreferences := customerInput.Device.Preferences
+	if customerInputPreferences == nil {
+		customerInputPreferences = []*types.DevicePreferencesInput{}
+	}
+	preferences := make([]*pbTypes.DevicePreferencesInput, len(customerInputPreferences))
+	for _, preference := range customerInputPreferences {
+		preferences = append(preferences, &pbTypes.DevicePreferencesInput{
+			Value: preference.Value,
+			Type:  r.mapper.PreferenceInputFromModel(preference.Type),
+		})
+	}
+	req := auth.SignupRequest{
+		CustomerInput: &auth.CustomerInput{
+			Phone:         customerInput.Phone,
+			Email:         email,
+			LoginPassword: customerInput.LoginPassword,
+		},
+		Device: &pbTypes.DeviceInput{
+			Identifier:  customerInput.Device.Identifier,
+			Os:          customerInput.Device.Os,
+			Brand:       customerInput.Device.Brand,
+			Tokens:      deviceTokenInputs,
+			Preferences: preferences,
+		},
+	}
+	tokens, err := r.AuthService.Signup(context.Background(), &req)
+	if err != nil {
+		invalidMsg := errorvalues.Message(errorvalues.InternalErr)
+		return &types.AuthResponse{
+			Message: &invalidMsg,
+			Success: false,
+			Code:    http.StatusInternalServerError,
+		}, err
+	}
+	msg := "Success"
 	return &types.AuthResponse{
 		Message: &msg,
-		Code:    int64(500),
+		Success: true,
+		Tokens: &types.AuthTokens{
+			Auth:    tokens.AuthToken,
+			Refresh: &tokens.RefreshToken,
+		},
+		Code: int64(http.StatusOK),
 	}, nil
 }
 

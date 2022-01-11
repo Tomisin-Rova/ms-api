@@ -10,6 +10,9 @@ import (
 	"ms.api/config"
 	"ms.api/libs/mapper"
 	"ms.api/libs/preloader"
+	devicevalidator "ms.api/libs/validator/device"
+	emailvalidator "ms.api/libs/validator/email"
+	"ms.api/libs/validator/phonenumbervalidator"
 	"ms.api/protos/pb/account"
 	"ms.api/protos/pb/auth"
 	"ms.api/protos/pb/customer"
@@ -35,6 +38,9 @@ type ResolverOpts struct {
 	preloader           preloader.Preloader
 	mapper              mapper.Mapper
 	AuthMw              *middlewares.AuthMiddleware
+	EmailValidator      emailvalidator.EmailValidator
+	DeviceValidator     devicevalidator.DeviceValidator
+	PhoneValidator      phonenumbervalidator.PhoneNumberValidator
 }
 
 type Resolver struct {
@@ -48,9 +54,13 @@ type Resolver struct {
 	preloader           preloader.Preloader
 	mapper              mapper.Mapper
 	logger              *zap.Logger
+	emailValidator      emailvalidator.EmailValidator
+	deviceValidator     devicevalidator.DeviceValidator
+	phoneValidator      phonenumbervalidator.PhoneNumberValidator
 }
 
 func NewResolver(opt *ResolverOpts, logger *zap.Logger) *Resolver {
+
 	return &Resolver{
 		AccountService:      opt.AccountService,
 		AuthService:         opt.AuthService,
@@ -62,6 +72,9 @@ func NewResolver(opt *ResolverOpts, logger *zap.Logger) *Resolver {
 		preloader:           opt.preloader,
 		mapper:              opt.mapper,
 		logger:              logger,
+		emailValidator:      opt.EmailValidator,
+		deviceValidator:     opt.DeviceValidator,
+		phoneValidator:      opt.PhoneValidator,
 	}
 }
 

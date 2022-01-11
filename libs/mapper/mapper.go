@@ -6,10 +6,14 @@ import (
 	coreError "github.com/roava/zebra/errors"
 	zaplogger "github.com/roava/zebra/logger"
 	"go.uber.org/zap"
+	pbTypes "ms.api/protos/pb/types"
+	"ms.api/types"
 )
 
 type Mapper interface {
 	Hydrate(from interface{}, to interface{}) error
+	DeviceTokenInputFromModel(tokenType types.DeviceTokenTypes) pbTypes.DeviceToken_DeviceTokenTypes
+	PreferenceInputFromModel(input types.DevicePreferencesTypes) pbTypes.DevicePreferences_DevicePreferencesTypes
 }
 
 // GQLMapper a mapper that returns Graphql types
@@ -61,5 +65,25 @@ func Float64(i float64) *float64 {
 func NewMapper() *GQLMapper {
 	return &GQLMapper{
 		logger: zaplogger.New(),
+	}
+}
+
+func (G *GQLMapper) DeviceTokenInputFromModel(tokenType types.DeviceTokenTypes) pbTypes.DeviceToken_DeviceTokenTypes {
+	switch tokenType {
+	case types.DeviceTokenTypesFirebase:
+		return pbTypes.DeviceToken_FIREBASE
+	default:
+		return pbTypes.DeviceToken_FIREBASE
+	}
+}
+
+func (G *GQLMapper) PreferenceInputFromModel(input types.DevicePreferencesTypes) pbTypes.DevicePreferences_DevicePreferencesTypes {
+	switch input {
+	case types.DevicePreferencesTypesPush:
+		return pbTypes.DevicePreferences_PUSH
+	case types.DevicePreferencesTypesBiometrics:
+		return pbTypes.DevicePreferences_BIOMETRICS
+	default:
+		return pbTypes.DevicePreferences_PUSH
 	}
 }

@@ -36,3 +36,13 @@ func Validate(email string) (string, error) {
 	}
 	return strings.ToLower(email), nil
 }
+
+type EmailValidator interface {
+	Validate(email string) (string, error)
+}
+
+type Validator struct{}
+
+func (v *Validator) Validate(email string) (string, error) {
+	return Validate(email)
+}
