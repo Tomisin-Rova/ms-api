@@ -11,7 +11,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap/zaptest"
 	errorvalues "ms.api/libs/errors"
-	"ms.api/libs/mapper"
 	devicevalidator "ms.api/libs/validator/device"
 	emailvalidator "ms.api/libs/validator/email"
 	phonenumbervalidator "ms.api/libs/validator/phonenumbervalidator"
@@ -380,7 +379,6 @@ func TestMutationResolver_Signup(t *testing.T) {
 		PhoneValidator:  phoneNumberValidator,
 		EmailValidator:  emailValidator,
 		DeviceValidator: deviceValidator,
-		mapper:          mapper.NewMapper(),
 	}
 
 	for _, testCase := range testCases {

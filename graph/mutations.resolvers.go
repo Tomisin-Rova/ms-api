@@ -108,7 +108,7 @@ func (r *mutationResolver) Signup(ctx context.Context, customerInput types.Custo
 	for _, tokenInput := range customerInputTokens {
 		deviceTokenInputs = append(deviceTokenInputs, &pbTypes.DeviceTokenInput{
 			Value: tokenInput.Value,
-			Type:  r.mapper.DeviceTokenInputFromModel(tokenInput.Type),
+			Type:  r.helper.DeviceTokenInputFromModel(tokenInput.Type),
 		})
 	}
 	customerInputPreferences := customerInput.Device.Preferences
@@ -119,7 +119,7 @@ func (r *mutationResolver) Signup(ctx context.Context, customerInput types.Custo
 	for _, preference := range customerInputPreferences {
 		preferences = append(preferences, &pbTypes.DevicePreferencesInput{
 			Value: preference.Value,
-			Type:  r.mapper.PreferenceInputFromModel(preference.Type),
+			Type:  r.helper.PreferenceInputFromModel(preference.Type),
 		})
 	}
 	req := auth.SignupRequest{

@@ -10,6 +10,17 @@ var (
 	authFailedMessage = "User authentication failed"
 )
 
+type Helper interface {
+	GetQuestionaryStatusIndex(val types.QuestionaryStatuses) int32
+	GetQuestionaryTypesIndex(val types.QuestionaryTypes) int32
+	GetDeveicePreferenceTypesIndex(val types.DevicePreferencesTypes) int32
+	GetCustomer_CustomerStatusIndex(val customerTypes.Customer_CustomerStatuses) int32
+	GetCustomerStatusIndex(val types.CustomerStatuses) int32
+	DeviceTokenInputFromModel(tokenType types.DeviceTokenTypes) customerTypes.DeviceToken_DeviceTokenTypes
+	PreferenceInputFromModel(input types.DevicePreferencesTypes) customerTypes.DevicePreferences_DevicePreferencesTypes
+	NormalizeCustomerDeviceInput(deviceInput *types.DeviceInput) ([]*customerTypes.DeviceTokenInput, []*customerTypes.DevicePreferencesInput)
+}
+
 type helpersfactory struct{}
 
 func (h *helpersfactory) GetQuestionaryStatusIndex(val types.QuestionaryStatuses) int32 {
@@ -84,4 +95,49 @@ func (h *helpersfactory) GetCustomerStatusIndex(val types.CustomerStatuses) int3
 		// should never happen
 		return -1
 	}
+}
+
+func (h *helpersfactory) DeviceTokenInputFromModel(tokenType types.DeviceTokenTypes) customerTypes.DeviceToken_DeviceTokenTypes {
+	switch tokenType {
+	default:
+		return customerTypes.DeviceToken_FIREBASE
+	}
+}
+
+func (h *helpersfactory) PreferenceInputFromModel(input types.DevicePreferencesTypes) customerTypes.DevicePreferences_DevicePreferencesTypes {
+	switch input {
+	case types.DevicePreferencesTypesPush:
+		return customerTypes.DevicePreferences_PUSH
+	case types.DevicePreferencesTypesBiometrics:
+		return customerTypes.DevicePreferences_BIOMETRICS
+	default:
+		return customerTypes.DevicePreferences_PUSH
+	}
+}
+
+func (h *helpersfactory) NormalizeCustomerDeviceInput(deviceInput *types.DeviceInput) ([]*customerTypes.DeviceTokenInput, []*customerTypes.DevicePreferencesInput) {
+	customerInputTokens := deviceInput.Tokens
+	if customerInputTokens == nil {
+		customerInputTokens = []*types.DeviceTokenInput{}
+	}
+	deviceTokenInputs := make([]*customerTypes.DeviceTokenInput, len(customerInputTokens))
+	for _, tokenInput := range customerInputTokens {
+		deviceTokenInputs = append(deviceTokenInputs, &customerTypes.DeviceTokenInput{
+			Value: tokenInput.Value,
+			Type:  h.DeviceTokenInputFromModel(tokenInput.Type),
+		})
+	}
+	customerInputPreferences := deviceInput.Preferences
+	if customerInputPreferences == nil {
+		customerInputPreferences = []*types.DevicePreferencesInput{}
+	}
+	preferences := make([]*customerTypes.DevicePreferencesInput, len(customerInputPreferences))
+	for _, preference := range customerInputPreferences {
+		preferences = append(preferences, &customerTypes.DevicePreferencesInput{
+			Value: preference.Value,
+			Type:  h.PreferenceInputFromModel(preference.Type),
+		})
+	}
+
+	return deviceTokenInputs, preferences
 }

@@ -41,6 +41,7 @@ type ResolverOpts struct {
 	EmailValidator      emailvalidator.EmailValidator
 	DeviceValidator     devicevalidator.DeviceValidator
 	PhoneValidator      phonenumbervalidator.PhoneNumberValidator
+	Helper              Helper
 }
 
 type Resolver struct {
@@ -57,10 +58,14 @@ type Resolver struct {
 	emailValidator      emailvalidator.EmailValidator
 	deviceValidator     devicevalidator.DeviceValidator
 	phoneValidator      phonenumbervalidator.PhoneNumberValidator
+	helper              Helper
 }
 
 func NewResolver(opt *ResolverOpts, logger *zap.Logger) *Resolver {
-
+	helper := opt.Helper
+	if helper == nil {
+		helper = &helpersfactory{}
+	}
 	return &Resolver{
 		AccountService:      opt.AccountService,
 		AuthService:         opt.AuthService,
@@ -75,6 +80,7 @@ func NewResolver(opt *ResolverOpts, logger *zap.Logger) *Resolver {
 		emailValidator:      opt.EmailValidator,
 		deviceValidator:     opt.DeviceValidator,
 		phoneValidator:      opt.PhoneValidator,
+		helper:              helper,
 	}
 }
 
