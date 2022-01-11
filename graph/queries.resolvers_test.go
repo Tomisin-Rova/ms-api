@@ -125,6 +125,11 @@ func Test_queryResolver_Contents(t *testing.T) {
 	const (
 		firstFiveContents = iota
 		lastFiveContents
+		successNoFilters
+		successFirst
+		successLast
+		successAfter
+		successBefore
 	)
 	zero := int64(0)
 	firstFive := int64(5)
@@ -159,6 +164,58 @@ func Test_queryResolver_Contents(t *testing.T) {
 				before string
 			}{first: &zero, after: "", last: &lastFive, before: ""},
 		},
+		{
+			name:     "Test success with no filters",
+			testType: successNoFilters,
+			arg: struct {
+				first  *int64
+				after  string
+				last   *int64
+				before string
+			}{},
+		},
+		{
+			name:     "Test success with first",
+			testType: successFirst,
+			arg: struct {
+				first  *int64
+				after  string
+				last   *int64
+				before string
+			}{
+				first: &firstFive,
+			},
+		},
+		{
+			name:     "Test success with last",
+			testType: successLast,
+			arg: struct {
+				first  *int64
+				after  string
+				last   *int64
+				before string
+			}{last: &lastFive},
+		},
+		{
+			name:     "Test success with after",
+			testType: successAfter,
+			arg: struct {
+				first  *int64
+				after  string
+				last   *int64
+				before string
+			}{after: "validId"},
+		},
+		{
+			name:     "Test success with before",
+			testType: successBefore,
+			arg: struct {
+				first  *int64
+				after  string
+				last   *int64
+				before string
+			}{before: "validId"},
+		},
 	}
 
 	controller := gomock.NewController(t)
@@ -184,6 +241,51 @@ func Test_queryResolver_Contents(t *testing.T) {
 
 			case lastFiveContents:
 				serviceReq := &customer.GetContentsRequest{First: int32(*test.arg.first), After: test.arg.after, Last: int32(*test.arg.last), Before: test.arg.before}
+				customerServiceClient.EXPECT().GetContents(context.Background(),
+					serviceReq,
+				).Return(mockExpectedContents, nil)
+
+				response, err := resolver.Contents(context.Background(), test.arg.first, &test.arg.after, test.arg.last, &test.arg.before)
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+			case successNoFilters:
+				serviceReq := &customer.GetContentsRequest{}
+				customerServiceClient.EXPECT().GetContents(context.Background(),
+					serviceReq,
+				).Return(mockExpectedContents, nil)
+
+				response, err := resolver.Contents(context.Background(), test.arg.first, &test.arg.after, test.arg.last, &test.arg.before)
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+			case successFirst:
+				serviceReq := &customer.GetContentsRequest{First: int32(5)}
+				customerServiceClient.EXPECT().GetContents(context.Background(),
+					serviceReq,
+				).Return(mockExpectedContents, nil)
+
+				response, err := resolver.Contents(context.Background(), test.arg.first, &test.arg.after, test.arg.last, &test.arg.before)
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+			case successLast:
+				serviceReq := &customer.GetContentsRequest{Last: int32(5)}
+				customerServiceClient.EXPECT().GetContents(context.Background(),
+					serviceReq,
+				).Return(mockExpectedContents, nil)
+
+				response, err := resolver.Contents(context.Background(), test.arg.first, &test.arg.after, test.arg.last, &test.arg.before)
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+			case successAfter:
+				serviceReq := &customer.GetContentsRequest{After: "validId"}
+				customerServiceClient.EXPECT().GetContents(context.Background(),
+					serviceReq,
+				).Return(mockExpectedContents, nil)
+
+				response, err := resolver.Contents(context.Background(), test.arg.first, &test.arg.after, test.arg.last, &test.arg.before)
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+			case successBefore:
+				serviceReq := &customer.GetContentsRequest{Before: "validId"}
 				customerServiceClient.EXPECT().GetContents(context.Background(),
 					serviceReq,
 				).Return(mockExpectedContents, nil)
@@ -728,6 +830,11 @@ func Test_queryResolver_Questionaries(t *testing.T) {
 		first_ten_questionaries = iota
 		last_ten_questionaries
 		first_ten_active_questionaries
+		successNoFilters
+		successFirst
+		successLast
+		successAfter
+		successBefore
 	)
 
 	tests := []struct {
@@ -804,6 +911,71 @@ func Test_queryResolver_Questionaries(t *testing.T) {
 				types:    []types.QuestionaryTypes{types.QuestionaryTypesReasons},
 			},
 		},
+		{
+			name: "Test success no filters",
+			args: struct {
+				keywords string
+				first    int64
+				after    string
+				last     int64
+				before   string
+				statuses []types.QuestionaryStatuses
+				types    []types.QuestionaryTypes
+			}{},
+			testType: successNoFilters,
+		},
+		{
+			name: "Test success with first",
+			args: struct {
+				keywords string
+				first    int64
+				after    string
+				last     int64
+				before   string
+				statuses []types.QuestionaryStatuses
+				types    []types.QuestionaryTypes
+			}{first: int64(1)},
+			testType: successFirst,
+		},
+		{
+			name: "Test success with last",
+			args: struct {
+				keywords string
+				first    int64
+				after    string
+				last     int64
+				before   string
+				statuses []types.QuestionaryStatuses
+				types    []types.QuestionaryTypes
+			}{last: int64(1)},
+			testType: successLast,
+		},
+		{
+			name: "Test success with before",
+			args: struct {
+				keywords string
+				first    int64
+				after    string
+				last     int64
+				before   string
+				statuses []types.QuestionaryStatuses
+				types    []types.QuestionaryTypes
+			}{before: "validId"},
+			testType: successBefore,
+		},
+		{
+			name: "Test success with after",
+			args: struct {
+				keywords string
+				first    int64
+				after    string
+				last     int64
+				before   string
+				statuses []types.QuestionaryStatuses
+				types    []types.QuestionaryTypes
+			}{after: "validId"},
+			testType: successAfter,
+		},
 	}
 
 	for _, test := range tests {
@@ -823,7 +995,7 @@ func Test_queryResolver_Questionaries(t *testing.T) {
 				statuses := make([]pbTypes.Questionary_QuestionaryStatuses, 0)
 				if len(test.args.statuses) > 0 {
 					for _, state := range test.args.statuses {
-						statuses = append(statuses, pbTypes.Questionary_QuestionaryStatuses(helpers.GetQuestionaryStatusIndex(state)))
+						statuses = append(statuses, pbTypes.Questionary_QuestionaryStatuses(helpers.MapQuestionaryStatus(state)))
 					}
 				}
 
@@ -831,7 +1003,7 @@ func Test_queryResolver_Questionaries(t *testing.T) {
 				questionaryTypes := make([]pbTypes.Questionary_QuestionaryTypes, 0)
 				if len(test.args.types) > 0 {
 					for _, qstType := range test.args.types {
-						questionaryTypes = append(questionaryTypes, pbTypes.Questionary_QuestionaryTypes(helpers.GetQuestionaryTypesIndex(qstType)))
+						questionaryTypes = append(questionaryTypes, pbTypes.Questionary_QuestionaryTypes(helpers.MapQuestionaryType(qstType)))
 					}
 				}
 
