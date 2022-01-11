@@ -70,8 +70,6 @@ func NewMapper() *GQLMapper {
 
 func (G *GQLMapper) DeviceTokenInputFromModel(tokenType types.DeviceTokenTypes) pbTypes.DeviceToken_DeviceTokenTypes {
 	switch tokenType {
-	case types.DeviceTokenTypesFirebase:
-		return pbTypes.DeviceToken_FIREBASE
 	default:
 		return pbTypes.DeviceToken_FIREBASE
 	}
