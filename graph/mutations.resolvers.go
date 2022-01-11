@@ -13,7 +13,7 @@ import (
 	"ms.api/libs/validator/datevalidator"
 	devicevalidator "ms.api/libs/validator/device"
 	emailvalidator "ms.api/libs/validator/email"
-	phonenumbervalidator "ms.api/libs/validator/phonenumbervalidator"
+	"ms.api/libs/validator/phonenumbervalidator"
 	"ms.api/protos/pb/auth"
 	"ms.api/protos/pb/customer"
 	"ms.api/protos/pb/onboarding"
@@ -72,8 +72,8 @@ func (r *mutationResolver) VerifyOtp(ctx context.Context, target string, otpToke
 	}, nil
 }
 
-func (r *mutationResolver) Signup(ctx context.Context, customerInput types.CustomerInput) (*types.AuthResponse, error) {
-	err := r.phoneValidator.ValidatePhoneNumber(customerInput.Phone)
+func (r *mutationResolver) Signup(ctx context.Context, customer types.CustomerInput) (*types.AuthResponse, error) {
+	err := r.phoneValidator.ValidatePhoneNumber(customer.Phone)
 	if err != nil {
 		invalidMsg := phonenumbervalidator.ErrInvalidPhoneNumber.Message()
 		return &types.AuthResponse{
@@ -82,7 +82,7 @@ func (r *mutationResolver) Signup(ctx context.Context, customerInput types.Custo
 			Code:    http.StatusBadRequest,
 		}, err
 	}
-	email, err := r.emailValidator.Validate(customerInput.Email)
+	email, err := r.emailValidator.Validate(customer.Email)
 	if err != nil {
 		invalidMsg := emailvalidator.ErrInvalidEmail.Message()
 		return &types.AuthResponse{
@@ -91,7 +91,7 @@ func (r *mutationResolver) Signup(ctx context.Context, customerInput types.Custo
 			Code:    http.StatusBadRequest,
 		}, err
 	}
-	err = r.deviceValidator.Validate(customerInput.Device)
+	err = r.deviceValidator.Validate(customer.Device)
 	if err != nil {
 		invalidMsg := devicevalidator.ErrInvalidDevice.Message()
 		return &types.AuthResponse{
@@ -100,7 +100,7 @@ func (r *mutationResolver) Signup(ctx context.Context, customerInput types.Custo
 			Code:    http.StatusBadRequest,
 		}, err
 	}
-	customerInputTokens := customerInput.Device.Tokens
+	customerInputTokens := customer.Device.Tokens
 	if customerInputTokens == nil {
 		customerInputTokens = []*types.DeviceTokenInput{}
 	}
@@ -111,7 +111,7 @@ func (r *mutationResolver) Signup(ctx context.Context, customerInput types.Custo
 			Type:  r.helper.DeviceTokenInputFromModel(tokenInput.Type),
 		})
 	}
-	customerInputPreferences := customerInput.Device.Preferences
+	customerInputPreferences := customer.Device.Preferences
 	if customerInputPreferences == nil {
 		customerInputPreferences = []*types.DevicePreferencesInput{}
 	}
@@ -124,14 +124,14 @@ func (r *mutationResolver) Signup(ctx context.Context, customerInput types.Custo
 	}
 	req := auth.SignupRequest{
 		CustomerInput: &auth.CustomerInput{
-			Phone:         customerInput.Phone,
+			Phone:         customer.Phone,
 			Email:         email,
-			LoginPassword: customerInput.LoginPassword,
+			LoginPassword: customer.LoginPassword,
 		},
 		Device: &pbTypes.DeviceInput{
-			Identifier:  customerInput.Device.Identifier,
-			Os:          customerInput.Device.Os,
-			Brand:       customerInput.Device.Brand,
+			Identifier:  customer.Device.Identifier,
+			Os:          customer.Device.Os,
+			Brand:       customer.Device.Brand,
 			Tokens:      deviceTokenInputs,
 			Preferences: preferences,
 		},
