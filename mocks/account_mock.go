@@ -6,37 +6,38 @@ package mocks
 
 import (
 	context "context"
+	reflect "reflect"
+
 	gomock "github.com/golang/mock/gomock"
 	grpc "google.golang.org/grpc"
 	account "ms.api/protos/pb/account"
 	types "ms.api/protos/pb/types"
-	reflect "reflect"
 )
 
-// MockAccountServiceClient is a mock of AccountServiceClient interface
+// MockAccountServiceClient is a mock of AccountServiceClient interface.
 type MockAccountServiceClient struct {
 	ctrl     *gomock.Controller
 	recorder *MockAccountServiceClientMockRecorder
 }
 
-// MockAccountServiceClientMockRecorder is the mock recorder for MockAccountServiceClient
+// MockAccountServiceClientMockRecorder is the mock recorder for MockAccountServiceClient.
 type MockAccountServiceClientMockRecorder struct {
 	mock *MockAccountServiceClient
 }
 
-// NewMockAccountServiceClient creates a new mock instance
+// NewMockAccountServiceClient creates a new mock instance.
 func NewMockAccountServiceClient(ctrl *gomock.Controller) *MockAccountServiceClient {
 	mock := &MockAccountServiceClient{ctrl: ctrl}
 	mock.recorder = &MockAccountServiceClientMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockAccountServiceClient) EXPECT() *MockAccountServiceClientMockRecorder {
 	return m.recorder
 }
 
-// CreateAccount mocks base method
+// CreateAccount mocks base method.
 func (m *MockAccountServiceClient) CreateAccount(ctx context.Context, in *account.CreateAccountRequest, opts ...grpc.CallOption) (*types.Account, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
@@ -49,14 +50,14 @@ func (m *MockAccountServiceClient) CreateAccount(ctx context.Context, in *accoun
 	return ret0, ret1
 }
 
-// CreateAccount indicates an expected call of CreateAccount
+// CreateAccount indicates an expected call of CreateAccount.
 func (mr *MockAccountServiceClientMockRecorder) CreateAccount(ctx, in interface{}, opts ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateAccount", reflect.TypeOf((*MockAccountServiceClient)(nil).CreateAccount), varargs...)
 }
 
-// CreateVaultAccount mocks base method
+// CreateVaultAccount mocks base method.
 func (m *MockAccountServiceClient) CreateVaultAccount(ctx context.Context, in *account.CreateVaultAccountRequest, opts ...grpc.CallOption) (*types.Account, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
@@ -69,14 +70,14 @@ func (m *MockAccountServiceClient) CreateVaultAccount(ctx context.Context, in *a
 	return ret0, ret1
 }
 
-// CreateVaultAccount indicates an expected call of CreateVaultAccount
+// CreateVaultAccount indicates an expected call of CreateVaultAccount.
 func (mr *MockAccountServiceClientMockRecorder) CreateVaultAccount(ctx, in interface{}, opts ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateVaultAccount", reflect.TypeOf((*MockAccountServiceClient)(nil).CreateVaultAccount), varargs...)
 }
 
-// GetAccount mocks base method
+// GetAccount mocks base method.
 func (m *MockAccountServiceClient) GetAccount(ctx context.Context, in *account.GetAccountRequest, opts ...grpc.CallOption) (*types.Account, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
@@ -89,14 +90,14 @@ func (m *MockAccountServiceClient) GetAccount(ctx context.Context, in *account.G
 	return ret0, ret1
 }
 
-// GetAccount indicates an expected call of GetAccount
+// GetAccount indicates an expected call of GetAccount.
 func (mr *MockAccountServiceClientMockRecorder) GetAccount(ctx, in interface{}, opts ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccount", reflect.TypeOf((*MockAccountServiceClient)(nil).GetAccount), varargs...)
 }
 
-// GetAccounts mocks base method
+// GetAccounts mocks base method.
 func (m *MockAccountServiceClient) GetAccounts(ctx context.Context, in *account.GetAccountsRequest, opts ...grpc.CallOption) (*account.GetAccountsResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
@@ -109,14 +110,14 @@ func (m *MockAccountServiceClient) GetAccounts(ctx context.Context, in *account.
 	return ret0, ret1
 }
 
-// GetAccounts indicates an expected call of GetAccounts
+// GetAccounts indicates an expected call of GetAccounts.
 func (mr *MockAccountServiceClientMockRecorder) GetAccounts(ctx, in interface{}, opts ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccounts", reflect.TypeOf((*MockAccountServiceClient)(nil).GetAccounts), varargs...)
 }
 
-// GetProduct mocks base method
+// GetProduct mocks base method.
 func (m *MockAccountServiceClient) GetProduct(ctx context.Context, in *account.GetProductRequest, opts ...grpc.CallOption) (*types.Product, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
@@ -129,14 +130,14 @@ func (m *MockAccountServiceClient) GetProduct(ctx context.Context, in *account.G
 	return ret0, ret1
 }
 
-// GetProduct indicates an expected call of GetProduct
+// GetProduct indicates an expected call of GetProduct.
 func (mr *MockAccountServiceClientMockRecorder) GetProduct(ctx, in interface{}, opts ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProduct", reflect.TypeOf((*MockAccountServiceClient)(nil).GetProduct), varargs...)
 }
 
-// GetProducts mocks base method
+// GetProducts mocks base method.
 func (m *MockAccountServiceClient) GetProducts(ctx context.Context, in *account.GetProductsRequest, opts ...grpc.CallOption) (*account.GetProductsResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
@@ -149,37 +150,37 @@ func (m *MockAccountServiceClient) GetProducts(ctx context.Context, in *account.
 	return ret0, ret1
 }
 
-// GetProducts indicates an expected call of GetProducts
+// GetProducts indicates an expected call of GetProducts.
 func (mr *MockAccountServiceClientMockRecorder) GetProducts(ctx, in interface{}, opts ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProducts", reflect.TypeOf((*MockAccountServiceClient)(nil).GetProducts), varargs...)
 }
 
-// MockAccountServiceServer is a mock of AccountServiceServer interface
+// MockAccountServiceServer is a mock of AccountServiceServer interface.
 type MockAccountServiceServer struct {
 	ctrl     *gomock.Controller
 	recorder *MockAccountServiceServerMockRecorder
 }
 
-// MockAccountServiceServerMockRecorder is the mock recorder for MockAccountServiceServer
+// MockAccountServiceServerMockRecorder is the mock recorder for MockAccountServiceServer.
 type MockAccountServiceServerMockRecorder struct {
 	mock *MockAccountServiceServer
 }
 
-// NewMockAccountServiceServer creates a new mock instance
+// NewMockAccountServiceServer creates a new mock instance.
 func NewMockAccountServiceServer(ctrl *gomock.Controller) *MockAccountServiceServer {
 	mock := &MockAccountServiceServer{ctrl: ctrl}
 	mock.recorder = &MockAccountServiceServerMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockAccountServiceServer) EXPECT() *MockAccountServiceServerMockRecorder {
 	return m.recorder
 }
 
-// CreateAccount mocks base method
+// CreateAccount mocks base method.
 func (m *MockAccountServiceServer) CreateAccount(arg0 context.Context, arg1 *account.CreateAccountRequest) (*types.Account, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateAccount", arg0, arg1)
@@ -188,13 +189,13 @@ func (m *MockAccountServiceServer) CreateAccount(arg0 context.Context, arg1 *acc
 	return ret0, ret1
 }
 
-// CreateAccount indicates an expected call of CreateAccount
+// CreateAccount indicates an expected call of CreateAccount.
 func (mr *MockAccountServiceServerMockRecorder) CreateAccount(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateAccount", reflect.TypeOf((*MockAccountServiceServer)(nil).CreateAccount), arg0, arg1)
 }
 
-// CreateVaultAccount mocks base method
+// CreateVaultAccount mocks base method.
 func (m *MockAccountServiceServer) CreateVaultAccount(arg0 context.Context, arg1 *account.CreateVaultAccountRequest) (*types.Account, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateVaultAccount", arg0, arg1)
@@ -203,13 +204,13 @@ func (m *MockAccountServiceServer) CreateVaultAccount(arg0 context.Context, arg1
 	return ret0, ret1
 }
 
-// CreateVaultAccount indicates an expected call of CreateVaultAccount
+// CreateVaultAccount indicates an expected call of CreateVaultAccount.
 func (mr *MockAccountServiceServerMockRecorder) CreateVaultAccount(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateVaultAccount", reflect.TypeOf((*MockAccountServiceServer)(nil).CreateVaultAccount), arg0, arg1)
 }
 
-// GetAccount mocks base method
+// GetAccount mocks base method.
 func (m *MockAccountServiceServer) GetAccount(arg0 context.Context, arg1 *account.GetAccountRequest) (*types.Account, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAccount", arg0, arg1)
@@ -218,13 +219,13 @@ func (m *MockAccountServiceServer) GetAccount(arg0 context.Context, arg1 *accoun
 	return ret0, ret1
 }
 
-// GetAccount indicates an expected call of GetAccount
+// GetAccount indicates an expected call of GetAccount.
 func (mr *MockAccountServiceServerMockRecorder) GetAccount(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccount", reflect.TypeOf((*MockAccountServiceServer)(nil).GetAccount), arg0, arg1)
 }
 
-// GetAccounts mocks base method
+// GetAccounts mocks base method.
 func (m *MockAccountServiceServer) GetAccounts(arg0 context.Context, arg1 *account.GetAccountsRequest) (*account.GetAccountsResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAccounts", arg0, arg1)
@@ -233,13 +234,13 @@ func (m *MockAccountServiceServer) GetAccounts(arg0 context.Context, arg1 *accou
 	return ret0, ret1
 }
 
-// GetAccounts indicates an expected call of GetAccounts
+// GetAccounts indicates an expected call of GetAccounts.
 func (mr *MockAccountServiceServerMockRecorder) GetAccounts(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccounts", reflect.TypeOf((*MockAccountServiceServer)(nil).GetAccounts), arg0, arg1)
 }
 
-// GetProduct mocks base method
+// GetProduct mocks base method.
 func (m *MockAccountServiceServer) GetProduct(arg0 context.Context, arg1 *account.GetProductRequest) (*types.Product, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetProduct", arg0, arg1)
@@ -248,13 +249,13 @@ func (m *MockAccountServiceServer) GetProduct(arg0 context.Context, arg1 *accoun
 	return ret0, ret1
 }
 
-// GetProduct indicates an expected call of GetProduct
+// GetProduct indicates an expected call of GetProduct.
 func (mr *MockAccountServiceServerMockRecorder) GetProduct(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProduct", reflect.TypeOf((*MockAccountServiceServer)(nil).GetProduct), arg0, arg1)
 }
 
-// GetProducts mocks base method
+// GetProducts mocks base method.
 func (m *MockAccountServiceServer) GetProducts(arg0 context.Context, arg1 *account.GetProductsRequest) (*account.GetProductsResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetProducts", arg0, arg1)
@@ -263,7 +264,7 @@ func (m *MockAccountServiceServer) GetProducts(arg0 context.Context, arg1 *accou
 	return ret0, ret1
 }
 
-// GetProducts indicates an expected call of GetProducts
+// GetProducts indicates an expected call of GetProducts.
 func (mr *MockAccountServiceServerMockRecorder) GetProducts(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProducts", reflect.TypeOf((*MockAccountServiceServer)(nil).GetProducts), arg0, arg1)

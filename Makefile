@@ -61,6 +61,9 @@ gen-mocks: proto
 	mockgen -source=./protos/pb/payment/payment.pb.go -destination=./mocks/payment_mock.go -package=mocks
 	mockgen -source=./protos/pb/pricing/pricing.pb.go -destination=./mocks/pricing_mock.go -package=mocks
 	mockgen -source=./protos/pb/verification/verification.pb.go -destination=./mocks/verification_mock.go -package=mocks
+	mockgen -source=./libs/validator/device/device_validator.go -destination=./mocks/device_validator_mock.go -package=mocks
+	mockgen -source=./libs/validator/email/email.go -destination=./mocks/email_validator_mock.go -package=mocks
+	mockgen -source=./libs/validator/phonenumbervalidator/phone_number_validator.go -destination=./mocks/phone_number_validator_mock.go -package=mocks
 	go generate ./...
 
 local: update-dependencies schema proto gen-mocks lint test
