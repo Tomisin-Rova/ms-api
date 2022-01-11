@@ -11,8 +11,10 @@ var (
 )
 
 type Helper interface {
-	GetQuestionaryStatusIndex(val types.QuestionaryStatuses) int32
-	GetQuestionaryTypesIndex(val types.QuestionaryTypes) int32
+	MapQuestionaryStatus(val types.QuestionaryStatuses) customerTypes.Questionary_QuestionaryStatuses
+	MapQuestionaryType(val types.QuestionaryTypes) customerTypes.Questionary_QuestionaryTypes
+	MapProtoQuesionaryStatus(val customerTypes.Questionary_QuestionaryStatuses) types.QuestionaryStatuses
+	MapProtoQuestionaryType(val customerTypes.Questionary_QuestionaryTypes) types.QuestionaryTypes
 	GetDeveicePreferenceTypesIndex(val types.DevicePreferencesTypes) int32
 	GetCustomer_CustomerStatusIndex(val customerTypes.Customer_CustomerStatuses) int32
 	GetCustomerStatusIndex(val types.CustomerStatuses) int32

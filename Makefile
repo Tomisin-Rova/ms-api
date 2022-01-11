@@ -73,6 +73,7 @@ local: update-dependencies schema proto gen-mocks lint test
 	(export ENVIRONMENT=${environment}; go run main.go)
 
 update-dependencies:
+	GOSUMDB=off go get -d github.com/99designs/gqlgen
 	GOSUMDB=off go get -u github.com/roava/zebra@master
 
 tools:
