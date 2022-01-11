@@ -331,10 +331,43 @@ func (r *mutationResolver) ResetTransactionPassword(ctx context.Context, otpToke
 }
 
 func (r *mutationResolver) Login(ctx context.Context, credentials types.AuthInput) (*types.AuthResponse, error) {
-	msg := "Not implemented"
+	email, err := r.emailValidator.Validate(credentials.Email)
+	if err != nil {
+		invalidMsg := emailvalidator.ErrInvalidEmail.Message()
+		return &types.AuthResponse{
+			Message: &invalidMsg,
+			Success: false,
+			Code:    http.StatusBadRequest,
+		}, err
+	}
+	req := auth.LoginRequest{
+		CustomerInput: &auth.CustomerInput{
+			Email:         email,
+			LoginPassword: credentials.Password,
+		},
+		Device: &pbTypes.DeviceInput{
+			Identifier: credentials.DeviceIdentifier,
+			Tokens:     []*pbTypes.DeviceTokenInput{},
+		},
+	}
+	tokens, err := r.AuthService.Login(context.Background(), &req)
+	if err != nil {
+		invalidMsg := errorvalues.Message(errorvalues.InternalErr)
+		return &types.AuthResponse{
+			Message: &invalidMsg,
+			Success: false,
+			Code:    http.StatusInternalServerError,
+		}, err
+	}
+	msg := "Success"
 	return &types.AuthResponse{
 		Message: &msg,
-		Code:    int64(500),
+		Success: true,
+		Tokens: &types.AuthTokens{
+			Auth:    tokens.AuthToken,
+			Refresh: &tokens.RefreshToken,
+		},
+		Code: int64(http.StatusOK),
 	}, nil
 }
 

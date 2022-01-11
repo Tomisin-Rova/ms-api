@@ -930,19 +930,95 @@ func TestMutationResolver_ResetTransactionPassword(t *testing.T) {
 }
 
 func TestMutationResolver_Login(t *testing.T) {
+	const (
+		failInvalidEmail = iota
+		failAuthServiceError
+		success
+	)
+
+	defaultPayload := types.AuthInput{
+		Email:            "EMAIL@user.org",
+		Password:         "123456",
+		DeviceIdentifier: "device-identifier",
+	}
+
+	authServiceResponse := &auth.TokenPairResponse{
+		AuthToken:    "auth-token",
+		RefreshToken: "refresh-token",
+	}
+
+	testCases := []struct {
+		name     string
+		input    types.AuthInput
+		testType int
+	}{
+
+		{
+			name:     "Fail if invalid e-mail",
+			input:    defaultPayload,
+			testType: failInvalidEmail,
+		},
+		{
+			name:     "Fail on auth service error",
+			input:    defaultPayload,
+			testType: failAuthServiceError,
+		},
+
+		{
+			name:     "Success request",
+			input:    defaultPayload,
+			testType: success,
+		},
+	}
+
 	controller := gomock.NewController(t)
 	defer controller.Finish()
 	authServiceClient := mocks.NewMockAuthServiceClient(controller)
+	emailValidator := mocks.NewMockEmailValidator(controller)
 	resolverOpts := &ResolverOpts{
-		AuthService: authServiceClient,
+		AuthService:    authServiceClient,
+		EmailValidator: emailValidator,
 	}
-	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
-	resp, err := resolver.Login(context.Background(), types.AuthInput{})
 
-	assert.NoError(t, err)
-	assert.NotNil(t, resp)
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			switch testCase.testType {
+			case failInvalidEmail:
+				emailValidator.EXPECT().Validate(testCase.input.Email).Return("", errors.New("")).Times(1)
+				resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
+				resp, err := resolver.Login(context.Background(), testCase.input)
+				assert.Error(t, err)
+				assert.NotNil(t, resp)
+				assert.False(t, resp.Success)
+				assert.NotNil(t, resp.Message)
+				assert.Equal(t, emailvalidator.ErrInvalidEmail.Message(), *resp.Message)
+				assert.Equal(t, int64(http.StatusBadRequest), resp.Code)
+			case failAuthServiceError:
+				emailValidator.EXPECT().Validate(testCase.input.Email).Return("email@user.org", nil).Times(1)
+				authServiceClient.EXPECT().Login(gomock.Any(), gomock.Any()).Return(nil, errors.New("")).Times(1)
+				resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
+				resp, err := resolver.Login(context.Background(), testCase.input)
+				assert.Error(t, err)
+				assert.NotNil(t, resp)
+				assert.False(t, resp.Success)
+				assert.NotNil(t, resp.Message)
+				assert.Equal(t, errorvalues.Message(errorvalues.InternalErr), *resp.Message)
+				assert.Equal(t, int64(http.StatusInternalServerError), resp.Code)
+			case success:
+				emailValidator.EXPECT().Validate(testCase.input.Email).Return("email@user.org", nil).Times(1)
+				authServiceClient.EXPECT().Login(gomock.Any(), gomock.Any()).Return(authServiceResponse, nil).Times(1)
+				resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
+				resp, err := resolver.Login(context.Background(), testCase.input)
+				assert.Nil(t, err)
+				assert.NotNil(t, resp)
+				assert.True(t, resp.Success)
+				assert.NotNil(t, resp.Message)
+				assert.Equal(t, "Success", *resp.Message)
+				assert.Equal(t, int64(http.StatusOK), resp.Code)
+			}
+		})
+	}
 }
-
 func TestMutationResolver_RefreshToken(t *testing.T) {
 	controller := gomock.NewController(t)
 	defer controller.Finish()
