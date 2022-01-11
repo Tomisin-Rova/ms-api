@@ -77,9 +77,9 @@ func NewResolver(opt *ResolverOpts, logger *zap.Logger) *Resolver {
 		preloader:           opt.preloader,
 		mapper:              opt.mapper,
 		logger:              logger,
-		emailValidator:      opt.EmailValidator,
-		deviceValidator:     opt.DeviceValidator,
-		phoneValidator:      opt.PhoneValidator,
+		emailValidator:      startEmailValidator(opt.EmailValidator),
+		deviceValidator:     startDeviceValidator(opt.DeviceValidator),
+		phoneValidator:      startPhoneValidator(opt.PhoneValidator),
 		helper:              helper,
 	}
 }
@@ -178,4 +178,25 @@ func dialRPC(ctx context.Context, address string) (*grpc.ClientConn, error) {
 		return nil, err
 	}
 	return connection, nil
+}
+
+func startEmailValidator(validator emailvalidator.EmailValidator) emailvalidator.EmailValidator {
+	if validator == nil {
+		return &emailvalidator.Validator{}
+	}
+	return validator
+}
+
+func startDeviceValidator(validator devicevalidator.DeviceValidator) devicevalidator.DeviceValidator {
+	if validator == nil {
+		return &devicevalidator.Validator{}
+	}
+	return validator
+}
+
+func startPhoneValidator(validator phonenumbervalidator.PhoneNumberValidator) phonenumbervalidator.PhoneNumberValidator {
+	if validator == nil {
+		return &phonenumbervalidator.Validator{}
+	}
+	return validator
 }
