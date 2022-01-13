@@ -504,7 +504,7 @@ type ComplexityRoot struct {
 		Me               func(childComplexity int) int
 		OnfidoSDKToken   func(childComplexity int) int
 		Product          func(childComplexity int, id string) int
-		Products         func(childComplexity int, first *int64, after *string, last *int64, before *string, statuses []types.ProductStatuses, typeArg *types.ProductTypes) int
+		Products         func(childComplexity int, first *int64, after *string, last *int64, before *string, statuses []types.ProductStatuses) int
 		Questionaries    func(childComplexity int, keywords *string, first *int64, after *string, last *int64, before *string, statuses []types.QuestionaryStatuses, typeArg []types.QuestionaryTypes) int
 		Questionary      func(childComplexity int, id string) int
 		Transaction      func(childComplexity int, id string) int
@@ -694,7 +694,7 @@ type QueryResolver interface {
 	Content(ctx context.Context, id string) (*types.Content, error)
 	Contents(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.ContentConnection, error)
 	Product(ctx context.Context, id string) (*types.Product, error)
-	Products(ctx context.Context, first *int64, after *string, last *int64, before *string, statuses []types.ProductStatuses, typeArg *types.ProductTypes) (*types.ProductConnection, error)
+	Products(ctx context.Context, first *int64, after *string, last *int64, before *string, statuses []types.ProductStatuses) (*types.ProductConnection, error)
 	Banks(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.BankConnection, error)
 	Account(ctx context.Context, id string) (*types.Account, error)
 	Accounts(ctx context.Context, first *int64, after *string, last *int64, before *string, statuses []types.AccountStatuses, types []types.ProductTypes) (*types.AccountConnection, error)
@@ -3070,7 +3070,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Products(childComplexity, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string), args["statuses"].([]types.ProductStatuses), args["type"].(*types.ProductTypes)), true
+		return e.complexity.Query.Products(childComplexity, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string), args["statuses"].([]types.ProductStatuses)), true
 
 	case "Query.questionaries":
 		if e.complexity.Query.Questionaries == nil {
@@ -4129,8 +4129,6 @@ enum DeliveryMode {
         before: String
         # Filter product by it's status. If empty, should ignore the field
         statuses: [ProductStatuses!]
-        # Filter product by it's type. If empty, should ignore the field
-        type: ProductTypes
     ): ProductConnection!
     # Fetch a list of banks
     banks(
@@ -6402,15 +6400,6 @@ func (ec *executionContext) field_Query_products_args(ctx context.Context, rawAr
 		}
 	}
 	args["statuses"] = arg4
-	var arg5 *types.ProductTypes
-	if tmp, ok := rawArgs["type"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
-		arg5, err = ec.unmarshalOProductTypes2ᚖmsᚗapiᚋtypesᚐProductTypes(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["type"] = arg5
 	return args, nil
 }
 
@@ -16814,7 +16803,7 @@ func (ec *executionContext) _Query_products(ctx context.Context, field graphql.C
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Products(rctx, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string), args["statuses"].([]types.ProductStatuses), args["type"].(*types.ProductTypes))
+		return ec.resolvers.Query().Products(rctx, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string), args["statuses"].([]types.ProductStatuses))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -30153,22 +30142,6 @@ func (ec *executionContext) marshalOProductTypes2ᚕmsᚗapiᚋtypesᚐProductTy
 	}
 
 	return ret
-}
-
-func (ec *executionContext) unmarshalOProductTypes2ᚖmsᚗapiᚋtypesᚐProductTypes(ctx context.Context, v interface{}) (*types.ProductTypes, error) {
-	if v == nil {
-		return nil, nil
-	}
-	var res = new(types.ProductTypes)
-	err := res.UnmarshalGQL(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOProductTypes2ᚖmsᚗapiᚋtypesᚐProductTypes(ctx context.Context, sel ast.SelectionSet, v *types.ProductTypes) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return v
 }
 
 func (ec *executionContext) marshalOQuestionaryPredefinedAnswer2ᚕᚖmsᚗapiᚋtypesᚐQuestionaryPredefinedAnswerᚄ(ctx context.Context, sel ast.SelectionSet, v []*types.QuestionaryPredefinedAnswer) graphql.Marshaler {

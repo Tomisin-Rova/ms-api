@@ -16,8 +16,7 @@ type Helper interface {
 	MapProtoQuesionaryStatus(val customerTypes.Questionary_QuestionaryStatuses) types.QuestionaryStatuses
 	MapProtoQuestionaryType(val customerTypes.Questionary_QuestionaryTypes) types.QuestionaryTypes
 	GetDeveicePreferenceTypesIndex(val types.DevicePreferencesTypes) int32
-	GetCustomer_CustomerStatusIndex(val customerTypes.Customer_CustomerStatuses) int32
-	GetCustomerStatusIndex(val types.CustomerStatuses) int32
+	GetProtoCustomerStatuses(val types.CustomerStatuses) customerTypes.Customer_CustomerStatuses
 	DeviceTokenInputFromModel(tokenType types.DeviceTokenTypes) customerTypes.DeviceToken_DeviceTokenTypes
 	PreferenceInputFromModel(input types.DevicePreferencesTypes) customerTypes.DevicePreferences_DevicePreferencesTypes
 }
@@ -78,40 +77,40 @@ func (h *helpersfactory) GetDeveicePreferenceTypesIndex(val types.DevicePreferen
 	}
 }
 
-func (h *helpersfactory) GetCustomer_CustomerStatusIndex(val customerTypes.Customer_CustomerStatuses) int32 {
+func (h *helpersfactory) MapProtoCustomerStatuses(val customerTypes.Customer_CustomerStatuses) types.CustomerStatuses {
 	switch val {
 	case customerTypes.Customer_SIGNEDUP:
-		return 0
+		return types.CustomerStatusesSignedup
 	case customerTypes.Customer_REGISTERED:
-		return 1
+		return types.CustomerStatusesRegistered
 	case customerTypes.Customer_VERIFIED:
-		return 2
+		return types.CustomerStatusesVerified
 	case customerTypes.Customer_ONBOARDED:
-		return 3
+		return types.CustomerStatusesOnboarded
 	case customerTypes.Customer_REJECTED:
-		return 4
+		return types.CustomerStatusesRegistered
 	case customerTypes.Customer_EXITED:
-		return 5
+		return types.CustomerStatusesExited
 	default:
 		// should never happen
-		return -1
+		return ""
 	}
 }
 
-func (h *helpersfactory) GetCustomerStatusIndex(val types.CustomerStatuses) int32 {
+func (h *helpersfactory) GetProtoCustomerStatuses(val types.CustomerStatuses) customerTypes.Customer_CustomerStatuses {
 	switch val {
 	case types.CustomerStatusesSignedup:
-		return 0
+		return customerTypes.Customer_SIGNEDUP
 	case types.CustomerStatusesRegistered:
-		return 1
+		return customerTypes.Customer_REGISTERED
 	case types.CustomerStatusesVerified:
-		return 2
+		return customerTypes.Customer_VERIFIED
 	case types.CustomerStatusesOnboarded:
-		return 3
+		return customerTypes.Customer_ONBOARDED
 	case types.CustomerStatusesRejected:
-		return 4
+		return customerTypes.Customer_REJECTED
 	case types.CustomerStatusesExited:
-		return 5
+		return customerTypes.Customer_EXITED
 	default:
 		// should never happen
 		return -1
@@ -133,5 +132,16 @@ func (h *helpersfactory) PreferenceInputFromModel(input types.DevicePreferencesT
 		return customerTypes.DevicePreferences_BIOMETRICS
 	default:
 		return customerTypes.DevicePreferences_PUSH
+	}
+}
+
+func (h *helpersfactory) MapProtoStaffStatuses(val customerTypes.Staff_StaffStatuses) types.StaffStatuses {
+	switch val {
+	case customerTypes.Staff_ACTIVE:
+		return types.StaffStatusesActive
+	case customerTypes.Staff_INACTIVE:
+		return types.StaffStatusesInactive
+	default:
+		return ""
 	}
 }
