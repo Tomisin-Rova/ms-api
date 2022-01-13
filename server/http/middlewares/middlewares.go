@@ -8,13 +8,13 @@ import (
 	"net/http"
 	"strings"
 
+	coreMiddleware "github.com/roava/zebra/middleware"
 	"github.com/roava/zebra/models"
+	"go.uber.org/zap"
 	"google.golang.org/grpc/metadata"
+	errorvalues "ms.api/libs/errors"
 	"ms.api/protos/pb/auth"
 	"ms.api/protos/pb/types"
-
-	coreMiddleware "github.com/roava/zebra/middleware"
-	"go.uber.org/zap"
 )
 
 const (
@@ -59,17 +59,17 @@ func (mw *AuthMiddleware) ValidateToken(token string) (*models.JWTClaims, error)
 func GetClaimsFromCtx(ctx context.Context) (*models.JWTClaims, error) {
 	md, ok := metadata.FromOutgoingContext(ctx)
 	if !ok {
-		return nil, errors.New("unable to parse authenticated user")
+		return nil, errorvalues.Format(errorvalues.InvalidAuthentication, errors.New("unable to parse authenticated user"))
 	}
 	jsonClaims := md.Get(coreMiddleware.AuthenticatedUserMetadataKey)
 	if len(jsonClaims) == 0 {
-		return nil, errors.New("fail decode authenticated user claims")
+		return nil, errorvalues.Format(errorvalues.InvalidAuthentication, errors.New("fail decode authenticated user claims"))
 	}
 
 	var claims models.JWTClaims
 	err := json.Unmarshal([]byte(jsonClaims[0]), &claims)
 	if err != nil {
-		return nil, errors.New("fail to unmarshall claims")
+		return nil, errorvalues.Format(errorvalues.InvalidAuthentication, errors.New("fail to unmarshall claims"))
 	}
 
 	return &claims, nil
