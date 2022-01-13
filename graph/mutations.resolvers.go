@@ -192,22 +192,43 @@ func (r *mutationResolver) Register(ctx context.Context, customerDetails types.C
 		return &types.Response{Message: &responseMessage, Success: false, Code: int64(500)}, err
 	}
 
+	customerAddress := customerDetails.Address
+	if customerAddress == nil {
+		customerAddress = &types.AddressInput{}
+	}
+
+	var customerState string
+	if customerAddress.State != nil {
+		customerState = *customerAddress.State
+	}
+
+	var customerCity string
+	if customerAddress.City != nil {
+		customerCity = *customerAddress.City
+	}
+
+	customerCoordinates := customerAddress.Cordinates
+	if customerCoordinates == nil {
+		customerCoordinates = &types.CordinatesInput{}
+	}
+
 	customerReq := &customer.RegisterRequest{
 		FirstName: customerDetails.FirstName,
 		LastName:  customerDetails.LastName,
 		Dob:       customerDetails.Dob,
 		Address: &customer.AddressInput{
-			CountryId: customerDetails.Address.CountryID,
-			State:     *customerDetails.Address.State,
-			City:      *customerDetails.Address.City,
-			Street:    customerDetails.Address.Street,
-			Postcode:  customerDetails.Address.Postcode,
+			CountryId: customerAddress.CountryID,
+			State:     customerState,
+			City:      customerCity,
+			Street:    customerAddress.Street,
+			Postcode:  customerAddress.Postcode,
 			Cordinates: &customer.CordinatesInput{
-				Longitude: float32(customerDetails.Address.Cordinates.Longitude),
-				Latitude:  float32(customerDetails.Address.Cordinates.Latitude),
+				Longitude: float32(customerCoordinates.Longitude),
+				Latitude:  float32(customerCoordinates.Latitude),
 			},
 		},
 	}
+
 	_, err = r.CustomerService.Register(ctx, customerReq)
 	if err != nil {
 		responseMessage = "Failed"

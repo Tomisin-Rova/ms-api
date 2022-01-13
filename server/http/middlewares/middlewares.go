@@ -2,28 +2,24 @@ package middlewares
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
 	"strings"
 
 	"github.com/roava/zebra/models"
+	"google.golang.org/grpc/metadata"
 	"ms.api/protos/pb/auth"
 	"ms.api/protos/pb/types"
 
+	coreMiddleware "github.com/roava/zebra/middleware"
 	"go.uber.org/zap"
 )
 
-type ctxKey struct {
-	Name string
-}
-
-var (
-	AuthenticatedUserContextKey = &ctxKey{Name: "AuthenticatedUser"}
-)
-
 const (
-	Bearer string = "Bearer"
+	AuthenticatedUserContextKey = "AuthenticatedUser"
+	Bearer                      = "Bearer"
 )
 
 type AuthMiddleware struct {
@@ -62,10 +58,21 @@ func (mw *AuthMiddleware) ValidateToken(token string) (*models.JWTClaims, error)
 
 // GetClaimsFromCtx returns claims from an authenticated user
 func GetClaimsFromCtx(ctx context.Context) (*models.JWTClaims, error) {
-	claims, ok := ctx.Value(AuthenticatedUserContextKey).(models.JWTClaims)
+	md, ok := metadata.FromOutgoingContext(ctx)
 	if !ok {
 		return nil, errors.New("unable to parse authenticated user")
 	}
+	jsonClaims := md.Get(AuthenticatedUserContextKey)
+	if len(jsonClaims) == 0 {
+		return nil, errors.New("fail decode authenticated user claims")
+	}
+
+	var claims models.JWTClaims
+	err := json.Unmarshal([]byte(jsonClaims[0]), &claims)
+	if err != nil {
+		return nil, err
+	}
+
 	return &claims, nil
 }
 
@@ -98,12 +105,20 @@ func (mw *AuthMiddleware) Middeware(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), AuthenticatedUserContextKey, models.JWTClaims{
+		ctx, err := coreMiddleware.PutClaimsOnContext(r.Context(), &models.JWTClaims{
 			Client:   resp.Client,
 			ID:       resp.ID,
 			Email:    resp.Email,
 			DeviceID: resp.DeviceID,
 		})
+		if err != nil {
+			mw.logger.Info(fmt.Sprintf("failed to marshal claims: %v", err),
+				zap.String("token", token),
+			)
+			next.ServeHTTP(w, r)
+			return
+		}
+
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
