@@ -539,6 +539,7 @@ func Test_queryResolver_Me(t *testing.T) {
 									},
 								},
 							},
+							Status: pbTypes.Staff_INACTIVE,
 						},
 					},
 				}, nil)
@@ -640,7 +641,7 @@ func Test_queryResolver_Products(t *testing.T) {
 	last := int64(10)
 	before := "before"
 
-	resp, err := resolver.Products(context.Background(), &first, &after, &last, &before, []types.ProductStatuses{}, nil)
+	resp, err := resolver.Products(context.Background(), &first, &after, &last, &before, []types.ProductStatuses{})
 
 	assert.Error(t, err)
 	assert.NotNil(t, resp)
@@ -1600,6 +1601,7 @@ func Test_queryResolver_Customers(t *testing.T) {
 					types.CustomerStatusesVerified,
 					types.CustomerStatusesExited,
 					types.CustomerStatusesRejected,
+					types.CustomerStatusesRegistered,
 				},
 			},
 		},
@@ -1623,7 +1625,7 @@ func Test_queryResolver_Customers(t *testing.T) {
 				statuses := make([]pbTypes.Customer_CustomerStatuses, 0)
 				if len(test.args.statuses) > 0 {
 					for _, state := range test.args.statuses {
-						statuses = append(statuses, pbTypes.Customer_CustomerStatuses(helpers.GetCustomerStatusIndex(state)))
+						statuses = append(statuses, pbTypes.Customer_CustomerStatuses(helpers.GetProtoCustomerStatuses(state)))
 					}
 				}
 
@@ -1702,6 +1704,72 @@ func Test_queryResolver_Customers(t *testing.T) {
 							StatusTs: timestamppb.Now(),
 							Ts:       timestamppb.Now(),
 						},
+
+						{
+							Id:        "3",
+							FirstName: "firstname_2",
+							LastName:  "lastname_2",
+							Dob:       "mm-dd-yyyy",
+							Bvn:       "1200488434",
+							Addresses: []*pbTypes.Address{
+								{
+									Primary: true,
+									Country: &pbTypes.Country{
+										Id:         "country_id",
+										CodeAlpha2: "code_alpha_2",
+										CodeAlpha3: "code_alpha_3",
+										Name:       "country_name",
+									},
+								},
+							},
+							Phones: []*pbTypes.Phone{
+								{
+									Primary:  true,
+									Number:   "2349599997294",
+									Verified: true,
+								},
+							},
+							Email: &pbTypes.Email{
+								Address:  "example2@mail.com",
+								Verified: true,
+							},
+							Status:   pbTypes.Customer_REJECTED,
+							StatusTs: timestamppb.Now(),
+							Ts:       timestamppb.Now(),
+						},
+
+						{
+							Id:        "4",
+							FirstName: "firstname_4",
+							LastName:  "lastname_4",
+							Dob:       "mm-dd-yyyy",
+							Bvn:       "1267688434",
+							Addresses: []*pbTypes.Address{
+								{
+									Primary: true,
+									Country: &pbTypes.Country{
+										Id:         "country_id",
+										CodeAlpha2: "code_alpha_2",
+										CodeAlpha3: "code_alpha_3",
+										Name:       "country_name",
+									},
+								},
+							},
+							Phones: []*pbTypes.Phone{
+								{
+									Primary:  true,
+									Number:   "2349599997294",
+									Verified: true,
+								},
+							},
+							Email: &pbTypes.Email{
+								Address:  "example2@mail.com",
+								Verified: true,
+							},
+							Status:   pbTypes.Customer_EXITED,
+							StatusTs: timestamppb.Now(),
+							Ts:       timestamppb.Now(),
+						},
 					},
 
 					PaginationInfo: &pbTypes.PaginationInfo{
@@ -1711,21 +1779,21 @@ func Test_queryResolver_Customers(t *testing.T) {
 						EndCursor:       "end_cursor",
 					},
 
-					TotalCount: 2,
+					TotalCount: 4,
 				}, nil)
 
 				resp, err := resolver.Customers(context.Background(), &test.args.keywords, &test.args.first, &test.args.after, &test.args.last, &test.args.before, test.args.statuses)
 
 				assert.NoError(t, err)
 				assert.NotNil(t, resp)
-				assert.Equal(t, resp.TotalCount, int64(2))
+				assert.Equal(t, resp.TotalCount, int64(4))
 
 			case last_ten_customers:
 				// convert statuses to Customer_CustomerStatuses
 				statuses := make([]pbTypes.Customer_CustomerStatuses, 0)
 				if len(test.args.statuses) > 0 {
 					for _, state := range test.args.statuses {
-						statuses = append(statuses, pbTypes.Customer_CustomerStatuses(helpers.GetCustomerStatusIndex(state)))
+						statuses = append(statuses, pbTypes.Customer_CustomerStatuses(helpers.GetProtoCustomerStatuses(state)))
 					}
 				}
 
@@ -1739,6 +1807,38 @@ func Test_queryResolver_Customers(t *testing.T) {
 						Statuses: statuses,
 					}).Return(&customer.GetCustomersResponse{
 					Nodes: []*pbTypes.Customer{
+						{
+							Id:        "3",
+							FirstName: "firstname_3",
+							LastName:  "lastname_3",
+							Dob:       "mm-dd-yyyy",
+							Bvn:       "12004884934",
+							Addresses: []*pbTypes.Address{
+								{
+									Primary: true,
+									Country: &pbTypes.Country{
+										Id:         "country_id",
+										CodeAlpha2: "code_alpha_2",
+										CodeAlpha3: "code_alpha_3",
+										Name:       "country_name",
+									},
+								},
+							},
+							Phones: []*pbTypes.Phone{
+								{
+									Primary:  true,
+									Number:   "2349599990994",
+									Verified: true,
+								},
+							},
+							Email: &pbTypes.Email{
+								Address:  "example2@mail.com",
+								Verified: true,
+							},
+							Status:   pbTypes.Customer_ONBOARDED,
+							StatusTs: timestamppb.Now(),
+							Ts:       timestamppb.Now(),
+						},
 
 						{
 							Id:        "2",
@@ -1814,7 +1914,7 @@ func Test_queryResolver_Customers(t *testing.T) {
 						EndCursor:       "end_cursor",
 					},
 
-					TotalCount: 2,
+					TotalCount: 3,
 				}, nil)
 
 				resp, err := resolver.Customers(context.Background(), &test.args.keywords, &test.args.first, &test.args.after, &test.args.last, &test.args.before, test.args.statuses)

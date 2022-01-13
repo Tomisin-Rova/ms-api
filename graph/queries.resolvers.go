@@ -262,7 +262,7 @@ func (r *queryResolver) Product(ctx context.Context, id string) (*apiTypes.Produ
 	}, errors.New("not implemented")
 }
 
-func (r *queryResolver) Products(ctx context.Context, first *int64, after *string, last *int64, before *string, statuses []apiTypes.ProductStatuses, typeArg *apiTypes.ProductTypes) (*apiTypes.ProductConnection, error) {
+func (r *queryResolver) Products(ctx context.Context, first *int64, after *string, last *int64, before *string, statuses []apiTypes.ProductStatuses) (*apiTypes.ProductConnection, error) {
 	return &apiTypes.ProductConnection{
 		Nodes: []*apiTypes.Product{
 			{
@@ -417,6 +417,9 @@ func (r *queryResolver) Questionaries(ctx context.Context, keywords *string, fir
 	if before != nil {
 		request.Before = *before
 	}
+	if keywords != nil {
+		request.Keywords = *keywords
+	}
 
 	resp, err := r.CustomerService.GetQuestionaries(ctx, &request)
 	if err != nil {
@@ -513,6 +516,8 @@ func (r *queryResolver) Me(ctx context.Context) (apiTypes.MeResult, error) {
 		return apiTypes.Staff{}, err
 	}
 
+	helpers := &helpersfactory{}
+
 	switch claims.Client {
 
 	case models.DASHBOARD:
@@ -557,7 +562,7 @@ func (r *queryResolver) Me(ctx context.Context) (apiTypes.MeResult, error) {
 			Addresses: addresses,
 			Phones:    phones,
 			Email:     staff.Email,
-			Status:    apiTypes.StaffStatuses(staff.Status),
+			Status:    helpers.MapProtoStaffStatuses(staff.Status),
 			StatusTs:  staff.StatusTs.AsTime().Unix(),
 			Ts:        staff.Ts.AsTime().Unix(),
 		}, nil
@@ -608,7 +613,7 @@ func (r *queryResolver) Me(ctx context.Context) (apiTypes.MeResult, error) {
 				Address:  appCustomer.Email.Address,
 				Verified: appCustomer.Email.Verified,
 			},
-			Status:   apiTypes.CustomerStatuses(appCustomer.Status),
+			Status:   helpers.MapProtoCustomerStatuses(appCustomer.Status),
 			StatusTs: appCustomer.StatusTs.AsTime().Unix(),
 			Ts:       appCustomer.Ts.AsTime().Unix(),
 		}, nil
@@ -662,7 +667,7 @@ func (r *queryResolver) Customer(ctx context.Context, id string) (*apiTypes.Cust
 			Address:  result.Email.Address,
 			Verified: result.Email.Verified,
 		},
-		Status:   apiTypes.CustomerStatuses(helpers.GetCustomer_CustomerStatusIndex(result.Status)),
+		Status:   helpers.MapProtoCustomerStatuses(result.Status),
 		StatusTs: result.StatusTs.AsTime().Unix(),
 		Ts:       result.Ts.AsTime().Unix(),
 	}, nil
@@ -674,19 +679,31 @@ func (r *queryResolver) Customers(ctx context.Context, keywords *string, first *
 
 	if len(statuses) > 0 {
 		for _, state := range statuses {
-			customerStatuses = append(customerStatuses, types.Customer_CustomerStatuses(helper.GetCustomerStatusIndex(state)))
+			customerStatuses = append(customerStatuses, helper.GetProtoCustomerStatuses(state))
 		}
 	}
 
-	customerQuestionariesReq := customer.GetCustomersRequest{
-		Keywords: *keywords,
-		First:    int32(*first),
-		After:    *after,
-		Last:     int32(*last),
+	// Build request
+	request := customer.GetCustomersRequest{
 		Statuses: customerStatuses,
 	}
+	if first != nil {
+		request.First = int32(*first)
+	}
+	if after != nil {
+		request.After = *after
+	}
+	if last != nil {
+		request.Last = int32(*last)
+	}
+	if before != nil {
+		request.Before = *before
+	}
+	if keywords != nil {
+		request.Keywords = *keywords
+	}
 
-	resp, err := r.CustomerService.GetCustomers(ctx, &customerQuestionariesReq)
+	resp, err := r.CustomerService.GetCustomers(ctx, &request)
 	if err != nil {
 		return nil, err
 	}
@@ -731,7 +748,7 @@ func (r *queryResolver) Customers(ctx context.Context, keywords *string, first *
 				Address:  node.Email.Address,
 				Verified: node.Email.Verified,
 			},
-			Status:   apiTypes.CustomerStatuses(helper.GetCustomer_CustomerStatusIndex(node.Status)),
+			Status:   helper.MapProtoCustomerStatuses(node.Status),
 			StatusTs: node.StatusTs.AsTime().Unix(),
 			Ts:       node.Ts.AsTime().Unix(),
 		}
