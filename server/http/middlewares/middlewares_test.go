@@ -2,12 +2,19 @@ package middlewares
 
 import (
 	"context"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
+	"github.com/golang/mock/gomock"
 	"github.com/roava/zebra/middleware"
 	"github.com/roava/zebra/models"
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/zap/zaptest"
 	"google.golang.org/grpc/metadata"
+	"ms.api/mocks"
+	"ms.api/protos/pb/auth"
+	"ms.api/protos/pb/types"
 )
 
 func Test_GetClaimsFromCtx(t *testing.T) {
@@ -73,4 +80,41 @@ func Test_GetClaimsFromCtx(t *testing.T) {
 			}
 		})
 	}
+}
+
+type Handler struct {
+	T *testing.T
+}
+
+func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	claims, err := GetClaimsFromCtx(r.Context())
+	assert.NoError(h.T, err)
+	assert.NotNil(h.T, claims)
+}
+
+func Test_Middleware(t *testing.T) {
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+
+	mockAuthService := mocks.NewMockAuthServiceClient(controller)
+	req := http.Request{
+		Header: map[string][]string{
+			"Authorization": {
+				"Bearer somejwtclaim",
+			},
+		},
+	}
+
+	mockAuthService.EXPECT().ValidateToken(gomock.Any(), gomock.Any()).Return(&auth.ValidateTokenResponse{
+		IsValid: true,
+		Claims: &types.JWTClaims{
+			Id:       "some-id",
+			Email:    "user@email.org",
+			DeviceId: "some-device-id",
+		},
+	}, nil).Times(1)
+
+	service := NewAuthMiddleware(mockAuthService, zaptest.NewLogger(t))
+	handler := service.Middleware(&Handler{t})
+	handler.ServeHTTP(httptest.NewRecorder(), &req)
 }
