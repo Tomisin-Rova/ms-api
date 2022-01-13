@@ -1020,17 +1020,65 @@ func TestMutationResolver_Login(t *testing.T) {
 	}
 }
 func TestMutationResolver_RefreshToken(t *testing.T) {
-	controller := gomock.NewController(t)
-	defer controller.Finish()
-	authServiceClient := mocks.NewMockAuthServiceClient(controller)
-	resolverOpts := &ResolverOpts{
-		AuthService: authServiceClient,
-	}
-	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
-	resp, err := resolver.RefreshToken(context.Background(), "")
+	const (
+		success = iota
+		errorRefreshingToken
+	)
 
-	assert.NoError(t, err)
-	assert.NotNil(t, resp)
+	var tests = []struct {
+		name     string
+		arg      string
+		testType int
+	}{
+		{
+			name:     "Test refresh token success",
+			arg:      "sample-jwt-token",
+			testType: success,
+		},
+
+		{
+			name:     "Test error refresh token",
+			arg:      "",
+			testType: errorRefreshingToken,
+		},
+	}
+
+	for _, testCase := range tests {
+		controller := gomock.NewController(t)
+		defer controller.Finish()
+		authServiceClient := mocks.NewMockAuthServiceClient(controller)
+		resolverOpts := &ResolverOpts{
+			AuthService: authServiceClient,
+		}
+
+		resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
+
+		t.Run(testCase.name, func(t *testing.T) {
+			switch testCase.testType {
+			case success:
+				ctx := context.Background()
+				authServiceClient.EXPECT().RefreshToken(ctx, &auth.RefreshTokenRequest{Token: testCase.arg}).
+					Return(
+						&auth.TokenPairResponse{
+							AuthToken:    "valid-auth-token",
+							RefreshToken: "refreshed-token",
+						}, nil).Times(1)
+
+				resp, err := resolver.RefreshToken(ctx, testCase.arg)
+				assert.NotNil(t, resp)
+				assert.NoError(t, err)
+
+			case errorRefreshingToken:
+				authServiceClient.EXPECT().RefreshToken(context.Background(), &auth.RefreshTokenRequest{Token: testCase.arg}).
+					Return(nil, errors.New("")).Times(1)
+
+				resp, err := resolver.RefreshToken(context.Background(), testCase.arg)
+				assert.NoError(t, err)
+				assert.Equal(t, resp.Success, false)
+			}
+		})
+
+	}
 }
 
 func TestMutationResolver_SetDeviceToken(t *testing.T) {
