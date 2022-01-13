@@ -372,10 +372,26 @@ func (r *mutationResolver) Login(ctx context.Context, credentials types.AuthInpu
 }
 
 func (r *mutationResolver) RefreshToken(ctx context.Context, token string) (*types.AuthResponse, error) {
-	msg := "Not implemented"
+	result, err := r.AuthService.RefreshToken(ctx, &auth.RefreshTokenRequest{Token: token})
+	if err != nil {
+		msg := "Failed"
+		return &types.AuthResponse{
+			Message: &msg,
+			Code:    http.StatusInternalServerError,
+			Success: false,
+			Tokens:  nil,
+		}, nil
+	}
+
+	message := "Success"
 	return &types.AuthResponse{
-		Message: &msg,
-		Code:    int64(500),
+		Message: &message,
+		Success: true,
+		Code:    int64(http.StatusOK),
+		Tokens: &types.AuthTokens{
+			Auth:    result.AuthToken,
+			Refresh: &result.RefreshToken,
+		},
 	}, nil
 }
 
