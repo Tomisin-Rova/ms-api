@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
+	"github.com/roava/zebra/middleware"
 	"github.com/roava/zebra/models"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap/zaptest"
@@ -15,7 +16,6 @@ import (
 	"ms.api/protos/pb/customer"
 	"ms.api/protos/pb/onboarding"
 	pbTypes "ms.api/protos/pb/types"
-	"ms.api/server/http/middlewares"
 	"ms.api/types"
 )
 
@@ -372,6 +372,9 @@ func Test_queryResolver_OnfidoSDKToken(t *testing.T) {
 		errorGetOnfidoSDKToken
 	)
 
+	ctx, err := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{})
+	assert.NoError(t, err)
+
 	var tests = []struct {
 		name     string
 		arg      context.Context
@@ -379,7 +382,7 @@ func Test_queryResolver_OnfidoSDKToken(t *testing.T) {
 	}{
 		{
 			name:     "Test success",
-			arg:      context.WithValue(context.Background(), middlewares.AuthenticatedUserContextKey, models.JWTClaims{}),
+			arg:      ctx,
 			testType: success,
 		},
 		{
@@ -389,7 +392,7 @@ func Test_queryResolver_OnfidoSDKToken(t *testing.T) {
 		},
 		{
 			name:     "Test error calling getting sdk token",
-			arg:      context.WithValue(context.Background(), middlewares.AuthenticatedUserContextKey, models.JWTClaims{}),
+			arg:      ctx,
 			testType: errorGetOnfidoSDKToken,
 		},
 	}
@@ -506,8 +509,8 @@ func Test_queryResolver_Me(t *testing.T) {
 		switch testCase.testType {
 		case me_staff_success:
 
-			ctx := context.WithValue(context.Background(),
-				middlewares.AuthenticatedUserContextKey, testCase.arg)
+			ctx, err := middleware.PutClaimsOnContext(context.Background(), &testCase.arg)
+			assert.NoError(t, err)
 
 			customerServiceClient.EXPECT().Me(ctx, &customer.MeRequest{}).
 				Return(&customer.MeResponse{
@@ -545,8 +548,8 @@ func Test_queryResolver_Me(t *testing.T) {
 			assert.NotNil(t, resp)
 
 		case me_customer_success:
-			ctx := context.WithValue(context.Background(),
-				middlewares.AuthenticatedUserContextKey, testCase.arg)
+			ctx, err := middleware.PutClaimsOnContext(context.Background(), &testCase.arg)
+			assert.NoError(t, err)
 
 			customerServiceClient.EXPECT().Me(ctx, &customer.MeRequest{}).
 				Return(&customer.MeResponse{
@@ -598,12 +601,12 @@ func Test_queryResolver_Me(t *testing.T) {
 			assert.NoError(t, err)
 			assert.NotNil(t, resp)
 		case me_auth_err:
-			ctx := context.WithValue(context.Background(),
-				middlewares.AuthenticatedUserContextKey, testCase.arg)
+			ctx, err := middleware.PutClaimsOnContext(context.Background(), &testCase.arg)
+			assert.NoError(t, err)
 
 			customerServiceClient.EXPECT().Me(ctx, &customer.MeRequest{}).Return(&customer.MeResponse{}, errors.New("auth problem"))
 
-			_, err := resolver.Me(ctx)
+			_, err = resolver.Me(ctx)
 			assert.Error(t, err)
 		}
 
@@ -637,7 +640,7 @@ func Test_queryResolver_Products(t *testing.T) {
 	last := int64(10)
 	before := "before"
 
-	resp, err := resolver.Products(context.Background(), &first, &after, &last, &before, []types.ProductStatuses{})
+	resp, err := resolver.Products(context.Background(), &first, &after, &last, &before, []types.ProductStatuses{}, nil)
 
 	assert.Error(t, err)
 	assert.NotNil(t, resp)

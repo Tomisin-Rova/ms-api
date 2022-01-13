@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
+	"github.com/roava/zebra/middleware"
 	"github.com/roava/zebra/models"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap/zaptest"
@@ -20,7 +21,6 @@ import (
 	"ms.api/protos/pb/onboarding"
 	pbTypes "ms.api/protos/pb/types"
 	"ms.api/protos/pb/verification"
-	"ms.api/server/http/middlewares"
 	"ms.api/types"
 )
 
@@ -540,7 +540,7 @@ func TestMutationResolver_Register(t *testing.T) {
 
 			switch testCase.testType {
 			case success:
-				ctx := context.WithValue(context.Background(), middlewares.AuthenticatedUserContextKey, models.JWTClaims{Client: models.APP, ID: "123456", Email: "f@roava.app", DeviceID: "129594533fsdd"})
+				ctx, _ := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{Client: models.APP, ID: "123456", Email: "f@roava.app", DeviceID: "129594533fsdd"})
 
 				customerServiceClient.EXPECT().Register(ctx, &customer.RegisterRequest{
 					FirstName: "roava",
@@ -565,7 +565,7 @@ func TestMutationResolver_Register(t *testing.T) {
 
 			case invalidDob:
 
-				ctx := context.WithValue(context.Background(), middlewares.AuthenticatedUserContextKey, models.JWTClaims{Client: models.APP, ID: "123456", Email: "f@roava.app", DeviceID: "129594533fsdd"})
+				ctx, _ := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{Client: models.APP, ID: "123456", Email: "f@roava.app", DeviceID: "129594533fsdd"})
 				mockRegisterReq.Dob = "1994-10-02"
 
 				_, err := resolver.Register(ctx, mockRegisterReq)
@@ -593,6 +593,8 @@ func TestMutationResolver_SubmitCdd(t *testing.T) {
 		errorSubmitCDD
 	)
 
+	ctx, _ := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{})
+
 	type arg struct {
 		ctx      context.Context
 		cddInput types.CDDInput
@@ -605,7 +607,7 @@ func TestMutationResolver_SubmitCdd(t *testing.T) {
 		{
 			name: "Test success all validations",
 			arg: arg{
-				ctx: context.WithValue(context.Background(), middlewares.AuthenticatedUserContextKey, models.JWTClaims{}),
+				ctx: ctx,
 				cddInput: types.CDDInput{
 					Kyc: &types.KYCInput{
 						ReportTypes: []types.KYCTypes{types.KYCTypesDocument, types.KYCTypesFacialVideo},
@@ -621,7 +623,7 @@ func TestMutationResolver_SubmitCdd(t *testing.T) {
 		{
 			name: "Test success no KYC validation",
 			arg: arg{
-				ctx: context.WithValue(context.Background(), middlewares.AuthenticatedUserContextKey, models.JWTClaims{}),
+				ctx: ctx,
 				cddInput: types.CDDInput{
 					Kyc: nil,
 					Aml: true,
@@ -635,7 +637,7 @@ func TestMutationResolver_SubmitCdd(t *testing.T) {
 		{
 			name: "Test success no aml validation",
 			arg: arg{
-				ctx: context.WithValue(context.Background(), middlewares.AuthenticatedUserContextKey, models.JWTClaims{}),
+				ctx: ctx,
 				cddInput: types.CDDInput{
 					Kyc: &types.KYCInput{
 						ReportTypes: []types.KYCTypes{types.KYCTypesDocument, types.KYCTypesFacialVideo},
@@ -651,7 +653,7 @@ func TestMutationResolver_SubmitCdd(t *testing.T) {
 		{
 			name: "Test success no POA validation",
 			arg: arg{
-				ctx: context.WithValue(context.Background(), middlewares.AuthenticatedUserContextKey, models.JWTClaims{}),
+				ctx: ctx,
 				cddInput: types.CDDInput{
 					Kyc: &types.KYCInput{
 						ReportTypes: []types.KYCTypes{types.KYCTypesDocument, types.KYCTypesFacialVideo},
@@ -672,7 +674,7 @@ func TestMutationResolver_SubmitCdd(t *testing.T) {
 		{
 			name: "Test error submitting CDD",
 			arg: arg{
-				ctx: context.WithValue(context.Background(), middlewares.AuthenticatedUserContextKey, models.JWTClaims{}),
+				ctx: ctx,
 				cddInput: types.CDDInput{
 					Kyc: &types.KYCInput{
 						ReportTypes: []types.KYCTypes{types.KYCTypesDocument, types.KYCTypesFacialVideo},
@@ -837,13 +839,14 @@ func TestMutationResolver_AnswerQuestionary(t *testing.T) {
 
 			switch testCase.testType {
 			case success:
-				ctx := context.WithValue(context.Background(),
-					middlewares.AuthenticatedUserContextKey,
-					models.JWTClaims{
+				ctx, _ := middleware.PutClaimsOnContext(
+					context.Background(),
+					&models.JWTClaims{
 						Client:   models.APP,
 						ID:       "123456",
 						Email:    "f@roava.app",
-						DeviceID: "129594533fsdd"})
+						DeviceID: "129594533fsdd"},
+				)
 
 				customerServiceClient.EXPECT().AnswerQuestionary(ctx,
 					&customer.AnswerQuestionaryRequest{
@@ -1122,13 +1125,11 @@ func TestMutationResolver_SetDeviceToken(t *testing.T) {
 		switch testCase.testType {
 
 		case success:
-			ctx := context.WithValue(context.Background(),
-				middlewares.AuthenticatedUserContextKey,
-				models.JWTClaims{
-					Client:   models.APP,
-					ID:       "123456",
-					Email:    "f@roava.app",
-					DeviceID: "129594533fsdd"})
+			ctx, _ := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{
+				Client:   models.APP,
+				ID:       "123456",
+				Email:    "f@roava.app",
+				DeviceID: "129594533fsdd"})
 
 			customerServiceClient.EXPECT().SetDeviceToken(ctx,
 				&customer.SetDeviceTokenRequest{
@@ -1204,13 +1205,11 @@ func TestMutationResolver_SetDevicePreferences(t *testing.T) {
 		switch testCase.testType {
 
 		case success:
-			ctx := context.WithValue(context.Background(),
-				middlewares.AuthenticatedUserContextKey,
-				models.JWTClaims{
-					Client:   models.APP,
-					ID:       "123456",
-					Email:    "f@roava.app",
-					DeviceID: "129594533fsdd"})
+			ctx, _ := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{
+				Client:   models.APP,
+				ID:       "123456",
+				Email:    "f@roava.app",
+				DeviceID: "129594533fsdd"})
 
 			customerServiceClient.EXPECT().SetDevicePreferences(ctx,
 				&customer.SetDevicePreferencesRequest{

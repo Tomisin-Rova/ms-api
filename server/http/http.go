@@ -76,7 +76,7 @@ func MountServer(secrets *config.Secrets, logger *zap.Logger) *chi.Mux {
 		logger.Fatal(fmt.Sprintf("failed to setup service dependencies: %v", err))
 	}
 	mw := middlewares.NewAuthMiddleware(opts.AuthService, logger)
-	router.Use(mw.Middeware)
+	router.Use(mw.Middleware)
 	opts.AuthMw = mw
 	switch secrets.Service.Environment {
 	case config.LocalEnvironment, config.DevEnvironment:

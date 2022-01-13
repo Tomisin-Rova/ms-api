@@ -262,7 +262,7 @@ func (r *queryResolver) Product(ctx context.Context, id string) (*apiTypes.Produ
 	}, errors.New("not implemented")
 }
 
-func (r *queryResolver) Products(ctx context.Context, first *int64, after *string, last *int64, before *string, statuses []apiTypes.ProductStatuses) (*apiTypes.ProductConnection, error) {
+func (r *queryResolver) Products(ctx context.Context, first *int64, after *string, last *int64, before *string, statuses []apiTypes.ProductStatuses, typeArg *apiTypes.ProductTypes) (*apiTypes.ProductConnection, error) {
 	return &apiTypes.ProductConnection{
 		Nodes: []*apiTypes.Product{
 			{
