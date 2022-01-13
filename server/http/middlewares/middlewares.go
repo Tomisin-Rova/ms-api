@@ -104,19 +104,12 @@ func (mw *AuthMiddleware) Middleware(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx, err := coreMiddleware.PutClaimsOnContext(r.Context(), &models.JWTClaims{
+		ctx, _ := coreMiddleware.PutClaimsOnContext(r.Context(), &models.JWTClaims{
 			Client:   resp.Client,
 			ID:       resp.ID,
 			Email:    resp.Email,
 			DeviceID: resp.DeviceID,
 		})
-		if err != nil {
-			mw.logger.Info(fmt.Sprintf("failed to marshal claims: %v", err),
-				zap.String("token", token),
-			)
-			next.ServeHTTP(w, r)
-			return
-		}
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
