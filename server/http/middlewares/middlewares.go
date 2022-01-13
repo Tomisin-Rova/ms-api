@@ -18,8 +18,7 @@ import (
 )
 
 const (
-	AuthenticatedUserContextKey = "AuthenticatedUser"
-	Bearer                      = "Bearer"
+	Bearer = "Bearer"
 )
 
 type AuthMiddleware struct {
@@ -62,7 +61,7 @@ func GetClaimsFromCtx(ctx context.Context) (*models.JWTClaims, error) {
 	if !ok {
 		return nil, errors.New("unable to parse authenticated user")
 	}
-	jsonClaims := md.Get(AuthenticatedUserContextKey)
+	jsonClaims := md.Get(coreMiddleware.AuthenticatedUserMetadataKey)
 	if len(jsonClaims) == 0 {
 		return nil, errors.New("fail decode authenticated user claims")
 	}
@@ -70,13 +69,13 @@ func GetClaimsFromCtx(ctx context.Context) (*models.JWTClaims, error) {
 	var claims models.JWTClaims
 	err := json.Unmarshal([]byte(jsonClaims[0]), &claims)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("fail to unmarshall claims")
 	}
 
 	return &claims, nil
 }
 
-func (mw *AuthMiddleware) Middeware(next http.Handler) http.Handler {
+func (mw *AuthMiddleware) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authorization := r.Header.Get("Authorization")
 		token := ""
