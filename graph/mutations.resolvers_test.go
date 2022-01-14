@@ -3,9 +3,10 @@ package graph
 import (
 	"context"
 	"errors"
-	terror "github.com/roava/zebra/errors"
 	"net/http"
 	"testing"
+
+	terror "github.com/roava/zebra/errors"
 
 	"github.com/golang/mock/gomock"
 	"github.com/roava/zebra/middleware"
@@ -1431,17 +1432,68 @@ func TestMutationResolver_RequestResubmit(t *testing.T) {
 }
 
 func TestMutationResolver_StaffLogin(t *testing.T) {
+	const (
+		failAuthServiceError = iota
+		success
+	)
+
+	authServiceResponse := &auth.TokenPairResponse{
+		AuthToken:    "auth-token",
+		RefreshToken: "refresh-token",
+	}
+
+	testCases := []struct {
+		name     string
+		input    string
+		testType int
+	}{
+
+		{
+			name:     "Fail on auth service error",
+			input:    "some-token",
+			testType: failAuthServiceError,
+		},
+
+		{
+			name:     "Success request",
+			input:    "some-token",
+			testType: success,
+		},
+	}
+
 	controller := gomock.NewController(t)
 	defer controller.Finish()
 	authServiceClient := mocks.NewMockAuthServiceClient(controller)
 	resolverOpts := &ResolverOpts{
 		AuthService: authServiceClient,
 	}
-	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
-	resp, err := resolver.StaffLogin(context.Background(), "", types.AuthTypeGoogle)
 
-	assert.NoError(t, err)
-	assert.NotNil(t, resp)
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			switch testCase.testType {
+			case failAuthServiceError:
+				authServiceClient.EXPECT().StaffLogin(gomock.Any(), gomock.Any()).Return(nil, errors.New("")).Times(1)
+				resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
+				resp, err := resolver.StaffLogin(context.Background(), testCase.input, types.AuthTypeGoogle)
+				assert.Error(t, err)
+				assert.NotNil(t, resp)
+				assert.False(t, resp.Success)
+				assert.NotNil(t, resp.Message)
+				assert.Equal(t, errorvalues.Message(errorvalues.InternalErr), *resp.Message)
+				assert.Equal(t, int64(http.StatusInternalServerError), resp.Code)
+			case success:
+				authServiceClient.EXPECT().StaffLogin(gomock.Any(), gomock.Any()).Return(authServiceResponse, nil).Times(1)
+				resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
+				resp, err := resolver.StaffLogin(context.Background(), testCase.input, types.AuthTypeGoogle)
+				assert.Nil(t, err)
+				assert.NotNil(t, resp)
+				assert.True(t, resp.Success)
+				assert.NotNil(t, resp.Message)
+				assert.Equal(t, "Success", *resp.Message)
+				assert.Equal(t, int64(http.StatusOK), resp.Code)
+			}
+		})
+	}
 }
 
 func TestMutationResolver_UpdateKYCStatus(t *testing.T) {
