@@ -353,8 +353,9 @@ func Test_queryResolver_CheckEmail(t *testing.T) {
 					&customer.CheckEmailRequest{Email: test.arg},
 				).Return(&pbTypes.DefaultResponse{Success: false}, errors.New("not found"))
 
-				_, err := resolver.CheckEmail(context.Background(), test.arg)
-				assert.Error(t, err)
+				resp, err := resolver.CheckEmail(context.Background(), test.arg)
+				assert.NoError(t, err)
+				assert.Equal(t, resp, false)
 
 			case invalidEmail:
 				resp, err := resolver.CheckEmail(context.Background(), test.arg)
