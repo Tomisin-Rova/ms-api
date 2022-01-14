@@ -28,7 +28,7 @@ func (r *queryResolver) CheckEmail(ctx context.Context, email string) (bool, err
 
 	resp, err := r.CustomerService.CheckEmail(ctx, &customer.CheckEmailRequest{Email: email})
 	if err != nil {
-		return false, err
+		return false, nil
 	}
 
 	return resp.Success, nil
