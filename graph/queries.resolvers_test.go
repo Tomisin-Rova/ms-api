@@ -642,7 +642,7 @@ func Test_queryResolver_Products(t *testing.T) {
 	last := int64(10)
 	before := "before"
 
-	resp, err := resolver.Products(context.Background(), &first, &after, &last, &before, []types.ProductStatuses{})
+	resp, err := resolver.Products(context.Background(), &first, &after, &last, &before, []types.ProductStatuses{}, nil)
 
 	assert.Error(t, err)
 	assert.NotNil(t, resp)

@@ -6,38 +6,37 @@ package mocks
 
 import (
 	context "context"
-	reflect "reflect"
-
 	gomock "github.com/golang/mock/gomock"
 	grpc "google.golang.org/grpc"
 	types "ms.api/protos/pb/types"
 	verification "ms.api/protos/pb/verification"
+	reflect "reflect"
 )
 
-// MockVerificationServiceClient is a mock of VerificationServiceClient interface.
+// MockVerificationServiceClient is a mock of VerificationServiceClient interface
 type MockVerificationServiceClient struct {
 	ctrl     *gomock.Controller
 	recorder *MockVerificationServiceClientMockRecorder
 }
 
-// MockVerificationServiceClientMockRecorder is the mock recorder for MockVerificationServiceClient.
+// MockVerificationServiceClientMockRecorder is the mock recorder for MockVerificationServiceClient
 type MockVerificationServiceClientMockRecorder struct {
 	mock *MockVerificationServiceClient
 }
 
-// NewMockVerificationServiceClient creates a new mock instance.
+// NewMockVerificationServiceClient creates a new mock instance
 func NewMockVerificationServiceClient(ctrl *gomock.Controller) *MockVerificationServiceClient {
 	mock := &MockVerificationServiceClient{ctrl: ctrl}
 	mock.recorder = &MockVerificationServiceClientMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use.
+// EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockVerificationServiceClient) EXPECT() *MockVerificationServiceClientMockRecorder {
 	return m.recorder
 }
 
-// RequestOTP mocks base method.
+// RequestOTP mocks base method
 func (m *MockVerificationServiceClient) RequestOTP(ctx context.Context, in *verification.RequestOTPRequest, opts ...grpc.CallOption) (*types.DefaultResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
@@ -50,14 +49,14 @@ func (m *MockVerificationServiceClient) RequestOTP(ctx context.Context, in *veri
 	return ret0, ret1
 }
 
-// RequestOTP indicates an expected call of RequestOTP.
+// RequestOTP indicates an expected call of RequestOTP
 func (mr *MockVerificationServiceClientMockRecorder) RequestOTP(ctx, in interface{}, opts ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RequestOTP", reflect.TypeOf((*MockVerificationServiceClient)(nil).RequestOTP), varargs...)
 }
 
-// VerifyOTP mocks base method.
+// VerifyOTP mocks base method
 func (m *MockVerificationServiceClient) VerifyOTP(ctx context.Context, in *verification.VerifyOTPRequest, opts ...grpc.CallOption) (*types.DefaultResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
@@ -70,37 +69,37 @@ func (m *MockVerificationServiceClient) VerifyOTP(ctx context.Context, in *verif
 	return ret0, ret1
 }
 
-// VerifyOTP indicates an expected call of VerifyOTP.
+// VerifyOTP indicates an expected call of VerifyOTP
 func (mr *MockVerificationServiceClientMockRecorder) VerifyOTP(ctx, in interface{}, opts ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VerifyOTP", reflect.TypeOf((*MockVerificationServiceClient)(nil).VerifyOTP), varargs...)
 }
 
-// MockVerificationServiceServer is a mock of VerificationServiceServer interface.
+// MockVerificationServiceServer is a mock of VerificationServiceServer interface
 type MockVerificationServiceServer struct {
 	ctrl     *gomock.Controller
 	recorder *MockVerificationServiceServerMockRecorder
 }
 
-// MockVerificationServiceServerMockRecorder is the mock recorder for MockVerificationServiceServer.
+// MockVerificationServiceServerMockRecorder is the mock recorder for MockVerificationServiceServer
 type MockVerificationServiceServerMockRecorder struct {
 	mock *MockVerificationServiceServer
 }
 
-// NewMockVerificationServiceServer creates a new mock instance.
+// NewMockVerificationServiceServer creates a new mock instance
 func NewMockVerificationServiceServer(ctrl *gomock.Controller) *MockVerificationServiceServer {
 	mock := &MockVerificationServiceServer{ctrl: ctrl}
 	mock.recorder = &MockVerificationServiceServerMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use.
+// EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockVerificationServiceServer) EXPECT() *MockVerificationServiceServerMockRecorder {
 	return m.recorder
 }
 
-// RequestOTP mocks base method.
+// RequestOTP mocks base method
 func (m *MockVerificationServiceServer) RequestOTP(arg0 context.Context, arg1 *verification.RequestOTPRequest) (*types.DefaultResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RequestOTP", arg0, arg1)
@@ -109,13 +108,13 @@ func (m *MockVerificationServiceServer) RequestOTP(arg0 context.Context, arg1 *v
 	return ret0, ret1
 }
 
-// RequestOTP indicates an expected call of RequestOTP.
+// RequestOTP indicates an expected call of RequestOTP
 func (mr *MockVerificationServiceServerMockRecorder) RequestOTP(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RequestOTP", reflect.TypeOf((*MockVerificationServiceServer)(nil).RequestOTP), arg0, arg1)
 }
 
-// VerifyOTP mocks base method.
+// VerifyOTP mocks base method
 func (m *MockVerificationServiceServer) VerifyOTP(arg0 context.Context, arg1 *verification.VerifyOTPRequest) (*types.DefaultResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "VerifyOTP", arg0, arg1)
@@ -124,7 +123,7 @@ func (m *MockVerificationServiceServer) VerifyOTP(arg0 context.Context, arg1 *ve
 	return ret0, ret1
 }
 
-// VerifyOTP indicates an expected call of VerifyOTP.
+// VerifyOTP indicates an expected call of VerifyOTP
 func (mr *MockVerificationServiceServerMockRecorder) VerifyOTP(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VerifyOTP", reflect.TypeOf((*MockVerificationServiceServer)(nil).VerifyOTP), arg0, arg1)

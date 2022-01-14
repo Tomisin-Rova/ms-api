@@ -5,35 +5,34 @@
 package mocks
 
 import (
-	reflect "reflect"
-
 	gomock "github.com/golang/mock/gomock"
+	reflect "reflect"
 )
 
-// MockPhoneNumberValidator is a mock of PhoneNumberValidator interface.
+// MockPhoneNumberValidator is a mock of PhoneNumberValidator interface
 type MockPhoneNumberValidator struct {
 	ctrl     *gomock.Controller
 	recorder *MockPhoneNumberValidatorMockRecorder
 }
 
-// MockPhoneNumberValidatorMockRecorder is the mock recorder for MockPhoneNumberValidator.
+// MockPhoneNumberValidatorMockRecorder is the mock recorder for MockPhoneNumberValidator
 type MockPhoneNumberValidatorMockRecorder struct {
 	mock *MockPhoneNumberValidator
 }
 
-// NewMockPhoneNumberValidator creates a new mock instance.
+// NewMockPhoneNumberValidator creates a new mock instance
 func NewMockPhoneNumberValidator(ctrl *gomock.Controller) *MockPhoneNumberValidator {
 	mock := &MockPhoneNumberValidator{ctrl: ctrl}
 	mock.recorder = &MockPhoneNumberValidatorMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use.
+// EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockPhoneNumberValidator) EXPECT() *MockPhoneNumberValidatorMockRecorder {
 	return m.recorder
 }
 
-// ValidatePhoneNumber mocks base method.
+// ValidatePhoneNumber mocks base method
 func (m *MockPhoneNumberValidator) ValidatePhoneNumber(phoneNumber string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ValidatePhoneNumber", phoneNumber)
@@ -41,7 +40,7 @@ func (m *MockPhoneNumberValidator) ValidatePhoneNumber(phoneNumber string) error
 	return ret0
 }
 
-// ValidatePhoneNumber indicates an expected call of ValidatePhoneNumber.
+// ValidatePhoneNumber indicates an expected call of ValidatePhoneNumber
 func (mr *MockPhoneNumberValidatorMockRecorder) ValidatePhoneNumber(phoneNumber interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidatePhoneNumber", reflect.TypeOf((*MockPhoneNumberValidator)(nil).ValidatePhoneNumber), phoneNumber)

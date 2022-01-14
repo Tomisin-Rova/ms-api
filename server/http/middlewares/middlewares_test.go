@@ -2,6 +2,8 @@ package middlewares
 
 import (
 	"context"
+	terror "github.com/roava/zebra/errors"
+	errorvalues "ms.api/libs/errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -60,17 +62,20 @@ func Test_GetClaimsFromCtx(t *testing.T) {
 			case failNotOutgoingContext:
 				claims, err := GetClaimsFromCtx(testCase.arg)
 				assert.Error(t, err)
-				assert.Equal(t, err.Error(), "unable to parse authenticated user")
+				assert.IsType(t, &terror.Terror{}, err)
+				assert.Equal(t, errorvalues.InvalidAuthentication, err.(*terror.Terror).Code())
 				assert.Nil(t, claims)
 			case failToDecodeAuthenticatedUserClaims:
 				claims, err := GetClaimsFromCtx(testCase.arg)
 				assert.Error(t, err)
-				assert.Equal(t, err.Error(), "fail decode authenticated user claims")
+				assert.IsType(t, &terror.Terror{}, err)
+				assert.Equal(t, errorvalues.InvalidAuthentication, err.(*terror.Terror).Code())
 				assert.Nil(t, claims)
 			case failToUnmarshalClaims:
 				claims, err := GetClaimsFromCtx(testCase.arg)
 				assert.Error(t, err)
-				assert.Equal(t, err.Error(), "fail to unmarshall claims")
+				assert.IsType(t, &terror.Terror{}, err)
+				assert.Equal(t, errorvalues.InvalidAuthentication, err.(*terror.Terror).Code())
 				assert.Nil(t, claims)
 			case success:
 				claims, err := GetClaimsFromCtx(testCase.arg)

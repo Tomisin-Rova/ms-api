@@ -6,58 +6,37 @@ package mocks
 
 import (
 	context "context"
-	reflect "reflect"
-
 	gomock "github.com/golang/mock/gomock"
 	grpc "google.golang.org/grpc"
 	payment "ms.api/protos/pb/payment"
 	types "ms.api/protos/pb/types"
+	reflect "reflect"
 )
 
-// MockPaymentServiceClient is a mock of PaymentServiceClient interface.
+// MockPaymentServiceClient is a mock of PaymentServiceClient interface
 type MockPaymentServiceClient struct {
 	ctrl     *gomock.Controller
 	recorder *MockPaymentServiceClientMockRecorder
 }
 
-// MockPaymentServiceClientMockRecorder is the mock recorder for MockPaymentServiceClient.
+// MockPaymentServiceClientMockRecorder is the mock recorder for MockPaymentServiceClient
 type MockPaymentServiceClientMockRecorder struct {
 	mock *MockPaymentServiceClient
 }
 
-// NewMockPaymentServiceClient creates a new mock instance.
+// NewMockPaymentServiceClient creates a new mock instance
 func NewMockPaymentServiceClient(ctrl *gomock.Controller) *MockPaymentServiceClient {
 	mock := &MockPaymentServiceClient{ctrl: ctrl}
 	mock.recorder = &MockPaymentServiceClientMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use.
+// EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockPaymentServiceClient) EXPECT() *MockPaymentServiceClientMockRecorder {
 	return m.recorder
 }
 
-// AddBeneficiaryAccount mocks base method.
-func (m *MockPaymentServiceClient) AddBeneficiaryAccount(ctx context.Context, in *payment.AddBeneficiaryAccountRequest, opts ...grpc.CallOption) (*types.BeneficiaryAccount, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, in}
-	for _, a := range opts {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "AddBeneficiaryAccount", varargs...)
-	ret0, _ := ret[0].(*types.BeneficiaryAccount)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// AddBeneficiaryAccount indicates an expected call of AddBeneficiaryAccount.
-func (mr *MockPaymentServiceClientMockRecorder) AddBeneficiaryAccount(ctx, in interface{}, opts ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddBeneficiaryAccount", reflect.TypeOf((*MockPaymentServiceClient)(nil).AddBeneficiaryAccount), varargs...)
-}
-
-// CreateBeneficiary mocks base method.
+// CreateBeneficiary mocks base method
 func (m *MockPaymentServiceClient) CreateBeneficiary(ctx context.Context, in *payment.CreateBeneficiaryRequest, opts ...grpc.CallOption) (*types.Beneficiary, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
@@ -70,34 +49,34 @@ func (m *MockPaymentServiceClient) CreateBeneficiary(ctx context.Context, in *pa
 	return ret0, ret1
 }
 
-// CreateBeneficiary indicates an expected call of CreateBeneficiary.
+// CreateBeneficiary indicates an expected call of CreateBeneficiary
 func (mr *MockPaymentServiceClientMockRecorder) CreateBeneficiary(ctx, in interface{}, opts ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateBeneficiary", reflect.TypeOf((*MockPaymentServiceClient)(nil).CreateBeneficiary), varargs...)
 }
 
-// CreateTransfer mocks base method.
-func (m *MockPaymentServiceClient) CreateTransfer(ctx context.Context, in *payment.CreateTransferRequest, opts ...grpc.CallOption) (*types.Transaction, error) {
+// AddBeneficiaryAccount mocks base method
+func (m *MockPaymentServiceClient) AddBeneficiaryAccount(ctx context.Context, in *payment.AddBeneficiaryAccountRequest, opts ...grpc.CallOption) (*types.BeneficiaryAccount, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
-	ret := m.ctrl.Call(m, "CreateTransfer", varargs...)
-	ret0, _ := ret[0].(*types.Transaction)
+	ret := m.ctrl.Call(m, "AddBeneficiaryAccount", varargs...)
+	ret0, _ := ret[0].(*types.BeneficiaryAccount)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// CreateTransfer indicates an expected call of CreateTransfer.
-func (mr *MockPaymentServiceClientMockRecorder) CreateTransfer(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+// AddBeneficiaryAccount indicates an expected call of AddBeneficiaryAccount
+func (mr *MockPaymentServiceClientMockRecorder) AddBeneficiaryAccount(ctx, in interface{}, opts ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateTransfer", reflect.TypeOf((*MockPaymentServiceClient)(nil).CreateTransfer), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddBeneficiaryAccount", reflect.TypeOf((*MockPaymentServiceClient)(nil).AddBeneficiaryAccount), varargs...)
 }
 
-// DeleteBeneficiaryAccount mocks base method.
+// DeleteBeneficiaryAccount mocks base method
 func (m *MockPaymentServiceClient) DeleteBeneficiaryAccount(ctx context.Context, in *payment.DeleteBeneficiaryAccountRequest, opts ...grpc.CallOption) (*types.DefaultResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
@@ -110,34 +89,14 @@ func (m *MockPaymentServiceClient) DeleteBeneficiaryAccount(ctx context.Context,
 	return ret0, ret1
 }
 
-// DeleteBeneficiaryAccount indicates an expected call of DeleteBeneficiaryAccount.
+// DeleteBeneficiaryAccount indicates an expected call of DeleteBeneficiaryAccount
 func (mr *MockPaymentServiceClientMockRecorder) DeleteBeneficiaryAccount(ctx, in interface{}, opts ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteBeneficiaryAccount", reflect.TypeOf((*MockPaymentServiceClient)(nil).DeleteBeneficiaryAccount), varargs...)
 }
 
-// GetBeneficiaries mocks base method.
-func (m *MockPaymentServiceClient) GetBeneficiaries(ctx context.Context, in *payment.GetBeneficiariesRequest, opts ...grpc.CallOption) (*payment.GetBeneficiariesResponse, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, in}
-	for _, a := range opts {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "GetBeneficiaries", varargs...)
-	ret0, _ := ret[0].(*payment.GetBeneficiariesResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetBeneficiaries indicates an expected call of GetBeneficiaries.
-func (mr *MockPaymentServiceClientMockRecorder) GetBeneficiaries(ctx, in interface{}, opts ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBeneficiaries", reflect.TypeOf((*MockPaymentServiceClient)(nil).GetBeneficiaries), varargs...)
-}
-
-// GetBeneficiary mocks base method.
+// GetBeneficiary mocks base method
 func (m *MockPaymentServiceClient) GetBeneficiary(ctx context.Context, in *payment.GetBeneficiaryRequest, opts ...grpc.CallOption) (*types.Beneficiary, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
@@ -150,14 +109,54 @@ func (m *MockPaymentServiceClient) GetBeneficiary(ctx context.Context, in *payme
 	return ret0, ret1
 }
 
-// GetBeneficiary indicates an expected call of GetBeneficiary.
+// GetBeneficiary indicates an expected call of GetBeneficiary
 func (mr *MockPaymentServiceClientMockRecorder) GetBeneficiary(ctx, in interface{}, opts ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBeneficiary", reflect.TypeOf((*MockPaymentServiceClient)(nil).GetBeneficiary), varargs...)
 }
 
-// GetTransaction mocks base method.
+// GetBeneficiaries mocks base method
+func (m *MockPaymentServiceClient) GetBeneficiaries(ctx context.Context, in *payment.GetBeneficiariesRequest, opts ...grpc.CallOption) (*payment.GetBeneficiariesResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetBeneficiaries", varargs...)
+	ret0, _ := ret[0].(*payment.GetBeneficiariesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetBeneficiaries indicates an expected call of GetBeneficiaries
+func (mr *MockPaymentServiceClientMockRecorder) GetBeneficiaries(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBeneficiaries", reflect.TypeOf((*MockPaymentServiceClient)(nil).GetBeneficiaries), varargs...)
+}
+
+// CreateTransfer mocks base method
+func (m *MockPaymentServiceClient) CreateTransfer(ctx context.Context, in *payment.CreateTransferRequest, opts ...grpc.CallOption) (*types.Transaction, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CreateTransfer", varargs...)
+	ret0, _ := ret[0].(*types.Transaction)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateTransfer indicates an expected call of CreateTransfer
+func (mr *MockPaymentServiceClientMockRecorder) CreateTransfer(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateTransfer", reflect.TypeOf((*MockPaymentServiceClient)(nil).CreateTransfer), varargs...)
+}
+
+// GetTransaction mocks base method
 func (m *MockPaymentServiceClient) GetTransaction(ctx context.Context, in *payment.GetTransactionRequest, opts ...grpc.CallOption) (*types.Transaction, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
@@ -170,34 +169,14 @@ func (m *MockPaymentServiceClient) GetTransaction(ctx context.Context, in *payme
 	return ret0, ret1
 }
 
-// GetTransaction indicates an expected call of GetTransaction.
+// GetTransaction indicates an expected call of GetTransaction
 func (mr *MockPaymentServiceClientMockRecorder) GetTransaction(ctx, in interface{}, opts ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTransaction", reflect.TypeOf((*MockPaymentServiceClient)(nil).GetTransaction), varargs...)
 }
 
-// GetTransactionTypes mocks base method.
-func (m *MockPaymentServiceClient) GetTransactionTypes(ctx context.Context, in *payment.GetTransactionTypesRequest, opts ...grpc.CallOption) (*payment.GetTransactionTypesResponse, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, in}
-	for _, a := range opts {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "GetTransactionTypes", varargs...)
-	ret0, _ := ret[0].(*payment.GetTransactionTypesResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetTransactionTypes indicates an expected call of GetTransactionTypes.
-func (mr *MockPaymentServiceClientMockRecorder) GetTransactionTypes(ctx, in interface{}, opts ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTransactionTypes", reflect.TypeOf((*MockPaymentServiceClient)(nil).GetTransactionTypes), varargs...)
-}
-
-// GetTransactions mocks base method.
+// GetTransactions mocks base method
 func (m *MockPaymentServiceClient) GetTransactions(ctx context.Context, in *payment.GetTransactionsRequest, opts ...grpc.CallOption) (*payment.GetTransactionsResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
@@ -210,52 +189,57 @@ func (m *MockPaymentServiceClient) GetTransactions(ctx context.Context, in *paym
 	return ret0, ret1
 }
 
-// GetTransactions indicates an expected call of GetTransactions.
+// GetTransactions indicates an expected call of GetTransactions
 func (mr *MockPaymentServiceClientMockRecorder) GetTransactions(ctx, in interface{}, opts ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTransactions", reflect.TypeOf((*MockPaymentServiceClient)(nil).GetTransactions), varargs...)
 }
 
-// MockPaymentServiceServer is a mock of PaymentServiceServer interface.
+// GetTransactionTypes mocks base method
+func (m *MockPaymentServiceClient) GetTransactionTypes(ctx context.Context, in *payment.GetTransactionTypesRequest, opts ...grpc.CallOption) (*payment.GetTransactionTypesResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetTransactionTypes", varargs...)
+	ret0, _ := ret[0].(*payment.GetTransactionTypesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTransactionTypes indicates an expected call of GetTransactionTypes
+func (mr *MockPaymentServiceClientMockRecorder) GetTransactionTypes(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTransactionTypes", reflect.TypeOf((*MockPaymentServiceClient)(nil).GetTransactionTypes), varargs...)
+}
+
+// MockPaymentServiceServer is a mock of PaymentServiceServer interface
 type MockPaymentServiceServer struct {
 	ctrl     *gomock.Controller
 	recorder *MockPaymentServiceServerMockRecorder
 }
 
-// MockPaymentServiceServerMockRecorder is the mock recorder for MockPaymentServiceServer.
+// MockPaymentServiceServerMockRecorder is the mock recorder for MockPaymentServiceServer
 type MockPaymentServiceServerMockRecorder struct {
 	mock *MockPaymentServiceServer
 }
 
-// NewMockPaymentServiceServer creates a new mock instance.
+// NewMockPaymentServiceServer creates a new mock instance
 func NewMockPaymentServiceServer(ctrl *gomock.Controller) *MockPaymentServiceServer {
 	mock := &MockPaymentServiceServer{ctrl: ctrl}
 	mock.recorder = &MockPaymentServiceServerMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use.
+// EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockPaymentServiceServer) EXPECT() *MockPaymentServiceServerMockRecorder {
 	return m.recorder
 }
 
-// AddBeneficiaryAccount mocks base method.
-func (m *MockPaymentServiceServer) AddBeneficiaryAccount(arg0 context.Context, arg1 *payment.AddBeneficiaryAccountRequest) (*types.BeneficiaryAccount, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AddBeneficiaryAccount", arg0, arg1)
-	ret0, _ := ret[0].(*types.BeneficiaryAccount)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// AddBeneficiaryAccount indicates an expected call of AddBeneficiaryAccount.
-func (mr *MockPaymentServiceServerMockRecorder) AddBeneficiaryAccount(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddBeneficiaryAccount", reflect.TypeOf((*MockPaymentServiceServer)(nil).AddBeneficiaryAccount), arg0, arg1)
-}
-
-// CreateBeneficiary mocks base method.
+// CreateBeneficiary mocks base method
 func (m *MockPaymentServiceServer) CreateBeneficiary(arg0 context.Context, arg1 *payment.CreateBeneficiaryRequest) (*types.Beneficiary, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateBeneficiary", arg0, arg1)
@@ -264,28 +248,28 @@ func (m *MockPaymentServiceServer) CreateBeneficiary(arg0 context.Context, arg1 
 	return ret0, ret1
 }
 
-// CreateBeneficiary indicates an expected call of CreateBeneficiary.
+// CreateBeneficiary indicates an expected call of CreateBeneficiary
 func (mr *MockPaymentServiceServerMockRecorder) CreateBeneficiary(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateBeneficiary", reflect.TypeOf((*MockPaymentServiceServer)(nil).CreateBeneficiary), arg0, arg1)
 }
 
-// CreateTransfer mocks base method.
-func (m *MockPaymentServiceServer) CreateTransfer(arg0 context.Context, arg1 *payment.CreateTransferRequest) (*types.Transaction, error) {
+// AddBeneficiaryAccount mocks base method
+func (m *MockPaymentServiceServer) AddBeneficiaryAccount(arg0 context.Context, arg1 *payment.AddBeneficiaryAccountRequest) (*types.BeneficiaryAccount, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateTransfer", arg0, arg1)
-	ret0, _ := ret[0].(*types.Transaction)
+	ret := m.ctrl.Call(m, "AddBeneficiaryAccount", arg0, arg1)
+	ret0, _ := ret[0].(*types.BeneficiaryAccount)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// CreateTransfer indicates an expected call of CreateTransfer.
-func (mr *MockPaymentServiceServerMockRecorder) CreateTransfer(arg0, arg1 interface{}) *gomock.Call {
+// AddBeneficiaryAccount indicates an expected call of AddBeneficiaryAccount
+func (mr *MockPaymentServiceServerMockRecorder) AddBeneficiaryAccount(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateTransfer", reflect.TypeOf((*MockPaymentServiceServer)(nil).CreateTransfer), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddBeneficiaryAccount", reflect.TypeOf((*MockPaymentServiceServer)(nil).AddBeneficiaryAccount), arg0, arg1)
 }
 
-// DeleteBeneficiaryAccount mocks base method.
+// DeleteBeneficiaryAccount mocks base method
 func (m *MockPaymentServiceServer) DeleteBeneficiaryAccount(arg0 context.Context, arg1 *payment.DeleteBeneficiaryAccountRequest) (*types.DefaultResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteBeneficiaryAccount", arg0, arg1)
@@ -294,28 +278,13 @@ func (m *MockPaymentServiceServer) DeleteBeneficiaryAccount(arg0 context.Context
 	return ret0, ret1
 }
 
-// DeleteBeneficiaryAccount indicates an expected call of DeleteBeneficiaryAccount.
+// DeleteBeneficiaryAccount indicates an expected call of DeleteBeneficiaryAccount
 func (mr *MockPaymentServiceServerMockRecorder) DeleteBeneficiaryAccount(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteBeneficiaryAccount", reflect.TypeOf((*MockPaymentServiceServer)(nil).DeleteBeneficiaryAccount), arg0, arg1)
 }
 
-// GetBeneficiaries mocks base method.
-func (m *MockPaymentServiceServer) GetBeneficiaries(arg0 context.Context, arg1 *payment.GetBeneficiariesRequest) (*payment.GetBeneficiariesResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetBeneficiaries", arg0, arg1)
-	ret0, _ := ret[0].(*payment.GetBeneficiariesResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetBeneficiaries indicates an expected call of GetBeneficiaries.
-func (mr *MockPaymentServiceServerMockRecorder) GetBeneficiaries(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBeneficiaries", reflect.TypeOf((*MockPaymentServiceServer)(nil).GetBeneficiaries), arg0, arg1)
-}
-
-// GetBeneficiary mocks base method.
+// GetBeneficiary mocks base method
 func (m *MockPaymentServiceServer) GetBeneficiary(arg0 context.Context, arg1 *payment.GetBeneficiaryRequest) (*types.Beneficiary, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetBeneficiary", arg0, arg1)
@@ -324,13 +293,43 @@ func (m *MockPaymentServiceServer) GetBeneficiary(arg0 context.Context, arg1 *pa
 	return ret0, ret1
 }
 
-// GetBeneficiary indicates an expected call of GetBeneficiary.
+// GetBeneficiary indicates an expected call of GetBeneficiary
 func (mr *MockPaymentServiceServerMockRecorder) GetBeneficiary(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBeneficiary", reflect.TypeOf((*MockPaymentServiceServer)(nil).GetBeneficiary), arg0, arg1)
 }
 
-// GetTransaction mocks base method.
+// GetBeneficiaries mocks base method
+func (m *MockPaymentServiceServer) GetBeneficiaries(arg0 context.Context, arg1 *payment.GetBeneficiariesRequest) (*payment.GetBeneficiariesResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetBeneficiaries", arg0, arg1)
+	ret0, _ := ret[0].(*payment.GetBeneficiariesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetBeneficiaries indicates an expected call of GetBeneficiaries
+func (mr *MockPaymentServiceServerMockRecorder) GetBeneficiaries(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBeneficiaries", reflect.TypeOf((*MockPaymentServiceServer)(nil).GetBeneficiaries), arg0, arg1)
+}
+
+// CreateTransfer mocks base method
+func (m *MockPaymentServiceServer) CreateTransfer(arg0 context.Context, arg1 *payment.CreateTransferRequest) (*types.Transaction, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateTransfer", arg0, arg1)
+	ret0, _ := ret[0].(*types.Transaction)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateTransfer indicates an expected call of CreateTransfer
+func (mr *MockPaymentServiceServerMockRecorder) CreateTransfer(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateTransfer", reflect.TypeOf((*MockPaymentServiceServer)(nil).CreateTransfer), arg0, arg1)
+}
+
+// GetTransaction mocks base method
 func (m *MockPaymentServiceServer) GetTransaction(arg0 context.Context, arg1 *payment.GetTransactionRequest) (*types.Transaction, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetTransaction", arg0, arg1)
@@ -339,28 +338,13 @@ func (m *MockPaymentServiceServer) GetTransaction(arg0 context.Context, arg1 *pa
 	return ret0, ret1
 }
 
-// GetTransaction indicates an expected call of GetTransaction.
+// GetTransaction indicates an expected call of GetTransaction
 func (mr *MockPaymentServiceServerMockRecorder) GetTransaction(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTransaction", reflect.TypeOf((*MockPaymentServiceServer)(nil).GetTransaction), arg0, arg1)
 }
 
-// GetTransactionTypes mocks base method.
-func (m *MockPaymentServiceServer) GetTransactionTypes(arg0 context.Context, arg1 *payment.GetTransactionTypesRequest) (*payment.GetTransactionTypesResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetTransactionTypes", arg0, arg1)
-	ret0, _ := ret[0].(*payment.GetTransactionTypesResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetTransactionTypes indicates an expected call of GetTransactionTypes.
-func (mr *MockPaymentServiceServerMockRecorder) GetTransactionTypes(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTransactionTypes", reflect.TypeOf((*MockPaymentServiceServer)(nil).GetTransactionTypes), arg0, arg1)
-}
-
-// GetTransactions mocks base method.
+// GetTransactions mocks base method
 func (m *MockPaymentServiceServer) GetTransactions(arg0 context.Context, arg1 *payment.GetTransactionsRequest) (*payment.GetTransactionsResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetTransactions", arg0, arg1)
@@ -369,8 +353,23 @@ func (m *MockPaymentServiceServer) GetTransactions(arg0 context.Context, arg1 *p
 	return ret0, ret1
 }
 
-// GetTransactions indicates an expected call of GetTransactions.
+// GetTransactions indicates an expected call of GetTransactions
 func (mr *MockPaymentServiceServerMockRecorder) GetTransactions(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTransactions", reflect.TypeOf((*MockPaymentServiceServer)(nil).GetTransactions), arg0, arg1)
+}
+
+// GetTransactionTypes mocks base method
+func (m *MockPaymentServiceServer) GetTransactionTypes(arg0 context.Context, arg1 *payment.GetTransactionTypesRequest) (*payment.GetTransactionTypesResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTransactionTypes", arg0, arg1)
+	ret0, _ := ret[0].(*payment.GetTransactionTypesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTransactionTypes indicates an expected call of GetTransactionTypes
+func (mr *MockPaymentServiceServerMockRecorder) GetTransactionTypes(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTransactionTypes", reflect.TypeOf((*MockPaymentServiceServer)(nil).GetTransactionTypes), arg0, arg1)
 }

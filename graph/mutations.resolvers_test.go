@@ -3,6 +3,7 @@ package graph
 import (
 	"context"
 	"errors"
+	terror "github.com/roava/zebra/errors"
 	"net/http"
 	"testing"
 
@@ -462,16 +463,94 @@ func TestMutationResolver_Signup(t *testing.T) {
 }
 
 func TestMutationResolver_ResetLoginPassword(t *testing.T) {
-	controller := gomock.NewController(t)
-	defer controller.Finish()
-	customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
-	resolverOpts := &ResolverOpts{
-		CustomerService: customerServiceClient,
+	const (
+		success = iota
+		errorUnauthenticatedUser
+		errorCallingResetLoginPassword
+	)
+
+	type arg struct {
+		otpToken      string
+		email         string
+		loginPassword string
 	}
-	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
-	resp, err := resolver.ResetLoginPassword(context.Background(), "", "", "")
-	assert.NoError(t, err)
-	assert.NotNil(t, resp)
+	var tests = []struct {
+		name     string
+		arg      arg
+		testType int
+	}{
+		{
+			name: "Test success",
+			arg: arg{
+				otpToken:      "validOTP",
+				email:         "email@roava.app",
+				loginPassword: "newLoginPassword",
+			},
+			testType: success,
+		},
+		{
+			name:     "Test error unauthenticated user",
+			testType: errorUnauthenticatedUser,
+		},
+		{
+			name: "Test error calling RPC",
+			arg: arg{
+				otpToken:      "validOTP",
+				email:         "email@roava.app",
+				loginPassword: "newLoginPassword",
+			},
+			testType: errorCallingResetLoginPassword,
+		},
+	}
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			controller := gomock.NewController(t)
+			defer controller.Finish()
+			customerService := mocks.NewMockCustomerServiceClient(controller)
+			resolverOpts := &ResolverOpts{
+				CustomerService: customerService,
+			}
+			resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
+
+			switch testCase.testType {
+			case success:
+				ctx, _ := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{ID: "customerID"})
+				customerService.EXPECT().ResetLoginPassword(ctx, &customer.ResetLoginPasswordRequest{
+					OtpToken:      "validOTP",
+					Email:         "email@roava.app",
+					LoginPassword: "newLoginPassword",
+				}).Return(&pbTypes.DefaultResponse{
+					Success: true,
+					Code:    http.StatusOK,
+				}, nil)
+
+				response, err := resolver.ResetLoginPassword(ctx, testCase.arg.otpToken, testCase.arg.email, testCase.arg.loginPassword)
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+				assert.Equal(t, &types.Response{
+					Success: true,
+					Code:    http.StatusOK,
+				}, response)
+			case errorUnauthenticatedUser:
+				response, err := resolver.ResetLoginPassword(context.Background(), testCase.arg.otpToken, testCase.arg.email, testCase.arg.loginPassword)
+				assert.Error(t, err)
+				assert.IsType(t, &terror.Terror{}, err)
+				assert.Equal(t, errorvalues.InvalidAuthentication, err.(*terror.Terror).Code())
+				assert.Nil(t, response)
+			case errorCallingResetLoginPassword:
+				ctx, _ := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{ID: "customerID"})
+				customerService.EXPECT().ResetLoginPassword(ctx, &customer.ResetLoginPasswordRequest{
+					OtpToken:      "validOTP",
+					Email:         "email@roava.app",
+					LoginPassword: "newLoginPassword",
+				}).Return(nil, errors.New(""))
+
+				response, err := resolver.ResetLoginPassword(ctx, testCase.arg.otpToken, testCase.arg.email, testCase.arg.loginPassword)
+				assert.Error(t, err)
+				assert.Nil(t, response)
+			}
+		})
+	}
 }
 
 func TestMutationResolver_CheckCustomerEmail(t *testing.T) {
