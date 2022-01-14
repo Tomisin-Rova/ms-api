@@ -1,6 +1,7 @@
 package graph
 
 import (
+	"ms.api/protos/pb/auth"
 	customerTypes "ms.api/protos/pb/types"
 	"ms.api/types"
 )
@@ -19,6 +20,7 @@ type Helper interface {
 	GetProtoCustomerStatuses(val types.CustomerStatuses) customerTypes.Customer_CustomerStatuses
 	DeviceTokenInputFromModel(tokenType types.DeviceTokenTypes) customerTypes.DeviceToken_DeviceTokenTypes
 	PreferenceInputFromModel(input types.DevicePreferencesTypes) customerTypes.DevicePreferences_DevicePreferencesTypes
+	StaffLoginTypeFromModel(input types.AuthType) auth.StaffLoginRequest_AuthType
 }
 
 type helpersfactory struct{}
@@ -143,5 +145,14 @@ func (h *helpersfactory) MapProtoStaffStatuses(val customerTypes.Staff_StaffStat
 		return types.StaffStatusesInactive
 	default:
 		return ""
+	}
+}
+
+func (h *helpersfactory) StaffLoginTypeFromModel(input types.AuthType) auth.StaffLoginRequest_AuthType {
+	switch input {
+	case types.AuthTypeGoogle:
+		return auth.StaffLoginRequest_GOOGLE
+	default:
+		return -1
 	}
 }

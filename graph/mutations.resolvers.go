@@ -552,10 +552,25 @@ func (r *mutationResolver) RequestResubmit(ctx context.Context, customerID strin
 }
 
 func (r *mutationResolver) StaffLogin(ctx context.Context, token string, authType types.AuthType) (*types.AuthResponse, error) {
-	msg := "Not implemented"
+	loginType := r.helper.StaffLoginTypeFromModel(authType)
+	tokens, err := r.AuthService.StaffLogin(ctx, &auth.StaffLoginRequest{Token: token, AuthType: loginType})
+	if err != nil {
+		invalidMsg := errorvalues.Message(errorvalues.InternalErr)
+		return &types.AuthResponse{
+			Message: &invalidMsg,
+			Success: false,
+			Code:    http.StatusInternalServerError,
+		}, err
+	}
+	msg := "Success"
 	return &types.AuthResponse{
 		Message: &msg,
-		Code:    int64(500),
+		Success: true,
+		Tokens: &types.AuthTokens{
+			Auth:    tokens.AuthToken,
+			Refresh: &tokens.RefreshToken,
+		},
+		Code: int64(http.StatusOK),
 	}, nil
 }
 
