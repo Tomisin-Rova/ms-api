@@ -3,11 +3,11 @@ module ms.api
 go 1.17
 
 require (
-	github.com/99designs/gqlgen v0.14.0
+	github.com/99designs/gqlgen v0.15.1
 	github.com/go-chi/chi v4.1.2+incompatible
 	github.com/golang/mock v1.6.0
 	github.com/gorilla/websocket v1.4.2
-	github.com/roava/zebra v0.0.0-20220113161817-dac91399dad0
+	github.com/roava/zebra v0.0.0-20220117200604-4a473e41b86c
 	github.com/rs/cors v1.8.0
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.0

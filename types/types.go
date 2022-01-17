@@ -411,7 +411,7 @@ type Kyc struct {
 	Organization *Organization `json:"organization"`
 	Identifier   string        `json:"identifier"`
 	PublicURL    *string       `json:"publicUrl"`
-	Reports      *Reports      `json:"reports"`
+	Reports      []*Reports    `json:"reports"`
 	Actions      []*KYCAction  `json:"actions"`
 	Status       KYCStatuses   `json:"status"`
 	StatusTs     int64         `json:"statusTs"`
