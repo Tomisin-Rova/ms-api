@@ -21,6 +21,386 @@ import (
 
 var (
 	emptyString = ""
+
+	mockCDDResponse = &pbTypes.CDD{
+		Id: "id",
+		Customer: &pbTypes.Customer{
+			Id: "customer_id",
+			Addresses: []*pbTypes.Address{
+				{
+					Primary: true,
+					Country: &pbTypes.Country{
+						Id:         "country_id",
+						CodeAlpha2: "code_alpha2",
+						CodeAlpha3: "code_alpha3",
+						Name:       "country name",
+					},
+				},
+			},
+			Phones: []*pbTypes.Phone{
+				{
+					Primary:  true,
+					Number:   "234000xxxxxx",
+					Verified: true,
+				},
+			},
+			Email: &pbTypes.Email{
+				Address:  "foo@mail.com",
+				Verified: true,
+			},
+		},
+		Amls: []*pbTypes.AML{
+			{
+				Organization: &pbTypes.Organization{
+					Id:     "organisation_id",
+					Status: pbTypes.Organization_ACTIVE,
+				},
+				Identifier: "identifier_id",
+				Actions: []*pbTypes.AMLAction{
+					{
+						Type: pbTypes.AMLAction_CHANGE_STATUS,
+						Reporter: &pbTypes.Staff{
+							Addresses: []*pbTypes.Address{
+								{
+									Primary: true,
+									Country: &pbTypes.Country{
+										Id:         "country_id",
+										CodeAlpha2: "code_alpha2",
+										CodeAlpha3: "code_alpha3",
+										Name:       "country name",
+									},
+								},
+							},
+							Phones: []*pbTypes.Phone{
+								{
+									Primary:  true,
+									Number:   "234000xxxxxx",
+									Verified: true,
+								},
+							},
+							Status: pbTypes.Staff_ACTIVE,
+						},
+						Message:      "message",
+						TargetStatus: pbTypes.AMLAction_APPROVED,
+					},
+				},
+				Status: pbTypes.AML_PENDING,
+			},
+			{
+				Organization: &pbTypes.Organization{
+					Id:     "organisation_id",
+					Status: pbTypes.Organization_ACTIVE,
+				},
+				Identifier: "identifier_",
+				Actions: []*pbTypes.AMLAction{
+					{
+						Type: pbTypes.AMLAction_CHANGE_STATUS,
+						Reporter: &pbTypes.Staff{
+							Addresses: []*pbTypes.Address{
+								{
+									Primary: true,
+									Country: &pbTypes.Country{
+										Id:         "country_id",
+										CodeAlpha2: "code_alpha2",
+										CodeAlpha3: "code_alpha3",
+										Name:       "country name",
+									},
+								},
+							},
+							Phones: []*pbTypes.Phone{
+								{
+									Primary:  true,
+									Number:   "234000xxxxxx",
+									Verified: true,
+								},
+							},
+							Status: pbTypes.Staff_INACTIVE,
+						},
+						Message:      "message",
+						TargetStatus: pbTypes.AMLAction_DECLINED,
+					},
+				},
+				Status: pbTypes.AML_APPROVED,
+			},
+			{
+				Organization: &pbTypes.Organization{
+					Id:     "organisation_id",
+					Status: pbTypes.Organization_ACTIVE,
+				},
+				Identifier: "identifier_id",
+				Actions: []*pbTypes.AMLAction{
+					{
+						Type: pbTypes.AMLAction_CHANGE_STATUS,
+						Reporter: &pbTypes.Staff{
+							Addresses: []*pbTypes.Address{
+								{
+									Primary: true,
+									Country: &pbTypes.Country{
+										Id:         "country_id",
+										CodeAlpha2: "code_alpha2",
+										CodeAlpha3: "code_alpha3",
+										Name:       "country name",
+									},
+								},
+							},
+							Phones: []*pbTypes.Phone{
+								{
+									Primary:  true,
+									Number:   "234000xxxxxx",
+									Verified: true,
+								},
+							},
+							Status: pbTypes.Staff_ACTIVE,
+						},
+						Message:      "message",
+						TargetStatus: pbTypes.AMLAction_APPROVED,
+					},
+				},
+				Status: pbTypes.AML_MANUAL_REVIEW,
+			},
+		},
+		Kycs: []*pbTypes.KYC{
+			{
+				Organization: &pbTypes.Organization{
+					Id:     "organisation_id",
+					Status: pbTypes.Organization_ACTIVE,
+				},
+				Identifier: "identifier_id",
+				Actions: []*pbTypes.KYCAction{
+					{
+						Type: pbTypes.KYCAction_CHANGE_STATUS,
+						Reporter: &pbTypes.Staff{
+							Addresses: []*pbTypes.Address{
+								{
+									Primary: true,
+									Country: &pbTypes.Country{
+										Id:         "country_id",
+										CodeAlpha2: "code_alpha2",
+										CodeAlpha3: "code_alpha3",
+										Name:       "country name",
+									},
+								},
+							},
+							Phones: []*pbTypes.Phone{
+								{
+									Primary:  true,
+									Number:   "234000xxxxxx",
+									Verified: true,
+								},
+							},
+							Status: pbTypes.Staff_ACTIVE,
+						},
+						Message:      "message",
+						TargetStatus: pbTypes.KYCAction_MANUAL_REVIEW,
+					},
+				},
+				Reports: []*pbTypes.Report{
+					{
+						Identifier: "identifier",
+						Type:       pbTypes.Report_DOCUMENT,
+						File:       "file",
+						Review: &pbTypes.Review{
+							Resubmit: true,
+							Message:  "message",
+						},
+					},
+
+					{
+						Identifier: "identifier2",
+						Type:       pbTypes.Report_FACIAL_VIDEO,
+						File:       "file",
+						Review: &pbTypes.Review{
+							Resubmit: true,
+							Message:  "message",
+						},
+					},
+				},
+			},
+			{
+				Organization: &pbTypes.Organization{
+					Id:     "organisation_id",
+					Status: pbTypes.Organization_ACTIVE,
+				},
+				Identifier: "identifier_",
+				Actions: []*pbTypes.KYCAction{
+					{
+						Type: pbTypes.KYCAction_CHANGE_STATUS,
+						Reporter: &pbTypes.Staff{
+							Addresses: []*pbTypes.Address{
+								{
+									Primary: true,
+									Country: &pbTypes.Country{
+										Id:         "country_id",
+										CodeAlpha2: "code_alpha2",
+										CodeAlpha3: "code_alpha3",
+										Name:       "country name",
+									},
+								},
+							},
+							Phones: []*pbTypes.Phone{
+								{
+									Primary:  true,
+									Number:   "234000xxxxxx",
+									Verified: true,
+								},
+							},
+							Status: pbTypes.Staff_ACTIVE,
+						},
+						Message:      "message",
+						TargetStatus: pbTypes.KYCAction_APPROVED,
+					},
+				},
+				Reports: []*pbTypes.Report{
+					{
+						Identifier: "identifier",
+						Type:       pbTypes.Report_DOCUMENT,
+						File:       "file",
+						Review: &pbTypes.Review{
+							Resubmit: true,
+							Message:  "message",
+						},
+					},
+
+					{
+						Identifier: "identifier2",
+						Type:       pbTypes.Report_FACIAL_VIDEO,
+						File:       "file",
+						Review: &pbTypes.Review{
+							Resubmit: true,
+							Message:  "message",
+						},
+					},
+				},
+			},
+		},
+		Poas: []*pbTypes.POA{
+			{
+				Organization: &pbTypes.Organization{
+					Id:     "organisation_id",
+					Status: pbTypes.Organization_ACTIVE,
+				},
+				Identifier: "identifier_",
+				Actions: []*pbTypes.POAAction{
+					{
+						Reporter: &pbTypes.Staff{
+							Addresses: []*pbTypes.Address{
+								{
+									Primary: true,
+									Country: &pbTypes.Country{
+										Id:         "country_id",
+										CodeAlpha2: "code_alpha2",
+										CodeAlpha3: "code_alpha3",
+										Name:       "country name",
+									},
+								},
+							},
+							Phones: []*pbTypes.Phone{
+								{
+									Primary:  true,
+									Number:   "234000xxxxxx",
+									Verified: true,
+								},
+							},
+							Status: pbTypes.Staff_ACTIVE,
+						},
+						TargetStatus: pbTypes.POAAction_APPROVED,
+					},
+					{
+						Reporter: &pbTypes.Staff{
+							Addresses: []*pbTypes.Address{
+								{
+									Primary: true,
+									Country: &pbTypes.Country{
+										Id:         "country_id",
+										CodeAlpha2: "code_alpha2",
+										CodeAlpha3: "code_alpha3",
+										Name:       "country name",
+									},
+								},
+							},
+							Phones: []*pbTypes.Phone{
+								{
+									Primary:  true,
+									Number:   "234000xxxxxx",
+									Verified: true,
+								},
+							},
+							Status: pbTypes.Staff_ACTIVE,
+						},
+						TargetStatus: pbTypes.POAAction_DECLINED,
+					},
+				},
+				Review: &pbTypes.Review{
+					Resubmit: true,
+					Message:  "mesg",
+				},
+				Status: pbTypes.POA_MANUAL_REVIEW,
+			},
+			{
+				Organization: &pbTypes.Organization{
+					Id:     "organisation_id",
+					Status: pbTypes.Organization_ACTIVE,
+				},
+				Identifier: "identifier_id",
+				Actions: []*pbTypes.POAAction{
+					{
+						Reporter: &pbTypes.Staff{
+							Addresses: []*pbTypes.Address{
+								{
+									Primary: true,
+									Country: &pbTypes.Country{
+										Id:         "country_id",
+										CodeAlpha2: "code_alpha2",
+										CodeAlpha3: "code_alpha3",
+										Name:       "country name",
+									},
+								},
+							},
+							Phones: []*pbTypes.Phone{
+								{
+									Primary:  true,
+									Number:   "234000xxxxxx",
+									Verified: true,
+								},
+							},
+							Status: pbTypes.Staff_ACTIVE,
+						},
+						TargetStatus: pbTypes.POAAction_APPROVED,
+					},
+					{
+						Reporter: &pbTypes.Staff{
+							Addresses: []*pbTypes.Address{
+								{
+									Primary: true,
+									Country: &pbTypes.Country{
+										Id:         "country_id",
+										CodeAlpha2: "code_alpha2",
+										CodeAlpha3: "code_alpha3",
+										Name:       "country name",
+									},
+								},
+							},
+							Phones: []*pbTypes.Phone{
+								{
+									Primary:  true,
+									Number:   "234000xxxxxx",
+									Verified: true,
+								},
+							},
+							Status: pbTypes.Staff_INACTIVE,
+						},
+						TargetStatus: pbTypes.POAAction_PENDING,
+					},
+				},
+				Review: &pbTypes.Review{
+					Resubmit: true,
+					Message:  "mesg",
+				},
+				Status: pbTypes.POA_APPROVED,
+			},
+		},
+		Status: pbTypes.CDD_APPROVED,
+	}
 )
 
 var (
@@ -443,6 +823,26 @@ func Test_queryResolver_OnfidoSDKToken(t *testing.T) {
 }
 
 func Test_queryResolver_Cdd(t *testing.T) {
+	const (
+		success = iota
+		cddNotFound
+	)
+	tests := []struct {
+		name       string
+		filterLast bool
+		testType   int
+	}{
+		{
+			name:       "Test get cdd successful",
+			filterLast: true,
+			testType:   success,
+		},
+
+		{
+			name:     "Test error getting cdd",
+			testType: cddNotFound,
+		},
+	}
 	controller := gomock.NewController(t)
 	defer controller.Finish()
 	onboardingServiceClient := mocks.NewMockOnboardingServiceClient(controller)
@@ -450,10 +850,36 @@ func Test_queryResolver_Cdd(t *testing.T) {
 		OnboardingService: onboardingServiceClient,
 	}
 	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Query()
-	resp, err := resolver.Cdd(context.Background(), types.CommonQueryFilterInput{})
 
-	assert.Error(t, err)
-	assert.NotNil(t, resp)
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			switch test.testType {
+			case success:
+				req := &onboarding.GetCDDRequest{
+					Id:   "",
+					Last: test.filterLast,
+				}
+				onboardingServiceClient.EXPECT().GetCDD(context.Background(), req).Return(mockCDDResponse, nil)
+
+				resp, err := resolver.Cdd(context.Background(), types.CommonQueryFilterInput{Last: &test.filterLast})
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, resp.ID, mockCDDResponse.Id)
+
+			case cddNotFound:
+				req := &onboarding.GetCDDRequest{
+					Id:   "",
+					Last: test.filterLast,
+				}
+				onboardingServiceClient.EXPECT().GetCDD(context.Background(), req).Return(nil, errors.New(""))
+
+				resp, err := resolver.Cdd(context.Background(), types.CommonQueryFilterInput{Last: &test.filterLast})
+				assert.Error(t, err)
+				assert.Nil(t, resp)
+			}
+		})
+	}
+
 }
 
 func Test_queryResolver_Me(t *testing.T) {
@@ -1928,21 +2354,2140 @@ func Test_queryResolver_Customers(t *testing.T) {
 }
 
 func Test_queryResolver_Cdds(t *testing.T) {
-	controller := gomock.NewController(t)
-	defer controller.Finish()
-	onboardingServiceClient := mocks.NewMockOnboardingServiceClient(controller)
-	resolverOpts := &ResolverOpts{
-		OnboardingService: onboardingServiceClient,
-	}
-	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Query()
-	first := int64(10)
-	after := "after"
-	last := int64(10)
-	before := "before"
 
-	resp, err := resolver.Cdds(context.Background(), &first, &after, &last, &before, []types.CDDStatuses{})
-	assert.Error(t, err)
-	assert.NotNil(t, resp)
+	const (
+		success_first = iota
+		success_last
+		success_after
+		success_before
+		success_only_filters
+	)
+
+	var number = int64(1)
+	var stringArg = "cdd_id"
+
+	tests := []struct {
+		name string
+		args struct {
+			first    *int64
+			after    *string
+			last     *int64
+			before   *string
+			statuses []types.CDDStatuses
+		}
+		testType int
+	}{
+		{
+			name: "Test success for first",
+			args: struct {
+				first    *int64
+				after    *string
+				last     *int64
+				before   *string
+				statuses []types.CDDStatuses
+			}{
+				first: &number,
+			},
+			testType: success_first,
+		},
+
+		{
+			name: "Test success for last",
+			args: struct {
+				first    *int64
+				after    *string
+				last     *int64
+				before   *string
+				statuses []types.CDDStatuses
+			}{
+				last: &number,
+			},
+			testType: success_last,
+		},
+
+		{
+			name: "Test success for before",
+			args: struct {
+				first    *int64
+				after    *string
+				last     *int64
+				before   *string
+				statuses []types.CDDStatuses
+			}{
+				before: &stringArg,
+			},
+			testType: success_before,
+		},
+
+		{
+			name: "Test success for after",
+			args: struct {
+				first    *int64
+				after    *string
+				last     *int64
+				before   *string
+				statuses []types.CDDStatuses
+			}{
+				after: &stringArg,
+			},
+			testType: success_after,
+		},
+
+		{
+			name: "Test success with filters",
+			args: struct {
+				first    *int64
+				after    *string
+				last     *int64
+				before   *string
+				statuses []types.CDDStatuses
+			}{
+				statuses: []types.CDDStatuses{
+					types.CDDStatusesApproved, types.CDDStatusesManualReview, types.CDDStatusesPending, types.CDDStatusesDeclined,
+				},
+			},
+			testType: success_only_filters,
+		},
+	}
+
+	for _, test := range tests {
+		controller := gomock.NewController(t)
+		defer controller.Finish()
+		onboardingServiceClient := mocks.NewMockOnboardingServiceClient(controller)
+		resolverOpts := &ResolverOpts{
+			OnboardingService: onboardingServiceClient,
+		}
+		resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Query()
+
+		t.Run(test.name, func(t *testing.T) {
+			switch test.testType {
+			case success_first:
+				request := &onboarding.GetCDDsRequest{
+					First:    int32(*test.args.first),
+					Last:     int32(0),
+					Before:   "",
+					After:    "",
+					Statuses: []pbTypes.CDD_CDDStatuses{},
+				}
+				onboardingServiceClient.EXPECT().GetCDDs(context.Background(), request).
+					Return(&onboarding.GetCDDsResponse{
+						Nodes: []*pbTypes.CDD{
+							{
+								Id: "id",
+								Customer: &pbTypes.Customer{
+									Id: "customer_id",
+									Addresses: []*pbTypes.Address{
+										{
+											Primary: true,
+											Country: &pbTypes.Country{
+												Id:         "country_id",
+												CodeAlpha2: "code_alpha2",
+												CodeAlpha3: "code_alpha3",
+												Name:       "country name",
+											},
+										},
+									},
+									Phones: []*pbTypes.Phone{
+										{
+											Primary:  true,
+											Number:   "234000xxxxxx",
+											Verified: true,
+										},
+									},
+									Email: &pbTypes.Email{
+										Address:  "foo@mail.com",
+										Verified: true,
+									},
+								},
+								Amls: []*pbTypes.AML{
+									{
+										Organization: &pbTypes.Organization{
+											Id:     "organisation_id",
+											Status: pbTypes.Organization_ACTIVE,
+										},
+										Identifier: "identifier_id",
+										Actions: []*pbTypes.AMLAction{
+											{
+												Type: pbTypes.AMLAction_CHANGE_STATUS,
+												Reporter: &pbTypes.Staff{
+													Addresses: []*pbTypes.Address{
+														{
+															Primary: true,
+															Country: &pbTypes.Country{
+																Id:         "country_id",
+																CodeAlpha2: "code_alpha2",
+																CodeAlpha3: "code_alpha3",
+																Name:       "country name",
+															},
+														},
+													},
+													Phones: []*pbTypes.Phone{
+														{
+															Primary:  true,
+															Number:   "234000xxxxxx",
+															Verified: true,
+														},
+													},
+													Status: pbTypes.Staff_ACTIVE,
+												},
+												Message:      "message",
+												TargetStatus: pbTypes.AMLAction_APPROVED,
+											},
+										},
+										Status: pbTypes.AML_PENDING,
+									},
+									{
+										Organization: &pbTypes.Organization{
+											Id:     "organisation_id",
+											Status: pbTypes.Organization_ACTIVE,
+										},
+										Identifier: "identifier_",
+										Actions: []*pbTypes.AMLAction{
+											{
+												Type: pbTypes.AMLAction_CHANGE_STATUS,
+												Reporter: &pbTypes.Staff{
+													Addresses: []*pbTypes.Address{
+														{
+															Primary: true,
+															Country: &pbTypes.Country{
+																Id:         "country_id",
+																CodeAlpha2: "code_alpha2",
+																CodeAlpha3: "code_alpha3",
+																Name:       "country name",
+															},
+														},
+													},
+													Phones: []*pbTypes.Phone{
+														{
+															Primary:  true,
+															Number:   "234000xxxxxx",
+															Verified: true,
+														},
+													},
+													Status: pbTypes.Staff_INACTIVE,
+												},
+												Message:      "message",
+												TargetStatus: pbTypes.AMLAction_DECLINED,
+											},
+										},
+										Status: pbTypes.AML_APPROVED,
+									},
+									{
+										Organization: &pbTypes.Organization{
+											Id:     "organisation_id",
+											Status: pbTypes.Organization_ACTIVE,
+										},
+										Identifier: "identifier_id",
+										Actions: []*pbTypes.AMLAction{
+											{
+												Type: pbTypes.AMLAction_CHANGE_STATUS,
+												Reporter: &pbTypes.Staff{
+													Addresses: []*pbTypes.Address{
+														{
+															Primary: true,
+															Country: &pbTypes.Country{
+																Id:         "country_id",
+																CodeAlpha2: "code_alpha2",
+																CodeAlpha3: "code_alpha3",
+																Name:       "country name",
+															},
+														},
+													},
+													Phones: []*pbTypes.Phone{
+														{
+															Primary:  true,
+															Number:   "234000xxxxxx",
+															Verified: true,
+														},
+													},
+													Status: pbTypes.Staff_ACTIVE,
+												},
+												Message:      "message",
+												TargetStatus: pbTypes.AMLAction_APPROVED,
+											},
+										},
+										Status: pbTypes.AML_MANUAL_REVIEW,
+									},
+								},
+								Kycs: []*pbTypes.KYC{
+									{
+										Organization: &pbTypes.Organization{
+											Id:     "organisation_id",
+											Status: pbTypes.Organization_ACTIVE,
+										},
+										Identifier: "identifier_id",
+										Actions: []*pbTypes.KYCAction{
+											{
+												Type: pbTypes.KYCAction_CHANGE_STATUS,
+												Reporter: &pbTypes.Staff{
+													Addresses: []*pbTypes.Address{
+														{
+															Primary: true,
+															Country: &pbTypes.Country{
+																Id:         "country_id",
+																CodeAlpha2: "code_alpha2",
+																CodeAlpha3: "code_alpha3",
+																Name:       "country name",
+															},
+														},
+													},
+													Phones: []*pbTypes.Phone{
+														{
+															Primary:  true,
+															Number:   "234000xxxxxx",
+															Verified: true,
+														},
+													},
+													Status: pbTypes.Staff_ACTIVE,
+												},
+												Message:      "message",
+												TargetStatus: pbTypes.KYCAction_MANUAL_REVIEW,
+											},
+										},
+										Reports: []*pbTypes.Report{
+											{
+												Identifier: "identifier",
+												Type:       pbTypes.Report_DOCUMENT,
+												File:       "file",
+												Review: &pbTypes.Review{
+													Resubmit: true,
+													Message:  "message",
+												},
+											},
+
+											{
+												Identifier: "identifier2",
+												Type:       pbTypes.Report_FACIAL_VIDEO,
+												File:       "file",
+												Review: &pbTypes.Review{
+													Resubmit: true,
+													Message:  "message",
+												},
+											},
+										},
+									},
+									{
+										Organization: &pbTypes.Organization{
+											Id:     "organisation_id",
+											Status: pbTypes.Organization_ACTIVE,
+										},
+										Identifier: "identifier_",
+										Actions: []*pbTypes.KYCAction{
+											{
+												Type: pbTypes.KYCAction_CHANGE_STATUS,
+												Reporter: &pbTypes.Staff{
+													Addresses: []*pbTypes.Address{
+														{
+															Primary: true,
+															Country: &pbTypes.Country{
+																Id:         "country_id",
+																CodeAlpha2: "code_alpha2",
+																CodeAlpha3: "code_alpha3",
+																Name:       "country name",
+															},
+														},
+													},
+													Phones: []*pbTypes.Phone{
+														{
+															Primary:  true,
+															Number:   "234000xxxxxx",
+															Verified: true,
+														},
+													},
+													Status: pbTypes.Staff_ACTIVE,
+												},
+												Message:      "message",
+												TargetStatus: pbTypes.KYCAction_APPROVED,
+											},
+										},
+										Reports: []*pbTypes.Report{
+											{
+												Identifier: "identifier",
+												Type:       pbTypes.Report_DOCUMENT,
+												File:       "file",
+												Review: &pbTypes.Review{
+													Resubmit: true,
+													Message:  "message",
+												},
+											},
+
+											{
+												Identifier: "identifier2",
+												Type:       pbTypes.Report_FACIAL_VIDEO,
+												File:       "file",
+												Review: &pbTypes.Review{
+													Resubmit: true,
+													Message:  "message",
+												},
+											},
+										},
+									},
+								},
+								Poas: []*pbTypes.POA{
+									{
+										Organization: &pbTypes.Organization{
+											Id:     "organisation_id",
+											Status: pbTypes.Organization_ACTIVE,
+										},
+										Identifier: "identifier_",
+										Actions: []*pbTypes.POAAction{
+											{
+												Reporter: &pbTypes.Staff{
+													Addresses: []*pbTypes.Address{
+														{
+															Primary: true,
+															Country: &pbTypes.Country{
+																Id:         "country_id",
+																CodeAlpha2: "code_alpha2",
+																CodeAlpha3: "code_alpha3",
+																Name:       "country name",
+															},
+														},
+													},
+													Phones: []*pbTypes.Phone{
+														{
+															Primary:  true,
+															Number:   "234000xxxxxx",
+															Verified: true,
+														},
+													},
+													Status: pbTypes.Staff_ACTIVE,
+												},
+												TargetStatus: pbTypes.POAAction_APPROVED,
+											},
+											{
+												Reporter: &pbTypes.Staff{
+													Addresses: []*pbTypes.Address{
+														{
+															Primary: true,
+															Country: &pbTypes.Country{
+																Id:         "country_id",
+																CodeAlpha2: "code_alpha2",
+																CodeAlpha3: "code_alpha3",
+																Name:       "country name",
+															},
+														},
+													},
+													Phones: []*pbTypes.Phone{
+														{
+															Primary:  true,
+															Number:   "234000xxxxxx",
+															Verified: true,
+														},
+													},
+													Status: pbTypes.Staff_ACTIVE,
+												},
+												TargetStatus: pbTypes.POAAction_DECLINED,
+											},
+										},
+										Review: &pbTypes.Review{
+											Resubmit: true,
+											Message:  "mesg",
+										},
+										Status: pbTypes.POA_MANUAL_REVIEW,
+									},
+									{
+										Organization: &pbTypes.Organization{
+											Id:     "organisation_id",
+											Status: pbTypes.Organization_ACTIVE,
+										},
+										Identifier: "identifier_id",
+										Actions: []*pbTypes.POAAction{
+											{
+												Reporter: &pbTypes.Staff{
+													Addresses: []*pbTypes.Address{
+														{
+															Primary: true,
+															Country: &pbTypes.Country{
+																Id:         "country_id",
+																CodeAlpha2: "code_alpha2",
+																CodeAlpha3: "code_alpha3",
+																Name:       "country name",
+															},
+														},
+													},
+													Phones: []*pbTypes.Phone{
+														{
+															Primary:  true,
+															Number:   "234000xxxxxx",
+															Verified: true,
+														},
+													},
+													Status: pbTypes.Staff_ACTIVE,
+												},
+												TargetStatus: pbTypes.POAAction_APPROVED,
+											},
+											{
+												Reporter: &pbTypes.Staff{
+													Addresses: []*pbTypes.Address{
+														{
+															Primary: true,
+															Country: &pbTypes.Country{
+																Id:         "country_id",
+																CodeAlpha2: "code_alpha2",
+																CodeAlpha3: "code_alpha3",
+																Name:       "country name",
+															},
+														},
+													},
+													Phones: []*pbTypes.Phone{
+														{
+															Primary:  true,
+															Number:   "234000xxxxxx",
+															Verified: true,
+														},
+													},
+													Status: pbTypes.Staff_INACTIVE,
+												},
+												TargetStatus: pbTypes.POAAction_PENDING,
+											},
+										},
+										Review: &pbTypes.Review{
+											Resubmit: true,
+											Message:  "mesg",
+										},
+										Status: pbTypes.POA_APPROVED,
+									},
+								},
+								Status: pbTypes.CDD_APPROVED,
+							},
+						},
+						TotalCount: 1,
+						PaginationInfo: &pbTypes.PaginationInfo{
+							HasNextPage:     false,
+							HasPreviousPage: false,
+							StartCursor:     "start",
+							EndCursor:       "end",
+						},
+					}, nil)
+
+				resp, err := resolver.Cdds(context.Background(), test.args.first, test.args.after, test.args.last, test.args.before, test.args.statuses)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+
+			case success_last:
+				request := &onboarding.GetCDDsRequest{
+					First:    int32(0),
+					Last:     int32(*test.args.last),
+					Before:   "",
+					After:    "",
+					Statuses: []pbTypes.CDD_CDDStatuses{},
+				}
+				onboardingServiceClient.EXPECT().GetCDDs(context.Background(), request).
+					Return(&onboarding.GetCDDsResponse{
+						Nodes: []*pbTypes.CDD{
+							{
+								Id: "id",
+								Customer: &pbTypes.Customer{
+									Id: "customer_id",
+									Addresses: []*pbTypes.Address{
+										{
+											Primary: true,
+											Country: &pbTypes.Country{
+												Id:         "country_id",
+												CodeAlpha2: "code_alpha2",
+												CodeAlpha3: "code_alpha3",
+												Name:       "country name",
+											},
+										},
+									},
+									Phones: []*pbTypes.Phone{
+										{
+											Primary:  true,
+											Number:   "234000xxxxxx",
+											Verified: true,
+										},
+									},
+									Email: &pbTypes.Email{
+										Address:  "foo@mail.com",
+										Verified: true,
+									},
+								},
+								Amls: []*pbTypes.AML{
+									{
+										Organization: &pbTypes.Organization{
+											Id:     "organisation_id",
+											Status: pbTypes.Organization_ACTIVE,
+										},
+										Identifier: "identifier_id",
+										Actions: []*pbTypes.AMLAction{
+											{
+												Type: pbTypes.AMLAction_CHANGE_STATUS,
+												Reporter: &pbTypes.Staff{
+													Addresses: []*pbTypes.Address{
+														{
+															Primary: true,
+															Country: &pbTypes.Country{
+																Id:         "country_id",
+																CodeAlpha2: "code_alpha2",
+																CodeAlpha3: "code_alpha3",
+																Name:       "country name",
+															},
+														},
+													},
+													Phones: []*pbTypes.Phone{
+														{
+															Primary:  true,
+															Number:   "234000xxxxxx",
+															Verified: true,
+														},
+													},
+													Status: pbTypes.Staff_ACTIVE,
+												},
+												Message:      "message",
+												TargetStatus: pbTypes.AMLAction_APPROVED,
+											},
+										},
+										Status: pbTypes.AML_PENDING,
+									},
+									{
+										Organization: &pbTypes.Organization{
+											Id:     "organisation_id",
+											Status: pbTypes.Organization_ACTIVE,
+										},
+										Identifier: "identifier_",
+										Actions: []*pbTypes.AMLAction{
+											{
+												Type: pbTypes.AMLAction_CHANGE_STATUS,
+												Reporter: &pbTypes.Staff{
+													Addresses: []*pbTypes.Address{
+														{
+															Primary: true,
+															Country: &pbTypes.Country{
+																Id:         "country_id",
+																CodeAlpha2: "code_alpha2",
+																CodeAlpha3: "code_alpha3",
+																Name:       "country name",
+															},
+														},
+													},
+													Phones: []*pbTypes.Phone{
+														{
+															Primary:  true,
+															Number:   "234000xxxxxx",
+															Verified: true,
+														},
+													},
+													Status: pbTypes.Staff_INACTIVE,
+												},
+												Message:      "message",
+												TargetStatus: pbTypes.AMLAction_DECLINED,
+											},
+										},
+										Status: pbTypes.AML_APPROVED,
+									},
+									{
+										Organization: &pbTypes.Organization{
+											Id:     "organisation_id",
+											Status: pbTypes.Organization_ACTIVE,
+										},
+										Identifier: "identifier_id",
+										Actions: []*pbTypes.AMLAction{
+											{
+												Type: pbTypes.AMLAction_CHANGE_STATUS,
+												Reporter: &pbTypes.Staff{
+													Addresses: []*pbTypes.Address{
+														{
+															Primary: true,
+															Country: &pbTypes.Country{
+																Id:         "country_id",
+																CodeAlpha2: "code_alpha2",
+																CodeAlpha3: "code_alpha3",
+																Name:       "country name",
+															},
+														},
+													},
+													Phones: []*pbTypes.Phone{
+														{
+															Primary:  true,
+															Number:   "234000xxxxxx",
+															Verified: true,
+														},
+													},
+													Status: pbTypes.Staff_ACTIVE,
+												},
+												Message:      "message",
+												TargetStatus: pbTypes.AMLAction_APPROVED,
+											},
+										},
+										Status: pbTypes.AML_MANUAL_REVIEW,
+									},
+								},
+								Kycs: []*pbTypes.KYC{
+									{
+										Organization: &pbTypes.Organization{
+											Id:     "organisation_id",
+											Status: pbTypes.Organization_ACTIVE,
+										},
+										Identifier: "identifier_id",
+										Actions: []*pbTypes.KYCAction{
+											{
+												Type: pbTypes.KYCAction_CHANGE_STATUS,
+												Reporter: &pbTypes.Staff{
+													Addresses: []*pbTypes.Address{
+														{
+															Primary: true,
+															Country: &pbTypes.Country{
+																Id:         "country_id",
+																CodeAlpha2: "code_alpha2",
+																CodeAlpha3: "code_alpha3",
+																Name:       "country name",
+															},
+														},
+													},
+													Phones: []*pbTypes.Phone{
+														{
+															Primary:  true,
+															Number:   "234000xxxxxx",
+															Verified: true,
+														},
+													},
+													Status: pbTypes.Staff_ACTIVE,
+												},
+												Message:      "message",
+												TargetStatus: pbTypes.KYCAction_MANUAL_REVIEW,
+											},
+										},
+										Reports: []*pbTypes.Report{
+											{
+												Identifier: "identifier",
+												Type:       pbTypes.Report_DOCUMENT,
+												File:       "file",
+												Review: &pbTypes.Review{
+													Resubmit: true,
+													Message:  "message",
+												},
+											},
+
+											{
+												Identifier: "identifier2",
+												Type:       pbTypes.Report_FACIAL_VIDEO,
+												File:       "file",
+												Review: &pbTypes.Review{
+													Resubmit: true,
+													Message:  "message",
+												},
+											},
+										},
+									},
+									{
+										Organization: &pbTypes.Organization{
+											Id:     "organisation_id",
+											Status: pbTypes.Organization_ACTIVE,
+										},
+										Identifier: "identifier_",
+										Actions: []*pbTypes.KYCAction{
+											{
+												Type: pbTypes.KYCAction_CHANGE_STATUS,
+												Reporter: &pbTypes.Staff{
+													Addresses: []*pbTypes.Address{
+														{
+															Primary: true,
+															Country: &pbTypes.Country{
+																Id:         "country_id",
+																CodeAlpha2: "code_alpha2",
+																CodeAlpha3: "code_alpha3",
+																Name:       "country name",
+															},
+														},
+													},
+													Phones: []*pbTypes.Phone{
+														{
+															Primary:  true,
+															Number:   "234000xxxxxx",
+															Verified: true,
+														},
+													},
+													Status: pbTypes.Staff_ACTIVE,
+												},
+												Message:      "message",
+												TargetStatus: pbTypes.KYCAction_APPROVED,
+											},
+										},
+										Reports: []*pbTypes.Report{
+											{
+												Identifier: "identifier",
+												Type:       pbTypes.Report_DOCUMENT,
+												File:       "file",
+												Review: &pbTypes.Review{
+													Resubmit: true,
+													Message:  "message",
+												},
+											},
+
+											{
+												Identifier: "identifier2",
+												Type:       pbTypes.Report_FACIAL_VIDEO,
+												File:       "file",
+												Review: &pbTypes.Review{
+													Resubmit: true,
+													Message:  "message",
+												},
+											},
+										},
+									},
+								},
+								Poas: []*pbTypes.POA{
+									{
+										Organization: &pbTypes.Organization{
+											Id:     "organisation_id",
+											Status: pbTypes.Organization_ACTIVE,
+										},
+										Identifier: "identifier_",
+										Actions: []*pbTypes.POAAction{
+											{
+												Reporter: &pbTypes.Staff{
+													Addresses: []*pbTypes.Address{
+														{
+															Primary: true,
+															Country: &pbTypes.Country{
+																Id:         "country_id",
+																CodeAlpha2: "code_alpha2",
+																CodeAlpha3: "code_alpha3",
+																Name:       "country name",
+															},
+														},
+													},
+													Phones: []*pbTypes.Phone{
+														{
+															Primary:  true,
+															Number:   "234000xxxxxx",
+															Verified: true,
+														},
+													},
+													Status: pbTypes.Staff_ACTIVE,
+												},
+												TargetStatus: pbTypes.POAAction_APPROVED,
+											},
+											{
+												Reporter: &pbTypes.Staff{
+													Addresses: []*pbTypes.Address{
+														{
+															Primary: true,
+															Country: &pbTypes.Country{
+																Id:         "country_id",
+																CodeAlpha2: "code_alpha2",
+																CodeAlpha3: "code_alpha3",
+																Name:       "country name",
+															},
+														},
+													},
+													Phones: []*pbTypes.Phone{
+														{
+															Primary:  true,
+															Number:   "234000xxxxxx",
+															Verified: true,
+														},
+													},
+													Status: pbTypes.Staff_ACTIVE,
+												},
+												TargetStatus: pbTypes.POAAction_DECLINED,
+											},
+										},
+										Review: &pbTypes.Review{
+											Resubmit: true,
+											Message:  "mesg",
+										},
+										Status: pbTypes.POA_MANUAL_REVIEW,
+									},
+									{
+										Organization: &pbTypes.Organization{
+											Id:     "organisation_id",
+											Status: pbTypes.Organization_ACTIVE,
+										},
+										Identifier: "identifier_id",
+										Actions: []*pbTypes.POAAction{
+											{
+												Reporter: &pbTypes.Staff{
+													Addresses: []*pbTypes.Address{
+														{
+															Primary: true,
+															Country: &pbTypes.Country{
+																Id:         "country_id",
+																CodeAlpha2: "code_alpha2",
+																CodeAlpha3: "code_alpha3",
+																Name:       "country name",
+															},
+														},
+													},
+													Phones: []*pbTypes.Phone{
+														{
+															Primary:  true,
+															Number:   "234000xxxxxx",
+															Verified: true,
+														},
+													},
+													Status: pbTypes.Staff_ACTIVE,
+												},
+												TargetStatus: pbTypes.POAAction_APPROVED,
+											},
+											{
+												Reporter: &pbTypes.Staff{
+													Addresses: []*pbTypes.Address{
+														{
+															Primary: true,
+															Country: &pbTypes.Country{
+																Id:         "country_id",
+																CodeAlpha2: "code_alpha2",
+																CodeAlpha3: "code_alpha3",
+																Name:       "country name",
+															},
+														},
+													},
+													Phones: []*pbTypes.Phone{
+														{
+															Primary:  true,
+															Number:   "234000xxxxxx",
+															Verified: true,
+														},
+													},
+													Status: pbTypes.Staff_INACTIVE,
+												},
+												TargetStatus: pbTypes.POAAction_PENDING,
+											},
+										},
+										Review: &pbTypes.Review{
+											Resubmit: true,
+											Message:  "mesg",
+										},
+										Status: pbTypes.POA_APPROVED,
+									},
+								},
+								Status: pbTypes.CDD_APPROVED,
+							},
+						},
+						TotalCount: 1,
+						PaginationInfo: &pbTypes.PaginationInfo{
+							HasNextPage:     false,
+							HasPreviousPage: false,
+							StartCursor:     "start",
+							EndCursor:       "end",
+						},
+					}, nil)
+
+				resp, err := resolver.Cdds(context.Background(), test.args.first, test.args.after, test.args.last, test.args.before, test.args.statuses)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+
+			case success_after:
+				request := &onboarding.GetCDDsRequest{
+					First:    int32(0),
+					Last:     int32(0),
+					Before:   "",
+					After:    *test.args.after,
+					Statuses: []pbTypes.CDD_CDDStatuses{},
+				}
+				onboardingServiceClient.EXPECT().GetCDDs(context.Background(), request).
+					Return(&onboarding.GetCDDsResponse{
+						Nodes: []*pbTypes.CDD{
+							{
+								Id: "cdd_id",
+								Customer: &pbTypes.Customer{
+									Id: "customer_id",
+									Addresses: []*pbTypes.Address{
+										{
+											Primary: true,
+											Country: &pbTypes.Country{
+												Id:         "country_id",
+												CodeAlpha2: "code_alpha2",
+												CodeAlpha3: "code_alpha3",
+												Name:       "country name",
+											},
+										},
+									},
+									Phones: []*pbTypes.Phone{
+										{
+											Primary:  true,
+											Number:   "234000xxxxxx",
+											Verified: true,
+										},
+									},
+									Email: &pbTypes.Email{
+										Address:  "foo@mail.com",
+										Verified: true,
+									},
+								},
+								Amls: []*pbTypes.AML{
+									{
+										Organization: &pbTypes.Organization{
+											Id:     "organisation_id",
+											Status: pbTypes.Organization_ACTIVE,
+										},
+										Identifier: "identifier_id",
+										Actions: []*pbTypes.AMLAction{
+											{
+												Type: pbTypes.AMLAction_CHANGE_STATUS,
+												Reporter: &pbTypes.Staff{
+													Addresses: []*pbTypes.Address{
+														{
+															Primary: true,
+															Country: &pbTypes.Country{
+																Id:         "country_id",
+																CodeAlpha2: "code_alpha2",
+																CodeAlpha3: "code_alpha3",
+																Name:       "country name",
+															},
+														},
+													},
+													Phones: []*pbTypes.Phone{
+														{
+															Primary:  true,
+															Number:   "234000xxxxxx",
+															Verified: true,
+														},
+													},
+													Status: pbTypes.Staff_ACTIVE,
+												},
+												Message:      "message",
+												TargetStatus: pbTypes.AMLAction_APPROVED,
+											},
+										},
+										Status: pbTypes.AML_PENDING,
+									},
+									{
+										Organization: &pbTypes.Organization{
+											Id:     "organisation_id",
+											Status: pbTypes.Organization_ACTIVE,
+										},
+										Identifier: "identifier_",
+										Actions: []*pbTypes.AMLAction{
+											{
+												Type: pbTypes.AMLAction_CHANGE_STATUS,
+												Reporter: &pbTypes.Staff{
+													Addresses: []*pbTypes.Address{
+														{
+															Primary: true,
+															Country: &pbTypes.Country{
+																Id:         "country_id",
+																CodeAlpha2: "code_alpha2",
+																CodeAlpha3: "code_alpha3",
+																Name:       "country name",
+															},
+														},
+													},
+													Phones: []*pbTypes.Phone{
+														{
+															Primary:  true,
+															Number:   "234000xxxxxx",
+															Verified: true,
+														},
+													},
+													Status: pbTypes.Staff_INACTIVE,
+												},
+												Message:      "message",
+												TargetStatus: pbTypes.AMLAction_DECLINED,
+											},
+										},
+										Status: pbTypes.AML_APPROVED,
+									},
+									{
+										Organization: &pbTypes.Organization{
+											Id:     "organisation_id",
+											Status: pbTypes.Organization_ACTIVE,
+										},
+										Identifier: "identifier_id",
+										Actions: []*pbTypes.AMLAction{
+											{
+												Type: pbTypes.AMLAction_CHANGE_STATUS,
+												Reporter: &pbTypes.Staff{
+													Addresses: []*pbTypes.Address{
+														{
+															Primary: true,
+															Country: &pbTypes.Country{
+																Id:         "country_id",
+																CodeAlpha2: "code_alpha2",
+																CodeAlpha3: "code_alpha3",
+																Name:       "country name",
+															},
+														},
+													},
+													Phones: []*pbTypes.Phone{
+														{
+															Primary:  true,
+															Number:   "234000xxxxxx",
+															Verified: true,
+														},
+													},
+													Status: pbTypes.Staff_ACTIVE,
+												},
+												Message:      "message",
+												TargetStatus: pbTypes.AMLAction_APPROVED,
+											},
+										},
+										Status: pbTypes.AML_MANUAL_REVIEW,
+									},
+								},
+								Kycs: []*pbTypes.KYC{
+									{
+										Organization: &pbTypes.Organization{
+											Id:     "organisation_id",
+											Status: pbTypes.Organization_ACTIVE,
+										},
+										Identifier: "identifier_id",
+										Actions: []*pbTypes.KYCAction{
+											{
+												Type: pbTypes.KYCAction_CHANGE_STATUS,
+												Reporter: &pbTypes.Staff{
+													Addresses: []*pbTypes.Address{
+														{
+															Primary: true,
+															Country: &pbTypes.Country{
+																Id:         "country_id",
+																CodeAlpha2: "code_alpha2",
+																CodeAlpha3: "code_alpha3",
+																Name:       "country name",
+															},
+														},
+													},
+													Phones: []*pbTypes.Phone{
+														{
+															Primary:  true,
+															Number:   "234000xxxxxx",
+															Verified: true,
+														},
+													},
+													Status: pbTypes.Staff_ACTIVE,
+												},
+												Message:      "message",
+												TargetStatus: pbTypes.KYCAction_MANUAL_REVIEW,
+											},
+										},
+										Reports: []*pbTypes.Report{
+											{
+												Identifier: "identifier",
+												Type:       pbTypes.Report_DOCUMENT,
+												File:       "file",
+												Review: &pbTypes.Review{
+													Resubmit: true,
+													Message:  "message",
+												},
+											},
+
+											{
+												Identifier: "identifier2",
+												Type:       pbTypes.Report_FACIAL_VIDEO,
+												File:       "file",
+												Review: &pbTypes.Review{
+													Resubmit: true,
+													Message:  "message",
+												},
+											},
+										},
+									},
+									{
+										Organization: &pbTypes.Organization{
+											Id:     "organisation_id",
+											Status: pbTypes.Organization_ACTIVE,
+										},
+										Identifier: "identifier_",
+										Actions: []*pbTypes.KYCAction{
+											{
+												Type: pbTypes.KYCAction_CHANGE_STATUS,
+												Reporter: &pbTypes.Staff{
+													Addresses: []*pbTypes.Address{
+														{
+															Primary: true,
+															Country: &pbTypes.Country{
+																Id:         "country_id",
+																CodeAlpha2: "code_alpha2",
+																CodeAlpha3: "code_alpha3",
+																Name:       "country name",
+															},
+														},
+													},
+													Phones: []*pbTypes.Phone{
+														{
+															Primary:  true,
+															Number:   "234000xxxxxx",
+															Verified: true,
+														},
+													},
+													Status: pbTypes.Staff_ACTIVE,
+												},
+												Message:      "message",
+												TargetStatus: pbTypes.KYCAction_APPROVED,
+											},
+										},
+										Reports: []*pbTypes.Report{
+											{
+												Identifier: "identifier",
+												Type:       pbTypes.Report_DOCUMENT,
+												File:       "file",
+												Review: &pbTypes.Review{
+													Resubmit: true,
+													Message:  "message",
+												},
+											},
+
+											{
+												Identifier: "identifier2",
+												Type:       pbTypes.Report_FACIAL_VIDEO,
+												File:       "file",
+												Review: &pbTypes.Review{
+													Resubmit: true,
+													Message:  "message",
+												},
+											},
+										},
+									},
+								},
+								Poas: []*pbTypes.POA{
+									{
+										Organization: &pbTypes.Organization{
+											Id:     "organisation_id",
+											Status: pbTypes.Organization_ACTIVE,
+										},
+										Identifier: "identifier_",
+										Actions: []*pbTypes.POAAction{
+											{
+												Reporter: &pbTypes.Staff{
+													Addresses: []*pbTypes.Address{
+														{
+															Primary: true,
+															Country: &pbTypes.Country{
+																Id:         "country_id",
+																CodeAlpha2: "code_alpha2",
+																CodeAlpha3: "code_alpha3",
+																Name:       "country name",
+															},
+														},
+													},
+													Phones: []*pbTypes.Phone{
+														{
+															Primary:  true,
+															Number:   "234000xxxxxx",
+															Verified: true,
+														},
+													},
+													Status: pbTypes.Staff_ACTIVE,
+												},
+												TargetStatus: pbTypes.POAAction_APPROVED,
+											},
+											{
+												Reporter: &pbTypes.Staff{
+													Addresses: []*pbTypes.Address{
+														{
+															Primary: true,
+															Country: &pbTypes.Country{
+																Id:         "country_id",
+																CodeAlpha2: "code_alpha2",
+																CodeAlpha3: "code_alpha3",
+																Name:       "country name",
+															},
+														},
+													},
+													Phones: []*pbTypes.Phone{
+														{
+															Primary:  true,
+															Number:   "234000xxxxxx",
+															Verified: true,
+														},
+													},
+													Status: pbTypes.Staff_ACTIVE,
+												},
+												TargetStatus: pbTypes.POAAction_DECLINED,
+											},
+										},
+										Review: &pbTypes.Review{
+											Resubmit: true,
+											Message:  "mesg",
+										},
+										Status: pbTypes.POA_MANUAL_REVIEW,
+									},
+									{
+										Organization: &pbTypes.Organization{
+											Id:     "organisation_id",
+											Status: pbTypes.Organization_ACTIVE,
+										},
+										Identifier: "identifier_id",
+										Actions: []*pbTypes.POAAction{
+											{
+												Reporter: &pbTypes.Staff{
+													Addresses: []*pbTypes.Address{
+														{
+															Primary: true,
+															Country: &pbTypes.Country{
+																Id:         "country_id",
+																CodeAlpha2: "code_alpha2",
+																CodeAlpha3: "code_alpha3",
+																Name:       "country name",
+															},
+														},
+													},
+													Phones: []*pbTypes.Phone{
+														{
+															Primary:  true,
+															Number:   "234000xxxxxx",
+															Verified: true,
+														},
+													},
+													Status: pbTypes.Staff_ACTIVE,
+												},
+												TargetStatus: pbTypes.POAAction_APPROVED,
+											},
+											{
+												Reporter: &pbTypes.Staff{
+													Addresses: []*pbTypes.Address{
+														{
+															Primary: true,
+															Country: &pbTypes.Country{
+																Id:         "country_id",
+																CodeAlpha2: "code_alpha2",
+																CodeAlpha3: "code_alpha3",
+																Name:       "country name",
+															},
+														},
+													},
+													Phones: []*pbTypes.Phone{
+														{
+															Primary:  true,
+															Number:   "234000xxxxxx",
+															Verified: true,
+														},
+													},
+													Status: pbTypes.Staff_INACTIVE,
+												},
+												TargetStatus: pbTypes.POAAction_PENDING,
+											},
+										},
+										Review: &pbTypes.Review{
+											Resubmit: true,
+											Message:  "mesg",
+										},
+										Status: pbTypes.POA_APPROVED,
+									},
+								},
+								Status: pbTypes.CDD_APPROVED,
+							},
+						},
+						TotalCount: 1,
+						PaginationInfo: &pbTypes.PaginationInfo{
+							HasNextPage:     false,
+							HasPreviousPage: false,
+							StartCursor:     "start",
+							EndCursor:       "end",
+						},
+					}, nil)
+
+				resp, err := resolver.Cdds(context.Background(), test.args.first, test.args.after, test.args.last, test.args.before, test.args.statuses)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+
+			case success_before:
+				request := &onboarding.GetCDDsRequest{
+					First:    int32(0),
+					Last:     int32(0),
+					Before:   *test.args.before,
+					After:    "",
+					Statuses: []pbTypes.CDD_CDDStatuses{},
+				}
+				onboardingServiceClient.EXPECT().GetCDDs(context.Background(), request).
+					Return(&onboarding.GetCDDsResponse{
+						Nodes: []*pbTypes.CDD{
+							{
+								Id: "cdd_id",
+								Customer: &pbTypes.Customer{
+									Id: "customer_id",
+									Addresses: []*pbTypes.Address{
+										{
+											Primary: true,
+											Country: &pbTypes.Country{
+												Id:         "country_id",
+												CodeAlpha2: "code_alpha2",
+												CodeAlpha3: "code_alpha3",
+												Name:       "country name",
+											},
+										},
+									},
+									Phones: []*pbTypes.Phone{
+										{
+											Primary:  true,
+											Number:   "234000xxxxxx",
+											Verified: true,
+										},
+									},
+									Email: &pbTypes.Email{
+										Address:  "foo@mail.com",
+										Verified: true,
+									},
+								},
+								Amls: []*pbTypes.AML{
+									{
+										Organization: &pbTypes.Organization{
+											Id:     "organisation_id",
+											Status: pbTypes.Organization_ACTIVE,
+										},
+										Identifier: "identifier_id",
+										Actions: []*pbTypes.AMLAction{
+											{
+												Type: pbTypes.AMLAction_CHANGE_STATUS,
+												Reporter: &pbTypes.Staff{
+													Addresses: []*pbTypes.Address{
+														{
+															Primary: true,
+															Country: &pbTypes.Country{
+																Id:         "country_id",
+																CodeAlpha2: "code_alpha2",
+																CodeAlpha3: "code_alpha3",
+																Name:       "country name",
+															},
+														},
+													},
+													Phones: []*pbTypes.Phone{
+														{
+															Primary:  true,
+															Number:   "234000xxxxxx",
+															Verified: true,
+														},
+													},
+													Status: pbTypes.Staff_ACTIVE,
+												},
+												Message:      "message",
+												TargetStatus: pbTypes.AMLAction_APPROVED,
+											},
+										},
+										Status: pbTypes.AML_PENDING,
+									},
+									{
+										Organization: &pbTypes.Organization{
+											Id:     "organisation_id",
+											Status: pbTypes.Organization_ACTIVE,
+										},
+										Identifier: "identifier_",
+										Actions: []*pbTypes.AMLAction{
+											{
+												Type: pbTypes.AMLAction_CHANGE_STATUS,
+												Reporter: &pbTypes.Staff{
+													Addresses: []*pbTypes.Address{
+														{
+															Primary: true,
+															Country: &pbTypes.Country{
+																Id:         "country_id",
+																CodeAlpha2: "code_alpha2",
+																CodeAlpha3: "code_alpha3",
+																Name:       "country name",
+															},
+														},
+													},
+													Phones: []*pbTypes.Phone{
+														{
+															Primary:  true,
+															Number:   "234000xxxxxx",
+															Verified: true,
+														},
+													},
+													Status: pbTypes.Staff_INACTIVE,
+												},
+												Message:      "message",
+												TargetStatus: pbTypes.AMLAction_DECLINED,
+											},
+										},
+										Status: pbTypes.AML_APPROVED,
+									},
+									{
+										Organization: &pbTypes.Organization{
+											Id:     "organisation_id",
+											Status: pbTypes.Organization_ACTIVE,
+										},
+										Identifier: "identifier_id",
+										Actions: []*pbTypes.AMLAction{
+											{
+												Type: pbTypes.AMLAction_CHANGE_STATUS,
+												Reporter: &pbTypes.Staff{
+													Addresses: []*pbTypes.Address{
+														{
+															Primary: true,
+															Country: &pbTypes.Country{
+																Id:         "country_id",
+																CodeAlpha2: "code_alpha2",
+																CodeAlpha3: "code_alpha3",
+																Name:       "country name",
+															},
+														},
+													},
+													Phones: []*pbTypes.Phone{
+														{
+															Primary:  true,
+															Number:   "234000xxxxxx",
+															Verified: true,
+														},
+													},
+													Status: pbTypes.Staff_ACTIVE,
+												},
+												Message:      "message",
+												TargetStatus: pbTypes.AMLAction_APPROVED,
+											},
+										},
+										Status: pbTypes.AML_MANUAL_REVIEW,
+									},
+								},
+								Kycs: []*pbTypes.KYC{
+									{
+										Organization: &pbTypes.Organization{
+											Id:     "organisation_id",
+											Status: pbTypes.Organization_ACTIVE,
+										},
+										Identifier: "identifier_id",
+										Actions: []*pbTypes.KYCAction{
+											{
+												Type: pbTypes.KYCAction_CHANGE_STATUS,
+												Reporter: &pbTypes.Staff{
+													Addresses: []*pbTypes.Address{
+														{
+															Primary: true,
+															Country: &pbTypes.Country{
+																Id:         "country_id",
+																CodeAlpha2: "code_alpha2",
+																CodeAlpha3: "code_alpha3",
+																Name:       "country name",
+															},
+														},
+													},
+													Phones: []*pbTypes.Phone{
+														{
+															Primary:  true,
+															Number:   "234000xxxxxx",
+															Verified: true,
+														},
+													},
+													Status: pbTypes.Staff_ACTIVE,
+												},
+												Message:      "message",
+												TargetStatus: pbTypes.KYCAction_MANUAL_REVIEW,
+											},
+										},
+										Reports: []*pbTypes.Report{
+											{
+												Identifier: "identifier",
+												Type:       pbTypes.Report_DOCUMENT,
+												File:       "file",
+												Review: &pbTypes.Review{
+													Resubmit: true,
+													Message:  "message",
+												},
+											},
+
+											{
+												Identifier: "identifier2",
+												Type:       pbTypes.Report_FACIAL_VIDEO,
+												File:       "file",
+												Review: &pbTypes.Review{
+													Resubmit: true,
+													Message:  "message",
+												},
+											},
+										},
+									},
+									{
+										Organization: &pbTypes.Organization{
+											Id:     "organisation_id",
+											Status: pbTypes.Organization_ACTIVE,
+										},
+										Identifier: "identifier_",
+										Actions: []*pbTypes.KYCAction{
+											{
+												Type: pbTypes.KYCAction_CHANGE_STATUS,
+												Reporter: &pbTypes.Staff{
+													Addresses: []*pbTypes.Address{
+														{
+															Primary: true,
+															Country: &pbTypes.Country{
+																Id:         "country_id",
+																CodeAlpha2: "code_alpha2",
+																CodeAlpha3: "code_alpha3",
+																Name:       "country name",
+															},
+														},
+													},
+													Phones: []*pbTypes.Phone{
+														{
+															Primary:  true,
+															Number:   "234000xxxxxx",
+															Verified: true,
+														},
+													},
+													Status: pbTypes.Staff_ACTIVE,
+												},
+												Message:      "message",
+												TargetStatus: pbTypes.KYCAction_APPROVED,
+											},
+										},
+										Reports: []*pbTypes.Report{
+											{
+												Identifier: "identifier",
+												Type:       pbTypes.Report_DOCUMENT,
+												File:       "file",
+												Review: &pbTypes.Review{
+													Resubmit: true,
+													Message:  "message",
+												},
+											},
+
+											{
+												Identifier: "identifier2",
+												Type:       pbTypes.Report_FACIAL_VIDEO,
+												File:       "file",
+												Review: &pbTypes.Review{
+													Resubmit: true,
+													Message:  "message",
+												},
+											},
+										},
+									},
+								},
+								Poas: []*pbTypes.POA{
+									{
+										Organization: &pbTypes.Organization{
+											Id:     "organisation_id",
+											Status: pbTypes.Organization_ACTIVE,
+										},
+										Identifier: "identifier_",
+										Actions: []*pbTypes.POAAction{
+											{
+												Reporter: &pbTypes.Staff{
+													Addresses: []*pbTypes.Address{
+														{
+															Primary: true,
+															Country: &pbTypes.Country{
+																Id:         "country_id",
+																CodeAlpha2: "code_alpha2",
+																CodeAlpha3: "code_alpha3",
+																Name:       "country name",
+															},
+														},
+													},
+													Phones: []*pbTypes.Phone{
+														{
+															Primary:  true,
+															Number:   "234000xxxxxx",
+															Verified: true,
+														},
+													},
+													Status: pbTypes.Staff_ACTIVE,
+												},
+												TargetStatus: pbTypes.POAAction_APPROVED,
+											},
+											{
+												Reporter: &pbTypes.Staff{
+													Addresses: []*pbTypes.Address{
+														{
+															Primary: true,
+															Country: &pbTypes.Country{
+																Id:         "country_id",
+																CodeAlpha2: "code_alpha2",
+																CodeAlpha3: "code_alpha3",
+																Name:       "country name",
+															},
+														},
+													},
+													Phones: []*pbTypes.Phone{
+														{
+															Primary:  true,
+															Number:   "234000xxxxxx",
+															Verified: true,
+														},
+													},
+													Status: pbTypes.Staff_ACTIVE,
+												},
+												TargetStatus: pbTypes.POAAction_DECLINED,
+											},
+										},
+										Review: &pbTypes.Review{
+											Resubmit: true,
+											Message:  "mesg",
+										},
+										Status: pbTypes.POA_MANUAL_REVIEW,
+									},
+									{
+										Organization: &pbTypes.Organization{
+											Id:     "organisation_id",
+											Status: pbTypes.Organization_ACTIVE,
+										},
+										Identifier: "identifier_id",
+										Actions: []*pbTypes.POAAction{
+											{
+												Reporter: &pbTypes.Staff{
+													Addresses: []*pbTypes.Address{
+														{
+															Primary: true,
+															Country: &pbTypes.Country{
+																Id:         "country_id",
+																CodeAlpha2: "code_alpha2",
+																CodeAlpha3: "code_alpha3",
+																Name:       "country name",
+															},
+														},
+													},
+													Phones: []*pbTypes.Phone{
+														{
+															Primary:  true,
+															Number:   "234000xxxxxx",
+															Verified: true,
+														},
+													},
+													Status: pbTypes.Staff_ACTIVE,
+												},
+												TargetStatus: pbTypes.POAAction_APPROVED,
+											},
+											{
+												Reporter: &pbTypes.Staff{
+													Addresses: []*pbTypes.Address{
+														{
+															Primary: true,
+															Country: &pbTypes.Country{
+																Id:         "country_id",
+																CodeAlpha2: "code_alpha2",
+																CodeAlpha3: "code_alpha3",
+																Name:       "country name",
+															},
+														},
+													},
+													Phones: []*pbTypes.Phone{
+														{
+															Primary:  true,
+															Number:   "234000xxxxxx",
+															Verified: true,
+														},
+													},
+													Status: pbTypes.Staff_INACTIVE,
+												},
+												TargetStatus: pbTypes.POAAction_PENDING,
+											},
+										},
+										Review: &pbTypes.Review{
+											Resubmit: true,
+											Message:  "mesg",
+										},
+										Status: pbTypes.POA_APPROVED,
+									},
+								},
+								Status: pbTypes.CDD_APPROVED,
+							},
+						},
+						TotalCount: 1,
+						PaginationInfo: &pbTypes.PaginationInfo{
+							HasNextPage:     false,
+							HasPreviousPage: false,
+							StartCursor:     "start",
+							EndCursor:       "end",
+						},
+					}, nil)
+
+				resp, err := resolver.Cdds(context.Background(), test.args.first, test.args.after, test.args.last, test.args.before, test.args.statuses)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+
+			case success_only_filters:
+				helper := helpersfactory{}
+				statuses := make([]pbTypes.CDD_CDDStatuses, len(test.args.statuses))
+				for index, state := range test.args.statuses {
+					statuses[index] = helper.MapCDDStatusesFromModel(state)
+				}
+				request := &onboarding.GetCDDsRequest{
+					First:    int32(0),
+					Last:     int32(0),
+					Before:   "",
+					After:    "",
+					Statuses: statuses,
+				}
+				onboardingServiceClient.EXPECT().GetCDDs(context.Background(), request).
+					Return(&onboarding.GetCDDsResponse{
+						Nodes: []*pbTypes.CDD{
+							{
+								Id: "cdd_id",
+								Customer: &pbTypes.Customer{
+									Id: "customer_id",
+									Addresses: []*pbTypes.Address{
+										{
+											Primary: true,
+											Country: &pbTypes.Country{
+												Id:         "country_id",
+												CodeAlpha2: "code_alpha2",
+												CodeAlpha3: "code_alpha3",
+												Name:       "country name",
+											},
+										},
+									},
+									Phones: []*pbTypes.Phone{
+										{
+											Primary:  true,
+											Number:   "234000xxxxxx",
+											Verified: true,
+										},
+									},
+									Email: &pbTypes.Email{
+										Address:  "foo@mail.com",
+										Verified: true,
+									},
+								},
+								Amls: []*pbTypes.AML{
+									{
+										Organization: &pbTypes.Organization{
+											Id:     "organisation_id",
+											Status: pbTypes.Organization_ACTIVE,
+										},
+										Identifier: "identifier_id",
+										Actions: []*pbTypes.AMLAction{
+											{
+												Type: pbTypes.AMLAction_CHANGE_STATUS,
+												Reporter: &pbTypes.Staff{
+													Addresses: []*pbTypes.Address{
+														{
+															Primary: true,
+															Country: &pbTypes.Country{
+																Id:         "country_id",
+																CodeAlpha2: "code_alpha2",
+																CodeAlpha3: "code_alpha3",
+																Name:       "country name",
+															},
+														},
+													},
+													Phones: []*pbTypes.Phone{
+														{
+															Primary:  true,
+															Number:   "234000xxxxxx",
+															Verified: true,
+														},
+													},
+													Status: pbTypes.Staff_ACTIVE,
+												},
+												Message:      "message",
+												TargetStatus: pbTypes.AMLAction_APPROVED,
+											},
+										},
+										Status: pbTypes.AML_PENDING,
+									},
+									{
+										Organization: &pbTypes.Organization{
+											Id:     "organisation_id",
+											Status: pbTypes.Organization_ACTIVE,
+										},
+										Identifier: "identifier_",
+										Actions: []*pbTypes.AMLAction{
+											{
+												Type: pbTypes.AMLAction_CHANGE_STATUS,
+												Reporter: &pbTypes.Staff{
+													Addresses: []*pbTypes.Address{
+														{
+															Primary: true,
+															Country: &pbTypes.Country{
+																Id:         "country_id",
+																CodeAlpha2: "code_alpha2",
+																CodeAlpha3: "code_alpha3",
+																Name:       "country name",
+															},
+														},
+													},
+													Phones: []*pbTypes.Phone{
+														{
+															Primary:  true,
+															Number:   "234000xxxxxx",
+															Verified: true,
+														},
+													},
+													Status: pbTypes.Staff_INACTIVE,
+												},
+												Message:      "message",
+												TargetStatus: pbTypes.AMLAction_DECLINED,
+											},
+										},
+										Status: pbTypes.AML_APPROVED,
+									},
+									{
+										Organization: &pbTypes.Organization{
+											Id:     "organisation_id",
+											Status: pbTypes.Organization_ACTIVE,
+										},
+										Identifier: "identifier_id",
+										Actions: []*pbTypes.AMLAction{
+											{
+												Type: pbTypes.AMLAction_CHANGE_STATUS,
+												Reporter: &pbTypes.Staff{
+													Addresses: []*pbTypes.Address{
+														{
+															Primary: true,
+															Country: &pbTypes.Country{
+																Id:         "country_id",
+																CodeAlpha2: "code_alpha2",
+																CodeAlpha3: "code_alpha3",
+																Name:       "country name",
+															},
+														},
+													},
+													Phones: []*pbTypes.Phone{
+														{
+															Primary:  true,
+															Number:   "234000xxxxxx",
+															Verified: true,
+														},
+													},
+													Status: pbTypes.Staff_ACTIVE,
+												},
+												Message:      "message",
+												TargetStatus: pbTypes.AMLAction_APPROVED,
+											},
+										},
+										Status: pbTypes.AML_MANUAL_REVIEW,
+									},
+								},
+								Kycs: []*pbTypes.KYC{
+									{
+										Organization: &pbTypes.Organization{
+											Id:     "organisation_id",
+											Status: pbTypes.Organization_ACTIVE,
+										},
+										Identifier: "identifier_id",
+										Actions: []*pbTypes.KYCAction{
+											{
+												Type: pbTypes.KYCAction_CHANGE_STATUS,
+												Reporter: &pbTypes.Staff{
+													Addresses: []*pbTypes.Address{
+														{
+															Primary: true,
+															Country: &pbTypes.Country{
+																Id:         "country_id",
+																CodeAlpha2: "code_alpha2",
+																CodeAlpha3: "code_alpha3",
+																Name:       "country name",
+															},
+														},
+													},
+													Phones: []*pbTypes.Phone{
+														{
+															Primary:  true,
+															Number:   "234000xxxxxx",
+															Verified: true,
+														},
+													},
+													Status: pbTypes.Staff_ACTIVE,
+												},
+												Message:      "message",
+												TargetStatus: pbTypes.KYCAction_MANUAL_REVIEW,
+											},
+										},
+										Reports: []*pbTypes.Report{
+											{
+												Identifier: "identifier",
+												Type:       pbTypes.Report_DOCUMENT,
+												File:       "file",
+												Review: &pbTypes.Review{
+													Resubmit: true,
+													Message:  "message",
+												},
+											},
+
+											{
+												Identifier: "identifier2",
+												Type:       pbTypes.Report_FACIAL_VIDEO,
+												File:       "file",
+												Review: &pbTypes.Review{
+													Resubmit: true,
+													Message:  "message",
+												},
+											},
+										},
+									},
+									{
+										Organization: &pbTypes.Organization{
+											Id:     "organisation_id",
+											Status: pbTypes.Organization_ACTIVE,
+										},
+										Identifier: "identifier_",
+										Actions: []*pbTypes.KYCAction{
+											{
+												Type: pbTypes.KYCAction_CHANGE_STATUS,
+												Reporter: &pbTypes.Staff{
+													Addresses: []*pbTypes.Address{
+														{
+															Primary: true,
+															Country: &pbTypes.Country{
+																Id:         "country_id",
+																CodeAlpha2: "code_alpha2",
+																CodeAlpha3: "code_alpha3",
+																Name:       "country name",
+															},
+														},
+													},
+													Phones: []*pbTypes.Phone{
+														{
+															Primary:  true,
+															Number:   "234000xxxxxx",
+															Verified: true,
+														},
+													},
+													Status: pbTypes.Staff_ACTIVE,
+												},
+												Message:      "message",
+												TargetStatus: pbTypes.KYCAction_APPROVED,
+											},
+										},
+										Reports: []*pbTypes.Report{
+											{
+												Identifier: "identifier",
+												Type:       pbTypes.Report_DOCUMENT,
+												File:       "file",
+												Review: &pbTypes.Review{
+													Resubmit: true,
+													Message:  "message",
+												},
+											},
+
+											{
+												Identifier: "identifier2",
+												Type:       pbTypes.Report_FACIAL_VIDEO,
+												File:       "file",
+												Review: &pbTypes.Review{
+													Resubmit: true,
+													Message:  "message",
+												},
+											},
+										},
+									},
+								},
+								Poas: []*pbTypes.POA{
+									{
+										Organization: &pbTypes.Organization{
+											Id:     "organisation_id",
+											Status: pbTypes.Organization_ACTIVE,
+										},
+										Identifier: "identifier_",
+										Actions: []*pbTypes.POAAction{
+											{
+												Reporter: &pbTypes.Staff{
+													Addresses: []*pbTypes.Address{
+														{
+															Primary: true,
+															Country: &pbTypes.Country{
+																Id:         "country_id",
+																CodeAlpha2: "code_alpha2",
+																CodeAlpha3: "code_alpha3",
+																Name:       "country name",
+															},
+														},
+													},
+													Phones: []*pbTypes.Phone{
+														{
+															Primary:  true,
+															Number:   "234000xxxxxx",
+															Verified: true,
+														},
+													},
+													Status: pbTypes.Staff_ACTIVE,
+												},
+												TargetStatus: pbTypes.POAAction_APPROVED,
+											},
+											{
+												Reporter: &pbTypes.Staff{
+													Addresses: []*pbTypes.Address{
+														{
+															Primary: true,
+															Country: &pbTypes.Country{
+																Id:         "country_id",
+																CodeAlpha2: "code_alpha2",
+																CodeAlpha3: "code_alpha3",
+																Name:       "country name",
+															},
+														},
+													},
+													Phones: []*pbTypes.Phone{
+														{
+															Primary:  true,
+															Number:   "234000xxxxxx",
+															Verified: true,
+														},
+													},
+													Status: pbTypes.Staff_ACTIVE,
+												},
+												TargetStatus: pbTypes.POAAction_DECLINED,
+											},
+										},
+										Review: &pbTypes.Review{
+											Resubmit: true,
+											Message:  "mesg",
+										},
+										Status: pbTypes.POA_MANUAL_REVIEW,
+									},
+									{
+										Organization: &pbTypes.Organization{
+											Id:     "organisation_id",
+											Status: pbTypes.Organization_ACTIVE,
+										},
+										Identifier: "identifier_id",
+										Actions: []*pbTypes.POAAction{
+											{
+												Reporter: &pbTypes.Staff{
+													Addresses: []*pbTypes.Address{
+														{
+															Primary: true,
+															Country: &pbTypes.Country{
+																Id:         "country_id",
+																CodeAlpha2: "code_alpha2",
+																CodeAlpha3: "code_alpha3",
+																Name:       "country name",
+															},
+														},
+													},
+													Phones: []*pbTypes.Phone{
+														{
+															Primary:  true,
+															Number:   "234000xxxxxx",
+															Verified: true,
+														},
+													},
+													Status: pbTypes.Staff_ACTIVE,
+												},
+												TargetStatus: pbTypes.POAAction_APPROVED,
+											},
+											{
+												Reporter: &pbTypes.Staff{
+													Addresses: []*pbTypes.Address{
+														{
+															Primary: true,
+															Country: &pbTypes.Country{
+																Id:         "country_id",
+																CodeAlpha2: "code_alpha2",
+																CodeAlpha3: "code_alpha3",
+																Name:       "country name",
+															},
+														},
+													},
+													Phones: []*pbTypes.Phone{
+														{
+															Primary:  true,
+															Number:   "234000xxxxxx",
+															Verified: true,
+														},
+													},
+													Status: pbTypes.Staff_INACTIVE,
+												},
+												TargetStatus: pbTypes.POAAction_PENDING,
+											},
+										},
+										Review: &pbTypes.Review{
+											Resubmit: true,
+											Message:  "mesg",
+										},
+										Status: pbTypes.POA_APPROVED,
+									},
+								},
+								Status: pbTypes.CDD_APPROVED,
+							},
+						},
+						TotalCount: 1,
+						PaginationInfo: &pbTypes.PaginationInfo{
+							HasNextPage:     false,
+							HasPreviousPage: false,
+							StartCursor:     "start",
+							EndCursor:       "end",
+						},
+					}, nil)
+
+				resp, err := resolver.Cdds(context.Background(), test.args.first, test.args.after, test.args.last, test.args.before, test.args.statuses)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+			}
+		})
+	}
 }
 
 func TestQueryResolver_Addresses(t *testing.T) {

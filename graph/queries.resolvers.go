@@ -185,9 +185,33 @@ func (r *queryResolver) OnfidoSDKToken(ctx context.Context) (*apiTypes.TokenResp
 }
 
 func (r *queryResolver) Cdd(ctx context.Context, filter apiTypes.CommonQueryFilterInput) (*apiTypes.Cdd, error) {
-	return &apiTypes.Cdd{
-		ID: "n/a",
-	}, errors.New("not implemented")
+	request := onboarding.GetCDDRequest{Last: false}
+	if filter.ID != nil {
+		request.Id = *filter.ID
+	}
+
+	if filter.Last != nil {
+		request.Last = *filter.Last
+	}
+
+	resp, err := r.OnBoardingService.GetCDD(ctx, &request)
+	if err != nil {
+		return nil, err
+	}
+
+	helpers := helpersfactory{}
+	cdd := &apiTypes.Cdd{
+		ID:       resp.Id,
+		Customer: helpers.makeCustomerFromProto(resp.Customer),
+		Amls:     helpers.makeAMLsFromProto(resp.Amls),
+		Kycs:     helpers.makeKYCsFromProto(resp.Kycs),
+		Poas:     helpers.makePOAsFromProto(resp.Poas),
+		Status:   helpers.MapProtoCDDStatuses(resp.Status),
+		StatusTs: resp.StatusTs.AsTime().Unix(),
+		Ts:       resp.Ts.AsTime().Unix(),
+	}
+
+	return cdd, nil
 }
 
 func (r *queryResolver) Content(ctx context.Context, id string) (*apiTypes.Content, error) {
@@ -625,52 +649,12 @@ func (r *queryResolver) Me(ctx context.Context) (apiTypes.MeResult, error) {
 func (r *queryResolver) Customer(ctx context.Context, id string) (*apiTypes.Customer, error) {
 	result, err := r.CustomerService.GetCustomer(ctx, &customer.GetCustomerRequest{Id: id})
 	if err != nil {
-		return &apiTypes.Customer{}, errors.New("not implemented")
-	}
-
-	addresses := make([]*apiTypes.Address, 0)
-	for _, addr := range result.Addresses {
-		address := apiTypes.Address{
-			Primary: addr.Primary,
-			Country: &apiTypes.Country{
-				ID:         addr.Country.Id,
-				CodeAlpha2: addr.Country.CodeAlpha2,
-				CodeAlpha3: addr.Country.CodeAlpha3,
-				Name:       addr.Country.Name,
-			},
-		}
-		addresses = append(addresses, &address)
-	}
-
-	phones := make([]*apiTypes.Phone, 0)
-	for _, phone := range result.Phones {
-		phone := apiTypes.Phone{
-			Primary:  phone.Primary,
-			Number:   phone.Number,
-			Verified: phone.Verified,
-		}
-
-		phones = append(phones, &phone)
+		return &apiTypes.Customer{}, err
 	}
 
 	helpers := &helpersfactory{}
 
-	return &apiTypes.Customer{
-		ID:        result.Id,
-		FirstName: result.FirstName,
-		LastName:  result.LastName,
-		Dob:       result.Dob,
-		Bvn:       &result.Bvn,
-		Addresses: addresses,
-		Phones:    phones,
-		Email: &apiTypes.Email{
-			Address:  result.Email.Address,
-			Verified: result.Email.Verified,
-		},
-		Status:   helpers.MapProtoCustomerStatuses(result.Status),
-		StatusTs: result.StatusTs.AsTime().Unix(),
-		Ts:       result.Ts.AsTime().Unix(),
-	}, nil
+	return helpers.makeCustomerFromProto(result), nil
 }
 
 func (r *queryResolver) Customers(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string, statuses []apiTypes.CustomerStatuses) (*apiTypes.CustomerConnection, error) {
@@ -710,50 +694,8 @@ func (r *queryResolver) Customers(ctx context.Context, keywords *string, first *
 
 	nodes := make([]*apiTypes.Customer, 0)
 	for _, node := range resp.Nodes {
-
-		addresses := make([]*apiTypes.Address, 0)
-		for _, addr := range node.Addresses {
-			address := apiTypes.Address{
-				Primary: addr.Primary,
-				Country: &apiTypes.Country{
-					ID:         addr.Country.Id,
-					CodeAlpha2: addr.Country.CodeAlpha2,
-					CodeAlpha3: addr.Country.CodeAlpha3,
-					Name:       addr.Country.Name,
-				},
-			}
-			addresses = append(addresses, &address)
-		}
-
-		phones := make([]*apiTypes.Phone, 0)
-		for _, phone := range node.Phones {
-			phone := apiTypes.Phone{
-				Primary:  phone.Primary,
-				Number:   phone.Number,
-				Verified: phone.Verified,
-			}
-
-			phones = append(phones, &phone)
-		}
-
-		customer_ := apiTypes.Customer{
-			ID:        node.Id,
-			FirstName: node.FirstName,
-			LastName:  node.LastName,
-			Dob:       node.Dob,
-			Bvn:       &node.Bvn,
-			Addresses: addresses,
-			Phones:    phones,
-			Email: &apiTypes.Email{
-				Address:  node.Email.Address,
-				Verified: node.Email.Verified,
-			},
-			Status:   helper.MapProtoCustomerStatuses(node.Status),
-			StatusTs: node.StatusTs.AsTime().Unix(),
-			Ts:       node.Ts.AsTime().Unix(),
-		}
-
-		nodes = append(nodes, &customer_)
+		customer_ := helper.makeCustomerFromProto(node)
+		nodes = append(nodes, customer_)
 	}
 
 	pageInfo := apiTypes.PageInfo{
@@ -769,13 +711,63 @@ func (r *queryResolver) Customers(ctx context.Context, keywords *string, first *
 }
 
 func (r *queryResolver) Cdds(ctx context.Context, first *int64, after *string, last *int64, before *string, statuses []apiTypes.CDDStatuses) (*apiTypes.CDDConnection, error) {
+	helpers := helpersfactory{}
+	cddStatuses := make([]types.CDD_CDDStatuses, len(statuses))
+
+	for i, state := range statuses {
+		cddStatuses[i] = helpers.MapCDDStatusesFromModel(state)
+	}
+
+	// Build request
+	request := onboarding.GetCDDsRequest{
+		Statuses: cddStatuses,
+	}
+
+	if first != nil {
+		request.First = int32(*first)
+	}
+	if after != nil {
+		request.After = *after
+	}
+	if last != nil {
+		request.Last = int32(*last)
+	}
+	if before != nil {
+		request.Before = *before
+	}
+
+	resp, err := r.OnBoardingService.GetCDDs(ctx, &request)
+	if err != nil {
+		return nil, err
+	}
+
+	nodes := make([]*apiTypes.Cdd, len(resp.Nodes))
+
+	for i, node := range resp.Nodes {
+		cdd := &apiTypes.Cdd{
+			ID:       node.Id,
+			Customer: helpers.makeCustomerFromProto(node.Customer),
+			Amls:     helpers.makeAMLsFromProto(node.Amls),
+			Kycs:     helpers.makeKYCsFromProto(node.Kycs),
+			Poas:     helpers.makePOAsFromProto(node.Poas),
+			Status:   helpers.MapProtoCDDStatuses(node.Status),
+			StatusTs: node.StatusTs.AsTime().Unix(),
+			Ts:       node.Ts.AsTime().Unix(),
+		}
+
+		nodes[i] = cdd
+	}
+
 	return &apiTypes.CDDConnection{
-		Nodes: []*apiTypes.Cdd{
-			{
-				ID: "n/a",
-			},
+		Nodes: nodes,
+		PageInfo: &apiTypes.PageInfo{
+			HasNextPage:     resp.PaginationInfo.HasNextPage,
+			HasPreviousPage: resp.PaginationInfo.HasPreviousPage,
+			StartCursor:     &resp.PaginationInfo.StartCursor,
+			EndCursor:       &resp.PaginationInfo.EndCursor,
 		},
-	}, errors.New("not implemented")
+		TotalCount: int64(resp.TotalCount),
+	}, nil
 }
 
 // Query returns generated.QueryResolver implementation.
