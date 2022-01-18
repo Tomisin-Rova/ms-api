@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	dateRegex        = regexp.MustCompile(`(0?[1-9]|[12][0-9]|3[01])/(0?[1-9]|1[012])/((19|20)\d\d)`)
+	dateRegex        = regexp.MustCompile(`(0?[1-9]|[12][0-9]|3[01])-(0?[1-9]|1[012])-((19|20)\d\d)`)
 	ErrInvalidFormat = coreError.NewTerror(
 		7007,
 		"ErrInvalidDateFormat",
@@ -35,7 +35,7 @@ func ValidateDob(value string) error {
 	if ok := dateRegex.MatchString(value); !ok {
 		return ErrInvalidFormat
 	}
-	values := strings.Split(value, "/")
+	values := strings.Split(value, "-")
 	if len(values) != 3 {
 		return ErrInvalidFormat
 	}

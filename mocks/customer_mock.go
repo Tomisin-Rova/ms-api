@@ -6,373 +6,72 @@ package mocks
 
 import (
 	context "context"
-	reflect "reflect"
-
 	gomock "github.com/golang/mock/gomock"
 	grpc "google.golang.org/grpc"
 	customer "ms.api/protos/pb/customer"
 	types "ms.api/protos/pb/types"
+	reflect "reflect"
 )
 
-// MockisMeResponse_Data is a mock of isMeResponse_Data interface.
+// MockisMeResponse_Data is a mock of isMeResponse_Data interface
 type MockisMeResponse_Data struct {
 	ctrl     *gomock.Controller
 	recorder *MockisMeResponse_DataMockRecorder
 }
 
-// MockisMeResponse_DataMockRecorder is the mock recorder for MockisMeResponse_Data.
+// MockisMeResponse_DataMockRecorder is the mock recorder for MockisMeResponse_Data
 type MockisMeResponse_DataMockRecorder struct {
 	mock *MockisMeResponse_Data
 }
 
-// NewMockisMeResponse_Data creates a new mock instance.
+// NewMockisMeResponse_Data creates a new mock instance
 func NewMockisMeResponse_Data(ctrl *gomock.Controller) *MockisMeResponse_Data {
 	mock := &MockisMeResponse_Data{ctrl: ctrl}
 	mock.recorder = &MockisMeResponse_DataMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use.
+// EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockisMeResponse_Data) EXPECT() *MockisMeResponse_DataMockRecorder {
 	return m.recorder
 }
 
-// isMeResponse_Data mocks base method.
+// isMeResponse_Data mocks base method
 func (m *MockisMeResponse_Data) isMeResponse_Data() {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "isMeResponse_Data")
 }
 
-// isMeResponse_Data indicates an expected call of isMeResponse_Data.
+// isMeResponse_Data indicates an expected call of isMeResponse_Data
 func (mr *MockisMeResponse_DataMockRecorder) isMeResponse_Data() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "isMeResponse_Data", reflect.TypeOf((*MockisMeResponse_Data)(nil).isMeResponse_Data))
 }
 
-// MockCustomerServiceClient is a mock of CustomerServiceClient interface.
+// MockCustomerServiceClient is a mock of CustomerServiceClient interface
 type MockCustomerServiceClient struct {
 	ctrl     *gomock.Controller
 	recorder *MockCustomerServiceClientMockRecorder
 }
 
-// MockCustomerServiceClientMockRecorder is the mock recorder for MockCustomerServiceClient.
+// MockCustomerServiceClientMockRecorder is the mock recorder for MockCustomerServiceClient
 type MockCustomerServiceClientMockRecorder struct {
 	mock *MockCustomerServiceClient
 }
 
-// NewMockCustomerServiceClient creates a new mock instance.
+// NewMockCustomerServiceClient creates a new mock instance
 func NewMockCustomerServiceClient(ctrl *gomock.Controller) *MockCustomerServiceClient {
 	mock := &MockCustomerServiceClient{ctrl: ctrl}
 	mock.recorder = &MockCustomerServiceClientMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use.
+// EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockCustomerServiceClient) EXPECT() *MockCustomerServiceClientMockRecorder {
 	return m.recorder
 }
 
-// AnswerQuestionary mocks base method.
-func (m *MockCustomerServiceClient) AnswerQuestionary(ctx context.Context, in *customer.AnswerQuestionaryRequest, opts ...grpc.CallOption) (*types.DefaultResponse, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, in}
-	for _, a := range opts {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "AnswerQuestionary", varargs...)
-	ret0, _ := ret[0].(*types.DefaultResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// AnswerQuestionary indicates an expected call of AnswerQuestionary.
-func (mr *MockCustomerServiceClientMockRecorder) AnswerQuestionary(ctx, in interface{}, opts ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AnswerQuestionary", reflect.TypeOf((*MockCustomerServiceClient)(nil).AnswerQuestionary), varargs...)
-}
-
-// CheckBVN mocks base method.
-func (m *MockCustomerServiceClient) CheckBVN(ctx context.Context, in *customer.CheckBVNRequest, opts ...grpc.CallOption) (*types.DefaultResponse, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, in}
-	for _, a := range opts {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "CheckBVN", varargs...)
-	ret0, _ := ret[0].(*types.DefaultResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// CheckBVN indicates an expected call of CheckBVN.
-func (mr *MockCustomerServiceClientMockRecorder) CheckBVN(ctx, in interface{}, opts ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckBVN", reflect.TypeOf((*MockCustomerServiceClient)(nil).CheckBVN), varargs...)
-}
-
-// CheckCustomerData mocks base method.
-func (m *MockCustomerServiceClient) CheckCustomerData(ctx context.Context, in *customer.CheckCustomerDataRequest, opts ...grpc.CallOption) (*types.DefaultResponse, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, in}
-	for _, a := range opts {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "CheckCustomerData", varargs...)
-	ret0, _ := ret[0].(*types.DefaultResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// CheckCustomerData indicates an expected call of CheckCustomerData.
-func (mr *MockCustomerServiceClientMockRecorder) CheckCustomerData(ctx, in interface{}, opts ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckCustomerData", reflect.TypeOf((*MockCustomerServiceClient)(nil).CheckCustomerData), varargs...)
-}
-
-// CheckCustomerEmail mocks base method.
-func (m *MockCustomerServiceClient) CheckCustomerEmail(ctx context.Context, in *customer.CheckCustomerEmailRequest, opts ...grpc.CallOption) (*types.DefaultResponse, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, in}
-	for _, a := range opts {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "CheckCustomerEmail", varargs...)
-	ret0, _ := ret[0].(*types.DefaultResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// CheckCustomerEmail indicates an expected call of CheckCustomerEmail.
-func (mr *MockCustomerServiceClientMockRecorder) CheckCustomerEmail(ctx, in interface{}, opts ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckCustomerEmail", reflect.TypeOf((*MockCustomerServiceClient)(nil).CheckCustomerEmail), varargs...)
-}
-
-// CheckEmail mocks base method.
-func (m *MockCustomerServiceClient) CheckEmail(ctx context.Context, in *customer.CheckEmailRequest, opts ...grpc.CallOption) (*types.DefaultResponse, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, in}
-	for _, a := range opts {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "CheckEmail", varargs...)
-	ret0, _ := ret[0].(*types.DefaultResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// CheckEmail indicates an expected call of CheckEmail.
-func (mr *MockCustomerServiceClientMockRecorder) CheckEmail(ctx, in interface{}, opts ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckEmail", reflect.TypeOf((*MockCustomerServiceClient)(nil).CheckEmail), varargs...)
-}
-
-// GetAddresses mocks base method.
-func (m *MockCustomerServiceClient) GetAddresses(ctx context.Context, in *customer.GetAddressesRequest, opts ...grpc.CallOption) (*customer.GetAddressesResponse, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, in}
-	for _, a := range opts {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "GetAddresses", varargs...)
-	ret0, _ := ret[0].(*customer.GetAddressesResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetAddresses indicates an expected call of GetAddresses.
-func (mr *MockCustomerServiceClientMockRecorder) GetAddresses(ctx, in interface{}, opts ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAddresses", reflect.TypeOf((*MockCustomerServiceClient)(nil).GetAddresses), varargs...)
-}
-
-// GetContent mocks base method.
-func (m *MockCustomerServiceClient) GetContent(ctx context.Context, in *customer.GetContentRequest, opts ...grpc.CallOption) (*types.Content, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, in}
-	for _, a := range opts {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "GetContent", varargs...)
-	ret0, _ := ret[0].(*types.Content)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetContent indicates an expected call of GetContent.
-func (mr *MockCustomerServiceClientMockRecorder) GetContent(ctx, in interface{}, opts ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetContent", reflect.TypeOf((*MockCustomerServiceClient)(nil).GetContent), varargs...)
-}
-
-// GetContents mocks base method.
-func (m *MockCustomerServiceClient) GetContents(ctx context.Context, in *customer.GetContentsRequest, opts ...grpc.CallOption) (*customer.GetContentsResponse, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, in}
-	for _, a := range opts {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "GetContents", varargs...)
-	ret0, _ := ret[0].(*customer.GetContentsResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetContents indicates an expected call of GetContents.
-func (mr *MockCustomerServiceClientMockRecorder) GetContents(ctx, in interface{}, opts ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetContents", reflect.TypeOf((*MockCustomerServiceClient)(nil).GetContents), varargs...)
-}
-
-// GetCountries mocks base method.
-func (m *MockCustomerServiceClient) GetCountries(ctx context.Context, in *customer.GetCountriesRequest, opts ...grpc.CallOption) (*customer.GetCountriesResponse, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, in}
-	for _, a := range opts {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "GetCountries", varargs...)
-	ret0, _ := ret[0].(*customer.GetCountriesResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetCountries indicates an expected call of GetCountries.
-func (mr *MockCustomerServiceClientMockRecorder) GetCountries(ctx, in interface{}, opts ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCountries", reflect.TypeOf((*MockCustomerServiceClient)(nil).GetCountries), varargs...)
-}
-
-// GetCustomer mocks base method.
-func (m *MockCustomerServiceClient) GetCustomer(ctx context.Context, in *customer.GetCustomerRequest, opts ...grpc.CallOption) (*types.Customer, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, in}
-	for _, a := range opts {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "GetCustomer", varargs...)
-	ret0, _ := ret[0].(*types.Customer)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetCustomer indicates an expected call of GetCustomer.
-func (mr *MockCustomerServiceClientMockRecorder) GetCustomer(ctx, in interface{}, opts ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCustomer", reflect.TypeOf((*MockCustomerServiceClient)(nil).GetCustomer), varargs...)
-}
-
-// GetCustomers mocks base method.
-func (m *MockCustomerServiceClient) GetCustomers(ctx context.Context, in *customer.GetCustomersRequest, opts ...grpc.CallOption) (*customer.GetCustomersResponse, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, in}
-	for _, a := range opts {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "GetCustomers", varargs...)
-	ret0, _ := ret[0].(*customer.GetCustomersResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetCustomers indicates an expected call of GetCustomers.
-func (mr *MockCustomerServiceClientMockRecorder) GetCustomers(ctx, in interface{}, opts ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCustomers", reflect.TypeOf((*MockCustomerServiceClient)(nil).GetCustomers), varargs...)
-}
-
-// GetQuestionaries mocks base method.
-func (m *MockCustomerServiceClient) GetQuestionaries(ctx context.Context, in *customer.GetQuestionariesRequest, opts ...grpc.CallOption) (*customer.GetQuestionariesResponse, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, in}
-	for _, a := range opts {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "GetQuestionaries", varargs...)
-	ret0, _ := ret[0].(*customer.GetQuestionariesResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetQuestionaries indicates an expected call of GetQuestionaries.
-func (mr *MockCustomerServiceClientMockRecorder) GetQuestionaries(ctx, in interface{}, opts ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetQuestionaries", reflect.TypeOf((*MockCustomerServiceClient)(nil).GetQuestionaries), varargs...)
-}
-
-// GetQuestionary mocks base method.
-func (m *MockCustomerServiceClient) GetQuestionary(ctx context.Context, in *customer.GetQuestionaryRequest, opts ...grpc.CallOption) (*types.Questionary, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, in}
-	for _, a := range opts {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "GetQuestionary", varargs...)
-	ret0, _ := ret[0].(*types.Questionary)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetQuestionary indicates an expected call of GetQuestionary.
-func (mr *MockCustomerServiceClientMockRecorder) GetQuestionary(ctx, in interface{}, opts ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetQuestionary", reflect.TypeOf((*MockCustomerServiceClient)(nil).GetQuestionary), varargs...)
-}
-
-// Me mocks base method.
-func (m *MockCustomerServiceClient) Me(ctx context.Context, in *customer.MeRequest, opts ...grpc.CallOption) (*customer.MeResponse, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, in}
-	for _, a := range opts {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "Me", varargs...)
-	ret0, _ := ret[0].(*customer.MeResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Me indicates an expected call of Me.
-func (mr *MockCustomerServiceClientMockRecorder) Me(ctx, in interface{}, opts ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Me", reflect.TypeOf((*MockCustomerServiceClient)(nil).Me), varargs...)
-}
-
-// Register mocks base method.
-func (m *MockCustomerServiceClient) Register(ctx context.Context, in *customer.RegisterRequest, opts ...grpc.CallOption) (*types.Customer, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, in}
-	for _, a := range opts {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "Register", varargs...)
-	ret0, _ := ret[0].(*types.Customer)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Register indicates an expected call of Register.
-func (mr *MockCustomerServiceClientMockRecorder) Register(ctx, in interface{}, opts ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Register", reflect.TypeOf((*MockCustomerServiceClient)(nil).Register), varargs...)
-}
-
-// ResetLoginPassword mocks base method.
+// ResetLoginPassword mocks base method
 func (m *MockCustomerServiceClient) ResetLoginPassword(ctx context.Context, in *customer.ResetLoginPasswordRequest, opts ...grpc.CallOption) (*types.DefaultResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
@@ -385,94 +84,74 @@ func (m *MockCustomerServiceClient) ResetLoginPassword(ctx context.Context, in *
 	return ret0, ret1
 }
 
-// ResetLoginPassword indicates an expected call of ResetLoginPassword.
+// ResetLoginPassword indicates an expected call of ResetLoginPassword
 func (mr *MockCustomerServiceClientMockRecorder) ResetLoginPassword(ctx, in interface{}, opts ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResetLoginPassword", reflect.TypeOf((*MockCustomerServiceClient)(nil).ResetLoginPassword), varargs...)
 }
 
-// ResetTransactionPassword mocks base method.
-func (m *MockCustomerServiceClient) ResetTransactionPassword(ctx context.Context, in *customer.ResetTransactionPasswordRequest, opts ...grpc.CallOption) (*types.DefaultResponse, error) {
+// CheckCustomerEmail mocks base method
+func (m *MockCustomerServiceClient) CheckCustomerEmail(ctx context.Context, in *customer.CheckCustomerEmailRequest, opts ...grpc.CallOption) (*types.DefaultResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
-	ret := m.ctrl.Call(m, "ResetTransactionPassword", varargs...)
+	ret := m.ctrl.Call(m, "CheckCustomerEmail", varargs...)
 	ret0, _ := ret[0].(*types.DefaultResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// ResetTransactionPassword indicates an expected call of ResetTransactionPassword.
-func (mr *MockCustomerServiceClientMockRecorder) ResetTransactionPassword(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+// CheckCustomerEmail indicates an expected call of CheckCustomerEmail
+func (mr *MockCustomerServiceClientMockRecorder) CheckCustomerEmail(ctx, in interface{}, opts ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResetTransactionPassword", reflect.TypeOf((*MockCustomerServiceClient)(nil).ResetTransactionPassword), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckCustomerEmail", reflect.TypeOf((*MockCustomerServiceClient)(nil).CheckCustomerEmail), varargs...)
 }
 
-// SetAcceptance mocks base method.
-func (m *MockCustomerServiceClient) SetAcceptance(ctx context.Context, in *customer.SetAcceptanceRequest, opts ...grpc.CallOption) (*types.DefaultResponse, error) {
+// CheckCustomerData mocks base method
+func (m *MockCustomerServiceClient) CheckCustomerData(ctx context.Context, in *customer.CheckCustomerDataRequest, opts ...grpc.CallOption) (*types.DefaultResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
-	ret := m.ctrl.Call(m, "SetAcceptance", varargs...)
+	ret := m.ctrl.Call(m, "CheckCustomerData", varargs...)
 	ret0, _ := ret[0].(*types.DefaultResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// SetAcceptance indicates an expected call of SetAcceptance.
-func (mr *MockCustomerServiceClientMockRecorder) SetAcceptance(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+// CheckCustomerData indicates an expected call of CheckCustomerData
+func (mr *MockCustomerServiceClientMockRecorder) CheckCustomerData(ctx, in interface{}, opts ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetAcceptance", reflect.TypeOf((*MockCustomerServiceClient)(nil).SetAcceptance), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckCustomerData", reflect.TypeOf((*MockCustomerServiceClient)(nil).CheckCustomerData), varargs...)
 }
 
-// SetDevicePreferences mocks base method.
-func (m *MockCustomerServiceClient) SetDevicePreferences(ctx context.Context, in *customer.SetDevicePreferencesRequest, opts ...grpc.CallOption) (*types.Device, error) {
+// Register mocks base method
+func (m *MockCustomerServiceClient) Register(ctx context.Context, in *customer.RegisterRequest, opts ...grpc.CallOption) (*types.Customer, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
-	ret := m.ctrl.Call(m, "SetDevicePreferences", varargs...)
-	ret0, _ := ret[0].(*types.Device)
+	ret := m.ctrl.Call(m, "Register", varargs...)
+	ret0, _ := ret[0].(*types.Customer)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// SetDevicePreferences indicates an expected call of SetDevicePreferences.
-func (mr *MockCustomerServiceClientMockRecorder) SetDevicePreferences(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+// Register indicates an expected call of Register
+func (mr *MockCustomerServiceClientMockRecorder) Register(ctx, in interface{}, opts ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetDevicePreferences", reflect.TypeOf((*MockCustomerServiceClient)(nil).SetDevicePreferences), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Register", reflect.TypeOf((*MockCustomerServiceClient)(nil).Register), varargs...)
 }
 
-// SetDeviceToken mocks base method.
-func (m *MockCustomerServiceClient) SetDeviceToken(ctx context.Context, in *customer.SetDeviceTokenRequest, opts ...grpc.CallOption) (*types.DefaultResponse, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, in}
-	for _, a := range opts {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "SetDeviceToken", varargs...)
-	ret0, _ := ret[0].(*types.DefaultResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// SetDeviceToken indicates an expected call of SetDeviceToken.
-func (mr *MockCustomerServiceClientMockRecorder) SetDeviceToken(ctx, in interface{}, opts ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetDeviceToken", reflect.TypeOf((*MockCustomerServiceClient)(nil).SetDeviceToken), varargs...)
-}
-
-// SetTransactionPassword mocks base method.
+// SetTransactionPassword mocks base method
 func (m *MockCustomerServiceClient) SetTransactionPassword(ctx context.Context, in *customer.SetTransactionPasswordRequest, opts ...grpc.CallOption) (*types.DefaultResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
@@ -485,262 +164,357 @@ func (m *MockCustomerServiceClient) SetTransactionPassword(ctx context.Context, 
 	return ret0, ret1
 }
 
-// SetTransactionPassword indicates an expected call of SetTransactionPassword.
+// SetTransactionPassword indicates an expected call of SetTransactionPassword
 func (mr *MockCustomerServiceClientMockRecorder) SetTransactionPassword(ctx, in interface{}, opts ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetTransactionPassword", reflect.TypeOf((*MockCustomerServiceClient)(nil).SetTransactionPassword), varargs...)
 }
 
-// MockCustomerServiceServer is a mock of CustomerServiceServer interface.
+// ResetTransactionPassword mocks base method
+func (m *MockCustomerServiceClient) ResetTransactionPassword(ctx context.Context, in *customer.ResetTransactionPasswordRequest, opts ...grpc.CallOption) (*types.DefaultResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ResetTransactionPassword", varargs...)
+	ret0, _ := ret[0].(*types.DefaultResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ResetTransactionPassword indicates an expected call of ResetTransactionPassword
+func (mr *MockCustomerServiceClientMockRecorder) ResetTransactionPassword(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResetTransactionPassword", reflect.TypeOf((*MockCustomerServiceClient)(nil).ResetTransactionPassword), varargs...)
+}
+
+// SetDeviceToken mocks base method
+func (m *MockCustomerServiceClient) SetDeviceToken(ctx context.Context, in *customer.SetDeviceTokenRequest, opts ...grpc.CallOption) (*types.DefaultResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SetDeviceToken", varargs...)
+	ret0, _ := ret[0].(*types.DefaultResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SetDeviceToken indicates an expected call of SetDeviceToken
+func (mr *MockCustomerServiceClientMockRecorder) SetDeviceToken(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetDeviceToken", reflect.TypeOf((*MockCustomerServiceClient)(nil).SetDeviceToken), varargs...)
+}
+
+// SetDevicePreferences mocks base method
+func (m *MockCustomerServiceClient) SetDevicePreferences(ctx context.Context, in *customer.SetDevicePreferencesRequest, opts ...grpc.CallOption) (*types.Device, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SetDevicePreferences", varargs...)
+	ret0, _ := ret[0].(*types.Device)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SetDevicePreferences indicates an expected call of SetDevicePreferences
+func (mr *MockCustomerServiceClientMockRecorder) SetDevicePreferences(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetDevicePreferences", reflect.TypeOf((*MockCustomerServiceClient)(nil).SetDevicePreferences), varargs...)
+}
+
+// CheckBVN mocks base method
+func (m *MockCustomerServiceClient) CheckBVN(ctx context.Context, in *customer.CheckBVNRequest, opts ...grpc.CallOption) (*types.DefaultResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CheckBVN", varargs...)
+	ret0, _ := ret[0].(*types.DefaultResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CheckBVN indicates an expected call of CheckBVN
+func (mr *MockCustomerServiceClientMockRecorder) CheckBVN(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckBVN", reflect.TypeOf((*MockCustomerServiceClient)(nil).CheckBVN), varargs...)
+}
+
+// CheckEmail mocks base method
+func (m *MockCustomerServiceClient) CheckEmail(ctx context.Context, in *customer.CheckEmailRequest, opts ...grpc.CallOption) (*types.DefaultResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CheckEmail", varargs...)
+	ret0, _ := ret[0].(*types.DefaultResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CheckEmail indicates an expected call of CheckEmail
+func (mr *MockCustomerServiceClientMockRecorder) CheckEmail(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckEmail", reflect.TypeOf((*MockCustomerServiceClient)(nil).CheckEmail), varargs...)
+}
+
+// Me mocks base method
+func (m *MockCustomerServiceClient) Me(ctx context.Context, in *customer.MeRequest, opts ...grpc.CallOption) (*customer.MeResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "Me", varargs...)
+	ret0, _ := ret[0].(*customer.MeResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Me indicates an expected call of Me
+func (mr *MockCustomerServiceClientMockRecorder) Me(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Me", reflect.TypeOf((*MockCustomerServiceClient)(nil).Me), varargs...)
+}
+
+// GetCustomer mocks base method
+func (m *MockCustomerServiceClient) GetCustomer(ctx context.Context, in *customer.GetCustomerRequest, opts ...grpc.CallOption) (*types.Customer, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetCustomer", varargs...)
+	ret0, _ := ret[0].(*types.Customer)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCustomer indicates an expected call of GetCustomer
+func (mr *MockCustomerServiceClientMockRecorder) GetCustomer(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCustomer", reflect.TypeOf((*MockCustomerServiceClient)(nil).GetCustomer), varargs...)
+}
+
+// GetCustomers mocks base method
+func (m *MockCustomerServiceClient) GetCustomers(ctx context.Context, in *customer.GetCustomersRequest, opts ...grpc.CallOption) (*customer.GetCustomersResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetCustomers", varargs...)
+	ret0, _ := ret[0].(*customer.GetCustomersResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCustomers indicates an expected call of GetCustomers
+func (mr *MockCustomerServiceClientMockRecorder) GetCustomers(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCustomers", reflect.TypeOf((*MockCustomerServiceClient)(nil).GetCustomers), varargs...)
+}
+
+// GetContent mocks base method
+func (m *MockCustomerServiceClient) GetContent(ctx context.Context, in *customer.GetContentRequest, opts ...grpc.CallOption) (*types.Content, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetContent", varargs...)
+	ret0, _ := ret[0].(*types.Content)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetContent indicates an expected call of GetContent
+func (mr *MockCustomerServiceClientMockRecorder) GetContent(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetContent", reflect.TypeOf((*MockCustomerServiceClient)(nil).GetContent), varargs...)
+}
+
+// GetContents mocks base method
+func (m *MockCustomerServiceClient) GetContents(ctx context.Context, in *customer.GetContentsRequest, opts ...grpc.CallOption) (*customer.GetContentsResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetContents", varargs...)
+	ret0, _ := ret[0].(*customer.GetContentsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetContents indicates an expected call of GetContents
+func (mr *MockCustomerServiceClientMockRecorder) GetContents(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetContents", reflect.TypeOf((*MockCustomerServiceClient)(nil).GetContents), varargs...)
+}
+
+// SetAcceptance mocks base method
+func (m *MockCustomerServiceClient) SetAcceptance(ctx context.Context, in *customer.SetAcceptanceRequest, opts ...grpc.CallOption) (*types.DefaultResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SetAcceptance", varargs...)
+	ret0, _ := ret[0].(*types.DefaultResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SetAcceptance indicates an expected call of SetAcceptance
+func (mr *MockCustomerServiceClientMockRecorder) SetAcceptance(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetAcceptance", reflect.TypeOf((*MockCustomerServiceClient)(nil).SetAcceptance), varargs...)
+}
+
+// GetQuestionary mocks base method
+func (m *MockCustomerServiceClient) GetQuestionary(ctx context.Context, in *customer.GetQuestionaryRequest, opts ...grpc.CallOption) (*types.Questionary, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetQuestionary", varargs...)
+	ret0, _ := ret[0].(*types.Questionary)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetQuestionary indicates an expected call of GetQuestionary
+func (mr *MockCustomerServiceClientMockRecorder) GetQuestionary(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetQuestionary", reflect.TypeOf((*MockCustomerServiceClient)(nil).GetQuestionary), varargs...)
+}
+
+// GetQuestionaries mocks base method
+func (m *MockCustomerServiceClient) GetQuestionaries(ctx context.Context, in *customer.GetQuestionariesRequest, opts ...grpc.CallOption) (*customer.GetQuestionariesResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetQuestionaries", varargs...)
+	ret0, _ := ret[0].(*customer.GetQuestionariesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetQuestionaries indicates an expected call of GetQuestionaries
+func (mr *MockCustomerServiceClientMockRecorder) GetQuestionaries(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetQuestionaries", reflect.TypeOf((*MockCustomerServiceClient)(nil).GetQuestionaries), varargs...)
+}
+
+// AnswerQuestionary mocks base method
+func (m *MockCustomerServiceClient) AnswerQuestionary(ctx context.Context, in *customer.AnswerQuestionaryRequest, opts ...grpc.CallOption) (*types.DefaultResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "AnswerQuestionary", varargs...)
+	ret0, _ := ret[0].(*types.DefaultResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AnswerQuestionary indicates an expected call of AnswerQuestionary
+func (mr *MockCustomerServiceClientMockRecorder) AnswerQuestionary(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AnswerQuestionary", reflect.TypeOf((*MockCustomerServiceClient)(nil).AnswerQuestionary), varargs...)
+}
+
+// GetAddresses mocks base method
+func (m *MockCustomerServiceClient) GetAddresses(ctx context.Context, in *customer.GetAddressesRequest, opts ...grpc.CallOption) (*customer.GetAddressesResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetAddresses", varargs...)
+	ret0, _ := ret[0].(*customer.GetAddressesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAddresses indicates an expected call of GetAddresses
+func (mr *MockCustomerServiceClientMockRecorder) GetAddresses(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAddresses", reflect.TypeOf((*MockCustomerServiceClient)(nil).GetAddresses), varargs...)
+}
+
+// GetCountries mocks base method
+func (m *MockCustomerServiceClient) GetCountries(ctx context.Context, in *customer.GetCountriesRequest, opts ...grpc.CallOption) (*customer.GetCountriesResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetCountries", varargs...)
+	ret0, _ := ret[0].(*customer.GetCountriesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCountries indicates an expected call of GetCountries
+func (mr *MockCustomerServiceClientMockRecorder) GetCountries(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCountries", reflect.TypeOf((*MockCustomerServiceClient)(nil).GetCountries), varargs...)
+}
+
+// MockCustomerServiceServer is a mock of CustomerServiceServer interface
 type MockCustomerServiceServer struct {
 	ctrl     *gomock.Controller
 	recorder *MockCustomerServiceServerMockRecorder
 }
 
-// MockCustomerServiceServerMockRecorder is the mock recorder for MockCustomerServiceServer.
+// MockCustomerServiceServerMockRecorder is the mock recorder for MockCustomerServiceServer
 type MockCustomerServiceServerMockRecorder struct {
 	mock *MockCustomerServiceServer
 }
 
-// NewMockCustomerServiceServer creates a new mock instance.
+// NewMockCustomerServiceServer creates a new mock instance
 func NewMockCustomerServiceServer(ctrl *gomock.Controller) *MockCustomerServiceServer {
 	mock := &MockCustomerServiceServer{ctrl: ctrl}
 	mock.recorder = &MockCustomerServiceServerMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use.
+// EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockCustomerServiceServer) EXPECT() *MockCustomerServiceServerMockRecorder {
 	return m.recorder
 }
 
-// AnswerQuestionary mocks base method.
-func (m *MockCustomerServiceServer) AnswerQuestionary(arg0 context.Context, arg1 *customer.AnswerQuestionaryRequest) (*types.DefaultResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AnswerQuestionary", arg0, arg1)
-	ret0, _ := ret[0].(*types.DefaultResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// AnswerQuestionary indicates an expected call of AnswerQuestionary.
-func (mr *MockCustomerServiceServerMockRecorder) AnswerQuestionary(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AnswerQuestionary", reflect.TypeOf((*MockCustomerServiceServer)(nil).AnswerQuestionary), arg0, arg1)
-}
-
-// CheckBVN mocks base method.
-func (m *MockCustomerServiceServer) CheckBVN(arg0 context.Context, arg1 *customer.CheckBVNRequest) (*types.DefaultResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CheckBVN", arg0, arg1)
-	ret0, _ := ret[0].(*types.DefaultResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// CheckBVN indicates an expected call of CheckBVN.
-func (mr *MockCustomerServiceServerMockRecorder) CheckBVN(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckBVN", reflect.TypeOf((*MockCustomerServiceServer)(nil).CheckBVN), arg0, arg1)
-}
-
-// CheckCustomerData mocks base method.
-func (m *MockCustomerServiceServer) CheckCustomerData(arg0 context.Context, arg1 *customer.CheckCustomerDataRequest) (*types.DefaultResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CheckCustomerData", arg0, arg1)
-	ret0, _ := ret[0].(*types.DefaultResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// CheckCustomerData indicates an expected call of CheckCustomerData.
-func (mr *MockCustomerServiceServerMockRecorder) CheckCustomerData(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckCustomerData", reflect.TypeOf((*MockCustomerServiceServer)(nil).CheckCustomerData), arg0, arg1)
-}
-
-// CheckCustomerEmail mocks base method.
-func (m *MockCustomerServiceServer) CheckCustomerEmail(arg0 context.Context, arg1 *customer.CheckCustomerEmailRequest) (*types.DefaultResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CheckCustomerEmail", arg0, arg1)
-	ret0, _ := ret[0].(*types.DefaultResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// CheckCustomerEmail indicates an expected call of CheckCustomerEmail.
-func (mr *MockCustomerServiceServerMockRecorder) CheckCustomerEmail(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckCustomerEmail", reflect.TypeOf((*MockCustomerServiceServer)(nil).CheckCustomerEmail), arg0, arg1)
-}
-
-// CheckEmail mocks base method.
-func (m *MockCustomerServiceServer) CheckEmail(arg0 context.Context, arg1 *customer.CheckEmailRequest) (*types.DefaultResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CheckEmail", arg0, arg1)
-	ret0, _ := ret[0].(*types.DefaultResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// CheckEmail indicates an expected call of CheckEmail.
-func (mr *MockCustomerServiceServerMockRecorder) CheckEmail(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckEmail", reflect.TypeOf((*MockCustomerServiceServer)(nil).CheckEmail), arg0, arg1)
-}
-
-// GetAddresses mocks base method.
-func (m *MockCustomerServiceServer) GetAddresses(arg0 context.Context, arg1 *customer.GetAddressesRequest) (*customer.GetAddressesResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAddresses", arg0, arg1)
-	ret0, _ := ret[0].(*customer.GetAddressesResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetAddresses indicates an expected call of GetAddresses.
-func (mr *MockCustomerServiceServerMockRecorder) GetAddresses(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAddresses", reflect.TypeOf((*MockCustomerServiceServer)(nil).GetAddresses), arg0, arg1)
-}
-
-// GetContent mocks base method.
-func (m *MockCustomerServiceServer) GetContent(arg0 context.Context, arg1 *customer.GetContentRequest) (*types.Content, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetContent", arg0, arg1)
-	ret0, _ := ret[0].(*types.Content)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetContent indicates an expected call of GetContent.
-func (mr *MockCustomerServiceServerMockRecorder) GetContent(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetContent", reflect.TypeOf((*MockCustomerServiceServer)(nil).GetContent), arg0, arg1)
-}
-
-// GetContents mocks base method.
-func (m *MockCustomerServiceServer) GetContents(arg0 context.Context, arg1 *customer.GetContentsRequest) (*customer.GetContentsResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetContents", arg0, arg1)
-	ret0, _ := ret[0].(*customer.GetContentsResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetContents indicates an expected call of GetContents.
-func (mr *MockCustomerServiceServerMockRecorder) GetContents(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetContents", reflect.TypeOf((*MockCustomerServiceServer)(nil).GetContents), arg0, arg1)
-}
-
-// GetCountries mocks base method.
-func (m *MockCustomerServiceServer) GetCountries(arg0 context.Context, arg1 *customer.GetCountriesRequest) (*customer.GetCountriesResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetCountries", arg0, arg1)
-	ret0, _ := ret[0].(*customer.GetCountriesResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetCountries indicates an expected call of GetCountries.
-func (mr *MockCustomerServiceServerMockRecorder) GetCountries(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCountries", reflect.TypeOf((*MockCustomerServiceServer)(nil).GetCountries), arg0, arg1)
-}
-
-// GetCustomer mocks base method.
-func (m *MockCustomerServiceServer) GetCustomer(arg0 context.Context, arg1 *customer.GetCustomerRequest) (*types.Customer, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetCustomer", arg0, arg1)
-	ret0, _ := ret[0].(*types.Customer)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetCustomer indicates an expected call of GetCustomer.
-func (mr *MockCustomerServiceServerMockRecorder) GetCustomer(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCustomer", reflect.TypeOf((*MockCustomerServiceServer)(nil).GetCustomer), arg0, arg1)
-}
-
-// GetCustomers mocks base method.
-func (m *MockCustomerServiceServer) GetCustomers(arg0 context.Context, arg1 *customer.GetCustomersRequest) (*customer.GetCustomersResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetCustomers", arg0, arg1)
-	ret0, _ := ret[0].(*customer.GetCustomersResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetCustomers indicates an expected call of GetCustomers.
-func (mr *MockCustomerServiceServerMockRecorder) GetCustomers(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCustomers", reflect.TypeOf((*MockCustomerServiceServer)(nil).GetCustomers), arg0, arg1)
-}
-
-// GetQuestionaries mocks base method.
-func (m *MockCustomerServiceServer) GetQuestionaries(arg0 context.Context, arg1 *customer.GetQuestionariesRequest) (*customer.GetQuestionariesResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetQuestionaries", arg0, arg1)
-	ret0, _ := ret[0].(*customer.GetQuestionariesResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetQuestionaries indicates an expected call of GetQuestionaries.
-func (mr *MockCustomerServiceServerMockRecorder) GetQuestionaries(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetQuestionaries", reflect.TypeOf((*MockCustomerServiceServer)(nil).GetQuestionaries), arg0, arg1)
-}
-
-// GetQuestionary mocks base method.
-func (m *MockCustomerServiceServer) GetQuestionary(arg0 context.Context, arg1 *customer.GetQuestionaryRequest) (*types.Questionary, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetQuestionary", arg0, arg1)
-	ret0, _ := ret[0].(*types.Questionary)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetQuestionary indicates an expected call of GetQuestionary.
-func (mr *MockCustomerServiceServerMockRecorder) GetQuestionary(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetQuestionary", reflect.TypeOf((*MockCustomerServiceServer)(nil).GetQuestionary), arg0, arg1)
-}
-
-// Me mocks base method.
-func (m *MockCustomerServiceServer) Me(arg0 context.Context, arg1 *customer.MeRequest) (*customer.MeResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Me", arg0, arg1)
-	ret0, _ := ret[0].(*customer.MeResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Me indicates an expected call of Me.
-func (mr *MockCustomerServiceServerMockRecorder) Me(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Me", reflect.TypeOf((*MockCustomerServiceServer)(nil).Me), arg0, arg1)
-}
-
-// Register mocks base method.
-func (m *MockCustomerServiceServer) Register(arg0 context.Context, arg1 *customer.RegisterRequest) (*types.Customer, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Register", arg0, arg1)
-	ret0, _ := ret[0].(*types.Customer)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Register indicates an expected call of Register.
-func (mr *MockCustomerServiceServerMockRecorder) Register(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Register", reflect.TypeOf((*MockCustomerServiceServer)(nil).Register), arg0, arg1)
-}
-
-// ResetLoginPassword mocks base method.
+// ResetLoginPassword mocks base method
 func (m *MockCustomerServiceServer) ResetLoginPassword(arg0 context.Context, arg1 *customer.ResetLoginPasswordRequest) (*types.DefaultResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ResetLoginPassword", arg0, arg1)
@@ -749,73 +523,58 @@ func (m *MockCustomerServiceServer) ResetLoginPassword(arg0 context.Context, arg
 	return ret0, ret1
 }
 
-// ResetLoginPassword indicates an expected call of ResetLoginPassword.
+// ResetLoginPassword indicates an expected call of ResetLoginPassword
 func (mr *MockCustomerServiceServerMockRecorder) ResetLoginPassword(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResetLoginPassword", reflect.TypeOf((*MockCustomerServiceServer)(nil).ResetLoginPassword), arg0, arg1)
 }
 
-// ResetTransactionPassword mocks base method.
-func (m *MockCustomerServiceServer) ResetTransactionPassword(arg0 context.Context, arg1 *customer.ResetTransactionPasswordRequest) (*types.DefaultResponse, error) {
+// CheckCustomerEmail mocks base method
+func (m *MockCustomerServiceServer) CheckCustomerEmail(arg0 context.Context, arg1 *customer.CheckCustomerEmailRequest) (*types.DefaultResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ResetTransactionPassword", arg0, arg1)
+	ret := m.ctrl.Call(m, "CheckCustomerEmail", arg0, arg1)
 	ret0, _ := ret[0].(*types.DefaultResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// ResetTransactionPassword indicates an expected call of ResetTransactionPassword.
-func (mr *MockCustomerServiceServerMockRecorder) ResetTransactionPassword(arg0, arg1 interface{}) *gomock.Call {
+// CheckCustomerEmail indicates an expected call of CheckCustomerEmail
+func (mr *MockCustomerServiceServerMockRecorder) CheckCustomerEmail(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResetTransactionPassword", reflect.TypeOf((*MockCustomerServiceServer)(nil).ResetTransactionPassword), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckCustomerEmail", reflect.TypeOf((*MockCustomerServiceServer)(nil).CheckCustomerEmail), arg0, arg1)
 }
 
-// SetAcceptance mocks base method.
-func (m *MockCustomerServiceServer) SetAcceptance(arg0 context.Context, arg1 *customer.SetAcceptanceRequest) (*types.DefaultResponse, error) {
+// CheckCustomerData mocks base method
+func (m *MockCustomerServiceServer) CheckCustomerData(arg0 context.Context, arg1 *customer.CheckCustomerDataRequest) (*types.DefaultResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SetAcceptance", arg0, arg1)
+	ret := m.ctrl.Call(m, "CheckCustomerData", arg0, arg1)
 	ret0, _ := ret[0].(*types.DefaultResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// SetAcceptance indicates an expected call of SetAcceptance.
-func (mr *MockCustomerServiceServerMockRecorder) SetAcceptance(arg0, arg1 interface{}) *gomock.Call {
+// CheckCustomerData indicates an expected call of CheckCustomerData
+func (mr *MockCustomerServiceServerMockRecorder) CheckCustomerData(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetAcceptance", reflect.TypeOf((*MockCustomerServiceServer)(nil).SetAcceptance), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckCustomerData", reflect.TypeOf((*MockCustomerServiceServer)(nil).CheckCustomerData), arg0, arg1)
 }
 
-// SetDevicePreferences mocks base method.
-func (m *MockCustomerServiceServer) SetDevicePreferences(arg0 context.Context, arg1 *customer.SetDevicePreferencesRequest) (*types.Device, error) {
+// Register mocks base method
+func (m *MockCustomerServiceServer) Register(arg0 context.Context, arg1 *customer.RegisterRequest) (*types.Customer, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SetDevicePreferences", arg0, arg1)
-	ret0, _ := ret[0].(*types.Device)
+	ret := m.ctrl.Call(m, "Register", arg0, arg1)
+	ret0, _ := ret[0].(*types.Customer)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// SetDevicePreferences indicates an expected call of SetDevicePreferences.
-func (mr *MockCustomerServiceServerMockRecorder) SetDevicePreferences(arg0, arg1 interface{}) *gomock.Call {
+// Register indicates an expected call of Register
+func (mr *MockCustomerServiceServerMockRecorder) Register(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetDevicePreferences", reflect.TypeOf((*MockCustomerServiceServer)(nil).SetDevicePreferences), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Register", reflect.TypeOf((*MockCustomerServiceServer)(nil).Register), arg0, arg1)
 }
 
-// SetDeviceToken mocks base method.
-func (m *MockCustomerServiceServer) SetDeviceToken(arg0 context.Context, arg1 *customer.SetDeviceTokenRequest) (*types.DefaultResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SetDeviceToken", arg0, arg1)
-	ret0, _ := ret[0].(*types.DefaultResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// SetDeviceToken indicates an expected call of SetDeviceToken.
-func (mr *MockCustomerServiceServerMockRecorder) SetDeviceToken(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetDeviceToken", reflect.TypeOf((*MockCustomerServiceServer)(nil).SetDeviceToken), arg0, arg1)
-}
-
-// SetTransactionPassword mocks base method.
+// SetTransactionPassword mocks base method
 func (m *MockCustomerServiceServer) SetTransactionPassword(arg0 context.Context, arg1 *customer.SetTransactionPasswordRequest) (*types.DefaultResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SetTransactionPassword", arg0, arg1)
@@ -824,8 +583,248 @@ func (m *MockCustomerServiceServer) SetTransactionPassword(arg0 context.Context,
 	return ret0, ret1
 }
 
-// SetTransactionPassword indicates an expected call of SetTransactionPassword.
+// SetTransactionPassword indicates an expected call of SetTransactionPassword
 func (mr *MockCustomerServiceServerMockRecorder) SetTransactionPassword(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetTransactionPassword", reflect.TypeOf((*MockCustomerServiceServer)(nil).SetTransactionPassword), arg0, arg1)
+}
+
+// ResetTransactionPassword mocks base method
+func (m *MockCustomerServiceServer) ResetTransactionPassword(arg0 context.Context, arg1 *customer.ResetTransactionPasswordRequest) (*types.DefaultResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ResetTransactionPassword", arg0, arg1)
+	ret0, _ := ret[0].(*types.DefaultResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ResetTransactionPassword indicates an expected call of ResetTransactionPassword
+func (mr *MockCustomerServiceServerMockRecorder) ResetTransactionPassword(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResetTransactionPassword", reflect.TypeOf((*MockCustomerServiceServer)(nil).ResetTransactionPassword), arg0, arg1)
+}
+
+// SetDeviceToken mocks base method
+func (m *MockCustomerServiceServer) SetDeviceToken(arg0 context.Context, arg1 *customer.SetDeviceTokenRequest) (*types.DefaultResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetDeviceToken", arg0, arg1)
+	ret0, _ := ret[0].(*types.DefaultResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SetDeviceToken indicates an expected call of SetDeviceToken
+func (mr *MockCustomerServiceServerMockRecorder) SetDeviceToken(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetDeviceToken", reflect.TypeOf((*MockCustomerServiceServer)(nil).SetDeviceToken), arg0, arg1)
+}
+
+// SetDevicePreferences mocks base method
+func (m *MockCustomerServiceServer) SetDevicePreferences(arg0 context.Context, arg1 *customer.SetDevicePreferencesRequest) (*types.Device, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetDevicePreferences", arg0, arg1)
+	ret0, _ := ret[0].(*types.Device)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SetDevicePreferences indicates an expected call of SetDevicePreferences
+func (mr *MockCustomerServiceServerMockRecorder) SetDevicePreferences(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetDevicePreferences", reflect.TypeOf((*MockCustomerServiceServer)(nil).SetDevicePreferences), arg0, arg1)
+}
+
+// CheckBVN mocks base method
+func (m *MockCustomerServiceServer) CheckBVN(arg0 context.Context, arg1 *customer.CheckBVNRequest) (*types.DefaultResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CheckBVN", arg0, arg1)
+	ret0, _ := ret[0].(*types.DefaultResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CheckBVN indicates an expected call of CheckBVN
+func (mr *MockCustomerServiceServerMockRecorder) CheckBVN(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckBVN", reflect.TypeOf((*MockCustomerServiceServer)(nil).CheckBVN), arg0, arg1)
+}
+
+// CheckEmail mocks base method
+func (m *MockCustomerServiceServer) CheckEmail(arg0 context.Context, arg1 *customer.CheckEmailRequest) (*types.DefaultResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CheckEmail", arg0, arg1)
+	ret0, _ := ret[0].(*types.DefaultResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CheckEmail indicates an expected call of CheckEmail
+func (mr *MockCustomerServiceServerMockRecorder) CheckEmail(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckEmail", reflect.TypeOf((*MockCustomerServiceServer)(nil).CheckEmail), arg0, arg1)
+}
+
+// Me mocks base method
+func (m *MockCustomerServiceServer) Me(arg0 context.Context, arg1 *customer.MeRequest) (*customer.MeResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Me", arg0, arg1)
+	ret0, _ := ret[0].(*customer.MeResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Me indicates an expected call of Me
+func (mr *MockCustomerServiceServerMockRecorder) Me(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Me", reflect.TypeOf((*MockCustomerServiceServer)(nil).Me), arg0, arg1)
+}
+
+// GetCustomer mocks base method
+func (m *MockCustomerServiceServer) GetCustomer(arg0 context.Context, arg1 *customer.GetCustomerRequest) (*types.Customer, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCustomer", arg0, arg1)
+	ret0, _ := ret[0].(*types.Customer)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCustomer indicates an expected call of GetCustomer
+func (mr *MockCustomerServiceServerMockRecorder) GetCustomer(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCustomer", reflect.TypeOf((*MockCustomerServiceServer)(nil).GetCustomer), arg0, arg1)
+}
+
+// GetCustomers mocks base method
+func (m *MockCustomerServiceServer) GetCustomers(arg0 context.Context, arg1 *customer.GetCustomersRequest) (*customer.GetCustomersResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCustomers", arg0, arg1)
+	ret0, _ := ret[0].(*customer.GetCustomersResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCustomers indicates an expected call of GetCustomers
+func (mr *MockCustomerServiceServerMockRecorder) GetCustomers(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCustomers", reflect.TypeOf((*MockCustomerServiceServer)(nil).GetCustomers), arg0, arg1)
+}
+
+// GetContent mocks base method
+func (m *MockCustomerServiceServer) GetContent(arg0 context.Context, arg1 *customer.GetContentRequest) (*types.Content, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetContent", arg0, arg1)
+	ret0, _ := ret[0].(*types.Content)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetContent indicates an expected call of GetContent
+func (mr *MockCustomerServiceServerMockRecorder) GetContent(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetContent", reflect.TypeOf((*MockCustomerServiceServer)(nil).GetContent), arg0, arg1)
+}
+
+// GetContents mocks base method
+func (m *MockCustomerServiceServer) GetContents(arg0 context.Context, arg1 *customer.GetContentsRequest) (*customer.GetContentsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetContents", arg0, arg1)
+	ret0, _ := ret[0].(*customer.GetContentsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetContents indicates an expected call of GetContents
+func (mr *MockCustomerServiceServerMockRecorder) GetContents(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetContents", reflect.TypeOf((*MockCustomerServiceServer)(nil).GetContents), arg0, arg1)
+}
+
+// SetAcceptance mocks base method
+func (m *MockCustomerServiceServer) SetAcceptance(arg0 context.Context, arg1 *customer.SetAcceptanceRequest) (*types.DefaultResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetAcceptance", arg0, arg1)
+	ret0, _ := ret[0].(*types.DefaultResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SetAcceptance indicates an expected call of SetAcceptance
+func (mr *MockCustomerServiceServerMockRecorder) SetAcceptance(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetAcceptance", reflect.TypeOf((*MockCustomerServiceServer)(nil).SetAcceptance), arg0, arg1)
+}
+
+// GetQuestionary mocks base method
+func (m *MockCustomerServiceServer) GetQuestionary(arg0 context.Context, arg1 *customer.GetQuestionaryRequest) (*types.Questionary, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetQuestionary", arg0, arg1)
+	ret0, _ := ret[0].(*types.Questionary)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetQuestionary indicates an expected call of GetQuestionary
+func (mr *MockCustomerServiceServerMockRecorder) GetQuestionary(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetQuestionary", reflect.TypeOf((*MockCustomerServiceServer)(nil).GetQuestionary), arg0, arg1)
+}
+
+// GetQuestionaries mocks base method
+func (m *MockCustomerServiceServer) GetQuestionaries(arg0 context.Context, arg1 *customer.GetQuestionariesRequest) (*customer.GetQuestionariesResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetQuestionaries", arg0, arg1)
+	ret0, _ := ret[0].(*customer.GetQuestionariesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetQuestionaries indicates an expected call of GetQuestionaries
+func (mr *MockCustomerServiceServerMockRecorder) GetQuestionaries(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetQuestionaries", reflect.TypeOf((*MockCustomerServiceServer)(nil).GetQuestionaries), arg0, arg1)
+}
+
+// AnswerQuestionary mocks base method
+func (m *MockCustomerServiceServer) AnswerQuestionary(arg0 context.Context, arg1 *customer.AnswerQuestionaryRequest) (*types.DefaultResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AnswerQuestionary", arg0, arg1)
+	ret0, _ := ret[0].(*types.DefaultResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AnswerQuestionary indicates an expected call of AnswerQuestionary
+func (mr *MockCustomerServiceServerMockRecorder) AnswerQuestionary(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AnswerQuestionary", reflect.TypeOf((*MockCustomerServiceServer)(nil).AnswerQuestionary), arg0, arg1)
+}
+
+// GetAddresses mocks base method
+func (m *MockCustomerServiceServer) GetAddresses(arg0 context.Context, arg1 *customer.GetAddressesRequest) (*customer.GetAddressesResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAddresses", arg0, arg1)
+	ret0, _ := ret[0].(*customer.GetAddressesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAddresses indicates an expected call of GetAddresses
+func (mr *MockCustomerServiceServerMockRecorder) GetAddresses(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAddresses", reflect.TypeOf((*MockCustomerServiceServer)(nil).GetAddresses), arg0, arg1)
+}
+
+// GetCountries mocks base method
+func (m *MockCustomerServiceServer) GetCountries(arg0 context.Context, arg1 *customer.GetCountriesRequest) (*customer.GetCountriesResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCountries", arg0, arg1)
+	ret0, _ := ret[0].(*customer.GetCountriesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCountries indicates an expected call of GetCountries
+func (mr *MockCustomerServiceServerMockRecorder) GetCountries(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCountries", reflect.TypeOf((*MockCustomerServiceServer)(nil).GetCountries), arg0, arg1)
 }

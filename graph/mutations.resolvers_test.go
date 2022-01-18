@@ -44,7 +44,7 @@ var (
 	mockRegisterReq = types.CustomerDetailsInput{
 		FirstName: "roava",
 		LastName:  "app",
-		Dob:       "18/05/1994",
+		Dob:       "18-05-1994",
 		Address:   &mockAddress,
 	}
 )
@@ -625,7 +625,7 @@ func TestMutationResolver_Register(t *testing.T) {
 				customerServiceClient.EXPECT().Register(ctx, &customer.RegisterRequest{
 					FirstName: "roava",
 					LastName:  "app",
-					Dob:       "18/05/1994",
+					Dob:       "18-05-1994",
 					Address: &customer.AddressInput{
 						CountryId: "111xcc",
 						State:     state,
