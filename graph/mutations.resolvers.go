@@ -545,9 +545,29 @@ func (r *mutationResolver) CreateTransfer(ctx context.Context, transfer types.Tr
 }
 
 func (r *mutationResolver) RequestResubmit(ctx context.Context, customerID string, reportIds []string, message *string) (*types.Response, error) {
-	msg := "Not implemented"
+	// Get user claims
+	_, err := middlewares.GetClaimsFromCtx(ctx)
+	if err != nil {
+		return &types.Response{Message: &authFailedMessage, Success: false, Code: http.StatusUnauthorized}, nil
+	}
+
+	// Build request
+	request := onboarding.RequestResubmitRequest{
+		CustomerId: customerID,
+		ReportIds:  reportIds,
+	}
+	if message != nil {
+		request.Message = *message
+	}
+	// Call RPC
+	response, err := r.OnBoardingService.RequestResubmit(ctx, &request)
+	if err != nil {
+		return nil, err
+	}
+
 	return &types.Response{
-		Message: &msg,
+		Success: response.Success,
+		Code:    int64(response.Code),
 	}, nil
 }
 
@@ -575,16 +595,70 @@ func (r *mutationResolver) StaffLogin(ctx context.Context, token string, authTyp
 }
 
 func (r *mutationResolver) UpdateKYCStatus(ctx context.Context, id string, status types.KYCStatuses, message string) (*types.Response, error) {
-	msg := "Not implemented"
+	// Get user claims
+	_, err := middlewares.GetClaimsFromCtx(ctx)
+	if err != nil {
+		return &types.Response{Message: &authFailedMessage, Success: false, Code: http.StatusUnauthorized}, nil
+	}
+
+	// Build request
+	request := onboarding.UpdateKYCStatusRequest{
+		Id:      id,
+		Message: message,
+	}
+	switch status {
+	case types.KYCStatusesPending:
+		request.Status = pbTypes.KYC_PENDING
+	case types.KYCStatusesManualReview:
+		request.Status = pbTypes.KYC_MANUAL_REVIEW
+	case types.KYCStatusesApproved:
+		request.Status = pbTypes.KYC_APPROVED
+	case types.KYCStatusesDeclined:
+		request.Status = pbTypes.KYC_DECLINED
+
+	}
+	response, err := r.OnBoardingService.UpdateKYCStatus(ctx, &request)
+	if err != nil {
+		return nil, err
+	}
+
 	return &types.Response{
-		Message: &msg,
+		Success: response.Success,
+		Code:    int64(response.Code),
 	}, nil
 }
 
 func (r *mutationResolver) UpdateAMLStatus(ctx context.Context, id string, status types.AMLStatuses, message string) (*types.Response, error) {
-	msg := "Not implemented"
+	// Get user claims
+	_, err := middlewares.GetClaimsFromCtx(ctx)
+	if err != nil {
+		return &types.Response{Message: &authFailedMessage, Success: false, Code: http.StatusUnauthorized}, nil
+	}
+
+	// Build request
+	request := onboarding.UpdateAMLStatusRequest{
+		Id:      id,
+		Message: message,
+	}
+	switch status {
+	case types.AMLStatusesPending:
+		request.Status = pbTypes.AML_PENDING
+	case types.AMLStatusesManualReview:
+		request.Status = pbTypes.AML_MANUAL_REVIEW
+	case types.AMLStatusesApproved:
+		request.Status = pbTypes.AML_APPROVED
+	case types.AMLStatusesDeclined:
+		request.Status = pbTypes.AML_DECLINED
+
+	}
+	response, err := r.OnBoardingService.UpdateAMLStatus(ctx, &request)
+	if err != nil {
+		return nil, err
+	}
+
 	return &types.Response{
-		Message: &msg,
+		Success: response.Success,
+		Code:    int64(response.Code),
 	}, nil
 }
 

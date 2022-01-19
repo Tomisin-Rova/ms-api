@@ -1415,20 +1415,103 @@ func TestMutationResolver_CreateTransfer(t *testing.T) {
 }
 
 func TestMutationResolver_RequestResubmit(t *testing.T) {
-	controller := gomock.NewController(t)
-	defer controller.Finish()
-	onboardingServiceClient := mocks.NewMockOnboardingServiceClient(controller)
-	resolverOpts := &ResolverOpts{
-		OnboardingService: onboardingServiceClient,
+	const (
+		success = iota
+		errorUnauthenticated
+		errorCallingRPC
+	)
+
+	type arg struct {
+		customerID string
+		reportIds  []string
+		message    *string
 	}
+	message := "Message"
+	var tests = []struct {
+		name     string
+		arg      arg
+		testType int
+	}{
+		{
+			name: "Test success",
+			arg: arg{
+				customerID: "customerId",
+				reportIds:  []string{"reportId1", "reportId2"},
+				message:    &message,
+			},
+			testType: success,
+		},
+		{
+			name:     "Test error unathenticated user",
+			testType: errorUnauthenticated,
+		},
+		{
+			name: "Test error requesting resubmit",
+			arg: arg{
+				customerID: "customerId",
+				reportIds:  []string{"reportId1", "reportId2"},
+				message:    &message,
+			},
+			testType: errorCallingRPC,
+		},
+	}
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			controller := gomock.NewController(t)
+			defer controller.Finish()
+			onboardingServiceClient := mocks.NewMockOnboardingServiceClient(controller)
+			resolverOpts := &ResolverOpts{
+				OnboardingService: onboardingServiceClient,
+			}
+			resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
 
-	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
-	message := ""
+			switch testCase.testType {
+			case success:
+				ctx, _ := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{ID: "customerID"})
 
-	resp, err := resolver.RequestResubmit(context.Background(), "", []string{}, &message)
+				onboardingServiceClient.EXPECT().RequestResubmit(ctx, &onboarding.RequestResubmitRequest{
+					CustomerId: testCase.arg.customerID,
+					ReportIds:  testCase.arg.reportIds,
+					Message:    *testCase.arg.message,
+				}).Return(&pbTypes.DefaultResponse{
+					Success: true,
+					Code:    http.StatusOK,
+				}, nil)
 
-	assert.NoError(t, err)
-	assert.NotNil(t, resp)
+				resp, err := resolver.RequestResubmit(ctx, testCase.arg.customerID, testCase.arg.reportIds,
+					testCase.arg.message)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, &types.Response{
+					Success: true,
+					Code:    http.StatusOK,
+				}, resp)
+			case errorUnauthenticated:
+				resp, err := resolver.RequestResubmit(context.Background(), testCase.arg.customerID, testCase.arg.reportIds,
+					testCase.arg.message)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, &types.Response{
+					Message: &authFailedMessage,
+					Success: false,
+					Code:    http.StatusUnauthorized,
+				}, resp)
+			case errorCallingRPC:
+				ctx, _ := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{ID: "customerID"})
+
+				onboardingServiceClient.EXPECT().RequestResubmit(ctx, &onboarding.RequestResubmitRequest{
+					CustomerId: testCase.arg.customerID,
+					ReportIds:  testCase.arg.reportIds,
+					Message:    *testCase.arg.message,
+				}).Return(nil, errors.New(""))
+
+				resp, err := resolver.RequestResubmit(ctx, testCase.arg.customerID, testCase.arg.reportIds,
+					testCase.arg.message)
+				assert.Error(t, err)
+				assert.Nil(t, resp)
+			}
+		})
+	}
 }
 
 func TestMutationResolver_StaffLogin(t *testing.T) {
@@ -1497,29 +1580,380 @@ func TestMutationResolver_StaffLogin(t *testing.T) {
 }
 
 func TestMutationResolver_UpdateKYCStatus(t *testing.T) {
-	controller := gomock.NewController(t)
-	defer controller.Finish()
-	onboardingServiceClient := mocks.NewMockOnboardingServiceClient(controller)
-	resolverOpts := &ResolverOpts{
-		OnboardingService: onboardingServiceClient,
-	}
-	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
-	resp, err := resolver.UpdateKYCStatus(context.Background(), "", types.KYCStatusesApproved, "")
+	const (
+		success = iota
+		successManualReview
+		successApproved
+		successDeclined
+		errorUnauthenticated
+		errorCallRPC
+	)
 
-	assert.NoError(t, err)
-	assert.NotNil(t, resp)
+	type arg struct {
+		id      string
+		status  types.KYCStatuses
+		message string
+	}
+	var tests = []struct {
+		name     string
+		arg      arg
+		testType int
+	}{
+		{
+			name: "Test success",
+			arg: arg{
+				id:      "kycId",
+				status:  types.KYCStatusesPending,
+				message: "Message",
+			},
+			testType: success,
+		},
+		{
+			name: "Test success manual review",
+			arg: arg{
+				id:      "kycId",
+				status:  types.KYCStatusesManualReview,
+				message: "Message",
+			},
+			testType: successManualReview,
+		},
+		{
+			name: "Test success approved",
+			arg: arg{
+				id:      "kycId",
+				status:  types.KYCStatusesApproved,
+				message: "Message",
+			},
+			testType: successApproved,
+		},
+		{
+			name: "Test success declined",
+			arg: arg{
+				id:      "kycId",
+				status:  types.KYCStatusesDeclined,
+				message: "Message",
+			},
+			testType: successDeclined,
+		},
+		{
+			name:     "Test error customer not authenticated",
+			testType: errorUnauthenticated,
+		},
+		{
+			name: "Test error calling updating kyc status",
+			arg: arg{
+				id:      "kycId",
+				status:  types.KYCStatusesPending,
+				message: "Message",
+			},
+			testType: errorCallRPC,
+		},
+	}
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			controller := gomock.NewController(t)
+			defer controller.Finish()
+			onboardingServiceClient := mocks.NewMockOnboardingServiceClient(controller)
+			resolverOpts := &ResolverOpts{
+				OnboardingService: onboardingServiceClient,
+			}
+			resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
+
+			switch testCase.testType {
+			case success:
+				ctx, _ := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{ID: "customerID"})
+
+				onboardingServiceClient.EXPECT().UpdateKYCStatus(ctx, &onboarding.UpdateKYCStatusRequest{
+					Id:      testCase.arg.id,
+					Status:  pbTypes.KYC_PENDING,
+					Message: testCase.arg.message,
+				}).Return(&pbTypes.DefaultResponse{
+					Success: true,
+					Code:    http.StatusOK,
+				}, nil)
+
+				resp, err := resolver.UpdateKYCStatus(ctx, testCase.arg.id, testCase.arg.status,
+					testCase.arg.message)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, &types.Response{
+					Success: true,
+					Code:    http.StatusOK,
+				}, resp)
+			case successManualReview:
+				ctx, _ := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{ID: "customerID"})
+
+				onboardingServiceClient.EXPECT().UpdateKYCStatus(ctx, &onboarding.UpdateKYCStatusRequest{
+					Id:      testCase.arg.id,
+					Status:  pbTypes.KYC_MANUAL_REVIEW,
+					Message: testCase.arg.message,
+				}).Return(&pbTypes.DefaultResponse{
+					Success: true,
+					Code:    http.StatusOK,
+				}, nil)
+
+				resp, err := resolver.UpdateKYCStatus(ctx, testCase.arg.id, testCase.arg.status,
+					testCase.arg.message)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, &types.Response{
+					Success: true,
+					Code:    http.StatusOK,
+				}, resp)
+			case successApproved:
+				ctx, _ := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{ID: "customerID"})
+
+				onboardingServiceClient.EXPECT().UpdateKYCStatus(ctx, &onboarding.UpdateKYCStatusRequest{
+					Id:      testCase.arg.id,
+					Status:  pbTypes.KYC_APPROVED,
+					Message: testCase.arg.message,
+				}).Return(&pbTypes.DefaultResponse{
+					Success: true,
+					Code:    http.StatusOK,
+				}, nil)
+
+				resp, err := resolver.UpdateKYCStatus(ctx, testCase.arg.id, testCase.arg.status,
+					testCase.arg.message)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, &types.Response{
+					Success: true,
+					Code:    http.StatusOK,
+				}, resp)
+			case successDeclined:
+				ctx, _ := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{ID: "customerID"})
+
+				onboardingServiceClient.EXPECT().UpdateKYCStatus(ctx, &onboarding.UpdateKYCStatusRequest{
+					Id:      testCase.arg.id,
+					Status:  pbTypes.KYC_DECLINED,
+					Message: testCase.arg.message,
+				}).Return(&pbTypes.DefaultResponse{
+					Success: true,
+					Code:    http.StatusOK,
+				}, nil)
+
+				resp, err := resolver.UpdateKYCStatus(ctx, testCase.arg.id, testCase.arg.status,
+					testCase.arg.message)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, &types.Response{
+					Success: true,
+					Code:    http.StatusOK,
+				}, resp)
+			case errorUnauthenticated:
+				resp, err := resolver.UpdateKYCStatus(context.Background(), testCase.arg.id, testCase.arg.status,
+					testCase.arg.message)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, &types.Response{
+					Message: &authFailedMessage,
+					Success: false,
+					Code:    http.StatusUnauthorized,
+				}, resp)
+			case errorCallRPC:
+				ctx, _ := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{ID: "customerID"})
+
+				onboardingServiceClient.EXPECT().UpdateKYCStatus(ctx, &onboarding.UpdateKYCStatusRequest{
+					Id:      testCase.arg.id,
+					Status:  pbTypes.KYC_PENDING,
+					Message: testCase.arg.message,
+				}).Return(nil, errors.New(""))
+
+				resp, err := resolver.UpdateKYCStatus(ctx, testCase.arg.id, testCase.arg.status,
+					testCase.arg.message)
+				assert.Error(t, err)
+				assert.Nil(t, resp)
+			}
+		})
+	}
+
 }
 
 func TestMutationResolver_UpdateAMLStatus(t *testing.T) {
-	controller := gomock.NewController(t)
-	defer controller.Finish()
-	onboardingServiceClient := mocks.NewMockOnboardingServiceClient(controller)
-	resolverOpts := &ResolverOpts{
-		OnboardingService: onboardingServiceClient,
-	}
-	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
-	resp, err := resolver.UpdateAMLStatus(context.Background(), "", types.AMLStatusesPending, "")
+	const (
+		success = iota
+		successManualReview
+		successApproved
+		successDeclined
+		errorUnauthenticated
+		errorCallRPC
+	)
 
-	assert.NoError(t, err)
-	assert.NotNil(t, resp)
+	type arg struct {
+		id      string
+		status  types.AMLStatuses
+		message string
+	}
+	var tests = []struct {
+		name     string
+		arg      arg
+		testType int
+	}{
+		{
+			name: "Test success",
+			arg: arg{
+				id:      "amlId",
+				status:  types.AMLStatusesPending,
+				message: "Message",
+			},
+			testType: success,
+		},
+		{
+			name: "Test success manual review",
+			arg: arg{
+				id:      "amlId",
+				status:  types.AMLStatusesManualReview,
+				message: "Message",
+			},
+			testType: successManualReview,
+		},
+		{
+			name: "Test success approved",
+			arg: arg{
+				id:      "amlId",
+				status:  types.AMLStatusesApproved,
+				message: "Message",
+			},
+			testType: successApproved,
+		},
+		{
+			name: "Test success declined",
+			arg: arg{
+				id:      "amlId",
+				status:  types.AMLStatusesDeclined,
+				message: "Message",
+			},
+			testType: successDeclined,
+		},
+		{
+			name:     "Test error customer not authenticated",
+			testType: errorUnauthenticated,
+		},
+		{
+			name: "Test error calling updating kyc status",
+			arg: arg{
+				id:      "amlId",
+				status:  types.AMLStatusesPending,
+				message: "Message",
+			},
+			testType: errorCallRPC,
+		},
+	}
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			controller := gomock.NewController(t)
+			defer controller.Finish()
+			onboardingServiceClient := mocks.NewMockOnboardingServiceClient(controller)
+			resolverOpts := &ResolverOpts{
+				OnboardingService: onboardingServiceClient,
+			}
+			resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
+
+			switch testCase.testType {
+			case success:
+				ctx, _ := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{ID: "customerID"})
+
+				onboardingServiceClient.EXPECT().UpdateAMLStatus(ctx, &onboarding.UpdateAMLStatusRequest{
+					Id:      testCase.arg.id,
+					Status:  pbTypes.AML_PENDING,
+					Message: testCase.arg.message,
+				}).Return(&pbTypes.DefaultResponse{
+					Success: true,
+					Code:    http.StatusOK,
+				}, nil)
+
+				resp, err := resolver.UpdateAMLStatus(ctx, testCase.arg.id, testCase.arg.status,
+					testCase.arg.message)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, &types.Response{
+					Success: true,
+					Code:    http.StatusOK,
+				}, resp)
+			case successManualReview:
+				ctx, _ := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{ID: "customerID"})
+
+				onboardingServiceClient.EXPECT().UpdateAMLStatus(ctx, &onboarding.UpdateAMLStatusRequest{
+					Id:      testCase.arg.id,
+					Status:  pbTypes.AML_MANUAL_REVIEW,
+					Message: testCase.arg.message,
+				}).Return(&pbTypes.DefaultResponse{
+					Success: true,
+					Code:    http.StatusOK,
+				}, nil)
+
+				resp, err := resolver.UpdateAMLStatus(ctx, testCase.arg.id, testCase.arg.status,
+					testCase.arg.message)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, &types.Response{
+					Success: true,
+					Code:    http.StatusOK,
+				}, resp)
+			case successApproved:
+				ctx, _ := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{ID: "customerID"})
+
+				onboardingServiceClient.EXPECT().UpdateAMLStatus(ctx, &onboarding.UpdateAMLStatusRequest{
+					Id:      testCase.arg.id,
+					Status:  pbTypes.AML_APPROVED,
+					Message: testCase.arg.message,
+				}).Return(&pbTypes.DefaultResponse{
+					Success: true,
+					Code:    http.StatusOK,
+				}, nil)
+
+				resp, err := resolver.UpdateAMLStatus(ctx, testCase.arg.id, testCase.arg.status,
+					testCase.arg.message)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, &types.Response{
+					Success: true,
+					Code:    http.StatusOK,
+				}, resp)
+			case successDeclined:
+				ctx, _ := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{ID: "customerID"})
+
+				onboardingServiceClient.EXPECT().UpdateAMLStatus(ctx, &onboarding.UpdateAMLStatusRequest{
+					Id:      testCase.arg.id,
+					Status:  pbTypes.AML_DECLINED,
+					Message: testCase.arg.message,
+				}).Return(&pbTypes.DefaultResponse{
+					Success: true,
+					Code:    http.StatusOK,
+				}, nil)
+
+				resp, err := resolver.UpdateAMLStatus(ctx, testCase.arg.id, testCase.arg.status,
+					testCase.arg.message)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, &types.Response{
+					Success: true,
+					Code:    http.StatusOK,
+				}, resp)
+			case errorUnauthenticated:
+				resp, err := resolver.UpdateAMLStatus(context.Background(), testCase.arg.id, testCase.arg.status,
+					testCase.arg.message)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, &types.Response{
+					Message: &authFailedMessage,
+					Success: false,
+					Code:    http.StatusUnauthorized,
+				}, resp)
+			case errorCallRPC:
+				ctx, _ := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{ID: "customerID"})
+
+				onboardingServiceClient.EXPECT().UpdateAMLStatus(ctx, &onboarding.UpdateAMLStatusRequest{
+					Id:      testCase.arg.id,
+					Status:  pbTypes.AML_PENDING,
+					Message: testCase.arg.message,
+				}).Return(nil, errors.New(""))
+
+				resp, err := resolver.UpdateAMLStatus(ctx, testCase.arg.id, testCase.arg.status,
+					testCase.arg.message)
+				assert.Error(t, err)
+				assert.Nil(t, resp)
+			}
+		})
+	}
 }
