@@ -14,7 +14,7 @@ var (
 	ErrInvalidFormat = coreError.NewTerror(
 		7007,
 		"ErrInvalidDateFormat",
-		"invalid date format. Date format must be dd/mm/yyyy",
+		"invalid date format. Date format must be dd-mm-yyyy",
 		"",
 	)
 	ErrInvalidType = coreError.NewTerror(
