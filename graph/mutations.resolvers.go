@@ -414,13 +414,7 @@ func (r *mutationResolver) Login(ctx context.Context, credentials types.AuthInpu
 func (r *mutationResolver) RefreshToken(ctx context.Context, token string) (*types.AuthResponse, error) {
 	result, err := r.AuthService.RefreshToken(ctx, &auth.RefreshTokenRequest{Token: token})
 	if err != nil {
-		msg := "Failed"
-		return &types.AuthResponse{
-			Message: &msg,
-			Code:    http.StatusInternalServerError,
-			Success: false,
-			Tokens:  nil,
-		}, nil
+		return nil, err
 	}
 
 	message := "Success"
