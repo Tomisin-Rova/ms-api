@@ -1156,8 +1156,8 @@ func TestMutationResolver_RefreshToken(t *testing.T) {
 					Return(nil, errors.New("")).Times(1)
 
 				resp, err := resolver.RefreshToken(context.Background(), testCase.arg)
-				assert.NoError(t, err)
-				assert.Equal(t, resp.Success, false)
+				assert.Error(t, err)
+				assert.Nil(t, resp)
 			}
 		})
 

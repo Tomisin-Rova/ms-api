@@ -316,12 +316,13 @@ func (r *mutationResolver) AnswerQuestionary(ctx context.Context, questionary ty
 		responseMessage = "Questionary answers not found"
 		return &types.Response{Message: &responseMessage, Success: false, Code: int64(400)}, nil
 	}
-
 	for index, ans := range questionary.Answers {
 		answer := &customer.AnswerInput{
 			Id:                ans.ID,
-			Answer:            *ans.Answer,
 			PredefinedAnswers: ans.PredefinedAnswers,
+		}
+		if ans.Answer != nil {
+			answer.Answer = *ans.Answer
 		}
 		customerAnswers[index] = answer
 	}
@@ -413,13 +414,7 @@ func (r *mutationResolver) Login(ctx context.Context, credentials types.AuthInpu
 func (r *mutationResolver) RefreshToken(ctx context.Context, token string) (*types.AuthResponse, error) {
 	result, err := r.AuthService.RefreshToken(ctx, &auth.RefreshTokenRequest{Token: token})
 	if err != nil {
-		msg := "Failed"
-		return &types.AuthResponse{
-			Message: &msg,
-			Code:    http.StatusInternalServerError,
-			Success: false,
-			Tokens:  nil,
-		}, nil
+		return nil, err
 	}
 
 	message := "Success"
