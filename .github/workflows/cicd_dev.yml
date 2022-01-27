@@ -2,6 +2,8 @@ name: Build, deploy to GCR
 on:
   pull_request:
     types: [opened, reopened]
+  push:
+    branches: [develop]
 
 env:
   PROJECT_ID: ${{ secrets.PROJECT_SHARED }}
@@ -115,7 +117,7 @@ jobs:
     steps:
       - name: Get the version
         id: get_version
-        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/heads\//}
+        run: echo ::set-output name=VERSION::develop
 
       - name: Get short commit id
         id: vars
@@ -175,6 +177,6 @@ jobs:
       - name: Deploy service
         run: |
           export SERVICE_NAME=`echo $GITHUB_REPOSITORY | cut -d'/' -f2`
-          export VERSION_NAME=`echo $GITHUB_REF | cut -d'/' -f3`
+          export VERSION_NAME=`echo ${{ steps.get_version.outputs.VERSION }}`
           deploy "${SERVICE_NAME}" "${VERSION_NAME}"
 

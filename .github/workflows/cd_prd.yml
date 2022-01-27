@@ -1,4 +1,4 @@
-name: Build, deploy to GCR
+name: Build and Package to production 
 on:
   push:
     tags:
@@ -145,15 +145,16 @@ jobs:
           docker push "$REGISTRY_HOSTNAME"/"$CONTAINER":"$TAG"
           docker push "$REGISTRY_HOSTNAME"/"$CONTAINER":latest
   
-  deploy:
-    name: Deploy to UAT
-    runs-on: [self-hosted, linux, x64, uat]
-    needs: [package]
+  # deploy:
+  #   name: Deploy to PRD
+  #   runs-on: [self-hosted, linux, x64, prd]
+  #   needs: [package]
 
-    steps:
-      - name: Deploy service
-        run: |
-          export SERVICE_NAME=`echo $GITHUB_REPOSITORY | cut -d'/' -f2`
-          export VERSION_NAME=`echo $GITHUB_REF | cut -d'/' -f3`
-          deploy "${SERVICE_NAME}" "${VERSION_NAME}"
+  #   steps:
+  #     - name: Deploy service
+  #       run: |
+  #         export SERVICE_NAME=`echo $GITHUB_REPOSITORY | cut -d'/' -f2`
+  #         export VERSION_NAME=`echo ${{ steps.get_version.outputs.VERSION }}`
+  #         deploy "${SERVICE_NAME}" "${VERSION_NAME}"
+
 
