@@ -1,4 +1,4 @@
-name: Build, deploy to GCR
+name: Build, deploy to QA
 on:
   push:
     tags:
@@ -92,17 +92,13 @@ jobs:
     needs: [build] # Only run this workflow when "build" workflow succeeds
 
     steps:
-      - name: Get the version
-        id: get_version
-        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
-
       - name: Get short commit id
         id: vars
         run: echo "::set-output name=SHORT_COMMIT_ID::$(git rev-parse --short HEAD)"
 
       - name: Print version
         run: |
-          echo [github.tag]: ${{ steps.get_version.outputs.VERSION }}
+          echo [github.tag]: $GITHUB_REF_NAME
           echo [github.sha]: ${{ github.sha }}
           echo [github.ref]: ${{ github.ref }}
           echo [github.actor]: trigered by $GITHUB_ACTOR
@@ -127,7 +123,7 @@ jobs:
       - name: Build the Docker image
         id: build
         run: |
-          export TAG=`echo ${{ steps.get_version.outputs.VERSION }}`
+          export TAG=`echo $GITHUB_REF_NAME`
           export CONTAINER=`echo $ORG/$IMAGE`
           docker build -t "$REGISTRY_HOSTNAME"/"$CONTAINER":"$TAG" \
           -t "$REGISTRY_HOSTNAME"/"$CONTAINER":"${GITHUB_SHA::8}" \
@@ -140,7 +136,7 @@ jobs:
       - name: Publish
         id: publish
         run: |
-          export TAG=`echo ${{ steps.get_version.outputs.VERSION }}`
+          export TAG=`echo $GITHUB_REF_NAME`
           export CONTAINER=`echo $ORG/$IMAGE`
           docker push "$REGISTRY_HOSTNAME"/"$CONTAINER":"$TAG"
           docker push "$REGISTRY_HOSTNAME"/"$CONTAINER":latest
@@ -154,6 +150,6 @@ jobs:
       - name: Deploy service
         run: |
           export SERVICE_NAME=`echo $GITHUB_REPOSITORY | cut -d'/' -f2`
-          export VERSION_NAME=`echo ${{ steps.get_version.outputs.VERSION }}`
+          export VERSION_NAME=`echo $GITHUB_REF_NAME`
           deploy-qa "${SERVICE_NAME}" "${VERSION_NAME}"
 
