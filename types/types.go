@@ -801,17 +801,19 @@ type AccountStatuses string
 
 const (
 	AccountStatusesActive   AccountStatuses = "ACTIVE"
+	AccountStatusesPending  AccountStatuses = "PENDING"
 	AccountStatusesInactive AccountStatuses = "INACTIVE"
 )
 
 var AllAccountStatuses = []AccountStatuses{
 	AccountStatusesActive,
+	AccountStatusesPending,
 	AccountStatusesInactive,
 }
 
 func (e AccountStatuses) IsValid() bool {
 	switch e {
-	case AccountStatusesActive, AccountStatusesInactive:
+	case AccountStatusesActive, AccountStatusesPending, AccountStatusesInactive:
 		return true
 	}
 	return false
