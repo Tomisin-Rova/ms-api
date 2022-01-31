@@ -6,8 +6,6 @@ import (
 	"net/http"
 	"testing"
 
-	terror "github.com/roava/zebra/errors"
-
 	"github.com/golang/mock/gomock"
 	"github.com/roava/zebra/middleware"
 	"github.com/roava/zebra/models"
@@ -466,7 +464,6 @@ func TestMutationResolver_Signup(t *testing.T) {
 func TestMutationResolver_ResetLoginPassword(t *testing.T) {
 	const (
 		success = iota
-		errorUnauthenticatedUser
 		errorCallingResetLoginPassword
 	)
 
@@ -488,10 +485,6 @@ func TestMutationResolver_ResetLoginPassword(t *testing.T) {
 				loginPassword: "newLoginPassword",
 			},
 			testType: success,
-		},
-		{
-			name:     "Test error unauthenticated user",
-			testType: errorUnauthenticatedUser,
 		},
 		{
 			name: "Test error calling RPC",
@@ -532,12 +525,6 @@ func TestMutationResolver_ResetLoginPassword(t *testing.T) {
 					Success: true,
 					Code:    http.StatusOK,
 				}, response)
-			case errorUnauthenticatedUser:
-				response, err := resolver.ResetLoginPassword(context.Background(), testCase.arg.otpToken, testCase.arg.email, testCase.arg.loginPassword)
-				assert.Error(t, err)
-				assert.IsType(t, &terror.Terror{}, err)
-				assert.Equal(t, errorvalues.InvalidAuthentication, err.(*terror.Terror).Code())
-				assert.Nil(t, response)
 			case errorCallingResetLoginPassword:
 				ctx, _ := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{ID: "customerID"})
 				customerService.EXPECT().ResetLoginPassword(ctx, &customer.ResetLoginPasswordRequest{

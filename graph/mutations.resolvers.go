@@ -159,12 +159,6 @@ func (r *mutationResolver) Signup(ctx context.Context, customer types.CustomerIn
 }
 
 func (r *mutationResolver) ResetLoginPassword(ctx context.Context, otpToken string, email string, loginPassword string) (*types.Response, error) {
-	// Get user claims
-	_, err := middlewares.GetClaimsFromCtx(ctx)
-	if err != nil {
-		return nil, err
-	}
-
 	// Build request
 	request := customer.ResetLoginPasswordRequest{
 		OtpToken:      otpToken,
