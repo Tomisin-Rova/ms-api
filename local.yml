@@ -1,6 +1,6 @@
 SERVICE_NAME: "ms.api"
 PORT: "2000"
-mongodb_uri: "mongodb://root:root@localhost:27017"
+mongodb_uri: "mongodb://127.0.0.1:27017"
 pulsar_url: "pulsar://127.0.0.1:6650"
 pulsar_cert: ""
 HTTP_PORT: "8000"

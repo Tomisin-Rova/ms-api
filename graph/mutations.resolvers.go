@@ -8,6 +8,7 @@ import (
 	"errors"
 	"net/http"
 
+	"go.uber.org/zap"
 	"ms.api/graph/generated"
 	errorvalues "ms.api/libs/errors"
 	"ms.api/libs/validator/datevalidator"
@@ -183,9 +184,21 @@ func (r *mutationResolver) ResetLoginPassword(ctx context.Context, otpToken stri
 }
 
 func (r *mutationResolver) CheckCustomerEmail(ctx context.Context, email string, device types.DeviceInput) (*types.Response, error) {
-	msg := "Not implemented"
+	_, err := emailvalidator.Validate(email)
+	if err != nil {
+		r.logger.Info("invalid email supplied", zap.String("email", email))
+		return nil, err
+	}
+
+	resp, err := r.CustomerService.CheckEmail(ctx, &customer.CheckEmailRequest{Email: email})
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO: Temporal implementation, refactor to use correct RPC call when implemented
 	return &types.Response{
-		Message: &msg,
+		Success: resp.Success,
+		Code:    0,
 	}, nil
 }
 

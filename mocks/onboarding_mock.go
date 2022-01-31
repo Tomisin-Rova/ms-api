@@ -6,118 +6,37 @@ package mocks
 
 import (
 	context "context"
-	reflect "reflect"
-
 	gomock "github.com/golang/mock/gomock"
 	grpc "google.golang.org/grpc"
 	onboarding "ms.api/protos/pb/onboarding"
 	types "ms.api/protos/pb/types"
+	reflect "reflect"
 )
 
-// MockOnboardingServiceClient is a mock of OnboardingServiceClient interface.
+// MockOnboardingServiceClient is a mock of OnboardingServiceClient interface
 type MockOnboardingServiceClient struct {
 	ctrl     *gomock.Controller
 	recorder *MockOnboardingServiceClientMockRecorder
 }
 
-// MockOnboardingServiceClientMockRecorder is the mock recorder for MockOnboardingServiceClient.
+// MockOnboardingServiceClientMockRecorder is the mock recorder for MockOnboardingServiceClient
 type MockOnboardingServiceClientMockRecorder struct {
 	mock *MockOnboardingServiceClient
 }
 
-// NewMockOnboardingServiceClient creates a new mock instance.
+// NewMockOnboardingServiceClient creates a new mock instance
 func NewMockOnboardingServiceClient(ctrl *gomock.Controller) *MockOnboardingServiceClient {
 	mock := &MockOnboardingServiceClient{ctrl: ctrl}
 	mock.recorder = &MockOnboardingServiceClientMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use.
+// EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockOnboardingServiceClient) EXPECT() *MockOnboardingServiceClientMockRecorder {
 	return m.recorder
 }
 
-// GetCDD mocks base method.
-func (m *MockOnboardingServiceClient) GetCDD(ctx context.Context, in *onboarding.GetCDDRequest, opts ...grpc.CallOption) (*types.CDD, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, in}
-	for _, a := range opts {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "GetCDD", varargs...)
-	ret0, _ := ret[0].(*types.CDD)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetCDD indicates an expected call of GetCDD.
-func (mr *MockOnboardingServiceClientMockRecorder) GetCDD(ctx, in interface{}, opts ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCDD", reflect.TypeOf((*MockOnboardingServiceClient)(nil).GetCDD), varargs...)
-}
-
-// GetCDDs mocks base method.
-func (m *MockOnboardingServiceClient) GetCDDs(ctx context.Context, in *onboarding.GetCDDsRequest, opts ...grpc.CallOption) (*onboarding.GetCDDsResponse, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, in}
-	for _, a := range opts {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "GetCDDs", varargs...)
-	ret0, _ := ret[0].(*onboarding.GetCDDsResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetCDDs indicates an expected call of GetCDDs.
-func (mr *MockOnboardingServiceClientMockRecorder) GetCDDs(ctx, in interface{}, opts ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCDDs", reflect.TypeOf((*MockOnboardingServiceClient)(nil).GetCDDs), varargs...)
-}
-
-// GetOnfidoSDKToken mocks base method.
-func (m *MockOnboardingServiceClient) GetOnfidoSDKToken(ctx context.Context, in *onboarding.GetOnfidoSDKTokenRequest, opts ...grpc.CallOption) (*onboarding.GetOnfidoSDKTokenResponse, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, in}
-	for _, a := range opts {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "GetOnfidoSDKToken", varargs...)
-	ret0, _ := ret[0].(*onboarding.GetOnfidoSDKTokenResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetOnfidoSDKToken indicates an expected call of GetOnfidoSDKToken.
-func (mr *MockOnboardingServiceClientMockRecorder) GetOnfidoSDKToken(ctx, in interface{}, opts ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOnfidoSDKToken", reflect.TypeOf((*MockOnboardingServiceClient)(nil).GetOnfidoSDKToken), varargs...)
-}
-
-// RequestResubmit mocks base method.
-func (m *MockOnboardingServiceClient) RequestResubmit(ctx context.Context, in *onboarding.RequestResubmitRequest, opts ...grpc.CallOption) (*types.DefaultResponse, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, in}
-	for _, a := range opts {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "RequestResubmit", varargs...)
-	ret0, _ := ret[0].(*types.DefaultResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// RequestResubmit indicates an expected call of RequestResubmit.
-func (mr *MockOnboardingServiceClientMockRecorder) RequestResubmit(ctx, in interface{}, opts ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RequestResubmit", reflect.TypeOf((*MockOnboardingServiceClient)(nil).RequestResubmit), varargs...)
-}
-
-// SubmitCDD mocks base method.
+// SubmitCDD mocks base method
 func (m *MockOnboardingServiceClient) SubmitCDD(ctx context.Context, in *onboarding.SubmitCDDRequest, opts ...grpc.CallOption) (*types.DefaultResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
@@ -130,34 +49,94 @@ func (m *MockOnboardingServiceClient) SubmitCDD(ctx context.Context, in *onboard
 	return ret0, ret1
 }
 
-// SubmitCDD indicates an expected call of SubmitCDD.
+// SubmitCDD indicates an expected call of SubmitCDD
 func (mr *MockOnboardingServiceClientMockRecorder) SubmitCDD(ctx, in interface{}, opts ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SubmitCDD", reflect.TypeOf((*MockOnboardingServiceClient)(nil).SubmitCDD), varargs...)
 }
 
-// UpdateAMLStatus mocks base method.
-func (m *MockOnboardingServiceClient) UpdateAMLStatus(ctx context.Context, in *onboarding.UpdateAMLStatusRequest, opts ...grpc.CallOption) (*types.DefaultResponse, error) {
+// GetOnfidoSDKToken mocks base method
+func (m *MockOnboardingServiceClient) GetOnfidoSDKToken(ctx context.Context, in *onboarding.GetOnfidoSDKTokenRequest, opts ...grpc.CallOption) (*onboarding.GetOnfidoSDKTokenResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
-	ret := m.ctrl.Call(m, "UpdateAMLStatus", varargs...)
+	ret := m.ctrl.Call(m, "GetOnfidoSDKToken", varargs...)
+	ret0, _ := ret[0].(*onboarding.GetOnfidoSDKTokenResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetOnfidoSDKToken indicates an expected call of GetOnfidoSDKToken
+func (mr *MockOnboardingServiceClientMockRecorder) GetOnfidoSDKToken(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOnfidoSDKToken", reflect.TypeOf((*MockOnboardingServiceClient)(nil).GetOnfidoSDKToken), varargs...)
+}
+
+// GetCDD mocks base method
+func (m *MockOnboardingServiceClient) GetCDD(ctx context.Context, in *onboarding.GetCDDRequest, opts ...grpc.CallOption) (*types.CDD, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetCDD", varargs...)
+	ret0, _ := ret[0].(*types.CDD)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCDD indicates an expected call of GetCDD
+func (mr *MockOnboardingServiceClientMockRecorder) GetCDD(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCDD", reflect.TypeOf((*MockOnboardingServiceClient)(nil).GetCDD), varargs...)
+}
+
+// GetCDDs mocks base method
+func (m *MockOnboardingServiceClient) GetCDDs(ctx context.Context, in *onboarding.GetCDDsRequest, opts ...grpc.CallOption) (*onboarding.GetCDDsResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetCDDs", varargs...)
+	ret0, _ := ret[0].(*onboarding.GetCDDsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCDDs indicates an expected call of GetCDDs
+func (mr *MockOnboardingServiceClientMockRecorder) GetCDDs(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCDDs", reflect.TypeOf((*MockOnboardingServiceClient)(nil).GetCDDs), varargs...)
+}
+
+// RequestResubmit mocks base method
+func (m *MockOnboardingServiceClient) RequestResubmit(ctx context.Context, in *onboarding.RequestResubmitRequest, opts ...grpc.CallOption) (*types.DefaultResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RequestResubmit", varargs...)
 	ret0, _ := ret[0].(*types.DefaultResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// UpdateAMLStatus indicates an expected call of UpdateAMLStatus.
-func (mr *MockOnboardingServiceClientMockRecorder) UpdateAMLStatus(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+// RequestResubmit indicates an expected call of RequestResubmit
+func (mr *MockOnboardingServiceClientMockRecorder) RequestResubmit(ctx, in interface{}, opts ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAMLStatus", reflect.TypeOf((*MockOnboardingServiceClient)(nil).UpdateAMLStatus), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RequestResubmit", reflect.TypeOf((*MockOnboardingServiceClient)(nil).RequestResubmit), varargs...)
 }
 
-// UpdateKYCStatus mocks base method.
+// UpdateKYCStatus mocks base method
 func (m *MockOnboardingServiceClient) UpdateKYCStatus(ctx context.Context, in *onboarding.UpdateKYCStatusRequest, opts ...grpc.CallOption) (*types.DefaultResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
@@ -170,97 +149,57 @@ func (m *MockOnboardingServiceClient) UpdateKYCStatus(ctx context.Context, in *o
 	return ret0, ret1
 }
 
-// UpdateKYCStatus indicates an expected call of UpdateKYCStatus.
+// UpdateKYCStatus indicates an expected call of UpdateKYCStatus
 func (mr *MockOnboardingServiceClientMockRecorder) UpdateKYCStatus(ctx, in interface{}, opts ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateKYCStatus", reflect.TypeOf((*MockOnboardingServiceClient)(nil).UpdateKYCStatus), varargs...)
 }
 
-// MockOnboardingServiceServer is a mock of OnboardingServiceServer interface.
+// UpdateAMLStatus mocks base method
+func (m *MockOnboardingServiceClient) UpdateAMLStatus(ctx context.Context, in *onboarding.UpdateAMLStatusRequest, opts ...grpc.CallOption) (*types.DefaultResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UpdateAMLStatus", varargs...)
+	ret0, _ := ret[0].(*types.DefaultResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateAMLStatus indicates an expected call of UpdateAMLStatus
+func (mr *MockOnboardingServiceClientMockRecorder) UpdateAMLStatus(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAMLStatus", reflect.TypeOf((*MockOnboardingServiceClient)(nil).UpdateAMLStatus), varargs...)
+}
+
+// MockOnboardingServiceServer is a mock of OnboardingServiceServer interface
 type MockOnboardingServiceServer struct {
 	ctrl     *gomock.Controller
 	recorder *MockOnboardingServiceServerMockRecorder
 }
 
-// MockOnboardingServiceServerMockRecorder is the mock recorder for MockOnboardingServiceServer.
+// MockOnboardingServiceServerMockRecorder is the mock recorder for MockOnboardingServiceServer
 type MockOnboardingServiceServerMockRecorder struct {
 	mock *MockOnboardingServiceServer
 }
 
-// NewMockOnboardingServiceServer creates a new mock instance.
+// NewMockOnboardingServiceServer creates a new mock instance
 func NewMockOnboardingServiceServer(ctrl *gomock.Controller) *MockOnboardingServiceServer {
 	mock := &MockOnboardingServiceServer{ctrl: ctrl}
 	mock.recorder = &MockOnboardingServiceServerMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use.
+// EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockOnboardingServiceServer) EXPECT() *MockOnboardingServiceServerMockRecorder {
 	return m.recorder
 }
 
-// GetCDD mocks base method.
-func (m *MockOnboardingServiceServer) GetCDD(arg0 context.Context, arg1 *onboarding.GetCDDRequest) (*types.CDD, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetCDD", arg0, arg1)
-	ret0, _ := ret[0].(*types.CDD)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetCDD indicates an expected call of GetCDD.
-func (mr *MockOnboardingServiceServerMockRecorder) GetCDD(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCDD", reflect.TypeOf((*MockOnboardingServiceServer)(nil).GetCDD), arg0, arg1)
-}
-
-// GetCDDs mocks base method.
-func (m *MockOnboardingServiceServer) GetCDDs(arg0 context.Context, arg1 *onboarding.GetCDDsRequest) (*onboarding.GetCDDsResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetCDDs", arg0, arg1)
-	ret0, _ := ret[0].(*onboarding.GetCDDsResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetCDDs indicates an expected call of GetCDDs.
-func (mr *MockOnboardingServiceServerMockRecorder) GetCDDs(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCDDs", reflect.TypeOf((*MockOnboardingServiceServer)(nil).GetCDDs), arg0, arg1)
-}
-
-// GetOnfidoSDKToken mocks base method.
-func (m *MockOnboardingServiceServer) GetOnfidoSDKToken(arg0 context.Context, arg1 *onboarding.GetOnfidoSDKTokenRequest) (*onboarding.GetOnfidoSDKTokenResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetOnfidoSDKToken", arg0, arg1)
-	ret0, _ := ret[0].(*onboarding.GetOnfidoSDKTokenResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetOnfidoSDKToken indicates an expected call of GetOnfidoSDKToken.
-func (mr *MockOnboardingServiceServerMockRecorder) GetOnfidoSDKToken(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOnfidoSDKToken", reflect.TypeOf((*MockOnboardingServiceServer)(nil).GetOnfidoSDKToken), arg0, arg1)
-}
-
-// RequestResubmit mocks base method.
-func (m *MockOnboardingServiceServer) RequestResubmit(arg0 context.Context, arg1 *onboarding.RequestResubmitRequest) (*types.DefaultResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RequestResubmit", arg0, arg1)
-	ret0, _ := ret[0].(*types.DefaultResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// RequestResubmit indicates an expected call of RequestResubmit.
-func (mr *MockOnboardingServiceServerMockRecorder) RequestResubmit(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RequestResubmit", reflect.TypeOf((*MockOnboardingServiceServer)(nil).RequestResubmit), arg0, arg1)
-}
-
-// SubmitCDD mocks base method.
+// SubmitCDD mocks base method
 func (m *MockOnboardingServiceServer) SubmitCDD(arg0 context.Context, arg1 *onboarding.SubmitCDDRequest) (*types.DefaultResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SubmitCDD", arg0, arg1)
@@ -269,28 +208,73 @@ func (m *MockOnboardingServiceServer) SubmitCDD(arg0 context.Context, arg1 *onbo
 	return ret0, ret1
 }
 
-// SubmitCDD indicates an expected call of SubmitCDD.
+// SubmitCDD indicates an expected call of SubmitCDD
 func (mr *MockOnboardingServiceServerMockRecorder) SubmitCDD(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SubmitCDD", reflect.TypeOf((*MockOnboardingServiceServer)(nil).SubmitCDD), arg0, arg1)
 }
 
-// UpdateAMLStatus mocks base method.
-func (m *MockOnboardingServiceServer) UpdateAMLStatus(arg0 context.Context, arg1 *onboarding.UpdateAMLStatusRequest) (*types.DefaultResponse, error) {
+// GetOnfidoSDKToken mocks base method
+func (m *MockOnboardingServiceServer) GetOnfidoSDKToken(arg0 context.Context, arg1 *onboarding.GetOnfidoSDKTokenRequest) (*onboarding.GetOnfidoSDKTokenResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateAMLStatus", arg0, arg1)
+	ret := m.ctrl.Call(m, "GetOnfidoSDKToken", arg0, arg1)
+	ret0, _ := ret[0].(*onboarding.GetOnfidoSDKTokenResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetOnfidoSDKToken indicates an expected call of GetOnfidoSDKToken
+func (mr *MockOnboardingServiceServerMockRecorder) GetOnfidoSDKToken(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOnfidoSDKToken", reflect.TypeOf((*MockOnboardingServiceServer)(nil).GetOnfidoSDKToken), arg0, arg1)
+}
+
+// GetCDD mocks base method
+func (m *MockOnboardingServiceServer) GetCDD(arg0 context.Context, arg1 *onboarding.GetCDDRequest) (*types.CDD, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCDD", arg0, arg1)
+	ret0, _ := ret[0].(*types.CDD)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCDD indicates an expected call of GetCDD
+func (mr *MockOnboardingServiceServerMockRecorder) GetCDD(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCDD", reflect.TypeOf((*MockOnboardingServiceServer)(nil).GetCDD), arg0, arg1)
+}
+
+// GetCDDs mocks base method
+func (m *MockOnboardingServiceServer) GetCDDs(arg0 context.Context, arg1 *onboarding.GetCDDsRequest) (*onboarding.GetCDDsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCDDs", arg0, arg1)
+	ret0, _ := ret[0].(*onboarding.GetCDDsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCDDs indicates an expected call of GetCDDs
+func (mr *MockOnboardingServiceServerMockRecorder) GetCDDs(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCDDs", reflect.TypeOf((*MockOnboardingServiceServer)(nil).GetCDDs), arg0, arg1)
+}
+
+// RequestResubmit mocks base method
+func (m *MockOnboardingServiceServer) RequestResubmit(arg0 context.Context, arg1 *onboarding.RequestResubmitRequest) (*types.DefaultResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RequestResubmit", arg0, arg1)
 	ret0, _ := ret[0].(*types.DefaultResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// UpdateAMLStatus indicates an expected call of UpdateAMLStatus.
-func (mr *MockOnboardingServiceServerMockRecorder) UpdateAMLStatus(arg0, arg1 interface{}) *gomock.Call {
+// RequestResubmit indicates an expected call of RequestResubmit
+func (mr *MockOnboardingServiceServerMockRecorder) RequestResubmit(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAMLStatus", reflect.TypeOf((*MockOnboardingServiceServer)(nil).UpdateAMLStatus), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RequestResubmit", reflect.TypeOf((*MockOnboardingServiceServer)(nil).RequestResubmit), arg0, arg1)
 }
 
-// UpdateKYCStatus mocks base method.
+// UpdateKYCStatus mocks base method
 func (m *MockOnboardingServiceServer) UpdateKYCStatus(arg0 context.Context, arg1 *onboarding.UpdateKYCStatusRequest) (*types.DefaultResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateKYCStatus", arg0, arg1)
@@ -299,8 +283,23 @@ func (m *MockOnboardingServiceServer) UpdateKYCStatus(arg0 context.Context, arg1
 	return ret0, ret1
 }
 
-// UpdateKYCStatus indicates an expected call of UpdateKYCStatus.
+// UpdateKYCStatus indicates an expected call of UpdateKYCStatus
 func (mr *MockOnboardingServiceServerMockRecorder) UpdateKYCStatus(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateKYCStatus", reflect.TypeOf((*MockOnboardingServiceServer)(nil).UpdateKYCStatus), arg0, arg1)
+}
+
+// UpdateAMLStatus mocks base method
+func (m *MockOnboardingServiceServer) UpdateAMLStatus(arg0 context.Context, arg1 *onboarding.UpdateAMLStatusRequest) (*types.DefaultResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateAMLStatus", arg0, arg1)
+	ret0, _ := ret[0].(*types.DefaultResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateAMLStatus indicates an expected call of UpdateAMLStatus
+func (mr *MockOnboardingServiceServerMockRecorder) UpdateAMLStatus(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAMLStatus", reflect.TypeOf((*MockOnboardingServiceServer)(nil).UpdateAMLStatus), arg0, arg1)
 }

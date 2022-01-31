@@ -555,18 +555,74 @@ func TestMutationResolver_ResetLoginPassword(t *testing.T) {
 }
 
 func TestMutationResolver_CheckCustomerEmail(t *testing.T) {
-	controller := gomock.NewController(t)
-	defer controller.Finish()
-	customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
-	resolverOpts := &ResolverOpts{
-		CustomerService: customerServiceClient,
+	const (
+		success = iota
+		emailNotFound
+		invalidEmail
+	)
+
+	tests := []struct {
+		name     string
+		arg      string
+		testType int
+	}{
+		{
+			name:     "Test check email found successful",
+			arg:      "f@mail.com",
+			testType: success,
+		},
+
+		{
+			name:     "Test error check email not found",
+			arg:      "f@mail.com",
+			testType: emailNotFound,
+		},
+		{
+			name:     "Test invalid email error",
+			arg:      "invalidEmail",
+			testType: invalidEmail,
+		},
 	}
 
-	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
-	resp, err := resolver.CheckCustomerEmail(context.Background(), "", types.DeviceInput{})
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			controller := gomock.NewController(t)
+			defer controller.Finish()
+			customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
+			resolverOpts := &ResolverOpts{
+				CustomerService: customerServiceClient,
+			}
+			resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
 
-	assert.NoError(t, err)
-	assert.NotNil(t, resp)
+			switch test.testType {
+			case success:
+				customerServiceClient.EXPECT().CheckEmail(context.Background(),
+					&customer.CheckEmailRequest{Email: test.arg},
+				).Return(&pbTypes.DefaultResponse{Success: true}, nil)
+
+				resp, err := resolver.CheckCustomerEmail(context.Background(), test.arg, types.DeviceInput{})
+				assert.NoError(t, err)
+				assert.Equal(t, &types.Response{
+					Success: true,
+					Code:    0,
+				}, resp)
+
+			case emailNotFound:
+				customerServiceClient.EXPECT().CheckEmail(context.Background(),
+					&customer.CheckEmailRequest{Email: test.arg},
+				).Return(&pbTypes.DefaultResponse{Success: false}, errors.New("not found"))
+
+				resp, err := resolver.CheckCustomerEmail(context.Background(), test.arg, types.DeviceInput{})
+				assert.Error(t, err)
+				assert.Nil(t, resp)
+
+			case invalidEmail:
+				resp, err := resolver.CheckCustomerEmail(context.Background(), test.arg, types.DeviceInput{})
+				assert.Error(t, err)
+				assert.Nil(t, resp)
+			}
+		})
+	}
 }
 
 func TestMutationResolver_CheckCustomerData(t *testing.T) {
