@@ -4681,6 +4681,7 @@ type Account {
 
 enum AccountStatuses {
     ACTIVE
+    PENDING
     INACTIVE
 }
 

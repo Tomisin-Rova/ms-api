@@ -198,6 +198,14 @@ func (h *helpersfactory) makeAddressFromProto(adddresses []*customerTypes.Addres
 				CodeAlpha3: address.Country.CodeAlpha3,
 				Name:       address.Country.Name,
 			},
+			State:    &address.State,
+			City:     &address.City,
+			Street:   address.Street,
+			Postcode: address.Postcode,
+			Cordinates: &types.Cordinates{
+				Latitude:  float64(address.Coordinates.Latitude),
+				Longitude: float64(address.Coordinates.Longitude),
+			},
 		}
 	}
 	return addresses_
