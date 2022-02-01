@@ -6,24 +6,24 @@ import (
 )
 
 const (
-	InternalErr           = 7101
-	InvalidAuthentication = 7102
+	InternalErr                = 7101
+	InvalidAuthenticationError = 7103
 )
 
 var (
 	errorTypes = map[int]string{
-		InternalErr:           "InternalErr",
-		InvalidAuthentication: "InvalidAuthentication",
+		InternalErr:                "InternalErr",
+		InvalidAuthenticationError: "InvalidAuthenticationError",
 	}
 
 	errorMessages = map[int]string{
-		InternalErr:           "failed to process the request, please try again later.",
-		InvalidAuthentication: "invalid authentication token provided",
+		InternalErr:                "failed to process the request, please try again later.",
+		InvalidAuthenticationError: "invalid authentication token provided",
 	}
 
 	errorDetail = map[int]string{
-		InternalErr:           "failed to process the request, please try again later.",
-		InvalidAuthentication: "invalid authentication token provided",
+		InternalErr:                "failed to process the request, please try again later.",
+		InvalidAuthenticationError: "invalid authentication token provided",
 	}
 )
 

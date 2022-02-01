@@ -268,7 +268,8 @@ func (r *mutationResolver) SubmitCdd(ctx context.Context, cdd types.CDDInput) (*
 	// Get user claims
 	_, err := middlewares.GetClaimsFromCtx(ctx)
 	if err != nil {
-		return &types.Response{Message: &authFailedMessage, Success: false, Code: http.StatusUnauthorized}, nil
+		responseMessage := "User authentication failed"
+		return &types.Response{Message: &responseMessage, Success: false, Code: int64(500)}, err
 	}
 
 	// Build request
@@ -550,7 +551,8 @@ func (r *mutationResolver) RequestResubmit(ctx context.Context, customerID strin
 	// Get user claims
 	_, err := middlewares.GetClaimsFromCtx(ctx)
 	if err != nil {
-		return &types.Response{Message: &authFailedMessage, Success: false, Code: http.StatusUnauthorized}, nil
+		responseMessage := "User authentication failed"
+		return &types.Response{Message: &responseMessage, Success: false, Code: int64(500)}, err
 	}
 
 	// Build request
@@ -600,7 +602,8 @@ func (r *mutationResolver) UpdateKYCStatus(ctx context.Context, id string, statu
 	// Get user claims
 	_, err := middlewares.GetClaimsFromCtx(ctx)
 	if err != nil {
-		return &types.Response{Message: &authFailedMessage, Success: false, Code: http.StatusUnauthorized}, nil
+		responseMessage := "User authentication failed"
+		return &types.Response{Message: &responseMessage, Success: false, Code: int64(500)}, err
 	}
 
 	// Build request
@@ -634,7 +637,8 @@ func (r *mutationResolver) UpdateAMLStatus(ctx context.Context, id string, statu
 	// Get user claims
 	_, err := middlewares.GetClaimsFromCtx(ctx)
 	if err != nil {
-		return &types.Response{Message: &authFailedMessage, Success: false, Code: http.StatusUnauthorized}, nil
+		responseMessage := "User authentication failed"
+		return &types.Response{Message: &responseMessage, Success: false, Code: int64(500)}, err
 	}
 
 	// Build request

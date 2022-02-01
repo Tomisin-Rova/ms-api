@@ -904,12 +904,12 @@ func TestMutationResolver_SubmitCdd(t *testing.T) {
 				}, resp)
 			case errorUnauthenticatedUser:
 				resp, err := resolver.SubmitCdd(testCase.arg.ctx, testCase.arg.cddInput)
-				assert.NoError(t, err)
+				assert.Error(t, err)
 				assert.NotNil(t, resp)
 				assert.Equal(t, &types.Response{
 					Message: &authFailedMessage,
 					Success: false,
-					Code:    http.StatusUnauthorized,
+					Code:    http.StatusInternalServerError,
 				}, resp)
 			case errorSubmitCDD:
 				onboardingServiceClient.EXPECT().SubmitCDD(testCase.arg.ctx, &onboarding.SubmitCDDRequest{
@@ -1532,12 +1532,12 @@ func TestMutationResolver_RequestResubmit(t *testing.T) {
 			case errorUnauthenticated:
 				resp, err := resolver.RequestResubmit(context.Background(), testCase.arg.customerID, testCase.arg.reportIds,
 					testCase.arg.message)
-				assert.NoError(t, err)
+				assert.Error(t, err)
 				assert.NotNil(t, resp)
 				assert.Equal(t, &types.Response{
 					Message: &authFailedMessage,
 					Success: false,
-					Code:    http.StatusUnauthorized,
+					Code:    http.StatusInternalServerError,
 				}, resp)
 			case errorCallingRPC:
 				ctx, _ := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{ID: "customerID"})
@@ -1786,12 +1786,12 @@ func TestMutationResolver_UpdateKYCStatus(t *testing.T) {
 			case errorUnauthenticated:
 				resp, err := resolver.UpdateKYCStatus(context.Background(), testCase.arg.id, testCase.arg.status,
 					testCase.arg.message)
-				assert.NoError(t, err)
+				assert.Error(t, err)
 				assert.NotNil(t, resp)
 				assert.Equal(t, &types.Response{
 					Message: &authFailedMessage,
 					Success: false,
-					Code:    http.StatusUnauthorized,
+					Code:    http.StatusInternalServerError,
 				}, resp)
 			case errorCallRPC:
 				ctx, _ := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{ID: "customerID"})
@@ -1976,12 +1976,12 @@ func TestMutationResolver_UpdateAMLStatus(t *testing.T) {
 			case errorUnauthenticated:
 				resp, err := resolver.UpdateAMLStatus(context.Background(), testCase.arg.id, testCase.arg.status,
 					testCase.arg.message)
-				assert.NoError(t, err)
+				assert.Error(t, err)
 				assert.NotNil(t, resp)
 				assert.Equal(t, &types.Response{
 					Message: &authFailedMessage,
 					Success: false,
-					Code:    http.StatusUnauthorized,
+					Code:    http.StatusInternalServerError,
 				}, resp)
 			case errorCallRPC:
 				ctx, _ := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{ID: "customerID"})

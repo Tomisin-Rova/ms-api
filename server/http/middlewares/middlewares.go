@@ -59,17 +59,17 @@ func (mw *AuthMiddleware) ValidateToken(token string) (*models.JWTClaims, error)
 func GetClaimsFromCtx(ctx context.Context) (*models.JWTClaims, error) {
 	md, ok := metadata.FromOutgoingContext(ctx)
 	if !ok {
-		return nil, errorvalues.Format(errorvalues.InvalidAuthentication, errors.New("unable to parse authenticated user"))
+		return nil, errorvalues.Format(errorvalues.InvalidAuthenticationError, errors.New("unable to parse authenticated user"))
 	}
 	jsonClaims := md.Get(coreMiddleware.AuthenticatedUserMetadataKey)
 	if len(jsonClaims) == 0 {
-		return nil, errorvalues.Format(errorvalues.InvalidAuthentication, errors.New("fail decode authenticated user claims"))
+		return nil, errorvalues.Format(errorvalues.InvalidAuthenticationError, errors.New("fail decode authenticated user claims"))
 	}
 
 	var claims models.JWTClaims
 	err := json.Unmarshal([]byte(jsonClaims[0]), &claims)
 	if err != nil {
-		return nil, errorvalues.Format(errorvalues.InvalidAuthentication, errors.New("fail to unmarshall claims"))
+		return nil, errorvalues.Format(errorvalues.InvalidAuthenticationError, errors.New("fail to unmarshall claims"))
 	}
 
 	return &claims, nil
