@@ -189,9 +189,11 @@ func (r *queryResolver) Cdd(ctx context.Context, filter apiTypes.CommonQueryFilt
 	if filter.ID != nil {
 		request.Id = *filter.ID
 	}
-
 	if filter.Last != nil {
 		request.Last = *filter.Last
+	}
+	if filter.CustomerID != nil {
+		request.CustomerId = *filter.CustomerID
 	}
 
 	resp, err := r.OnBoardingService.GetCDD(ctx, &request)
