@@ -2,7 +2,7 @@ name: Build, deploy to QA
 on:
   push:
     tags:
-      - '.*-rc.*'
+      - '*-rc.[0-9]+'
 
 env:
   PROJECT_ID: ${{ secrets.PROJECT_SHARED }}
