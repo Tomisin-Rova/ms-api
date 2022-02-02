@@ -1269,6 +1269,7 @@ func Test_queryResolver_OnfidoSDKToken(t *testing.T) {
 func Test_queryResolver_Cdd(t *testing.T) {
 	const (
 		success = iota
+		successCustomerId
 		successEmptyAddressAndPhones
 		cddNotFound
 	)
@@ -1281,6 +1282,11 @@ func Test_queryResolver_Cdd(t *testing.T) {
 			name:       "Test get cdd successful",
 			filterLast: true,
 			testType:   success,
+		},
+		{
+			name:       "Test get cdd successful with customerId filter",
+			filterLast: true,
+			testType:   successCustomerId,
 		},
 		{
 			name:       "Test get cdd successful without address or phones",
@@ -1311,6 +1317,19 @@ func Test_queryResolver_Cdd(t *testing.T) {
 				onboardingServiceClient.EXPECT().GetCDD(context.Background(), req).Return(mockCDDResponse, nil)
 
 				resp, err := resolver.Cdd(context.Background(), types.CommonQueryFilterInput{Last: &test.filterLast})
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, resp.ID, mockCDDResponse.Id)
+			case successCustomerId:
+				customerId := "customerId"
+				req := &onboarding.GetCDDRequest{
+					Id:         "",
+					Last:       test.filterLast,
+					CustomerId: customerId,
+				}
+				onboardingServiceClient.EXPECT().GetCDD(context.Background(), req).Return(mockCDDResponse, nil)
+
+				resp, err := resolver.Cdd(context.Background(), types.CommonQueryFilterInput{Last: &test.filterLast, CustomerID: &customerId})
 				assert.NoError(t, err)
 				assert.NotNil(t, resp)
 				assert.Equal(t, resp.ID, mockCDDResponse.Id)
