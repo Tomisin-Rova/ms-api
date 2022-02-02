@@ -63,19 +63,19 @@ func Test_GetClaimsFromCtx(t *testing.T) {
 				claims, err := GetClaimsFromCtx(testCase.arg)
 				assert.Error(t, err)
 				assert.IsType(t, &terror.Terror{}, err)
-				assert.Equal(t, errorvalues.InvalidAuthentication, err.(*terror.Terror).Code())
+				assert.Equal(t, errorvalues.InvalidAuthenticationError, err.(*terror.Terror).Code())
 				assert.Nil(t, claims)
 			case failToDecodeAuthenticatedUserClaims:
 				claims, err := GetClaimsFromCtx(testCase.arg)
 				assert.Error(t, err)
 				assert.IsType(t, &terror.Terror{}, err)
-				assert.Equal(t, errorvalues.InvalidAuthentication, err.(*terror.Terror).Code())
+				assert.Equal(t, errorvalues.InvalidAuthenticationError, err.(*terror.Terror).Code())
 				assert.Nil(t, claims)
 			case failToUnmarshalClaims:
 				claims, err := GetClaimsFromCtx(testCase.arg)
 				assert.Error(t, err)
 				assert.IsType(t, &terror.Terror{}, err)
-				assert.Equal(t, errorvalues.InvalidAuthentication, err.(*terror.Terror).Code())
+				assert.Equal(t, errorvalues.InvalidAuthenticationError, err.(*terror.Terror).Code())
 				assert.Nil(t, claims)
 			case success:
 				claims, err := GetClaimsFromCtx(testCase.arg)

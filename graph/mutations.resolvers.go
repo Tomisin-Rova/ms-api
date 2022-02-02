@@ -8,6 +8,7 @@ import (
 	"errors"
 	"net/http"
 
+	"go.uber.org/zap"
 	"ms.api/graph/generated"
 	errorvalues "ms.api/libs/errors"
 	"ms.api/libs/validator/datevalidator"
@@ -158,12 +159,6 @@ func (r *mutationResolver) Signup(ctx context.Context, customer types.CustomerIn
 }
 
 func (r *mutationResolver) ResetLoginPassword(ctx context.Context, otpToken string, email string, loginPassword string) (*types.Response, error) {
-	// Get user claims
-	_, err := middlewares.GetClaimsFromCtx(ctx)
-	if err != nil {
-		return nil, err
-	}
-
 	// Build request
 	request := customer.ResetLoginPasswordRequest{
 		OtpToken:      otpToken,
@@ -183,9 +178,21 @@ func (r *mutationResolver) ResetLoginPassword(ctx context.Context, otpToken stri
 }
 
 func (r *mutationResolver) CheckCustomerEmail(ctx context.Context, email string, device types.DeviceInput) (*types.Response, error) {
-	msg := "Not implemented"
+	_, err := emailvalidator.Validate(email)
+	if err != nil {
+		r.logger.Info("invalid email supplied", zap.String("email", email))
+		return nil, err
+	}
+
+	resp, err := r.CustomerService.CheckEmail(ctx, &customer.CheckEmailRequest{Email: email})
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO: Temporal implementation, refactor to use correct RPC call when implemented
 	return &types.Response{
-		Message: &msg,
+		Success: resp.Success,
+		Code:    0,
 	}, nil
 }
 
@@ -261,7 +268,8 @@ func (r *mutationResolver) SubmitCdd(ctx context.Context, cdd types.CDDInput) (*
 	// Get user claims
 	_, err := middlewares.GetClaimsFromCtx(ctx)
 	if err != nil {
-		return &types.Response{Message: &authFailedMessage, Success: false, Code: http.StatusUnauthorized}, nil
+		responseMessage := "User authentication failed"
+		return &types.Response{Message: &responseMessage, Success: false, Code: int64(500)}, err
 	}
 
 	// Build request
@@ -543,7 +551,8 @@ func (r *mutationResolver) RequestResubmit(ctx context.Context, customerID strin
 	// Get user claims
 	_, err := middlewares.GetClaimsFromCtx(ctx)
 	if err != nil {
-		return &types.Response{Message: &authFailedMessage, Success: false, Code: http.StatusUnauthorized}, nil
+		responseMessage := "User authentication failed"
+		return &types.Response{Message: &responseMessage, Success: false, Code: int64(500)}, err
 	}
 
 	// Build request
@@ -593,7 +602,8 @@ func (r *mutationResolver) UpdateKYCStatus(ctx context.Context, id string, statu
 	// Get user claims
 	_, err := middlewares.GetClaimsFromCtx(ctx)
 	if err != nil {
-		return &types.Response{Message: &authFailedMessage, Success: false, Code: http.StatusUnauthorized}, nil
+		responseMessage := "User authentication failed"
+		return &types.Response{Message: &responseMessage, Success: false, Code: int64(500)}, err
 	}
 
 	// Build request
@@ -627,7 +637,8 @@ func (r *mutationResolver) UpdateAMLStatus(ctx context.Context, id string, statu
 	// Get user claims
 	_, err := middlewares.GetClaimsFromCtx(ctx)
 	if err != nil {
-		return &types.Response{Message: &authFailedMessage, Success: false, Code: http.StatusUnauthorized}, nil
+		responseMessage := "User authentication failed"
+		return &types.Response{Message: &responseMessage, Success: false, Code: int64(500)}, err
 	}
 
 	// Build request

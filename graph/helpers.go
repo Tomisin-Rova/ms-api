@@ -188,6 +188,10 @@ func (h *helpersfactory) MapProtoCDDStatuses(val customerTypes.CDD_CDDStatuses) 
 }
 
 func (h *helpersfactory) makeAddressFromProto(adddresses []*customerTypes.Address) []*types.Address {
+	if adddresses == nil {
+		return make([]*types.Address, 0)
+	}
+
 	addresses_ := make([]*types.Address, len(adddresses))
 	for i, address := range adddresses {
 		addresses_[i] = &types.Address{
@@ -202,16 +206,25 @@ func (h *helpersfactory) makeAddressFromProto(adddresses []*customerTypes.Addres
 			City:     &address.City,
 			Street:   address.Street,
 			Postcode: address.Postcode,
-			Cordinates: &types.Cordinates{
-				Latitude:  float64(address.Coordinates.Latitude),
-				Longitude: float64(address.Coordinates.Longitude),
-			},
+			Cordinates: func() *types.Cordinates {
+				if address.Coordinates == nil {
+					return &types.Cordinates{}
+				}
+				return &types.Cordinates{
+					Latitude:  float64(address.Coordinates.Latitude),
+					Longitude: float64(address.Coordinates.Longitude),
+				}
+			}(),
 		}
 	}
 	return addresses_
 }
 
 func (h *helpersfactory) makePhonesFromProto(phones []*customerTypes.Phone) []*types.Phone {
+	if phones == nil {
+		return make([]*types.Phone, 0)
+	}
+
 	phones_ := make([]*types.Phone, len(phones))
 	for i, phone := range phones {
 		phones_[i] = &types.Phone{

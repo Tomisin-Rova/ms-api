@@ -6,8 +6,6 @@ import (
 	"net/http"
 	"testing"
 
-	terror "github.com/roava/zebra/errors"
-
 	"github.com/golang/mock/gomock"
 	"github.com/roava/zebra/middleware"
 	"github.com/roava/zebra/models"
@@ -466,7 +464,6 @@ func TestMutationResolver_Signup(t *testing.T) {
 func TestMutationResolver_ResetLoginPassword(t *testing.T) {
 	const (
 		success = iota
-		errorUnauthenticatedUser
 		errorCallingResetLoginPassword
 	)
 
@@ -488,10 +485,6 @@ func TestMutationResolver_ResetLoginPassword(t *testing.T) {
 				loginPassword: "newLoginPassword",
 			},
 			testType: success,
-		},
-		{
-			name:     "Test error unauthenticated user",
-			testType: errorUnauthenticatedUser,
 		},
 		{
 			name: "Test error calling RPC",
@@ -532,12 +525,6 @@ func TestMutationResolver_ResetLoginPassword(t *testing.T) {
 					Success: true,
 					Code:    http.StatusOK,
 				}, response)
-			case errorUnauthenticatedUser:
-				response, err := resolver.ResetLoginPassword(context.Background(), testCase.arg.otpToken, testCase.arg.email, testCase.arg.loginPassword)
-				assert.Error(t, err)
-				assert.IsType(t, &terror.Terror{}, err)
-				assert.Equal(t, errorvalues.InvalidAuthentication, err.(*terror.Terror).Code())
-				assert.Nil(t, response)
 			case errorCallingResetLoginPassword:
 				ctx, _ := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{ID: "customerID"})
 				customerService.EXPECT().ResetLoginPassword(ctx, &customer.ResetLoginPasswordRequest{
@@ -555,18 +542,74 @@ func TestMutationResolver_ResetLoginPassword(t *testing.T) {
 }
 
 func TestMutationResolver_CheckCustomerEmail(t *testing.T) {
-	controller := gomock.NewController(t)
-	defer controller.Finish()
-	customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
-	resolverOpts := &ResolverOpts{
-		CustomerService: customerServiceClient,
+	const (
+		success = iota
+		emailNotFound
+		invalidEmail
+	)
+
+	tests := []struct {
+		name     string
+		arg      string
+		testType int
+	}{
+		{
+			name:     "Test check email found successful",
+			arg:      "f@mail.com",
+			testType: success,
+		},
+
+		{
+			name:     "Test error check email not found",
+			arg:      "f@mail.com",
+			testType: emailNotFound,
+		},
+		{
+			name:     "Test invalid email error",
+			arg:      "invalidEmail",
+			testType: invalidEmail,
+		},
 	}
 
-	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
-	resp, err := resolver.CheckCustomerEmail(context.Background(), "", types.DeviceInput{})
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			controller := gomock.NewController(t)
+			defer controller.Finish()
+			customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
+			resolverOpts := &ResolverOpts{
+				CustomerService: customerServiceClient,
+			}
+			resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
 
-	assert.NoError(t, err)
-	assert.NotNil(t, resp)
+			switch test.testType {
+			case success:
+				customerServiceClient.EXPECT().CheckEmail(context.Background(),
+					&customer.CheckEmailRequest{Email: test.arg},
+				).Return(&pbTypes.DefaultResponse{Success: true}, nil)
+
+				resp, err := resolver.CheckCustomerEmail(context.Background(), test.arg, types.DeviceInput{})
+				assert.NoError(t, err)
+				assert.Equal(t, &types.Response{
+					Success: true,
+					Code:    0,
+				}, resp)
+
+			case emailNotFound:
+				customerServiceClient.EXPECT().CheckEmail(context.Background(),
+					&customer.CheckEmailRequest{Email: test.arg},
+				).Return(&pbTypes.DefaultResponse{Success: false}, errors.New("not found"))
+
+				resp, err := resolver.CheckCustomerEmail(context.Background(), test.arg, types.DeviceInput{})
+				assert.Error(t, err)
+				assert.Nil(t, resp)
+
+			case invalidEmail:
+				resp, err := resolver.CheckCustomerEmail(context.Background(), test.arg, types.DeviceInput{})
+				assert.Error(t, err)
+				assert.Nil(t, resp)
+			}
+		})
+	}
 }
 
 func TestMutationResolver_CheckCustomerData(t *testing.T) {
@@ -861,12 +904,12 @@ func TestMutationResolver_SubmitCdd(t *testing.T) {
 				}, resp)
 			case errorUnauthenticatedUser:
 				resp, err := resolver.SubmitCdd(testCase.arg.ctx, testCase.arg.cddInput)
-				assert.NoError(t, err)
+				assert.Error(t, err)
 				assert.NotNil(t, resp)
 				assert.Equal(t, &types.Response{
 					Message: &authFailedMessage,
 					Success: false,
-					Code:    http.StatusUnauthorized,
+					Code:    http.StatusInternalServerError,
 				}, resp)
 			case errorSubmitCDD:
 				onboardingServiceClient.EXPECT().SubmitCDD(testCase.arg.ctx, &onboarding.SubmitCDDRequest{
@@ -1489,12 +1532,12 @@ func TestMutationResolver_RequestResubmit(t *testing.T) {
 			case errorUnauthenticated:
 				resp, err := resolver.RequestResubmit(context.Background(), testCase.arg.customerID, testCase.arg.reportIds,
 					testCase.arg.message)
-				assert.NoError(t, err)
+				assert.Error(t, err)
 				assert.NotNil(t, resp)
 				assert.Equal(t, &types.Response{
 					Message: &authFailedMessage,
 					Success: false,
-					Code:    http.StatusUnauthorized,
+					Code:    http.StatusInternalServerError,
 				}, resp)
 			case errorCallingRPC:
 				ctx, _ := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{ID: "customerID"})
@@ -1743,12 +1786,12 @@ func TestMutationResolver_UpdateKYCStatus(t *testing.T) {
 			case errorUnauthenticated:
 				resp, err := resolver.UpdateKYCStatus(context.Background(), testCase.arg.id, testCase.arg.status,
 					testCase.arg.message)
-				assert.NoError(t, err)
+				assert.Error(t, err)
 				assert.NotNil(t, resp)
 				assert.Equal(t, &types.Response{
 					Message: &authFailedMessage,
 					Success: false,
-					Code:    http.StatusUnauthorized,
+					Code:    http.StatusInternalServerError,
 				}, resp)
 			case errorCallRPC:
 				ctx, _ := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{ID: "customerID"})
@@ -1933,12 +1976,12 @@ func TestMutationResolver_UpdateAMLStatus(t *testing.T) {
 			case errorUnauthenticated:
 				resp, err := resolver.UpdateAMLStatus(context.Background(), testCase.arg.id, testCase.arg.status,
 					testCase.arg.message)
-				assert.NoError(t, err)
+				assert.Error(t, err)
 				assert.NotNil(t, resp)
 				assert.Equal(t, &types.Response{
 					Message: &authFailedMessage,
 					Success: false,
-					Code:    http.StatusUnauthorized,
+					Code:    http.StatusInternalServerError,
 				}, resp)
 			case errorCallRPC:
 				ctx, _ := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{ID: "customerID"})
