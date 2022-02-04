@@ -3,6 +3,8 @@ package graph
 import (
 	"context"
 	"errors"
+	terror "github.com/roava/zebra/errors"
+	accountPb "ms.api/protos/pb/account"
 	"net/http"
 	"testing"
 
@@ -1374,17 +1376,92 @@ func TestMutationResolver_CheckBvn(t *testing.T) {
 }
 
 func TestMutationResolver_CreateAccount(t *testing.T) {
-	controller := gomock.NewController(t)
-	defer controller.Finish()
-	accountServiceClient := mocks.NewMockAccountServiceClient(controller)
-	resolverOpts := &ResolverOpts{
-		AccountService: accountServiceClient,
-	}
-	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
-	resp, err := resolver.CreateAccount(context.Background(), types.AccountInput{})
+	const (
+		success = iota
+		errorAuthentication
+		errorCreatingAccount
+	)
 
-	assert.NoError(t, err)
-	assert.NotNil(t, resp)
+	var tests = []struct {
+		name     string
+		arg      types.AccountInput
+		testType int
+	}{
+		{
+			name: "Test name",
+			arg: types.AccountInput{
+				ProductID: "produtId",
+			},
+			testType: success,
+		},
+		{
+			name:     "Test error unauthenticated",
+			testType: errorAuthentication,
+		},
+		{
+			name: "Test error calling CreateAccount",
+			arg: types.AccountInput{
+				ProductID: "produtId",
+			},
+			testType: errorCreatingAccount,
+		},
+	}
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			controller := gomock.NewController(t)
+			defer controller.Finish()
+			accountServiceClient := mocks.NewMockAccountServiceClient(controller)
+			resolverOpts := &ResolverOpts{
+				AccountService: accountServiceClient,
+			}
+			resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
+			switch testCase.testType {
+			case success:
+				ctx, _ := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{
+					Client:   models.APP,
+					ID:       "123456",
+					Email:    "email@roava.app",
+					DeviceID: "12345"})
+
+				request := accountPb.CreateAccountRequest{
+					ProductId: testCase.arg.ProductID,
+				}
+				accountServiceClient.EXPECT().CreateAccount(ctx, &request).Return(&pbTypes.Account{Id: "accountId"}, nil)
+
+				resp, err := resolver.CreateAccount(ctx, testCase.arg)
+
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, &types.Response{
+					Success: true,
+					Code:    http.StatusOK,
+				}, resp)
+			case errorAuthentication:
+				resp, err := resolver.CreateAccount(context.Background(), testCase.arg)
+
+				assert.Error(t, err)
+				assert.IsType(t, &terror.Terror{}, err)
+				assert.Equal(t, errorvalues.InvalidAuthenticationError, err.(*terror.Terror).Code())
+				assert.Nil(t, resp)
+			case errorCreatingAccount:
+				ctx, _ := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{
+					Client:   models.APP,
+					ID:       "123456",
+					Email:    "email@roava.app",
+					DeviceID: "12345"})
+
+				request := accountPb.CreateAccountRequest{
+					ProductId: testCase.arg.ProductID,
+				}
+				accountServiceClient.EXPECT().CreateAccount(ctx, &request).Return(nil, errors.New(""))
+
+				resp, err := resolver.CreateAccount(ctx, testCase.arg)
+
+				assert.Error(t, err)
+				assert.Nil(t, resp)
+			}
+		})
+	}
 }
 
 func TestMutationResolver_CreateVaultAccount(t *testing.T) {

@@ -15,6 +15,7 @@ import (
 	devicevalidator "ms.api/libs/validator/device"
 	emailvalidator "ms.api/libs/validator/email"
 	"ms.api/libs/validator/phonenumbervalidator"
+	accountPb "ms.api/protos/pb/account"
 	"ms.api/protos/pb/auth"
 	"ms.api/protos/pb/customer"
 	"ms.api/protos/pb/onboarding"
@@ -506,9 +507,25 @@ func (r *mutationResolver) CheckBvn(ctx context.Context, bvn string, phone strin
 }
 
 func (r *mutationResolver) CreateAccount(ctx context.Context, account types.AccountInput) (*types.Response, error) {
-	msg := "Not implemented"
+	// Get user claims
+	_, err := middlewares.GetClaimsFromCtx(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Build request
+	request := accountPb.CreateAccountRequest{
+		ProductId: account.ProductID,
+	}
+	// Call RPC
+	_, err = r.AccountService.CreateAccount(ctx, &request)
+	if err != nil {
+		return nil, err
+	}
+
 	return &types.Response{
-		Message: &msg,
+		Success: true,
+		Code:    http.StatusOK,
 	}, nil
 }
 
