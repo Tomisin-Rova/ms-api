@@ -12,6 +12,7 @@ import (
 	"go.uber.org/zap"
 	"ms.api/graph/generated"
 	emailvalidator "ms.api/libs/validator/email"
+	"ms.api/protos/pb/account"
 	"ms.api/protos/pb/customer"
 	"ms.api/protos/pb/onboarding"
 	"ms.api/protos/pb/types"
@@ -283,19 +284,71 @@ func (r *queryResolver) Contents(ctx context.Context, first *int64, after *strin
 }
 
 func (r *queryResolver) Product(ctx context.Context, id string) (*apiTypes.Product, error) {
-	return &apiTypes.Product{
-		ID: "n/a",
-	}, errors.New("not implemented")
+	result, err := r.AccountService.GetProduct(ctx, &account.GetProductRequest{Id: id})
+	if err != nil {
+		return nil, err
+	}
+
+	helpers := &helpersfactory{}
+
+	return helpers.makeProductFromProto(result), nil
 }
 
 func (r *queryResolver) Products(ctx context.Context, first *int64, after *string, last *int64, before *string, statuses []apiTypes.ProductStatuses, typeArg *apiTypes.ProductTypes) (*apiTypes.ProductConnection, error) {
+	helper := helpersfactory{}
+	productStatuses := make([]types.Product_ProductStatuses, len(statuses))
+
+	if len(statuses) > 0 {
+		for index, state := range statuses {
+			productStatuses[index] = helper.GetProtoProductStatuses(state)
+		}
+	}
+
+	// Build request
+	request := account.GetProductsRequest{}
+
+	if first != nil {
+		request.First = int32(*first)
+	}
+	if after != nil {
+		request.After = *after
+	}
+	if last != nil {
+		request.Last = int32(*last)
+	}
+	if before != nil {
+		request.Before = *before
+	}
+
+	if typeArg != nil {
+		request.Type = helper.GetProtoProductTypes(*typeArg)
+	}
+
+	if len(statuses) > 0 {
+		request.Statuses = productStatuses
+	}
+
+	resp, err := r.AccountService.GetProducts(ctx, &request)
+
+	if err != nil {
+		return nil, err
+	}
+
+	nodes := make([]*apiTypes.Product, len(resp.Nodes))
+	for index, node := range resp.Nodes {
+		nodes[index] = helper.makeProductFromProto(node)
+	}
+
+	pageInfo := apiTypes.PageInfo{
+		HasNextPage:     resp.PaginationInfo.HasNextPage,
+		HasPreviousPage: resp.PaginationInfo.HasPreviousPage,
+		StartCursor:     &resp.PaginationInfo.StartCursor,
+		EndCursor:       &resp.PaginationInfo.EndCursor,
+	}
+
 	return &apiTypes.ProductConnection{
-		Nodes: []*apiTypes.Product{
-			{
-				ID: "n/a",
-			},
-		},
-	}, errors.New("not implemented")
+		Nodes: nodes, PageInfo: &pageInfo,
+		TotalCount: int64(resp.TotalCount)}, nil
 }
 
 func (r *queryResolver) Banks(ctx context.Context, first *int64, after *string, last *int64, before *string) (*apiTypes.BankConnection, error) {
