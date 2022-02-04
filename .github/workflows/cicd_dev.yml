@@ -33,7 +33,7 @@ jobs:
         uses: actions/checkout@v2
       # Set credentials to get zebra library
       - name: Setup credentials to access private repo
-        run: git config --global url."https://${{ secrets.PAT2 }}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
+        run: git config --global url."https://${{ secrets.PAT }}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
       # Run fmt of code
       - name: check formatting
         run: make fmt-check
@@ -61,7 +61,7 @@ jobs:
         uses: actions/checkout@v2
       # Set credentials to get zebra library
       - name: Setup credentials to access private repo
-        run: git config --global url."https://${{ secrets.PAT2 }}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
+        run: git config --global url."https://${{ secrets.PAT }}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
       # Run unit tests + coverage
       - name: Run unit tests
         run: make test
@@ -79,7 +79,7 @@ jobs:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
         # Set credentials to get zebra library
       - name: Setup credentials to access private repo
-        run: git config --global url."https://${{ secrets.PAT2 }}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
+        run: git config --global url."https://${{ secrets.PAT }}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
       - name: Generate test cover report
         run:  go test -race -covermode=atomic -coverprofile=coverage.out -json ./... > report.json
       - name: SonarCloud Scan
@@ -105,7 +105,7 @@ jobs:
         uses: actions/checkout@v2
       # Set credentials to get zebra library
       - name: Setup credentials to access private repo
-        run: git config --global url."https://${{ secrets.PAT2 }}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
+        run: git config --global url."https://${{ secrets.PAT }}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
       # Run build of the application
       - name: Run build
         run: go build .
@@ -153,7 +153,7 @@ jobs:
           -t "$REGISTRY_HOSTNAME"/"$CONTAINER":"${GITHUB_SHA::8}" \
           -t "$REGISTRY_HOSTNAME"/"$CONTAINER":"$GITHUB_SHA" \
             --build-arg GITHUB_SHA="$GITHUB_SHA" \
-            --build-arg ACCESS_TOKEN="${{ secrets.PAT2 }}" \
+            --build-arg ACCESS_TOKEN="${{ secrets.PAT }}" \
             --build-arg GITHUB_REF="$GITHUB_REF" .
           docker tag "$REGISTRY_HOSTNAME"/"$CONTAINER":"$TAG" "$REGISTRY_HOSTNAME"/"$CONTAINER":latest
 
