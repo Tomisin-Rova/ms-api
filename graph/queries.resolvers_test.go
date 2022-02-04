@@ -13,6 +13,7 @@ import (
 	"go.uber.org/zap/zaptest"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"ms.api/mocks"
+	"ms.api/protos/pb/account"
 	"ms.api/protos/pb/customer"
 	"ms.api/protos/pb/onboarding"
 	pbTypes "ms.api/protos/pb/types"
@@ -1520,6 +1521,29 @@ func Test_queryResolver_Me(t *testing.T) {
 }
 
 func Test_queryResolver_Product(t *testing.T) {
+	const (
+		success = iota
+		productNotFound
+	)
+
+	tests := []struct {
+		name     string
+		arg      string
+		testType int
+	}{
+		{
+			name:     "Test product found successfully with a given product_id",
+			arg:      "1",
+			testType: success,
+		},
+
+		{
+			name:     "Test error product not found with an invalidId",
+			arg:      "invalidId",
+			testType: productNotFound,
+		},
+	}
+
 	controller := gomock.NewController(t)
 	defer controller.Finish()
 	accountServiceClient := mocks.NewMockAccountServiceClient(controller)
@@ -1527,29 +1551,426 @@ func Test_queryResolver_Product(t *testing.T) {
 		AccountService: accountServiceClient,
 	}
 	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Query()
-	resp, err := resolver.Product(context.Background(), "")
 
-	assert.Error(t, err)
-	assert.NotNil(t, resp)
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			switch test.testType {
+			case success:
+				accountServiceClient.EXPECT().GetProduct(context.Background(),
+					&account.GetProductRequest{Id: test.arg},
+				).Return(&pbTypes.Product{
+					Id:   test.arg,
+					Type: pbTypes.Product_CURRENT_ACCOUNT,
+					Currency: &pbTypes.Currency{
+						Id:     "currency_id",
+						Symbol: "#",
+						Code:   "GBP",
+						Name:   "Pounds",
+					},
+					Name:                  "Product name",
+					TermLength:            9,
+					InterestRate:          0.5,
+					MinimumOpeningBalance: 100,
+					Mambu: &pbTypes.ProductMambu{
+						EncodedKey: "mambu-encoded-key",
+					},
+					Status:   pbTypes.Product_ACTIVE,
+					StatusTs: timestamppb.Now(),
+					Ts:       timestamppb.Now(),
+				}, nil)
+
+				resp, err := resolver.Product(context.Background(), test.arg)
+
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.NotEmpty(t, resp)
+				assert.Equal(t, resp.ID, test.arg)
+
+			case productNotFound:
+				accountServiceClient.EXPECT().GetProduct(context.Background(),
+					&account.GetProductRequest{Id: test.arg}).Return(nil, errors.New("product not found"))
+
+				resp, err := resolver.Product(context.Background(), test.arg)
+				assert.Error(t, err)
+				assert.Nil(t, resp)
+			}
+		})
+	}
+
 }
 
 func Test_queryResolver_Products(t *testing.T) {
-	controller := gomock.NewController(t)
-	defer controller.Finish()
-	accountServiceClient := mocks.NewMockAccountServiceClient(controller)
-	resolverOpts := &ResolverOpts{
-		AccountService: accountServiceClient,
+	const (
+		successFirst = iota
+		successLast
+		successAfter
+		successBefore
+	)
+
+	tests := []struct {
+		name string
+		args struct {
+			first       int64
+			after       string
+			last        int64
+			before      string
+			statuses    []types.ProductStatuses
+			productType types.ProductTypes
+		}
+		testType int
+	}{
+		{
+			name: "Test first ten product successfully",
+			args: struct {
+				first       int64
+				after       string
+				last        int64
+				before      string
+				statuses    []types.ProductStatuses
+				productType types.ProductTypes
+			}{
+				first:       int64(10),
+				after:       "",
+				last:        0,
+				before:      "",
+				statuses:    []types.ProductStatuses{types.ProductStatusesActive},
+				productType: types.ProductTypesCurrentAccount,
+			},
+			testType: successFirst,
+		},
+
+		{
+			name: "Test last ten questionaries successfully",
+			args: struct {
+				first       int64
+				after       string
+				last        int64
+				before      string
+				statuses    []types.ProductStatuses
+				productType types.ProductTypes
+			}{
+				first:       0,
+				after:       "",
+				last:        int64(10),
+				before:      "",
+				statuses:    []types.ProductStatuses{types.ProductStatusesInactive},
+				productType: types.ProductTypesFixedDeposit,
+			},
+			testType: successLast,
+		},
+
+		{
+			name: "Test get products successfully after a given id",
+			args: struct {
+				first       int64
+				after       string
+				last        int64
+				before      string
+				statuses    []types.ProductStatuses
+				productType types.ProductTypes
+			}{
+				first:    int64(0),
+				after:    "1",
+				last:     int64(0),
+				before:   "",
+				statuses: []types.ProductStatuses{},
+			},
+			testType: successAfter,
+		},
+
+		{
+			name: "Test get products successfully before a given id",
+			args: struct {
+				first       int64
+				after       string
+				last        int64
+				before      string
+				statuses    []types.ProductStatuses
+				productType types.ProductTypes
+			}{
+				first:       0,
+				after:       "",
+				last:        int64(10),
+				before:      "2",
+				statuses:    []types.ProductStatuses{},
+				productType: types.ProductTypesFixedDeposit,
+			},
+			testType: successBefore,
+		},
 	}
-	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Query()
-	first := int64(10)
-	after := "after"
-	last := int64(10)
-	before := "before"
 
-	resp, err := resolver.Products(context.Background(), &first, &after, &last, &before, []types.ProductStatuses{}, nil)
+	for _, test := range tests {
+		controller := gomock.NewController(t)
+		defer controller.Finish()
 
-	assert.Error(t, err)
-	assert.NotNil(t, resp)
+		accountServiceClient := mocks.NewMockAccountServiceClient(controller)
+		resolverOpts := &ResolverOpts{
+			AccountService: accountServiceClient,
+		}
+		resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Query()
+
+		t.Run(test.name, func(t *testing.T) {
+			switch test.testType {
+			case successFirst:
+				helpers := helpersfactory{}
+				// convert statuses to Product_ProductStatuses
+				statuses := make([]pbTypes.Product_ProductStatuses, len(test.args.statuses))
+				for index, state := range test.args.statuses {
+					statuses[index] = helpers.GetProtoProductStatuses(state)
+				}
+
+				accountServiceClient.EXPECT().GetProducts(context.Background(),
+					&account.GetProductsRequest{
+						First:    int32(test.args.first),
+						After:    test.args.after,
+						Last:     int32(test.args.last),
+						Before:   test.args.before,
+						Statuses: statuses,
+						Type:     helpers.GetProtoProductTypes(test.args.productType),
+					}).Return(&account.GetProductsResponse{
+					Nodes: []*pbTypes.Product{
+						{
+							Id:   "1",
+							Type: pbTypes.Product_CURRENT_ACCOUNT,
+							Currency: &pbTypes.Currency{
+								Id:     "currency_id",
+								Symbol: "#",
+								Code:   "GBP",
+								Name:   "Pounds",
+							},
+							Name:                  "Product name",
+							TermLength:            9,
+							InterestRate:          0.5,
+							MinimumOpeningBalance: 100,
+							Mambu: &pbTypes.ProductMambu{
+								EncodedKey: "mambu-encoded-key",
+							},
+							Status:   pbTypes.Product_ACTIVE,
+							StatusTs: timestamppb.Now(),
+							Ts:       timestamppb.Now(),
+						},
+						{
+							Id:   "2",
+							Type: pbTypes.Product_CURRENT_ACCOUNT,
+							Currency: &pbTypes.Currency{
+								Id:     "currency_id",
+								Symbol: "#",
+								Code:   "GBP",
+								Name:   "Pounds",
+							},
+							Name:                  "Product name",
+							TermLength:            9,
+							InterestRate:          0.5,
+							MinimumOpeningBalance: 100,
+							Mambu: &pbTypes.ProductMambu{
+								EncodedKey: "mambu-encoded-key",
+							},
+							Status:   pbTypes.Product_ACTIVE,
+							StatusTs: timestamppb.Now(),
+							Ts:       timestamppb.Now(),
+						},
+					},
+
+					PaginationInfo: &pbTypes.PaginationInfo{
+						HasNextPage:     false,
+						HasPreviousPage: false,
+						EndCursor:       "end_cursor",
+						StartCursor:     "start_cursor",
+					},
+
+					TotalCount: 2,
+				}, nil)
+
+				resp, err := resolver.Products(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, test.args.statuses, &test.args.productType)
+
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, resp.TotalCount, int64(2))
+
+			case successLast:
+				helpers := helpersfactory{}
+				// convert statuses to Product_ProductStatuses
+				statuses := make([]pbTypes.Product_ProductStatuses, len(test.args.statuses))
+				for index, state := range test.args.statuses {
+					statuses[index] = helpers.GetProtoProductStatuses(state)
+				}
+
+				accountServiceClient.EXPECT().GetProducts(context.Background(),
+					&account.GetProductsRequest{
+						First:    int32(test.args.first),
+						After:    test.args.after,
+						Last:     int32(test.args.last),
+						Before:   test.args.before,
+						Statuses: statuses,
+						Type:     helpers.GetProtoProductTypes(test.args.productType),
+					}).Return(&account.GetProductsResponse{
+					Nodes: []*pbTypes.Product{
+						{
+							Id:   "2",
+							Type: pbTypes.Product_FIXED_DEPOSIT,
+							Currency: &pbTypes.Currency{
+								Id:     "currency_id",
+								Symbol: "#",
+								Code:   "GBP",
+								Name:   "Pounds",
+							},
+							Name:                  "Product name",
+							TermLength:            9,
+							InterestRate:          0.5,
+							MinimumOpeningBalance: 100,
+							Mambu: &pbTypes.ProductMambu{
+								EncodedKey: "mambu-encoded-key",
+							},
+							Status:   pbTypes.Product_ACTIVE,
+							StatusTs: timestamppb.Now(),
+							Ts:       timestamppb.Now(),
+						},
+						{
+							Id:   "1",
+							Type: pbTypes.Product_FIXED_DEPOSIT,
+							Currency: &pbTypes.Currency{
+								Id:     "currency_id",
+								Symbol: "#",
+								Code:   "GBP",
+								Name:   "Pounds",
+							},
+							Name:                  "Product name",
+							TermLength:            9,
+							InterestRate:          0.5,
+							MinimumOpeningBalance: 100,
+							Mambu: &pbTypes.ProductMambu{
+								EncodedKey: "mambu-encoded-key",
+							},
+							Status:   pbTypes.Product_ACTIVE,
+							StatusTs: timestamppb.Now(),
+							Ts:       timestamppb.Now(),
+						},
+					},
+
+					PaginationInfo: &pbTypes.PaginationInfo{
+						HasNextPage:     false,
+						HasPreviousPage: false,
+						EndCursor:       "end_cursor",
+						StartCursor:     "start_cursor",
+					},
+
+					TotalCount: 2,
+				}, nil)
+
+				resp, err := resolver.Products(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, test.args.statuses, &test.args.productType)
+
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, resp.TotalCount, int64(2))
+
+			case successAfter:
+				helpers := helpersfactory{}
+
+				accountServiceClient.EXPECT().GetProducts(
+					context.Background(),
+					&account.GetProductsRequest{
+						First:  int32(test.args.first),
+						After:  test.args.after,
+						Last:   int32(test.args.last),
+						Before: test.args.before,
+						Type:   helpers.GetProtoProductTypes(test.args.productType),
+					}).Return(
+					&account.GetProductsResponse{
+						Nodes: []*pbTypes.Product{
+							{
+								Id:   "2",
+								Type: pbTypes.Product_FIXED_DEPOSIT,
+								Currency: &pbTypes.Currency{
+									Id:     "currency_id",
+									Symbol: "#",
+									Code:   "GBP",
+									Name:   "Pounds",
+								},
+								Name:                  "Product name",
+								TermLength:            9,
+								InterestRate:          0.5,
+								MinimumOpeningBalance: 100,
+								Mambu: &pbTypes.ProductMambu{
+									EncodedKey: "mambu-encoded-key",
+								},
+								Status:   pbTypes.Product_ACTIVE,
+								StatusTs: timestamppb.Now(),
+								Ts:       timestamppb.Now(),
+							},
+						},
+
+						PaginationInfo: &pbTypes.PaginationInfo{
+							HasNextPage:     false,
+							HasPreviousPage: false,
+							EndCursor:       "end_cursor",
+							StartCursor:     "start_cursor",
+						},
+
+						TotalCount: 1,
+					}, nil)
+
+				resp, err := resolver.Products(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, test.args.statuses, &test.args.productType)
+
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, resp.TotalCount, int64(1))
+
+			case successBefore:
+				helpers := helpersfactory{}
+
+				accountServiceClient.EXPECT().GetProducts(
+					context.Background(),
+					&account.GetProductsRequest{
+						First:  int32(test.args.first),
+						After:  test.args.after,
+						Last:   int32(test.args.last),
+						Before: test.args.before,
+						Type:   helpers.GetProtoProductTypes(test.args.productType),
+					}).Return(
+					&account.GetProductsResponse{
+						Nodes: []*pbTypes.Product{
+							{
+								Id:   "1",
+								Type: pbTypes.Product_FIXED_DEPOSIT,
+								Currency: &pbTypes.Currency{
+									Id:     "currency_id",
+									Symbol: "#",
+									Code:   "GBP",
+									Name:   "Pounds",
+								},
+								Name:                  "Product name",
+								TermLength:            9,
+								InterestRate:          0.5,
+								MinimumOpeningBalance: 100,
+								Mambu: &pbTypes.ProductMambu{
+									EncodedKey: "mambu-encoded-key",
+								},
+								Status:   pbTypes.Product_ACTIVE,
+								StatusTs: timestamppb.Now(),
+								Ts:       timestamppb.Now(),
+							},
+						},
+
+						PaginationInfo: &pbTypes.PaginationInfo{
+							HasNextPage:     false,
+							HasPreviousPage: false,
+							EndCursor:       "end_cursor",
+							StartCursor:     "start_cursor",
+						},
+
+						TotalCount: 1,
+					}, nil)
+
+				resp, err := resolver.Products(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, test.args.statuses, &test.args.productType)
+
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, resp.TotalCount, int64(1))
+			}
+
+		})
+	}
+
 }
 
 func Test_queryResolver_Banks(t *testing.T) {

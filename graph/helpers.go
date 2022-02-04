@@ -2,7 +2,7 @@ package graph
 
 import (
 	"ms.api/protos/pb/auth"
-	customerTypes "ms.api/protos/pb/types"
+	protoTypes "ms.api/protos/pb/types"
 	"ms.api/types"
 )
 
@@ -12,55 +12,55 @@ var (
 )
 
 type Helper interface {
-	MapQuestionaryStatus(val types.QuestionaryStatuses) customerTypes.Questionary_QuestionaryStatuses
-	MapQuestionaryType(val types.QuestionaryTypes) customerTypes.Questionary_QuestionaryTypes
-	MapProtoQuesionaryStatus(val customerTypes.Questionary_QuestionaryStatuses) types.QuestionaryStatuses
-	MapProtoQuestionaryType(val customerTypes.Questionary_QuestionaryTypes) types.QuestionaryTypes
+	MapQuestionaryStatus(val types.QuestionaryStatuses) protoTypes.Questionary_QuestionaryStatuses
+	MapQuestionaryType(val types.QuestionaryTypes) protoTypes.Questionary_QuestionaryTypes
+	MapProtoQuesionaryStatus(val protoTypes.Questionary_QuestionaryStatuses) types.QuestionaryStatuses
+	MapProtoQuestionaryType(val protoTypes.Questionary_QuestionaryTypes) types.QuestionaryTypes
 	GetDeveicePreferenceTypesIndex(val types.DevicePreferencesTypes) int32
-	GetProtoCustomerStatuses(val types.CustomerStatuses) customerTypes.Customer_CustomerStatuses
-	DeviceTokenInputFromModel(tokenType types.DeviceTokenTypes) customerTypes.DeviceToken_DeviceTokenTypes
-	PreferenceInputFromModel(input types.DevicePreferencesTypes) customerTypes.DevicePreferences_DevicePreferencesTypes
+	GetProtoCustomerStatuses(val types.CustomerStatuses) protoTypes.Customer_CustomerStatuses
+	DeviceTokenInputFromModel(tokenType types.DeviceTokenTypes) protoTypes.DeviceToken_DeviceTokenTypes
+	PreferenceInputFromModel(input types.DevicePreferencesTypes) protoTypes.DevicePreferences_DevicePreferencesTypes
 	StaffLoginTypeFromModel(input types.AuthType) auth.StaffLoginRequest_AuthType
 }
 
 type helpersfactory struct{}
 
-func (h *helpersfactory) MapQuestionaryStatus(val types.QuestionaryStatuses) customerTypes.Questionary_QuestionaryStatuses {
+func (h *helpersfactory) MapQuestionaryStatus(val types.QuestionaryStatuses) protoTypes.Questionary_QuestionaryStatuses {
 	switch val {
 	case types.QuestionaryStatusesActive:
-		return customerTypes.Questionary_ACTIVE
+		return protoTypes.Questionary_ACTIVE
 	case types.QuestionaryStatusesInactive:
-		return customerTypes.Questionary_INACTIVE
+		return protoTypes.Questionary_INACTIVE
 	default:
 		// should never happen
 		return -1
 	}
 }
 
-func (h *helpersfactory) MapQuestionaryType(val types.QuestionaryTypes) customerTypes.Questionary_QuestionaryTypes {
+func (h *helpersfactory) MapQuestionaryType(val types.QuestionaryTypes) protoTypes.Questionary_QuestionaryTypes {
 	switch val {
 	case types.QuestionaryTypesReasons:
-		return customerTypes.Questionary_REASONS
+		return protoTypes.Questionary_REASONS
 	default:
 		// should never happen
 		return -1
 	}
 }
 
-func (h *helpersfactory) MapProtoQuesionaryStatus(val customerTypes.Questionary_QuestionaryStatuses) types.QuestionaryStatuses {
+func (h *helpersfactory) MapProtoQuesionaryStatus(val protoTypes.Questionary_QuestionaryStatuses) types.QuestionaryStatuses {
 	switch val {
-	case customerTypes.Questionary_ACTIVE:
+	case protoTypes.Questionary_ACTIVE:
 		return types.QuestionaryStatusesActive
-	case customerTypes.Questionary_INACTIVE:
+	case protoTypes.Questionary_INACTIVE:
 		return types.QuestionaryStatusesInactive
 	}
 
 	return ""
 }
 
-func (h *helpersfactory) MapProtoQuestionaryType(val customerTypes.Questionary_QuestionaryTypes) types.QuestionaryTypes {
+func (h *helpersfactory) MapProtoQuestionaryType(val protoTypes.Questionary_QuestionaryTypes) types.QuestionaryTypes {
 	switch val {
-	case customerTypes.Questionary_REASONS:
+	case protoTypes.Questionary_REASONS:
 		return types.QuestionaryTypesReasons
 	}
 
@@ -79,19 +79,19 @@ func (h *helpersfactory) GetDeveicePreferenceTypesIndex(val types.DevicePreferen
 	}
 }
 
-func (h *helpersfactory) MapProtoCustomerStatuses(val customerTypes.Customer_CustomerStatuses) types.CustomerStatuses {
+func (h *helpersfactory) MapProtoCustomerStatuses(val protoTypes.Customer_CustomerStatuses) types.CustomerStatuses {
 	switch val {
-	case customerTypes.Customer_SIGNEDUP:
+	case protoTypes.Customer_SIGNEDUP:
 		return types.CustomerStatusesSignedup
-	case customerTypes.Customer_REGISTERED:
+	case protoTypes.Customer_REGISTERED:
 		return types.CustomerStatusesRegistered
-	case customerTypes.Customer_VERIFIED:
+	case protoTypes.Customer_VERIFIED:
 		return types.CustomerStatusesVerified
-	case customerTypes.Customer_ONBOARDED:
+	case protoTypes.Customer_ONBOARDED:
 		return types.CustomerStatusesOnboarded
-	case customerTypes.Customer_REJECTED:
+	case protoTypes.Customer_REJECTED:
 		return types.CustomerStatusesRegistered
-	case customerTypes.Customer_EXITED:
+	case protoTypes.Customer_EXITED:
 		return types.CustomerStatusesExited
 	default:
 		// should never happen
@@ -99,49 +99,71 @@ func (h *helpersfactory) MapProtoCustomerStatuses(val customerTypes.Customer_Cus
 	}
 }
 
-func (h *helpersfactory) GetProtoCustomerStatuses(val types.CustomerStatuses) customerTypes.Customer_CustomerStatuses {
+func (h *helpersfactory) GetProtoCustomerStatuses(val types.CustomerStatuses) protoTypes.Customer_CustomerStatuses {
 	switch val {
 	case types.CustomerStatusesSignedup:
-		return customerTypes.Customer_SIGNEDUP
+		return protoTypes.Customer_SIGNEDUP
 	case types.CustomerStatusesRegistered:
-		return customerTypes.Customer_REGISTERED
+		return protoTypes.Customer_REGISTERED
 	case types.CustomerStatusesVerified:
-		return customerTypes.Customer_VERIFIED
+		return protoTypes.Customer_VERIFIED
 	case types.CustomerStatusesOnboarded:
-		return customerTypes.Customer_ONBOARDED
+		return protoTypes.Customer_ONBOARDED
 	case types.CustomerStatusesRejected:
-		return customerTypes.Customer_REJECTED
+		return protoTypes.Customer_REJECTED
 	case types.CustomerStatusesExited:
-		return customerTypes.Customer_EXITED
+		return protoTypes.Customer_EXITED
 	default:
 		// should never happen
 		return -1
 	}
 }
 
-func (h *helpersfactory) DeviceTokenInputFromModel(tokenType types.DeviceTokenTypes) customerTypes.DeviceToken_DeviceTokenTypes {
+func (h *helpersfactory) GetProtoProductStatuses(val types.ProductStatuses) protoTypes.Product_ProductStatuses {
+	switch val {
+	case types.ProductStatusesActive:
+		return protoTypes.Product_ACTIVE
+	case types.ProductStatusesInactive:
+		return protoTypes.Product_INACTIVE
+	default:
+		return -1
+	}
+}
+
+func (h *helpersfactory) GetProtoProductTypes(val types.ProductTypes) protoTypes.Product_ProductTypes {
+	switch val {
+	case types.ProductTypesCurrentAccount:
+		return protoTypes.Product_CURRENT_ACCOUNT
+	case types.ProductTypesFixedDeposit:
+		return protoTypes.Product_FIXED_DEPOSIT
+	default:
+		return -1
+	}
+}
+
+func (h *helpersfactory) DeviceTokenInputFromModel(tokenType types.DeviceTokenTypes) protoTypes.DeviceToken_DeviceTokenTypes {
 	switch tokenType {
 	default:
-		return customerTypes.DeviceToken_FIREBASE
+		return protoTypes.DeviceToken_FIREBASE
 	}
 }
 
-func (h *helpersfactory) PreferenceInputFromModel(input types.DevicePreferencesTypes) customerTypes.DevicePreferences_DevicePreferencesTypes {
+func (h *helpersfactory) PreferenceInputFromModel(input types.DevicePreferencesTypes) protoTypes.DevicePreferences_DevicePreferencesTypes {
 	switch input {
 	case types.DevicePreferencesTypesPush:
-		return customerTypes.DevicePreferences_PUSH
+		return protoTypes.DevicePreferences_PUSH
 	case types.DevicePreferencesTypesBiometrics:
-		return customerTypes.DevicePreferences_BIOMETRICS
+		return protoTypes.DevicePreferences_BIOMETRICS
 	default:
-		return customerTypes.DevicePreferences_PUSH
+		return protoTypes.DevicePreferences_PUSH
 	}
 }
 
-func (h *helpersfactory) MapProtoStaffStatuses(val customerTypes.Staff_StaffStatuses) types.StaffStatuses {
+func (h *helpersfactory) MapProtoStaffStatuses(val protoTypes.Staff_StaffStatuses) types.StaffStatuses {
 	switch val {
-	case customerTypes.Staff_ACTIVE:
+	case protoTypes.Staff_ACTIVE:
 		return types.StaffStatusesActive
-	case customerTypes.Staff_INACTIVE:
+	case protoTypes.Staff_INACTIVE:
 		return types.StaffStatusesInactive
 	default:
 		return ""
@@ -157,37 +179,59 @@ func (h *helpersfactory) StaffLoginTypeFromModel(input types.AuthType) auth.Staf
 	}
 }
 
-func (h *helpersfactory) MapCDDStatusesFromModel(val types.CDDStatuses) customerTypes.CDD_CDDStatuses {
+func (h *helpersfactory) MapCDDStatusesFromModel(val types.CDDStatuses) protoTypes.CDD_CDDStatuses {
 	switch val {
 	case types.CDDStatusesPending:
-		return customerTypes.CDD_PENDING
+		return protoTypes.CDD_PENDING
 	case types.CDDStatusesManualReview:
-		return customerTypes.CDD_MANUAL_REVIEW
+		return protoTypes.CDD_MANUAL_REVIEW
 	case types.CDDStatusesApproved:
-		return customerTypes.CDD_APPROVED
+		return protoTypes.CDD_APPROVED
 	case types.CDDStatusesDeclined:
-		return customerTypes.CDD_DECLINED
+		return protoTypes.CDD_DECLINED
 	default:
 		return -1
 	}
 }
 
-func (h *helpersfactory) MapProtoCDDStatuses(val customerTypes.CDD_CDDStatuses) types.CDDStatuses {
+func (h *helpersfactory) MapProtoCDDStatuses(val protoTypes.CDD_CDDStatuses) types.CDDStatuses {
 	switch val {
-	case customerTypes.CDD_PENDING:
+	case protoTypes.CDD_PENDING:
 		return types.CDDStatusesPending
-	case customerTypes.CDD_MANUAL_REVIEW:
+	case protoTypes.CDD_MANUAL_REVIEW:
 		return types.CDDStatusesManualReview
-	case customerTypes.CDD_APPROVED:
+	case protoTypes.CDD_APPROVED:
 		return types.CDDStatusesApproved
-	case customerTypes.CDD_DECLINED:
+	case protoTypes.CDD_DECLINED:
 		return types.CDDStatusesDeclined
 	default:
 		return ""
 	}
 }
 
-func (h *helpersfactory) makeAddressFromProto(adddresses []*customerTypes.Address) []*types.Address {
+func (h *helpersfactory) MapProtoProductStatuses(val protoTypes.Product_ProductStatuses) types.ProductStatuses {
+	switch val {
+	case protoTypes.Product_ACTIVE:
+		return types.ProductStatusesActive
+	case protoTypes.Product_INACTIVE:
+		return types.ProductStatusesInactive
+	default:
+		return ""
+	}
+}
+
+func (h *helpersfactory) MapProtoProductTypes(val protoTypes.Product_ProductTypes) types.ProductTypes {
+	switch val {
+	case protoTypes.Product_CURRENT_ACCOUNT:
+		return types.ProductTypesCurrentAccount
+	case protoTypes.Product_FIXED_DEPOSIT:
+		return types.ProductTypesFixedDeposit
+	default:
+		return ""
+	}
+}
+
+func (h *helpersfactory) makeAddressFromProto(adddresses []*protoTypes.Address) []*types.Address {
 	if adddresses == nil {
 		return make([]*types.Address, 0)
 	}
@@ -220,7 +264,7 @@ func (h *helpersfactory) makeAddressFromProto(adddresses []*customerTypes.Addres
 	return addresses_
 }
 
-func (h *helpersfactory) makePhonesFromProto(phones []*customerTypes.Phone) []*types.Phone {
+func (h *helpersfactory) makePhonesFromProto(phones []*protoTypes.Phone) []*types.Phone {
 	if phones == nil {
 		return make([]*types.Phone, 0)
 	}
@@ -236,7 +280,7 @@ func (h *helpersfactory) makePhonesFromProto(phones []*customerTypes.Phone) []*t
 	return phones_
 }
 
-func (h *helpersfactory) makeCustomerFromProto(customer *customerTypes.Customer) *types.Customer {
+func (h *helpersfactory) makeCustomerFromProto(customer *protoTypes.Customer) *types.Customer {
 	return &types.Customer{
 		ID:        customer.Id,
 		FirstName: customer.FirstName,
@@ -255,7 +299,7 @@ func (h *helpersfactory) makeCustomerFromProto(customer *customerTypes.Customer)
 	}
 }
 
-func (h *helpersfactory) makeStaffFromProto(staff *customerTypes.Staff) *types.Staff {
+func (h *helpersfactory) makeStaffFromProto(staff *protoTypes.Staff) *types.Staff {
 	return &types.Staff{
 		ID:        staff.Id,
 		Name:      staff.Name,
@@ -270,11 +314,11 @@ func (h *helpersfactory) makeStaffFromProto(staff *customerTypes.Staff) *types.S
 	}
 }
 
-func (h *helpersfactory) mapOrganizationStatuses(val customerTypes.Organization_OrganizationStatuses) types.OrganizationStatuses {
+func (h *helpersfactory) mapOrganizationStatuses(val protoTypes.Organization_OrganizationStatuses) types.OrganizationStatuses {
 	switch val {
-	case customerTypes.Organization_ACTIVE:
+	case protoTypes.Organization_ACTIVE:
 		return types.OrganizationStatusesActive
-	case customerTypes.Organization_INACTIVE:
+	case protoTypes.Organization_INACTIVE:
 		return types.OrganizationStatusesInactive
 
 	default:
@@ -282,7 +326,7 @@ func (h *helpersfactory) mapOrganizationStatuses(val customerTypes.Organization_
 	}
 }
 
-func (h *helpersfactory) makeOrganisationFromProto(organization *customerTypes.Organization) *types.Organization {
+func (h *helpersfactory) makeOrganisationFromProto(organization *protoTypes.Organization) *types.Organization {
 	return &types.Organization{
 		ID:       organization.Id,
 		Name:     organization.Name,
@@ -292,150 +336,150 @@ func (h *helpersfactory) makeOrganisationFromProto(organization *customerTypes.O
 	}
 }
 
-func (h *helpersfactory) mapPOAStatuses(val customerTypes.POA_POAStatuses) types.POAStatuses {
+func (h *helpersfactory) mapPOAStatuses(val protoTypes.POA_POAStatuses) types.POAStatuses {
 	switch val {
-	case customerTypes.POA_APPROVED:
+	case protoTypes.POA_APPROVED:
 		return types.POAStatusesApproved
-	case customerTypes.POA_MANUAL_REVIEW:
+	case protoTypes.POA_MANUAL_REVIEW:
 		return types.POAStatusesManualReview
-	case customerTypes.POA_PENDING:
+	case protoTypes.POA_PENDING:
 		return types.POAStatusesPending
-	case customerTypes.POA_DECLINED:
+	case protoTypes.POA_DECLINED:
 		return types.POAStatusesDeclined
 	default:
 		return ""
 	}
 }
 
-func (h *helpersfactory) mapPOAActionStatuses(val customerTypes.POAAction_POAStatuses) types.POAStatuses {
+func (h *helpersfactory) mapPOAActionStatuses(val protoTypes.POAAction_POAStatuses) types.POAStatuses {
 	switch val {
-	case customerTypes.POAAction_APPROVED:
+	case protoTypes.POAAction_APPROVED:
 		return types.POAStatusesApproved
-	case customerTypes.POAAction_MANUAL_REVIEW:
+	case protoTypes.POAAction_MANUAL_REVIEW:
 		return types.POAStatusesManualReview
-	case customerTypes.POAAction_PENDING:
+	case protoTypes.POAAction_PENDING:
 		return types.POAStatusesPending
-	case customerTypes.POAAction_DECLINED:
+	case protoTypes.POAAction_DECLINED:
 		return types.POAStatusesDeclined
 	default:
 		return ""
 	}
 }
 
-func (h *helpersfactory) mapPOAActionTypes(val customerTypes.POAAction_POAActionTypes) types.POAActionTypes {
+func (h *helpersfactory) mapPOAActionTypes(val protoTypes.POAAction_POAActionTypes) types.POAActionTypes {
 	switch val {
-	case customerTypes.POAAction_CHANGE_STATUS:
+	case protoTypes.POAAction_CHANGE_STATUS:
 		return types.POAActionTypesChangeStatus
 	default:
 		return ""
 	}
 }
 
-func (h *helpersfactory) mapKYCStatuses(val customerTypes.KYC_KYCStatuses) types.KYCStatuses {
+func (h *helpersfactory) mapKYCStatuses(val protoTypes.KYC_KYCStatuses) types.KYCStatuses {
 	switch val {
-	case customerTypes.KYC_APPROVED:
+	case protoTypes.KYC_APPROVED:
 		return types.KYCStatusesApproved
-	case customerTypes.KYC_MANUAL_REVIEW:
+	case protoTypes.KYC_MANUAL_REVIEW:
 		return types.KYCStatusesManualReview
-	case customerTypes.KYC_PENDING:
+	case protoTypes.KYC_PENDING:
 		return types.KYCStatusesPending
-	case customerTypes.KYC_DECLINED:
+	case protoTypes.KYC_DECLINED:
 		return types.KYCStatusesDeclined
 	default:
 		return ""
 	}
 }
 
-func (h *helpersfactory) mapKYCActionTypes(val customerTypes.KYCAction_KYCActionTypes) types.KYCActionTypes {
+func (h *helpersfactory) mapKYCActionTypes(val protoTypes.KYCAction_KYCActionTypes) types.KYCActionTypes {
 	switch val {
-	case customerTypes.KYCAction_CHANGE_STATUS:
+	case protoTypes.KYCAction_CHANGE_STATUS:
 		return types.KYCActionTypesChangeStatus
 	default:
 		return ""
 	}
 }
 
-func (h *helpersfactory) mapKYCActionStatuses(val customerTypes.KYCAction_KYCStatuses) types.KYCStatuses {
+func (h *helpersfactory) mapKYCActionStatuses(val protoTypes.KYCAction_KYCStatuses) types.KYCStatuses {
 	switch val {
-	case customerTypes.KYCAction_APPROVED:
+	case protoTypes.KYCAction_APPROVED:
 		return types.KYCStatusesApproved
-	case customerTypes.KYCAction_MANUAL_REVIEW:
+	case protoTypes.KYCAction_MANUAL_REVIEW:
 		return types.KYCStatusesManualReview
-	case customerTypes.KYCAction_PENDING:
+	case protoTypes.KYCAction_PENDING:
 		return types.KYCStatusesPending
-	case customerTypes.KYCAction_DECLINED:
+	case protoTypes.KYCAction_DECLINED:
 		return types.KYCStatusesDeclined
 	default:
 		return ""
 	}
 }
 
-func (h *helpersfactory) mapKYCReportStatuses(val customerTypes.Report_ReportStatuses) types.ReportStatuses {
+func (h *helpersfactory) mapKYCReportStatuses(val protoTypes.Report_ReportStatuses) types.ReportStatuses {
 	switch val {
-	case customerTypes.Report_APPROVED:
+	case protoTypes.Report_APPROVED:
 		return types.ReportStatusesApproved
-	case customerTypes.Report_MANUAL_REVIEW:
+	case protoTypes.Report_MANUAL_REVIEW:
 		return types.ReportStatusesManualReview
-	case customerTypes.Report_PENDING:
+	case protoTypes.Report_PENDING:
 		return types.ReportStatusesPending
-	case customerTypes.Report_DECLINED:
+	case protoTypes.Report_DECLINED:
 		return types.ReportStatusesDeclined
 	default:
 		return ""
 	}
 }
 
-func (h *helpersfactory) mapKYCReportTypes(val customerTypes.Report_ReportTypes) types.KYCTypes {
+func (h *helpersfactory) mapKYCReportTypes(val protoTypes.Report_ReportTypes) types.KYCTypes {
 	switch val {
-	case customerTypes.Report_DOCUMENT:
+	case protoTypes.Report_DOCUMENT:
 		return types.KYCTypesDocument
-	case customerTypes.Report_FACIAL_VIDEO:
+	case protoTypes.Report_FACIAL_VIDEO:
 		return types.KYCTypesFacialVideo
 	default:
 		return ""
 	}
 }
 
-func (h *helpersfactory) mapAMLStatuses(val customerTypes.AML_AMLStatuses) types.AMLStatuses {
+func (h *helpersfactory) mapAMLStatuses(val protoTypes.AML_AMLStatuses) types.AMLStatuses {
 	switch val {
-	case customerTypes.AML_APPROVED:
+	case protoTypes.AML_APPROVED:
 		return types.AMLStatusesApproved
-	case customerTypes.AML_MANUAL_REVIEW:
+	case protoTypes.AML_MANUAL_REVIEW:
 		return types.AMLStatusesManualReview
-	case customerTypes.AML_PENDING:
+	case protoTypes.AML_PENDING:
 		return types.AMLStatusesPending
-	case customerTypes.AML_DECLINED:
+	case protoTypes.AML_DECLINED:
 		return types.AMLStatusesDeclined
 	default:
 		return ""
 	}
 }
 
-func (h *helpersfactory) mapAMLActionStatuses(val customerTypes.AMLAction_AMLStatuses) types.AMLStatuses {
+func (h *helpersfactory) mapAMLActionStatuses(val protoTypes.AMLAction_AMLStatuses) types.AMLStatuses {
 	switch val {
-	case customerTypes.AMLAction_APPROVED:
+	case protoTypes.AMLAction_APPROVED:
 		return types.AMLStatusesApproved
-	case customerTypes.AMLAction_MANUAL_REVIEW:
+	case protoTypes.AMLAction_MANUAL_REVIEW:
 		return types.AMLStatusesManualReview
-	case customerTypes.AMLAction_PENDING:
+	case protoTypes.AMLAction_PENDING:
 		return types.AMLStatusesPending
-	case customerTypes.AMLAction_DECLINED:
+	case protoTypes.AMLAction_DECLINED:
 		return types.AMLStatusesDeclined
 	default:
 		return ""
 	}
 }
 
-func (h *helpersfactory) mapAMLActionTypes(val customerTypes.AMLAction_AMLActionTypes) types.AMLActionTypes {
+func (h *helpersfactory) mapAMLActionTypes(val protoTypes.AMLAction_AMLActionTypes) types.AMLActionTypes {
 	switch val {
-	case customerTypes.AMLAction_CHANGE_STATUS:
+	case protoTypes.AMLAction_CHANGE_STATUS:
 		return types.AMLActionTypesChangeStatus
 	default:
 		return ""
 	}
 }
 
-func (h *helpersfactory) makeAMLsFromProto(amls []*customerTypes.AML) []*types.Aml {
+func (h *helpersfactory) makeAMLsFromProto(amls []*protoTypes.AML) []*types.Aml {
 	amls_ := make([]*types.Aml, len(amls))
 	for i, aml := range amls {
 		amlActions := make([]*types.AMLAction, len(aml.Actions))
@@ -464,7 +508,7 @@ func (h *helpersfactory) makeAMLsFromProto(amls []*customerTypes.AML) []*types.A
 	return amls_
 }
 
-func (h *helpersfactory) makeKYCsFromProto(kycs []*customerTypes.KYC) []*types.Kyc {
+func (h *helpersfactory) makeKYCsFromProto(kycs []*protoTypes.KYC) []*types.Kyc {
 	kycs_ := make([]*types.Kyc, len(kycs))
 	for i, kyc := range kycs {
 		reports := make([]*types.Reports, len(kyc.Reports))
@@ -513,7 +557,7 @@ func (h *helpersfactory) makeKYCsFromProto(kycs []*customerTypes.KYC) []*types.K
 	return kycs_
 }
 
-func (h *helpersfactory) makePOAsFromProto(poas []*customerTypes.POA) []*types.Poa {
+func (h *helpersfactory) makePOAsFromProto(poas []*protoTypes.POA) []*types.Poa {
 	poas_ := make([]*types.Poa, len(poas))
 	for i, poa := range poas {
 		poaActions := make([]*types.POAAction, len(poa.Actions))
@@ -544,4 +588,35 @@ func (h *helpersfactory) makePOAsFromProto(poas []*customerTypes.POA) []*types.P
 	}
 
 	return poas_
+}
+
+func (h *helpersfactory) makeProductFromProto(product *protoTypes.Product) *types.Product {
+	result := &types.Product{}
+
+	if product != nil {
+		termLength := int64(product.TermLength)
+		interestRate := float64(product.InterestRate)
+		minimumOpeningBalance := float64(product.MinimumOpeningBalance)
+		result = &types.Product{
+			ID:   product.Id,
+			Type: h.MapProtoProductTypes(product.Type),
+			Currency: &types.Currency{
+				ID:     product.Currency.Id,
+				Symbol: product.Currency.Symbol,
+				Code:   product.Currency.Code,
+				Name:   product.Currency.Name,
+			},
+			TermLength:            &termLength,
+			InterestRate:          &interestRate,
+			MinimumOpeningBalance: &minimumOpeningBalance,
+			Mambu: &types.ProductMambu{
+				EncodedKey: &product.Mambu.EncodedKey,
+			},
+			Status:   h.MapProtoProductStatuses(product.Status),
+			StatusTs: product.StatusTs.AsTime().Unix(),
+			Ts:       product.Ts.AsTime().Unix(),
+		}
+	}
+
+	return result
 }
