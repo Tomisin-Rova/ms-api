@@ -281,6 +281,12 @@ func (h *helpersfactory) makePhonesFromProto(phones []*protoTypes.Phone) []*type
 }
 
 func (h *helpersfactory) makeCustomerFromProto(customer *protoTypes.Customer) *types.Customer {
+	email := &types.Email{}
+	if customer.Email != nil {
+		email.Address = customer.Email.Address
+		email.Verified = customer.Email.Verified
+	}
+
 	return &types.Customer{
 		ID:        customer.Id,
 		FirstName: customer.FirstName,
@@ -289,13 +295,10 @@ func (h *helpersfactory) makeCustomerFromProto(customer *protoTypes.Customer) *t
 		Bvn:       &customer.Bvn,
 		Addresses: h.makeAddressFromProto(customer.Addresses),
 		Phones:    h.makePhonesFromProto(customer.Phones),
-		Email: &types.Email{
-			Address:  customer.Email.Address,
-			Verified: customer.Email.Verified,
-		},
-		Status:   h.MapProtoCustomerStatuses(customer.Status),
-		StatusTs: customer.StatusTs.AsTime().Unix(),
-		Ts:       customer.Ts.AsTime().Unix(),
+		Email:     email,
+		Status:    h.MapProtoCustomerStatuses(customer.Status),
+		StatusTs:  customer.StatusTs.AsTime().Unix(),
+		Ts:        customer.Ts.AsTime().Unix(),
 	}
 }
 

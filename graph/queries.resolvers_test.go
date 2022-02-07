@@ -846,9 +846,7 @@ var (
 		},
 		Status: pbTypes.CDD_APPROVED,
 	}
-)
 
-var (
 	mockExpectedContents = &customer.GetContentsResponse{
 		Nodes: []*pbTypes.Content{
 			{
@@ -879,6 +877,44 @@ var (
 		},
 
 		TotalCount: 3,
+	}
+
+	mockAccountResponse = &pbTypes.Account{
+		Id: "account-id",
+		Customer: &pbTypes.Customer{
+			Id:        "customer-id",
+			FirstName: "first",
+			LastName:  "last",
+			Addresses: []*pbTypes.Address{
+				{
+					Primary: true,
+					Country: &pbTypes.Country{
+						Id:   "country-id",
+						Name: "some country",
+					},
+				},
+			},
+		},
+		Product: &pbTypes.Product{
+			Id:   "product-id",
+			Type: pbTypes.Product_CURRENT_ACCOUNT,
+			Currency: &pbTypes.Currency{
+				Id:     "currency_id",
+				Symbol: "#",
+				Code:   "GBP",
+				Name:   "Pounds",
+			},
+			Name:                  "Product name",
+			TermLength:            9,
+			InterestRate:          0.5,
+			MinimumOpeningBalance: 100,
+			Mambu: &pbTypes.ProductMambu{
+				EncodedKey: "mambu-encoded-key",
+			},
+			Status:   pbTypes.Product_ACTIVE,
+			StatusTs: timestamppb.Now(),
+			Ts:       timestamppb.Now(),
+		},
 	}
 )
 
@@ -1993,6 +2029,28 @@ func Test_queryResolver_Banks(t *testing.T) {
 }
 
 func Test_queryResolver_Account(t *testing.T) {
+	const (
+		failOnAccountNotFound = iota
+		success
+	)
+
+	tests := []struct {
+		name     string
+		arg      string
+		testType int
+	}{
+		{
+			name:     "fail on GetAccount error",
+			arg:      "",
+			testType: failOnAccountNotFound,
+		},
+		{
+			name:     "Test product found successfully with a given product_id",
+			arg:      "1",
+			testType: success,
+		},
+	}
+
 	controller := gomock.NewController(t)
 	defer controller.Finish()
 	accountServiceClient := mocks.NewMockAccountServiceClient(controller)
@@ -2000,10 +2058,26 @@ func Test_queryResolver_Account(t *testing.T) {
 		AccountService: accountServiceClient,
 	}
 	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Query()
-	resp, err := resolver.Account(context.Background(), "")
 
-	assert.Error(t, err)
-	assert.NotNil(t, resp)
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			switch test.testType {
+			case failOnAccountNotFound:
+				req := &account.GetAccountRequest{Id: test.arg}
+				accountServiceClient.EXPECT().GetAccount(context.Background(), req).Return(nil, errors.New("")).Times(1)
+				resp, err := resolver.Account(context.Background(), test.arg)
+				assert.Error(t, err)
+				assert.Nil(t, resp)
+			case success:
+				req := &account.GetAccountRequest{Id: test.arg}
+				accountServiceClient.EXPECT().GetAccount(context.Background(), req).Return(mockAccountResponse, nil).Times(1)
+				resp, err := resolver.Account(context.Background(), test.arg)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.NotEmpty(t, resp)
+			}
+		})
+	}
 }
 
 func Test_queryResolver_Transactions(t *testing.T) {
@@ -6849,12 +6923,74 @@ func TestQueryResolver_Countries(t *testing.T) {
 }
 
 func TestQueryResolver_Accounts(t *testing.T) {
-	resolverOpts := &ResolverOpts{}
-	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Query()
+	const (
+		failOnGetAccountsError = iota
+		success
+	)
 
-	resp, err := resolver.Accounts(context.Background(), nil, nil, nil, nil, nil, nil)
-	assert.Error(t, err)
-	assert.NotNil(t, resp)
+	testCases := []struct {
+		name     string
+		arg      *account.GetAccountsRequest
+		testType int
+	}{
+		{
+			name:     "fail on GetAccounts error",
+			arg:      &account.GetAccountsRequest{},
+			testType: failOnGetAccountsError,
+		},
+		{
+			name: "success",
+			arg: &account.GetAccountsRequest{
+				First: 2,
+				After: "after-object-id",
+			},
+			testType: success,
+		},
+	}
+
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	accountServiceClient := mocks.NewMockAccountServiceClient(controller)
+	resolverOpts := &ResolverOpts{
+		AccountService: accountServiceClient,
+	}
+	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Query()
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			switch testCase.testType {
+			case failOnGetAccountsError:
+				req := testCase.arg
+				first := int64(req.First)
+				last := int64(req.Last)
+				statuses := []types.AccountStatuses{}
+				productTypes := []types.ProductTypes{}
+				accountServiceClient.EXPECT().GetAccounts(context.Background(), gomock.Any()).Return(nil, errors.New("")).Times(1)
+				accounts, err := resolver.Accounts(context.Background(), &first, &req.After, &last, &req.Before, statuses, productTypes)
+				assert.Error(t, err)
+				assert.Nil(t, accounts)
+			case success:
+				req := testCase.arg
+				first := int64(req.First)
+				last := int64(req.Last)
+				statuses := []types.AccountStatuses{types.AccountStatusesActive}
+				productTypes := []types.ProductTypes{types.ProductTypesCurrentAccount}
+				resp := account.GetAccountsResponse{
+					Nodes: []*pbTypes.Account{mockAccountResponse},
+					PaginationInfo: &pbTypes.PaginationInfo{
+						HasNextPage:     false,
+						HasPreviousPage: false,
+						StartCursor:     "",
+						EndCursor:       "",
+					},
+				}
+				accountServiceClient.EXPECT().GetAccounts(context.Background(), gomock.Any()).Return(&resp, nil).Times(1)
+				accounts, err := resolver.Accounts(context.Background(), &first, &req.After, &last, &req.Before, statuses, productTypes)
+				assert.NoError(t, err)
+				assert.NotNil(t, accounts)
+			}
+		})
+	}
+
 }
 
 func TestQueryResolver_Transaction(t *testing.T) {
