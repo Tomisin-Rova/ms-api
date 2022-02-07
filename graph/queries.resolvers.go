@@ -291,7 +291,7 @@ func (r *queryResolver) Product(ctx context.Context, id string) (*apiTypes.Produ
 
 	helpers := &helpersfactory{}
 
-	return helpers.makeProductFromProto(result), nil
+	return helpers.MakeProductFromProto(result), nil
 }
 
 func (r *queryResolver) Products(ctx context.Context, first *int64, after *string, last *int64, before *string, statuses []apiTypes.ProductStatuses, typeArg *apiTypes.ProductTypes) (*apiTypes.ProductConnection, error) {
@@ -336,7 +336,7 @@ func (r *queryResolver) Products(ctx context.Context, first *int64, after *strin
 
 	nodes := make([]*apiTypes.Product, len(resp.Nodes))
 	for index, node := range resp.Nodes {
-		nodes[index] = helper.makeProductFromProto(node)
+		nodes[index] = helper.MakeProductFromProto(node)
 	}
 
 	pageInfo := apiTypes.PageInfo{
@@ -362,15 +362,69 @@ func (r *queryResolver) Banks(ctx context.Context, first *int64, after *string, 
 }
 
 func (r *queryResolver) Account(ctx context.Context, id string) (*apiTypes.Account, error) {
-	return &apiTypes.Account{
-		ID: "n/a",
-	}, errors.New("not implemented")
+	request := account.GetAccountRequest{Id: id}
+	account, err := r.AccountService.GetAccount(ctx, &request)
+	if err != nil {
+		return nil, err
+	}
+
+	helpers := helpersfactory{}
+	return helpers.MakeAccountFromProto(account), nil
 }
 
-func (r *queryResolver) Accounts(ctx context.Context, first *int64, after *string, last *int64, before *string, statuses []apiTypes.AccountStatuses, types []apiTypes.ProductTypes) (*apiTypes.AccountConnection, error) {
+func (r *queryResolver) Accounts(ctx context.Context, first *int64, after *string, last *int64, before *string, statuses []apiTypes.AccountStatuses, productTypes []apiTypes.ProductTypes) (*apiTypes.AccountConnection, error) {
+	helpers := helpersfactory{}
+	request := account.GetAccountsRequest{
+		Statuses:     make([]types.Account_AccountStatuses, 0),
+		ProductTypes: make([]types.Product_ProductTypes, 0),
+	}
+
+	if first != nil {
+		request.First = int32(*first)
+	}
+	if after != nil {
+		request.After = *after
+	}
+	if last != nil {
+		request.Last = int32(*last)
+	}
+	if before != nil {
+		request.Before = *before
+	}
+	if len(statuses) > 0 {
+		for _, status := range statuses {
+			request.Statuses = append(request.Statuses, helpers.MapAccountStatuses(status))
+		}
+	}
+	if len(productTypes) > 0 {
+		for _, productType := range productTypes {
+			request.ProductTypes = append(request.ProductTypes, helpers.GetProtoProductTypes(productType))
+		}
+	}
+
+	resp, err := r.AccountService.GetAccounts(ctx, &request)
+	if err != nil {
+		return nil, err
+	}
+
+	nodes := make([]*apiTypes.Account, len(resp.Nodes))
+	for i, account := range resp.Nodes {
+		nodes[i] = helpers.MakeAccountFromProto(account)
+	}
+
+	pageInfo := &apiTypes.PageInfo{}
+	if resp.PaginationInfo != nil {
+		pageInfo.StartCursor = &resp.PaginationInfo.StartCursor
+		pageInfo.EndCursor = &resp.PaginationInfo.EndCursor
+		pageInfo.HasNextPage = resp.PaginationInfo.HasNextPage
+		pageInfo.HasPreviousPage = resp.PaginationInfo.HasPreviousPage
+	}
+
 	return &apiTypes.AccountConnection{
-		TotalCount: 0,
-	}, errors.New("not implemented")
+		Nodes:      nodes,
+		PageInfo:   pageInfo,
+		TotalCount: int64(resp.TotalCount),
+	}, nil
 }
 
 func (r *queryResolver) Transaction(ctx context.Context, id string) (*apiTypes.Transaction, error) {
