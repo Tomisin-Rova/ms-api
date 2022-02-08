@@ -281,6 +281,12 @@ func (h *helpersfactory) makePhonesFromProto(phones []*protoTypes.Phone) []*type
 }
 
 func (h *helpersfactory) makeCustomerFromProto(customer *protoTypes.Customer) *types.Customer {
+	email := &types.Email{}
+	if customer.Email != nil {
+		email.Address = customer.Email.Address
+		email.Verified = customer.Email.Verified
+	}
+
 	return &types.Customer{
 		ID:        customer.Id,
 		FirstName: customer.FirstName,
@@ -289,13 +295,23 @@ func (h *helpersfactory) makeCustomerFromProto(customer *protoTypes.Customer) *t
 		Bvn:       &customer.Bvn,
 		Addresses: h.makeAddressFromProto(customer.Addresses),
 		Phones:    h.makePhonesFromProto(customer.Phones),
-		Email: &types.Email{
-			Address:  customer.Email.Address,
-			Verified: customer.Email.Verified,
-		},
-		Status:   h.MapProtoCustomerStatuses(customer.Status),
-		StatusTs: customer.StatusTs.AsTime().Unix(),
-		Ts:       customer.Ts.AsTime().Unix(),
+		Email:     email,
+		Status:    h.MapProtoCustomerStatuses(customer.Status),
+		StatusTs:  customer.StatusTs.AsTime().Unix(),
+		Ts:        customer.Ts.AsTime().Unix(),
+	}
+}
+
+func (h *helpersfactory) MakeCurrencyFromProto(currency *protoTypes.Currency) *types.Currency {
+	if currency == nil {
+		return &types.Currency{}
+	}
+
+	return &types.Currency{
+		ID:     currency.Id,
+		Name:   currency.Name,
+		Code:   currency.Code,
+		Symbol: currency.Symbol,
 	}
 }
 
@@ -590,33 +606,97 @@ func (h *helpersfactory) makePOAsFromProto(poas []*protoTypes.POA) []*types.Poa 
 	return poas_
 }
 
-func (h *helpersfactory) makeProductFromProto(product *protoTypes.Product) *types.Product {
-	result := &types.Product{}
-
-	if product != nil {
-		termLength := int64(product.TermLength)
-		interestRate := float64(product.InterestRate)
-		minimumOpeningBalance := float64(product.MinimumOpeningBalance)
-		result = &types.Product{
-			ID:   product.Id,
-			Type: h.MapProtoProductTypes(product.Type),
-			Currency: &types.Currency{
-				ID:     product.Currency.Id,
-				Symbol: product.Currency.Symbol,
-				Code:   product.Currency.Code,
-				Name:   product.Currency.Name,
-			},
-			TermLength:            &termLength,
-			InterestRate:          &interestRate,
-			MinimumOpeningBalance: &minimumOpeningBalance,
-			Mambu: &types.ProductMambu{
-				EncodedKey: &product.Mambu.EncodedKey,
-			},
-			Status:   h.MapProtoProductStatuses(product.Status),
-			StatusTs: product.StatusTs.AsTime().Unix(),
-			Ts:       product.Ts.AsTime().Unix(),
-		}
+func (h *helpersfactory) MakeProductFromProto(product *protoTypes.Product) *types.Product {
+	if product == nil {
+		return &types.Product{}
 	}
 
-	return result
+	termLength := int64(product.TermLength)
+	interestRate := float64(product.InterestRate)
+	minimumOpeningBalance := float64(product.MinimumOpeningBalance)
+
+	mambu := &types.ProductMambu{}
+	if product.Mambu != nil {
+		mambu.EncodedKey = &product.Mambu.EncodedKey
+	}
+	return &types.Product{
+		ID:                    product.Id,
+		Type:                  h.MapProtoProductTypes(product.Type),
+		Currency:              h.MakeCurrencyFromProto(product.Currency),
+		TermLength:            &termLength,
+		InterestRate:          &interestRate,
+		MinimumOpeningBalance: &minimumOpeningBalance,
+		Mambu:                 mambu,
+		Status:                h.MapProtoProductStatuses(product.Status),
+		StatusTs:              product.StatusTs.AsTime().Unix(),
+		Ts:                    product.Ts.AsTime().Unix(),
+	}
+
+}
+
+func (h *helpersfactory) MakeAccountFromProto(account *protoTypes.Account) *types.Account {
+	if account == nil {
+		return &types.Account{}
+	}
+
+	balances := &types.AccountBalances{}
+	if account.Balances != nil {
+		balances.TotalBalance = float64(account.Balances.TotalBalance)
+	}
+
+	fcmb := &types.AccountFcmb{}
+	if account.Fcmb != nil {
+		fcmb.CifID = &account.Fcmb.CifId
+		fcmb.NgnAccountNumber = &account.Fcmb.NgnAccountNumber
+	}
+
+	return &types.Account{
+		ID:            account.Id,
+		Customer:      h.makeCustomerFromProto(account.Customer),
+		Product:       h.MakeProductFromProto(account.Product),
+		Name:          account.Name,
+		Iban:          &account.Iban,
+		AccountNumber: &account.AccountNumber,
+		Code:          &account.Code,
+		MaturityDate:  &account.MaturityDate,
+		Balances:      balances,
+		Mambu:         h.makeMambuAccountFromProto(account.Mambu),
+		Fcmb:          fcmb,
+		Status:        h.MapProtoAccountStatuses(account.Status),
+		StatusTs:      account.StatusTs.AsTime().Unix(),
+		Ts:            account.Ts.AsTime().Unix(),
+	}
+}
+
+func (h *helpersfactory) makeMambuAccountFromProto(mambu *protoTypes.AccountMambu) *types.AccountMambu {
+	if mambu == nil {
+		return &types.AccountMambu{}
+	}
+
+	return &types.AccountMambu{
+		BranchKey:  &mambu.BranchKey,
+		EncodedKey: &mambu.EncodedKey,
+	}
+}
+
+func (h *helpersfactory) MapProtoAccountStatuses(val protoTypes.Account_AccountStatuses) types.AccountStatuses {
+	switch val {
+	case protoTypes.Account_ACTIVE:
+		return types.AccountStatusesActive
+	case protoTypes.Account_INACTIVE:
+		return types.AccountStatusesInactive
+	default:
+		return ""
+	}
+}
+
+func (h *helpersfactory) MapAccountStatuses(val types.AccountStatuses) protoTypes.Account_AccountStatuses {
+	switch val {
+	case types.AccountStatusesActive:
+		return protoTypes.Account_ACTIVE
+	case types.AccountStatusesInactive:
+		return protoTypes.Account_INACTIVE
+	default:
+		return -1
+	}
 }
