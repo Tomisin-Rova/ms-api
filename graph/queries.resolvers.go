@@ -15,7 +15,7 @@ import (
 	"ms.api/protos/pb/account"
 	"ms.api/protos/pb/customer"
 	"ms.api/protos/pb/onboarding"
-	"ms.api/protos/pb/types"
+	protoTypes "ms.api/protos/pb/types"
 	"ms.api/server/http/middlewares"
 	apiTypes "ms.api/types"
 )
@@ -296,7 +296,7 @@ func (r *queryResolver) Product(ctx context.Context, id string) (*apiTypes.Produ
 
 func (r *queryResolver) Products(ctx context.Context, first *int64, after *string, last *int64, before *string, statuses []apiTypes.ProductStatuses, typeArg *apiTypes.ProductTypes) (*apiTypes.ProductConnection, error) {
 	helper := helpersfactory{}
-	productStatuses := make([]types.Product_ProductStatuses, len(statuses))
+	productStatuses := make([]protoTypes.Product_ProductStatuses, len(statuses))
 
 	if len(statuses) > 0 {
 		for index, state := range statuses {
@@ -372,11 +372,11 @@ func (r *queryResolver) Account(ctx context.Context, id string) (*apiTypes.Accou
 	return helpers.MakeAccountFromProto(account), nil
 }
 
-func (r *queryResolver) Accounts(ctx context.Context, first *int64, after *string, last *int64, before *string, statuses []apiTypes.AccountStatuses, productTypes []apiTypes.ProductTypes) (*apiTypes.AccountConnection, error) {
+func (r *queryResolver) Accounts(ctx context.Context, first *int64, after *string, last *int64, before *string, statuses []apiTypes.AccountStatuses, types []apiTypes.ProductTypes) (*apiTypes.AccountConnection, error) {
 	helpers := helpersfactory{}
 	request := account.GetAccountsRequest{
-		Statuses:     make([]types.Account_AccountStatuses, 0),
-		ProductTypes: make([]types.Product_ProductTypes, 0),
+		Statuses:     make([]protoTypes.Account_AccountStatuses, 0),
+		ProductTypes: make([]protoTypes.Product_ProductTypes, 0),
 	}
 
 	if first != nil {
@@ -396,8 +396,8 @@ func (r *queryResolver) Accounts(ctx context.Context, first *int64, after *strin
 			request.Statuses = append(request.Statuses, helpers.MapAccountStatuses(status))
 		}
 	}
-	if len(productTypes) > 0 {
-		for _, productType := range productTypes {
+	if len(types) > 0 {
+		for _, productType := range types {
 			request.ProductTypes = append(request.ProductTypes, helpers.GetProtoProductTypes(productType))
 		}
 	}
@@ -503,13 +503,13 @@ func (r *queryResolver) Questionary(ctx context.Context, id string) (*apiTypes.Q
 		Ts:        resp.Ts.AsTime().Unix(),
 	}
 	switch resp.Type {
-	case types.Questionary_REASONS:
+	case protoTypes.Questionary_REASONS:
 		response.Type = apiTypes.QuestionaryTypesReasons
 	}
 	switch resp.Status {
-	case types.Questionary_ACTIVE:
+	case protoTypes.Questionary_ACTIVE:
 		response.Status = apiTypes.QuestionaryStatusesActive
-	case types.Questionary_INACTIVE:
+	case protoTypes.Questionary_INACTIVE:
 		response.Status = apiTypes.QuestionaryStatusesInactive
 	}
 
@@ -518,8 +518,8 @@ func (r *queryResolver) Questionary(ctx context.Context, id string) (*apiTypes.Q
 
 func (r *queryResolver) Questionaries(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string, statuses []apiTypes.QuestionaryStatuses, typeArg []apiTypes.QuestionaryTypes) (*apiTypes.QuestionaryConnection, error) {
 	helper := helpersfactory{}
-	questionaryStatuses := make([]types.Questionary_QuestionaryStatuses, 0)
-	questionaryTypes := make([]types.Questionary_QuestionaryTypes, 0)
+	questionaryStatuses := make([]protoTypes.Questionary_QuestionaryStatuses, 0)
+	questionaryTypes := make([]protoTypes.Questionary_QuestionaryTypes, 0)
 
 	if len(statuses) > 0 {
 		for _, state := range statuses {
@@ -768,7 +768,7 @@ func (r *queryResolver) Customer(ctx context.Context, id string) (*apiTypes.Cust
 
 func (r *queryResolver) Customers(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string, statuses []apiTypes.CustomerStatuses) (*apiTypes.CustomerConnection, error) {
 	helper := helpersfactory{}
-	customerStatuses := make([]types.Customer_CustomerStatuses, 0)
+	customerStatuses := make([]protoTypes.Customer_CustomerStatuses, 0)
 
 	if len(statuses) > 0 {
 		for _, state := range statuses {
@@ -821,7 +821,7 @@ func (r *queryResolver) Customers(ctx context.Context, keywords *string, first *
 
 func (r *queryResolver) Cdds(ctx context.Context, first *int64, after *string, last *int64, before *string, statuses []apiTypes.CDDStatuses) (*apiTypes.CDDConnection, error) {
 	helpers := helpersfactory{}
-	cddStatuses := make([]types.CDD_CDDStatuses, len(statuses))
+	cddStatuses := make([]protoTypes.CDD_CDDStatuses, len(statuses))
 
 	for i, state := range statuses {
 		cddStatuses[i] = helpers.MapCDDStatusesFromModel(state)
