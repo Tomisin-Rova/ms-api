@@ -15,6 +15,7 @@ import (
 	"ms.api/protos/pb/account"
 	"ms.api/protos/pb/customer"
 	"ms.api/protos/pb/onboarding"
+	"ms.api/protos/pb/payment"
 	protoTypes "ms.api/protos/pb/types"
 	"ms.api/server/http/middlewares"
 	apiTypes "ms.api/types"
@@ -428,17 +429,73 @@ func (r *queryResolver) Accounts(ctx context.Context, first *int64, after *strin
 }
 
 func (r *queryResolver) Transaction(ctx context.Context, id string) (*apiTypes.Transaction, error) {
-	return &apiTypes.Transaction{
-		ID: "n/a",
-	}, errors.New("not implemented")
+	result, err := r.PaymentService.GetTransaction(ctx, &payment.GetTransactionRequest{Id: id})
+	if err != nil {
+		return nil, err
+	}
+
+	helpers := &helpersfactory{}
+
+	return helpers.MakeTransactionFromProto(result), nil
 }
 
-func (r *queryResolver) Transactions(ctx context.Context, first *int64, after *string, last *int64, before *string, statuses []apiTypes.AccountStatuses, accountIds []string, beneficiaryIds []string) (*apiTypes.TransactionConnection, error) {
+func (r *queryResolver) Transactions(ctx context.Context, first *int64, after *string, last *int64, before *string, statuses []apiTypes.TransactionStatuses, accountIds []string, beneficiaryIds []string) (*apiTypes.TransactionConnection, error) {
+	helper := helpersfactory{}
+	transactionStatuses := make([]protoTypes.Transaction_TransactionStatuses, len(statuses))
+
+	if len(statuses) > 0 {
+		for index, state := range statuses {
+			transactionStatuses[index] = helper.GetProtoTransactionStatuses(state)
+		}
+	}
+
+	// Build request
+	request := payment.GetTransactionsRequest{}
+
+	if first != nil {
+		request.First = int32(*first)
+	}
+	if after != nil {
+		request.After = *after
+	}
+	if last != nil {
+		request.Last = int32(*last)
+	}
+	if before != nil {
+		request.Before = *before
+	}
+	if len(accountIds) > 0 {
+		request.AccountIds = accountIds
+	}
+	if len(beneficiaryIds) > 0 {
+		request.BeneficiaryIds = beneficiaryIds
+	}
+	if len(statuses) > 0 {
+		request.Statuses = transactionStatuses
+	}
+
+	resp, err := r.PaymentService.GetTransactions(ctx, &request)
+	if err != nil {
+		return nil, err
+	}
+
+	nodes := make([]*apiTypes.Transaction, len(resp.Nodes))
+	for index, node := range resp.Nodes {
+		nodes[index] = helper.MakeTransactionFromProto(node)
+	}
+
+	pageInfo := apiTypes.PageInfo{
+		HasNextPage:     resp.PaginationInfo.HasNextPage,
+		HasPreviousPage: resp.PaginationInfo.HasPreviousPage,
+		StartCursor:     &resp.PaginationInfo.StartCursor,
+		EndCursor:       &resp.PaginationInfo.EndCursor,
+	}
+
 	return &apiTypes.TransactionConnection{
-		Nodes: []*apiTypes.Transaction{
-			{ID: "n/a"},
-		},
-	}, errors.New("not implemented")
+		Nodes:      nodes,
+		PageInfo:   &pageInfo,
+		TotalCount: int64(resp.TotalCount),
+	}, nil
 }
 
 func (r *queryResolver) Beneficiary(ctx context.Context, id string) (*apiTypes.Beneficiary, error) {

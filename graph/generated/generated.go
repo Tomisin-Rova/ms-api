@@ -509,7 +509,7 @@ type ComplexityRoot struct {
 		Questionary      func(childComplexity int, id string) int
 		Transaction      func(childComplexity int, id string) int
 		TransactionTypes func(childComplexity int, first *int64, after *string, last *int64, before *string, statuses []types.TransactionTypeStatuses) int
-		Transactions     func(childComplexity int, first *int64, after *string, last *int64, before *string, statuses []types.AccountStatuses, accountIds []string, beneficiaryIds []string) int
+		Transactions     func(childComplexity int, first *int64, after *string, last *int64, before *string, statuses []types.TransactionStatuses, accountIds []string, beneficiaryIds []string) int
 	}
 
 	Questionary struct {
@@ -699,7 +699,7 @@ type QueryResolver interface {
 	Account(ctx context.Context, id string) (*types.Account, error)
 	Accounts(ctx context.Context, first *int64, after *string, last *int64, before *string, statuses []types.AccountStatuses, types []types.ProductTypes) (*types.AccountConnection, error)
 	Transaction(ctx context.Context, id string) (*types.Transaction, error)
-	Transactions(ctx context.Context, first *int64, after *string, last *int64, before *string, statuses []types.AccountStatuses, accountIds []string, beneficiaryIds []string) (*types.TransactionConnection, error)
+	Transactions(ctx context.Context, first *int64, after *string, last *int64, before *string, statuses []types.TransactionStatuses, accountIds []string, beneficiaryIds []string) (*types.TransactionConnection, error)
 	Beneficiary(ctx context.Context, id string) (*types.Beneficiary, error)
 	Beneficiaries(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string, statuses []types.BeneficiaryStatuses) (*types.BeneficiaryConnection, error)
 	TransactionTypes(ctx context.Context, first *int64, after *string, last *int64, before *string, statuses []types.TransactionTypeStatuses) (*types.TransactionTypeConnection, error)
@@ -3130,7 +3130,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Transactions(childComplexity, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string), args["statuses"].([]types.AccountStatuses), args["accountIds"].([]string), args["beneficiaryIds"].([]string)), true
+		return e.complexity.Query.Transactions(childComplexity, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string), args["statuses"].([]types.TransactionStatuses), args["accountIds"].([]string), args["beneficiaryIds"].([]string)), true
 
 	case "Questionary.id":
 		if e.complexity.Questionary.ID == nil {
@@ -4173,7 +4173,7 @@ enum DeliveryMode {
         # Returns the elements in the list that come before the specified cursor.
         before: String
         # Filter transaction by it's status. If empty, should ignore the field
-        statuses: [AccountStatuses!]
+        statuses: [TransactionStatuses!]
         # Filter transaction by it's account. If empty, should ignore the field
         accountIds: [ID!]
         # Filter transaction by beneficiary. If empty, should ignore the field
@@ -6604,10 +6604,10 @@ func (ec *executionContext) field_Query_transactions_args(ctx context.Context, r
 		}
 	}
 	args["before"] = arg3
-	var arg4 []types.AccountStatuses
+	var arg4 []types.TransactionStatuses
 	if tmp, ok := rawArgs["statuses"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("statuses"))
-		arg4, err = ec.unmarshalOAccountStatuses2ᚕmsᚗapiᚋtypesᚐAccountStatusesᚄ(ctx, tmp)
+		arg4, err = ec.unmarshalOTransactionStatuses2ᚕmsᚗapiᚋtypesᚐTransactionStatusesᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -17025,7 +17025,7 @@ func (ec *executionContext) _Query_transactions(ctx context.Context, field graph
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Transactions(rctx, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string), args["statuses"].([]types.AccountStatuses), args["accountIds"].([]string), args["beneficiaryIds"].([]string))
+		return ec.resolvers.Query().Transactions(rctx, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string), args["statuses"].([]types.TransactionStatuses), args["accountIds"].([]string), args["beneficiaryIds"].([]string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -32660,6 +32660,73 @@ func (ec *executionContext) marshalOTransactionFee2ᚕᚖmsᚗapiᚋtypesᚐTran
 				defer wg.Done()
 			}
 			ret[i] = ec.marshalNTransactionFee2ᚖmsᚗapiᚋtypesᚐTransactionFee(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) unmarshalOTransactionStatuses2ᚕmsᚗapiᚋtypesᚐTransactionStatusesᚄ(ctx context.Context, v interface{}) ([]types.TransactionStatuses, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]types.TransactionStatuses, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNTransactionStatuses2msᚗapiᚋtypesᚐTransactionStatuses(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOTransactionStatuses2ᚕmsᚗapiᚋtypesᚐTransactionStatusesᚄ(ctx context.Context, sel ast.SelectionSet, v []types.TransactionStatuses) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNTransactionStatuses2msᚗapiᚋtypesᚐTransactionStatuses(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)

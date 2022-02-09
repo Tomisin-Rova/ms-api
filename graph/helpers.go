@@ -141,6 +141,19 @@ func (h *helpersfactory) GetProtoProductTypes(val types.ProductTypes) protoTypes
 	}
 }
 
+func (h *helpersfactory) GetProtoTransactionStatuses(val types.TransactionStatuses) protoTypes.Transaction_TransactionStatuses {
+	switch val {
+	case types.TransactionStatusesApproved:
+		return protoTypes.Transaction_APPROVED
+	case types.TransactionStatusesPending:
+		return protoTypes.Transaction_PENDING
+	case types.TransactionStatusesRejected:
+		return protoTypes.Transaction_REJECTED
+	default:
+		return -1
+	}
+}
+
 func (h *helpersfactory) DeviceTokenInputFromModel(tokenType types.DeviceTokenTypes) protoTypes.DeviceToken_DeviceTokenTypes {
 	switch tokenType {
 	default:
@@ -220,12 +233,71 @@ func (h *helpersfactory) MapProtoProductStatuses(val protoTypes.Product_ProductS
 	}
 }
 
+func (h *helpersfactory) MapBeneficiaryStatuses(val protoTypes.Beneficiary_BeneficiaryStatuses) types.BeneficiaryStatuses {
+	switch val {
+	case protoTypes.Beneficiary_ACTIVE:
+		return types.BeneficiaryStatusesActive
+	case protoTypes.Beneficiary_INACTIVE:
+		return types.BeneficiaryStatusesInactive
+	default:
+		return ""
+	}
+}
+
 func (h *helpersfactory) MapProtoProductTypes(val protoTypes.Product_ProductTypes) types.ProductTypes {
 	switch val {
 	case protoTypes.Product_CURRENT_ACCOUNT:
 		return types.ProductTypesCurrentAccount
 	case protoTypes.Product_FIXED_DEPOSIT:
 		return types.ProductTypesFixedDeposit
+	default:
+		return ""
+	}
+}
+
+func (h *helpersfactory) MapTransactionStatuses(val protoTypes.Transaction_TransactionStatuses) types.TransactionStatuses {
+	switch val {
+	case protoTypes.Transaction_APPROVED:
+		return types.TransactionStatusesApproved
+	case protoTypes.Transaction_PENDING:
+		return types.TransactionStatusesPending
+	case protoTypes.Transaction_REJECTED:
+		return types.TransactionStatusesRejected
+	default:
+		return ""
+	}
+}
+
+func (h *helpersfactory) MapBeneficiaryAccountStatuses(val protoTypes.BeneficiaryAccount_BeneficiaryAccountStatuses) types.BeneficiaryAccountStatuses {
+	switch val {
+	case protoTypes.BeneficiaryAccount_ACTIVE:
+		return types.BeneficiaryAccountStatusesActive
+	case protoTypes.BeneficiaryAccount_INACTIVE:
+		return types.BeneficiaryAccountStatusesInactive
+	default:
+		return ""
+	}
+}
+
+func (h *helpersfactory) MapLinkedTransactionStatuses(val protoTypes.LinkedTransaction_LinkedTransactionStatuses) types.LinkedTransactionStatuses {
+	switch val {
+	case protoTypes.LinkedTransaction_APPROVED:
+		return types.LinkedTransactionStatusesApproved
+	case protoTypes.LinkedTransaction_PENDING:
+		return types.LinkedTransactionStatusesPending
+	case protoTypes.LinkedTransaction_REJECTED:
+		return types.LinkedTransactionStatusesRejected
+	default:
+		return ""
+	}
+}
+
+func (h *helpersfactory) MapTransactionTypeStatus(val protoTypes.TransactionType_TransactionTypeStatuses) types.TransactionTypeStatuses {
+	switch val {
+	case protoTypes.TransactionType_ACTIVE:
+		return types.TransactionTypeStatusesActive
+	case protoTypes.TransactionType_INACTIVE:
+		return types.TransactionTypeStatusesInactive
 	default:
 		return ""
 	}
@@ -281,25 +353,30 @@ func (h *helpersfactory) makePhonesFromProto(phones []*protoTypes.Phone) []*type
 }
 
 func (h *helpersfactory) makeCustomerFromProto(customer *protoTypes.Customer) *types.Customer {
-	email := &types.Email{}
-	if customer.Email != nil {
-		email.Address = customer.Email.Address
-		email.Verified = customer.Email.Verified
-	}
+	result := &types.Customer{}
 
-	return &types.Customer{
-		ID:        customer.Id,
-		FirstName: customer.FirstName,
-		LastName:  customer.LastName,
-		Dob:       customer.Dob,
-		Bvn:       &customer.Bvn,
-		Addresses: h.makeAddressFromProto(customer.Addresses),
-		Phones:    h.makePhonesFromProto(customer.Phones),
-		Email:     email,
-		Status:    h.MapProtoCustomerStatuses(customer.Status),
-		StatusTs:  customer.StatusTs.AsTime().Unix(),
-		Ts:        customer.Ts.AsTime().Unix(),
+	if customer != nil {
+		email := &types.Email{}
+		if customer.Email != nil {
+			email.Address = customer.Email.Address
+			email.Verified = customer.Email.Verified
+		}
+
+		result = &types.Customer{
+			ID:        customer.Id,
+			FirstName: customer.FirstName,
+			LastName:  customer.LastName,
+			Dob:       customer.Dob,
+			Bvn:       &customer.Bvn,
+			Addresses: h.makeAddressFromProto(customer.Addresses),
+			Phones:    h.makePhonesFromProto(customer.Phones),
+			Email:     email,
+			Status:    h.MapProtoCustomerStatuses(customer.Status),
+			StatusTs:  customer.StatusTs.AsTime().Unix(),
+			Ts:        customer.Ts.AsTime().Unix(),
+		}
 	}
+	return result
 }
 
 func (h *helpersfactory) MakeCurrencyFromProto(currency *protoTypes.Currency) *types.Currency {
@@ -606,6 +683,54 @@ func (h *helpersfactory) makePOAsFromProto(poas []*protoTypes.POA) []*types.Poa 
 	return poas_
 }
 
+func (h *helpersfactory) MakeBeneficiaryFromProto(beneficiary *protoTypes.Beneficiary) *types.Beneficiary {
+	result := types.Beneficiary{}
+	if beneficiary != nil {
+
+		beneficiaryAccounts := make([]*types.BeneficiaryAccount, len(beneficiary.Accounts))
+		for index, beneficiaryAccount := range beneficiary.Accounts {
+			beneficiaryAccounts[index] = h.MakeBeneficiaryAccountFromProto(beneficiaryAccount)
+		}
+
+		result = types.Beneficiary{
+			ID:       beneficiary.Id,
+			Customer: h.makeCustomerFromProto(beneficiary.Customer),
+			Name:     beneficiary.Name,
+			Accounts: beneficiaryAccounts,
+			Status:   h.MapBeneficiaryStatuses(beneficiary.Status),
+			StatusTs: beneficiary.StatusTs.AsTime().Unix(),
+			Ts:       beneficiary.Ts.AsTime().Unix(),
+		}
+	}
+	return &result
+}
+
+func (h *helpersfactory) MakeBeneficiaryAccountFromProto(beneficiaryAccount *protoTypes.BeneficiaryAccount) *types.BeneficiaryAccount {
+	result := types.BeneficiaryAccount{}
+
+	if beneficiaryAccount != nil {
+		result = types.BeneficiaryAccount{
+			ID:          beneficiaryAccount.Id,
+			Beneficiary: h.MakeBeneficiaryFromProto(beneficiaryAccount.Beneficiary),
+			Name:        &beneficiaryAccount.Name,
+			Account:     h.MakeAccountFromProto(beneficiaryAccount.Account),
+			Currency: &types.Currency{
+				ID:     beneficiaryAccount.Currency.Id,
+				Name:   beneficiaryAccount.Currency.Name,
+				Code:   beneficiaryAccount.Currency.Code,
+				Symbol: beneficiaryAccount.Currency.Symbol,
+			},
+			AccountNumber: beneficiaryAccount.AccountNumber,
+			Code:          beneficiaryAccount.Code,
+			Status:        h.MapBeneficiaryAccountStatuses(beneficiaryAccount.Status),
+			StatusTs:      beneficiaryAccount.StatusTs.AsTime().Unix(),
+			Ts:            beneficiaryAccount.Ts.AsTime().Unix(),
+		}
+	}
+
+	return &result
+}
+
 func (h *helpersfactory) MakeProductFromProto(product *protoTypes.Product) *types.Product {
 	if product == nil {
 		return &types.Product{}
@@ -632,6 +757,19 @@ func (h *helpersfactory) MakeProductFromProto(product *protoTypes.Product) *type
 		Ts:                    product.Ts.AsTime().Unix(),
 	}
 
+}
+
+func (h *helpersfactory) MapLinkedTransactionTypes(val protoTypes.LinkedTransaction_LinkedTransactionTypes) types.LinkedTransactionTypes {
+	switch val {
+	case protoTypes.LinkedTransaction_APPLY_FEE:
+		return types.LinkedTransactionTypesApplyFee
+	case protoTypes.LinkedTransaction_DEPOSIT:
+		return types.LinkedTransactionTypesDeposit
+	case protoTypes.LinkedTransaction_WITHDRAWAL:
+		return types.LinkedTransactionTypesDeposit
+	default:
+		return ""
+	}
 }
 
 func (h *helpersfactory) MakeAccountFromProto(account *protoTypes.Account) *types.Account {
@@ -699,4 +837,102 @@ func (h *helpersfactory) MapAccountStatuses(val types.AccountStatuses) protoType
 	default:
 		return -1
 	}
+}
+
+func (h *helpersfactory) MakeTransactionFromProto(transaction *protoTypes.Transaction) *types.Transaction {
+	result := &types.Transaction{}
+
+	if transaction != nil {
+
+		fees := make([]*types.TransactionFee, len(transaction.Fees))
+		for index, fee := range transaction.Fees {
+			fees[index] = &types.TransactionFee{
+				ID:     fee.Id,
+				Amount: float64(fee.Amount),
+			}
+		}
+
+		linkedTransactions := make([]*types.LinkedTransaction, len(transaction.LinkedTransactions))
+		for index, linkedTransaction := range transaction.LinkedTransactions {
+			linkedTransactions[index] = &types.LinkedTransaction{
+				ID:   linkedTransaction.Id,
+				Type: h.MapLinkedTransactionTypes(linkedTransaction.Type),
+				Currency: &types.Currency{
+					ID:     linkedTransaction.Currency.Id,
+					Symbol: linkedTransaction.Currency.Symbol,
+					Code:   linkedTransaction.Currency.Code,
+					Name:   linkedTransaction.Currency.Name,
+				},
+				Amount: float64(linkedTransaction.Amount),
+				Source: &types.LinkedTransactionSource{
+					Customer:    h.makeCustomerFromProto(linkedTransaction.Source.Customer),
+					Account:     h.MakeAccountFromProto(linkedTransaction.Source.Account),
+					AccountData: linkedTransaction.Source.AccountData,
+				},
+				Target: &types.LinkedTransactionTarget{
+					Account:            h.MakeAccountFromProto(linkedTransaction.Target.Account),
+					BeneficiaryAccount: h.MakeBeneficiaryAccountFromProto(linkedTransaction.Target.BeneficiaryAccount),
+					AccountData:        linkedTransaction.Target.AccountData,
+				},
+				Mambu: &types.LinkedTransactionMambu{
+					TransactionEncodedKey: linkedTransaction.Mambu.TransactionEncodedKey,
+				},
+				Fcmb: &types.LinkedTransactionFcmb{
+					TransactionIdentifier: linkedTransaction.Fcmb.TransactionIdentifier,
+				},
+				Status:   h.MapLinkedTransactionStatuses(linkedTransaction.Status),
+				StatusTs: linkedTransaction.StatusTs.AsTime().Unix(),
+				Ts:       linkedTransaction.Ts.AsTime().Unix(),
+			}
+		}
+
+		result = &types.Transaction{
+			ID: transaction.Id,
+			TransactionType: &types.TransactionType{
+				ID:       transaction.TransactionType.Id,
+				Name:     transaction.TransactionType.Name,
+				Status:   h.MapTransactionTypeStatus(transaction.TransactionType.Status),
+				StatusTs: transaction.StatusTs.AsTime().Unix(),
+				Ts:       transaction.Ts.AsTime().Unix(),
+			},
+			Reference: transaction.Reference,
+			Fees:      fees,
+			ExchangeRate: &types.ExchangeRate{
+				ID: transaction.ExchangeRate.Id,
+				BaseCurrency: &types.Currency{
+					ID:     transaction.ExchangeRate.BaseCurrency.Id,
+					Symbol: transaction.ExchangeRate.BaseCurrency.Symbol,
+					Code:   transaction.ExchangeRate.BaseCurrency.Code,
+					Name:   transaction.ExchangeRate.BaseCurrency.Name,
+				},
+				TargetCurrency: &types.Currency{
+					ID:     transaction.ExchangeRate.TargetCurrency.Id,
+					Symbol: transaction.ExchangeRate.TargetCurrency.Symbol,
+					Code:   transaction.ExchangeRate.TargetCurrency.Code,
+					Name:   transaction.ExchangeRate.TargetCurrency.Name,
+				},
+			},
+			Source: &types.TransactionSource{
+				Customer:                h.makeCustomerFromProto(transaction.Source.Customer),
+				Account:                 h.MakeAccountFromProto(transaction.Source.Account),
+				Amount:                  float64(transaction.Source.Amount),
+				BalanceAfterTransaction: float64(transaction.Source.BalanceAfterTransaction),
+			},
+			Target: &types.TransactionTarget{
+				Customer:                h.makeCustomerFromProto(transaction.Target.Customer),
+				Beneficiary:             h.MakeBeneficiaryFromProto(transaction.Target.Beneficiary),
+				Account:                 h.MakeAccountFromProto(transaction.Target.Account),
+				BeneficiaryAccount:      h.MakeBeneficiaryAccountFromProto(transaction.Target.BeneficiaryAccount),
+				Amount:                  float64(transaction.Target.Amount),
+				BalanceAfterTransaction: float64(transaction.Target.BalanceAfterTransaction),
+			},
+			IdempotencyKey:     transaction.IdempotencyKey,
+			LinkedTransactions: linkedTransactions,
+			Status:             h.MapTransactionStatuses(transaction.Status),
+			StatusTs:           transaction.StatusTs.AsTime().Unix(),
+			Ts:                 transaction.Ts.AsTime().Unix(),
+		}
+	}
+
+	return result
 }
