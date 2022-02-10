@@ -366,16 +366,51 @@ func (r *mutationResolver) AcceptContent(ctx context.Context, contentID string) 
 }
 
 func (r *mutationResolver) SetTransactionPassword(ctx context.Context, password string) (*types.Response, error) {
-	msg := "Not implemented"
+	// Get user claims
+	_, err := middlewares.GetClaimsFromCtx(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Build request
+	request := customer.SetTransactionPasswordRequest{
+		Password: password,
+	}
+	// Execute RPC call
+	response, err := r.CustomerService.SetTransactionPassword(ctx, &request)
+	if err != nil {
+		return nil, err
+	}
+
 	return &types.Response{
-		Message: &msg,
+		Success: response.Success,
+		Code:    int64(response.Code),
 	}, nil
 }
 
 func (r *mutationResolver) ResetTransactionPassword(ctx context.Context, otpToken string, email string, newTransactionPassword string, currentTransactionPassword string) (*types.Response, error) {
-	msg := "Not implemented"
+	// Get user claims
+	_, err := middlewares.GetClaimsFromCtx(ctx)
+	if err != nil {
+		return nil, errorvalues.Format(errorvalues.InvalidAuthenticationError, err)
+	}
+
+	// Build request
+	request := customer.ResetTransactionPasswordRequest{
+		OtpToken:        otpToken,
+		Email:           email,
+		NewPassword:     newTransactionPassword,
+		CurrentPassword: currentTransactionPassword,
+	}
+	// Execute RPC call
+	response, err := r.CustomerService.ResetTransactionPassword(ctx, &request)
+	if err != nil {
+		return nil, err
+	}
+
 	return &types.Response{
-		Message: &msg,
+		Success: response.Success,
+		Code:    int64(response.Code),
 	}, nil
 }
 
