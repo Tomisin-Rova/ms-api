@@ -7,7 +7,7 @@ import (
 
 const (
 	InternalErr                = 7101
-	InvalidAuthenticationError = 7103
+	InvalidAuthenticationError = 7102
 )
 
 var (
