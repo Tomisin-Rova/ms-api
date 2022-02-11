@@ -16,6 +16,7 @@ import (
 	"ms.api/protos/pb/customer"
 	"ms.api/protos/pb/onboarding"
 	"ms.api/protos/pb/payment"
+	"ms.api/protos/pb/pricing"
 	protoTypes "ms.api/protos/pb/types"
 	"ms.api/server/http/middlewares"
 	apiTypes "ms.api/types"
@@ -515,13 +516,62 @@ func (r *queryResolver) Beneficiaries(ctx context.Context, keywords *string, fir
 }
 
 func (r *queryResolver) TransactionTypes(ctx context.Context, first *int64, after *string, last *int64, before *string, statuses []apiTypes.TransactionTypeStatuses) (*apiTypes.TransactionTypeConnection, error) {
+	transactionTypesStatuses := make([]protoTypes.TransactionType_TransactionTypeStatuses, len(statuses))
+
+	if len(transactionTypesStatuses) > 0 {
+		for index, state := range statuses {
+			transactionTypesStatuses[index] = r.helper.GetProtoTransactionTypesStatuses(state)
+		}
+	}
+
+	// Build request
+	request := payment.GetTransactionTypesRequest{}
+
+	if first != nil {
+		request.First = int32(*first)
+	}
+	if after != nil {
+		request.After = *after
+	}
+	if last != nil {
+		request.Last = int32(*last)
+	}
+	if before != nil {
+		request.Before = *before
+	}
+
+	if len(statuses) > 0 {
+		request.Statuses = transactionTypesStatuses
+	}
+
+	resp, err := r.PaymentService.GetTransactionTypes(ctx, &request)
+
+	if err != nil {
+		return nil, err
+	}
+
+	nodes := make([]*apiTypes.TransactionType, len(resp.Nodes))
+	for index, node := range resp.Nodes {
+		nodes[index] = &apiTypes.TransactionType{
+			ID:       node.Id,
+			Name:     node.Name,
+			Status:   r.helper.MapTransactionTypeStatus(node.Status),
+			StatusTs: node.StatusTs.AsTime().Unix(),
+			Ts:       node.Ts.AsTime().Unix(),
+		}
+	}
+
+	pageInfo := apiTypes.PageInfo{
+		HasNextPage:     resp.PaginationInfo.HasNextPage,
+		HasPreviousPage: resp.PaginationInfo.HasPreviousPage,
+		StartCursor:     &resp.PaginationInfo.StartCursor,
+		EndCursor:       &resp.PaginationInfo.EndCursor,
+	}
+
 	return &apiTypes.TransactionTypeConnection{
-		Nodes: []*apiTypes.TransactionType{
-			{
-				ID: "n/a",
-			},
-		},
-	}, errors.New("not implemented")
+		Nodes:      nodes,
+		PageInfo:   &pageInfo,
+		TotalCount: int64(resp.TotalCount)}, nil
 }
 
 func (r *queryResolver) Questionary(ctx context.Context, id string) (*apiTypes.Questionary, error) {
@@ -681,9 +731,12 @@ func (r *queryResolver) Currencies(ctx context.Context, keywords *string, first 
 }
 
 func (r *queryResolver) Fees(ctx context.Context, transactionTypeID string) ([]*apiTypes.Fee, error) {
-	return []*apiTypes.Fee{
-		{ID: "n/a"},
-	}, errors.New("not implemented")
+	resp, err := r.PricingService.GetFees(ctx, &pricing.GetFeesRequest{TransactionTypeId: transactionTypeID})
+	if err != nil {
+		return nil, err
+	}
+
+	return r.helper.MakeFeesFromProto(resp.Fees), nil
 }
 
 func (r *queryResolver) ExchangeRate(ctx context.Context, transactionTypeID string) (*apiTypes.ExchangeRate, error) {

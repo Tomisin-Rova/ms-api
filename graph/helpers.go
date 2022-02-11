@@ -21,6 +21,9 @@ type Helper interface {
 	DeviceTokenInputFromModel(tokenType types.DeviceTokenTypes) protoTypes.DeviceToken_DeviceTokenTypes
 	PreferenceInputFromModel(input types.DevicePreferencesTypes) protoTypes.DevicePreferences_DevicePreferencesTypes
 	StaffLoginTypeFromModel(input types.AuthType) auth.StaffLoginRequest_AuthType
+	MakeFeesFromProto(protoFees []*protoTypes.Fee) []*types.Fee
+	MapTransactionTypeStatus(val protoTypes.TransactionType_TransactionTypeStatuses) types.TransactionTypeStatuses
+	GetProtoTransactionTypesStatuses(val types.TransactionTypeStatuses) protoTypes.TransactionType_TransactionTypeStatuses
 }
 
 type helpersfactory struct{}
@@ -149,6 +152,17 @@ func (h *helpersfactory) GetProtoTransactionStatuses(val types.TransactionStatus
 		return protoTypes.Transaction_PENDING
 	case types.TransactionStatusesRejected:
 		return protoTypes.Transaction_REJECTED
+	default:
+		return -1
+	}
+}
+
+func (h *helpersfactory) GetProtoTransactionTypesStatuses(val types.TransactionTypeStatuses) protoTypes.TransactionType_TransactionTypeStatuses {
+	switch val {
+	case types.TransactionTypeStatusesActive:
+		return protoTypes.TransactionType_ACTIVE
+	case types.TransactionTypeStatusesInactive:
+		return protoTypes.TransactionType_INACTIVE
 	default:
 		return -1
 	}
@@ -772,6 +786,28 @@ func (h *helpersfactory) MapLinkedTransactionTypes(val protoTypes.LinkedTransact
 	}
 }
 
+func (h *helpersfactory) MapFeeTypes(val protoTypes.Fee_FeeTypes) types.FeeTypes {
+	switch val {
+	case protoTypes.Fee_FIXED:
+		return types.FeeTypesFixed
+	case protoTypes.Fee_VARIABLE:
+		return types.FeeTypesVariable
+	default:
+		return ""
+	}
+}
+
+func (h *helpersfactory) MapFeeStatuses(val protoTypes.Fee_FeeStatuses) types.FeeStatuses {
+	switch val {
+	case protoTypes.Fee_ACTIVE:
+		return types.FeeStatusesActive
+	case protoTypes.Fee_INACTIVE:
+		return types.FeeStatusesInactive
+	default:
+		return ""
+	}
+}
+
 func (h *helpersfactory) MakeAccountFromProto(account *protoTypes.Account) *types.Account {
 	if account == nil {
 		return &types.Account{}
@@ -935,4 +971,44 @@ func (h *helpersfactory) MakeTransactionFromProto(transaction *protoTypes.Transa
 	}
 
 	return result
+}
+
+func (h *helpersfactory) MakeFeesFromProto(protoFees []*protoTypes.Fee) []*types.Fee {
+	fees := make([]*types.Fee, len(protoFees))
+
+	for index, fee := range protoFees {
+
+		feeBoundaries := make([]*types.FeeBoundaries, len(fee.Boundaries))
+		for i, boundary := range fee.Boundaries {
+			lower := float64(boundary.Lower)
+			upper := float64(boundary.Upper)
+			amount := float64(boundary.Amount)
+			percentage := float64(boundary.Percentage)
+
+			feeBoundaries[i] = &types.FeeBoundaries{
+				Lower:      &lower,
+				Upper:      &upper,
+				Amount:     &amount,
+				Percentage: &percentage,
+			}
+		}
+
+		fees[index] = &types.Fee{
+			ID: fee.Id,
+			TransactionType: &types.TransactionType{
+				ID:       fee.TransactionType.Id,
+				Name:     fee.TransactionType.Name,
+				Status:   h.MapTransactionTypeStatus(fee.TransactionType.Status),
+				StatusTs: fee.TransactionType.StatusTs.AsTime().Unix(),
+				Ts:       fee.TransactionType.Ts.AsTime().Unix(),
+			},
+			Type:       h.MapFeeTypes(fee.Type),
+			Boundaries: feeBoundaries,
+			Status:     h.MapFeeStatuses(fee.Status),
+			StatusTs:   fee.StatusTs.AsTime().Unix(),
+			Ts:         fee.Ts.AsTime().Unix(),
+		}
+	}
+
+	return fees
 }

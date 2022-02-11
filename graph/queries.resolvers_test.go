@@ -17,6 +17,7 @@ import (
 	"ms.api/protos/pb/customer"
 	"ms.api/protos/pb/onboarding"
 	"ms.api/protos/pb/payment"
+	"ms.api/protos/pb/pricing"
 	pbTypes "ms.api/protos/pb/types"
 	"ms.api/types"
 )
@@ -3054,6 +3055,97 @@ func Test_queryResolver_Beneficiaries(t *testing.T) {
 }
 
 func Test_queryResolver_TransactionTypes(t *testing.T) {
+	const (
+		successFirst = iota
+		successLast
+		successAfter
+		successBefore
+	)
+
+	tests := []struct {
+		name string
+		args struct {
+			first    int64
+			after    string
+			last     int64
+			before   string
+			statuses []types.TransactionTypeStatuses
+		}
+		testType int
+	}{
+		{
+			name: "Test first ten transaction types successfully",
+			args: struct {
+				first    int64
+				after    string
+				last     int64
+				before   string
+				statuses []types.TransactionTypeStatuses
+			}{
+				first:    int64(10),
+				after:    "",
+				last:     0,
+				before:   "",
+				statuses: []types.TransactionTypeStatuses{types.TransactionTypeStatusesActive, types.TransactionTypeStatusesInactive},
+			},
+			testType: successFirst,
+		},
+
+		{
+			name: "Test last ten transaction types successfully",
+			args: struct {
+				first    int64
+				after    string
+				last     int64
+				before   string
+				statuses []types.TransactionTypeStatuses
+			}{
+				first:    0,
+				after:    "",
+				last:     int64(10),
+				before:   "",
+				statuses: []types.TransactionTypeStatuses{types.TransactionTypeStatusesActive, types.TransactionTypeStatusesInactive},
+			},
+			testType: successLast,
+		},
+
+		{
+			name: "Test get transaction types successfully after a given id",
+			args: struct {
+				first    int64
+				after    string
+				last     int64
+				before   string
+				statuses []types.TransactionTypeStatuses
+			}{
+				first:    int64(0),
+				after:    "1",
+				last:     int64(10),
+				before:   "",
+				statuses: []types.TransactionTypeStatuses{types.TransactionTypeStatusesActive, types.TransactionTypeStatusesInactive},
+			},
+			testType: successAfter,
+		},
+
+		{
+			name: "Test get transaction types successfully before a given id",
+			args: struct {
+				first    int64
+				after    string
+				last     int64
+				before   string
+				statuses []types.TransactionTypeStatuses
+			}{
+				first:    int64(10),
+				after:    "",
+				last:     int64(0),
+				before:   "2",
+				statuses: []types.TransactionTypeStatuses{types.TransactionTypeStatusesActive, types.TransactionTypeStatusesInactive},
+			},
+			testType: successBefore,
+		},
+	}
+
 	controller := gomock.NewController(t)
 	defer controller.Finish()
 	paymentServiceClient := mocks.NewMockPaymentServiceClient(controller)
@@ -3061,14 +3153,192 @@ func Test_queryResolver_TransactionTypes(t *testing.T) {
 		PaymentService: paymentServiceClient,
 	}
 	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Query()
-	first := int64(10)
-	after := "after"
-	last := int64(10)
-	before := "before"
 
-	resp, err := resolver.TransactionTypes(context.Background(), &first, &after, &last, &before, []types.TransactionTypeStatuses{})
-	assert.Error(t, err)
-	assert.NotNil(t, resp)
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			switch test.testType {
+			case successFirst:
+				helpers := helpersfactory{}
+				statuses := make([]pbTypes.TransactionType_TransactionTypeStatuses, len(test.args.statuses))
+				for index, status := range test.args.statuses {
+					statuses[index] = helpers.GetProtoTransactionTypesStatuses(status)
+				}
+
+				request := &payment.GetTransactionTypesRequest{
+					First:    int32(test.args.first),
+					After:    test.args.after,
+					Last:     int32(test.args.last),
+					Before:   test.args.before,
+					Statuses: statuses,
+				}
+				paymentServiceClient.EXPECT().GetTransactionTypes(context.Background(), request).Return(
+					&payment.GetTransactionTypesResponse{
+						Nodes: []*pbTypes.TransactionType{
+							{
+								Id:     "1",
+								Name:   "Transaction_Type_1",
+								Status: pbTypes.TransactionType_ACTIVE,
+							},
+
+							{
+								Id:     "2",
+								Name:   "Transaction_Type_2",
+								Status: pbTypes.TransactionType_ACTIVE,
+							},
+							{
+								Id:     "3",
+								Name:   "Transaction_Type_3",
+								Status: pbTypes.TransactionType_INACTIVE,
+							},
+						},
+						PaginationInfo: &pbTypes.PaginationInfo{
+							HasNextPage:     false,
+							HasPreviousPage: false,
+							EndCursor:       "end_cursor",
+							StartCursor:     "start_cursor",
+						},
+
+						TotalCount: 3,
+					}, nil)
+
+				resp, err := resolver.TransactionTypes(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, test.args.statuses)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, resp.TotalCount, int64(3))
+
+			case successLast:
+				helpers := helpersfactory{}
+				statuses := make([]pbTypes.TransactionType_TransactionTypeStatuses, len(test.args.statuses))
+				for index, status := range test.args.statuses {
+					statuses[index] = helpers.GetProtoTransactionTypesStatuses(status)
+				}
+
+				request := &payment.GetTransactionTypesRequest{
+					First:    int32(test.args.first),
+					After:    test.args.after,
+					Last:     int32(test.args.last),
+					Before:   test.args.before,
+					Statuses: statuses,
+				}
+				paymentServiceClient.EXPECT().GetTransactionTypes(context.Background(), request).Return(
+					&payment.GetTransactionTypesResponse{
+						Nodes: []*pbTypes.TransactionType{
+							{
+								Id:     "3",
+								Name:   "Transaction_Type_3",
+								Status: pbTypes.TransactionType_INACTIVE,
+							},
+
+							{
+								Id:     "2",
+								Name:   "Transaction_Type_2",
+								Status: pbTypes.TransactionType_ACTIVE,
+							},
+							{
+								Id:     "1",
+								Name:   "Transaction_Type_1",
+								Status: pbTypes.TransactionType_ACTIVE,
+							},
+						},
+						PaginationInfo: &pbTypes.PaginationInfo{
+							HasNextPage:     false,
+							HasPreviousPage: false,
+							EndCursor:       "end_cursor",
+							StartCursor:     "start_cursor",
+						},
+
+						TotalCount: 3,
+					}, nil)
+
+				resp, err := resolver.TransactionTypes(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, test.args.statuses)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, resp.TotalCount, int64(3))
+
+			case successAfter:
+				helpers := helpersfactory{}
+				statuses := make([]pbTypes.TransactionType_TransactionTypeStatuses, len(test.args.statuses))
+				for index, status := range test.args.statuses {
+					statuses[index] = helpers.GetProtoTransactionTypesStatuses(status)
+				}
+
+				request := &payment.GetTransactionTypesRequest{
+					First:    int32(test.args.first),
+					After:    test.args.after,
+					Last:     int32(test.args.last),
+					Before:   test.args.before,
+					Statuses: statuses,
+				}
+				paymentServiceClient.EXPECT().GetTransactionTypes(context.Background(), request).Return(
+					&payment.GetTransactionTypesResponse{
+						Nodes: []*pbTypes.TransactionType{
+
+							{
+								Id:     "2",
+								Name:   "Transaction_Type_2",
+								Status: pbTypes.TransactionType_ACTIVE,
+							},
+							{
+								Id:     "3",
+								Name:   "Transaction_Type_3",
+								Status: pbTypes.TransactionType_INACTIVE,
+							},
+						},
+						PaginationInfo: &pbTypes.PaginationInfo{
+							HasNextPage:     false,
+							HasPreviousPage: false,
+							EndCursor:       "end_cursor",
+							StartCursor:     "start_cursor",
+						},
+
+						TotalCount: 2,
+					}, nil)
+
+				resp, err := resolver.TransactionTypes(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, test.args.statuses)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, resp.TotalCount, int64(2))
+
+			case successBefore:
+				helpers := helpersfactory{}
+				statuses := make([]pbTypes.TransactionType_TransactionTypeStatuses, len(test.args.statuses))
+				for index, status := range test.args.statuses {
+					statuses[index] = helpers.GetProtoTransactionTypesStatuses(status)
+				}
+
+				request := &payment.GetTransactionTypesRequest{
+					First:    int32(test.args.first),
+					After:    test.args.after,
+					Last:     int32(test.args.last),
+					Before:   test.args.before,
+					Statuses: statuses,
+				}
+				paymentServiceClient.EXPECT().GetTransactionTypes(context.Background(), request).Return(
+					&payment.GetTransactionTypesResponse{
+						Nodes: []*pbTypes.TransactionType{
+							{
+								Id:     "1",
+								Name:   "Transaction_Type_1",
+								Status: pbTypes.TransactionType_ACTIVE,
+							},
+						},
+						PaginationInfo: &pbTypes.PaginationInfo{
+							HasNextPage:     false,
+							HasPreviousPage: false,
+							EndCursor:       "end_cursor",
+							StartCursor:     "start_cursor",
+						},
+
+						TotalCount: 1,
+					}, nil)
+
+				resp, err := resolver.TransactionTypes(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, test.args.statuses)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, resp.TotalCount, int64(1))
+			}
+		})
+	}
 }
 
 func Test_queryResolver_Questionary(t *testing.T) {
@@ -3743,6 +4013,29 @@ func Test_queryResolver_Currencies(t *testing.T) {
 }
 
 func Test_queryResolver_Fees(t *testing.T) {
+	const (
+		success = iota
+		errorNotFound
+	)
+
+	tests := []struct {
+		name     string
+		arg      string
+		testType int
+	}{
+		{
+			name:     "Test fees successfully with a valid transaction_type_id",
+			arg:      "transaction_type_id",
+			testType: success,
+		},
+
+		{
+			name:     "Test error getting fees with a invalid_transaction_type_id",
+			arg:      "invalid_transaction_type_id",
+			testType: errorNotFound,
+		},
+	}
+
 	controller := gomock.NewController(t)
 	defer controller.Finish()
 	pricingServiceClient := mocks.NewMockPricingServiceClient(controller)
@@ -3751,9 +4044,49 @@ func Test_queryResolver_Fees(t *testing.T) {
 	}
 	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Query()
 
-	resp, err := resolver.Fees(context.Background(), "")
-	assert.Error(t, err)
-	assert.NotNil(t, resp)
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			switch test.testType {
+			case success:
+				request := &pricing.GetFeesRequest{TransactionTypeId: test.arg}
+				pricingServiceClient.EXPECT().GetFees(context.Background(), request).Return(
+					&pricing.GetFeesResponse{
+						Fees: []*pbTypes.Fee{
+							{
+								Id: "fee_id_1",
+								TransactionType: &pbTypes.TransactionType{
+									Id:     test.arg,
+									Name:   "GBP-GBP",
+									Status: pbTypes.TransactionType_ACTIVE,
+								},
+								Type: pbTypes.Fee_FIXED,
+								Boundaries: []*pbTypes.FeeBoundaries{
+									{
+										Lower:      1.0,
+										Upper:      100.0,
+										Amount:     40.0,
+										Percentage: 0.15,
+									},
+								},
+								Status: pbTypes.Fee_ACTIVE,
+							},
+						},
+					}, nil)
+				resp, err := resolver.Fees(context.Background(), test.arg)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.NotEmpty(t, resp)
+
+			case errorNotFound:
+				request := &pricing.GetFeesRequest{TransactionTypeId: test.arg}
+				pricingServiceClient.EXPECT().GetFees(context.Background(), request).Return(nil, errors.New(""))
+				resp, err := resolver.Fees(context.Background(), test.arg)
+				assert.Error(t, err)
+				assert.Nil(t, resp)
+			}
+		})
+	}
+
 }
 
 func Test_queryResolver_ExchangeRate(t *testing.T) {
