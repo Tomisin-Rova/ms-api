@@ -500,9 +500,14 @@ func (r *queryResolver) Transactions(ctx context.Context, first *int64, after *s
 }
 
 func (r *queryResolver) Beneficiary(ctx context.Context, id string) (*apiTypes.Beneficiary, error) {
-	return &apiTypes.Beneficiary{
-		ID: "n/a",
-	}, errors.New("not implemented")
+	result, err := r.PaymentService.GetBeneficiary(ctx, &payment.GetBeneficiaryRequest{Id: id})
+	if err != nil {
+		return nil, err
+	}
+
+	helpers := &helpersfactory{}
+
+	return helpers.MakeBeneficiaryFromProto(result), nil
 }
 
 func (r *queryResolver) Beneficiaries(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string, statuses []apiTypes.BeneficiaryStatuses) (*apiTypes.BeneficiaryConnection, error) {
