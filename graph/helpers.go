@@ -745,6 +745,17 @@ func (h *helpersfactory) MakeBeneficiaryAccountFromProto(beneficiaryAccount *pro
 	return &result
 }
 
+func (h *helpersfactory) GetProtoBeneficiaryStatuses(val types.BeneficiaryStatuses) protoTypes.Beneficiary_BeneficiaryStatuses {
+	switch val {
+	case types.BeneficiaryStatusesActive:
+		return protoTypes.Beneficiary_ACTIVE
+	case types.BeneficiaryStatusesInactive:
+		return protoTypes.Beneficiary_INACTIVE
+	default:
+		return -1
+	}
+}
+
 func (h *helpersfactory) MakeProductFromProto(product *protoTypes.Product) *types.Product {
 	if product == nil {
 		return &types.Product{}
