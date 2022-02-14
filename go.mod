@@ -7,7 +7,7 @@ require (
 	github.com/go-chi/chi v4.1.2+incompatible
 	github.com/golang/mock v1.6.0
 	github.com/gorilla/websocket v1.4.2
-	github.com/roava/zebra v0.0.0-20220208125719-77ca938a5a63
+	github.com/roava/zebra v0.0.0-20220214133153-2f9afcd0ef94
 	github.com/rs/cors v1.8.0
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.0

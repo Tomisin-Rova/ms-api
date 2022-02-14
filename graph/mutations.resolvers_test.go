@@ -3,10 +3,11 @@ package graph
 import (
 	"context"
 	"errors"
-	terror "github.com/roava/zebra/errors"
-	accountPb "ms.api/protos/pb/account"
 	"net/http"
 	"testing"
+
+	terror "github.com/roava/zebra/errors"
+	accountPb "ms.api/protos/pb/account"
 
 	"github.com/golang/mock/gomock"
 	"github.com/roava/zebra/middleware"
@@ -551,24 +552,93 @@ func TestMutationResolver_CheckCustomerEmail(t *testing.T) {
 	)
 
 	tests := []struct {
-		name     string
-		arg      string
+		name string
+		args struct {
+			email       string
+			deviceInput types.DeviceInput
+		}
 		testType int
 	}{
 		{
-			name:     "Test check email found successful",
-			arg:      "f@mail.com",
+			name: "Test check email found successful",
+			args: struct {
+				email       string
+				deviceInput types.DeviceInput
+			}{
+				email: "f@mail.com",
+				deviceInput: types.DeviceInput{
+					Identifier: "identifier",
+					Os:         "IOS",
+					Brand:      "iPhoneX",
+					Tokens: []*types.DeviceTokenInput{
+						{
+							Type:  types.DeviceTokenTypesFirebase,
+							Value: "firebase-token-string",
+						},
+					},
+					Preferences: []*types.DevicePreferencesInput{
+						{
+							Type:  types.DevicePreferencesTypesPush,
+							Value: false,
+						},
+					},
+				},
+			},
 			testType: success,
 		},
 
 		{
-			name:     "Test error check email not found",
-			arg:      "f@mail.com",
+			name: "Test error check email not found",
+			args: struct {
+				email       string
+				deviceInput types.DeviceInput
+			}{
+				email: "noEmail@mail.com",
+				deviceInput: types.DeviceInput{
+					Identifier: "xxxxxxxxxx",
+					Os:         "Android",
+					Brand:      "Samsung",
+					Tokens: []*types.DeviceTokenInput{
+						{
+							Type:  types.DeviceTokenTypesFirebase,
+							Value: "sample-firebase-token-string",
+						},
+					},
+					Preferences: []*types.DevicePreferencesInput{
+						{
+							Type:  types.DevicePreferencesTypesPush,
+							Value: false,
+						},
+					},
+				},
+			},
 			testType: emailNotFound,
 		},
 		{
-			name:     "Test invalid email error",
-			arg:      "invalidEmail",
+			name: "Test invalid email error",
+			args: struct {
+				email       string
+				deviceInput types.DeviceInput
+			}{
+				email: "invalidEmail",
+				deviceInput: types.DeviceInput{
+					Identifier: "abczzabczz",
+					Os:         "Android",
+					Brand:      "Nokia1",
+					Tokens: []*types.DeviceTokenInput{
+						{
+							Type:  types.DeviceTokenTypesFirebase,
+							Value: "sample-firebase-token-string",
+						},
+					},
+					Preferences: []*types.DevicePreferencesInput{
+						{
+							Type:  types.DevicePreferencesTypesPush,
+							Value: false,
+						},
+					},
+				},
+			},
 			testType: invalidEmail,
 		},
 	}
@@ -582,31 +652,85 @@ func TestMutationResolver_CheckCustomerEmail(t *testing.T) {
 				CustomerService: customerServiceClient,
 			}
 			resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
-
+			helper := helpersfactory{}
 			switch test.testType {
 			case success:
-				customerServiceClient.EXPECT().CheckEmail(context.Background(),
-					&customer.CheckEmailRequest{Email: test.arg},
-				).Return(&pbTypes.DefaultResponse{Success: true}, nil)
+				tokens := make([]*pbTypes.DeviceTokenInput, len(test.args.deviceInput.Tokens))
+				for index, deviceToken := range test.args.deviceInput.Tokens {
+					tokens[index] = &pbTypes.DeviceTokenInput{
+						Type:  helper.GetProtoDeviceTokenType(deviceToken.Type),
+						Value: deviceToken.Value,
+					}
+				}
 
-				resp, err := resolver.CheckCustomerEmail(context.Background(), test.arg, types.DeviceInput{})
+				preferences := make([]*pbTypes.DevicePreferencesInput, len(test.args.deviceInput.Preferences))
+				for index, devicePreference := range test.args.deviceInput.Preferences {
+					preferences[index] = &pbTypes.DevicePreferencesInput{
+						Type:  helper.GetProtoDevicePreferencesType(devicePreference.Type),
+						Value: devicePreference.Value,
+					}
+				}
+
+				request := &customer.CheckCustomerEmailRequest{
+					Email: test.args.email,
+					Device: &pbTypes.DeviceInput{
+						Identifier:  test.args.deviceInput.Identifier,
+						Os:          test.args.deviceInput.Os,
+						Brand:       test.args.deviceInput.Brand,
+						Tokens:      tokens,
+						Preferences: preferences,
+					},
+				}
+
+				customerServiceClient.EXPECT().CheckCustomerEmail(context.Background(), request).Return(
+					&pbTypes.DefaultResponse{Success: true, Code: 1}, nil,
+				)
+
+				resp, err := resolver.CheckCustomerEmail(context.Background(), test.args.email, test.args.deviceInput)
 				assert.NoError(t, err)
 				assert.Equal(t, &types.Response{
 					Success: true,
-					Code:    0,
+					Code:    1,
 				}, resp)
 
 			case emailNotFound:
-				customerServiceClient.EXPECT().CheckEmail(context.Background(),
-					&customer.CheckEmailRequest{Email: test.arg},
-				).Return(&pbTypes.DefaultResponse{Success: false}, errors.New("not found"))
+				tokens := make([]*pbTypes.DeviceTokenInput, len(test.args.deviceInput.Tokens))
+				for index, deviceToken := range test.args.deviceInput.Tokens {
+					tokens[index] = &pbTypes.DeviceTokenInput{
+						Type:  helper.GetProtoDeviceTokenType(deviceToken.Type),
+						Value: deviceToken.Value,
+					}
+				}
 
-				resp, err := resolver.CheckCustomerEmail(context.Background(), test.arg, types.DeviceInput{})
+				preferences := make([]*pbTypes.DevicePreferencesInput, len(test.args.deviceInput.Preferences))
+				for index, devicePreference := range test.args.deviceInput.Preferences {
+					preferences[index] = &pbTypes.DevicePreferencesInput{
+						Type:  helper.GetProtoDevicePreferencesType(devicePreference.Type),
+						Value: devicePreference.Value,
+					}
+				}
+
+				request := &customer.CheckCustomerEmailRequest{
+					Email: test.args.email,
+					Device: &pbTypes.DeviceInput{
+						Identifier:  test.args.deviceInput.Identifier,
+						Os:          test.args.deviceInput.Os,
+						Brand:       test.args.deviceInput.Brand,
+						Tokens:      tokens,
+						Preferences: preferences,
+					},
+				}
+
+				customerServiceClient.EXPECT().CheckCustomerEmail(context.Background(), request).Return(
+					nil, errorvalues.Format(500, errors.New("")),
+				)
+
+				resp, err := resolver.CheckCustomerEmail(context.Background(), test.args.email, test.args.deviceInput)
 				assert.Error(t, err)
 				assert.Nil(t, resp)
 
 			case invalidEmail:
-				resp, err := resolver.CheckCustomerEmail(context.Background(), test.arg, types.DeviceInput{})
+				resp, err := resolver.CheckCustomerEmail(context.Background(), test.args.email, test.args.deviceInput)
 				assert.Error(t, err)
 				assert.Nil(t, resp)
 			}
@@ -615,17 +739,137 @@ func TestMutationResolver_CheckCustomerEmail(t *testing.T) {
 }
 
 func TestMutationResolver_CheckCustomerData(t *testing.T) {
-	controller := gomock.NewController(t)
-	defer controller.Finish()
-	customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
-	resolverOpts := &ResolverOpts{
-		CustomerService: customerServiceClient,
-	}
-	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
-	resp, err := resolver.CheckCustomerData(context.Background(), types.CheckCustomerDataInput{})
+	const (
+		success = iota
+		invalidEmail
+		invalidDob
+		customerNotFound
+	)
 
-	assert.NoError(t, err)
-	assert.NotNil(t, resp)
+	tests := []struct {
+		name              string
+		customerDataInput types.CheckCustomerDataInput
+		testType          int
+	}{
+		{
+			name: "Test checkCustomerData successfully",
+			customerDataInput: types.CheckCustomerDataInput{
+				Email:            "test@mail.com",
+				FirstName:        "first_name",
+				LastName:         "last_name",
+				Dob:              "01-02-2001",
+				AccountNumber:    "00011133",
+				SortCode:         "040695",
+				DeviceIdentifier: "zzz-ccxx-aaa",
+			},
+			testType: success,
+		},
+
+		{
+			name: "Test error check customer data with invalid email",
+			customerDataInput: types.CheckCustomerDataInput{
+				Email:            "invalidEmail",
+				FirstName:        "first_name",
+				LastName:         "last_name",
+				Dob:              "01-02-2001",
+				AccountNumber:    "00011133",
+				SortCode:         "040695",
+				DeviceIdentifier: "zzz-ccxx-aaa",
+			},
+			testType: invalidEmail,
+		},
+
+		{
+			name: "Test error check customer data with invalid Dob",
+			customerDataInput: types.CheckCustomerDataInput{
+				Email:            "invalidEmail",
+				FirstName:        "first_name",
+				LastName:         "last_name",
+				Dob:              "2001/01/02",
+				AccountNumber:    "00011133",
+				SortCode:         "040695",
+				DeviceIdentifier: "zzz-ccxx-aaa",
+			},
+			testType: invalidDob,
+		},
+
+		{
+			name: "Test error check customer data not found",
+			customerDataInput: types.CheckCustomerDataInput{
+				Email:            "noEmail@mail.com",
+				FirstName:        "first_name",
+				LastName:         "last_name",
+				Dob:              "01-10-1998",
+				AccountNumber:    "00011133",
+				SortCode:         "040695",
+				DeviceIdentifier: "zzz-ccxx-aaa",
+			},
+			testType: customerNotFound,
+		},
+	}
+
+	for _, test := range tests {
+
+		controller := gomock.NewController(t)
+		defer controller.Finish()
+		customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
+		resolverOpts := &ResolverOpts{
+			CustomerService: customerServiceClient,
+		}
+		resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
+
+		t.Run(test.name, func(t *testing.T) {
+			switch test.testType {
+			case success:
+				request := &customer.CheckCustomerDataRequest{
+					Email:            test.customerDataInput.Email,
+					FirstName:        test.customerDataInput.FirstName,
+					LastName:         test.customerDataInput.LastName,
+					Dob:              test.customerDataInput.Dob,
+					AccountNumber:    test.customerDataInput.AccountNumber,
+					SortCode:         test.customerDataInput.SortCode,
+					DeviceIdentifier: test.customerDataInput.DeviceIdentifier,
+				}
+
+				customerServiceClient.EXPECT().CheckCustomerData(context.Background(), request).Return(
+					&pbTypes.DefaultResponse{
+						Success: true,
+						Code:    1,
+					}, nil)
+
+				resp, err := resolver.CheckCustomerData(context.Background(), test.customerDataInput)
+				assert.NoError(t, err)
+				assert.Equal(t, &types.Response{Success: true, Code: int64(1)}, resp)
+
+			case invalidEmail:
+				resp, err := resolver.CheckCustomerData(context.Background(), test.customerDataInput)
+				assert.Error(t, err)
+				assert.Nil(t, resp)
+
+			case invalidDob:
+				resp, err := resolver.CheckCustomerData(context.Background(), test.customerDataInput)
+				assert.Error(t, err)
+				assert.Nil(t, resp)
+
+			case customerNotFound:
+				request := &customer.CheckCustomerDataRequest{
+					Email:            test.customerDataInput.Email,
+					FirstName:        test.customerDataInput.FirstName,
+					LastName:         test.customerDataInput.LastName,
+					Dob:              test.customerDataInput.Dob,
+					AccountNumber:    test.customerDataInput.AccountNumber,
+					SortCode:         test.customerDataInput.SortCode,
+					DeviceIdentifier: test.customerDataInput.DeviceIdentifier,
+				}
+
+				customerServiceClient.EXPECT().CheckCustomerData(context.Background(), request).Return(nil, errors.New(""))
+
+				resp, err := resolver.CheckCustomerData(context.Background(), test.customerDataInput)
+				assert.Error(t, err)
+				assert.Nil(t, resp)
+			}
+		})
+	}
 }
 
 func TestMutationResolver_Register(t *testing.T) {
