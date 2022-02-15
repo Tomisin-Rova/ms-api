@@ -1952,11 +1952,14 @@ func TestMutationResolver_CreateTransfer(t *testing.T) {
 			case failOnAuthenticationError:
 				resp, err := resolver.CreateTransfer(context.Background(), types.TransactionInput{}, "")
 				assert.Error(t, err)
-				assert.NotNil(t, resp)
-				assert.False(t, resp.Success)
-				assert.NotNil(t, resp.Message)
-				assert.Equal(t, authFailedMessage, *resp.Message)
-				assert.Equal(t, int64(http.StatusUnauthorized), resp.Code)
+				assert.Nil(t, resp)
+				switch newTerror := err.(type) {
+				case *terror.Terror:
+					assert.Equal(t, errorvalues.InvalidAuthenticationError, newTerror.Code())
+				default:
+					t.Error("Should return an error of type InvalidAuthenticationError")
+					t.Fail()
+				}
 			case failOnGRPCError:
 				ctx, err := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{ID: "customerID"})
 				assert.NoError(t, err)

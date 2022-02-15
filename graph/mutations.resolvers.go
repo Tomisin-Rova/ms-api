@@ -647,12 +647,7 @@ func (r *mutationResolver) CreateTransfer(ctx context.Context, transfer types.Tr
 	// Auhtenticate user
 	_, err := middlewares.GetClaimsFromCtx(ctx)
 	if err != nil {
-		responseMessage := authFailedMessage
-		return &types.Response{
-			Message: &responseMessage,
-			Success: false,
-			Code:    int64(http.StatusUnauthorized),
-		}, err
+		return nil, errorvalues.Format(errorvalues.InvalidAuthenticationError, err)
 	}
 	request := payment.CreateTransferRequest{
 		Transfer: &payment.TransactionInput{
