@@ -553,7 +553,7 @@ func (r *queryResolver) Beneficiaries(ctx context.Context, keywords *string, fir
 		nodes[index] = helper.MakeBeneficiaryFromProto(node)
 	}
 
-	pageInfo := apiTypes.PageInfo{
+	pageInfo := &apiTypes.PageInfo{
 		HasNextPage:     resp.PaginationInfo.HasNextPage,
 		HasPreviousPage: resp.PaginationInfo.HasPreviousPage,
 		StartCursor:     &resp.PaginationInfo.StartCursor,
@@ -562,7 +562,7 @@ func (r *queryResolver) Beneficiaries(ctx context.Context, keywords *string, fir
 
 	return &apiTypes.BeneficiaryConnection{
 		Nodes:      nodes,
-		PageInfo:   &pageInfo,
+		PageInfo:   pageInfo,
 		TotalCount: int64(resp.TotalCount),
 	}, nil
 }
