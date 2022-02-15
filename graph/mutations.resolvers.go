@@ -19,6 +19,7 @@ import (
 	"ms.api/protos/pb/auth"
 	"ms.api/protos/pb/customer"
 	"ms.api/protos/pb/onboarding"
+	"ms.api/protos/pb/payment"
 	pbTypes "ms.api/protos/pb/types"
 	"ms.api/protos/pb/verification"
 	"ms.api/server/http/middlewares"
@@ -643,9 +644,41 @@ func (r *mutationResolver) DeleteBeneficaryAccount(ctx context.Context, benefici
 }
 
 func (r *mutationResolver) CreateTransfer(ctx context.Context, transfer types.TransactionInput, transactionPassword string) (*types.Response, error) {
-	msg := "Not implemented"
+	// Auhtenticate user
+	_, err := middlewares.GetClaimsFromCtx(ctx)
+	if err != nil {
+		return nil, errorvalues.Format(errorvalues.InvalidAuthenticationError, err)
+	}
+	request := payment.CreateTransferRequest{
+		Transfer: &payment.TransactionInput{
+			TransactionTypeId: transfer.TransactionTypeID,
+			FeeIds:            transfer.FeeIds,
+			Amount:            float32(transfer.Amount),
+			SourceAccountId:   transfer.SourceAccountID,
+			TargetAccountId:   transfer.TargetAccountID,
+			IdempotencyKey:    transfer.IdempotencyKey,
+		},
+		TransactionPassword: transactionPassword,
+	}
+	if transfer.Reference != nil {
+		request.Transfer.Reference = *transfer.Reference
+	}
+	if transfer.ExchangeRateID != nil {
+		request.Transfer.ExchangeRateId = *transfer.ExchangeRateID
+	}
+	resp, err := r.PaymentService.CreateTransfer(ctx, &request)
+	if err != nil {
+		msg := err.Error()
+		return &types.Response{
+			Success: false,
+			Code:    int64(http.StatusInternalServerError),
+			Message: &msg,
+		}, err
+	}
+
 	return &types.Response{
-		Message: &msg,
+		Success: resp.Success,
+		Code:    int64(resp.Code),
 	}, nil
 }
 
