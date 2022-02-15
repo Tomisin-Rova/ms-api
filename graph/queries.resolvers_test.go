@@ -3022,6 +3022,28 @@ func Test_queryResolver_Transactions(t *testing.T) {
 }
 
 func Test_queryResolver_Beneficiary(t *testing.T) {
+	const (
+		success = iota
+		beneficiaryNotFound
+	)
+	tests := []struct {
+		name     string
+		arg      string
+		testType int
+	}{
+		{
+			name:     "Test beneficiary found successfully with a given beneficiaryId",
+			arg:      "1",
+			testType: success,
+		},
+
+		{
+			name:     "Test error beneficiary not found with an invalidId",
+			arg:      "invalidId",
+			testType: beneficiaryNotFound,
+		},
+	}
+
 	controller := gomock.NewController(t)
 	defer controller.Finish()
 	paymentServiceClient := mocks.NewMockPaymentServiceClient(controller)
@@ -3029,10 +3051,38 @@ func Test_queryResolver_Beneficiary(t *testing.T) {
 		PaymentService: paymentServiceClient,
 	}
 	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Query()
-	resp, err := resolver.Beneficiary(context.Background(), "")
 
-	assert.Error(t, err)
-	assert.NotNil(t, resp)
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			switch test.testType {
+			case success:
+				paymentServiceClient.EXPECT().GetBeneficiary(context.Background(),
+					&payment.GetBeneficiaryRequest{Id: test.arg},
+				).Return(&pbTypes.Beneficiary{
+					Id:       test.arg,
+					Customer: nil,
+					Name:     "Beneficiary name",
+					Accounts: []*pbTypes.BeneficiaryAccount{},
+					Status:   pbTypes.Beneficiary_ACTIVE,
+					StatusTs: timestamppb.Now(),
+					Ts:       timestamppb.Now(),
+				}, nil)
+
+				resp, err := resolver.Beneficiary(context.Background(), test.arg)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+
+			case beneficiaryNotFound:
+				paymentServiceClient.EXPECT().GetBeneficiary(context.Background(),
+					&payment.GetBeneficiaryRequest{Id: test.arg},
+				).Return(&pbTypes.Beneficiary{}, errors.New("beneficiary not found"))
+
+				resp, err := resolver.Beneficiary(context.Background(), test.arg)
+				assert.Error(t, err)
+				assert.Nil(t, resp)
+			}
+		})
+	}
 }
 
 func Test_queryResolver_Beneficiaries(t *testing.T) {
