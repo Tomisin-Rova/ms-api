@@ -258,6 +258,17 @@ func (h *helpersfactory) MapProtoBeneficiaryStatuses(val protoTypes.Beneficiary_
 	}
 }
 
+func (h *helpersfactory) MapBeneficiaryStatuses(val types.BeneficiaryStatuses) protoTypes.Beneficiary_BeneficiaryStatuses {
+	switch val {
+	case types.BeneficiaryStatusesActive:
+		return protoTypes.Beneficiary_ACTIVE
+	case types.BeneficiaryStatusesInactive:
+		return protoTypes.Beneficiary_INACTIVE
+	default:
+		return -1
+	}
+}
+
 func (h *helpersfactory) MapProtoProductTypes(val protoTypes.Product_ProductTypes) types.ProductTypes {
 	switch val {
 	case protoTypes.Product_CURRENT_ACCOUNT:
