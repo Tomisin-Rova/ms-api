@@ -24,6 +24,8 @@ type Helper interface {
 	MakeFeesFromProto(protoFees []*protoTypes.Fee) []*types.Fee
 	MapTransactionTypeStatus(val protoTypes.TransactionType_TransactionTypeStatuses) types.TransactionTypeStatuses
 	GetProtoTransactionTypesStatuses(val types.TransactionTypeStatuses) protoTypes.TransactionType_TransactionTypeStatuses
+	GetProtoDeviceTokenType(val types.DeviceTokenTypes) protoTypes.DeviceToken_DeviceTokenTypes
+	GetProtoDevicePreferencesType(val types.DevicePreferencesTypes) protoTypes.DevicePreferences_DevicePreferencesTypes
 }
 
 type helpersfactory struct{}
@@ -163,6 +165,26 @@ func (h *helpersfactory) GetProtoTransactionTypesStatuses(val types.TransactionT
 		return protoTypes.TransactionType_ACTIVE
 	case types.TransactionTypeStatusesInactive:
 		return protoTypes.TransactionType_INACTIVE
+	default:
+		return -1
+	}
+}
+
+func (h *helpersfactory) GetProtoDeviceTokenType(val types.DeviceTokenTypes) protoTypes.DeviceToken_DeviceTokenTypes {
+	switch val {
+	case types.DeviceTokenTypesFirebase:
+		return protoTypes.DeviceToken_FIREBASE
+	default:
+		return -1
+	}
+}
+
+func (h *helpersfactory) GetProtoDevicePreferencesType(val types.DevicePreferencesTypes) protoTypes.DevicePreferences_DevicePreferencesTypes {
+	switch val {
+	case types.DevicePreferencesTypesBiometrics:
+		return protoTypes.DevicePreferences_BIOMETRICS
+	case types.DevicePreferencesTypesPush:
+		return protoTypes.DevicePreferences_PUSH
 	default:
 		return -1
 	}
