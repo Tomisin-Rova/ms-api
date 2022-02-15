@@ -185,23 +185,73 @@ func (r *mutationResolver) CheckCustomerEmail(ctx context.Context, email string,
 		return nil, err
 	}
 
-	resp, err := r.CustomerService.CheckEmail(ctx, &customer.CheckEmailRequest{Email: email})
+	deviceTokens := make([]*pbTypes.DeviceTokenInput, len(device.Tokens))
+	for index, deviceToken := range device.Tokens {
+		deviceTokens[index] = &pbTypes.DeviceTokenInput{
+			Type:  r.helper.GetProtoDeviceTokenType(deviceToken.Type),
+			Value: deviceToken.Value,
+		}
+	}
+
+	devicePreferences := make([]*pbTypes.DevicePreferencesInput, len(device.Preferences))
+	for index, devicePreference := range device.Preferences {
+		devicePreferences[index] = &pbTypes.DevicePreferencesInput{
+			Type:  r.helper.GetProtoDevicePreferencesType(devicePreference.Type),
+			Value: devicePreference.Value,
+		}
+	}
+
+	// Build request
+	request := &customer.CheckCustomerEmailRequest{
+		Email: email,
+		Device: &pbTypes.DeviceInput{
+			Identifier:  device.Identifier,
+			Os:          device.Os,
+			Brand:       device.Brand,
+			Tokens:      deviceTokens,
+			Preferences: devicePreferences,
+		},
+	}
+
+	// Make RPC call
+	resp, err := r.CustomerService.CheckCustomerEmail(ctx, request)
 	if err != nil {
 		return nil, err
 	}
 
-	// TODO: Temporal implementation, refactor to use correct RPC call when implemented
-	return &types.Response{
-		Success: resp.Success,
-		Code:    0,
-	}, nil
+	return &types.Response{Success: resp.Success, Code: int64(resp.Code)}, nil
 }
 
 func (r *mutationResolver) CheckCustomerData(ctx context.Context, customerData types.CheckCustomerDataInput) (*types.Response, error) {
-	msg := "Not implemented"
-	return &types.Response{
-		Message: &msg,
-	}, nil
+	_, err := emailvalidator.Validate(customerData.Email)
+	if err != nil {
+		r.logger.Info("invalid email supplied", zap.String("email", customerData.Email))
+		return nil, err
+	}
+
+	if err = datevalidator.ValidateDob(customerData.Dob); err != nil {
+		r.logger.Info("invalid Dob supplied", zap.String("Dob", customerData.Dob))
+		return nil, err
+	}
+
+	// Build request
+	request := &customer.CheckCustomerDataRequest{
+		Email:            customerData.Email,
+		FirstName:        customerData.FirstName,
+		LastName:         customerData.LastName,
+		Dob:              customerData.Dob,
+		AccountNumber:    customerData.AccountNumber,
+		SortCode:         customerData.SortCode,
+		DeviceIdentifier: customerData.DeviceIdentifier,
+	}
+
+	// Make RPC call to customer service
+	resp, err := r.CustomerService.CheckCustomerData(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.Response{Success: resp.Success, Code: int64(resp.Code)}, nil
 }
 
 func (r *mutationResolver) Register(ctx context.Context, customerDetails types.CustomerDetailsInput) (*types.Response, error) {
