@@ -643,6 +643,7 @@ func (r *mutationResolver) DeleteBeneficaryAccount(ctx context.Context, benefici
 }
 
 func (r *mutationResolver) CreateTransfer(ctx context.Context, transfer types.TransactionInput, transactionPassword string) (*types.Response, error) {
+	// Initial Commit
 	msg := "Not implemented"
 	return &types.Response{
 		Message: &msg,
