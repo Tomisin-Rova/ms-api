@@ -523,6 +523,10 @@ func (r *queryResolver) Beneficiaries(ctx context.Context, keywords *string, fir
 	// Build request
 	request := payment.GetBeneficiariesRequest{}
 
+	if keywords != nil {
+		request.Keywords = *keywords
+	}
+
 	if first != nil {
 		request.First = int32(*first)
 	}
