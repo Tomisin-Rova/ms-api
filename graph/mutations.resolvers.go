@@ -623,9 +623,44 @@ func (r *mutationResolver) CreateVaultAccount(ctx context.Context, account types
 }
 
 func (r *mutationResolver) CreateBeneficiary(ctx context.Context, beneficiary types.BeneficiaryInput, transactionPassword string) (*types.Response, error) {
-	msg := "Not implemented"
+	// Authenticate user
+	_, err := middlewares.GetClaimsFromCtx(ctx)
+	if err != nil {
+		return nil, errorvalues.Format(errorvalues.InvalidAuthenticationError, err)
+	}
+	beneficiaryAccount := beneficiary.Account
+	if beneficiaryAccount == nil {
+		beneficiaryAccount = &types.BeneficiaryAccountInput{}
+	}
+	beneficaryAccountName := ""
+	if beneficiaryAccount.Name != nil {
+		beneficaryAccountName = *beneficiaryAccount.Name
+	}
+	req := payment.CreateBeneficiaryRequest{
+		TransactionPassword: transactionPassword,
+		Beneficiary: &payment.BeneficiaryInput{
+			Name: beneficiary.Name,
+			Account: &payment.BeneficiaryAccountInput{
+				Name:          beneficaryAccountName,
+				CurrencyId:    beneficiaryAccount.CurrencyID,
+				AccountNumber: beneficiaryAccount.AccountNumber,
+				Code:          beneficiaryAccount.Code,
+			},
+		},
+	}
+	_, err = r.PaymentService.CreateBeneficiary(ctx, &req)
+	if err != nil {
+		msg := err.Error()
+		return &types.Response{
+			Success: false,
+			Code:    int64(http.StatusInternalServerError),
+			Message: &msg,
+		}, err
+	}
+
 	return &types.Response{
-		Message: &msg,
+		Success: true,
+		Code:    int64(http.StatusOK),
 	}, nil
 }
 
