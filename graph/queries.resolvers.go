@@ -500,19 +500,71 @@ func (r *queryResolver) Transactions(ctx context.Context, first *int64, after *s
 }
 
 func (r *queryResolver) Beneficiary(ctx context.Context, id string) (*apiTypes.Beneficiary, error) {
-	return &apiTypes.Beneficiary{
-		ID: "n/a",
-	}, errors.New("not implemented")
+	result, err := r.PaymentService.GetBeneficiary(ctx, &payment.GetBeneficiaryRequest{Id: id})
+	if err != nil {
+		return nil, err
+	}
+
+	helpers := &helpersfactory{}
+
+	return helpers.MakeBeneficiaryFromProto(result), nil
 }
 
 func (r *queryResolver) Beneficiaries(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string, statuses []apiTypes.BeneficiaryStatuses) (*apiTypes.BeneficiaryConnection, error) {
+	helper := helpersfactory{}
+	beneficiaryStatuses := make([]protoTypes.Beneficiary_BeneficiaryStatuses, len(statuses))
+
+	if len(statuses) > 0 {
+		for index, state := range statuses {
+			beneficiaryStatuses[index] = helper.GetProtoBeneficiaryStatuses(state)
+		}
+	}
+
+	// Build request
+	request := payment.GetBeneficiariesRequest{}
+
+	if keywords != nil {
+		request.Keywords = *keywords
+	}
+
+	if first != nil {
+		request.First = int32(*first)
+	}
+	if after != nil {
+		request.After = *after
+	}
+	if last != nil {
+		request.Last = int32(*last)
+	}
+	if before != nil {
+		request.Before = *before
+	}
+	if len(statuses) > 0 {
+		request.Statuses = beneficiaryStatuses
+	}
+
+	resp, err := r.PaymentService.GetBeneficiaries(ctx, &request)
+	if err != nil {
+		return nil, err
+	}
+
+	nodes := make([]*apiTypes.Beneficiary, len(resp.Nodes))
+	for index, node := range resp.Nodes {
+		nodes[index] = helper.MakeBeneficiaryFromProto(node)
+	}
+
+	pageInfo := &apiTypes.PageInfo{
+		HasNextPage:     resp.PaginationInfo.HasNextPage,
+		HasPreviousPage: resp.PaginationInfo.HasPreviousPage,
+		StartCursor:     &resp.PaginationInfo.StartCursor,
+		EndCursor:       &resp.PaginationInfo.EndCursor,
+	}
+
 	return &apiTypes.BeneficiaryConnection{
-		Nodes: []*apiTypes.Beneficiary{
-			{
-				ID: "n/a",
-			},
-		},
-	}, errors.New("not implemented")
+		Nodes:      nodes,
+		PageInfo:   pageInfo,
+		TotalCount: int64(resp.TotalCount),
+	}, nil
 }
 
 func (r *queryResolver) TransactionTypes(ctx context.Context, first *int64, after *string, last *int64, before *string, statuses []apiTypes.TransactionTypeStatuses) (*apiTypes.TransactionTypeConnection, error) {

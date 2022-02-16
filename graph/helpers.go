@@ -269,7 +269,7 @@ func (h *helpersfactory) MapProtoProductStatuses(val protoTypes.Product_ProductS
 	}
 }
 
-func (h *helpersfactory) MapBeneficiaryStatuses(val protoTypes.Beneficiary_BeneficiaryStatuses) types.BeneficiaryStatuses {
+func (h *helpersfactory) MapProtoBeneficiaryStatuses(val protoTypes.Beneficiary_BeneficiaryStatuses) types.BeneficiaryStatuses {
 	switch val {
 	case protoTypes.Beneficiary_ACTIVE:
 		return types.BeneficiaryStatusesActive
@@ -277,6 +277,17 @@ func (h *helpersfactory) MapBeneficiaryStatuses(val protoTypes.Beneficiary_Benef
 		return types.BeneficiaryStatusesInactive
 	default:
 		return ""
+	}
+}
+
+func (h *helpersfactory) MapBeneficiaryStatuses(val types.BeneficiaryStatuses) protoTypes.Beneficiary_BeneficiaryStatuses {
+	switch val {
+	case types.BeneficiaryStatusesActive:
+		return protoTypes.Beneficiary_ACTIVE
+	case types.BeneficiaryStatusesInactive:
+		return protoTypes.Beneficiary_INACTIVE
+	default:
+		return -1
 	}
 }
 
@@ -733,7 +744,7 @@ func (h *helpersfactory) MakeBeneficiaryFromProto(beneficiary *protoTypes.Benefi
 			Customer: h.makeCustomerFromProto(beneficiary.Customer),
 			Name:     beneficiary.Name,
 			Accounts: beneficiaryAccounts,
-			Status:   h.MapBeneficiaryStatuses(beneficiary.Status),
+			Status:   h.MapProtoBeneficiaryStatuses(beneficiary.Status),
 			StatusTs: beneficiary.StatusTs.AsTime().Unix(),
 			Ts:       beneficiary.Ts.AsTime().Unix(),
 		}
@@ -765,6 +776,17 @@ func (h *helpersfactory) MakeBeneficiaryAccountFromProto(beneficiaryAccount *pro
 	}
 
 	return &result
+}
+
+func (h *helpersfactory) GetProtoBeneficiaryStatuses(val types.BeneficiaryStatuses) protoTypes.Beneficiary_BeneficiaryStatuses {
+	switch val {
+	case types.BeneficiaryStatusesActive:
+		return protoTypes.Beneficiary_ACTIVE
+	case types.BeneficiaryStatusesInactive:
+		return protoTypes.Beneficiary_INACTIVE
+	default:
+		return -1
+	}
 }
 
 func (h *helpersfactory) MakeProductFromProto(product *protoTypes.Product) *types.Product {

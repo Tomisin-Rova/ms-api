@@ -3022,6 +3022,28 @@ func Test_queryResolver_Transactions(t *testing.T) {
 }
 
 func Test_queryResolver_Beneficiary(t *testing.T) {
+	const (
+		success = iota
+		beneficiaryNotFound
+	)
+	tests := []struct {
+		name     string
+		arg      string
+		testType int
+	}{
+		{
+			name:     "Test beneficiary found successfully with a given beneficiaryId",
+			arg:      "1",
+			testType: success,
+		},
+
+		{
+			name:     "Test error beneficiary not found with an invalidId",
+			arg:      "invalidId",
+			testType: beneficiaryNotFound,
+		},
+	}
+
 	controller := gomock.NewController(t)
 	defer controller.Finish()
 	paymentServiceClient := mocks.NewMockPaymentServiceClient(controller)
@@ -3029,29 +3051,192 @@ func Test_queryResolver_Beneficiary(t *testing.T) {
 		PaymentService: paymentServiceClient,
 	}
 	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Query()
-	resp, err := resolver.Beneficiary(context.Background(), "")
 
-	assert.Error(t, err)
-	assert.NotNil(t, resp)
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			switch test.testType {
+			case success:
+				paymentServiceClient.EXPECT().GetBeneficiary(context.Background(),
+					&payment.GetBeneficiaryRequest{Id: test.arg},
+				).Return(&pbTypes.Beneficiary{
+					Id:       test.arg,
+					Customer: nil,
+					Name:     "Beneficiary name",
+					Accounts: []*pbTypes.BeneficiaryAccount{},
+					Status:   pbTypes.Beneficiary_ACTIVE,
+					StatusTs: timestamppb.Now(),
+					Ts:       timestamppb.Now(),
+				}, nil)
+
+				resp, err := resolver.Beneficiary(context.Background(), test.arg)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+
+			case beneficiaryNotFound:
+				paymentServiceClient.EXPECT().GetBeneficiary(context.Background(),
+					&payment.GetBeneficiaryRequest{Id: test.arg},
+				).Return(&pbTypes.Beneficiary{}, errors.New("beneficiary not found"))
+
+				resp, err := resolver.Beneficiary(context.Background(), test.arg)
+				assert.Error(t, err)
+				assert.Nil(t, resp)
+			}
+		})
+	}
 }
 
 func Test_queryResolver_Beneficiaries(t *testing.T) {
-	controller := gomock.NewController(t)
-	defer controller.Finish()
-	paymentServiceClient := mocks.NewMockPaymentServiceClient(controller)
-	resolverOpts := &ResolverOpts{
-		PaymentService: paymentServiceClient,
-	}
-	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Query()
-	first := int64(10)
-	after := "after"
-	last := int64(10)
-	before := "before"
-	keyword := "search_keyworkd"
+	const (
+		pass_arguments = iota
+		handle_failure
+	)
 
-	resp, err := resolver.Beneficiaries(context.Background(), &keyword, &first, &after, &last, &before, []types.BeneficiaryStatuses{})
-	assert.Error(t, err)
-	assert.NotNil(t, resp)
+	helpers := helpersfactory{}
+
+	tests := []struct {
+		name string
+		args struct {
+			keywords string
+			first    int64
+			after    string
+			last     int64
+			before   string
+			statuses []types.BeneficiaryStatuses
+		}
+		testType int
+	}{
+		{
+			name: "Test passes arguments to service correctly",
+			args: struct {
+				keywords string
+				first    int64
+				after    string
+				last     int64
+				before   string
+				statuses []types.BeneficiaryStatuses
+			}{
+				keywords: "test keywords",
+				first:    int64(5),
+				after:    "test after",
+				last:     int64(10),
+				before:   "test before",
+				statuses: []types.BeneficiaryStatuses{types.BeneficiaryStatusesActive, types.BeneficiaryStatusesInactive},
+			},
+			testType: pass_arguments,
+		},
+		{
+			name: "Test handles service errors correctly",
+			args: struct {
+				keywords string
+				first    int64
+				after    string
+				last     int64
+				before   string
+				statuses []types.BeneficiaryStatuses
+			}{
+				keywords: "",
+				first:    0,
+				after:    "",
+				last:     int64(10),
+				before:   "",
+				statuses: []types.BeneficiaryStatuses{types.BeneficiaryStatusesActive, types.BeneficiaryStatusesInactive},
+			},
+			testType: handle_failure,
+		},
+	}
+
+	for _, test := range tests {
+		controller := gomock.NewController(t)
+		defer controller.Finish()
+		paymentServiceClient := mocks.NewMockPaymentServiceClient(controller)
+		resolverOpts := &ResolverOpts{
+			PaymentService: paymentServiceClient,
+		}
+		resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Query()
+
+		t.Run(test.name, func(t *testing.T) {
+			switch test.testType {
+			case pass_arguments:
+				// convert statuses to Beneficiary_BeneficiaryStatuses
+				statuses := make([]pbTypes.Beneficiary_BeneficiaryStatuses, 0)
+				if len(test.args.statuses) > 0 {
+					for _, state := range test.args.statuses {
+						statuses = append(statuses, helpers.MapBeneficiaryStatuses(state))
+					}
+				}
+
+				mockResponse := &payment.GetBeneficiariesResponse{
+					Nodes: []*pbTypes.Beneficiary{
+						{
+							Id:       "1",
+							Customer: &pbTypes.Customer{},
+							Name:     "Beneficiary 1",
+							Accounts: []*pbTypes.BeneficiaryAccount{},
+							Status:   pbTypes.Beneficiary_ACTIVE,
+							StatusTs: timestamppb.Now(),
+							Ts:       timestamppb.Now(),
+						},
+						{
+							Id:       "2",
+							Customer: &pbTypes.Customer{},
+							Name:     "Beneficiary 2",
+							Accounts: []*pbTypes.BeneficiaryAccount{},
+							Status:   pbTypes.Beneficiary_ACTIVE,
+							StatusTs: timestamppb.Now(),
+							Ts:       timestamppb.Now(),
+						},
+					},
+					PaginationInfo: &pbTypes.PaginationInfo{
+						HasNextPage:     false,
+						HasPreviousPage: false,
+						EndCursor:       "end_cursor",
+						StartCursor:     "start_cursor",
+					},
+					TotalCount: 2,
+				}
+
+				paymentServiceClient.EXPECT().GetBeneficiaries(context.Background(),
+					&payment.GetBeneficiariesRequest{
+						Keywords: test.args.keywords,
+						First:    int32(test.args.first),
+						After:    test.args.after,
+						Last:     int32(test.args.last),
+						Before:   test.args.before,
+						Statuses: statuses,
+					}).Return(mockResponse, nil)
+
+				resp, err := resolver.Beneficiaries(context.Background(), &test.args.keywords, &test.args.first, &test.args.after, &test.args.last, &test.args.before, test.args.statuses)
+
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, resp.TotalCount, int64(2))
+
+			case handle_failure:
+				// convert statuses to Beneficiary_BeneficiaryStatuses
+				statuses := make([]pbTypes.Beneficiary_BeneficiaryStatuses, 0)
+				if len(test.args.statuses) > 0 {
+					for _, state := range test.args.statuses {
+						statuses = append(statuses, helpers.MapBeneficiaryStatuses(state))
+					}
+				}
+
+				paymentServiceClient.EXPECT().GetBeneficiaries(context.Background(),
+					&payment.GetBeneficiariesRequest{
+						Keywords: test.args.keywords,
+						First:    int32(test.args.first),
+						After:    test.args.after,
+						Last:     int32(test.args.last),
+						Before:   test.args.before,
+						Statuses: statuses,
+					}).Return(nil, errors.New("test error"))
+
+				resp, err := resolver.Beneficiaries(context.Background(), &test.args.keywords, &test.args.first, &test.args.after, &test.args.last, &test.args.before, test.args.statuses)
+				assert.Error(t, err)
+				assert.Nil(t, resp)
+				assert.Contains(t, err.Error(), "test error")
+			}
+		})
+	}
 }
 
 func Test_queryResolver_TransactionTypes(t *testing.T) {
