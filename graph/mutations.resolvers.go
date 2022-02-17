@@ -665,9 +665,38 @@ func (r *mutationResolver) CreateBeneficiary(ctx context.Context, beneficiary ty
 }
 
 func (r *mutationResolver) AddBeneficiaryAccount(ctx context.Context, beneficiaryID string, account types.BeneficiaryAccountInput, transactionPassword string) (*types.Response, error) {
-	msg := "Not implemented"
+	// Authenticate user
+	_, err := middlewares.GetClaimsFromCtx(ctx)
+	if err != nil {
+		return nil, errorvalues.Format(errorvalues.InvalidAuthenticationError, err)
+	}
+	beneficaryAccountName := ""
+	if account.Name != nil {
+		beneficaryAccountName = *account.Name
+	}
+	req := payment.AddBeneficiaryAccountRequest{
+		BeneficiaryId:       beneficiaryID,
+		TransactionPassword: transactionPassword,
+		Account: &payment.BeneficiaryAccountInput{
+			Name:          beneficaryAccountName,
+			CurrencyId:    account.CurrencyID,
+			AccountNumber: account.AccountNumber,
+			Code:          account.Code,
+		},
+	}
+	_, err = r.PaymentService.AddBeneficiaryAccount(ctx, &req)
+	if err != nil {
+		msg := err.Error()
+		return &types.Response{
+			Success: false,
+			Code:    int64(http.StatusInternalServerError),
+			Message: &msg,
+		}, err
+	}
+
 	return &types.Response{
-		Message: &msg,
+		Success: true,
+		Code:    int64(http.StatusOK),
 	}, nil
 }
 
