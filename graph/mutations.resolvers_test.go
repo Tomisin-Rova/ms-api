@@ -2014,7 +2014,7 @@ func TestMutationResolver_AddBeneficiaryAccount(t *testing.T) {
 	}
 }
 
-func TestMutationResolver_DeleteBeneficaryAccount(t *testing.T) {
+func TestMutationResolver_DeleteBeneficiaryAccount(t *testing.T) {
 	const (
 		failOnAuthenticationError = iota
 		failOnGRPCError
@@ -2050,7 +2050,7 @@ func TestMutationResolver_DeleteBeneficaryAccount(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			switch testCase.testType {
 			case failOnAuthenticationError:
-				resp, err := resolver.DeleteBeneficaryAccount(context.Background(), "", "", "")
+				resp, err := resolver.DeleteBeneficiaryAccount(context.Background(), "", "", "")
 				assert.Error(t, err)
 				assert.Nil(t, resp)
 				switch newTerror := err.(type) {
@@ -2064,7 +2064,7 @@ func TestMutationResolver_DeleteBeneficaryAccount(t *testing.T) {
 				ctx, err := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{ID: "customerID"})
 				assert.NoError(t, err)
 				paymentServiceClient.EXPECT().DeleteBeneficiaryAccount(gomock.Any(), gomock.Any()).Return(nil, errors.New("")).Times(1)
-				resp, err := resolver.DeleteBeneficaryAccount(ctx, "", "", "")
+				resp, err := resolver.DeleteBeneficiaryAccount(ctx, "", "", "")
 				assert.Error(t, err)
 				assert.NotNil(t, resp)
 				assert.False(t, resp.Success)
@@ -2074,7 +2074,7 @@ func TestMutationResolver_DeleteBeneficaryAccount(t *testing.T) {
 				ctx, err := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{ID: "customerID"})
 				assert.NoError(t, err)
 				paymentServiceClient.EXPECT().DeleteBeneficiaryAccount(gomock.Any(), gomock.Any()).Return(&pbTypes.DefaultResponse{}, nil).Times(1)
-				resp, err := resolver.DeleteBeneficaryAccount(ctx, "", "", "")
+				resp, err := resolver.DeleteBeneficiaryAccount(ctx, "", "", "")
 				assert.NoError(t, err)
 				assert.NotNil(t, resp)
 				assert.True(t, resp.Success)

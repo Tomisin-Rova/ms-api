@@ -700,7 +700,7 @@ func (r *mutationResolver) AddBeneficiaryAccount(ctx context.Context, beneficiar
 	}, nil
 }
 
-func (r *mutationResolver) DeleteBeneficaryAccount(ctx context.Context, beneficiaryID string, accountID string, transactionPassword string) (*types.Response, error) {
+func (r *mutationResolver) DeleteBeneficiaryAccount(ctx context.Context, beneficiaryID string, accountID string, transactionPassword string) (*types.Response, error) {
 	// Authenticate user
 	_, err := middlewares.GetClaimsFromCtx(ctx)
 	if err != nil {
