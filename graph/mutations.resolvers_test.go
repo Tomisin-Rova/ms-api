@@ -1873,45 +1873,215 @@ func TestMutationResolver_CreateVaultAccount(t *testing.T) {
 }
 
 func TestMutationResolver_CreateBeneficiary(t *testing.T) {
+	const (
+		failOnAuthenticationError = iota
+		failOnGRPCError
+		success
+	)
+	testCases := []struct {
+		name     string
+		testType int
+	}{
+		{
+			name:     "should fail on authentication error",
+			testType: failOnAuthenticationError,
+		},
+		{
+			name:     "should fail on gRPC error",
+			testType: failOnGRPCError,
+		},
+		{
+			name:     "success",
+			testType: success,
+		},
+	}
+
 	controller := gomock.NewController(t)
 	defer controller.Finish()
-	customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
+	paymentServiceClient := mocks.NewMockPaymentServiceClient(controller)
 	resolverOpts := &ResolverOpts{
-		CustomerService: customerServiceClient,
+		PaymentService: paymentServiceClient,
 	}
 	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
-	resp, err := resolver.CreateBeneficiary(context.Background(), types.BeneficiaryInput{}, "")
 
-	assert.NoError(t, err)
-	assert.NotNil(t, resp)
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			switch testCase.testType {
+			case failOnAuthenticationError:
+				resp, err := resolver.CreateBeneficiary(context.Background(), types.BeneficiaryInput{}, "")
+				assert.Error(t, err)
+				assert.Nil(t, resp)
+				switch newTerror := err.(type) {
+				case *terror.Terror:
+					assert.Equal(t, errorvalues.InvalidAuthenticationError, newTerror.Code())
+				default:
+					t.Error("Should return an error of type InvalidAuthenticationError")
+					t.Fail()
+				}
+			case failOnGRPCError:
+				ctx, err := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{ID: "customerID"})
+				assert.NoError(t, err)
+				paymentServiceClient.EXPECT().CreateBeneficiary(gomock.Any(), gomock.Any()).Return(nil, errors.New("")).Times(1)
+				resp, err := resolver.CreateBeneficiary(ctx, types.BeneficiaryInput{}, "")
+				assert.Error(t, err)
+				assert.NotNil(t, resp)
+				assert.False(t, resp.Success)
+				assert.NotNil(t, resp.Message)
+				assert.Equal(t, int64(http.StatusInternalServerError), resp.Code)
+			case success:
+				ctx, err := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{ID: "customerID"})
+				assert.NoError(t, err)
+				paymentServiceClient.EXPECT().CreateBeneficiary(gomock.Any(), gomock.Any()).Return(&pbTypes.Beneficiary{}, nil).Times(1)
+				input := &types.BeneficiaryInput{}
+				resp, err := resolver.CreateBeneficiary(ctx, *input, "")
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.True(t, resp.Success)
+				assert.Equal(t, int64(http.StatusOK), resp.Code)
+			}
+		})
+	}
 }
 
 func TestMutationResolver_AddBeneficiaryAccount(t *testing.T) {
+	const (
+		failOnAuthenticationError = iota
+		failOnGRPCError
+		success
+	)
+	testCases := []struct {
+		name     string
+		testType int
+	}{
+		{
+			name:     "should fail on authentication error",
+			testType: failOnAuthenticationError,
+		},
+		{
+			name:     "should fail on gRPC error",
+			testType: failOnGRPCError,
+		},
+		{
+			name:     "success",
+			testType: success,
+		},
+	}
+
 	controller := gomock.NewController(t)
 	defer controller.Finish()
-	customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
+	paymentServiceClient := mocks.NewMockPaymentServiceClient(controller)
 	resolverOpts := &ResolverOpts{
-		CustomerService: customerServiceClient,
+		PaymentService: paymentServiceClient,
 	}
 	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
-	resp, err := resolver.AddBeneficiaryAccount(context.Background(), "", types.BeneficiaryAccountInput{}, "")
 
-	assert.NoError(t, err)
-	assert.NotNil(t, resp)
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			switch testCase.testType {
+			case failOnAuthenticationError:
+				resp, err := resolver.AddBeneficiaryAccount(context.Background(), "", types.BeneficiaryAccountInput{}, "")
+				assert.Error(t, err)
+				assert.Nil(t, resp)
+				switch newTerror := err.(type) {
+				case *terror.Terror:
+					assert.Equal(t, errorvalues.InvalidAuthenticationError, newTerror.Code())
+				default:
+					t.Error("Should return an error of type InvalidAuthenticationError")
+					t.Fail()
+				}
+			case failOnGRPCError:
+				ctx, err := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{ID: "customerID"})
+				assert.NoError(t, err)
+				paymentServiceClient.EXPECT().AddBeneficiaryAccount(gomock.Any(), gomock.Any()).Return(nil, errors.New("")).Times(1)
+				resp, err := resolver.AddBeneficiaryAccount(ctx, "", types.BeneficiaryAccountInput{}, "")
+				assert.Error(t, err)
+				assert.NotNil(t, resp)
+				assert.False(t, resp.Success)
+				assert.NotNil(t, resp.Message)
+				assert.Equal(t, int64(http.StatusInternalServerError), resp.Code)
+			case success:
+				ctx, err := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{ID: "customerID"})
+				assert.NoError(t, err)
+				paymentServiceClient.EXPECT().AddBeneficiaryAccount(gomock.Any(), gomock.Any()).Return(&pbTypes.BeneficiaryAccount{}, nil).Times(1)
+				input := &types.BeneficiaryAccountInput{}
+				resp, err := resolver.AddBeneficiaryAccount(ctx, "", *input, "")
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.True(t, resp.Success)
+				assert.Equal(t, int64(http.StatusOK), resp.Code)
+			}
+		})
+	}
 }
 
-func TestMutationResolver_DeleteBeneficaryAccount(t *testing.T) {
+func TestMutationResolver_DeleteBeneficiaryAccount(t *testing.T) {
+	const (
+		failOnAuthenticationError = iota
+		failOnGRPCError
+		success
+	)
+	testCases := []struct {
+		name     string
+		testType int
+	}{
+		{
+			name:     "should fail on authentication error",
+			testType: failOnAuthenticationError,
+		},
+		{
+			name:     "should fail on gRPC error",
+			testType: failOnGRPCError,
+		},
+		{
+			name:     "success",
+			testType: success,
+		},
+	}
+
 	controller := gomock.NewController(t)
 	defer controller.Finish()
-	customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
+	paymentServiceClient := mocks.NewMockPaymentServiceClient(controller)
 	resolverOpts := &ResolverOpts{
-		CustomerService: customerServiceClient,
+		PaymentService: paymentServiceClient,
 	}
 	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
-	resp, err := resolver.DeleteBeneficaryAccount(context.Background(), "", "", "")
 
-	assert.NoError(t, err)
-	assert.NotNil(t, resp)
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			switch testCase.testType {
+			case failOnAuthenticationError:
+				resp, err := resolver.DeleteBeneficiaryAccount(context.Background(), "", "", "")
+				assert.Error(t, err)
+				assert.Nil(t, resp)
+				switch newTerror := err.(type) {
+				case *terror.Terror:
+					assert.Equal(t, errorvalues.InvalidAuthenticationError, newTerror.Code())
+				default:
+					t.Error("Should return an error of type InvalidAuthenticationError")
+					t.Fail()
+				}
+			case failOnGRPCError:
+				ctx, err := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{ID: "customerID"})
+				assert.NoError(t, err)
+				paymentServiceClient.EXPECT().DeleteBeneficiaryAccount(gomock.Any(), gomock.Any()).Return(nil, errors.New("")).Times(1)
+				resp, err := resolver.DeleteBeneficiaryAccount(ctx, "", "", "")
+				assert.Error(t, err)
+				assert.NotNil(t, resp)
+				assert.False(t, resp.Success)
+				assert.NotNil(t, resp.Message)
+				assert.Equal(t, int64(http.StatusInternalServerError), resp.Code)
+			case success:
+				ctx, err := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{ID: "customerID"})
+				assert.NoError(t, err)
+				paymentServiceClient.EXPECT().DeleteBeneficiaryAccount(gomock.Any(), gomock.Any()).Return(&pbTypes.DefaultResponse{}, nil).Times(1)
+				resp, err := resolver.DeleteBeneficiaryAccount(ctx, "", "", "")
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.True(t, resp.Success)
+				assert.Equal(t, int64(http.StatusOK), resp.Code)
+			}
+		})
+	}
 }
 
 func TestMutationResolver_CreateTransfer(t *testing.T) {

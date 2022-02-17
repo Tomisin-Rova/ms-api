@@ -6,6 +6,7 @@ package graph
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/roava/zebra/models"
@@ -35,6 +36,10 @@ func (r *queryResolver) CheckEmail(ctx context.Context, email string) (bool, err
 	}
 
 	return resp.Success, nil
+}
+
+func (r *queryResolver) CheckPhoneNumber(ctx context.Context, phone string) (bool, error) {
+	panic(fmt.Errorf("not implemented"))
 }
 
 func (r *queryResolver) Addresses(ctx context.Context, first *int64, after *string, last *int64, before *string, postcode *string) (*apiTypes.AddressConnection, error) {

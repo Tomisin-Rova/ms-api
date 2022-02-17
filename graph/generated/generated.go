@@ -398,7 +398,7 @@ type ComplexityRoot struct {
 		CreateBeneficiary        func(childComplexity int, beneficiary types.BeneficiaryInput, transactionPassword string) int
 		CreateTransfer           func(childComplexity int, transfer types.TransactionInput, transactionPassword string) int
 		CreateVaultAccount       func(childComplexity int, account types.VaultAccountInput, transactionPassword string) int
-		DeleteBeneficaryAccount  func(childComplexity int, beneficiaryID string, accountID string, transactionPassword string) int
+		DeleteBeneficiaryAccount func(childComplexity int, beneficiaryID string, accountID string, transactionPassword string) int
 		Login                    func(childComplexity int, credentials types.AuthInput) int
 		RefreshToken             func(childComplexity int, token string) int
 		Register                 func(childComplexity int, customerDetails types.CustomerDetailsInput) int
@@ -492,6 +492,7 @@ type ComplexityRoot struct {
 		Cdd              func(childComplexity int, filter types.CommonQueryFilterInput) int
 		Cdds             func(childComplexity int, first *int64, after *string, last *int64, before *string, statuses []types.CDDStatuses) int
 		CheckEmail       func(childComplexity int, email string) int
+		CheckPhoneNumber func(childComplexity int, phone string) int
 		Content          func(childComplexity int, id string) int
 		Contents         func(childComplexity int, first *int64, after *string, last *int64, before *string) int
 		Countries        func(childComplexity int, keywords *string, first *int64, after *string, last *int64, before *string) int
@@ -678,7 +679,7 @@ type MutationResolver interface {
 	CreateVaultAccount(ctx context.Context, account types.VaultAccountInput, transactionPassword string) (*types.Response, error)
 	CreateBeneficiary(ctx context.Context, beneficiary types.BeneficiaryInput, transactionPassword string) (*types.Response, error)
 	AddBeneficiaryAccount(ctx context.Context, beneficiaryID string, account types.BeneficiaryAccountInput, transactionPassword string) (*types.Response, error)
-	DeleteBeneficaryAccount(ctx context.Context, beneficiaryID string, accountID string, transactionPassword string) (*types.Response, error)
+	DeleteBeneficiaryAccount(ctx context.Context, beneficiaryID string, accountID string, transactionPassword string) (*types.Response, error)
 	CreateTransfer(ctx context.Context, transfer types.TransactionInput, transactionPassword string) (*types.Response, error)
 	RequestResubmit(ctx context.Context, customerID string, reportIds []string, message *string) (*types.Response, error)
 	StaffLogin(ctx context.Context, token string, authType types.AuthType) (*types.AuthResponse, error)
@@ -687,6 +688,7 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	CheckEmail(ctx context.Context, email string) (bool, error)
+	CheckPhoneNumber(ctx context.Context, phone string) (bool, error)
 	Addresses(ctx context.Context, first *int64, after *string, last *int64, before *string, postcode *string) (*types.AddressConnection, error)
 	Countries(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string) (*types.CountryConnection, error)
 	OnfidoSDKToken(ctx context.Context) (*types.TokenResponse, error)
@@ -2327,17 +2329,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateVaultAccount(childComplexity, args["account"].(types.VaultAccountInput), args["transactionPassword"].(string)), true
 
-	case "Mutation.deleteBeneficaryAccount":
-		if e.complexity.Mutation.DeleteBeneficaryAccount == nil {
+	case "Mutation.deleteBeneficiaryAccount":
+		if e.complexity.Mutation.DeleteBeneficiaryAccount == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_deleteBeneficaryAccount_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_deleteBeneficiaryAccount_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeleteBeneficaryAccount(childComplexity, args["beneficiaryId"].(string), args["accountId"].(string), args["transactionPassword"].(string)), true
+		return e.complexity.Mutation.DeleteBeneficiaryAccount(childComplexity, args["beneficiaryId"].(string), args["accountId"].(string), args["transactionPassword"].(string)), true
 
 	case "Mutation.login":
 		if e.complexity.Mutation.Login == nil {
@@ -2925,6 +2927,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.CheckEmail(childComplexity, args["email"].(string)), true
+
+	case "Query.checkPhoneNumber":
+		if e.complexity.Query.CheckPhoneNumber == nil {
+			break
+		}
+
+		args, err := ec.field_Query_checkPhoneNumber_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.CheckPhoneNumber(childComplexity, args["phone"].(string)), true
 
 	case "Query.content":
 		if e.complexity.Query.Content == nil {
@@ -3864,7 +3878,7 @@ var sources = []*ast.Source{
     # Add new account to existing beneficiary
     addBeneficiaryAccount(beneficiaryId: ID!, account: BeneficiaryAccountInput!, transactionPassword: String!): Response!
     # Delete an account from an existing beneficiary
-    deleteBeneficaryAccount(beneficiaryId: ID!, accountId: ID!, transactionPassword: String!): Response!
+    deleteBeneficiaryAccount(beneficiaryId: ID!, accountId: ID!, transactionPassword: String!): Response!
     # Create a new transfer to a beneficiary account
     createTransfer(transfer: TransactionInput!, transactionPassword: String!): Response!
 
@@ -4073,6 +4087,8 @@ enum DeliveryMode {
 	{Name: "graph/schemas/queries.graphql", Input: `type Query {
     # Check if there's a customer with the email given
     checkEmail(email: String!): Boolean!
+    # Check if there's a customer with the phone number given
+    checkPhoneNumber(phone: String!): Boolean!
     # Fetch a list of addresses related to the filters given
     addresses(
         # Returns the first n elements from the list.
@@ -5314,7 +5330,7 @@ func (ec *executionContext) field_Mutation_createVaultAccount_args(ctx context.C
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_deleteBeneficaryAccount_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_deleteBeneficiaryAccount_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
@@ -6058,6 +6074,21 @@ func (ec *executionContext) field_Query_checkEmail_args(ctx context.Context, raw
 		}
 	}
 	args["email"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_checkPhoneNumber_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["phone"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("phone"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["phone"] = arg0
 	return args, nil
 }
 
@@ -14810,7 +14841,7 @@ func (ec *executionContext) _Mutation_addBeneficiaryAccount(ctx context.Context,
 	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Mutation_deleteBeneficaryAccount(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Mutation_deleteBeneficiaryAccount(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -14827,7 +14858,7 @@ func (ec *executionContext) _Mutation_deleteBeneficaryAccount(ctx context.Contex
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_deleteBeneficaryAccount_args(ctx, rawArgs)
+	args, err := ec.field_Mutation_deleteBeneficiaryAccount_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -14835,7 +14866,7 @@ func (ec *executionContext) _Mutation_deleteBeneficaryAccount(ctx context.Contex
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteBeneficaryAccount(rctx, args["beneficiaryId"].(string), args["accountId"].(string), args["transactionPassword"].(string))
+		return ec.resolvers.Mutation().DeleteBeneficiaryAccount(rctx, args["beneficiaryId"].(string), args["accountId"].(string), args["transactionPassword"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -16487,6 +16518,48 @@ func (ec *executionContext) _Query_checkEmail(ctx context.Context, field graphql
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().CheckEmail(rctx, args["email"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_checkPhoneNumber(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_checkPhoneNumber_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().CheckPhoneNumber(rctx, args["phone"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -25866,9 +25939,9 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "deleteBeneficaryAccount":
+		case "deleteBeneficiaryAccount":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_deleteBeneficaryAccount(ctx, field)
+				return ec._Mutation_deleteBeneficiaryAccount(ctx, field)
 			}
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, innerFunc)
@@ -26508,6 +26581,29 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_checkEmail(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
+		case "checkPhoneNumber":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_checkPhoneNumber(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}

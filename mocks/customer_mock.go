@@ -172,6 +172,26 @@ func (mr *MockCustomerServiceClientMockRecorder) CheckEmail(ctx, in interface{},
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckEmail", reflect.TypeOf((*MockCustomerServiceClient)(nil).CheckEmail), varargs...)
 }
 
+// CheckPhoneNumber mocks base method.
+func (m *MockCustomerServiceClient) CheckPhoneNumber(ctx context.Context, in *customer.CheckPhoneNumberRequest, opts ...grpc.CallOption) (*types.DefaultResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CheckPhoneNumber", varargs...)
+	ret0, _ := ret[0].(*types.DefaultResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CheckPhoneNumber indicates an expected call of CheckPhoneNumber.
+func (mr *MockCustomerServiceClientMockRecorder) CheckPhoneNumber(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckPhoneNumber", reflect.TypeOf((*MockCustomerServiceClient)(nil).CheckPhoneNumber), varargs...)
+}
+
 // GetAddresses mocks base method.
 func (m *MockCustomerServiceClient) GetAddresses(ctx context.Context, in *customer.GetAddressesRequest, opts ...grpc.CallOption) (*customer.GetAddressesResponse, error) {
 	m.ctrl.T.Helper()
@@ -588,6 +608,21 @@ func (m *MockCustomerServiceServer) CheckEmail(arg0 context.Context, arg1 *custo
 func (mr *MockCustomerServiceServerMockRecorder) CheckEmail(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckEmail", reflect.TypeOf((*MockCustomerServiceServer)(nil).CheckEmail), arg0, arg1)
+}
+
+// CheckPhoneNumber mocks base method.
+func (m *MockCustomerServiceServer) CheckPhoneNumber(arg0 context.Context, arg1 *customer.CheckPhoneNumberRequest) (*types.DefaultResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CheckPhoneNumber", arg0, arg1)
+	ret0, _ := ret[0].(*types.DefaultResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CheckPhoneNumber indicates an expected call of CheckPhoneNumber.
+func (mr *MockCustomerServiceServerMockRecorder) CheckPhoneNumber(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckPhoneNumber", reflect.TypeOf((*MockCustomerServiceServer)(nil).CheckPhoneNumber), arg0, arg1)
 }
 
 // GetAddresses mocks base method.
