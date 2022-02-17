@@ -701,9 +701,30 @@ func (r *mutationResolver) AddBeneficiaryAccount(ctx context.Context, beneficiar
 }
 
 func (r *mutationResolver) DeleteBeneficaryAccount(ctx context.Context, beneficiaryID string, accountID string, transactionPassword string) (*types.Response, error) {
-	msg := "Not implemented"
+	// Authenticate user
+	_, err := middlewares.GetClaimsFromCtx(ctx)
+	if err != nil {
+		return nil, errorvalues.Format(errorvalues.InvalidAuthenticationError, err)
+	}
+
+	req := payment.DeleteBeneficiaryAccountRequest{
+		BeneficiaryId:       beneficiaryID,
+		TransactionPassword: transactionPassword,
+		AccountId:           accountID,
+	}
+	_, err = r.PaymentService.DeleteBeneficiaryAccount(ctx, &req)
+	if err != nil {
+		msg := err.Error()
+		return &types.Response{
+			Success: false,
+			Code:    int64(http.StatusInternalServerError),
+			Message: &msg,
+		}, err
+	}
+
 	return &types.Response{
-		Message: &msg,
+		Success: true,
+		Code:    int64(http.StatusOK),
 	}, nil
 }
 
