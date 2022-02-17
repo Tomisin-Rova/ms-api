@@ -12,6 +12,7 @@ import (
 	"go.uber.org/zap"
 	"ms.api/graph/generated"
 	emailvalidator "ms.api/libs/validator/email"
+	"ms.api/libs/validator/phonenumbervalidator"
 	"ms.api/protos/pb/account"
 	"ms.api/protos/pb/customer"
 	"ms.api/protos/pb/onboarding"
@@ -32,6 +33,22 @@ func (r *queryResolver) CheckEmail(ctx context.Context, email string) (bool, err
 	resp, err := r.CustomerService.CheckEmail(ctx, &customer.CheckEmailRequest{Email: email})
 	if err != nil {
 		return false, nil
+	}
+
+	return resp.Success, nil
+}
+
+func (r *queryResolver) CheckPhoneNumber(ctx context.Context, phone string) (bool, error) {
+	phonevalidator := phonenumbervalidator.Validator{}
+	err := phonevalidator.ValidatePhoneNumber(phone)
+	if err != nil {
+		r.logger.Info("invalid phone supplied", zap.String("phone", phone))
+		return false, err
+	}
+
+	resp, err := r.CustomerService.CheckPhoneNumber(ctx, &customer.CheckPhoneNumberRequest{Phone: phone})
+	if err != nil {
+		return false, err
 	}
 
 	return resp.Success, nil
