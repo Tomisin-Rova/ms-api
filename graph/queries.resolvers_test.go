@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap/zaptest"
 	"google.golang.org/protobuf/types/known/timestamppb"
+	"ms.api/libs/validator/phonenumbervalidator"
 	"ms.api/mocks"
 	"ms.api/protos/pb/account"
 	"ms.api/protos/pb/customer"
@@ -8635,6 +8636,97 @@ func TestQueryResolver_Transaction(t *testing.T) {
 				resp, err := resolver.Transaction(context.Background(), test.arg)
 				assert.Error(t, err)
 				assert.Nil(t, resp)
+			}
+		})
+	}
+}
+
+func TestQueryResolver_CheckPhoneNumber(t *testing.T) {
+	const (
+		failOnValidationError = iota
+		failOnGRPCError
+		modelNotFound
+		success
+	)
+
+	testCases := []struct {
+		name     string
+		arg      string
+		testType int
+	}{
+		{
+			name:     "should fail on validation error",
+			arg:      "000abc000",
+			testType: failOnValidationError,
+		},
+		{
+			name:     "should fail on gRPC error",
+			arg:      "10987654321",
+			testType: failOnGRPCError,
+		},
+		{
+			name:     "model not found",
+			arg:      "10293847561",
+			testType: modelNotFound,
+		},
+		{
+			name:     "success",
+			arg:      "12345678901",
+			testType: success,
+		},
+	}
+
+	for _, test := range testCases {
+		t.Run(test.name, func(t *testing.T) {
+			controller := gomock.NewController(t)
+			defer controller.Finish()
+			customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
+			resolverOpts := &ResolverOpts{
+				CustomerService: customerServiceClient,
+			}
+			resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Query()
+			switch test.testType {
+			case failOnValidationError:
+				resp, err := resolver.CheckPhoneNumber(context.Background(), test.arg)
+				assert.Error(t, err)
+				assert.Equal(t, err, phonenumbervalidator.ErrInvalidPhoneNumber)
+				assert.Equal(t, resp, false)
+
+			case failOnGRPCError:
+				request := &customer.CheckPhoneNumberRequest{
+					Phone: test.arg,
+				}
+				customerServiceClient.EXPECT().
+					CheckPhoneNumber(context.Background(), request).
+					Return(nil, errors.New(""))
+
+				resp, err := resolver.CheckPhoneNumber(context.Background(), test.arg)
+				assert.Error(t, err)
+				assert.Equal(t, resp, false)
+
+			case modelNotFound:
+				request := &customer.CheckPhoneNumberRequest{
+					Phone: test.arg,
+				}
+				customerServiceClient.EXPECT().
+					CheckPhoneNumber(context.Background(), request).
+					Return(&pbTypes.DefaultResponse{Success: false, Code: http.StatusOK}, nil)
+
+				resp, err := resolver.CheckPhoneNumber(context.Background(), test.arg)
+				assert.NoError(t, err)
+				assert.Equal(t, resp, false)
+
+			case success:
+				request := &customer.CheckPhoneNumberRequest{
+					Phone: test.arg,
+				}
+				customerServiceClient.EXPECT().
+					CheckPhoneNumber(context.Background(), request).
+					Return(&pbTypes.DefaultResponse{Success: true, Code: http.StatusOK}, nil)
+
+				resp, err := resolver.CheckPhoneNumber(context.Background(), test.arg)
+				assert.NoError(t, err)
+				assert.Equal(t, resp, true)
 			}
 		})
 	}

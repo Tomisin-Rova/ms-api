@@ -6,13 +6,13 @@ package graph
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/roava/zebra/models"
 	"go.uber.org/zap"
 	"ms.api/graph/generated"
 	emailvalidator "ms.api/libs/validator/email"
+	"ms.api/libs/validator/phonenumbervalidator"
 	"ms.api/protos/pb/account"
 	"ms.api/protos/pb/customer"
 	"ms.api/protos/pb/onboarding"
@@ -39,7 +39,19 @@ func (r *queryResolver) CheckEmail(ctx context.Context, email string) (bool, err
 }
 
 func (r *queryResolver) CheckPhoneNumber(ctx context.Context, phone string) (bool, error) {
-	panic(fmt.Errorf("not implemented"))
+	phonevalidator := phonenumbervalidator.Validator{}
+	err := phonevalidator.ValidatePhoneNumber(phone)
+	if err != nil {
+		r.logger.Info("invalid phone supplied", zap.String("phone", phone))
+		return false, err
+	}
+
+	resp, err := r.CustomerService.CheckPhoneNumber(ctx, &customer.CheckPhoneNumberRequest{Phone: phone})
+	if err != nil {
+		return false, err
+	}
+
+	return resp.Success, nil
 }
 
 func (r *queryResolver) Addresses(ctx context.Context, first *int64, after *string, last *int64, before *string, postcode *string) (*apiTypes.AddressConnection, error) {
