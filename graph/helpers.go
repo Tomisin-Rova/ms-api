@@ -756,17 +756,23 @@ func (h *helpersfactory) MakeBeneficiaryAccountFromProto(beneficiaryAccount *pro
 	result := types.BeneficiaryAccount{}
 
 	if beneficiaryAccount != nil {
-		result = types.BeneficiaryAccount{
-			ID:          beneficiaryAccount.Id,
-			Beneficiary: h.MakeBeneficiaryFromProto(beneficiaryAccount.Beneficiary),
-			Name:        &beneficiaryAccount.Name,
-			Account:     h.MakeAccountFromProto(beneficiaryAccount.Account),
-			Currency: &types.Currency{
+
+		currency := &types.Currency{}
+		if beneficiaryAccount.Currency != nil {
+			currency = &types.Currency{
 				ID:     beneficiaryAccount.Currency.Id,
 				Name:   beneficiaryAccount.Currency.Name,
 				Code:   beneficiaryAccount.Currency.Code,
 				Symbol: beneficiaryAccount.Currency.Symbol,
-			},
+			}
+		}
+
+		result = types.BeneficiaryAccount{
+			ID:            beneficiaryAccount.Id,
+			Beneficiary:   h.MakeBeneficiaryFromProto(beneficiaryAccount.Beneficiary),
+			Name:          &beneficiaryAccount.Name,
+			Account:       h.MakeAccountFromProto(beneficiaryAccount.Account),
+			Currency:      currency,
 			AccountNumber: beneficiaryAccount.AccountNumber,
 			Code:          beneficiaryAccount.Code,
 			Status:        h.MapBeneficiaryAccountStatuses(beneficiaryAccount.Status),
@@ -966,18 +972,9 @@ func (h *helpersfactory) MakeTransactionFromProto(transaction *protoTypes.Transa
 			}
 		}
 
-		result = &types.Transaction{
-			ID: transaction.Id,
-			TransactionType: &types.TransactionType{
-				ID:       transaction.TransactionType.Id,
-				Name:     transaction.TransactionType.Name,
-				Status:   h.MapTransactionTypeStatus(transaction.TransactionType.Status),
-				StatusTs: transaction.StatusTs.AsTime().Unix(),
-				Ts:       transaction.Ts.AsTime().Unix(),
-			},
-			Reference: transaction.Reference,
-			Fees:      fees,
-			ExchangeRate: &types.ExchangeRate{
+		exchangeRate := &types.ExchangeRate{}
+		if transaction.ExchangeRate.Id != "" {
+			exchangeRate = &types.ExchangeRate{
 				ID: transaction.ExchangeRate.Id,
 				BaseCurrency: &types.Currency{
 					ID:     transaction.ExchangeRate.BaseCurrency.Id,
@@ -991,7 +988,21 @@ func (h *helpersfactory) MakeTransactionFromProto(transaction *protoTypes.Transa
 					Code:   transaction.ExchangeRate.TargetCurrency.Code,
 					Name:   transaction.ExchangeRate.TargetCurrency.Name,
 				},
+			}
+		}
+
+		result = &types.Transaction{
+			ID: transaction.Id,
+			TransactionType: &types.TransactionType{
+				ID:       transaction.TransactionType.Id,
+				Name:     transaction.TransactionType.Name,
+				Status:   h.MapTransactionTypeStatus(transaction.TransactionType.Status),
+				StatusTs: transaction.StatusTs.AsTime().Unix(),
+				Ts:       transaction.Ts.AsTime().Unix(),
 			},
+			Reference:    transaction.Reference,
+			Fees:         fees,
+			ExchangeRate: exchangeRate,
 			Source: &types.TransactionSource{
 				Customer:                h.makeCustomerFromProto(transaction.Source.Customer),
 				Account:                 h.MakeAccountFromProto(transaction.Source.Account),
