@@ -252,6 +252,7 @@ type ComplexityRoot struct {
 		Phones    func(childComplexity int) int
 		Status    func(childComplexity int) int
 		StatusTs  func(childComplexity int) int
+		Title     func(childComplexity int) int
 		Ts        func(childComplexity int) int
 	}
 
@@ -1634,6 +1635,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Customer.StatusTs(childComplexity), true
+
+	case "Customer.title":
+		if e.complexity.Customer.Title == nil {
+			break
+		}
+
+		return e.complexity.Customer.Title(childComplexity), true
 
 	case "Customer.ts":
 		if e.complexity.Customer.Ts == nil {
@@ -3970,6 +3978,7 @@ input DevicePreferencesInput {
 }
 
 input CustomerDetailsInput {
+    title: CustomerTitle!
     firstName: String!
     lastName: String!
     dob: Date!
@@ -4454,6 +4463,7 @@ scalar Date
 
 type Customer {
     id: ID!
+    title: CustomerTitle!
     firstName: String!
     lastName: String!
     dob: Date!
@@ -4464,6 +4474,13 @@ type Customer {
     status: CustomerStatuses!
     statusTs: Int!
     ts: Int!
+}
+
+enum CustomerTitle {
+    MR
+    MRS
+    MISS
+    MS
 }
 
 enum CustomerStatuses {
@@ -10823,6 +10840,41 @@ func (ec *executionContext) _Customer_id(ctx context.Context, field graphql.Coll
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Customer_title(ctx context.Context, field graphql.CollectedField, obj *types.Customer) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Customer",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Title, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(types.CustomerTitle)
+	fc.Result = res
+	return ec.marshalNCustomerTitle2msᚗapiᚋtypesᚐCustomerTitle(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Customer_firstName(ctx context.Context, field graphql.CollectedField, obj *types.Customer) (ret graphql.Marshaler) {
@@ -22339,6 +22391,14 @@ func (ec *executionContext) unmarshalInputCustomerDetailsInput(ctx context.Conte
 
 	for k, v := range asMap {
 		switch k {
+		case "title":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("title"))
+			it.Title, err = ec.unmarshalNCustomerTitle2msᚗapiᚋtypesᚐCustomerTitle(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "firstName":
 			var err error
 
@@ -24476,6 +24536,16 @@ func (ec *executionContext) _Customer(ctx context.Context, sel ast.SelectionSet,
 		case "id":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Customer_id(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "title":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Customer_title(ctx, field, obj)
 			}
 
 			out.Values[i] = innerFunc(ctx)
@@ -29728,6 +29798,16 @@ func (ec *executionContext) unmarshalNCustomerStatuses2msᚗapiᚋtypesᚐCustom
 }
 
 func (ec *executionContext) marshalNCustomerStatuses2msᚗapiᚋtypesᚐCustomerStatuses(ctx context.Context, sel ast.SelectionSet, v types.CustomerStatuses) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) unmarshalNCustomerTitle2msᚗapiᚋtypesᚐCustomerTitle(ctx context.Context, v interface{}) (types.CustomerTitle, error) {
+	var res types.CustomerTitle
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNCustomerTitle2msᚗapiᚋtypesᚐCustomerTitle(ctx context.Context, sel ast.SelectionSet, v types.CustomerTitle) graphql.Marshaler {
 	return v
 }
 

@@ -784,19 +784,66 @@ func (r *queryResolver) Questionaries(ctx context.Context, keywords *string, fir
 }
 
 func (r *queryResolver) Currency(ctx context.Context, id string) (*apiTypes.Currency, error) {
+	// Make call
+	currency, err := r.PricingService.GetCurrency(ctx, &pricing.GetCurrencyRequest{Id: id})
+	if err != nil {
+		return nil, err
+	}
+
 	return &apiTypes.Currency{
-		ID: "n/a",
-	}, errors.New("not implemented")
+		ID:     currency.Id,
+		Symbol: currency.Symbol,
+		Code:   currency.Code,
+		Name:   currency.Name,
+	}, nil
 }
 
 func (r *queryResolver) Currencies(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string) (*apiTypes.CurrencyConnection, error) {
-	return &apiTypes.CurrencyConnection{
-		Nodes: []*apiTypes.Currency{
-			{
-				ID: "n/a",
-			},
+	// Build request
+	var request pricing.GetCurrenciesRequest
+	if keywords != nil {
+		request.Keywords = *keywords
+	}
+	if first != nil {
+		request.First = int32(*first)
+	}
+	if after != nil {
+		request.After = *after
+	}
+	if last != nil {
+		request.Last = int32(*last)
+	}
+	if before != nil {
+		request.Before = *before
+	}
+
+	// Make call
+	currencies, err := r.PricingService.GetCurrencies(ctx, &request)
+	if err != nil {
+		return nil, err
+	}
+
+	// Build response
+	response := &apiTypes.CurrencyConnection{
+		Nodes: make([]*apiTypes.Currency, len(currencies.Nodes)),
+		PageInfo: &apiTypes.PageInfo{
+			HasNextPage:     currencies.PaginationInfo.HasNextPage,
+			HasPreviousPage: currencies.PaginationInfo.HasPreviousPage,
+			StartCursor:     &currencies.PaginationInfo.StartCursor,
+			EndCursor:       &currencies.PaginationInfo.EndCursor,
 		},
-	}, errors.New("not implemented")
+		TotalCount: int64(currencies.TotalCount),
+	}
+	for index, currency := range currencies.Nodes {
+		response.Nodes[index] = &apiTypes.Currency{
+			ID:     currency.Id,
+			Symbol: currency.Symbol,
+			Code:   currency.Code,
+			Name:   currency.Name,
+		}
+	}
+
+	return response, nil
 }
 
 func (r *queryResolver) Fees(ctx context.Context, transactionTypeID string) ([]*apiTypes.Fee, error) {
