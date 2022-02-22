@@ -4166,36 +4166,175 @@ func Test_queryResolver_Questionaries(t *testing.T) {
 }
 
 func Test_queryResolver_Currency(t *testing.T) {
-	controller := gomock.NewController(t)
-	defer controller.Finish()
-	pricingServiceClient := mocks.NewMockPricingServiceClient(controller)
-	resolverOpts := &ResolverOpts{
-		PricingService: pricingServiceClient,
-	}
-	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Query()
+	const (
+		success = iota
+		errorGettingCurrency
+	)
 
-	resp, err := resolver.Currency(context.Background(), "")
-	assert.Error(t, err)
-	assert.NotNil(t, resp)
+	var tests = []struct {
+		name     string
+		arg      string
+		testType int
+	}{
+		{
+			name:     "Test success",
+			arg:      "currencyId",
+			testType: success,
+		},
+		{
+			name:     "Test error getting currency",
+			arg:      "currencyId",
+			testType: errorGettingCurrency,
+		},
+	}
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			controller := gomock.NewController(t)
+			defer controller.Finish()
+			pricingServiceClient := mocks.NewMockPricingServiceClient(controller)
+			resolverOpts := &ResolverOpts{
+				PricingService: pricingServiceClient,
+			}
+			resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Query()
+
+			switch testCase.testType {
+			case success:
+				pricingServiceClient.EXPECT().GetCurrency(context.Background(), &pricing.GetCurrencyRequest{Id: testCase.arg}).
+					Return(&pbTypes.Currency{
+						Id:     testCase.arg,
+						Symbol: "Symbol",
+						Code:   "Code",
+						Name:   "Name",
+					}, nil)
+
+				resp, err := resolver.Currency(context.Background(), testCase.arg)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, &types.Currency{
+					ID:     testCase.arg,
+					Symbol: "Symbol",
+					Code:   "Code",
+					Name:   "Name",
+				}, resp)
+			case errorGettingCurrency:
+				pricingServiceClient.EXPECT().GetCurrency(context.Background(), &pricing.GetCurrencyRequest{Id: testCase.arg}).
+					Return(nil, errors.New(""))
+
+				resp, err := resolver.Currency(context.Background(), testCase.arg)
+				assert.Error(t, err)
+				assert.Nil(t, resp)
+			}
+		})
+	}
 }
 
 func Test_queryResolver_Currencies(t *testing.T) {
-	controller := gomock.NewController(t)
-	defer controller.Finish()
-	pricingServiceClient := mocks.NewMockPricingServiceClient(controller)
-	resolverOpts := &ResolverOpts{
-		PricingService: pricingServiceClient,
-	}
-	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Query()
-	first := int64(10)
-	after := "after"
-	last := int64(10)
-	before := "before"
-	keywords := "keywords"
+	const (
+		success = iota
+		errorGettingCurrency
+	)
 
-	resp, err := resolver.Currencies(context.Background(), &keywords, &first, &after, &last, &before)
-	assert.Error(t, err)
-	assert.NotNil(t, resp)
+	type arg struct {
+		keywords *string
+		first    *int64
+		after    *string
+		last     *int64
+		before   *string
+	}
+	var (
+		keywords       = "keywords"
+		first    int64 = 1
+		after          = "afterId"
+		last     int64 = 1
+		before         = "beforeId"
+	)
+	var tests = []struct {
+		name     string
+		arg      arg
+		testType int
+	}{
+		{
+			name: "Test success",
+			arg: arg{
+				keywords: &keywords,
+				first:    &first,
+				after:    &after,
+				last:     &last,
+				before:   &before,
+			},
+			testType: success,
+		},
+		{
+			name: "Test error getting currencies",
+			arg: arg{
+				keywords: &keywords,
+				first:    &first,
+				after:    &after,
+				last:     &last,
+				before:   &before,
+			},
+			testType: errorGettingCurrency,
+		},
+	}
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			controller := gomock.NewController(t)
+			defer controller.Finish()
+			pricingServiceClient := mocks.NewMockPricingServiceClient(controller)
+			resolverOpts := &ResolverOpts{
+				PricingService: pricingServiceClient,
+			}
+			resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Query()
+
+			switch testCase.testType {
+			case success:
+				pricingServiceClient.EXPECT().GetCurrencies(context.Background(), &pricing.GetCurrenciesRequest{
+					Keywords: keywords,
+					First:    int32(first),
+					After:    after,
+					Last:     int32(last),
+					Before:   before,
+				}).Return(&pricing.GetCurrenciesResponse{
+					Nodes: []*pbTypes.Currency{{}, {}},
+					PaginationInfo: &pbTypes.PaginationInfo{
+						HasNextPage:     false,
+						HasPreviousPage: false,
+						StartCursor:     "",
+						EndCursor:       "",
+					},
+					TotalCount: 2,
+				}, nil)
+
+				resp, err := resolver.Currencies(context.Background(), testCase.arg.keywords, testCase.arg.first,
+					testCase.arg.after, testCase.arg.last, testCase.arg.before)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, &types.CurrencyConnection{
+					Nodes: []*types.Currency{{}, {}},
+					PageInfo: &types.PageInfo{
+						HasNextPage:     false,
+						HasPreviousPage: false,
+						StartCursor:     &emptyString,
+						EndCursor:       &emptyString,
+					},
+					TotalCount: 2,
+				}, resp)
+			case errorGettingCurrency:
+				pricingServiceClient.EXPECT().GetCurrencies(context.Background(), &pricing.GetCurrenciesRequest{
+					Keywords: keywords,
+					First:    int32(first),
+					After:    after,
+					Last:     int32(last),
+					Before:   before,
+				}).Return(nil, errors.New(""))
+
+				resp, err := resolver.Currencies(context.Background(), testCase.arg.keywords, testCase.arg.first,
+					testCase.arg.after, testCase.arg.last, testCase.arg.before)
+				assert.Error(t, err)
+				assert.Nil(t, resp)
+			}
+		})
+	}
 }
 
 func Test_queryResolver_Fees(t *testing.T) {
