@@ -4914,7 +4914,7 @@ type Transaction {
     transactionType: TransactionType!
     reference: String!
     fees: [TransactionFee!]
-    exchangeRate: ExchangeRate!
+    exchangeRate: ExchangeRate
     source: TransactionSource!
     target: TransactionTarget!
     idempotencyKey: String!
@@ -19784,14 +19784,11 @@ func (ec *executionContext) _Transaction_exchangeRate(ctx context.Context, field
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
 	res := resTmp.(*types.ExchangeRate)
 	fc.Result = res
-	return ec.marshalNExchangeRate2ᚖmsᚗapiᚋtypesᚐExchangeRate(ctx, field.Selections, res)
+	return ec.marshalOExchangeRate2ᚖmsᚗapiᚋtypesᚐExchangeRate(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Transaction_source(ctx context.Context, field graphql.CollectedField, obj *types.Transaction) (ret graphql.Marshaler) {
@@ -28090,9 +28087,6 @@ func (ec *executionContext) _Transaction(ctx context.Context, sel ast.SelectionS
 
 			out.Values[i] = innerFunc(ctx)
 
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "source":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Transaction_source(ctx, field, obj)
@@ -31898,6 +31892,13 @@ func (ec *executionContext) unmarshalODeviceTokenInput2ᚖmsᚗapiᚋtypesᚐDev
 	}
 	res, err := ec.unmarshalInputDeviceTokenInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOExchangeRate2ᚖmsᚗapiᚋtypesᚐExchangeRate(ctx context.Context, sel ast.SelectionSet, v *types.ExchangeRate) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._ExchangeRate(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOFloat2ᚖfloat64(ctx context.Context, v interface{}) (*float64, error) {
