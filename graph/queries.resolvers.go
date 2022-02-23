@@ -371,13 +371,10 @@ func (r *queryResolver) Products(ctx context.Context, first *int64, after *strin
 }
 
 func (r *queryResolver) Banks(ctx context.Context, first *int64, after *string, last *int64, before *string) (*apiTypes.BankConnection, error) {
+	// TODO - This is just for Demo purposes. This query should access the correct service to perform correctly
 	return &apiTypes.BankConnection{
-		Nodes: []*apiTypes.Bank{
-			{
-				ID: "n/a",
-			},
-		},
-	}, errors.New("not implemented")
+		Nodes: []*apiTypes.Bank{},
+	}, nil
 }
 
 func (r *queryResolver) Account(ctx context.Context, id string) (*apiTypes.Account, error) {
