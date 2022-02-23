@@ -2027,7 +2027,7 @@ func Test_queryResolver_Banks(t *testing.T) {
 
 	resp, err := resolver.Banks(context.Background(), &first, &after, &last, &before)
 
-	assert.Error(t, err)
+	assert.NoError(t, err)
 	assert.NotNil(t, resp)
 }
 
