@@ -972,7 +972,7 @@ func (h *helpersfactory) MakeTransactionFromProto(transaction *protoTypes.Transa
 			}
 		}
 
-		exchangeRate := &types.ExchangeRate{}
+		var exchangeRate *types.ExchangeRate
 		if transaction.ExchangeRate.Id != "" {
 			exchangeRate = &types.ExchangeRate{
 				ID: transaction.ExchangeRate.Id,
