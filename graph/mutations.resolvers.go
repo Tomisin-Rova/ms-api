@@ -290,6 +290,7 @@ func (r *mutationResolver) Register(ctx context.Context, customerDetails types.C
 	}
 
 	customerReq := &customer.RegisterRequest{
+		Title:     r.helper.MapCustomerTitle(customerDetails.Title),
 		FirstName: customerDetails.FirstName,
 		LastName:  customerDetails.LastName,
 		Dob:       customerDetails.Dob,
