@@ -4469,6 +4469,7 @@ func Test_queryResolver_Customer(t *testing.T) {
 					&customer.GetCustomerRequest{Id: test.arg},
 				).Return(&pbTypes.Customer{
 					Id:        test.arg,
+					Title:     pbTypes.Customer_MR,
 					FirstName: "firstname",
 					LastName:  "lastname",
 					Dob:       "mm-dd-yyyt",
@@ -4630,6 +4631,7 @@ func Test_queryResolver_Customers(t *testing.T) {
 					Nodes: []*pbTypes.Customer{
 						{
 							Id:        "1",
+							Title:     pbTypes.Customer_MR,
 							FirstName: "firstname",
 							LastName:  "lastname",
 							Dob:       "mm-dd-yyyt",
@@ -4671,6 +4673,7 @@ func Test_queryResolver_Customers(t *testing.T) {
 
 						{
 							Id:        "2",
+							Title:     pbTypes.Customer_MRS,
 							FirstName: "firstname_2",
 							LastName:  "lastname_2",
 							Dob:       "mm-dd-yyyy",
@@ -4712,6 +4715,7 @@ func Test_queryResolver_Customers(t *testing.T) {
 
 						{
 							Id:        "3",
+							Title:     pbTypes.Customer_MS,
 							FirstName: "firstname_2",
 							LastName:  "lastname_2",
 							Dob:       "mm-dd-yyyy",
@@ -4753,6 +4757,7 @@ func Test_queryResolver_Customers(t *testing.T) {
 
 						{
 							Id:        "4",
+							Title:     pbTypes.Customer_MISS,
 							FirstName: "firstname_4",
 							LastName:  "lastname_4",
 							Dob:       "mm-dd-yyyy",
@@ -4830,6 +4835,7 @@ func Test_queryResolver_Customers(t *testing.T) {
 					Nodes: []*pbTypes.Customer{
 						{
 							Id:        "3",
+							Title:     pbTypes.Customer_MS,
 							FirstName: "firstname_3",
 							LastName:  "lastname_3",
 							Dob:       "mm-dd-yyyy",
@@ -4863,6 +4869,7 @@ func Test_queryResolver_Customers(t *testing.T) {
 
 						{
 							Id:        "2",
+							Title:     pbTypes.Customer_MRS,
 							FirstName: "firstname_2",
 							LastName:  "lastname_2",
 							Dob:       "mm-dd-yyyy",
@@ -4896,6 +4903,7 @@ func Test_queryResolver_Customers(t *testing.T) {
 
 						{
 							Id:        "1",
+							Title:     pbTypes.Customer_MR,
 							FirstName: "firstname",
 							LastName:  "lastname",
 							Dob:       "mm-dd-yyyt",
