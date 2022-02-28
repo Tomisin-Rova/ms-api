@@ -959,6 +959,7 @@ func (r *queryResolver) Me(ctx context.Context) (apiTypes.MeResult, error) {
 
 		return apiTypes.Customer{
 			ID:        appCustomer.Id,
+			Title:     r.helper.MapProtoCustomerTitle(appCustomer.Title),
 			FirstName: appCustomer.FirstName,
 			LastName:  appCustomer.LastName,
 			Dob:       appCustomer.Dob,

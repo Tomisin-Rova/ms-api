@@ -1502,6 +1502,7 @@ func Test_queryResolver_Me(t *testing.T) {
 					Data: &customer.MeResponse_Customer{
 						Customer: &pbTypes.Customer{
 							Id:        "id",
+							Title:     pbTypes.Customer_MR,
 							FirstName: "firstname",
 							LastName:  "lastname",
 							Dob:       "mm-dd-yyyt",
