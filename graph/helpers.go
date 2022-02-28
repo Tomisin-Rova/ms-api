@@ -445,6 +445,7 @@ func (h *helpersfactory) makeCustomerFromProto(customer *protoTypes.Customer) *t
 
 		result = &types.Customer{
 			ID:        customer.Id,
+			Title:     h.MapProtoCustomerTitle(customer.Title),
 			FirstName: customer.FirstName,
 			LastName:  customer.LastName,
 			Dob:       customer.Dob,
