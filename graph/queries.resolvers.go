@@ -567,11 +567,14 @@ func (r *queryResolver) Beneficiaries(ctx context.Context, keywords *string, fir
 		nodes[index] = helper.MakeBeneficiaryFromProto(node)
 	}
 
-	pageInfo := &apiTypes.PageInfo{
-		HasNextPage:     resp.PaginationInfo.HasNextPage,
-		HasPreviousPage: resp.PaginationInfo.HasPreviousPage,
-		StartCursor:     &resp.PaginationInfo.StartCursor,
-		EndCursor:       &resp.PaginationInfo.EndCursor,
+	pageInfo := &apiTypes.PageInfo{}
+	if resp.PaginationInfo != nil {
+		pageInfo = &apiTypes.PageInfo{
+			HasNextPage:     resp.PaginationInfo.HasNextPage,
+			HasPreviousPage: resp.PaginationInfo.HasPreviousPage,
+			StartCursor:     &resp.PaginationInfo.StartCursor,
+			EndCursor:       &resp.PaginationInfo.EndCursor,
+		}
 	}
 
 	return &apiTypes.BeneficiaryConnection{
