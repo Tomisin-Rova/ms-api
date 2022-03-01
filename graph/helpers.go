@@ -26,9 +26,43 @@ type Helper interface {
 	GetProtoTransactionTypesStatuses(val types.TransactionTypeStatuses) protoTypes.TransactionType_TransactionTypeStatuses
 	GetProtoDeviceTokenType(val types.DeviceTokenTypes) protoTypes.DeviceToken_DeviceTokenTypes
 	GetProtoDevicePreferencesType(val types.DevicePreferencesTypes) protoTypes.DevicePreferences_DevicePreferencesTypes
+	MapCustomerTitle(val types.CustomerTitle) protoTypes.Customer_CustomerTitle
+	MapProtoCustomerTitle(val protoTypes.Customer_CustomerTitle) types.CustomerTitle
 }
 
 type helpersfactory struct{}
+
+func (h *helpersfactory) MapCustomerTitle(val types.CustomerTitle) protoTypes.Customer_CustomerTitle {
+	switch val {
+	case types.CustomerTitleMr:
+		return protoTypes.Customer_MR
+	case types.CustomerTitleMrs:
+		return protoTypes.Customer_MRS
+	case types.CustomerTitleMiss:
+		return protoTypes.Customer_MISS
+	case types.CustomerTitleMs:
+		return protoTypes.Customer_MS
+	default:
+		// should never happen
+		return -1
+	}
+}
+
+func (h *helpersfactory) MapProtoCustomerTitle(val protoTypes.Customer_CustomerTitle) types.CustomerTitle {
+	switch val {
+	case protoTypes.Customer_MR:
+		return types.CustomerTitleMr
+	case protoTypes.Customer_MRS:
+		return types.CustomerTitleMrs
+	case protoTypes.Customer_MISS:
+		return types.CustomerTitleMiss
+	case protoTypes.Customer_MS:
+		return types.CustomerTitleMs
+	default:
+		// should never happen
+		return ""
+	}
+}
 
 func (h *helpersfactory) MapQuestionaryStatus(val types.QuestionaryStatuses) protoTypes.Questionary_QuestionaryStatuses {
 	switch val {
@@ -411,6 +445,7 @@ func (h *helpersfactory) makeCustomerFromProto(customer *protoTypes.Customer) *t
 
 		result = &types.Customer{
 			ID:        customer.Id,
+			Title:     h.MapProtoCustomerTitle(customer.Title),
 			FirstName: customer.FirstName,
 			LastName:  customer.LastName,
 			Dob:       customer.Dob,

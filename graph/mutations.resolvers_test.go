@@ -43,6 +43,7 @@ var (
 		},
 	}
 	mockRegisterReq = types.CustomerDetailsInput{
+		Title:     types.CustomerTitleMr,
 		FirstName: "roava",
 		LastName:  "app",
 		Dob:       "18-05-1994",
@@ -912,6 +913,7 @@ func TestMutationResolver_Register(t *testing.T) {
 				ctx, _ := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{Client: models.APP, ID: "123456", Email: "f@roava.app", DeviceID: "129594533fsdd"})
 
 				customerServiceClient.EXPECT().Register(ctx, &customer.RegisterRequest{
+					Title:     pbTypes.Customer_MR,
 					FirstName: "roava",
 					LastName:  "app",
 					Dob:       "18-05-1994",
