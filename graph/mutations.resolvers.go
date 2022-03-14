@@ -6,6 +6,7 @@ package graph
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"go.uber.org/zap"
@@ -440,6 +441,29 @@ func (r *mutationResolver) SetTransactionPassword(ctx context.Context, password 
 	}, nil
 }
 
+func (r *mutationResolver) ForgotTransactionPassword(ctx context.Context, newTransactionPassword string) (*types.Response, error) {
+	// Get user claims
+	_, err := middlewares.GetClaimsFromCtx(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Build request
+	request := customer.ForgotTransactionPasswordRequest{
+		NewPassword: newTransactionPassword,
+	}
+	// Execute RPC call
+	response, err := r.CustomerService.ForgotTransactionPassword(ctx, &request)
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.Response{
+		Success: response.Success,
+		Code:    int64(response.Code),
+	}, nil
+}
+
 func (r *mutationResolver) ResetTransactionPassword(ctx context.Context, otpToken string, email string, newTransactionPassword string, currentTransactionPassword string) (*types.Response, error) {
 	// Get user claims
 	_, err := middlewares.GetClaimsFromCtx(ctx)
@@ -766,6 +790,10 @@ func (r *mutationResolver) CreateTransfer(ctx context.Context, transfer types.Tr
 		Success: resp.Success,
 		Code:    int64(resp.Code),
 	}, nil
+}
+
+func (r *mutationResolver) SendNotification(ctx context.Context, typeArg types.DeliveryMode, content string, templateID string) (*types.Response, error) {
+	panic(fmt.Errorf("not implemented"))
 }
 
 func (r *mutationResolver) RequestResubmit(ctx context.Context, customerID string, reportIds []string, message *string) (*types.Response, error) {
