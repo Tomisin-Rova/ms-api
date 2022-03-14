@@ -1352,6 +1352,83 @@ func TestMutationResolver_SetTransactionPassword(t *testing.T) {
 	}
 }
 
+func TestMutationResolver_ForgotTransactionPassword(t *testing.T) {
+	const (
+		success = iota
+		errorUnauthenticated
+		errorSettingTransactionPassword
+	)
+
+	var tests = []struct {
+		name     string
+		arg      string
+		testType int
+	}{
+		{
+			name:     "Test success",
+			arg:      "password",
+			testType: success,
+		},
+		{
+			name:     "Test error unauthenticated user",
+			arg:      "password",
+			testType: errorUnauthenticated,
+		},
+		{
+			name:     "Test error setting transaction password",
+			arg:      "password",
+			testType: errorSettingTransactionPassword,
+		},
+	}
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			validCtx, err := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{})
+			if err != nil {
+				assert.NoError(t, err)
+				t.Fail()
+			}
+			controller := gomock.NewController(t)
+			defer controller.Finish()
+			customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
+			resolverOpts := &ResolverOpts{
+				CustomerService: customerServiceClient,
+			}
+			resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
+			switch testCase.testType {
+			case success:
+				customerServiceClient.EXPECT().ForgotTransactionPassword(validCtx, &customer.ForgotTransactionPasswordRequest{
+					NewPassword: testCase.arg,
+				}).Return(&pbTypes.DefaultResponse{
+					Success: true,
+					Code:    http.StatusOK,
+				}, nil)
+
+				resp, err := resolver.ForgotTransactionPassword(validCtx, testCase.arg)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, &types.Response{
+					Success: true,
+					Code:    http.StatusOK,
+				}, resp)
+			case errorUnauthenticated:
+				resp, err := resolver.ForgotTransactionPassword(context.Background(), testCase.arg)
+				assert.Error(t, err)
+				assert.IsType(t, &terror.Terror{}, err)
+				assert.Equal(t, errorvalues.InvalidAuthenticationError, err.(*terror.Terror).Code())
+				assert.Nil(t, resp)
+			case errorSettingTransactionPassword:
+				customerServiceClient.EXPECT().ForgotTransactionPassword(validCtx, &customer.ForgotTransactionPasswordRequest{
+					NewPassword: testCase.arg,
+				}).Return(nil, errors.New(""))
+
+				resp, err := resolver.ForgotTransactionPassword(validCtx, testCase.arg)
+				assert.Error(t, err)
+				assert.Nil(t, resp)
+			}
+		})
+	}
+}
+
 func TestMutationResolver_ResetTransactionPassword(t *testing.T) {
 	const (
 		success = iota
