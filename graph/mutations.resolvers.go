@@ -611,9 +611,25 @@ func (r *mutationResolver) SetDevicePreferences(ctx context.Context, preferences
 }
 
 func (r *mutationResolver) CheckBvn(ctx context.Context, bvn string, phone string) (*types.Response, error) {
-	msg := "Not implemented"
+	// Get user claims
+	_, err := middlewares.GetClaimsFromCtx(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Build request
+	request := customer.CheckBVNRequest{
+		Bvn:   bvn,
+		Phone: phone,
+	}
+	// Execute RPC call
+	response, err := r.CustomerService.CheckBVN(ctx, &request)
+	if err != nil {
+		return nil, err
+	}
 	return &types.Response{
-		Message: &msg,
+		Success: response.Success,
+		Code:    int64(response.Code),
 	}, nil
 }
 
