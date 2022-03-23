@@ -1835,17 +1835,97 @@ func TestMutationResolver_SetDevicePreferences(t *testing.T) {
 }
 
 func TestMutationResolver_CheckBvn(t *testing.T) {
-	controller := gomock.NewController(t)
-	defer controller.Finish()
-	customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
-	resolverOpts := &ResolverOpts{
-		CustomerService: customerServiceClient,
-	}
-	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
-	resp, err := resolver.CheckBvn(context.Background(), "", "")
+	const (
+		success = iota
+		errorUnauthenticated
+		errorCheckingBvn
+	)
 
-	assert.NoError(t, err)
-	assert.NotNil(t, resp)
+	type arg struct {
+		bvn   string
+		phone string
+	}
+
+	var tests = []struct {
+		name     string
+		arg      arg
+		testType int
+	}{
+		{
+			name: "Test success",
+			arg: arg{
+				bvn:   "22241890998",
+				phone: "08060223673",
+			},
+			testType: success,
+		},
+		{
+			name: "Test error unauthenticated user",
+			arg: arg{
+				bvn:   "22241890998",
+				phone: "08060223673",
+			},
+			testType: errorUnauthenticated,
+		},
+		{
+			name: "Test error setting transaction password",
+			arg: arg{
+				bvn:   "22241890998",
+				phone: "08060223673",
+			},
+			testType: errorCheckingBvn,
+		},
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			validCtx, err := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{})
+			if err != nil {
+				assert.NoError(t, err)
+				t.Fail()
+			}
+			controller := gomock.NewController(t)
+			defer controller.Finish()
+			customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
+			resolverOpts := &ResolverOpts{
+				CustomerService: customerServiceClient,
+			}
+			resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
+			switch testCase.testType {
+			case success:
+				customerServiceClient.EXPECT().CheckBVN(validCtx, &customer.CheckBVNRequest{
+					Bvn:   testCase.arg.bvn,
+					Phone: testCase.arg.phone,
+				}).Return(&pbTypes.DefaultResponse{
+					Success: true,
+					Code:    http.StatusOK,
+				}, nil)
+
+				resp, err := resolver.CheckBvn(validCtx, testCase.arg.bvn, testCase.arg.phone)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, &types.Response{
+					Success: true,
+					Code:    http.StatusOK,
+				}, resp)
+			case errorUnauthenticated:
+				resp, err := resolver.CheckBvn(context.Background(), testCase.arg.bvn, testCase.arg.phone)
+				assert.Error(t, err)
+				assert.IsType(t, &terror.Terror{}, err)
+				assert.Equal(t, errorvalues.InvalidAuthenticationError, err.(*terror.Terror).Code())
+				assert.Nil(t, resp)
+			case errorCheckingBvn:
+				customerServiceClient.EXPECT().CheckBVN(validCtx, &customer.CheckBVNRequest{
+					Bvn:   testCase.arg.bvn,
+					Phone: testCase.arg.phone,
+				}).Return(nil, errors.New(""))
+
+				resp, err := resolver.CheckBvn(validCtx, testCase.arg.bvn, testCase.arg.phone)
+				assert.Error(t, err)
+				assert.Nil(t, resp)
+			}
+		})
+	}
 }
 
 func TestMutationResolver_CreateAccount(t *testing.T) {
