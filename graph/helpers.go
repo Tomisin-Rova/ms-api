@@ -28,6 +28,7 @@ type Helper interface {
 	GetProtoDevicePreferencesType(val types.DevicePreferencesTypes) protoTypes.DevicePreferences_DevicePreferencesTypes
 	MapCustomerTitle(val types.CustomerTitle) protoTypes.Customer_CustomerTitle
 	MapProtoCustomerTitle(val protoTypes.Customer_CustomerTitle) types.CustomerTitle
+	MakeExchangeRateFromProto(protoExchangeRate *protoTypes.ExchangeRate) *types.ExchangeRate
 }
 
 type helpersfactory struct{}
@@ -1101,4 +1102,24 @@ func (h *helpersfactory) MakeFeesFromProto(protoFees []*protoTypes.Fee) []*types
 	}
 
 	return fees
+}
+
+func (h *helpersfactory) MakeExchangeRateFromProto(exchangeRate *protoTypes.ExchangeRate) *types.ExchangeRate {
+	return &types.ExchangeRate{
+		ID: exchangeRate.Id,
+		BaseCurrency: &types.Currency{
+			ID:     exchangeRate.BaseCurrency.Id,
+			Symbol: exchangeRate.BaseCurrency.Symbol,
+			Code:   exchangeRate.BaseCurrency.Code,
+			Name:   exchangeRate.BaseCurrency.Name,
+		},
+		TargetCurrency: &types.Currency{
+			ID:     exchangeRate.TargetCurrency.Id,
+			Symbol: exchangeRate.TargetCurrency.Symbol,
+			Code:   exchangeRate.TargetCurrency.Code,
+			Name:   exchangeRate.TargetCurrency.Name,
+		},
+		BuyPrice:  float64(exchangeRate.BuyPrice),
+		SalePrice: float64(exchangeRate.SalePrice),
+	}
 }
