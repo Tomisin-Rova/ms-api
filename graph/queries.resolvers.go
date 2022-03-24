@@ -861,7 +861,7 @@ func (r *queryResolver) ExchangeRate(ctx context.Context, transactionTypeID stri
 		return nil, err
 	}
 
-	return r.helper.MakeExchangeRateFromProto(resp.ExchangeRate), nil 
+	return r.helper.MakeExchangeRateFromProto(resp.ExchangeRate), nil
 }
 
 func (r *queryResolver) Me(ctx context.Context) (apiTypes.MeResult, error) {
