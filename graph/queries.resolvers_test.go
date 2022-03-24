@@ -4416,6 +4416,27 @@ func Test_queryResolver_Fees(t *testing.T) {
 }
 
 func Test_queryResolver_ExchangeRate(t *testing.T) {
+	const (
+		success = iota
+		errorNotFound
+	)
+
+	tests := []struct {
+		name     string
+		arg      string
+		testType int
+	}{
+		{
+			name:     "Success getting exchange rate from transaction type id",
+			arg:      "transactionTypeId",
+			testType: success,
+		}, {
+			name:     "Error getting exchange rate with invalid transaction type id",
+			arg:      "invalidTransactionTypeId",
+			testType: success,
+		},
+	}
+
 	controller := gomock.NewController(t)
 	defer controller.Finish()
 	pricingServiceClient := mocks.NewMockPricingServiceClient(controller)
@@ -4424,9 +4445,46 @@ func Test_queryResolver_ExchangeRate(t *testing.T) {
 	}
 	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Query()
 
-	resp, err := resolver.ExchangeRate(context.Background(), "")
-	assert.Error(t, err)
-	assert.NotNil(t, resp)
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			switch test.testType {
+			case success:
+				req := &pricing.GetExchangeRateRequest{TransactionTypeId: test.arg}
+				pricingServiceClient.EXPECT().GetExchangeRate(context.Background(), req).Return(
+					&pricing.GetExchangeRateResponse{
+						ExchangeRate: &pbTypes.ExchangeRate{
+							Id: "exchangeRateId",
+							BaseCurrency: &pbTypes.Currency{
+								Id:     "currencyId",
+								Name:   "currencyName",
+								Symbol: "SYMBOL",
+								Code:   "CODE",
+							},
+							TargetCurrency: &pbTypes.Currency{
+								Id:     "currencyId",
+								Name:   "currencyName",
+								Symbol: "SYMBOL",
+								Code:   "CODE",
+							},
+							BuyPrice:  10.0,
+							SalePrice: 10.0,
+							Ts:        timestamppb.Now(),
+						},
+					}, nil)
+				resp, err := resolver.ExchangeRate(context.Background(), test.arg)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.NotEmpty(t, resp)
+
+			case errorNotFound:
+				request := &pricing.GetExchangeRateRequest{TransactionTypeId: test.arg}
+				pricingServiceClient.EXPECT().GetExchangeRate(context.Background(), request).Return(nil, errors.New(""))
+				resp, err := resolver.ExchangeRate(context.Background(), test.arg)
+				assert.NoError(t, err)
+				assert.Nil(t, resp)
+			}
+		})
+	}
 }
 
 func Test_queryResolver_Customer(t *testing.T) {

@@ -856,9 +856,12 @@ func (r *queryResolver) Fees(ctx context.Context, transactionTypeID string) ([]*
 }
 
 func (r *queryResolver) ExchangeRate(ctx context.Context, transactionTypeID string) (*apiTypes.ExchangeRate, error) {
-	return &apiTypes.ExchangeRate{
-		ID: "n/a",
-	}, errors.New("not implemented")
+	resp, err := r.PricingService.GetExchangeRate(ctx, &pricing.GetExchangeRateRequest{TransactionTypeId: transactionTypeID})
+	if err != nil {
+		return nil, err
+	}
+
+	return r.helper.MakeExchangeRateFromProto(resp.ExchangeRate), nil 
 }
 
 func (r *queryResolver) Me(ctx context.Context) (apiTypes.MeResult, error) {
