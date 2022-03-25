@@ -6,7 +6,6 @@ package graph
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 
 	"go.uber.org/zap"
@@ -19,6 +18,7 @@ import (
 	accountPb "ms.api/protos/pb/account"
 	"ms.api/protos/pb/auth"
 	"ms.api/protos/pb/customer"
+	"ms.api/protos/pb/messaging"
 	"ms.api/protos/pb/onboarding"
 	"ms.api/protos/pb/payment"
 	pbTypes "ms.api/protos/pb/types"
@@ -809,7 +809,29 @@ func (r *mutationResolver) CreateTransfer(ctx context.Context, transfer types.Tr
 }
 
 func (r *mutationResolver) SendNotification(ctx context.Context, typeArg types.DeliveryMode, content string, templateID string) (*types.Response, error) {
-	panic(fmt.Errorf("not implemented"))
+	_, err := middlewares.GetClaimsFromCtx(ctx)
+	if err != nil {
+		responseMessage := "User authentication failed"
+		return &types.Response{Message: &responseMessage, Success: false, Code: int64(500)}, err
+	}
+
+	deliveryModeCode := messaging.SendNotificationRequest_DeliveryMode_value[typeArg.String()]
+
+	request := messaging.SendNotificationRequest{
+		Type:       messaging.SendNotificationRequest_DeliveryMode(deliveryModeCode),
+		Content:    content,
+		TemplateId: templateID,
+	}
+
+	response, err := r.MessagingService.SendNotification(ctx, &request)
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.Response{
+		Success: response.Success,
+		Code:    int64(response.Code),
+	}, nil
 }
 
 func (r *mutationResolver) RequestResubmit(ctx context.Context, customerID string, reportIds []string, message *string) (*types.Response, error) {

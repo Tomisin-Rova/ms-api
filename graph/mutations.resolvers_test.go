@@ -8,6 +8,7 @@ import (
 
 	terror "github.com/roava/zebra/errors"
 	accountPb "ms.api/protos/pb/account"
+	"ms.api/protos/pb/messaging"
 
 	"github.com/golang/mock/gomock"
 	"github.com/roava/zebra/middleware"
@@ -2310,6 +2311,165 @@ func TestMutationResolver_CreateTransfer(t *testing.T) {
 				assert.NotNil(t, resp)
 				assert.True(t, resp.Success)
 				assert.Equal(t, int64(http.StatusOK), resp.Code)
+			}
+		})
+	}
+}
+
+func TestMutationResolver_SendNotification(t *testing.T) {
+	const (
+		success = iota
+		successSMS
+		successPush
+		errorUnauthenticated
+		errorCallingRPC
+
+		templateId        = "templateId"
+		emailDeliveryMode = types.DeliveryMode("EMAIL")
+		smsDeliveryMode   = types.DeliveryMode("SMS")
+		pushDeliveryMode  = types.DeliveryMode("PUSH")
+	)
+
+	type arg struct {
+		deliveryMode types.DeliveryMode
+		content      string
+		templateID   string
+	}
+	var tests = []struct {
+		name     string
+		arg      arg
+		testType int
+	}{
+		{
+			name: "Test success",
+			arg: arg{
+				deliveryMode: emailDeliveryMode,
+				content:      "Something to send in success!",
+				templateID:   templateId,
+			},
+			testType: success,
+		},
+		{
+			name: "Test success SMS",
+			arg: arg{
+				deliveryMode: smsDeliveryMode,
+				content:      "Something to send in sms success",
+				templateID:   templateId,
+			},
+			testType: successSMS,
+		},
+		{
+			name: "Test success Push",
+			arg: arg{
+				deliveryMode: pushDeliveryMode,
+				content:      "Something to send in push success",
+				templateID:   templateId,
+			},
+			testType: successPush,
+		},
+		{
+			name:     "Test error unathenticated user",
+			testType: errorUnauthenticated,
+		},
+		{
+			name: "Test error requesting resubmit",
+			arg: arg{
+				deliveryMode: pushDeliveryMode,
+				content:      "Something to send in push success",
+				templateID:   templateId,
+			},
+			testType: errorCallingRPC,
+		},
+	}
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			controller := gomock.NewController(t)
+			defer controller.Finish()
+			messagingServiceClient := mocks.NewMockMessagingServiceClient(controller)
+			resolverOpts := &ResolverOpts{
+				MessagingService: messagingServiceClient,
+			}
+			resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
+
+			switch testCase.testType {
+			case success:
+				ctx, _ := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{ID: "customerID"})
+
+				messagingServiceClient.EXPECT().SendNotification(ctx, &messaging.SendNotificationRequest{
+					Type:       messaging.SendNotificationRequest_DeliveryMode(0),
+					Content:    testCase.arg.content,
+					TemplateId: testCase.arg.templateID,
+				}).Return(&pbTypes.DefaultResponse{
+					Success: true,
+					Code:    http.StatusOK,
+				}, nil)
+
+				resp, err := resolver.SendNotification(ctx, testCase.arg.deliveryMode, testCase.arg.content, testCase.arg.templateID)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, &types.Response{
+					Success: true,
+					Code:    http.StatusOK,
+				}, resp)
+			case successSMS:
+				ctx, _ := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{ID: "customerID"})
+
+				messagingServiceClient.EXPECT().SendNotification(ctx, &messaging.SendNotificationRequest{
+					Type:       messaging.SendNotificationRequest_DeliveryMode(1),
+					Content:    testCase.arg.content,
+					TemplateId: testCase.arg.templateID,
+				}).Return(&pbTypes.DefaultResponse{
+					Success: true,
+					Code:    http.StatusOK,
+				}, nil)
+
+				resp, err := resolver.SendNotification(ctx, testCase.arg.deliveryMode, testCase.arg.content, testCase.arg.templateID)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, &types.Response{
+					Success: true,
+					Code:    http.StatusOK,
+				}, resp)
+			case successPush:
+				ctx, _ := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{ID: "customerID"})
+
+				messagingServiceClient.EXPECT().SendNotification(ctx, &messaging.SendNotificationRequest{
+					Type:       messaging.SendNotificationRequest_DeliveryMode(2),
+					Content:    testCase.arg.content,
+					TemplateId: testCase.arg.templateID,
+				}).Return(&pbTypes.DefaultResponse{
+					Success: true,
+					Code:    http.StatusOK,
+				}, nil)
+
+				resp, err := resolver.SendNotification(ctx, testCase.arg.deliveryMode, testCase.arg.content, testCase.arg.templateID)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, &types.Response{
+					Success: true,
+					Code:    http.StatusOK,
+				}, resp)
+			case errorUnauthenticated:
+				resp, err := resolver.SendNotification(context.Background(), testCase.arg.deliveryMode, testCase.arg.content, testCase.arg.templateID)
+				assert.Error(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, &types.Response{
+					Message: &authFailedMessage,
+					Success: false,
+					Code:    http.StatusInternalServerError,
+				}, resp)
+			case errorCallingRPC:
+				ctx, _ := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{ID: "customerID"})
+
+				messagingServiceClient.EXPECT().SendNotification(ctx, &messaging.SendNotificationRequest{
+					Type:       messaging.SendNotificationRequest_DeliveryMode(2),
+					Content:    testCase.arg.content,
+					TemplateId: testCase.arg.templateID,
+				}).Return(nil, errors.New(""))
+
+				resp, err := resolver.SendNotification(ctx, testCase.arg.deliveryMode, testCase.arg.content, testCase.arg.templateID)
+				assert.Error(t, err)
+				assert.Nil(t, resp)
 			}
 		})
 	}
