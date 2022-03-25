@@ -2,7 +2,7 @@
 <div align="center">
 <h2 align="center">API</h2>
   <p align="center">
-    Roava api service provides the graphql api to the clients. The api service connects with all other microservices to handle the mutations and queries. 
+    Roava api service provides the graphql api to the clients. The api service connects with all other microservices to handle the mutations and queries.
     <br />
     <a href="https://fcmbuk.atlassian.net/wiki/spaces/ROAV/pages/1046315011/Features">Features</a>
     ·
@@ -61,6 +61,7 @@ account_service_url: "127.0.0.1:<SERVICE_PORT>"
 customer_service_url: "127.0.0.1:<SERVICE_PORT>"
 payment_service_url: "127.0.0.1:<SERVICE_PORT>"
 pricing_service_url: "127.0.0.1:<SERVICE_PORT>"
+messaging_service_url: "127.0.0.1:<SERVICE_PORT>"
 
 ```
 
