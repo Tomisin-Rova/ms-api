@@ -58,6 +58,7 @@ gen-mocks: proto
 	mockgen -source=./protos/pb/auth/auth.pb.go -destination=./mocks/auth_mock.go -package=mocks
 	mockgen -source=./protos/pb/customer/customer.pb.go -destination=./mocks/customer_mock.go -package=mocks
 	mockgen -source=./protos/pb/onboarding/onboarding.pb.go -destination=./mocks/onboarding_mock.go -package=mocks
+	mockgen -source=./protos/pb/messaging/messaging.pb.go -destination=./mocks/messaging_mock.go -package=mocks
 	mockgen -source=./protos/pb/payment/payment.pb.go -destination=./mocks/payment_mock.go -package=mocks
 	mockgen -source=./protos/pb/pricing/pricing.pb.go -destination=./mocks/pricing_mock.go -package=mocks
 	mockgen -source=./protos/pb/verification/verification.pb.go -destination=./mocks/verification_mock.go -package=mocks

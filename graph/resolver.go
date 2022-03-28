@@ -16,6 +16,7 @@ import (
 	"ms.api/protos/pb/account"
 	"ms.api/protos/pb/auth"
 	"ms.api/protos/pb/customer"
+	"ms.api/protos/pb/messaging"
 	"ms.api/protos/pb/onboarding"
 	"ms.api/protos/pb/payment"
 	"ms.api/protos/pb/pricing"
@@ -32,6 +33,7 @@ type ResolverOpts struct {
 	AuthService         auth.AuthServiceClient
 	CustomerService     customer.CustomerServiceClient
 	OnboardingService   onboarding.OnboardingServiceClient
+	MessagingService    messaging.MessagingServiceClient
 	PaymentService      payment.PaymentServiceClient
 	PricingService      pricing.PricingServiceClient
 	VerificationService verification.VerificationServiceClient
@@ -52,6 +54,7 @@ type Resolver struct {
 	PaymentService      payment.PaymentServiceClient
 	PricingService      pricing.PricingServiceClient
 	VerificationService verification.VerificationServiceClient
+	MessagingService    messaging.MessagingServiceClient
 	preloader           preloader.Preloader
 	mapper              mapper.Mapper
 	logger              *zap.Logger
@@ -70,6 +73,7 @@ func NewResolver(opt *ResolverOpts, logger *zap.Logger) *Resolver {
 		AccountService:      opt.AccountService,
 		AuthService:         opt.AuthService,
 		CustomerService:     opt.CustomerService,
+		MessagingService:    opt.MessagingService,
 		OnBoardingService:   opt.OnboardingService,
 		PaymentService:      opt.PaymentService,
 		PricingService:      opt.PricingService,
@@ -155,6 +159,17 @@ func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) 
 			return nil, fmt.Errorf("%v: %s", err, secrets.CustomerServiceURL)
 		}
 		opts.CustomerService = customer.NewCustomerServiceClient(connection)
+	}
+
+	// messaging
+	if len(secrets.MessagingServiceURL) > 0 || !localDevEnvironment {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		connection, err := dialRPC(ctx, secrets.MessagingServiceURL)
+		if err != nil {
+			return nil, fmt.Errorf("%v: %s", err, secrets.MessagingServiceURL)
+		}
+		opts.MessagingService = messaging.NewMessagingServiceClient(connection)
 	}
 
 	// Pricing
