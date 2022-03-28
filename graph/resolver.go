@@ -161,6 +161,17 @@ func ConnectServiceDependencies(secrets *config.Secrets) (*ResolverOpts, error) 
 		opts.CustomerService = customer.NewCustomerServiceClient(connection)
 	}
 
+	// messaging
+	if len(secrets.MessagingServiceURL) > 0 || !localDevEnvironment {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		connection, err := dialRPC(ctx, secrets.MessagingServiceURL)
+		if err != nil {
+			return nil, fmt.Errorf("%v: %s", err, secrets.MessagingServiceURL)
+		}
+		opts.MessagingService = messaging.NewMessagingServiceClient(connection)
+	}
+
 	// Pricing
 	// TODO: Return local validation once pricing service it's refactored
 	if len(secrets.PricingServiceURL) > 0 {
