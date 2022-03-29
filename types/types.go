@@ -282,6 +282,7 @@ type CurrencyConnection struct {
 
 type Customer struct {
 	ID        string           `json:"id"`
+	Title     CustomerTitle    `json:"title"`
 	FirstName string           `json:"firstName"`
 	LastName  string           `json:"lastName"`
 	Dob       string           `json:"dob"`
@@ -303,6 +304,7 @@ type CustomerConnection struct {
 }
 
 type CustomerDetailsInput struct {
+	Title     CustomerTitle `json:"title"`
 	FirstName string        `json:"firstName"`
 	LastName  string        `json:"lastName"`
 	Dob       string        `json:"dob"`
@@ -1101,6 +1103,51 @@ func (e *CustomerStatuses) UnmarshalGQL(v interface{}) error {
 }
 
 func (e CustomerStatuses) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type CustomerTitle string
+
+const (
+	CustomerTitleMr   CustomerTitle = "MR"
+	CustomerTitleMrs  CustomerTitle = "MRS"
+	CustomerTitleMiss CustomerTitle = "MISS"
+	CustomerTitleMs   CustomerTitle = "MS"
+)
+
+var AllCustomerTitle = []CustomerTitle{
+	CustomerTitleMr,
+	CustomerTitleMrs,
+	CustomerTitleMiss,
+	CustomerTitleMs,
+}
+
+func (e CustomerTitle) IsValid() bool {
+	switch e {
+	case CustomerTitleMr, CustomerTitleMrs, CustomerTitleMiss, CustomerTitleMs:
+		return true
+	}
+	return false
+}
+
+func (e CustomerTitle) String() string {
+	return string(e)
+}
+
+func (e *CustomerTitle) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = CustomerTitle(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid CustomerTitle", str)
+	}
+	return nil
+}
+
+func (e CustomerTitle) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

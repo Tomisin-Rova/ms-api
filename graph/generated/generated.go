@@ -252,6 +252,7 @@ type ComplexityRoot struct {
 		Phones    func(childComplexity int) int
 		Status    func(childComplexity int) int
 		StatusTs  func(childComplexity int) int
+		Title     func(childComplexity int) int
 		Ts        func(childComplexity int) int
 	}
 
@@ -388,33 +389,35 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		AcceptContent            func(childComplexity int, contentID string) int
-		AddBeneficiaryAccount    func(childComplexity int, beneficiaryID string, account types.BeneficiaryAccountInput, transactionPassword string) int
-		AnswerQuestionary        func(childComplexity int, questionary types.QuestionaryAnswerInput) int
-		CheckBvn                 func(childComplexity int, bvn string, phone string) int
-		CheckCustomerData        func(childComplexity int, customerData types.CheckCustomerDataInput) int
-		CheckCustomerEmail       func(childComplexity int, email string, device types.DeviceInput) int
-		CreateAccount            func(childComplexity int, account types.AccountInput) int
-		CreateBeneficiary        func(childComplexity int, beneficiary types.BeneficiaryInput, transactionPassword string) int
-		CreateTransfer           func(childComplexity int, transfer types.TransactionInput, transactionPassword string) int
-		CreateVaultAccount       func(childComplexity int, account types.VaultAccountInput, transactionPassword string) int
-		DeleteBeneficaryAccount  func(childComplexity int, beneficiaryID string, accountID string, transactionPassword string) int
-		Login                    func(childComplexity int, credentials types.AuthInput) int
-		RefreshToken             func(childComplexity int, token string) int
-		Register                 func(childComplexity int, customerDetails types.CustomerDetailsInput) int
-		RequestOtp               func(childComplexity int, typeArg types.DeliveryMode, target string, expireTimeInSeconds *int64) int
-		RequestResubmit          func(childComplexity int, customerID string, reportIds []string, message *string) int
-		ResetLoginPassword       func(childComplexity int, otpToken string, email string, loginPassword string) int
-		ResetTransactionPassword func(childComplexity int, otpToken string, email string, newTransactionPassword string, currentTransactionPassword string) int
-		SetDevicePreferences     func(childComplexity int, preferences []*types.DevicePreferencesInput) int
-		SetDeviceToken           func(childComplexity int, tokens []*types.DeviceTokenInput) int
-		SetTransactionPassword   func(childComplexity int, password string) int
-		Signup                   func(childComplexity int, customer types.CustomerInput) int
-		StaffLogin               func(childComplexity int, token string, authType types.AuthType) int
-		SubmitCdd                func(childComplexity int, cdd types.CDDInput) int
-		UpdateAMLStatus          func(childComplexity int, id string, status types.AMLStatuses, message string) int
-		UpdateKYCStatus          func(childComplexity int, id string, status types.KYCStatuses, message string) int
-		VerifyOtp                func(childComplexity int, target string, otpToken string) int
+		AcceptContent             func(childComplexity int, contentID string) int
+		AddBeneficiaryAccount     func(childComplexity int, beneficiaryID string, account types.BeneficiaryAccountInput, transactionPassword string) int
+		AnswerQuestionary         func(childComplexity int, questionary types.QuestionaryAnswerInput) int
+		CheckBvn                  func(childComplexity int, bvn string, phone string) int
+		CheckCustomerData         func(childComplexity int, customerData types.CheckCustomerDataInput) int
+		CheckCustomerEmail        func(childComplexity int, email string, device types.DeviceInput) int
+		CreateAccount             func(childComplexity int, account types.AccountInput) int
+		CreateBeneficiary         func(childComplexity int, beneficiary types.BeneficiaryInput, transactionPassword string) int
+		CreateTransfer            func(childComplexity int, transfer types.TransactionInput, transactionPassword string) int
+		CreateVaultAccount        func(childComplexity int, account types.VaultAccountInput, transactionPassword string) int
+		DeleteBeneficiaryAccount  func(childComplexity int, beneficiaryID string, accountID string, transactionPassword string) int
+		ForgotTransactionPassword func(childComplexity int, newTransactionPassword string) int
+		Login                     func(childComplexity int, credentials types.AuthInput) int
+		RefreshToken              func(childComplexity int, token string) int
+		Register                  func(childComplexity int, customerDetails types.CustomerDetailsInput) int
+		RequestOtp                func(childComplexity int, typeArg types.DeliveryMode, target string, expireTimeInSeconds *int64) int
+		RequestResubmit           func(childComplexity int, customerID string, reportIds []string, message *string) int
+		ResetLoginPassword        func(childComplexity int, otpToken string, email string, loginPassword string) int
+		ResetTransactionPassword  func(childComplexity int, otpToken string, email string, newTransactionPassword string, currentTransactionPassword string) int
+		SendNotification          func(childComplexity int, typeArg types.DeliveryMode, content string, templateID string) int
+		SetDevicePreferences      func(childComplexity int, preferences []*types.DevicePreferencesInput) int
+		SetDeviceToken            func(childComplexity int, tokens []*types.DeviceTokenInput) int
+		SetTransactionPassword    func(childComplexity int, password string) int
+		Signup                    func(childComplexity int, customer types.CustomerInput) int
+		StaffLogin                func(childComplexity int, token string, authType types.AuthType) int
+		SubmitCdd                 func(childComplexity int, cdd types.CDDInput) int
+		UpdateAMLStatus           func(childComplexity int, id string, status types.AMLStatuses, message string) int
+		UpdateKYCStatus           func(childComplexity int, id string, status types.KYCStatuses, message string) int
+		VerifyOtp                 func(childComplexity int, target string, otpToken string) int
 	}
 
 	Organization struct {
@@ -492,6 +495,7 @@ type ComplexityRoot struct {
 		Cdd              func(childComplexity int, filter types.CommonQueryFilterInput) int
 		Cdds             func(childComplexity int, first *int64, after *string, last *int64, before *string, statuses []types.CDDStatuses) int
 		CheckEmail       func(childComplexity int, email string) int
+		CheckPhoneNumber func(childComplexity int, phone string) int
 		Content          func(childComplexity int, id string) int
 		Contents         func(childComplexity int, first *int64, after *string, last *int64, before *string) int
 		Countries        func(childComplexity int, keywords *string, first *int64, after *string, last *int64, before *string) int
@@ -668,6 +672,7 @@ type MutationResolver interface {
 	AnswerQuestionary(ctx context.Context, questionary types.QuestionaryAnswerInput) (*types.Response, error)
 	AcceptContent(ctx context.Context, contentID string) (*types.Response, error)
 	SetTransactionPassword(ctx context.Context, password string) (*types.Response, error)
+	ForgotTransactionPassword(ctx context.Context, newTransactionPassword string) (*types.Response, error)
 	ResetTransactionPassword(ctx context.Context, otpToken string, email string, newTransactionPassword string, currentTransactionPassword string) (*types.Response, error)
 	Login(ctx context.Context, credentials types.AuthInput) (*types.AuthResponse, error)
 	RefreshToken(ctx context.Context, token string) (*types.AuthResponse, error)
@@ -678,8 +683,9 @@ type MutationResolver interface {
 	CreateVaultAccount(ctx context.Context, account types.VaultAccountInput, transactionPassword string) (*types.Response, error)
 	CreateBeneficiary(ctx context.Context, beneficiary types.BeneficiaryInput, transactionPassword string) (*types.Response, error)
 	AddBeneficiaryAccount(ctx context.Context, beneficiaryID string, account types.BeneficiaryAccountInput, transactionPassword string) (*types.Response, error)
-	DeleteBeneficaryAccount(ctx context.Context, beneficiaryID string, accountID string, transactionPassword string) (*types.Response, error)
+	DeleteBeneficiaryAccount(ctx context.Context, beneficiaryID string, accountID string, transactionPassword string) (*types.Response, error)
 	CreateTransfer(ctx context.Context, transfer types.TransactionInput, transactionPassword string) (*types.Response, error)
+	SendNotification(ctx context.Context, typeArg types.DeliveryMode, content string, templateID string) (*types.Response, error)
 	RequestResubmit(ctx context.Context, customerID string, reportIds []string, message *string) (*types.Response, error)
 	StaffLogin(ctx context.Context, token string, authType types.AuthType) (*types.AuthResponse, error)
 	UpdateKYCStatus(ctx context.Context, id string, status types.KYCStatuses, message string) (*types.Response, error)
@@ -687,6 +693,7 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	CheckEmail(ctx context.Context, email string) (bool, error)
+	CheckPhoneNumber(ctx context.Context, phone string) (bool, error)
 	Addresses(ctx context.Context, first *int64, after *string, last *int64, before *string, postcode *string) (*types.AddressConnection, error)
 	Countries(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string) (*types.CountryConnection, error)
 	OnfidoSDKToken(ctx context.Context) (*types.TokenResponse, error)
@@ -1633,6 +1640,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Customer.StatusTs(childComplexity), true
 
+	case "Customer.title":
+		if e.complexity.Customer.Title == nil {
+			break
+		}
+
+		return e.complexity.Customer.Title(childComplexity), true
+
 	case "Customer.ts":
 		if e.complexity.Customer.Ts == nil {
 			break
@@ -2327,17 +2341,29 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateVaultAccount(childComplexity, args["account"].(types.VaultAccountInput), args["transactionPassword"].(string)), true
 
-	case "Mutation.deleteBeneficaryAccount":
-		if e.complexity.Mutation.DeleteBeneficaryAccount == nil {
+	case "Mutation.deleteBeneficiaryAccount":
+		if e.complexity.Mutation.DeleteBeneficiaryAccount == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_deleteBeneficaryAccount_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_deleteBeneficiaryAccount_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeleteBeneficaryAccount(childComplexity, args["beneficiaryId"].(string), args["accountId"].(string), args["transactionPassword"].(string)), true
+		return e.complexity.Mutation.DeleteBeneficiaryAccount(childComplexity, args["beneficiaryId"].(string), args["accountId"].(string), args["transactionPassword"].(string)), true
+
+	case "Mutation.forgotTransactionPassword":
+		if e.complexity.Mutation.ForgotTransactionPassword == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_forgotTransactionPassword_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.ForgotTransactionPassword(childComplexity, args["newTransactionPassword"].(string)), true
 
 	case "Mutation.login":
 		if e.complexity.Mutation.Login == nil {
@@ -2422,6 +2448,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.ResetTransactionPassword(childComplexity, args["otpToken"].(string), args["email"].(string), args["newTransactionPassword"].(string), args["currentTransactionPassword"].(string)), true
+
+	case "Mutation.sendNotification":
+		if e.complexity.Mutation.SendNotification == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_sendNotification_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.SendNotification(childComplexity, args["type"].(types.DeliveryMode), args["content"].(string), args["templateId"].(string)), true
 
 	case "Mutation.setDevicePreferences":
 		if e.complexity.Mutation.SetDevicePreferences == nil {
@@ -2925,6 +2963,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.CheckEmail(childComplexity, args["email"].(string)), true
+
+	case "Query.checkPhoneNumber":
+		if e.complexity.Query.CheckPhoneNumber == nil {
+			break
+		}
+
+		args, err := ec.field_Query_checkPhoneNumber_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.CheckPhoneNumber(childComplexity, args["phone"].(string)), true
 
 	case "Query.content":
 		if e.complexity.Query.Content == nil {
@@ -3843,6 +3893,8 @@ var sources = []*ast.Source{
     acceptContent(contentId: String!): Response!
     # Creates a new transaction password (Only if customer doesn't set it up yet)
     setTransactionPassword(password: String!): Response!
+    # Creates a new Password (when a customer forgot transaction password)
+    forgotTransactionPassword(newTransactionPassword: String!): Response
     # Reset a customer transaction Password (OTP required)
     resetTransactionPassword(otpToken: String!, email: String!, newTransactionPassword: String!, currentTransactionPassword: String!): Response!
     # Generates a valid jwt token for the customer
@@ -3864,9 +3916,11 @@ var sources = []*ast.Source{
     # Add new account to existing beneficiary
     addBeneficiaryAccount(beneficiaryId: ID!, account: BeneficiaryAccountInput!, transactionPassword: String!): Response!
     # Delete an account from an existing beneficiary
-    deleteBeneficaryAccount(beneficiaryId: ID!, accountId: ID!, transactionPassword: String!): Response!
+    deleteBeneficiaryAccount(beneficiaryId: ID!, accountId: ID!, transactionPassword: String!): Response!
     # Create a new transfer to a beneficiary account
     createTransfer(transfer: TransactionInput!, transactionPassword: String!): Response!
+    # Send notification based on delivery mode specified
+    sendNotification(type: DeliveryMode!, content: String!, templateId: String!): Response!
 
     # ---- Dashboard -----
     # Ask for a customer to resubmit a report
@@ -3956,6 +4010,7 @@ input DevicePreferencesInput {
 }
 
 input CustomerDetailsInput {
+    title: CustomerTitle!
     firstName: String!
     lastName: String!
     dob: Date!
@@ -4073,6 +4128,8 @@ enum DeliveryMode {
 	{Name: "graph/schemas/queries.graphql", Input: `type Query {
     # Check if there's a customer with the email given
     checkEmail(email: String!): Boolean!
+    # Check if there's a customer with the phone number given
+    checkPhoneNumber(phone: String!): Boolean!
     # Fetch a list of addresses related to the filters given
     addresses(
         # Returns the first n elements from the list.
@@ -4438,6 +4495,7 @@ scalar Date
 
 type Customer {
     id: ID!
+    title: CustomerTitle!
     firstName: String!
     lastName: String!
     dob: Date!
@@ -4448,6 +4506,13 @@ type Customer {
     status: CustomerStatuses!
     statusTs: Int!
     ts: Int!
+}
+
+enum CustomerTitle {
+    MR
+    MRS
+    MISS
+    MS
 }
 
 enum CustomerStatuses {
@@ -4881,7 +4946,7 @@ type Transaction {
     transactionType: TransactionType!
     reference: String!
     fees: [TransactionFee!]
-    exchangeRate: ExchangeRate!
+    exchangeRate: ExchangeRate
     source: TransactionSource!
     target: TransactionTarget!
     idempotencyKey: String!
@@ -5314,7 +5379,7 @@ func (ec *executionContext) field_Mutation_createVaultAccount_args(ctx context.C
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_deleteBeneficaryAccount_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_deleteBeneficiaryAccount_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
@@ -5344,6 +5409,21 @@ func (ec *executionContext) field_Mutation_deleteBeneficaryAccount_args(ctx cont
 		}
 	}
 	args["transactionPassword"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_forgotTransactionPassword_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["newTransactionPassword"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("newTransactionPassword"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["newTransactionPassword"] = arg0
 	return args, nil
 }
 
@@ -5530,6 +5610,39 @@ func (ec *executionContext) field_Mutation_resetTransactionPassword_args(ctx con
 		}
 	}
 	args["currentTransactionPassword"] = arg3
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_sendNotification_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 types.DeliveryMode
+	if tmp, ok := rawArgs["type"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
+		arg0, err = ec.unmarshalNDeliveryMode2msᚗapiᚋtypesᚐDeliveryMode(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["type"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["content"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("content"))
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["content"] = arg1
+	var arg2 string
+	if tmp, ok := rawArgs["templateId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("templateId"))
+		arg2, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["templateId"] = arg2
 	return args, nil
 }
 
@@ -6058,6 +6171,21 @@ func (ec *executionContext) field_Query_checkEmail_args(ctx context.Context, raw
 		}
 	}
 	args["email"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_checkPhoneNumber_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["phone"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("phone"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["phone"] = arg0
 	return args, nil
 }
 
@@ -10794,6 +10922,41 @@ func (ec *executionContext) _Customer_id(ctx context.Context, field graphql.Coll
 	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Customer_title(ctx context.Context, field graphql.CollectedField, obj *types.Customer) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Customer",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Title, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(types.CustomerTitle)
+	fc.Result = res
+	return ec.marshalNCustomerTitle2msᚗapiᚋtypesᚐCustomerTitle(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Customer_firstName(ctx context.Context, field graphql.CollectedField, obj *types.Customer) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -14390,6 +14553,45 @@ func (ec *executionContext) _Mutation_setTransactionPassword(ctx context.Context
 	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_forgotTransactionPassword(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_forgotTransactionPassword_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().ForgotTransactionPassword(rctx, args["newTransactionPassword"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*types.Response)
+	fc.Result = res
+	return ec.marshalOResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Mutation_resetTransactionPassword(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -14810,7 +15012,7 @@ func (ec *executionContext) _Mutation_addBeneficiaryAccount(ctx context.Context,
 	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Mutation_deleteBeneficaryAccount(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Mutation_deleteBeneficiaryAccount(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -14827,7 +15029,7 @@ func (ec *executionContext) _Mutation_deleteBeneficaryAccount(ctx context.Contex
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_deleteBeneficaryAccount_args(ctx, rawArgs)
+	args, err := ec.field_Mutation_deleteBeneficiaryAccount_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -14835,7 +15037,7 @@ func (ec *executionContext) _Mutation_deleteBeneficaryAccount(ctx context.Contex
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteBeneficaryAccount(rctx, args["beneficiaryId"].(string), args["accountId"].(string), args["transactionPassword"].(string))
+		return ec.resolvers.Mutation().DeleteBeneficiaryAccount(rctx, args["beneficiaryId"].(string), args["accountId"].(string), args["transactionPassword"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -14878,6 +15080,48 @@ func (ec *executionContext) _Mutation_createTransfer(ctx context.Context, field 
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().CreateTransfer(rctx, args["transfer"].(types.TransactionInput), args["transactionPassword"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.Response)
+	fc.Result = res
+	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_sendNotification(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_sendNotification_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().SendNotification(rctx, args["type"].(types.DeliveryMode), args["content"].(string), args["templateId"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -16487,6 +16731,48 @@ func (ec *executionContext) _Query_checkEmail(ctx context.Context, field graphql
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().CheckEmail(rctx, args["email"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_checkPhoneNumber(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_checkPhoneNumber_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().CheckPhoneNumber(rctx, args["phone"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -19659,14 +19945,11 @@ func (ec *executionContext) _Transaction_exchangeRate(ctx context.Context, field
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
 	res := resTmp.(*types.ExchangeRate)
 	fc.Result = res
-	return ec.marshalNExchangeRate2ᚖmsᚗapiᚋtypesᚐExchangeRate(ctx, field.Selections, res)
+	return ec.marshalOExchangeRate2ᚖmsᚗapiᚋtypesᚐExchangeRate(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Transaction_source(ctx context.Context, field graphql.CollectedField, obj *types.Transaction) (ret graphql.Marshaler) {
@@ -20759,14 +21042,14 @@ func (ec *executionContext) ___Directive_description(ctx context.Context, field 
 		Object:     "__Directive",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
+		IsMethod:   true,
 		IsResolver: false,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Description, nil
+		return obj.Description(), nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -20775,9 +21058,9 @@ func (ec *executionContext) ___Directive_description(ctx context.Context, field 
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalOString2string(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Directive_locations(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -20931,14 +21214,14 @@ func (ec *executionContext) ___EnumValue_description(ctx context.Context, field 
 		Object:     "__EnumValue",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
+		IsMethod:   true,
 		IsResolver: false,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Description, nil
+		return obj.Description(), nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -20947,9 +21230,9 @@ func (ec *executionContext) ___EnumValue_description(ctx context.Context, field 
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalOString2string(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___EnumValue_isDeprecated(ctx context.Context, field graphql.CollectedField, obj *introspection.EnumValue) (ret graphql.Marshaler) {
@@ -21065,14 +21348,14 @@ func (ec *executionContext) ___Field_description(ctx context.Context, field grap
 		Object:     "__Field",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
+		IsMethod:   true,
 		IsResolver: false,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Description, nil
+		return obj.Description(), nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -21081,9 +21364,9 @@ func (ec *executionContext) ___Field_description(ctx context.Context, field grap
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalOString2string(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Field_args(ctx context.Context, field graphql.CollectedField, obj *introspection.Field) (ret graphql.Marshaler) {
@@ -21269,14 +21552,14 @@ func (ec *executionContext) ___InputValue_description(ctx context.Context, field
 		Object:     "__InputValue",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
+		IsMethod:   true,
 		IsResolver: false,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Description, nil
+		return obj.Description(), nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -21285,9 +21568,9 @@ func (ec *executionContext) ___InputValue_description(ctx context.Context, field
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalOString2string(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___InputValue_type(ctx context.Context, field graphql.CollectedField, obj *introspection.InputValue) (ret graphql.Marshaler) {
@@ -21344,6 +21627,38 @@ func (ec *executionContext) ___InputValue_defaultValue(ctx context.Context, fiel
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.DefaultValue, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) ___Schema_description(ctx context.Context, field graphql.CollectedField, obj *introspection.Schema) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "__Schema",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Description(), nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -21620,9 +21935,9 @@ func (ec *executionContext) ___Type_description(ctx context.Context, field graph
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalOString2string(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) (ret graphql.Marshaler) {
@@ -21829,6 +22144,38 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 	res := resTmp.(*introspection.Type)
 	fc.Result = res
 	return ec.marshalO__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) ___Type_specifiedByURL(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "__Type",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.SpecifiedByURL(), nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 // endregion **************************** field.gotpl *****************************
@@ -22266,6 +22613,14 @@ func (ec *executionContext) unmarshalInputCustomerDetailsInput(ctx context.Conte
 
 	for k, v := range asMap {
 		switch k {
+		case "title":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("title"))
+			it.Title, err = ec.unmarshalNCustomerTitle2msᚗapiᚋtypesᚐCustomerTitle(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "firstName":
 			var err error
 
@@ -24410,6 +24765,16 @@ func (ec *executionContext) _Customer(ctx context.Context, sel ast.SelectionSet,
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "title":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Customer_title(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "firstName":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Customer_firstName(ctx, field, obj)
@@ -25766,6 +26131,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "forgotTransactionPassword":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_forgotTransactionPassword(ctx, field)
+			}
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, innerFunc)
+
 		case "resetTransactionPassword":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_resetTransactionPassword(ctx, field)
@@ -25866,9 +26238,9 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "deleteBeneficaryAccount":
+		case "deleteBeneficiaryAccount":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_deleteBeneficaryAccount(ctx, field)
+				return ec._Mutation_deleteBeneficiaryAccount(ctx, field)
 			}
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, innerFunc)
@@ -25879,6 +26251,16 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "createTransfer":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_createTransfer(ctx, field)
+			}
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, innerFunc)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "sendNotification":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_sendNotification(ctx, field)
 			}
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, innerFunc)
@@ -26508,6 +26890,29 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_checkEmail(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
+		case "checkPhoneNumber":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_checkPhoneNumber(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -27924,9 +28329,6 @@ func (ec *executionContext) _Transaction(ctx context.Context, sel ast.SelectionS
 
 			out.Values[i] = innerFunc(ctx)
 
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "source":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Transaction_source(ctx, field, obj)
@@ -28621,6 +29023,13 @@ func (ec *executionContext) ___Schema(ctx context.Context, sel ast.SelectionSet,
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("__Schema")
+		case "description":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Schema_description(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "types":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				return ec.___Schema_types(ctx, field, obj)
@@ -28748,6 +29157,13 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 		case "ofType":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				return ec.___Type_ofType(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+		case "specifiedByURL":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Type_specifiedByURL(ctx, field, obj)
 			}
 
 			out.Values[i] = innerFunc(ctx)
@@ -29632,6 +30048,16 @@ func (ec *executionContext) unmarshalNCustomerStatuses2msᚗapiᚋtypesᚐCustom
 }
 
 func (ec *executionContext) marshalNCustomerStatuses2msᚗapiᚋtypesᚐCustomerStatuses(ctx context.Context, sel ast.SelectionSet, v types.CustomerStatuses) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) unmarshalNCustomerTitle2msᚗapiᚋtypesᚐCustomerTitle(ctx context.Context, v interface{}) (types.CustomerTitle, error) {
+	var res types.CustomerTitle
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNCustomerTitle2msᚗapiᚋtypesᚐCustomerTitle(ctx context.Context, sel ast.SelectionSet, v types.CustomerTitle) graphql.Marshaler {
 	return v
 }
 
@@ -31724,6 +32150,13 @@ func (ec *executionContext) unmarshalODeviceTokenInput2ᚖmsᚗapiᚋtypesᚐDev
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) marshalOExchangeRate2ᚖmsᚗapiᚋtypesᚐExchangeRate(ctx context.Context, sel ast.SelectionSet, v *types.ExchangeRate) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._ExchangeRate(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalOFloat2ᚖfloat64(ctx context.Context, v interface{}) (*float64, error) {
 	if v == nil {
 		return nil, nil
@@ -32554,21 +32987,18 @@ func (ec *executionContext) marshalOReports2ᚕᚖmsᚗapiᚋtypesᚐReportsᚄ(
 	return ret
 }
 
+func (ec *executionContext) marshalOResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx context.Context, sel ast.SelectionSet, v *types.Response) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Response(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalOReview2ᚖmsᚗapiᚋtypesᚐReview(ctx context.Context, sel ast.SelectionSet, v *types.Review) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Review(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {
-	res, err := graphql.UnmarshalString(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOString2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
-	res := graphql.MarshalString(v)
-	return res
 }
 
 func (ec *executionContext) unmarshalOString2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {

@@ -6,6 +6,7 @@ package graph
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"go.uber.org/zap"
@@ -19,6 +20,7 @@ import (
 	"ms.api/protos/pb/auth"
 	"ms.api/protos/pb/customer"
 	"ms.api/protos/pb/onboarding"
+	"ms.api/protos/pb/payment"
 	pbTypes "ms.api/protos/pb/types"
 	"ms.api/protos/pb/verification"
 	"ms.api/server/http/middlewares"
@@ -185,23 +187,73 @@ func (r *mutationResolver) CheckCustomerEmail(ctx context.Context, email string,
 		return nil, err
 	}
 
-	resp, err := r.CustomerService.CheckEmail(ctx, &customer.CheckEmailRequest{Email: email})
+	deviceTokens := make([]*pbTypes.DeviceTokenInput, len(device.Tokens))
+	for index, deviceToken := range device.Tokens {
+		deviceTokens[index] = &pbTypes.DeviceTokenInput{
+			Type:  r.helper.GetProtoDeviceTokenType(deviceToken.Type),
+			Value: deviceToken.Value,
+		}
+	}
+
+	devicePreferences := make([]*pbTypes.DevicePreferencesInput, len(device.Preferences))
+	for index, devicePreference := range device.Preferences {
+		devicePreferences[index] = &pbTypes.DevicePreferencesInput{
+			Type:  r.helper.GetProtoDevicePreferencesType(devicePreference.Type),
+			Value: devicePreference.Value,
+		}
+	}
+
+	// Build request
+	request := &customer.CheckCustomerEmailRequest{
+		Email: email,
+		Device: &pbTypes.DeviceInput{
+			Identifier:  device.Identifier,
+			Os:          device.Os,
+			Brand:       device.Brand,
+			Tokens:      deviceTokens,
+			Preferences: devicePreferences,
+		},
+	}
+
+	// Make RPC call
+	resp, err := r.CustomerService.CheckCustomerEmail(ctx, request)
 	if err != nil {
 		return nil, err
 	}
 
-	// TODO: Temporal implementation, refactor to use correct RPC call when implemented
-	return &types.Response{
-		Success: resp.Success,
-		Code:    0,
-	}, nil
+	return &types.Response{Success: resp.Success, Code: int64(resp.Code)}, nil
 }
 
 func (r *mutationResolver) CheckCustomerData(ctx context.Context, customerData types.CheckCustomerDataInput) (*types.Response, error) {
-	msg := "Not implemented"
-	return &types.Response{
-		Message: &msg,
-	}, nil
+	_, err := emailvalidator.Validate(customerData.Email)
+	if err != nil {
+		r.logger.Info("invalid email supplied", zap.String("email", customerData.Email))
+		return nil, err
+	}
+
+	if err = datevalidator.ValidateDob(customerData.Dob); err != nil {
+		r.logger.Info("invalid Dob supplied", zap.String("Dob", customerData.Dob))
+		return nil, err
+	}
+
+	// Build request
+	request := &customer.CheckCustomerDataRequest{
+		Email:            customerData.Email,
+		FirstName:        customerData.FirstName,
+		LastName:         customerData.LastName,
+		Dob:              customerData.Dob,
+		AccountNumber:    customerData.AccountNumber,
+		SortCode:         customerData.SortCode,
+		DeviceIdentifier: customerData.DeviceIdentifier,
+	}
+
+	// Make RPC call to customer service
+	resp, err := r.CustomerService.CheckCustomerData(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.Response{Success: resp.Success, Code: int64(resp.Code)}, nil
 }
 
 func (r *mutationResolver) Register(ctx context.Context, customerDetails types.CustomerDetailsInput) (*types.Response, error) {
@@ -239,6 +291,7 @@ func (r *mutationResolver) Register(ctx context.Context, customerDetails types.C
 	}
 
 	customerReq := &customer.RegisterRequest{
+		Title:     r.helper.MapCustomerTitle(customerDetails.Title),
 		FirstName: customerDetails.FirstName,
 		LastName:  customerDetails.LastName,
 		Dob:       customerDetails.Dob,
@@ -378,6 +431,29 @@ func (r *mutationResolver) SetTransactionPassword(ctx context.Context, password 
 	}
 	// Execute RPC call
 	response, err := r.CustomerService.SetTransactionPassword(ctx, &request)
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.Response{
+		Success: response.Success,
+		Code:    int64(response.Code),
+	}, nil
+}
+
+func (r *mutationResolver) ForgotTransactionPassword(ctx context.Context, newTransactionPassword string) (*types.Response, error) {
+	// Get user claims
+	_, err := middlewares.GetClaimsFromCtx(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Build request
+	request := customer.ForgotTransactionPasswordRequest{
+		NewPassword: newTransactionPassword,
+	}
+	// Execute RPC call
+	response, err := r.CustomerService.ForgotTransactionPassword(ctx, &request)
 	if err != nil {
 		return nil, err
 	}
@@ -535,9 +611,25 @@ func (r *mutationResolver) SetDevicePreferences(ctx context.Context, preferences
 }
 
 func (r *mutationResolver) CheckBvn(ctx context.Context, bvn string, phone string) (*types.Response, error) {
-	msg := "Not implemented"
+	// Get user claims
+	_, err := middlewares.GetClaimsFromCtx(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Build request
+	request := customer.CheckBVNRequest{
+		Bvn:   bvn,
+		Phone: phone,
+	}
+	// Execute RPC call
+	response, err := r.CustomerService.CheckBVN(ctx, &request)
+	if err != nil {
+		return nil, err
+	}
 	return &types.Response{
-		Message: &msg,
+		Success: response.Success,
+		Code:    int64(response.Code),
 	}, nil
 }
 
@@ -572,31 +664,152 @@ func (r *mutationResolver) CreateVaultAccount(ctx context.Context, account types
 }
 
 func (r *mutationResolver) CreateBeneficiary(ctx context.Context, beneficiary types.BeneficiaryInput, transactionPassword string) (*types.Response, error) {
-	msg := "Not implemented"
+	// Authenticate user
+	_, err := middlewares.GetClaimsFromCtx(ctx)
+	if err != nil {
+		return nil, errorvalues.Format(errorvalues.InvalidAuthenticationError, err)
+	}
+	beneficiaryAccount := beneficiary.Account
+	if beneficiaryAccount == nil {
+		beneficiaryAccount = &types.BeneficiaryAccountInput{}
+	}
+	beneficaryAccountName := ""
+	if beneficiaryAccount.Name != nil {
+		beneficaryAccountName = *beneficiaryAccount.Name
+	}
+	req := payment.CreateBeneficiaryRequest{
+		TransactionPassword: transactionPassword,
+		Beneficiary: &payment.BeneficiaryInput{
+			Name: beneficiary.Name,
+			Account: &payment.BeneficiaryAccountInput{
+				Name:          beneficaryAccountName,
+				CurrencyId:    beneficiaryAccount.CurrencyID,
+				AccountNumber: beneficiaryAccount.AccountNumber,
+				Code:          beneficiaryAccount.Code,
+			},
+		},
+	}
+	_, err = r.PaymentService.CreateBeneficiary(ctx, &req)
+	if err != nil {
+		msg := err.Error()
+		return &types.Response{
+			Success: false,
+			Code:    int64(http.StatusInternalServerError),
+			Message: &msg,
+		}, err
+	}
+
 	return &types.Response{
-		Message: &msg,
+		Success: true,
+		Code:    int64(http.StatusOK),
 	}, nil
 }
 
 func (r *mutationResolver) AddBeneficiaryAccount(ctx context.Context, beneficiaryID string, account types.BeneficiaryAccountInput, transactionPassword string) (*types.Response, error) {
-	msg := "Not implemented"
+	// Authenticate user
+	_, err := middlewares.GetClaimsFromCtx(ctx)
+	if err != nil {
+		return nil, errorvalues.Format(errorvalues.InvalidAuthenticationError, err)
+	}
+	beneficaryAccountName := ""
+	if account.Name != nil {
+		beneficaryAccountName = *account.Name
+	}
+	req := payment.AddBeneficiaryAccountRequest{
+		BeneficiaryId:       beneficiaryID,
+		TransactionPassword: transactionPassword,
+		Account: &payment.BeneficiaryAccountInput{
+			Name:          beneficaryAccountName,
+			CurrencyId:    account.CurrencyID,
+			AccountNumber: account.AccountNumber,
+			Code:          account.Code,
+		},
+	}
+	_, err = r.PaymentService.AddBeneficiaryAccount(ctx, &req)
+	if err != nil {
+		msg := err.Error()
+		return &types.Response{
+			Success: false,
+			Code:    int64(http.StatusInternalServerError),
+			Message: &msg,
+		}, err
+	}
+
 	return &types.Response{
-		Message: &msg,
+		Success: true,
+		Code:    int64(http.StatusOK),
 	}, nil
 }
 
-func (r *mutationResolver) DeleteBeneficaryAccount(ctx context.Context, beneficiaryID string, accountID string, transactionPassword string) (*types.Response, error) {
-	msg := "Not implemented"
+func (r *mutationResolver) DeleteBeneficiaryAccount(ctx context.Context, beneficiaryID string, accountID string, transactionPassword string) (*types.Response, error) {
+	// Authenticate user
+	_, err := middlewares.GetClaimsFromCtx(ctx)
+	if err != nil {
+		return nil, errorvalues.Format(errorvalues.InvalidAuthenticationError, err)
+	}
+
+	req := payment.DeleteBeneficiaryAccountRequest{
+		BeneficiaryId:       beneficiaryID,
+		TransactionPassword: transactionPassword,
+		AccountId:           accountID,
+	}
+	_, err = r.PaymentService.DeleteBeneficiaryAccount(ctx, &req)
+	if err != nil {
+		msg := err.Error()
+		return &types.Response{
+			Success: false,
+			Code:    int64(http.StatusInternalServerError),
+			Message: &msg,
+		}, err
+	}
+
 	return &types.Response{
-		Message: &msg,
+		Success: true,
+		Code:    int64(http.StatusOK),
 	}, nil
 }
 
 func (r *mutationResolver) CreateTransfer(ctx context.Context, transfer types.TransactionInput, transactionPassword string) (*types.Response, error) {
-	msg := "Not implemented"
+	// Auhtenticate user
+	_, err := middlewares.GetClaimsFromCtx(ctx)
+	if err != nil {
+		return nil, errorvalues.Format(errorvalues.InvalidAuthenticationError, err)
+	}
+	request := payment.CreateTransferRequest{
+		Transfer: &payment.TransactionInput{
+			TransactionTypeId: transfer.TransactionTypeID,
+			FeeIds:            transfer.FeeIds,
+			Amount:            float32(transfer.Amount),
+			SourceAccountId:   transfer.SourceAccountID,
+			TargetAccountId:   transfer.TargetAccountID,
+			IdempotencyKey:    transfer.IdempotencyKey,
+		},
+		TransactionPassword: transactionPassword,
+	}
+	if transfer.Reference != nil {
+		request.Transfer.Reference = *transfer.Reference
+	}
+	if transfer.ExchangeRateID != nil {
+		request.Transfer.ExchangeRateId = *transfer.ExchangeRateID
+	}
+	resp, err := r.PaymentService.CreateTransfer(ctx, &request)
+	if err != nil {
+		msg := err.Error()
+		return &types.Response{
+			Success: false,
+			Code:    int64(http.StatusInternalServerError),
+			Message: &msg,
+		}, err
+	}
+
 	return &types.Response{
-		Message: &msg,
+		Success: resp.Success,
+		Code:    int64(resp.Code),
 	}, nil
+}
+
+func (r *mutationResolver) SendNotification(ctx context.Context, typeArg types.DeliveryMode, content string, templateID string) (*types.Response, error) {
+	panic(fmt.Errorf("not implemented"))
 }
 
 func (r *mutationResolver) RequestResubmit(ctx context.Context, customerID string, reportIds []string, message *string) (*types.Response, error) {
