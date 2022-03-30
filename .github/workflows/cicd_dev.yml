@@ -13,6 +13,7 @@ env:
   IMAGE: ms.api
   REGISTRY_HOSTNAME: eu.gcr.io/${{ secrets.PROJECT_SHARED }}
   VERSION: develop
+  GCP_PROJECT_NAME: "dev-roava-io"
 
 jobs:
   lint:
@@ -179,7 +180,9 @@ jobs:
           token: ${{ secrets.PAT }}
 
       - name: Replace image in config
-        run: 'sed -i -e "s/\${parameters.version}/${VERSION}/g" templates/${{github.event.repository.name}}.yaml'
+        run: |
+          sed -i -e "s/\${parameters.gcp_project_name}/${GCP_PROJECT_NAME}/g" templates/${{github.event.repository.name}}.yaml
+          sed -i -e "s/\${parameters.version}/${VERSION}/g" templates/${{github.event.repository.name}}.yaml
       
       - name: check change
         run: cat templates/${{github.event.repository.name}}.yaml
