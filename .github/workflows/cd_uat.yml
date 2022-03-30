@@ -11,6 +11,8 @@ env:
   ORG: roava.io/services
   IMAGE: ms.api
   REGISTRY_HOSTNAME: eu.gcr.io/${{ secrets.PROJECT_SHARED }}
+  GCP_PROJECT_NAME: "uat-roava-io"
+
 
 jobs:
   lint:
