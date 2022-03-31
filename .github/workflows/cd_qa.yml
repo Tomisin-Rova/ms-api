@@ -143,7 +143,7 @@ jobs:
           docker push "$REGISTRY_HOSTNAME"/"$CONTAINER":latest
   
   deploy:
-    name: Deploy to DEV
+    name: Deploy to QA
     runs-on: [self-hosted, linux, x64, dev]
     needs: [package]
 
