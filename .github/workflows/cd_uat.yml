@@ -167,7 +167,7 @@ jobs:
 
   deploy:
     name: Deploy to UAT
-    runs-on: [self-hosted, linux, x64, dev]
+    runs-on: [self-hosted, linux, x64, UAT]
     needs: [package]
 
     steps:
