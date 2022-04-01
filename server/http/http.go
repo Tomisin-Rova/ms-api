@@ -28,7 +28,7 @@ import (
 // A Websocket transport is already added when using the NewDefaultServer function.
 // So it's required to initialize the server by using almost the same implementation
 // but with a custom WebSocket transport.
-func NewCustomServer(es graphql.ExecutableSchema) *handler.Server {
+func NewCustomServer(es graphql.ExecutableSchema, secrets *config.Secrets) *handler.Server {
 	srv := handler.New(es)
 
 	// Configure WebSocket
@@ -52,7 +52,13 @@ func NewCustomServer(es graphql.ExecutableSchema) *handler.Server {
 
 	srv.SetQueryCache(lru.New(1000))
 
-	srv.Use(extension.Introspection{})
+	switch secrets.Service.Environment {
+	case config.LocalEnvironment, config.DevEnvironment, config.QAEnvironment:
+		srv.Use(extension.Introspection{})
+	default:
+		break
+	}
+
 	srv.Use(extension.AutomaticPersistedQuery{
 		Cache: lru.New(100),
 	})
@@ -92,7 +98,7 @@ func MountServer(secrets *config.Secrets, logger *zap.Logger) *chi.Mux {
 
 	resolvers := graph.NewResolver(opts, logger)
 	// API Server
-	server := NewCustomServer(generated.NewExecutableSchema(generated.Config{Resolvers: resolvers}))
+	server := NewCustomServer(generated.NewExecutableSchema(generated.Config{Resolvers: resolvers}), secrets)
 	server.SetErrorPresenter(func(ctx context.Context, e error) *gqlerror.Error {
 		err := graphql.DefaultErrorPresenter(ctx, e)
 		return serviceErrors.FormatGqlTError(e, err)
