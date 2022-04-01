@@ -399,6 +399,7 @@ type ComplexityRoot struct {
 		CreateBeneficiary         func(childComplexity int, beneficiary types.BeneficiaryInput, transactionPassword string) int
 		CreateTransfer            func(childComplexity int, transfer types.TransactionInput, transactionPassword string) int
 		CreateVaultAccount        func(childComplexity int, account types.VaultAccountInput, transactionPassword string) int
+		DeactivateCredential      func(childComplexity int, credentialType types.IdentityCredentialsTypes) int
 		DeleteBeneficiaryAccount  func(childComplexity int, beneficiaryID string, accountID string, transactionPassword string) int
 		ForgotTransactionPassword func(childComplexity int, newTransactionPassword string) int
 		Login                     func(childComplexity int, credentials types.AuthInput) int
@@ -686,6 +687,7 @@ type MutationResolver interface {
 	DeleteBeneficiaryAccount(ctx context.Context, beneficiaryID string, accountID string, transactionPassword string) (*types.Response, error)
 	CreateTransfer(ctx context.Context, transfer types.TransactionInput, transactionPassword string) (*types.Response, error)
 	SendNotification(ctx context.Context, typeArg types.DeliveryMode, content string, templateID string) (*types.Response, error)
+	DeactivateCredential(ctx context.Context, credentialType types.IdentityCredentialsTypes) (*types.Response, error)
 	RequestResubmit(ctx context.Context, customerID string, reportIds []string, message *string) (*types.Response, error)
 	StaffLogin(ctx context.Context, token string, authType types.AuthType) (*types.AuthResponse, error)
 	UpdateKYCStatus(ctx context.Context, id string, status types.KYCStatuses, message string) (*types.Response, error)
@@ -2341,6 +2343,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateVaultAccount(childComplexity, args["account"].(types.VaultAccountInput), args["transactionPassword"].(string)), true
 
+	case "Mutation.deactivateCredential":
+		if e.complexity.Mutation.DeactivateCredential == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deactivateCredential_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeactivateCredential(childComplexity, args["credentialType"].(types.IdentityCredentialsTypes)), true
+
 	case "Mutation.deleteBeneficiaryAccount":
 		if e.complexity.Mutation.DeleteBeneficiaryAccount == nil {
 			break
@@ -3921,6 +3935,8 @@ var sources = []*ast.Source{
     createTransfer(transfer: TransactionInput!, transactionPassword: String!): Response!
     # Send notification based on delivery mode specified
     sendNotification(type: DeliveryMode!, content: String!, templateId: String!): Response!
+    # Deactivate a credential
+    deactivateCredential(credentialType: IdentityCredentialsTypes!): Response!
 
     # ---- Dashboard -----
     # Ask for a customer to resubmit a report
@@ -4124,7 +4140,8 @@ enum DeliveryMode {
     EMAIL
     SMS
     PUSH
-}`, BuiltIn: false},
+}
+`, BuiltIn: false},
 	{Name: "graph/schemas/queries.graphql", Input: `type Query {
     # Check if there's a customer with the email given
     checkEmail(email: String!): Boolean!
@@ -5376,6 +5393,21 @@ func (ec *executionContext) field_Mutation_createVaultAccount_args(ctx context.C
 		}
 	}
 	args["transactionPassword"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_deactivateCredential_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 types.IdentityCredentialsTypes
+	if tmp, ok := rawArgs["credentialType"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("credentialType"))
+		arg0, err = ec.unmarshalNIdentityCredentialsTypes2msᚗapiᚋtypesᚐIdentityCredentialsTypes(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["credentialType"] = arg0
 	return args, nil
 }
 
@@ -15122,6 +15154,48 @@ func (ec *executionContext) _Mutation_sendNotification(ctx context.Context, fiel
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().SendNotification(rctx, args["type"].(types.DeliveryMode), args["content"].(string), args["templateId"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.Response)
+	fc.Result = res
+	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_deactivateCredential(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_deactivateCredential_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeactivateCredential(rctx, args["credentialType"].(types.IdentityCredentialsTypes))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -26261,6 +26335,16 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "sendNotification":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_sendNotification(ctx, field)
+			}
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, innerFunc)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "deactivateCredential":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_deactivateCredential(ctx, field)
 			}
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, innerFunc)

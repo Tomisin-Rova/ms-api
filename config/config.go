@@ -13,6 +13,7 @@ const (
 	ServiceName      = "api"
 	LocalEnvironment = "local"
 	DevEnvironment   = "dev"
+	QAEnvironment    = "qa"
 )
 
 // Ensure interface implementation
