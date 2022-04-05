@@ -29,6 +29,8 @@ type Helper interface {
 	MapCustomerTitle(val types.CustomerTitle) protoTypes.Customer_CustomerTitle
 	MapProtoCustomerTitle(val protoTypes.Customer_CustomerTitle) types.CustomerTitle
 	MakeExchangeRateFromProto(protoExchangeRate *protoTypes.ExchangeRate) *types.ExchangeRate
+	MapProtoCredentialTypes(val protoTypes.IdentityCredentials_IdentityCredentialsTypes) types.IdentityCredentialsTypes
+	MapCredentialTypes(val types.IdentityCredentialsTypes) protoTypes.IdentityCredentials_IdentityCredentialsTypes
 }
 
 type helpersfactory struct{}
@@ -1121,5 +1123,27 @@ func (h *helpersfactory) MakeExchangeRateFromProto(exchangeRate *protoTypes.Exch
 		},
 		BuyPrice:  float64(exchangeRate.BuyPrice),
 		SalePrice: float64(exchangeRate.SalePrice),
+	}
+}
+
+func (h *helpersfactory) MapProtoCredentialTypes(val protoTypes.IdentityCredentials_IdentityCredentialsTypes) types.IdentityCredentialsTypes {
+	switch val {
+	case protoTypes.IdentityCredentials_LOGIN:
+		return types.IdentityCredentialsTypesLogin
+	case protoTypes.IdentityCredentials_PIN:
+		return types.IdentityCredentialsTypesPin
+	default:
+		return ""
+	}
+}
+
+func (h *helpersfactory) MapCredentialTypes(val types.IdentityCredentialsTypes) protoTypes.IdentityCredentials_IdentityCredentialsTypes {
+	switch val {
+	case types.IdentityCredentialsTypesLogin:
+		return protoTypes.IdentityCredentials_LOGIN
+	case types.IdentityCredentialsTypesPin:
+		return protoTypes.IdentityCredentials_PIN
+	default:
+		return -1
 	}
 }
