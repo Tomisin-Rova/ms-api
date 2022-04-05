@@ -6,7 +6,6 @@ package graph
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 
 	"go.uber.org/zap"
@@ -836,7 +835,26 @@ func (r *mutationResolver) SendNotification(ctx context.Context, typeArg types.D
 }
 
 func (r *mutationResolver) DeactivateCredential(ctx context.Context, credentialType types.IdentityCredentialsTypes) (*types.Response, error) {
-	panic(fmt.Errorf("not implemented"))
+	// Get user claims
+	_, err := middlewares.GetClaimsFromCtx(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Build request
+	request := customer.DeactivateCredentialRequest{
+		CredentialType: r.helper.MapCredentialTypes(credentialType),
+	}
+
+	// Execute RPC call
+	response, err := r.CustomerService.DeactivateCredential(ctx, &request)
+	if err != nil {
+		return nil, err
+	}
+	return &types.Response{
+		Success: response.Success,
+		Code:    int64(response.Code),
+	}, nil
 }
 
 func (r *mutationResolver) RequestResubmit(ctx context.Context, customerID string, reportIds []string, message *string) (*types.Response, error) {
