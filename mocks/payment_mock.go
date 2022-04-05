@@ -117,6 +117,26 @@ func (mr *MockPaymentServiceClientMockRecorder) DeleteBeneficiaryAccount(ctx, in
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteBeneficiaryAccount", reflect.TypeOf((*MockPaymentServiceClient)(nil).DeleteBeneficiaryAccount), varargs...)
 }
 
+// GetBanks mocks base method.
+func (m *MockPaymentServiceClient) GetBanks(ctx context.Context, in *payment.GetBanksRequest, opts ...grpc.CallOption) (*payment.GetBanksResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetBanks", varargs...)
+	ret0, _ := ret[0].(*payment.GetBanksResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetBanks indicates an expected call of GetBanks.
+func (mr *MockPaymentServiceClientMockRecorder) GetBanks(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBanks", reflect.TypeOf((*MockPaymentServiceClient)(nil).GetBanks), varargs...)
+}
+
 // GetBeneficiaries mocks base method.
 func (m *MockPaymentServiceClient) GetBeneficiaries(ctx context.Context, in *payment.GetBeneficiariesRequest, opts ...grpc.CallOption) (*payment.GetBeneficiariesResponse, error) {
 	m.ctrl.T.Helper()
@@ -298,6 +318,21 @@ func (m *MockPaymentServiceServer) DeleteBeneficiaryAccount(arg0 context.Context
 func (mr *MockPaymentServiceServerMockRecorder) DeleteBeneficiaryAccount(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteBeneficiaryAccount", reflect.TypeOf((*MockPaymentServiceServer)(nil).DeleteBeneficiaryAccount), arg0, arg1)
+}
+
+// GetBanks mocks base method.
+func (m *MockPaymentServiceServer) GetBanks(arg0 context.Context, arg1 *payment.GetBanksRequest) (*payment.GetBanksResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetBanks", arg0, arg1)
+	ret0, _ := ret[0].(*payment.GetBanksResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetBanks indicates an expected call of GetBanks.
+func (mr *MockPaymentServiceServerMockRecorder) GetBanks(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBanks", reflect.TypeOf((*MockPaymentServiceServer)(nil).GetBanks), arg0, arg1)
 }
 
 // GetBeneficiaries mocks base method.
