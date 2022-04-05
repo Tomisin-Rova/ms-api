@@ -3018,3 +3018,115 @@ func TestMutationResolver_UpdateAMLStatus(t *testing.T) {
 		})
 	}
 }
+
+func TestMutationResolver_DeactivateCredential(t *testing.T) {
+	const (
+		successLogin = iota
+		successPin
+		errorUnauthenticated
+		errorDeactivatingCredential
+	)
+
+	var tests = []struct {
+		name     string
+		arg      types.IdentityCredentialsTypes
+		testType int
+	}{
+		{
+			name:     "Test success deactivate login password",
+			arg:      types.IdentityCredentialsTypesLogin,
+			testType: successLogin,
+		},
+		{
+			name:     "Test success deactivate transaction password",
+			arg:      types.IdentityCredentialsTypesPin,
+			testType: successPin,
+		},
+		{
+			name:     "Test error unauthenticated user",
+			arg:      types.IdentityCredentialsTypesLogin,
+			testType: errorUnauthenticated,
+		},
+		{
+			name:     "Test error deactivating credential",
+			arg:      types.IdentityCredentialsTypesLogin,
+			testType: errorDeactivatingCredential,
+		},
+	}
+
+	validCtx, err := middleware.PutClaimsOnContext(
+		context.Background(),
+		&models.JWTClaims{},
+	)
+	if err != nil {
+		assert.NoError(t, err)
+		t.Fail()
+	}
+
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
+	resolverOpts := &ResolverOpts{
+		CustomerService: customerServiceClient,
+	}
+
+	mockResponse := pbTypes.DefaultResponse{
+		Success: true,
+		Code:    http.StatusOK,
+	}
+
+	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			switch testCase.testType {
+			case successLogin:
+				request := customer.DeactivateCredentialRequest{
+					CredentialType: pbTypes.IdentityCredentials_LOGIN,
+				}
+
+				customerServiceClient.EXPECT().
+					DeactivateCredential(validCtx, &request).
+					Return(&mockResponse, nil)
+
+				resp, err := resolver.DeactivateCredential(validCtx, testCase.arg)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, true, resp.Success)
+				assert.Equal(t, int64(http.StatusOK), resp.Code)
+			case successPin:
+				request := customer.DeactivateCredentialRequest{
+					CredentialType: pbTypes.IdentityCredentials_PIN,
+				}
+
+				customerServiceClient.EXPECT().
+					DeactivateCredential(validCtx, &request).
+					Return(&mockResponse, nil)
+
+				resp, err := resolver.DeactivateCredential(validCtx, testCase.arg)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, true, resp.Success)
+				assert.Equal(t, int64(http.StatusOK), resp.Code)
+			case errorUnauthenticated:
+				resp, err := resolver.DeactivateCredential(context.Background(), testCase.arg)
+				assert.Error(t, err)
+				assert.IsType(t, &terror.Terror{}, err)
+				assert.Equal(t, errorvalues.InvalidAuthenticationError, err.(*terror.Terror).Code())
+				assert.Nil(t, resp)
+			case errorDeactivatingCredential:
+				request := customer.DeactivateCredentialRequest{
+					CredentialType: pbTypes.IdentityCredentials_LOGIN,
+				}
+
+				customerServiceClient.EXPECT().
+					DeactivateCredential(validCtx, &request).
+					Return(nil, errors.New(""))
+
+				resp, err := resolver.DeactivateCredential(validCtx, testCase.arg)
+				assert.Error(t, err)
+				assert.Nil(t, resp)
+			}
+		})
+	}
+}
