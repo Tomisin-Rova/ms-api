@@ -18,6 +18,7 @@ import (
 	"github.com/rs/cors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 	"go.uber.org/zap"
+
 	"ms.api/config"
 	"ms.api/graph"
 	"ms.api/graph/generated"
@@ -74,6 +75,11 @@ func MountServer(secrets *config.Secrets, logger *zap.Logger) *chi.Mux {
 		AllowCredentials: true,
 		Debug:            true,
 	}).Handler)
+	router.Use(middleware.SetHeader("Content-Security-Policy", "*"))
+	router.Use(middleware.SetHeader("X-XSS-Protection", "1"))
+	router.Use(middleware.SetHeader("X-Frame-Options", "DENY"))
+	router.Use(middleware.SetHeader("X-Content-Type-Options", "nosniff"))
+	router.Use(middleware.SetHeader("Cache-Control", "no-store"))
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.RequestID)
 	router.Use(middleware.Logger)
@@ -104,13 +110,7 @@ func MountServer(secrets *config.Secrets, logger *zap.Logger) *chi.Mux {
 		return serviceErrors.FormatGqlTError(e, err)
 	})
 
-	// Cors setup
-	corsSetup := cors.New(cors.Options{
-		AllowCredentials: true,
-		Debug:            false,
-	})
-
-	router.Handle("/graphql", corsSetup.Handler(server))
+	router.Handle("/graphql", server)
 
 	return router
 }
