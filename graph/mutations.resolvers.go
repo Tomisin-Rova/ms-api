@@ -657,9 +657,40 @@ func (r *mutationResolver) CreateAccount(ctx context.Context, account types.Acco
 }
 
 func (r *mutationResolver) CreateVaultAccount(ctx context.Context, account types.VaultAccountInput, transactionPassword string) (*types.Response, error) {
-	msg := "Not implemented"
+	// Authenticate user
+	_, err := middlewares.GetClaimsFromCtx(ctx)
+	if err != nil {
+		return nil, errorvalues.Format(errorvalues.InvalidAuthenticationError, err)
+	}
+
+	accountName := ""
+	if account.Name != nil {
+		accountName = *account.Name
+	}
+
+	req := accountPb.CreateVaultAccountRequest{
+		VaultAccountInput: &accountPb.VaultAccountInput{
+			ProductId:     account.ProductID,
+			SourceAccount: account.SourceAccount,
+			Amount:        float32(account.Amount),
+			Name:          accountName,
+		},
+		TransactionPassword: transactionPassword,
+	}
+
+	_, err = r.AccountService.CreateVaultAccount(ctx, &req)
+	if err != nil {
+		msg := err.Error()
+		return &types.Response{
+			Success: false,
+			Code:    int64(http.StatusInternalServerError),
+			Message: &msg,
+		}, err
+	}
+
 	return &types.Response{
-		Message: &msg,
+		Success: true,
+		Code:    int64(http.StatusOK),
 	}, nil
 }
 
