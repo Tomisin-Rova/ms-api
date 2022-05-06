@@ -3,18 +3,18 @@ module ms.api
 go 1.17
 
 require (
-	github.com/99designs/gqlgen v0.17.2
+	github.com/99designs/gqlgen v0.17.5
 	github.com/go-chi/chi v4.1.2+incompatible
 	github.com/golang/mock v1.6.0
-	github.com/gorilla/websocket v1.4.2
-	github.com/roava/zebra v0.0.0-20220404093425-c8ad16f25838
+	github.com/gorilla/websocket v1.5.0
+	github.com/roava/zebra v0.0.0-20220427132732-285f91d91acb
 	github.com/rs/cors v1.8.0
 	github.com/sirupsen/logrus v1.8.1
-	github.com/stretchr/testify v1.7.0
-	github.com/vektah/gqlparser/v2 v2.4.0
+	github.com/stretchr/testify v1.7.1
+	github.com/vektah/gqlparser/v2 v2.4.2
 	go.uber.org/zap v1.18.1
 	google.golang.org/grpc v1.39.1
-	google.golang.org/protobuf v1.27.1
+	google.golang.org/protobuf v1.28.0
 )
 
 require (
@@ -52,8 +52,8 @@ require (
 	github.com/jstemmer/go-junit-report v0.9.1 // indirect
 	github.com/kr/pretty v0.2.1 // indirect
 	github.com/magiconair/properties v1.8.5 // indirect
-	github.com/mattn/go-colorable v0.1.8 // indirect
-	github.com/mattn/go-isatty v0.0.13 // indirect
+	github.com/mattn/go-colorable v0.1.12 // indirect
+	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/mapstructure v1.4.1 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
@@ -75,15 +75,15 @@ require (
 	go.opencensus.io v0.23.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.7.0 // indirect
-	golang.org/x/crypto v0.0.0-20210711020723-a769d52b0f97 // indirect
+	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616 // indirect
-	golang.org/x/mod v0.5.1 // indirect
+	golang.org/x/mod v0.6.0-dev.0.20220106191415-9b9b3d81d5e3 // indirect
 	golang.org/x/net v0.0.0-20211015210444-4f30a5c0130f // indirect
 	golang.org/x/oauth2 v0.0.0-20210805134026-6f1e6394065a // indirect
 	golang.org/x/sys v0.0.0-20211019181941-9d821ace8654 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac // indirect
-	golang.org/x/tools v0.1.9 // indirect
+	golang.org/x/tools v0.1.10 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/api v0.52.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect

@@ -192,6 +192,26 @@ func (mr *MockCustomerServiceClientMockRecorder) CheckPhoneNumber(ctx, in interf
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckPhoneNumber", reflect.TypeOf((*MockCustomerServiceClient)(nil).CheckPhoneNumber), varargs...)
 }
 
+// CustomerDetailsUpdate mocks base method.
+func (m *MockCustomerServiceClient) CustomerDetailsUpdate(ctx context.Context, in *customer.CustomerDetailsUpdateRequest, opts ...grpc.CallOption) (*types.DefaultResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CustomerDetailsUpdate", varargs...)
+	ret0, _ := ret[0].(*types.DefaultResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CustomerDetailsUpdate indicates an expected call of CustomerDetailsUpdate.
+func (mr *MockCustomerServiceClientMockRecorder) CustomerDetailsUpdate(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CustomerDetailsUpdate", reflect.TypeOf((*MockCustomerServiceClient)(nil).CustomerDetailsUpdate), varargs...)
+}
+
 // DeactivateCredential mocks base method.
 func (m *MockCustomerServiceClient) DeactivateCredential(ctx context.Context, in *customer.DeactivateCredentialRequest, opts ...grpc.CallOption) (*types.DefaultResponse, error) {
 	m.ctrl.T.Helper()
@@ -663,6 +683,21 @@ func (m *MockCustomerServiceServer) CheckPhoneNumber(arg0 context.Context, arg1 
 func (mr *MockCustomerServiceServerMockRecorder) CheckPhoneNumber(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckPhoneNumber", reflect.TypeOf((*MockCustomerServiceServer)(nil).CheckPhoneNumber), arg0, arg1)
+}
+
+// CustomerDetailsUpdate mocks base method.
+func (m *MockCustomerServiceServer) CustomerDetailsUpdate(arg0 context.Context, arg1 *customer.CustomerDetailsUpdateRequest) (*types.DefaultResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CustomerDetailsUpdate", arg0, arg1)
+	ret0, _ := ret[0].(*types.DefaultResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CustomerDetailsUpdate indicates an expected call of CustomerDetailsUpdate.
+func (mr *MockCustomerServiceServerMockRecorder) CustomerDetailsUpdate(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CustomerDetailsUpdate", reflect.TypeOf((*MockCustomerServiceServer)(nil).CustomerDetailsUpdate), arg0, arg1)
 }
 
 // DeactivateCredential mocks base method.
