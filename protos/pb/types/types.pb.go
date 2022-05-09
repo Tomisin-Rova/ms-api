@@ -6416,6 +6416,93 @@ func (x *JWTClaims) GetDeviceId() string {
 	return ""
 }
 
+type Bank struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	BankCode      string                 `protobuf:"bytes,2,opt,name=bank_code,json=bankCode,proto3" json:"bank_code,omitempty"`
+	BankName      string                 `protobuf:"bytes,3,opt,name=bank_name,json=bankName,proto3" json:"bank_name,omitempty"`
+	BankShortName string                 `protobuf:"bytes,4,opt,name=bank_short_name,json=bankShortName,proto3" json:"bank_short_name,omitempty"`
+	Active        bool                   `protobuf:"varint,5,opt,name=active,proto3" json:"active,omitempty"`
+	Ts            *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=ts,proto3" json:"ts,omitempty"`
+}
+
+func (x *Bank) Reset() {
+	*x = Bank{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_types_proto_msgTypes[57]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Bank) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Bank) ProtoMessage() {}
+
+func (x *Bank) ProtoReflect() protoreflect.Message {
+	mi := &file_types_proto_msgTypes[57]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Bank.ProtoReflect.Descriptor instead.
+func (*Bank) Descriptor() ([]byte, []int) {
+	return file_types_proto_rawDescGZIP(), []int{57}
+}
+
+func (x *Bank) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *Bank) GetBankCode() string {
+	if x != nil {
+		return x.BankCode
+	}
+	return ""
+}
+
+func (x *Bank) GetBankName() string {
+	if x != nil {
+		return x.BankName
+	}
+	return ""
+}
+
+func (x *Bank) GetBankShortName() string {
+	if x != nil {
+		return x.BankShortName
+	}
+	return ""
+}
+
+func (x *Bank) GetActive() bool {
+	if x != nil {
+		return x.Active
+	}
+	return false
+}
+
+func (x *Bank) GetTs() *timestamppb.Timestamp {
+	if x != nil {
+		return x.Ts
+	}
+	return nil
+}
+
 var File_types_proto protoreflect.FileDescriptor
 
 var file_types_proto_rawDesc = []byte{
@@ -7361,9 +7448,21 @@ var file_types_proto_rawDesc = []byte{
 	0x63, 0x65, 0x5f, 0x69, 0x64, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x64, 0x65, 0x76,
 	0x69, 0x63, 0x65, 0x49, 0x64, 0x22, 0x24, 0x0a, 0x0a, 0x43, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x54,
 	0x79, 0x70, 0x65, 0x12, 0x07, 0x0a, 0x03, 0x41, 0x50, 0x50, 0x10, 0x00, 0x12, 0x0d, 0x0a, 0x09,
-	0x44, 0x41, 0x53, 0x48, 0x42, 0x4f, 0x41, 0x52, 0x44, 0x10, 0x01, 0x42, 0x18, 0x5a, 0x16, 0x6d,
-	0x73, 0x2e, 0x61, 0x70, 0x69, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x73, 0x2f, 0x70, 0x62, 0x2f,
-	0x74, 0x79, 0x70, 0x65, 0x73, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x44, 0x41, 0x53, 0x48, 0x42, 0x4f, 0x41, 0x52, 0x44, 0x10, 0x01, 0x22, 0xbc, 0x01, 0x0a, 0x04,
+	0x42, 0x61, 0x6e, 0x6b, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x02, 0x69, 0x64, 0x12, 0x1b, 0x0a, 0x09, 0x62, 0x61, 0x6e, 0x6b, 0x5f, 0x63, 0x6f, 0x64,
+	0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x62, 0x61, 0x6e, 0x6b, 0x43, 0x6f, 0x64,
+	0x65, 0x12, 0x1b, 0x0a, 0x09, 0x62, 0x61, 0x6e, 0x6b, 0x5f, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x03,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x62, 0x61, 0x6e, 0x6b, 0x4e, 0x61, 0x6d, 0x65, 0x12, 0x26,
+	0x0a, 0x0f, 0x62, 0x61, 0x6e, 0x6b, 0x5f, 0x73, 0x68, 0x6f, 0x72, 0x74, 0x5f, 0x6e, 0x61, 0x6d,
+	0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0d, 0x62, 0x61, 0x6e, 0x6b, 0x53, 0x68, 0x6f,
+	0x72, 0x74, 0x4e, 0x61, 0x6d, 0x65, 0x12, 0x16, 0x0a, 0x06, 0x61, 0x63, 0x74, 0x69, 0x76, 0x65,
+	0x18, 0x05, 0x20, 0x01, 0x28, 0x08, 0x52, 0x06, 0x61, 0x63, 0x74, 0x69, 0x76, 0x65, 0x12, 0x2a,
+	0x0a, 0x02, 0x74, 0x73, 0x18, 0x06, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f,
+	0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d,
+	0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x52, 0x02, 0x74, 0x73, 0x42, 0x18, 0x5a, 0x16, 0x6d, 0x73,
+	0x2e, 0x61, 0x70, 0x69, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x73, 0x2f, 0x70, 0x62, 0x2f, 0x74,
+	0x79, 0x70, 0x65, 0x73, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -7379,7 +7478,7 @@ func file_types_proto_rawDescGZIP() []byte {
 }
 
 var file_types_proto_enumTypes = make([]protoimpl.EnumInfo, 37)
-var file_types_proto_msgTypes = make([]protoimpl.MessageInfo, 57)
+var file_types_proto_msgTypes = make([]protoimpl.MessageInfo, 58)
 var file_types_proto_goTypes = []interface{}{
 	(Customer_CustomerStatuses)(0),                       // 0: types.Customer.CustomerStatuses
 	(Customer_CustomerTitle)(0),                          // 1: types.Customer.CustomerTitle
@@ -7475,15 +7574,16 @@ var file_types_proto_goTypes = []interface{}{
 	(*DevicePreferencesInput)(nil),                       // 91: types.DevicePreferencesInput
 	(*PaginationInfo)(nil),                               // 92: types.PaginationInfo
 	(*JWTClaims)(nil),                                    // 93: types.JWTClaims
-	(*timestamppb.Timestamp)(nil),                        // 94: google.protobuf.Timestamp
+	(*Bank)(nil),                                         // 94: types.Bank
+	(*timestamppb.Timestamp)(nil),                        // 95: google.protobuf.Timestamp
 }
 var file_types_proto_depIdxs = []int32{
 	40,  // 0: types.Customer.addresses:type_name -> types.Address
 	39,  // 1: types.Customer.phones:type_name -> types.Phone
 	38,  // 2: types.Customer.email:type_name -> types.Email
 	0,   // 3: types.Customer.status:type_name -> types.Customer.CustomerStatuses
-	94,  // 4: types.Customer.status_ts:type_name -> google.protobuf.Timestamp
-	94,  // 5: types.Customer.ts:type_name -> google.protobuf.Timestamp
+	95,  // 4: types.Customer.status_ts:type_name -> google.protobuf.Timestamp
+	95,  // 5: types.Customer.ts:type_name -> google.protobuf.Timestamp
 	1,   // 6: types.Customer.title:type_name -> types.Customer.CustomerTitle
 	86,  // 7: types.Address.country:type_name -> types.Country
 	41,  // 8: types.Address.coordinates:type_name -> types.Coordinates
@@ -7491,38 +7591,38 @@ var file_types_proto_depIdxs = []int32{
 	44,  // 10: types.Identity.organization:type_name -> types.Organization
 	43,  // 11: types.Identity.credentials:type_name -> types.IdentityCredentials
 	2,   // 12: types.Identity.status:type_name -> types.Identity.IdentityStatuses
-	94,  // 13: types.Identity.status_ts:type_name -> google.protobuf.Timestamp
-	94,  // 14: types.Identity.ts:type_name -> google.protobuf.Timestamp
+	95,  // 13: types.Identity.status_ts:type_name -> google.protobuf.Timestamp
+	95,  // 14: types.Identity.ts:type_name -> google.protobuf.Timestamp
 	3,   // 15: types.IdentityCredentials.type:type_name -> types.IdentityCredentials.IdentityCredentialsTypes
 	4,   // 16: types.IdentityCredentials.status:type_name -> types.IdentityCredentials.IdentityCredentialsStatuses
-	94,  // 17: types.IdentityCredentials.status_ts:type_name -> google.protobuf.Timestamp
-	94,  // 18: types.IdentityCredentials.ts:type_name -> google.protobuf.Timestamp
-	94,  // 19: types.IdentityCredentials.update_ts:type_name -> google.protobuf.Timestamp
+	95,  // 17: types.IdentityCredentials.status_ts:type_name -> google.protobuf.Timestamp
+	95,  // 18: types.IdentityCredentials.ts:type_name -> google.protobuf.Timestamp
+	95,  // 19: types.IdentityCredentials.update_ts:type_name -> google.protobuf.Timestamp
 	5,   // 20: types.Organization.status:type_name -> types.Organization.OrganizationStatuses
-	94,  // 21: types.Organization.status_ts:type_name -> google.protobuf.Timestamp
-	94,  // 22: types.Organization.ts:type_name -> google.protobuf.Timestamp
+	95,  // 21: types.Organization.status_ts:type_name -> google.protobuf.Timestamp
+	95,  // 22: types.Organization.ts:type_name -> google.protobuf.Timestamp
 	40,  // 23: types.Staff.addresses:type_name -> types.Address
 	39,  // 24: types.Staff.phones:type_name -> types.Phone
 	6,   // 25: types.Staff.status:type_name -> types.Staff.StaffStatuses
-	94,  // 26: types.Staff.status_ts:type_name -> google.protobuf.Timestamp
-	94,  // 27: types.Staff.ts:type_name -> google.protobuf.Timestamp
+	95,  // 26: types.Staff.status_ts:type_name -> google.protobuf.Timestamp
+	95,  // 27: types.Staff.ts:type_name -> google.protobuf.Timestamp
 	87,  // 28: types.Acceptance.content:type_name -> types.Content
 	37,  // 29: types.Acceptance.customer:type_name -> types.Customer
-	94,  // 30: types.Acceptance.ts:type_name -> google.protobuf.Timestamp
+	95,  // 30: types.Acceptance.ts:type_name -> google.protobuf.Timestamp
 	7,   // 31: types.Questionary.type:type_name -> types.Questionary.QuestionaryTypes
 	48,  // 32: types.Questionary.questions:type_name -> types.QuestionaryQuestion
 	8,   // 33: types.Questionary.status:type_name -> types.Questionary.QuestionaryStatuses
-	94,  // 34: types.Questionary.status_ts:type_name -> google.protobuf.Timestamp
-	94,  // 35: types.Questionary.ts:type_name -> google.protobuf.Timestamp
+	95,  // 34: types.Questionary.status_ts:type_name -> google.protobuf.Timestamp
+	95,  // 35: types.Questionary.ts:type_name -> google.protobuf.Timestamp
 	49,  // 36: types.QuestionaryQuestion.predefined_answers:type_name -> types.QuestionaryPredefinedAnswer
 	51,  // 37: types.QuestionaryAnswer.questions:type_name -> types.QuestionaryAnswerQuestion
-	94,  // 38: types.QuestionaryAnswer.ts:type_name -> google.protobuf.Timestamp
+	95,  // 38: types.QuestionaryAnswer.ts:type_name -> google.protobuf.Timestamp
 	37,  // 39: types.Device.customer:type_name -> types.Customer
 	54,  // 40: types.Device.tokens:type_name -> types.DeviceToken
 	53,  // 41: types.Device.preferences:type_name -> types.DevicePreferences
 	9,   // 42: types.Device.status:type_name -> types.Device.DeviceStatuses
-	94,  // 43: types.Device.status_ts:type_name -> google.protobuf.Timestamp
-	94,  // 44: types.Device.ts:type_name -> google.protobuf.Timestamp
+	95,  // 43: types.Device.status_ts:type_name -> google.protobuf.Timestamp
+	95,  // 44: types.Device.ts:type_name -> google.protobuf.Timestamp
 	10,  // 45: types.DevicePreferences.type:type_name -> types.DevicePreferences.DevicePreferencesTypes
 	11,  // 46: types.DeviceToken.type:type_name -> types.DeviceToken.DeviceTokenTypes
 	37,  // 47: types.Account.customer:type_name -> types.Customer
@@ -7531,56 +7631,56 @@ var file_types_proto_depIdxs = []int32{
 	57,  // 50: types.Account.mambu:type_name -> types.AccountMambu
 	56,  // 51: types.Account.fcmb:type_name -> types.AccountFCMB
 	12,  // 52: types.Account.status:type_name -> types.Account.AccountStatuses
-	94,  // 53: types.Account.status_ts:type_name -> google.protobuf.Timestamp
-	94,  // 54: types.Account.ts:type_name -> google.protobuf.Timestamp
+	95,  // 53: types.Account.status_ts:type_name -> google.protobuf.Timestamp
+	95,  // 54: types.Account.ts:type_name -> google.protobuf.Timestamp
 	13,  // 55: types.Product.type:type_name -> types.Product.ProductTypes
 	85,  // 56: types.Product.currency:type_name -> types.Currency
 	60,  // 57: types.Product.mambu:type_name -> types.ProductMambu
 	14,  // 58: types.Product.status:type_name -> types.Product.ProductStatuses
-	94,  // 59: types.Product.status_ts:type_name -> google.protobuf.Timestamp
-	94,  // 60: types.Product.ts:type_name -> google.protobuf.Timestamp
+	95,  // 59: types.Product.status_ts:type_name -> google.protobuf.Timestamp
+	95,  // 60: types.Product.ts:type_name -> google.protobuf.Timestamp
 	37,  // 61: types.CDD.customer:type_name -> types.Customer
 	62,  // 62: types.CDD.amls:type_name -> types.AML
 	63,  // 63: types.CDD.kycs:type_name -> types.KYC
 	66,  // 64: types.CDD.poas:type_name -> types.POA
 	15,  // 65: types.CDD.status:type_name -> types.CDD.CDDStatuses
-	94,  // 66: types.CDD.status_ts:type_name -> google.protobuf.Timestamp
-	94,  // 67: types.CDD.ts:type_name -> google.protobuf.Timestamp
+	95,  // 66: types.CDD.status_ts:type_name -> google.protobuf.Timestamp
+	95,  // 67: types.CDD.ts:type_name -> google.protobuf.Timestamp
 	44,  // 68: types.AML.organization:type_name -> types.Organization
 	68,  // 69: types.AML.actions:type_name -> types.AMLAction
 	16,  // 70: types.AML.status:type_name -> types.AML.AMLStatuses
-	94,  // 71: types.AML.status_ts:type_name -> google.protobuf.Timestamp
-	94,  // 72: types.AML.ts:type_name -> google.protobuf.Timestamp
+	95,  // 71: types.AML.status_ts:type_name -> google.protobuf.Timestamp
+	95,  // 72: types.AML.ts:type_name -> google.protobuf.Timestamp
 	44,  // 73: types.KYC.organization:type_name -> types.Organization
 	64,  // 74: types.KYC.reports:type_name -> types.Report
 	69,  // 75: types.KYC.actions:type_name -> types.KYCAction
 	17,  // 76: types.KYC.status:type_name -> types.KYC.KYCStatuses
-	94,  // 77: types.KYC.status_ts:type_name -> google.protobuf.Timestamp
-	94,  // 78: types.KYC.ts:type_name -> google.protobuf.Timestamp
+	95,  // 77: types.KYC.status_ts:type_name -> google.protobuf.Timestamp
+	95,  // 78: types.KYC.ts:type_name -> google.protobuf.Timestamp
 	18,  // 79: types.Report.type:type_name -> types.Report.ReportTypes
 	65,  // 80: types.Report.review:type_name -> types.Review
 	19,  // 81: types.Report.status:type_name -> types.Report.ReportStatuses
-	94,  // 82: types.Report.status_ts:type_name -> google.protobuf.Timestamp
-	94,  // 83: types.Report.ts:type_name -> google.protobuf.Timestamp
-	94,  // 84: types.Review.ts:type_name -> google.protobuf.Timestamp
+	95,  // 82: types.Report.status_ts:type_name -> google.protobuf.Timestamp
+	95,  // 83: types.Report.ts:type_name -> google.protobuf.Timestamp
+	95,  // 84: types.Review.ts:type_name -> google.protobuf.Timestamp
 	44,  // 85: types.POA.organization:type_name -> types.Organization
 	65,  // 86: types.POA.review:type_name -> types.Review
 	67,  // 87: types.POA.actions:type_name -> types.POAAction
 	20,  // 88: types.POA.status:type_name -> types.POA.POAStatuses
-	94,  // 89: types.POA.status_ts:type_name -> google.protobuf.Timestamp
-	94,  // 90: types.POA.ts:type_name -> google.protobuf.Timestamp
+	95,  // 89: types.POA.status_ts:type_name -> google.protobuf.Timestamp
+	95,  // 90: types.POA.ts:type_name -> google.protobuf.Timestamp
 	21,  // 91: types.POAAction.type:type_name -> types.POAAction.POAActionTypes
 	45,  // 92: types.POAAction.reporter:type_name -> types.Staff
 	22,  // 93: types.POAAction.target_status:type_name -> types.POAAction.POAStatuses
-	94,  // 94: types.POAAction.ts:type_name -> google.protobuf.Timestamp
+	95,  // 94: types.POAAction.ts:type_name -> google.protobuf.Timestamp
 	23,  // 95: types.AMLAction.type:type_name -> types.AMLAction.AMLActionTypes
 	45,  // 96: types.AMLAction.reporter:type_name -> types.Staff
 	24,  // 97: types.AMLAction.target_status:type_name -> types.AMLAction.AMLStatuses
-	94,  // 98: types.AMLAction.ts:type_name -> google.protobuf.Timestamp
+	95,  // 98: types.AMLAction.ts:type_name -> google.protobuf.Timestamp
 	25,  // 99: types.KYCAction.type:type_name -> types.KYCAction.KYCActionTypes
 	45,  // 100: types.KYCAction.reporter:type_name -> types.Staff
 	26,  // 101: types.KYCAction.target_status:type_name -> types.KYCAction.KYCStatuses
-	94,  // 102: types.KYCAction.ts:type_name -> google.protobuf.Timestamp
+	95,  // 102: types.KYCAction.ts:type_name -> google.protobuf.Timestamp
 	79,  // 103: types.Transaction.transaction_type:type_name -> types.TransactionType
 	73,  // 104: types.Transaction.fees:type_name -> types.TransactionFee
 	82,  // 105: types.Transaction.exchange_rate:type_name -> types.ExchangeRate
@@ -7588,8 +7688,8 @@ var file_types_proto_depIdxs = []int32{
 	71,  // 107: types.Transaction.target:type_name -> types.TransactionTarget
 	74,  // 108: types.Transaction.linked_transactions:type_name -> types.LinkedTransaction
 	27,  // 109: types.Transaction.status:type_name -> types.Transaction.TransactionStatuses
-	94,  // 110: types.Transaction.status_ts:type_name -> google.protobuf.Timestamp
-	94,  // 111: types.Transaction.ts:type_name -> google.protobuf.Timestamp
+	95,  // 110: types.Transaction.status_ts:type_name -> google.protobuf.Timestamp
+	95,  // 111: types.Transaction.ts:type_name -> google.protobuf.Timestamp
 	37,  // 112: types.TransactionTarget.customer:type_name -> types.Customer
 	83,  // 113: types.TransactionTarget.beneficiary:type_name -> types.Beneficiary
 	55,  // 114: types.TransactionTarget.account:type_name -> types.Account
@@ -7603,47 +7703,48 @@ var file_types_proto_depIdxs = []int32{
 	76,  // 122: types.LinkedTransaction.mambu:type_name -> types.LinkedTransactionMambu
 	75,  // 123: types.LinkedTransaction.fcmb:type_name -> types.LinkedTransactionFCMB
 	29,  // 124: types.LinkedTransaction.status:type_name -> types.LinkedTransaction.LinkedTransactionStatuses
-	94,  // 125: types.LinkedTransaction.status_ts:type_name -> google.protobuf.Timestamp
-	94,  // 126: types.LinkedTransaction.ts:type_name -> google.protobuf.Timestamp
+	95,  // 125: types.LinkedTransaction.status_ts:type_name -> google.protobuf.Timestamp
+	95,  // 126: types.LinkedTransaction.ts:type_name -> google.protobuf.Timestamp
 	55,  // 127: types.LinkedTransactionTarget.account:type_name -> types.Account
 	84,  // 128: types.LinkedTransactionTarget.beneficiaryAccount:type_name -> types.BeneficiaryAccount
 	37,  // 129: types.LinkedTransactionSource.customer:type_name -> types.Customer
 	55,  // 130: types.LinkedTransactionSource.account:type_name -> types.Account
 	30,  // 131: types.TransactionType.status:type_name -> types.TransactionType.TransactionTypeStatuses
-	94,  // 132: types.TransactionType.status_ts:type_name -> google.protobuf.Timestamp
-	94,  // 133: types.TransactionType.ts:type_name -> google.protobuf.Timestamp
+	95,  // 132: types.TransactionType.status_ts:type_name -> google.protobuf.Timestamp
+	95,  // 133: types.TransactionType.ts:type_name -> google.protobuf.Timestamp
 	79,  // 134: types.Fee.transaction_type:type_name -> types.TransactionType
 	31,  // 135: types.Fee.type:type_name -> types.Fee.FeeTypes
 	81,  // 136: types.Fee.boundaries:type_name -> types.FeeBoundaries
 	32,  // 137: types.Fee.status:type_name -> types.Fee.FeeStatuses
-	94,  // 138: types.Fee.status_ts:type_name -> google.protobuf.Timestamp
-	94,  // 139: types.Fee.ts:type_name -> google.protobuf.Timestamp
+	95,  // 138: types.Fee.status_ts:type_name -> google.protobuf.Timestamp
+	95,  // 139: types.Fee.ts:type_name -> google.protobuf.Timestamp
 	85,  // 140: types.ExchangeRate.base_currency:type_name -> types.Currency
 	85,  // 141: types.ExchangeRate.target_currency:type_name -> types.Currency
-	94,  // 142: types.ExchangeRate.ts:type_name -> google.protobuf.Timestamp
+	95,  // 142: types.ExchangeRate.ts:type_name -> google.protobuf.Timestamp
 	37,  // 143: types.Beneficiary.customer:type_name -> types.Customer
 	84,  // 144: types.Beneficiary.accounts:type_name -> types.BeneficiaryAccount
 	33,  // 145: types.Beneficiary.status:type_name -> types.Beneficiary.BeneficiaryStatuses
-	94,  // 146: types.Beneficiary.status_ts:type_name -> google.protobuf.Timestamp
-	94,  // 147: types.Beneficiary.ts:type_name -> google.protobuf.Timestamp
+	95,  // 146: types.Beneficiary.status_ts:type_name -> google.protobuf.Timestamp
+	95,  // 147: types.Beneficiary.ts:type_name -> google.protobuf.Timestamp
 	83,  // 148: types.BeneficiaryAccount.beneficiary:type_name -> types.Beneficiary
 	55,  // 149: types.BeneficiaryAccount.account:type_name -> types.Account
 	85,  // 150: types.BeneficiaryAccount.currency:type_name -> types.Currency
 	34,  // 151: types.BeneficiaryAccount.status:type_name -> types.BeneficiaryAccount.BeneficiaryAccountStatuses
-	94,  // 152: types.BeneficiaryAccount.status_ts:type_name -> google.protobuf.Timestamp
-	94,  // 153: types.BeneficiaryAccount.ts:type_name -> google.protobuf.Timestamp
+	95,  // 152: types.BeneficiaryAccount.status_ts:type_name -> google.protobuf.Timestamp
+	95,  // 153: types.BeneficiaryAccount.ts:type_name -> google.protobuf.Timestamp
 	35,  // 154: types.Content.type:type_name -> types.Content.ContentType
-	94,  // 155: types.Content.ts:type_name -> google.protobuf.Timestamp
+	95,  // 155: types.Content.ts:type_name -> google.protobuf.Timestamp
 	90,  // 156: types.DeviceInput.tokens:type_name -> types.DeviceTokenInput
 	91,  // 157: types.DeviceInput.preferences:type_name -> types.DevicePreferencesInput
 	11,  // 158: types.DeviceTokenInput.type:type_name -> types.DeviceToken.DeviceTokenTypes
 	10,  // 159: types.DevicePreferencesInput.type:type_name -> types.DevicePreferences.DevicePreferencesTypes
 	36,  // 160: types.JWTClaims.clientType:type_name -> types.JWTClaims.ClientType
-	161, // [161:161] is the sub-list for method output_type
-	161, // [161:161] is the sub-list for method input_type
-	161, // [161:161] is the sub-list for extension type_name
-	161, // [161:161] is the sub-list for extension extendee
-	0,   // [0:161] is the sub-list for field type_name
+	95,  // 161: types.Bank.ts:type_name -> google.protobuf.Timestamp
+	162, // [162:162] is the sub-list for method output_type
+	162, // [162:162] is the sub-list for method input_type
+	162, // [162:162] is the sub-list for extension type_name
+	162, // [162:162] is the sub-list for extension extendee
+	0,   // [0:162] is the sub-list for field type_name
 }
 
 func init() { file_types_proto_init() }
@@ -8336,6 +8437,18 @@ func file_types_proto_init() {
 				return nil
 			}
 		}
+		file_types_proto_msgTypes[57].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Bank); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -8343,7 +8456,7 @@ func file_types_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_types_proto_rawDesc,
 			NumEnums:      37,
-			NumMessages:   57,
+			NumMessages:   58,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

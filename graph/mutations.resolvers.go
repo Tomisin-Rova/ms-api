@@ -256,6 +256,10 @@ func (r *mutationResolver) CheckCustomerData(ctx context.Context, customerData t
 	return &types.Response{Success: resp.Success, Code: int64(resp.Code)}, nil
 }
 
+func (r *mutationResolver) UpdateCustomerDetails(ctx context.Context, customerDetails types.CustomerDetailsUpdateInput, transactionPassword string) (*types.Response, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
 func (r *mutationResolver) Register(ctx context.Context, customerDetails types.CustomerDetailsInput) (*types.Response, error) {
 	var responseMessage string
 	_, err := middlewares.GetClaimsFromCtx(ctx)
@@ -705,6 +709,10 @@ func (r *mutationResolver) CreateBeneficiary(ctx context.Context, beneficiary ty
 	}, nil
 }
 
+func (r *mutationResolver) CreateBeneficiariesByPhone(ctx context.Context, beneficiaries []*types.BeneficiaryByPhoneInput, transactionPassword string) (*types.Response, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
 func (r *mutationResolver) AddBeneficiaryAccount(ctx context.Context, beneficiaryID string, account types.BeneficiaryAccountInput, transactionPassword string) (*types.Response, error) {
 	// Authenticate user
 	_, err := middlewares.GetClaimsFromCtx(ctx)
@@ -809,6 +817,10 @@ func (r *mutationResolver) CreateTransfer(ctx context.Context, transfer types.Tr
 }
 
 func (r *mutationResolver) SendNotification(ctx context.Context, typeArg types.DeliveryMode, content string, templateID string) (*types.Response, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *mutationResolver) DeactivateCredential(ctx context.Context, credentialType types.IdentityCredentialsTypes) (*types.Response, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 

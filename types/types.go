@@ -181,6 +181,11 @@ type BeneficiaryAccountInput struct {
 	Code          string  `json:"code"`
 }
 
+type BeneficiaryByPhoneInput struct {
+	Phone string `json:"phone"`
+	Name  string `json:"name"`
+}
+
 type BeneficiaryConnection struct {
 	Nodes      []*Beneficiary `json:"nodes"`
 	PageInfo   *PageInfo      `json:"pageInfo"`
@@ -308,6 +313,14 @@ type CustomerDetailsInput struct {
 	FirstName string        `json:"firstName"`
 	LastName  string        `json:"lastName"`
 	Dob       string        `json:"dob"`
+	Address   *AddressInput `json:"address"`
+}
+
+type CustomerDetailsUpdateInput struct {
+	FirstName *string       `json:"firstName"`
+	LastName  *string       `json:"lastName"`
+	Phone     *string       `json:"phone"`
+	Email     *string       `json:"email"`
 	Address   *AddressInput `json:"address"`
 }
 
