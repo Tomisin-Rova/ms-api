@@ -6,8 +6,8 @@ require (
 	github.com/99designs/gqlgen v0.17.5
 	github.com/go-chi/chi v4.1.2+incompatible
 	github.com/golang/mock v1.6.0
-	github.com/gorilla/websocket v1.5.0
-	github.com/roava/zebra v0.0.0-20220502190040-13c8c134c269
+	github.com/gorilla/websocket v1.4.2
+	github.com/roava/zebra v0.0.0-20220404093425-c8ad16f25838
 	github.com/rs/cors v1.8.0
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.1

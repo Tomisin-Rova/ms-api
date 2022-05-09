@@ -18,6 +18,7 @@ import (
 	"github.com/rs/cors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 	"go.uber.org/zap"
+
 	"ms.api/config"
 	"ms.api/graph"
 	"ms.api/graph/generated"
@@ -28,7 +29,7 @@ import (
 // A Websocket transport is already added when using the NewDefaultServer function.
 // So it's required to initialize the server by using almost the same implementation
 // but with a custom WebSocket transport.
-func NewCustomServer(es graphql.ExecutableSchema) *handler.Server {
+func NewCustomServer(es graphql.ExecutableSchema, secrets *config.Secrets) *handler.Server {
 	srv := handler.New(es)
 
 	// Configure WebSocket
@@ -52,7 +53,13 @@ func NewCustomServer(es graphql.ExecutableSchema) *handler.Server {
 
 	srv.SetQueryCache(lru.New(1000))
 
-	srv.Use(extension.Introspection{})
+	switch secrets.Service.Environment {
+	case config.LocalEnvironment, config.DevEnvironment, config.QAEnvironment:
+		srv.Use(extension.Introspection{})
+	default:
+		break
+	}
+
 	srv.Use(extension.AutomaticPersistedQuery{
 		Cache: lru.New(100),
 	})
@@ -68,6 +75,11 @@ func MountServer(secrets *config.Secrets, logger *zap.Logger) *chi.Mux {
 		AllowCredentials: true,
 		Debug:            true,
 	}).Handler)
+	router.Use(middleware.SetHeader("Content-Security-Policy", "*"))
+	router.Use(middleware.SetHeader("X-XSS-Protection", "1"))
+	router.Use(middleware.SetHeader("X-Frame-Options", "DENY"))
+	router.Use(middleware.SetHeader("X-Content-Type-Options", "nosniff"))
+	router.Use(middleware.SetHeader("Cache-Control", "no-store"))
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.RequestID)
 	router.Use(middleware.Logger)
@@ -92,19 +104,13 @@ func MountServer(secrets *config.Secrets, logger *zap.Logger) *chi.Mux {
 
 	resolvers := graph.NewResolver(opts, logger)
 	// API Server
-	server := NewCustomServer(generated.NewExecutableSchema(generated.Config{Resolvers: resolvers}))
+	server := NewCustomServer(generated.NewExecutableSchema(generated.Config{Resolvers: resolvers}), secrets)
 	server.SetErrorPresenter(func(ctx context.Context, e error) *gqlerror.Error {
 		err := graphql.DefaultErrorPresenter(ctx, e)
 		return serviceErrors.FormatGqlTError(e, err)
 	})
 
-	// Cors setup
-	corsSetup := cors.New(cors.Options{
-		AllowCredentials: true,
-		Debug:            false,
-	})
-
-	router.Handle("/graphql", corsSetup.Handler(server))
+	router.Handle("/graphql", server)
 
 	return router
 }

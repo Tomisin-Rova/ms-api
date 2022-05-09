@@ -2014,22 +2014,442 @@ func Test_queryResolver_Products(t *testing.T) {
 }
 
 func Test_queryResolver_Banks(t *testing.T) {
-	controller := gomock.NewController(t)
-	defer controller.Finish()
-	customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
-	resolverOpts := &ResolverOpts{
-		CustomerService: customerServiceClient,
+	const (
+		success = iota
+		successFirst
+		successAfter
+		successLast
+		successBefore
+		errorGetBanks
+	)
+
+	var number = int64(5)
+	var stringArg = "someString"
+
+	type arg struct {
+		ctx    context.Context
+		first  *int64
+		after  *string
+		last   *int64
+		before *string
 	}
-	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Query()
-	first := int64(10)
-	after := "after"
-	last := int64(10)
-	before := "before"
+	var tests = []struct {
+		name     string
+		arg      arg
+		testType int
+	}{
+		{
+			name: "Test success",
+			arg: arg{
+				ctx: context.Background(),
+			},
+			testType: success,
+		},
+		{
+			name: "Test success first arg",
+			arg: arg{
+				ctx:   context.Background(),
+				first: &number,
+			},
+			testType: successFirst,
+		},
+		{
+			name: "Test success after arg",
+			arg: arg{
+				ctx:   context.Background(),
+				after: &stringArg,
+			},
+			testType: successAfter,
+		},
+		{
+			name: "Test success last arg",
+			arg: arg{
+				ctx:  context.Background(),
+				last: &number,
+			},
+			testType: successLast,
+		},
+		{
+			name: "Test success before arg",
+			arg: arg{
+				ctx:    context.Background(),
+				before: &stringArg,
+			},
+			testType: successBefore,
+		},
+		{
+			name: "Test error getting banks",
+			arg: arg{
+				ctx: context.Background(),
+			},
+			testType: errorGetBanks,
+		},
+	}
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			controller := gomock.NewController(t)
+			defer controller.Finish()
+			paymentServiceClient := mocks.NewMockPaymentServiceClient(controller)
+			resolverOpts := &ResolverOpts{
+				PaymentService: paymentServiceClient,
+			}
+			resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Query()
 
-	resp, err := resolver.Banks(context.Background(), &first, &after, &last, &before)
+			switch testCase.testType {
+			case success:
+				paymentServiceClient.EXPECT().GetBanks(testCase.arg.ctx, &payment.GetBanksRequest{}).
+					Return(&payment.GetBanksResponse{
+						Nodes: []*pbTypes.Bank{
+							{
+								Id:            "1",
+								BankCode:      "000012",
+								BankName:      "Access Bank Plc",
+								BankShortName: "ACC",
+								Active:        true,
+								Ts:            nil,
+							},
+							{
+								Id:            "2",
+								BankCode:      "000013",
+								BankName:      "Kuda Bank Plc",
+								BankShortName: "ACC",
+								Active:        true,
+								Ts:            nil,
+							},
+						},
+						PaginationInfo: &pbTypes.PaginationInfo{
+							HasNextPage:     false,
+							HasPreviousPage: false,
+							StartCursor:     "",
+							EndCursor:       "",
+						},
+						TotalCount: 2,
+					}, nil)
 
-	assert.NoError(t, err)
-	assert.NotNil(t, resp)
+				response, err := resolver.Banks(testCase.arg.ctx, testCase.arg.first, testCase.arg.after,
+					testCase.arg.last, testCase.arg.before)
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+				assert.Equal(t, &types.BankConnection{
+					Nodes: []*types.Bank{
+						{
+							ID:            "1",
+							BankCode:      "000012",
+							BankName:      "Access Bank Plc",
+							BankShortName: "ACC",
+							Active:        true,
+							Ts:            0,
+						},
+						{
+							ID:            "2",
+							BankCode:      "000013",
+							BankName:      "Kuda Bank Plc",
+							BankShortName: "ACC",
+							Active:        true,
+							Ts:            0,
+						},
+					},
+					PageInfo: &types.PageInfo{
+						HasNextPage:     false,
+						HasPreviousPage: false,
+						StartCursor: func() *string {
+							s := ""
+							return &s
+						}(),
+						EndCursor: func() *string {
+							s := ""
+							return &s
+						}(),
+					},
+					TotalCount: 2,
+				}, response)
+			case successFirst:
+				paymentServiceClient.EXPECT().GetBanks(testCase.arg.ctx, &payment.GetBanksRequest{
+					First: int32(number),
+				}).
+					Return(&payment.GetBanksResponse{
+						Nodes: []*pbTypes.Bank{
+							{
+								Id:            "1",
+								BankCode:      "000012",
+								BankName:      "Access Bank Plc",
+								BankShortName: "ACC",
+								Active:        true,
+								Ts:            nil,
+							},
+							{
+								Id:            "2",
+								BankCode:      "000013",
+								BankName:      "Kuda Bank Plc",
+								BankShortName: "ACC",
+								Active:        true,
+								Ts:            nil,
+							},
+						},
+						PaginationInfo: &pbTypes.PaginationInfo{
+							HasNextPage:     false,
+							HasPreviousPage: false,
+							StartCursor:     "",
+							EndCursor:       "",
+						},
+						TotalCount: 2,
+					}, nil)
+
+				response, err := resolver.Banks(testCase.arg.ctx, testCase.arg.first, testCase.arg.after,
+					testCase.arg.last, testCase.arg.before)
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+				assert.Equal(t, &types.BankConnection{
+					Nodes: []*types.Bank{
+						{
+							ID:            "1",
+							BankCode:      "000012",
+							BankName:      "Access Bank Plc",
+							BankShortName: "ACC",
+							Active:        true,
+							Ts:            0,
+						},
+						{
+							ID:            "2",
+							BankCode:      "000013",
+							BankName:      "Kuda Bank Plc",
+							BankShortName: "ACC",
+							Active:        true,
+							Ts:            0,
+						},
+					},
+					PageInfo: &types.PageInfo{
+						HasNextPage:     false,
+						HasPreviousPage: false,
+						StartCursor: func() *string {
+							s := ""
+							return &s
+						}(),
+						EndCursor: func() *string {
+							s := ""
+							return &s
+						}(),
+					},
+					TotalCount: 2,
+				}, response)
+			case successAfter:
+				paymentServiceClient.EXPECT().GetBanks(testCase.arg.ctx, &payment.GetBanksRequest{
+					After: stringArg,
+				}).
+					Return(&payment.GetBanksResponse{
+						Nodes: []*pbTypes.Bank{
+							{
+								Id:            "1",
+								BankCode:      "000012",
+								BankName:      "Access Bank Plc",
+								BankShortName: "ACC",
+								Active:        true,
+								Ts:            nil,
+							},
+							{
+								Id:            "2",
+								BankCode:      "000013",
+								BankName:      "Kuda Bank Plc",
+								BankShortName: "ACC",
+								Active:        true,
+								Ts:            nil,
+							},
+						},
+						PaginationInfo: &pbTypes.PaginationInfo{
+							HasNextPage:     false,
+							HasPreviousPage: false,
+							StartCursor:     "",
+							EndCursor:       "",
+						},
+						TotalCount: 2,
+					}, nil)
+
+				response, err := resolver.Banks(testCase.arg.ctx, testCase.arg.first, testCase.arg.after,
+					testCase.arg.last, testCase.arg.before)
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+				assert.Equal(t, &types.BankConnection{
+					Nodes: []*types.Bank{
+						{
+							ID:            "1",
+							BankCode:      "000012",
+							BankName:      "Access Bank Plc",
+							BankShortName: "ACC",
+							Active:        true,
+							Ts:            0,
+						},
+						{
+							ID:            "2",
+							BankCode:      "000013",
+							BankName:      "Kuda Bank Plc",
+							BankShortName: "ACC",
+							Active:        true,
+							Ts:            0,
+						},
+					},
+					PageInfo: &types.PageInfo{
+						HasNextPage:     false,
+						HasPreviousPage: false,
+						StartCursor: func() *string {
+							s := ""
+							return &s
+						}(),
+						EndCursor: func() *string {
+							s := ""
+							return &s
+						}(),
+					},
+					TotalCount: 2,
+				}, response)
+			case successLast:
+				paymentServiceClient.EXPECT().GetBanks(testCase.arg.ctx, &payment.GetBanksRequest{
+					Last: int32(number),
+				}).
+					Return(&payment.GetBanksResponse{
+						Nodes: []*pbTypes.Bank{
+							{
+								Id:            "1",
+								BankCode:      "000012",
+								BankName:      "Access Bank Plc",
+								BankShortName: "ACC",
+								Active:        true,
+								Ts:            nil,
+							},
+							{
+								Id:            "2",
+								BankCode:      "000013",
+								BankName:      "Kuda Bank Plc",
+								BankShortName: "ACC",
+								Active:        true,
+								Ts:            nil,
+							},
+						},
+						PaginationInfo: &pbTypes.PaginationInfo{
+							HasNextPage:     false,
+							HasPreviousPage: false,
+							StartCursor:     "",
+							EndCursor:       "",
+						},
+						TotalCount: 2,
+					}, nil)
+
+				response, err := resolver.Banks(testCase.arg.ctx, testCase.arg.first, testCase.arg.after,
+					testCase.arg.last, testCase.arg.before)
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+				assert.Equal(t, &types.BankConnection{
+					Nodes: []*types.Bank{
+						{
+							ID:            "1",
+							BankCode:      "000012",
+							BankName:      "Access Bank Plc",
+							BankShortName: "ACC",
+							Active:        true,
+							Ts:            0,
+						},
+						{
+							ID:            "2",
+							BankCode:      "000013",
+							BankName:      "Kuda Bank Plc",
+							BankShortName: "ACC",
+							Active:        true,
+							Ts:            0,
+						},
+					},
+					PageInfo: &types.PageInfo{
+						HasNextPage:     false,
+						HasPreviousPage: false,
+						StartCursor: func() *string {
+							s := ""
+							return &s
+						}(),
+						EndCursor: func() *string {
+							s := ""
+							return &s
+						}(),
+					},
+					TotalCount: 2,
+				}, response)
+			case successBefore:
+				paymentServiceClient.EXPECT().GetBanks(testCase.arg.ctx, &payment.GetBanksRequest{
+					Before: stringArg,
+				}).
+					Return(&payment.GetBanksResponse{
+						Nodes: []*pbTypes.Bank{
+							{
+								Id:            "1",
+								BankCode:      "000012",
+								BankName:      "Access Bank Plc",
+								BankShortName: "ACC",
+								Active:        true,
+								Ts:            nil,
+							},
+							{
+								Id:            "2",
+								BankCode:      "000013",
+								BankName:      "Kuda Bank Plc",
+								BankShortName: "ACC",
+								Active:        true,
+								Ts:            nil,
+							},
+						},
+						PaginationInfo: &pbTypes.PaginationInfo{
+							HasNextPage:     false,
+							HasPreviousPage: false,
+							StartCursor:     "",
+							EndCursor:       "",
+						},
+						TotalCount: 2,
+					}, nil)
+
+				response, err := resolver.Banks(testCase.arg.ctx, testCase.arg.first, testCase.arg.after,
+					testCase.arg.last, testCase.arg.before)
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+				assert.Equal(t, &types.BankConnection{
+					Nodes: []*types.Bank{
+						{
+							ID:            "1",
+							BankCode:      "000012",
+							BankName:      "Access Bank Plc",
+							BankShortName: "ACC",
+							Active:        true,
+							Ts:            0,
+						},
+						{
+							ID:            "2",
+							BankCode:      "000013",
+							BankName:      "Kuda Bank Plc",
+							BankShortName: "ACC",
+							Active:        true,
+							Ts:            0,
+						},
+					},
+					PageInfo: &types.PageInfo{
+						HasNextPage:     false,
+						HasPreviousPage: false,
+						StartCursor: func() *string {
+							s := ""
+							return &s
+						}(),
+						EndCursor: func() *string {
+							s := ""
+							return &s
+						}(),
+					},
+					TotalCount: 2,
+				}, response)
+			case errorGetBanks:
+				paymentServiceClient.EXPECT().GetBanks(testCase.arg.ctx, &payment.GetBanksRequest{}).
+					Return(nil, errors.New(""))
+
+				response, err := resolver.Banks(testCase.arg.ctx, testCase.arg.first, testCase.arg.after,
+					testCase.arg.last, testCase.arg.before)
+				assert.Error(t, err)
+				assert.Nil(t, response)
+			}
+		})
+	}
 }
 
 func Test_queryResolver_Account(t *testing.T) {

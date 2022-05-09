@@ -58,6 +58,7 @@ gen-mocks: proto
 	mockgen -source=./protos/pb/auth/auth.pb.go -destination=./mocks/auth_mock.go -package=mocks
 	mockgen -source=./protos/pb/customer/customer.pb.go -destination=./mocks/customer_mock.go -package=mocks
 	mockgen -source=./protos/pb/onboarding/onboarding.pb.go -destination=./mocks/onboarding_mock.go -package=mocks
+	mockgen -source=./protos/pb/messaging/messaging.pb.go -destination=./mocks/messaging_mock.go -package=mocks
 	mockgen -source=./protos/pb/payment/payment.pb.go -destination=./mocks/payment_mock.go -package=mocks
 	mockgen -source=./protos/pb/pricing/pricing.pb.go -destination=./mocks/pricing_mock.go -package=mocks
 	mockgen -source=./protos/pb/verification/verification.pb.go -destination=./mocks/verification_mock.go -package=mocks
@@ -88,7 +89,7 @@ tools:
 lint:
 	@hash golangci-lint > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		export BINARY="golangci-lint"; \
-		curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(GOPATH)/bin v1.31.0; \
+		curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOPATH)/bin v1.45.2; \
 	fi
 	golangci-lint run --timeout 5m
 

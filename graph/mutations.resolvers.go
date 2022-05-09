@@ -6,7 +6,6 @@ package graph
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 
 	"go.uber.org/zap"
@@ -19,6 +18,7 @@ import (
 	accountPb "ms.api/protos/pb/account"
 	"ms.api/protos/pb/auth"
 	"ms.api/protos/pb/customer"
+	"ms.api/protos/pb/messaging"
 	"ms.api/protos/pb/onboarding"
 	"ms.api/protos/pb/payment"
 	pbTypes "ms.api/protos/pb/types"
@@ -661,9 +661,40 @@ func (r *mutationResolver) CreateAccount(ctx context.Context, account types.Acco
 }
 
 func (r *mutationResolver) CreateVaultAccount(ctx context.Context, account types.VaultAccountInput, transactionPassword string) (*types.Response, error) {
-	msg := "Not implemented"
+	// Authenticate user
+	_, err := middlewares.GetClaimsFromCtx(ctx)
+	if err != nil {
+		return nil, errorvalues.Format(errorvalues.InvalidAuthenticationError, err)
+	}
+
+	accountName := ""
+	if account.Name != nil {
+		accountName = *account.Name
+	}
+
+	req := accountPb.CreateVaultAccountRequest{
+		VaultAccountInput: &accountPb.VaultAccountInput{
+			ProductId:     account.ProductID,
+			SourceAccount: account.SourceAccount,
+			Amount:        float32(account.Amount),
+			Name:          accountName,
+		},
+		TransactionPassword: transactionPassword,
+	}
+
+	_, err = r.AccountService.CreateVaultAccount(ctx, &req)
+	if err != nil {
+		msg := err.Error()
+		return &types.Response{
+			Success: false,
+			Code:    int64(http.StatusInternalServerError),
+			Message: &msg,
+		}, err
+	}
+
 	return &types.Response{
-		Message: &msg,
+		Success: true,
+		Code:    int64(http.StatusOK),
 	}, nil
 }
 
@@ -817,7 +848,52 @@ func (r *mutationResolver) CreateTransfer(ctx context.Context, transfer types.Tr
 }
 
 func (r *mutationResolver) SendNotification(ctx context.Context, typeArg types.DeliveryMode, content string, templateID string) (*types.Response, error) {
-	panic(fmt.Errorf("not implemented"))
+	_, err := middlewares.GetClaimsFromCtx(ctx)
+	if err != nil {
+		responseMessage := "User authentication failed"
+		return &types.Response{Message: &responseMessage, Success: false, Code: int64(500)}, err
+	}
+
+	deliveryModeCode := messaging.SendNotificationRequest_DeliveryMode_value[typeArg.String()]
+
+	request := messaging.SendNotificationRequest{
+		Type:       messaging.SendNotificationRequest_DeliveryMode(deliveryModeCode),
+		Content:    content,
+		TemplateId: templateID,
+	}
+
+	response, err := r.MessagingService.SendNotification(ctx, &request)
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.Response{
+		Success: response.Success,
+		Code:    int64(response.Code),
+	}, nil
+}
+
+func (r *mutationResolver) DeactivateCredential(ctx context.Context, credentialType types.IdentityCredentialsTypes) (*types.Response, error) {
+	// Get user claims
+	_, err := middlewares.GetClaimsFromCtx(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Build request
+	request := customer.DeactivateCredentialRequest{
+		CredentialType: r.helper.MapCredentialTypes(credentialType),
+	}
+
+	// Execute RPC call
+	response, err := r.CustomerService.DeactivateCredential(ctx, &request)
+	if err != nil {
+		return nil, err
+	}
+	return &types.Response{
+		Success: response.Success,
+		Code:    int64(response.Code),
+	}, nil
 }
 
 func (r *mutationResolver) DeactivateCredential(ctx context.Context, credentialType types.IdentityCredentialsTypes) (*types.Response, error) {

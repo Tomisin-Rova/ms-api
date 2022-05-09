@@ -13,6 +13,7 @@ env:
   IMAGE: ms.api
   REGISTRY_HOSTNAME: eu.gcr.io/${{ secrets.PROJECT_SHARED }}
   VERSION: develop
+  GCP_PROJECT_NAME: "dev-roava-io"
 
 jobs:
   lint:
@@ -171,9 +172,43 @@ jobs:
     needs: [package]
 
     steps:
-      - name: Deploy service
+
+      - name: Check out my other private repo
+        uses: actions/checkout@master
+        with:
+          repository: roava/deploy
+          token: ${{ secrets.PAT }}
+
+      - name: Replace image in config
         run: |
-          export SERVICE_NAME=`echo $GITHUB_REPOSITORY | cut -d'/' -f2`
-          export VERSION_NAME=`echo $VERSION`
-          deploy "${SERVICE_NAME}" "${VERSION_NAME}"
+          sed -i -e "s/\${parameters.gcp_project_name}/${GCP_PROJECT_NAME}/g" templates/${{github.event.repository.name}}.yaml
+          sed -i -e "s/\${parameters.version}/${VERSION}/g" templates/${{github.event.repository.name}}.yaml
+      
+      - name: check change
+        run: cat templates/${{github.event.repository.name}}.yaml
+      
+      - id: auth
+        uses: 'google-github-actions/auth@v0.4.0'
+        with:
+          credentials_json: '${{ secrets.SV_ACCOUNT_DEV }}'
+
+      - id: get-credentials
+        uses: 'google-github-actions/get-gke-credentials@v0.4.0'
+        with:
+          cluster_name: 'services-cluster'
+          use_internal_ip: true
+          location: 'europe-west2-a'
+      
+      - name: deploy
+        run : kubectl apply -f templates/${{github.event.repository.name}}.yaml --record
+
+      - name: adding annotations
+        run : kubectl annotate --overwrite -f templates/${{github.event.repository.name}}.yaml kubernetes.io/change-cause="deploy to templates/${{github.event.repository.name}}.yaml from ${GITHUB_REF_NAME}"
+      
+      - name: restarting pod
+        run : |
+          SERVICE=`echo ${{github.event.repository.name}} | sed 's/\./-/g'`
+          kubectl rollout restart deployment $SERVICE
+          sh validation.sh $SERVICE
+      
 

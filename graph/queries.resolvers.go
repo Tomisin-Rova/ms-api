@@ -372,10 +372,56 @@ func (r *queryResolver) Products(ctx context.Context, first *int64, after *strin
 }
 
 func (r *queryResolver) Banks(ctx context.Context, first *int64, after *string, last *int64, before *string) (*apiTypes.BankConnection, error) {
-	// TODO - This is just for Demo purposes. This query should access the correct service to perform correctly
-	return &apiTypes.BankConnection{
-		Nodes: []*apiTypes.Bank{},
-	}, nil
+	// Build request
+	var request payment.GetBanksRequest
+	if first != nil {
+		request.First = int32(*first)
+	}
+	if after != nil {
+		request.After = *after
+	}
+	if last != nil {
+		request.Last = int32(*last)
+	}
+	if before != nil {
+		request.Before = *before
+	}
+
+	// Execute RPC call
+	response, err := r.PaymentService.GetBanks(ctx, &request)
+	if err != nil {
+		return nil, err
+	}
+
+	// Build response
+	nodes := make([]*apiTypes.Bank, len(response.Nodes))
+	for index, node := range response.Nodes {
+		address := apiTypes.Bank{
+			ID:            node.Id,
+			BankCode:      node.BankCode,
+			BankName:      node.BankName,
+			BankShortName: node.BankShortName,
+			Active:        node.Active,
+			Ts:            node.Ts.AsTime().Unix(),
+		}
+
+		nodes[index] = &address
+	}
+
+	pageInfo := apiTypes.PageInfo{
+		HasNextPage:     response.PaginationInfo.HasNextPage,
+		HasPreviousPage: response.PaginationInfo.HasPreviousPage,
+		StartCursor:     &response.PaginationInfo.StartCursor,
+		EndCursor:       &response.PaginationInfo.EndCursor,
+	}
+
+	result := &apiTypes.BankConnection{
+		Nodes:      nodes,
+		PageInfo:   &pageInfo,
+		TotalCount: int64(response.TotalCount),
+	}
+
+	return result, nil
 }
 
 func (r *queryResolver) Account(ctx context.Context, id string) (*apiTypes.Account, error) {

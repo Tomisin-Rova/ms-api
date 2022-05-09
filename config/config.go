@@ -13,6 +13,7 @@ const (
 	ServiceName      = "api"
 	LocalEnvironment = "local"
 	DevEnvironment   = "dev"
+	QAEnvironment    = "qa"
 )
 
 // Ensure interface implementation
@@ -29,6 +30,7 @@ type Secrets struct {
 	AuthServiceURL          string `mapstructure:"auth_service_url"`
 	AccountServiceURL       string `mapstructure:"account_service_url"`
 	CustomerServiceURL      string `mapstructure:"customer_service_url"`
+	MessagingServiceURL     string `mapstructure:"messaging_service_url"`
 	PaymentServiceURL       string `mapstructure:"payment_service_url"`
 	PricingServiceURL       string `mapstructure:"pricing_service_url"`
 }
