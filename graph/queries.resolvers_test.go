@@ -2546,6 +2546,8 @@ func Test_queryResolver_Transactions(t *testing.T) {
 				after:          "",
 				last:           int64(0),
 				before:         "",
+				startDate:      "",
+				endDate:        "",
 				statuses:       []types.TransactionStatuses{types.TransactionStatusesApproved},
 				accountIds:     []string{""},
 				beneficiaryIds: []string{""},
@@ -2659,12 +2661,18 @@ func Test_queryResolver_Transactions(t *testing.T) {
 					statuses[index] = helpers.GetProtoTransactionStatuses(state)
 				}
 
+				protoStatDate := timestamppb.Now()
+				protoStatDate.Seconds = -62135596800
+				protoStatDate.Nanos = 0
+
 				paymentServiceClient.EXPECT().GetTransactions(context.Background(),
 					&payment.GetTransactionsRequest{
 						First:          int32(test.args.first),
 						After:          test.args.after,
 						Last:           int32(test.args.last),
 						Before:         test.args.before,
+						StartDate:      protoStatDate,
+						EndDate:        protoStatDate,
 						Statuses:       statuses,
 						AccountIds:     test.args.accountIds,
 						BeneficiaryIds: test.args.beneficiaryIds,
@@ -2917,15 +2925,22 @@ func Test_queryResolver_Transactions(t *testing.T) {
 					statuses[index] = helpers.GetProtoTransactionStatuses(state)
 				}
 
+				protoStatDate := timestamppb.Now()
+				protoStatDate.Seconds = -62135596800
+				protoStatDate.Nanos = 0
+
 				paymentServiceClient.EXPECT().GetTransactions(context.Background(),
 					&payment.GetTransactionsRequest{
 						First:          int32(test.args.first),
 						After:          test.args.after,
 						Last:           int32(test.args.last),
 						Before:         test.args.before,
+						StartDate:      protoStatDate,
+						EndDate:        protoStatDate,
 						Statuses:       statuses,
 						AccountIds:     test.args.accountIds,
 						BeneficiaryIds: test.args.beneficiaryIds,
+						HasBeneficiary: test.args.hasBeneficiary,
 					}).Return(&payment.GetTransactionsResponse{
 					Nodes: []*pbTypes.Transaction{
 						{
@@ -3173,6 +3188,9 @@ func Test_queryResolver_Transactions(t *testing.T) {
 				for index, state := range test.args.statuses {
 					statuses[index] = helpers.GetProtoTransactionStatuses(state)
 				}
+				protoStatDate := timestamppb.Now()
+				protoStatDate.Seconds = -62135596800
+				protoStatDate.Nanos = 0
 
 				paymentServiceClient.EXPECT().GetTransactions(context.Background(),
 					&payment.GetTransactionsRequest{
@@ -3180,9 +3198,12 @@ func Test_queryResolver_Transactions(t *testing.T) {
 						After:          test.args.after,
 						Last:           int32(test.args.last),
 						Before:         test.args.before,
+						StartDate:      protoStatDate,
+						EndDate:        protoStatDate,
 						Statuses:       statuses,
 						AccountIds:     test.args.accountIds,
 						BeneficiaryIds: test.args.beneficiaryIds,
+						HasBeneficiary: test.args.hasBeneficiary,
 					}).Return(&payment.GetTransactionsResponse{
 					Nodes: []*pbTypes.Transaction{
 						{
@@ -3327,15 +3348,22 @@ func Test_queryResolver_Transactions(t *testing.T) {
 					statuses[index] = helpers.GetProtoTransactionStatuses(state)
 				}
 
+				protoStatDate := timestamppb.Now()
+				protoStatDate.Seconds = -62135596800
+				protoStatDate.Nanos = 0
+
 				paymentServiceClient.EXPECT().GetTransactions(context.Background(),
 					&payment.GetTransactionsRequest{
 						First:          int32(test.args.first),
 						After:          test.args.after,
 						Last:           int32(test.args.last),
 						Before:         test.args.before,
+						StartDate:      protoStatDate,
+						EndDate:        protoStatDate,
 						Statuses:       statuses,
 						AccountIds:     test.args.accountIds,
 						BeneficiaryIds: test.args.beneficiaryIds,
+						HasBeneficiary: test.args.hasBeneficiary,
 					}).Return(&payment.GetTransactionsResponse{
 					Nodes: []*pbTypes.Transaction{
 						{
