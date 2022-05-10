@@ -513,20 +513,17 @@ func (r *queryResolver) Transactions(ctx context.Context, first *int64, after *s
 		}
 	}
 
-	var formartedStartDate, formatedEndDate time.Time
-	var err error
-	if startDate != nil {
-		formartedStartDate, err = time.Parse("2006-01-02", *startDate)
-	}
-	if endDate != nil {
-		formatedEndDate, err = time.Parse("2006-01-02", *endDate)
-	}
-	if err != nil {
-		return &apiTypes.TransactionConnection{}, err
-	}
-
 	// Build request
 	request := payment.GetTransactionsRequest{}
+
+	if startDate != nil {
+		formartedStartDate, _ := time.Parse("2006-01-02", *startDate)
+		request.StartDate = timestamppb.New(formartedStartDate)
+	}
+	if endDate != nil {
+		formatedEndDate, _ := time.Parse("2006-01-02", *endDate)
+		request.EndDate = timestamppb.New(formatedEndDate)
+	}
 
 	if first != nil {
 		request.First = int32(*first)
@@ -549,12 +546,12 @@ func (r *queryResolver) Transactions(ctx context.Context, first *int64, after *s
 	if len(statuses) > 0 {
 		request.Statuses = transactionStatuses
 	}
-	if startDate != nil {
-		request.StartDate = timestamppb.New(formartedStartDate)
-	}
-	if endDate != nil {
-		request.EndDate = timestamppb.New(formatedEndDate)
-	}
+	// if startDate != nil {
+	// 	request.StartDate = timestamppb.New(formartedStartDate)
+	// }
+	// if endDate != nil {
+	// 	request.EndDate = timestamppb.New(formatedEndDate)
+	// }
 	if hasBeneficiary != nil {
 		request.HasBeneficiary = *hasBeneficiary
 	}
