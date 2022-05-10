@@ -8,9 +8,11 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/roava/zebra/models"
 	"go.uber.org/zap"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"ms.api/graph/generated"
 	emailvalidator "ms.api/libs/validator/email"
 	"ms.api/libs/validator/phonenumbervalidator"
@@ -511,6 +513,14 @@ func (r *queryResolver) Transactions(ctx context.Context, first *int64, after *s
 		}
 	}
 
+	var formartedStartDate, formatedEndDate time.Time
+	if startDate != nil {
+		formartedStartDate, _ = time.Parse("2006-01-02 15:04", *startDate)
+	}
+	if endDate != nil {
+		formatedEndDate, _ = time.Parse("2006-01-02 15:04", *endDate)
+	}
+
 	// Build request
 	request := payment.GetTransactionsRequest{}
 
@@ -534,6 +544,15 @@ func (r *queryResolver) Transactions(ctx context.Context, first *int64, after *s
 	}
 	if len(statuses) > 0 {
 		request.Statuses = transactionStatuses
+	}
+	if startDate != nil {
+		request.StartDate = timestamppb.New(formartedStartDate)
+	}
+	if endDate != nil {
+		request.EndDate = timestamppb.New(formatedEndDate)
+	}
+	if hasBeneficiary != nil {
+		request.HasBeneficiary = *hasBeneficiary
 	}
 
 	resp, err := r.PaymentService.GetTransactions(ctx, &request)
@@ -897,7 +916,7 @@ func (r *queryResolver) Currencies(ctx context.Context, keywords *string, first 
 	return response, nil
 }
 
-func (r *queryResolver) Fees(ctx context.Context, transactionTypeID string) ([]*apiTypes.Fee, error) {
+func (r *queryResolver) Fees(ctx context.Context, transactionTypeID string, sourceAccountID string, targetAccountID string) ([]*apiTypes.Fee, error) {
 	resp, err := r.PricingService.GetFees(ctx, &pricing.GetFeesRequest{TransactionTypeId: transactionTypeID})
 	if err != nil {
 		return nil, err

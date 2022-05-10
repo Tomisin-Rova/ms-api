@@ -4792,18 +4792,26 @@ func Test_queryResolver_Fees(t *testing.T) {
 
 	tests := []struct {
 		name     string
-		arg      string
+		arg      *pricing.GetFeesRequest
 		testType int
 	}{
 		{
-			name:     "Test fees successfully with a valid transaction_type_id",
-			arg:      "transaction_type_id",
+			name: "Test fees successfully with a valid transaction_type_id",
+			arg: &pricing.GetFeesRequest{
+				TransactionTypeId: "transactionTypeId",
+				SourceAccountId:   "sourceAccountId",
+				TargetAccountId:   "targetAccountId",
+			},
 			testType: success,
 		},
 
 		{
-			name:     "Test error getting fees with a invalid_transaction_type_id",
-			arg:      "invalid_transaction_type_id",
+			name: "Test error getting fees with a invalid_transaction_type_id",
+			arg: &pricing.GetFeesRequest{
+				TransactionTypeId: "transactionTypeId",
+				SourceAccountId:   "sourceAccountId",
+				TargetAccountId:   "targetAccountId",
+			},
 			testType: errorNotFound,
 		},
 	}
@@ -4820,14 +4828,14 @@ func Test_queryResolver_Fees(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			switch test.testType {
 			case success:
-				request := &pricing.GetFeesRequest{TransactionTypeId: test.arg}
+				request := &pricing.GetFeesRequest{TransactionTypeId: test.arg.TransactionTypeId}
 				pricingServiceClient.EXPECT().GetFees(context.Background(), request).Return(
 					&pricing.GetFeesResponse{
 						Fees: []*pbTypes.Fee{
 							{
 								Id: "fee_id_1",
 								TransactionType: &pbTypes.TransactionType{
-									Id:     test.arg,
+									Id:     test.arg.TransactionTypeId,
 									Name:   "GBP-GBP",
 									Status: pbTypes.TransactionType_ACTIVE,
 								},
@@ -4844,15 +4852,15 @@ func Test_queryResolver_Fees(t *testing.T) {
 							},
 						},
 					}, nil)
-				resp, err := resolver.Fees(context.Background(), test.arg)
+				resp, err := resolver.Fees(context.Background(), test.arg.TransactionTypeId, test.arg.SourceAccountId, test.arg.TargetAccountId)
 				assert.NoError(t, err)
 				assert.NotNil(t, resp)
 				assert.NotEmpty(t, resp)
 
 			case errorNotFound:
-				request := &pricing.GetFeesRequest{TransactionTypeId: test.arg}
+				request := &pricing.GetFeesRequest{TransactionTypeId: test.arg.TransactionTypeId}
 				pricingServiceClient.EXPECT().GetFees(context.Background(), request).Return(nil, errors.New(""))
-				resp, err := resolver.Fees(context.Background(), test.arg)
+				resp, err := resolver.Fees(context.Background(), test.arg.TransactionTypeId, test.arg.SourceAccountId, test.arg.TargetAccountId)
 				assert.Error(t, err)
 				assert.Nil(t, resp)
 			}

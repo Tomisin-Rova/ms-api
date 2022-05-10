@@ -389,36 +389,38 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		AcceptContent             func(childComplexity int, contentID string) int
-		AddBeneficiaryAccount     func(childComplexity int, beneficiaryID string, account types.BeneficiaryAccountInput, transactionPassword string) int
-		AnswerQuestionary         func(childComplexity int, questionary types.QuestionaryAnswerInput) int
-		CheckBvn                  func(childComplexity int, bvn string, phone string) int
-		CheckCustomerData         func(childComplexity int, customerData types.CheckCustomerDataInput) int
-		CheckCustomerEmail        func(childComplexity int, email string, device types.DeviceInput) int
-		CreateAccount             func(childComplexity int, account types.AccountInput) int
-		CreateBeneficiary         func(childComplexity int, beneficiary types.BeneficiaryInput, transactionPassword string) int
-		CreateTransfer            func(childComplexity int, transfer types.TransactionInput, transactionPassword string) int
-		CreateVaultAccount        func(childComplexity int, account types.VaultAccountInput, transactionPassword string) int
-		DeactivateCredential      func(childComplexity int, credentialType types.IdentityCredentialsTypes) int
-		DeleteBeneficiaryAccount  func(childComplexity int, beneficiaryID string, accountID string, transactionPassword string) int
-		ForgotTransactionPassword func(childComplexity int, newTransactionPassword string) int
-		Login                     func(childComplexity int, credentials types.AuthInput) int
-		RefreshToken              func(childComplexity int, token string) int
-		Register                  func(childComplexity int, customerDetails types.CustomerDetailsInput) int
-		RequestOtp                func(childComplexity int, typeArg types.DeliveryMode, target string, expireTimeInSeconds *int64) int
-		RequestResubmit           func(childComplexity int, customerID string, reportIds []string, message *string) int
-		ResetLoginPassword        func(childComplexity int, otpToken string, email string, loginPassword string) int
-		ResetTransactionPassword  func(childComplexity int, otpToken string, email string, newTransactionPassword string, currentTransactionPassword string) int
-		SendNotification          func(childComplexity int, typeArg types.DeliveryMode, content string, templateID string) int
-		SetDevicePreferences      func(childComplexity int, preferences []*types.DevicePreferencesInput) int
-		SetDeviceToken            func(childComplexity int, tokens []*types.DeviceTokenInput) int
-		SetTransactionPassword    func(childComplexity int, password string) int
-		Signup                    func(childComplexity int, customer types.CustomerInput) int
-		StaffLogin                func(childComplexity int, token string, authType types.AuthType) int
-		SubmitCdd                 func(childComplexity int, cdd types.CDDInput) int
-		UpdateAMLStatus           func(childComplexity int, id string, status types.AMLStatuses, message string) int
-		UpdateKYCStatus           func(childComplexity int, id string, status types.KYCStatuses, message string) int
-		VerifyOtp                 func(childComplexity int, target string, otpToken string) int
+		AcceptContent              func(childComplexity int, contentID string) int
+		AddBeneficiaryAccount      func(childComplexity int, beneficiaryID string, account types.BeneficiaryAccountInput, transactionPassword string) int
+		AnswerQuestionary          func(childComplexity int, questionary types.QuestionaryAnswerInput) int
+		CheckBvn                   func(childComplexity int, bvn string, phone string) int
+		CheckCustomerData          func(childComplexity int, customerData types.CheckCustomerDataInput) int
+		CheckCustomerEmail         func(childComplexity int, email string, device types.DeviceInput) int
+		CreateAccount              func(childComplexity int, account types.AccountInput) int
+		CreateBeneficiariesByPhone func(childComplexity int, beneficiaries []*types.BeneficiaryByPhoneInput, transactionPassword string) int
+		CreateBeneficiary          func(childComplexity int, beneficiary types.BeneficiaryInput, transactionPassword string) int
+		CreateTransfer             func(childComplexity int, transfer types.TransactionInput, transactionPassword string) int
+		CreateVaultAccount         func(childComplexity int, account types.VaultAccountInput, transactionPassword string) int
+		DeactivateCredential       func(childComplexity int, credentialType types.IdentityCredentialsTypes) int
+		DeleteBeneficiaryAccount   func(childComplexity int, beneficiaryID string, accountID string, transactionPassword string) int
+		ForgotTransactionPassword  func(childComplexity int, newTransactionPassword string) int
+		Login                      func(childComplexity int, credentials types.AuthInput) int
+		RefreshToken               func(childComplexity int, token string) int
+		Register                   func(childComplexity int, customerDetails types.CustomerDetailsInput) int
+		RequestOtp                 func(childComplexity int, typeArg types.DeliveryMode, target string, expireTimeInSeconds *int64) int
+		RequestResubmit            func(childComplexity int, customerID string, reportIds []string, message *string) int
+		ResetLoginPassword         func(childComplexity int, otpToken string, email string, loginPassword string) int
+		ResetTransactionPassword   func(childComplexity int, otpToken string, email string, newTransactionPassword string, currentTransactionPassword string) int
+		SendNotification           func(childComplexity int, typeArg types.DeliveryMode, content string, templateID string) int
+		SetDevicePreferences       func(childComplexity int, preferences []*types.DevicePreferencesInput) int
+		SetDeviceToken             func(childComplexity int, tokens []*types.DeviceTokenInput) int
+		SetTransactionPassword     func(childComplexity int, password string) int
+		Signup                     func(childComplexity int, customer types.CustomerInput) int
+		StaffLogin                 func(childComplexity int, token string, authType types.AuthType) int
+		SubmitCdd                  func(childComplexity int, cdd types.CDDInput) int
+		UpdateAMLStatus            func(childComplexity int, id string, status types.AMLStatuses, message string) int
+		UpdateCustomerDetails      func(childComplexity int, customerDetails types.CustomerDetailsUpdateInput, transactionPassword string) int
+		UpdateKYCStatus            func(childComplexity int, id string, status types.KYCStatuses, message string) int
+		VerifyOtp                  func(childComplexity int, target string, otpToken string) int
 	}
 
 	Organization struct {
@@ -506,7 +508,7 @@ type ComplexityRoot struct {
 		Customers                    func(childComplexity int, keywords *string, first *int64, after *string, last *int64, before *string, statuses []types.CustomerStatuses) int
 		ExchangeRate                 func(childComplexity int, transactionTypeID string) int
 		ExistingBeneficiariesByPhone func(childComplexity int, phones []string, transactionPassword string) int
-		Fees                         func(childComplexity int, transactionTypeID string) int
+		Fees                         func(childComplexity int, transactionTypeID string, sourceAccountID string, targetAccountID string) int
 		Me                           func(childComplexity int) int
 		OnfidoSDKToken               func(childComplexity int) int
 		Product                      func(childComplexity int, id string) int
@@ -720,7 +722,7 @@ type QueryResolver interface {
 	Questionaries(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string, statuses []types.QuestionaryStatuses, typeArg []types.QuestionaryTypes) (*types.QuestionaryConnection, error)
 	Currency(ctx context.Context, id string) (*types.Currency, error)
 	Currencies(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string) (*types.CurrencyConnection, error)
-	Fees(ctx context.Context, transactionTypeID string) ([]*types.Fee, error)
+	Fees(ctx context.Context, transactionTypeID string, sourceAccountID string, targetAccountID string) ([]*types.Fee, error)
 	ExchangeRate(ctx context.Context, transactionTypeID string) (*types.ExchangeRate, error)
 	Me(ctx context.Context) (types.MeResult, error)
 	Customer(ctx context.Context, id string) (*types.Customer, error)
@@ -3136,7 +3138,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Fees(childComplexity, args["transactionTypeId"].(string)), true
+		return e.complexity.Query.Fees(childComplexity, args["transactionTypeId"].(string), args["sourceAccountId"].(string), args["targetAccountId"].(string)), true
 
 	case "Query.me":
 		if e.complexity.Query.Me == nil {
@@ -4409,7 +4411,11 @@ enum DeliveryMode {
         # Returns the elements in the list that come before the specified cursor.
         before: String
     ): CurrencyConnection!
-    fees(transactionTypeId: ID!): [Fee!]!
+    fees(
+        transactionTypeId: ID!
+        sourceAccountId: ID!
+        targetAccountId: ID!
+    ): [Fee!]!
     exchangeRate(transactionTypeId: ID!): ExchangeRate!
 
     # ---- Dashboard -----
@@ -6661,6 +6667,24 @@ func (ec *executionContext) field_Query_fees_args(ctx context.Context, rawArgs m
 		}
 	}
 	args["transactionTypeId"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["sourceAccountId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sourceAccountId"))
+		arg1, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["sourceAccountId"] = arg1
+	var arg2 string
+	if tmp, ok := rawArgs["targetAccountId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("targetAccountId"))
+		arg2, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["targetAccountId"] = arg2
 	return args, nil
 }
 
@@ -18675,56 +18699,8 @@ func (ec *executionContext) _Mutation_addBeneficiaryAccount(ctx context.Context,
 	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Mutation_deactivateCredential(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_deactivateCredential_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeactivateCredential(rctx, args["credentialType"].(types.IdentityCredentialsTypes))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*types.Response)
-	fc.Result = res
-	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Mutation_requestResubmit(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
+func (ec *executionContext) fieldContext_Mutation_addBeneficiaryAccount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
 		IsMethod:   true,
@@ -22639,7 +22615,7 @@ func (ec *executionContext) _Query_fees(ctx context.Context, field graphql.Colle
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Fees(rctx, fc.Args["transactionTypeId"].(string))
+		return ec.resolvers.Query().Fees(rctx, fc.Args["transactionTypeId"].(string), fc.Args["sourceAccountId"].(string), fc.Args["targetAccountId"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -32687,16 +32663,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_deactivateCredential(ctx, field)
 			})
-
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "deactivateCredential":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_deactivateCredential(ctx, field)
-			}
-
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, innerFunc)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
