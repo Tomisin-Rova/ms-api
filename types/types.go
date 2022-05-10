@@ -311,6 +311,14 @@ type CustomerDetailsInput struct {
 	Address   *AddressInput `json:"address"`
 }
 
+type CustomerDetailsUpdateInput struct {
+	FirstName *string       `json:"firstName"`
+	LastName  *string       `json:"lastName"`
+	Phone     *string       `json:"phone"`
+	Email     *string       `json:"email"`
+	Address   *AddressInput `json:"address"`
+}
+
 type CustomerInput struct {
 	Phone         string       `json:"phone"`
 	Email         string       `json:"email"`

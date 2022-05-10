@@ -3192,3 +3192,156 @@ func TestMutationResolver_DeactivateCredential(t *testing.T) {
 		})
 	}
 }
+
+func TestMutationResolver_UpdateCustomerDetails(t *testing.T) {
+	const (
+		success = iota
+		errorUnauthenticated
+		errorUpdatingCustomerDetails
+	)
+	type arg struct {
+		CustomerDetails     types.CustomerDetailsUpdateInput
+		TransactionPassword string
+	}
+	var (
+		firstName = "firstName"
+		lastName  = "lastName"
+		phone     = "07000000000"
+		email     = "janedoe@gmail.com"
+		state     = "state"
+		city      = "city"
+	)
+	var tests = []struct {
+		name     string
+		arg      arg
+		testType int
+	}{
+		{
+			name: "Test Success",
+			arg: arg{
+				CustomerDetails: types.CustomerDetailsUpdateInput{
+					FirstName: &firstName,
+					LastName:  &lastName,
+					Phone:     &phone,
+					Email:     &email,
+					Address: &types.AddressInput{
+						CountryID: "countryId",
+						State:     &state,
+						City:      &city,
+						Street:    "street",
+						Postcode:  "postCode",
+						Cordinates: &types.CordinatesInput{
+							Latitude:  1.2333,
+							Longitude: 1.4555,
+						},
+					},
+				},
+			},
+			testType: success,
+		},
+		{
+			name:     "Test error unauthenticated customer",
+			testType: errorUnauthenticated,
+		},
+		{
+			name: "Test error updating customer details",
+			arg: arg{
+				CustomerDetails: types.CustomerDetailsUpdateInput{
+					FirstName: &firstName,
+					LastName:  &lastName,
+					Phone:     &phone,
+					Email:     &email,
+					Address: &types.AddressInput{
+						CountryID: "countryId",
+						State:     &state,
+						City:      &city,
+						Street:    "street",
+						Postcode:  "postCode",
+						Cordinates: &types.CordinatesInput{
+							Latitude:  1.2333,
+							Longitude: 1.4555,
+						},
+					},
+				},
+			},
+			testType: errorUpdatingCustomerDetails,
+		},
+	}
+
+	validCtx, err := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{})
+	if err != nil {
+		assert.NoError(t, err)
+		t.Fail()
+	}
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
+	resolverOpts := &ResolverOpts{
+		CustomerService: customerServiceClient,
+	}
+	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			switch testCase.testType {
+			case success:
+				customerServiceClient.EXPECT().CustomerDetailsUpdate(validCtx, &customer.CustomerDetailsUpdateRequest{
+					FirstName: *testCase.arg.CustomerDetails.FirstName,
+					LastName:  *testCase.arg.CustomerDetails.LastName,
+					Phone:     *testCase.arg.CustomerDetails.Phone,
+					Email:     *testCase.arg.CustomerDetails.Email,
+					Address: &customer.AddressInput{
+						CountryId: testCase.arg.CustomerDetails.Address.CountryID,
+						State:     *testCase.arg.CustomerDetails.Address.State,
+						City:      *testCase.arg.CustomerDetails.Address.City,
+						Street:    testCase.arg.CustomerDetails.Address.Street,
+						Postcode:  testCase.arg.CustomerDetails.Address.Postcode,
+						Cordinates: &customer.CordinatesInput{
+							Latitude:  float32(testCase.arg.CustomerDetails.Address.Cordinates.Latitude),
+							Longitude: float32(testCase.arg.CustomerDetails.Address.Cordinates.Longitude),
+						},
+					},
+					TransactionPassword: testCase.arg.TransactionPassword,
+				}).Return(&pbTypes.DefaultResponse{
+					Success: true,
+					Code:    http.StatusOK,
+				}, nil)
+
+				resp, err := resolver.UpdateCustomerDetails(validCtx, testCase.arg.CustomerDetails, testCase.arg.TransactionPassword)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, &types.Response{
+					Success: true,
+					Code:    http.StatusOK,
+				}, resp)
+			case errorUnauthenticated:
+				resp, err := resolver.UpdateCustomerDetails(context.Background(), testCase.arg.CustomerDetails, testCase.arg.TransactionPassword)
+				assert.Error(t, err)
+				assert.IsType(t, &terror.Terror{}, err)
+				assert.Equal(t, errorvalues.InvalidAuthenticationError, err.(*terror.Terror).Code())
+				assert.Nil(t, resp)
+			case errorUpdatingCustomerDetails:
+				customerServiceClient.EXPECT().CustomerDetailsUpdate(validCtx, &customer.CustomerDetailsUpdateRequest{
+					FirstName: *testCase.arg.CustomerDetails.FirstName,
+					LastName:  *testCase.arg.CustomerDetails.LastName,
+					Phone:     *testCase.arg.CustomerDetails.Phone,
+					Email:     *testCase.arg.CustomerDetails.Email,
+					Address: &customer.AddressInput{
+						CountryId: testCase.arg.CustomerDetails.Address.CountryID,
+						State:     *testCase.arg.CustomerDetails.Address.State,
+						City:      *testCase.arg.CustomerDetails.Address.City,
+						Street:    testCase.arg.CustomerDetails.Address.Street,
+						Postcode:  testCase.arg.CustomerDetails.Address.Postcode,
+						Cordinates: &customer.CordinatesInput{
+							Latitude:  float32(testCase.arg.CustomerDetails.Address.Cordinates.Latitude),
+							Longitude: float32(testCase.arg.CustomerDetails.Address.Cordinates.Longitude),
+						},
+					},
+					TransactionPassword: testCase.arg.TransactionPassword,
+				}).Return(nil, errors.New(""))
+				resp, err := resolver.UpdateCustomerDetails(validCtx, testCase.arg.CustomerDetails, testCase.arg.TransactionPassword)
+				assert.Error(t, err)
+				assert.Nil(t, resp)
+			}
+		})
+	}
+}

@@ -256,6 +256,44 @@ func (r *mutationResolver) CheckCustomerData(ctx context.Context, customerData t
 	return &types.Response{Success: resp.Success, Code: int64(resp.Code)}, nil
 }
 
+func (r *mutationResolver) UpdateCustomerDetails(ctx context.Context, customerDetails types.CustomerDetailsUpdateInput, transactionPassword string) (*types.Response, error) {
+	// Get user claims
+	_, err := middlewares.GetClaimsFromCtx(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Build request
+	request := customer.CustomerDetailsUpdateRequest{
+		FirstName: *customerDetails.FirstName,
+		LastName:  *customerDetails.LastName,
+		Phone:     *customerDetails.Phone,
+		Email:     *customerDetails.Email,
+		Address: &customer.AddressInput{
+			CountryId: customerDetails.Address.CountryID,
+			State:     *customerDetails.Address.State,
+			City:      *customerDetails.Address.City,
+			Street:    customerDetails.Address.Street,
+			Postcode:  customerDetails.Address.Postcode,
+			Cordinates: &customer.CordinatesInput{
+				Latitude:  float32(customerDetails.Address.Cordinates.Latitude),
+				Longitude: float32(customerDetails.Address.Cordinates.Longitude),
+			},
+		},
+		TransactionPassword: transactionPassword,
+	}
+	// Execute RPC call
+	response, err := r.CustomerService.CustomerDetailsUpdate(ctx, &request)
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.Response{
+		Success: response.Success,
+		Code:    int64(response.Code),
+	}, nil
+}
+
 func (r *mutationResolver) Register(ctx context.Context, customerDetails types.CustomerDetailsInput) (*types.Response, error) {
 	var responseMessage string
 	_, err := middlewares.GetClaimsFromCtx(ctx)
