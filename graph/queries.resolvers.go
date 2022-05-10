@@ -514,11 +514,15 @@ func (r *queryResolver) Transactions(ctx context.Context, first *int64, after *s
 	}
 
 	var formartedStartDate, formatedEndDate time.Time
+	var err error
 	if startDate != nil {
-		formartedStartDate, _ = time.Parse("2006-01-02 15:04", *startDate)
+		formartedStartDate, err = time.Parse("2006-01-02", *startDate)
 	}
 	if endDate != nil {
-		formatedEndDate, _ = time.Parse("2006-01-02 15:04", *endDate)
+		formatedEndDate, err = time.Parse("2006-01-02", *endDate)
+	}
+	if err != nil {
+		return &apiTypes.TransactionConnection{}, err
 	}
 
 	// Build request
