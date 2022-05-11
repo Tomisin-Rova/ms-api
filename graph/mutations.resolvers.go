@@ -774,6 +774,42 @@ func (r *mutationResolver) CreateBeneficiary(ctx context.Context, beneficiary ty
 	}, nil
 }
 
+func (r *mutationResolver) CreateBeneficiariesByPhone(ctx context.Context, beneficiaries []*types.BeneficiaryByPhoneInput, transactionPassword string) (*types.Response, error) {
+	// Authenticate user
+	_, err := middlewares.GetClaimsFromCtx(ctx)
+	if err != nil {
+		return nil, errorvalues.Format(errorvalues.InvalidAuthenticationError, err)
+	}
+
+	reqBeneficiaries := make([]*payment.BeneficiaryByPhoneInput, len(beneficiaries))
+	for _, b := range beneficiaries {
+		reqBeneficiaries = append(reqBeneficiaries, &payment.BeneficiaryByPhoneInput{
+			Phone: b.Phone,
+			Name:  b.Name,
+		})
+	}
+
+	req := payment.CreateBeneficiariesByPhoneRequest{
+		TransactionPassword: transactionPassword,
+		Beneficiaries:       reqBeneficiaries,
+	}
+
+	_, err = r.PaymentService.CreateBeneficiariesByPhone(ctx, &req)
+	if err != nil {
+		msg := err.Error()
+		return &types.Response{
+			Success: false,
+			Code:    int64(http.StatusInternalServerError),
+			Message: &msg,
+		}, err
+	}
+
+	return &types.Response{
+		Success: true,
+		Code:    int64(http.StatusOK),
+	}, nil
+}
+
 func (r *mutationResolver) AddBeneficiaryAccount(ctx context.Context, beneficiaryID string, account types.BeneficiaryAccountInput, transactionPassword string) (*types.Response, error) {
 	// Authenticate user
 	_, err := middlewares.GetClaimsFromCtx(ctx)
