@@ -519,7 +519,6 @@ func (r *queryResolver) Transactions(ctx context.Context, first *int64, after *s
 	if startDate != nil && *endDate != "" {
 		formartedStartDate, err := time.Parse("2006-01-02", *startDate)
 		if err != nil {
-			// log.Println("do nothing")
 			return nil, err
 		}
 
@@ -528,7 +527,6 @@ func (r *queryResolver) Transactions(ctx context.Context, first *int64, after *s
 	if endDate != nil && *endDate != "" {
 		formatedEndDate, err := time.Parse("2006-01-02", *endDate)
 		if err != nil {
-			// log.Println("do nothing")
 			return nil, err
 		}
 		request.EndDate = timestamppb.New(formatedEndDate)
