@@ -2550,8 +2550,8 @@ func Test_queryResolver_Transactions(t *testing.T) {
 				after:          "",
 				last:           int64(0),
 				before:         "",
-				startDate:      "2006-01-02",
-				endDate:        "2008-01-02",
+				startDate:      "",
+				endDate:        "",
 				statuses:       []types.TransactionStatuses{types.TransactionStatusesApproved},
 				accountIds:     []string{""},
 				beneficiaryIds: []string{""},
@@ -2662,7 +2662,6 @@ func Test_queryResolver_Transactions(t *testing.T) {
 				last:           int64(0),
 				before:         "",
 				startDate:      "2006-01-02",
-				endDate:        "2008-01-02",
 				statuses:       []types.TransactionStatuses{types.TransactionStatusesApproved},
 				accountIds:     []string{""},
 				beneficiaryIds: []string{""},
@@ -2688,7 +2687,6 @@ func Test_queryResolver_Transactions(t *testing.T) {
 				after:          "",
 				last:           int64(0),
 				before:         "",
-				startDate:      "2006-01-02",
 				endDate:        "2008-01-02",
 				statuses:       []types.TransactionStatuses{types.TransactionStatusesApproved},
 				accountIds:     []string{""},
@@ -2746,12 +2744,12 @@ func Test_queryResolver_Transactions(t *testing.T) {
 					statuses[index] = helpers.GetProtoTransactionStatuses(state)
 				}
 
-				goStartTime, err := time.Parse("2006-01-02", test.args.startDate)
-				assert.NoError(t, err)
-				goEndTime, err := time.Parse("2006-01-02", test.args.endDate)
-				assert.NoError(t, err)
-				protoStartDate := timestamppb.New(goStartTime)
-				protoEndDate := timestamppb.New(goEndTime)
+				// goStartTime, err := time.Parse("", test.args.startDate)
+				// assert.NoError(t, err)
+				// goEndTime, err := time.Parse("", test.args.endDate)
+				// assert.NoError(t, err)
+				// protoStartDate := timestamppb.New(goStartTime)
+				// protoEndDate := timestamppb.New(goEndTime)
 
 				paymentServiceClient.EXPECT().GetTransactions(context.Background(),
 					&payment.GetTransactionsRequest{
@@ -2759,8 +2757,6 @@ func Test_queryResolver_Transactions(t *testing.T) {
 						After:          test.args.after,
 						Last:           int32(test.args.last),
 						Before:         test.args.before,
-						StartDate:      protoStartDate,
-						EndDate:        protoEndDate,
 						Statuses:       statuses,
 						AccountIds:     test.args.accountIds,
 						BeneficiaryIds: test.args.beneficiaryIds,
@@ -3000,7 +2996,7 @@ func Test_queryResolver_Transactions(t *testing.T) {
 					TotalCount: 2,
 				}, nil)
 
-				resp, err := resolver.Transactions(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, &test.args.startDate, &test.args.endDate, test.args.statuses, test.args.accountIds, test.args.beneficiaryIds, &test.args.hasBeneficiary)
+				resp, err := resolver.Transactions(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, nil, nil, test.args.statuses, test.args.accountIds, test.args.beneficiaryIds, &test.args.hasBeneficiary)
 				assert.NoError(t, err)
 				assert.NotNil(t, resp)
 				assert.Equal(t, resp.TotalCount, int64(2))
@@ -3257,7 +3253,7 @@ func Test_queryResolver_Transactions(t *testing.T) {
 					TotalCount: 2,
 				}, nil)
 
-				resp, err := resolver.Transactions(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, &test.args.startDate, &test.args.endDate, test.args.statuses, test.args.accountIds, test.args.beneficiaryIds, &test.args.hasBeneficiary)
+				resp, err := resolver.Transactions(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, nil, nil, test.args.statuses, test.args.accountIds, test.args.beneficiaryIds, &test.args.hasBeneficiary)
 				assert.NoError(t, err)
 				assert.NotNil(t, resp)
 				assert.Equal(t, resp.TotalCount, int64(2))
@@ -3410,7 +3406,7 @@ func Test_queryResolver_Transactions(t *testing.T) {
 					TotalCount: 1,
 				}, nil)
 
-				resp, err := resolver.Transactions(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, &test.args.startDate, &test.args.endDate, test.args.statuses, test.args.accountIds, test.args.beneficiaryIds, &test.args.hasBeneficiary)
+				resp, err := resolver.Transactions(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, nil, nil, test.args.statuses, test.args.accountIds, test.args.beneficiaryIds, &test.args.hasBeneficiary)
 				assert.NoError(t, err)
 				assert.NotNil(t, resp)
 				assert.Equal(t, resp.TotalCount, int64(1))
@@ -3556,7 +3552,7 @@ func Test_queryResolver_Transactions(t *testing.T) {
 					TotalCount: 1,
 				}, nil)
 
-				resp, err := resolver.Transactions(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, &test.args.startDate, &test.args.endDate, test.args.statuses, test.args.accountIds, test.args.beneficiaryIds, &test.args.hasBeneficiary)
+				resp, err := resolver.Transactions(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, nil, nil, test.args.statuses, test.args.accountIds, test.args.beneficiaryIds, &test.args.hasBeneficiary)
 				assert.NoError(t, err)
 				assert.NotNil(t, resp)
 				assert.Equal(t, resp.TotalCount, int64(1))
@@ -3571,10 +3567,7 @@ func Test_queryResolver_Transactions(t *testing.T) {
 
 				goStartTime, err := time.Parse("2006-01-02", test.args.startDate)
 				assert.NoError(t, err)
-				goEndTime, err := time.Parse("2006-01-02", test.args.endDate)
-				assert.NoError(t, err)
 				protoStartDate := timestamppb.New(goStartTime)
-				protoEndDate := timestamppb.New(goEndTime)
 
 				paymentServiceClient.EXPECT().GetTransactions(context.Background(),
 					&payment.GetTransactionsRequest{
@@ -3583,7 +3576,6 @@ func Test_queryResolver_Transactions(t *testing.T) {
 						Last:           int32(test.args.last),
 						Before:         test.args.before,
 						StartDate:      protoStartDate,
-						EndDate:        protoEndDate,
 						Statuses:       statuses,
 						AccountIds:     test.args.accountIds,
 						BeneficiaryIds: test.args.beneficiaryIds,
@@ -3823,7 +3815,7 @@ func Test_queryResolver_Transactions(t *testing.T) {
 					TotalCount: 2,
 				}, nil)
 
-				resp, err := resolver.Transactions(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, &test.args.startDate, &test.args.endDate, test.args.statuses, test.args.accountIds, test.args.beneficiaryIds, &test.args.hasBeneficiary)
+				resp, err := resolver.Transactions(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, &test.args.startDate, nil, test.args.statuses, test.args.accountIds, test.args.beneficiaryIds, &test.args.hasBeneficiary)
 				assert.NoError(t, err)
 				assert.NotNil(t, resp)
 				assert.Equal(t, resp.TotalCount, int64(2))
@@ -3836,11 +3828,8 @@ func Test_queryResolver_Transactions(t *testing.T) {
 					statuses[index] = helpers.GetProtoTransactionStatuses(state)
 				}
 
-				goStartTime, err := time.Parse("2006-01-02", test.args.startDate)
-				assert.NoError(t, err)
 				goEndTime, err := time.Parse("2006-01-02", test.args.endDate)
 				assert.NoError(t, err)
-				protoStartDate := timestamppb.New(goStartTime)
 				protoEndDate := timestamppb.New(goEndTime)
 
 				paymentServiceClient.EXPECT().GetTransactions(context.Background(),
@@ -3849,7 +3838,6 @@ func Test_queryResolver_Transactions(t *testing.T) {
 						After:          test.args.after,
 						Last:           int32(test.args.last),
 						Before:         test.args.before,
-						StartDate:      protoStartDate,
 						EndDate:        protoEndDate,
 						Statuses:       statuses,
 						AccountIds:     test.args.accountIds,
@@ -4090,7 +4078,7 @@ func Test_queryResolver_Transactions(t *testing.T) {
 					TotalCount: 2,
 				}, nil)
 
-				resp, err := resolver.Transactions(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, &test.args.startDate, &test.args.endDate, test.args.statuses, test.args.accountIds, test.args.beneficiaryIds, &test.args.hasBeneficiary)
+				resp, err := resolver.Transactions(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, nil, &test.args.endDate, test.args.statuses, test.args.accountIds, test.args.beneficiaryIds, &test.args.hasBeneficiary)
 				assert.NoError(t, err)
 				assert.NotNil(t, resp)
 				assert.Equal(t, resp.TotalCount, int64(2))

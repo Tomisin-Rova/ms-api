@@ -516,7 +516,7 @@ func (r *queryResolver) Transactions(ctx context.Context, first *int64, after *s
 	// Build request
 	request := payment.GetTransactionsRequest{}
 
-	if startDate != nil && *endDate != "" {
+	if startDate != nil {
 		formartedStartDate, err := time.Parse("2006-01-02", *startDate)
 		if err != nil {
 			return nil, err
@@ -524,7 +524,7 @@ func (r *queryResolver) Transactions(ctx context.Context, first *int64, after *s
 
 		request.StartDate = timestamppb.New(formartedStartDate)
 	}
-	if endDate != nil && *endDate != "" {
+	if endDate != nil {
 		formatedEndDate, err := time.Parse("2006-01-02", *endDate)
 		if err != nil {
 			return nil, err
