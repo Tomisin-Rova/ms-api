@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/golang/mock/gomock"
 	"github.com/roava/zebra/middleware"
@@ -2745,12 +2746,12 @@ func Test_queryResolver_Transactions(t *testing.T) {
 					statuses[index] = helpers.GetProtoTransactionStatuses(state)
 				}
 
-				protoStartDate := timestamppb.Now()
-				protoStartDate.Seconds = 1136160000
-				protoStartDate.Nanos = 0
-				protoEndDate := timestamppb.Now()
-				protoEndDate.Seconds = 1199232000
-				protoEndDate.Nanos = 0
+				goStartTime, err := time.Parse("2006-01-02", test.args.startDate)
+				assert.NoError(t, err)
+				goEndTime, err := time.Parse("2006-01-02", test.args.endDate)
+				assert.NoError(t, err)
+				protoStartDate := timestamppb.New(goStartTime)
+				protoEndDate := timestamppb.New(goEndTime)
 
 				paymentServiceClient.EXPECT().GetTransactions(context.Background(),
 					&payment.GetTransactionsRequest{
@@ -3568,12 +3569,12 @@ func Test_queryResolver_Transactions(t *testing.T) {
 					statuses[index] = helpers.GetProtoTransactionStatuses(state)
 				}
 
-				protoStartDate := timestamppb.Now()
-				protoStartDate.Seconds = 1136160000
-				protoStartDate.Nanos = 0
-				protoEndDate := timestamppb.Now()
-				protoEndDate.Seconds = 1199232000
-				protoEndDate.Nanos = 0
+				goStartTime, err := time.Parse("2006-01-02", test.args.startDate)
+				assert.NoError(t, err)
+				goEndTime, err := time.Parse("2006-01-02", test.args.endDate)
+				assert.NoError(t, err)
+				protoStartDate := timestamppb.New(goStartTime)
+				protoEndDate := timestamppb.New(goEndTime)
 
 				paymentServiceClient.EXPECT().GetTransactions(context.Background(),
 					&payment.GetTransactionsRequest{
@@ -3835,12 +3836,12 @@ func Test_queryResolver_Transactions(t *testing.T) {
 					statuses[index] = helpers.GetProtoTransactionStatuses(state)
 				}
 
-				protoStartDate := timestamppb.Now()
-				protoStartDate.Seconds = 1136160000
-				protoStartDate.Nanos = 0
-				protoEndDate := timestamppb.Now()
-				protoEndDate.Seconds = 1199232000
-				protoEndDate.Nanos = 0
+				goStartTime, err := time.Parse("2006-01-02", test.args.startDate)
+				assert.NoError(t, err)
+				goEndTime, err := time.Parse("2006-01-02", test.args.endDate)
+				assert.NoError(t, err)
+				protoStartDate := timestamppb.New(goStartTime)
+				protoEndDate := timestamppb.New(goEndTime)
 
 				paymentServiceClient.EXPECT().GetTransactions(context.Background(),
 					&payment.GetTransactionsRequest{
@@ -4102,12 +4103,12 @@ func Test_queryResolver_Transactions(t *testing.T) {
 					statuses[index] = helpers.GetProtoTransactionStatuses(state)
 				}
 
-				protoStartDate := timestamppb.Now()
-				protoStartDate.Seconds = 1136160000
-				protoStartDate.Nanos = 0
-				protoEndDate := timestamppb.Now()
-				protoEndDate.Seconds = 1199232000
-				protoEndDate.Nanos = 0
+				goStartTime, err := time.Parse("2006-01-02", test.args.startDate)
+				assert.NoError(t, err)
+				goEndTime, err := time.Parse("2006-01-02", test.args.endDate)
+				assert.NoError(t, err)
+				protoStartDate := timestamppb.New(goStartTime)
+				protoEndDate := timestamppb.New(goEndTime)
 
 				paymentServiceClient.EXPECT().GetTransactions(context.Background(),
 					&payment.GetTransactionsRequest{
