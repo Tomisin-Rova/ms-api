@@ -516,12 +516,21 @@ func (r *queryResolver) Transactions(ctx context.Context, first *int64, after *s
 	// Build request
 	request := payment.GetTransactionsRequest{}
 
-	if startDate != nil {
-		formartedStartDate, _ := time.Parse("2006-01-02", *startDate)
+	if startDate != nil && *endDate != "" {
+		formartedStartDate, err := time.Parse("2006-01-02", *startDate)
+		if err != nil {
+			// log.Println("do nothing")
+			return nil, err
+		}
+
 		request.StartDate = timestamppb.New(formartedStartDate)
 	}
-	if endDate != nil {
-		formatedEndDate, _ := time.Parse("2006-01-02", *endDate)
+	if endDate != nil && *endDate != "" {
+		formatedEndDate, err := time.Parse("2006-01-02", *endDate)
+		if err != nil {
+			// log.Println("do nothing")
+			return nil, err
+		}
 		request.EndDate = timestamppb.New(formatedEndDate)
 	}
 

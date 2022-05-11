@@ -2510,6 +2510,9 @@ func Test_queryResolver_Transactions(t *testing.T) {
 		successLast
 		successAfter
 		successBefore
+		successHasStartDate
+		successHasEndDate
+		successHasBeneficiary
 	)
 
 	tests := []struct {
@@ -2546,8 +2549,8 @@ func Test_queryResolver_Transactions(t *testing.T) {
 				after:          "",
 				last:           int64(0),
 				before:         "",
-				startDate:      "",
-				endDate:        "",
+				startDate:      "2006-01-02",
+				endDate:        "2008-01-02",
 				statuses:       []types.TransactionStatuses{types.TransactionStatusesApproved},
 				accountIds:     []string{""},
 				beneficiaryIds: []string{""},
@@ -2639,6 +2642,87 @@ func Test_queryResolver_Transactions(t *testing.T) {
 			},
 			testType: successBefore,
 		},
+		{
+			name: "Test has start date",
+			args: struct {
+				first          int64
+				after          string
+				last           int64
+				before         string
+				startDate      string
+				endDate        string
+				statuses       []types.TransactionStatuses
+				accountIds     []string
+				beneficiaryIds []string
+				hasBeneficiary bool
+			}{
+				first:          int64(0),
+				after:          "",
+				last:           int64(0),
+				before:         "",
+				startDate:      "2006-01-02",
+				endDate:        "2008-01-02",
+				statuses:       []types.TransactionStatuses{types.TransactionStatusesApproved},
+				accountIds:     []string{""},
+				beneficiaryIds: []string{""},
+				hasBeneficiary: false,
+			},
+			testType: successHasStartDate,
+		},
+		{
+			name: "Test has end date",
+			args: struct {
+				first          int64
+				after          string
+				last           int64
+				before         string
+				startDate      string
+				endDate        string
+				statuses       []types.TransactionStatuses
+				accountIds     []string
+				beneficiaryIds []string
+				hasBeneficiary bool
+			}{
+				first:          int64(0),
+				after:          "",
+				last:           int64(0),
+				before:         "",
+				startDate:      "2006-01-02",
+				endDate:        "2008-01-02",
+				statuses:       []types.TransactionStatuses{types.TransactionStatusesApproved},
+				accountIds:     []string{""},
+				beneficiaryIds: []string{""},
+				hasBeneficiary: false,
+			},
+			testType: successHasEndDate,
+		},
+		{
+			name: "Test has beneficiary",
+			args: struct {
+				first          int64
+				after          string
+				last           int64
+				before         string
+				startDate      string
+				endDate        string
+				statuses       []types.TransactionStatuses
+				accountIds     []string
+				beneficiaryIds []string
+				hasBeneficiary bool
+			}{
+				first:          int64(10),
+				after:          "",
+				last:           int64(0),
+				before:         "",
+				startDate:      "2006-01-02",
+				endDate:        "2008-01-02",
+				statuses:       []types.TransactionStatuses{types.TransactionStatusesApproved},
+				accountIds:     []string{""},
+				beneficiaryIds: []string{""},
+				hasBeneficiary: true,
+			},
+			testType: successHasStartDate,
+		},
 	}
 
 	for _, test := range tests {
@@ -2661,9 +2745,12 @@ func Test_queryResolver_Transactions(t *testing.T) {
 					statuses[index] = helpers.GetProtoTransactionStatuses(state)
 				}
 
-				protoStatDate := timestamppb.Now()
-				protoStatDate.Seconds = -62135596800
-				protoStatDate.Nanos = 0
+				protoStartDate := timestamppb.Now()
+				protoStartDate.Seconds = 1136160000
+				protoStartDate.Nanos = 0
+				protoEndDate := timestamppb.Now()
+				protoEndDate.Seconds = 1199232000
+				protoEndDate.Nanos = 0
 
 				paymentServiceClient.EXPECT().GetTransactions(context.Background(),
 					&payment.GetTransactionsRequest{
@@ -2671,8 +2758,8 @@ func Test_queryResolver_Transactions(t *testing.T) {
 						After:          test.args.after,
 						Last:           int32(test.args.last),
 						Before:         test.args.before,
-						StartDate:      protoStatDate,
-						EndDate:        protoStatDate,
+						StartDate:      protoStartDate,
+						EndDate:        protoEndDate,
 						Statuses:       statuses,
 						AccountIds:     test.args.accountIds,
 						BeneficiaryIds: test.args.beneficiaryIds,
@@ -2925,22 +3012,15 @@ func Test_queryResolver_Transactions(t *testing.T) {
 					statuses[index] = helpers.GetProtoTransactionStatuses(state)
 				}
 
-				protoStatDate := timestamppb.Now()
-				protoStatDate.Seconds = -62135596800
-				protoStatDate.Nanos = 0
-
 				paymentServiceClient.EXPECT().GetTransactions(context.Background(),
 					&payment.GetTransactionsRequest{
 						First:          int32(test.args.first),
 						After:          test.args.after,
 						Last:           int32(test.args.last),
 						Before:         test.args.before,
-						StartDate:      protoStatDate,
-						EndDate:        protoStatDate,
 						Statuses:       statuses,
 						AccountIds:     test.args.accountIds,
 						BeneficiaryIds: test.args.beneficiaryIds,
-						HasBeneficiary: test.args.hasBeneficiary,
 					}).Return(&payment.GetTransactionsResponse{
 					Nodes: []*pbTypes.Transaction{
 						{
@@ -3176,7 +3256,7 @@ func Test_queryResolver_Transactions(t *testing.T) {
 					TotalCount: 2,
 				}, nil)
 
-				resp, err := resolver.Transactions(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, &test.args.startDate, &test.args.after, test.args.statuses, test.args.accountIds, test.args.beneficiaryIds, &test.args.hasBeneficiary)
+				resp, err := resolver.Transactions(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, &test.args.startDate, &test.args.endDate, test.args.statuses, test.args.accountIds, test.args.beneficiaryIds, &test.args.hasBeneficiary)
 				assert.NoError(t, err)
 				assert.NotNil(t, resp)
 				assert.Equal(t, resp.TotalCount, int64(2))
@@ -3188,9 +3268,6 @@ func Test_queryResolver_Transactions(t *testing.T) {
 				for index, state := range test.args.statuses {
 					statuses[index] = helpers.GetProtoTransactionStatuses(state)
 				}
-				protoStatDate := timestamppb.Now()
-				protoStatDate.Seconds = -62135596800
-				protoStatDate.Nanos = 0
 
 				paymentServiceClient.EXPECT().GetTransactions(context.Background(),
 					&payment.GetTransactionsRequest{
@@ -3198,12 +3275,9 @@ func Test_queryResolver_Transactions(t *testing.T) {
 						After:          test.args.after,
 						Last:           int32(test.args.last),
 						Before:         test.args.before,
-						StartDate:      protoStatDate,
-						EndDate:        protoStatDate,
 						Statuses:       statuses,
 						AccountIds:     test.args.accountIds,
 						BeneficiaryIds: test.args.beneficiaryIds,
-						HasBeneficiary: test.args.hasBeneficiary,
 					}).Return(&payment.GetTransactionsResponse{
 					Nodes: []*pbTypes.Transaction{
 						{
@@ -3335,7 +3409,7 @@ func Test_queryResolver_Transactions(t *testing.T) {
 					TotalCount: 1,
 				}, nil)
 
-				resp, err := resolver.Transactions(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, &test.args.startDate, &test.args.after, test.args.statuses, test.args.accountIds, test.args.beneficiaryIds, &test.args.hasBeneficiary)
+				resp, err := resolver.Transactions(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, &test.args.startDate, &test.args.endDate, test.args.statuses, test.args.accountIds, test.args.beneficiaryIds, &test.args.hasBeneficiary)
 				assert.NoError(t, err)
 				assert.NotNil(t, resp)
 				assert.Equal(t, resp.TotalCount, int64(1))
@@ -3348,18 +3422,12 @@ func Test_queryResolver_Transactions(t *testing.T) {
 					statuses[index] = helpers.GetProtoTransactionStatuses(state)
 				}
 
-				protoStatDate := timestamppb.Now()
-				protoStatDate.Seconds = -62135596800
-				protoStatDate.Nanos = 0
-
 				paymentServiceClient.EXPECT().GetTransactions(context.Background(),
 					&payment.GetTransactionsRequest{
 						First:          int32(test.args.first),
 						After:          test.args.after,
 						Last:           int32(test.args.last),
 						Before:         test.args.before,
-						StartDate:      protoStatDate,
-						EndDate:        protoStatDate,
 						Statuses:       statuses,
 						AccountIds:     test.args.accountIds,
 						BeneficiaryIds: test.args.beneficiaryIds,
@@ -3487,10 +3555,811 @@ func Test_queryResolver_Transactions(t *testing.T) {
 					TotalCount: 1,
 				}, nil)
 
-				resp, err := resolver.Transactions(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, &test.args.startDate, &test.args.after, test.args.statuses, test.args.accountIds, test.args.beneficiaryIds, &test.args.hasBeneficiary)
+				resp, err := resolver.Transactions(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, &test.args.startDate, &test.args.endDate, test.args.statuses, test.args.accountIds, test.args.beneficiaryIds, &test.args.hasBeneficiary)
 				assert.NoError(t, err)
 				assert.NotNil(t, resp)
 				assert.Equal(t, resp.TotalCount, int64(1))
+
+			case successHasStartDate:
+				helpers := helpersfactory{}
+				// convert statuses to Transaction_TransactionStatuses
+				statuses := make([]pbTypes.Transaction_TransactionStatuses, len(test.args.statuses))
+				for index, state := range test.args.statuses {
+					statuses[index] = helpers.GetProtoTransactionStatuses(state)
+				}
+
+				protoStartDate := timestamppb.Now()
+				protoStartDate.Seconds = 1136160000
+				protoStartDate.Nanos = 0
+				protoEndDate := timestamppb.Now()
+				protoEndDate.Seconds = 1199232000
+				protoEndDate.Nanos = 0
+
+				paymentServiceClient.EXPECT().GetTransactions(context.Background(),
+					&payment.GetTransactionsRequest{
+						First:          int32(test.args.first),
+						After:          test.args.after,
+						Last:           int32(test.args.last),
+						Before:         test.args.before,
+						StartDate:      protoStartDate,
+						EndDate:        protoEndDate,
+						Statuses:       statuses,
+						AccountIds:     test.args.accountIds,
+						BeneficiaryIds: test.args.beneficiaryIds,
+						HasBeneficiary: test.args.hasBeneficiary,
+					}).Return(&payment.GetTransactionsResponse{
+					Nodes: []*pbTypes.Transaction{
+						{
+							Id: "1",
+							TransactionType: &pbTypes.TransactionType{
+								Id:     "transaction_type_id",
+								Name:   "transaction_type",
+								Status: pbTypes.TransactionType_ACTIVE,
+							},
+							ExchangeRate: &pbTypes.ExchangeRate{
+								Id: "exchange_rate_id",
+								BaseCurrency: &pbTypes.Currency{
+									Id:     "base_currency_id",
+									Symbol: "symbol",
+									Code:   "code",
+									Name:   "name",
+								},
+								TargetCurrency: &pbTypes.Currency{
+									Id:     "target_currency_id",
+									Symbol: "symbol",
+									Code:   "code",
+									Name:   "name",
+								},
+							},
+							Reference:      "reference",
+							Fees:           []*pbTypes.TransactionFee{},
+							Source:         &pbTypes.TransactionSource{},
+							Target:         &pbTypes.TransactionTarget{},
+							IdempotencyKey: "idempotency-key",
+							LinkedTransactions: []*pbTypes.LinkedTransaction{
+								{
+									Id:   "linked_transaction_id",
+									Type: pbTypes.LinkedTransaction_DEPOSIT,
+									Currency: &pbTypes.Currency{
+										Id:     "currency_id",
+										Symbol: "symbol",
+										Name:   "name",
+										Code:   "code",
+									},
+									Amount: 50.0,
+									Source: &pbTypes.LinkedTransactionSource{
+										Account: &pbTypes.Account{
+											Id:            "source_account_id",
+											Name:          "account_name",
+											Iban:          "iban",
+											Code:          "code",
+											AccountNumber: "account_number",
+											Balances: &pbTypes.AccountBalances{
+												TotalBalance: 100.0,
+											},
+											MaturityDate: "20",
+											Mambu: &pbTypes.AccountMambu{
+												EncodedKey: "encodedKey",
+												BranchKey:  "branch_key",
+											},
+											Fcmb: &pbTypes.AccountFCMB{
+												NgnAccountNumber: "ngn_acc_number",
+												CifId:            "cif",
+											},
+											Status: pbTypes.Account_INACTIVE,
+										},
+										AccountData: "",
+									},
+									Target: &pbTypes.LinkedTransactionTarget{
+										Account: &pbTypes.Account{
+											Id:            "target_account_id",
+											Name:          "account_name",
+											Iban:          "iban",
+											Code:          "code",
+											AccountNumber: "account_number",
+											Balances: &pbTypes.AccountBalances{
+												TotalBalance: 100.0,
+											},
+											MaturityDate: "20",
+											Mambu: &pbTypes.AccountMambu{
+												EncodedKey: "encodedKey",
+												BranchKey:  "branch_key",
+											},
+											Fcmb: &pbTypes.AccountFCMB{
+												NgnAccountNumber: "ngn_acc_number",
+												CifId:            "cif",
+											},
+											Status: pbTypes.Account_INACTIVE,
+										},
+										BeneficiaryAccount: &pbTypes.BeneficiaryAccount{
+											Id: "beneficiary_account_id",
+											Beneficiary: &pbTypes.Beneficiary{
+												Id:       "beneficiary_id",
+												Name:     "name",
+												Accounts: []*pbTypes.BeneficiaryAccount{},
+												Status:   pbTypes.Beneficiary_ACTIVE,
+											},
+											Name: "name",
+											Currency: &pbTypes.Currency{
+												Id:     "currency_id",
+												Symbol: "symbol",
+												Name:   "name",
+												Code:   "code",
+											},
+											Status: pbTypes.BeneficiaryAccount_ACTIVE,
+										},
+										AccountData: "data",
+									},
+									Mambu: &pbTypes.LinkedTransactionMambu{
+										TransactionEncodedKey: "transaction_encoded_key",
+									},
+									Fcmb: &pbTypes.LinkedTransactionFCMB{
+										TransactionIdentifier: "trans_identifier",
+									},
+								},
+							},
+							Status: pbTypes.Transaction_APPROVED,
+						},
+
+						{
+							Id: "2",
+							TransactionType: &pbTypes.TransactionType{
+								Id:     "transaction_type_id",
+								Name:   "transaction_type",
+								Status: pbTypes.TransactionType_ACTIVE,
+							},
+							ExchangeRate: &pbTypes.ExchangeRate{
+								Id: "exchange_rate_id",
+								BaseCurrency: &pbTypes.Currency{
+									Id:     "base_currency_id",
+									Symbol: "symbol",
+									Code:   "code",
+									Name:   "name",
+								},
+								TargetCurrency: &pbTypes.Currency{
+									Id:     "target_currency_id",
+									Symbol: "symbol",
+									Code:   "code",
+									Name:   "name",
+								},
+							},
+							Reference:      "reference",
+							Fees:           []*pbTypes.TransactionFee{},
+							Source:         &pbTypes.TransactionSource{},
+							Target:         &pbTypes.TransactionTarget{},
+							IdempotencyKey: "idempotency-key",
+							LinkedTransactions: []*pbTypes.LinkedTransaction{
+								{
+									Id:   "linked_transaction_id",
+									Type: pbTypes.LinkedTransaction_DEPOSIT,
+									Currency: &pbTypes.Currency{
+										Id:     "currency_id",
+										Symbol: "symbol",
+										Name:   "name",
+										Code:   "code",
+									},
+									Amount: 50.0,
+									Source: &pbTypes.LinkedTransactionSource{
+										Account: &pbTypes.Account{
+											Id:            "source_account_id",
+											Name:          "account_name",
+											Iban:          "iban",
+											Code:          "code",
+											AccountNumber: "account_number",
+											Balances: &pbTypes.AccountBalances{
+												TotalBalance: 100.0,
+											},
+											MaturityDate: "20",
+											Mambu: &pbTypes.AccountMambu{
+												EncodedKey: "encodedKey",
+												BranchKey:  "branch_key",
+											},
+											Fcmb: &pbTypes.AccountFCMB{
+												NgnAccountNumber: "ngn_acc_number",
+												CifId:            "cif",
+											},
+											Status: pbTypes.Account_INACTIVE,
+										},
+										AccountData: "",
+									},
+									Target: &pbTypes.LinkedTransactionTarget{
+										Account: &pbTypes.Account{
+											Id:            "target_account_id",
+											Name:          "account_name",
+											Iban:          "iban",
+											Code:          "code",
+											AccountNumber: "account_number",
+											Balances: &pbTypes.AccountBalances{
+												TotalBalance: 100.0,
+											},
+											MaturityDate: "20",
+											Mambu: &pbTypes.AccountMambu{
+												EncodedKey: "encodedKey",
+												BranchKey:  "branch_key",
+											},
+											Fcmb: &pbTypes.AccountFCMB{
+												NgnAccountNumber: "ngn_acc_number",
+												CifId:            "cif",
+											},
+											Status: pbTypes.Account_INACTIVE,
+										},
+										BeneficiaryAccount: &pbTypes.BeneficiaryAccount{
+											Id: "beneficiary_account_id",
+											Beneficiary: &pbTypes.Beneficiary{
+												Id:       "beneficiary_id",
+												Name:     "name",
+												Accounts: []*pbTypes.BeneficiaryAccount{},
+												Status:   pbTypes.Beneficiary_ACTIVE,
+											},
+											Name: "name",
+											Currency: &pbTypes.Currency{
+												Id:     "currency_id",
+												Symbol: "symbol",
+												Name:   "name",
+												Code:   "code",
+											},
+											Status: pbTypes.BeneficiaryAccount_ACTIVE,
+										},
+										AccountData: "data",
+									},
+									Mambu: &pbTypes.LinkedTransactionMambu{
+										TransactionEncodedKey: "transaction_encoded_key",
+									},
+									Fcmb: &pbTypes.LinkedTransactionFCMB{
+										TransactionIdentifier: "trans_identifier",
+									},
+								},
+							},
+							Status: pbTypes.Transaction_APPROVED,
+						},
+					},
+					PaginationInfo: &pbTypes.PaginationInfo{
+						HasNextPage:     false,
+						HasPreviousPage: false,
+						EndCursor:       "end_cursor",
+						StartCursor:     "start_cursor",
+					},
+					TotalCount: 2,
+				}, nil)
+
+				resp, err := resolver.Transactions(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, &test.args.startDate, &test.args.endDate, test.args.statuses, test.args.accountIds, test.args.beneficiaryIds, &test.args.hasBeneficiary)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, resp.TotalCount, int64(2))
+
+			case successHasEndDate:
+				helpers := helpersfactory{}
+				// convert statuses to Transaction_TransactionStatuses
+				statuses := make([]pbTypes.Transaction_TransactionStatuses, len(test.args.statuses))
+				for index, state := range test.args.statuses {
+					statuses[index] = helpers.GetProtoTransactionStatuses(state)
+				}
+
+				protoStartDate := timestamppb.Now()
+				protoStartDate.Seconds = 1136160000
+				protoStartDate.Nanos = 0
+				protoEndDate := timestamppb.Now()
+				protoEndDate.Seconds = 1199232000
+				protoEndDate.Nanos = 0
+
+				paymentServiceClient.EXPECT().GetTransactions(context.Background(),
+					&payment.GetTransactionsRequest{
+						First:          int32(test.args.first),
+						After:          test.args.after,
+						Last:           int32(test.args.last),
+						Before:         test.args.before,
+						StartDate:      protoStartDate,
+						EndDate:        protoEndDate,
+						Statuses:       statuses,
+						AccountIds:     test.args.accountIds,
+						BeneficiaryIds: test.args.beneficiaryIds,
+						HasBeneficiary: test.args.hasBeneficiary,
+					}).Return(&payment.GetTransactionsResponse{
+					Nodes: []*pbTypes.Transaction{
+						{
+							Id: "1",
+							TransactionType: &pbTypes.TransactionType{
+								Id:     "transaction_type_id",
+								Name:   "transaction_type",
+								Status: pbTypes.TransactionType_ACTIVE,
+							},
+							ExchangeRate: &pbTypes.ExchangeRate{
+								Id: "exchange_rate_id",
+								BaseCurrency: &pbTypes.Currency{
+									Id:     "base_currency_id",
+									Symbol: "symbol",
+									Code:   "code",
+									Name:   "name",
+								},
+								TargetCurrency: &pbTypes.Currency{
+									Id:     "target_currency_id",
+									Symbol: "symbol",
+									Code:   "code",
+									Name:   "name",
+								},
+							},
+							Reference:      "reference",
+							Fees:           []*pbTypes.TransactionFee{},
+							Source:         &pbTypes.TransactionSource{},
+							Target:         &pbTypes.TransactionTarget{},
+							IdempotencyKey: "idempotency-key",
+							LinkedTransactions: []*pbTypes.LinkedTransaction{
+								{
+									Id:   "linked_transaction_id",
+									Type: pbTypes.LinkedTransaction_DEPOSIT,
+									Currency: &pbTypes.Currency{
+										Id:     "currency_id",
+										Symbol: "symbol",
+										Name:   "name",
+										Code:   "code",
+									},
+									Amount: 50.0,
+									Source: &pbTypes.LinkedTransactionSource{
+										Account: &pbTypes.Account{
+											Id:            "source_account_id",
+											Name:          "account_name",
+											Iban:          "iban",
+											Code:          "code",
+											AccountNumber: "account_number",
+											Balances: &pbTypes.AccountBalances{
+												TotalBalance: 100.0,
+											},
+											MaturityDate: "20",
+											Mambu: &pbTypes.AccountMambu{
+												EncodedKey: "encodedKey",
+												BranchKey:  "branch_key",
+											},
+											Fcmb: &pbTypes.AccountFCMB{
+												NgnAccountNumber: "ngn_acc_number",
+												CifId:            "cif",
+											},
+											Status: pbTypes.Account_INACTIVE,
+										},
+										AccountData: "",
+									},
+									Target: &pbTypes.LinkedTransactionTarget{
+										Account: &pbTypes.Account{
+											Id:            "target_account_id",
+											Name:          "account_name",
+											Iban:          "iban",
+											Code:          "code",
+											AccountNumber: "account_number",
+											Balances: &pbTypes.AccountBalances{
+												TotalBalance: 100.0,
+											},
+											MaturityDate: "20",
+											Mambu: &pbTypes.AccountMambu{
+												EncodedKey: "encodedKey",
+												BranchKey:  "branch_key",
+											},
+											Fcmb: &pbTypes.AccountFCMB{
+												NgnAccountNumber: "ngn_acc_number",
+												CifId:            "cif",
+											},
+											Status: pbTypes.Account_INACTIVE,
+										},
+										BeneficiaryAccount: &pbTypes.BeneficiaryAccount{
+											Id: "beneficiary_account_id",
+											Beneficiary: &pbTypes.Beneficiary{
+												Id:       "beneficiary_id",
+												Name:     "name",
+												Accounts: []*pbTypes.BeneficiaryAccount{},
+												Status:   pbTypes.Beneficiary_ACTIVE,
+											},
+											Name: "name",
+											Currency: &pbTypes.Currency{
+												Id:     "currency_id",
+												Symbol: "symbol",
+												Name:   "name",
+												Code:   "code",
+											},
+											Status: pbTypes.BeneficiaryAccount_ACTIVE,
+										},
+										AccountData: "data",
+									},
+									Mambu: &pbTypes.LinkedTransactionMambu{
+										TransactionEncodedKey: "transaction_encoded_key",
+									},
+									Fcmb: &pbTypes.LinkedTransactionFCMB{
+										TransactionIdentifier: "trans_identifier",
+									},
+								},
+							},
+							Status: pbTypes.Transaction_APPROVED,
+						},
+
+						{
+							Id: "2",
+							TransactionType: &pbTypes.TransactionType{
+								Id:     "transaction_type_id",
+								Name:   "transaction_type",
+								Status: pbTypes.TransactionType_ACTIVE,
+							},
+							ExchangeRate: &pbTypes.ExchangeRate{
+								Id: "exchange_rate_id",
+								BaseCurrency: &pbTypes.Currency{
+									Id:     "base_currency_id",
+									Symbol: "symbol",
+									Code:   "code",
+									Name:   "name",
+								},
+								TargetCurrency: &pbTypes.Currency{
+									Id:     "target_currency_id",
+									Symbol: "symbol",
+									Code:   "code",
+									Name:   "name",
+								},
+							},
+							Reference:      "reference",
+							Fees:           []*pbTypes.TransactionFee{},
+							Source:         &pbTypes.TransactionSource{},
+							Target:         &pbTypes.TransactionTarget{},
+							IdempotencyKey: "idempotency-key",
+							LinkedTransactions: []*pbTypes.LinkedTransaction{
+								{
+									Id:   "linked_transaction_id",
+									Type: pbTypes.LinkedTransaction_DEPOSIT,
+									Currency: &pbTypes.Currency{
+										Id:     "currency_id",
+										Symbol: "symbol",
+										Name:   "name",
+										Code:   "code",
+									},
+									Amount: 50.0,
+									Source: &pbTypes.LinkedTransactionSource{
+										Account: &pbTypes.Account{
+											Id:            "source_account_id",
+											Name:          "account_name",
+											Iban:          "iban",
+											Code:          "code",
+											AccountNumber: "account_number",
+											Balances: &pbTypes.AccountBalances{
+												TotalBalance: 100.0,
+											},
+											MaturityDate: "20",
+											Mambu: &pbTypes.AccountMambu{
+												EncodedKey: "encodedKey",
+												BranchKey:  "branch_key",
+											},
+											Fcmb: &pbTypes.AccountFCMB{
+												NgnAccountNumber: "ngn_acc_number",
+												CifId:            "cif",
+											},
+											Status: pbTypes.Account_INACTIVE,
+										},
+										AccountData: "",
+									},
+									Target: &pbTypes.LinkedTransactionTarget{
+										Account: &pbTypes.Account{
+											Id:            "target_account_id",
+											Name:          "account_name",
+											Iban:          "iban",
+											Code:          "code",
+											AccountNumber: "account_number",
+											Balances: &pbTypes.AccountBalances{
+												TotalBalance: 100.0,
+											},
+											MaturityDate: "20",
+											Mambu: &pbTypes.AccountMambu{
+												EncodedKey: "encodedKey",
+												BranchKey:  "branch_key",
+											},
+											Fcmb: &pbTypes.AccountFCMB{
+												NgnAccountNumber: "ngn_acc_number",
+												CifId:            "cif",
+											},
+											Status: pbTypes.Account_INACTIVE,
+										},
+										BeneficiaryAccount: &pbTypes.BeneficiaryAccount{
+											Id: "beneficiary_account_id",
+											Beneficiary: &pbTypes.Beneficiary{
+												Id:       "beneficiary_id",
+												Name:     "name",
+												Accounts: []*pbTypes.BeneficiaryAccount{},
+												Status:   pbTypes.Beneficiary_ACTIVE,
+											},
+											Name: "name",
+											Currency: &pbTypes.Currency{
+												Id:     "currency_id",
+												Symbol: "symbol",
+												Name:   "name",
+												Code:   "code",
+											},
+											Status: pbTypes.BeneficiaryAccount_ACTIVE,
+										},
+										AccountData: "data",
+									},
+									Mambu: &pbTypes.LinkedTransactionMambu{
+										TransactionEncodedKey: "transaction_encoded_key",
+									},
+									Fcmb: &pbTypes.LinkedTransactionFCMB{
+										TransactionIdentifier: "trans_identifier",
+									},
+								},
+							},
+							Status: pbTypes.Transaction_APPROVED,
+						},
+					},
+					PaginationInfo: &pbTypes.PaginationInfo{
+						HasNextPage:     false,
+						HasPreviousPage: false,
+						EndCursor:       "end_cursor",
+						StartCursor:     "start_cursor",
+					},
+					TotalCount: 2,
+				}, nil)
+
+				resp, err := resolver.Transactions(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, &test.args.startDate, &test.args.endDate, test.args.statuses, test.args.accountIds, test.args.beneficiaryIds, &test.args.hasBeneficiary)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, resp.TotalCount, int64(2))
+
+			case successHasBeneficiary:
+				helpers := helpersfactory{}
+				// convert statuses to Transaction_TransactionStatuses
+				statuses := make([]pbTypes.Transaction_TransactionStatuses, len(test.args.statuses))
+				for index, state := range test.args.statuses {
+					statuses[index] = helpers.GetProtoTransactionStatuses(state)
+				}
+
+				protoStartDate := timestamppb.Now()
+				protoStartDate.Seconds = 1136160000
+				protoStartDate.Nanos = 0
+				protoEndDate := timestamppb.Now()
+				protoEndDate.Seconds = 1199232000
+				protoEndDate.Nanos = 0
+
+				paymentServiceClient.EXPECT().GetTransactions(context.Background(),
+					&payment.GetTransactionsRequest{
+						First:          int32(test.args.first),
+						After:          test.args.after,
+						Last:           int32(test.args.last),
+						Before:         test.args.before,
+						StartDate:      protoStartDate,
+						EndDate:        protoEndDate,
+						Statuses:       statuses,
+						AccountIds:     test.args.accountIds,
+						BeneficiaryIds: test.args.beneficiaryIds,
+						HasBeneficiary: test.args.hasBeneficiary,
+					}).Return(&payment.GetTransactionsResponse{
+					Nodes: []*pbTypes.Transaction{
+						{
+							Id: "1",
+							TransactionType: &pbTypes.TransactionType{
+								Id:     "transaction_type_id",
+								Name:   "transaction_type",
+								Status: pbTypes.TransactionType_ACTIVE,
+							},
+							ExchangeRate: &pbTypes.ExchangeRate{
+								Id: "exchange_rate_id",
+								BaseCurrency: &pbTypes.Currency{
+									Id:     "base_currency_id",
+									Symbol: "symbol",
+									Code:   "code",
+									Name:   "name",
+								},
+								TargetCurrency: &pbTypes.Currency{
+									Id:     "target_currency_id",
+									Symbol: "symbol",
+									Code:   "code",
+									Name:   "name",
+								},
+							},
+							Reference:      "reference",
+							Fees:           []*pbTypes.TransactionFee{},
+							Source:         &pbTypes.TransactionSource{},
+							Target:         &pbTypes.TransactionTarget{},
+							IdempotencyKey: "idempotency-key",
+							LinkedTransactions: []*pbTypes.LinkedTransaction{
+								{
+									Id:   "linked_transaction_id",
+									Type: pbTypes.LinkedTransaction_DEPOSIT,
+									Currency: &pbTypes.Currency{
+										Id:     "currency_id",
+										Symbol: "symbol",
+										Name:   "name",
+										Code:   "code",
+									},
+									Amount: 50.0,
+									Source: &pbTypes.LinkedTransactionSource{
+										Account: &pbTypes.Account{
+											Id:            "source_account_id",
+											Name:          "account_name",
+											Iban:          "iban",
+											Code:          "code",
+											AccountNumber: "account_number",
+											Balances: &pbTypes.AccountBalances{
+												TotalBalance: 100.0,
+											},
+											MaturityDate: "20",
+											Mambu: &pbTypes.AccountMambu{
+												EncodedKey: "encodedKey",
+												BranchKey:  "branch_key",
+											},
+											Fcmb: &pbTypes.AccountFCMB{
+												NgnAccountNumber: "ngn_acc_number",
+												CifId:            "cif",
+											},
+											Status: pbTypes.Account_INACTIVE,
+										},
+										AccountData: "",
+									},
+									Target: &pbTypes.LinkedTransactionTarget{
+										Account: &pbTypes.Account{
+											Id:            "target_account_id",
+											Name:          "account_name",
+											Iban:          "iban",
+											Code:          "code",
+											AccountNumber: "account_number",
+											Balances: &pbTypes.AccountBalances{
+												TotalBalance: 100.0,
+											},
+											MaturityDate: "20",
+											Mambu: &pbTypes.AccountMambu{
+												EncodedKey: "encodedKey",
+												BranchKey:  "branch_key",
+											},
+											Fcmb: &pbTypes.AccountFCMB{
+												NgnAccountNumber: "ngn_acc_number",
+												CifId:            "cif",
+											},
+											Status: pbTypes.Account_INACTIVE,
+										},
+										BeneficiaryAccount: &pbTypes.BeneficiaryAccount{
+											Id: "beneficiary_account_id",
+											Beneficiary: &pbTypes.Beneficiary{
+												Id:       "beneficiary_id",
+												Name:     "name",
+												Accounts: []*pbTypes.BeneficiaryAccount{},
+												Status:   pbTypes.Beneficiary_ACTIVE,
+											},
+											Name: "name",
+											Currency: &pbTypes.Currency{
+												Id:     "currency_id",
+												Symbol: "symbol",
+												Name:   "name",
+												Code:   "code",
+											},
+											Status: pbTypes.BeneficiaryAccount_ACTIVE,
+										},
+										AccountData: "data",
+									},
+									Mambu: &pbTypes.LinkedTransactionMambu{
+										TransactionEncodedKey: "transaction_encoded_key",
+									},
+									Fcmb: &pbTypes.LinkedTransactionFCMB{
+										TransactionIdentifier: "trans_identifier",
+									},
+								},
+							},
+							Status: pbTypes.Transaction_APPROVED,
+						},
+
+						{
+							Id: "2",
+							TransactionType: &pbTypes.TransactionType{
+								Id:     "transaction_type_id",
+								Name:   "transaction_type",
+								Status: pbTypes.TransactionType_ACTIVE,
+							},
+							ExchangeRate: &pbTypes.ExchangeRate{
+								Id: "exchange_rate_id",
+								BaseCurrency: &pbTypes.Currency{
+									Id:     "base_currency_id",
+									Symbol: "symbol",
+									Code:   "code",
+									Name:   "name",
+								},
+								TargetCurrency: &pbTypes.Currency{
+									Id:     "target_currency_id",
+									Symbol: "symbol",
+									Code:   "code",
+									Name:   "name",
+								},
+							},
+							Reference:      "reference",
+							Fees:           []*pbTypes.TransactionFee{},
+							Source:         &pbTypes.TransactionSource{},
+							Target:         &pbTypes.TransactionTarget{},
+							IdempotencyKey: "idempotency-key",
+							LinkedTransactions: []*pbTypes.LinkedTransaction{
+								{
+									Id:   "linked_transaction_id",
+									Type: pbTypes.LinkedTransaction_DEPOSIT,
+									Currency: &pbTypes.Currency{
+										Id:     "currency_id",
+										Symbol: "symbol",
+										Name:   "name",
+										Code:   "code",
+									},
+									Amount: 50.0,
+									Source: &pbTypes.LinkedTransactionSource{
+										Account: &pbTypes.Account{
+											Id:            "source_account_id",
+											Name:          "account_name",
+											Iban:          "iban",
+											Code:          "code",
+											AccountNumber: "account_number",
+											Balances: &pbTypes.AccountBalances{
+												TotalBalance: 100.0,
+											},
+											MaturityDate: "20",
+											Mambu: &pbTypes.AccountMambu{
+												EncodedKey: "encodedKey",
+												BranchKey:  "branch_key",
+											},
+											Fcmb: &pbTypes.AccountFCMB{
+												NgnAccountNumber: "ngn_acc_number",
+												CifId:            "cif",
+											},
+											Status: pbTypes.Account_INACTIVE,
+										},
+										AccountData: "",
+									},
+									Target: &pbTypes.LinkedTransactionTarget{
+										Account: &pbTypes.Account{
+											Id:            "target_account_id",
+											Name:          "account_name",
+											Iban:          "iban",
+											Code:          "code",
+											AccountNumber: "account_number",
+											Balances: &pbTypes.AccountBalances{
+												TotalBalance: 100.0,
+											},
+											MaturityDate: "20",
+											Mambu: &pbTypes.AccountMambu{
+												EncodedKey: "encodedKey",
+												BranchKey:  "branch_key",
+											},
+											Fcmb: &pbTypes.AccountFCMB{
+												NgnAccountNumber: "ngn_acc_number",
+												CifId:            "cif",
+											},
+											Status: pbTypes.Account_INACTIVE,
+										},
+										BeneficiaryAccount: &pbTypes.BeneficiaryAccount{
+											Id: "beneficiary_account_id",
+											Beneficiary: &pbTypes.Beneficiary{
+												Id:       "beneficiary_id",
+												Name:     "name",
+												Accounts: []*pbTypes.BeneficiaryAccount{},
+												Status:   pbTypes.Beneficiary_ACTIVE,
+											},
+											Name: "name",
+											Currency: &pbTypes.Currency{
+												Id:     "currency_id",
+												Symbol: "symbol",
+												Name:   "name",
+												Code:   "code",
+											},
+											Status: pbTypes.BeneficiaryAccount_ACTIVE,
+										},
+										AccountData: "data",
+									},
+									Mambu: &pbTypes.LinkedTransactionMambu{
+										TransactionEncodedKey: "transaction_encoded_key",
+									},
+									Fcmb: &pbTypes.LinkedTransactionFCMB{
+										TransactionIdentifier: "trans_identifier",
+									},
+								},
+							},
+							Status: pbTypes.Transaction_APPROVED,
+						},
+					},
+					PaginationInfo: &pbTypes.PaginationInfo{
+						HasNextPage:     false,
+						HasPreviousPage: false,
+						EndCursor:       "end_cursor",
+						StartCursor:     "start_cursor",
+					},
+					TotalCount: 2,
+				}, nil)
+
+				resp, err := resolver.Transactions(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, &test.args.startDate, &test.args.endDate, test.args.statuses, test.args.accountIds, test.args.beneficiaryIds, &test.args.hasBeneficiary)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, resp.TotalCount, int64(2))
 			}
 		})
 
@@ -3710,6 +4579,7 @@ func Test_queryResolver_Beneficiaries(t *testing.T) {
 				assert.Error(t, err)
 				assert.Nil(t, resp)
 				assert.Contains(t, err.Error(), "test error")
+
 			}
 		})
 	}
