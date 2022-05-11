@@ -670,8 +670,8 @@ func (r *queryResolver) ExistingBeneficiariesByPhone(ctx context.Context, phones
 		return nil, err
 	}
 	results := make([]*string, len(response.Phones))
-	for index, phone := range response.Phones {
-		results[index] = &phone
+	for i := 0; i < len(response.Phones); i++ {
+		results[i] = &response.Phones[i]
 	}
 
 	return results, nil
