@@ -10305,7 +10305,7 @@ func TestQueryResolver_ExistingBeneficiariesByPhone(t *testing.T) {
 			testType: errorUnauthenticated,
 		},
 		{
-			name: "Test existing cuatomer with the given phone number",
+			name: "should fail on gRPC error",
 			arg: arg{
 				phone:               []string{"phonenumber1"},
 				transactionpassword: "",
