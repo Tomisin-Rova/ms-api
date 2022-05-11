@@ -6,6 +6,7 @@ package graph
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/roava/zebra/models"
@@ -500,7 +501,7 @@ func (r *queryResolver) Transaction(ctx context.Context, id string) (*apiTypes.T
 	return helpers.MakeTransactionFromProto(result), nil
 }
 
-func (r *queryResolver) Transactions(ctx context.Context, first *int64, after *string, last *int64, before *string, statuses []apiTypes.TransactionStatuses, accountIds []string, beneficiaryIds []string) (*apiTypes.TransactionConnection, error) {
+func (r *queryResolver) Transactions(ctx context.Context, first *int64, after *string, last *int64, before *string, startDate *string, endDate *string, statuses []apiTypes.TransactionStatuses, accountIds []string, beneficiaryIds []string, hasBeneficiary *bool) (*apiTypes.TransactionConnection, error) {
 	helper := helpersfactory{}
 	transactionStatuses := make([]protoTypes.Transaction_TransactionStatuses, len(statuses))
 
@@ -628,6 +629,10 @@ func (r *queryResolver) Beneficiaries(ctx context.Context, keywords *string, fir
 		PageInfo:   pageInfo,
 		TotalCount: int64(resp.TotalCount),
 	}, nil
+}
+
+func (r *queryResolver) ExistingBeneficiariesByPhone(ctx context.Context, phones []string, transactionPassword string) ([]*string, error) {
+	panic(fmt.Errorf("not implemented"))
 }
 
 func (r *queryResolver) TransactionTypes(ctx context.Context, first *int64, after *string, last *int64, before *string, statuses []apiTypes.TransactionTypeStatuses) (*apiTypes.TransactionTypeConnection, error) {
@@ -892,7 +897,7 @@ func (r *queryResolver) Currencies(ctx context.Context, keywords *string, first 
 	return response, nil
 }
 
-func (r *queryResolver) Fees(ctx context.Context, transactionTypeID string) ([]*apiTypes.Fee, error) {
+func (r *queryResolver) Fees(ctx context.Context, transactionTypeID string, sourceAccountID string, targetAccountID string) ([]*apiTypes.Fee, error) {
 	resp, err := r.PricingService.GetFees(ctx, &pricing.GetFeesRequest{TransactionTypeId: transactionTypeID})
 	if err != nil {
 		return nil, err
