@@ -181,6 +181,11 @@ type BeneficiaryAccountInput struct {
 	Code          string  `json:"code"`
 }
 
+type BeneficiaryByPhoneInput struct {
+	Phone string `json:"phone"`
+	Name  string `json:"name"`
+}
+
 type BeneficiaryConnection struct {
 	Nodes      []*Beneficiary `json:"nodes"`
 	PageInfo   *PageInfo      `json:"pageInfo"`

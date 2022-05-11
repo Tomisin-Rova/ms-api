@@ -389,37 +389,38 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		AcceptContent             func(childComplexity int, contentID string) int
-		AddBeneficiaryAccount     func(childComplexity int, beneficiaryID string, account types.BeneficiaryAccountInput, transactionPassword string) int
-		AnswerQuestionary         func(childComplexity int, questionary types.QuestionaryAnswerInput) int
-		CheckBvn                  func(childComplexity int, bvn string, phone string) int
-		CheckCustomerData         func(childComplexity int, customerData types.CheckCustomerDataInput) int
-		CheckCustomerEmail        func(childComplexity int, email string, device types.DeviceInput) int
-		CreateAccount             func(childComplexity int, account types.AccountInput) int
-		CreateBeneficiary         func(childComplexity int, beneficiary types.BeneficiaryInput, transactionPassword string) int
-		CreateTransfer            func(childComplexity int, transfer types.TransactionInput, transactionPassword string) int
-		CreateVaultAccount        func(childComplexity int, account types.VaultAccountInput, transactionPassword string) int
-		DeactivateCredential      func(childComplexity int, credentialType types.IdentityCredentialsTypes) int
-		DeleteBeneficiaryAccount  func(childComplexity int, beneficiaryID string, accountID string, transactionPassword string) int
-		ForgotTransactionPassword func(childComplexity int, newTransactionPassword string) int
-		Login                     func(childComplexity int, credentials types.AuthInput) int
-		RefreshToken              func(childComplexity int, token string) int
-		Register                  func(childComplexity int, customerDetails types.CustomerDetailsInput) int
-		RequestOtp                func(childComplexity int, typeArg types.DeliveryMode, target string, expireTimeInSeconds *int64) int
-		RequestResubmit           func(childComplexity int, customerID string, reportIds []string, message *string) int
-		ResetLoginPassword        func(childComplexity int, otpToken string, email string, loginPassword string) int
-		ResetTransactionPassword  func(childComplexity int, otpToken string, email string, newTransactionPassword string, currentTransactionPassword string) int
-		SendNotification          func(childComplexity int, typeArg types.DeliveryMode, content string, templateID string) int
-		SetDevicePreferences      func(childComplexity int, preferences []*types.DevicePreferencesInput) int
-		SetDeviceToken            func(childComplexity int, tokens []*types.DeviceTokenInput) int
-		SetTransactionPassword    func(childComplexity int, password string) int
-		Signup                    func(childComplexity int, customer types.CustomerInput) int
-		StaffLogin                func(childComplexity int, token string, authType types.AuthType) int
-		SubmitCdd                 func(childComplexity int, cdd types.CDDInput) int
-		UpdateAMLStatus           func(childComplexity int, id string, status types.AMLStatuses, message string) int
-		UpdateCustomerDetails     func(childComplexity int, customerDetails types.CustomerDetailsUpdateInput, transactionPassword string) int
-		UpdateKYCStatus           func(childComplexity int, id string, status types.KYCStatuses, message string) int
-		VerifyOtp                 func(childComplexity int, target string, otpToken string) int
+		AcceptContent              func(childComplexity int, contentID string) int
+		AddBeneficiaryAccount      func(childComplexity int, beneficiaryID string, account types.BeneficiaryAccountInput, transactionPassword string) int
+		AnswerQuestionary          func(childComplexity int, questionary types.QuestionaryAnswerInput) int
+		CheckBvn                   func(childComplexity int, bvn string, phone string) int
+		CheckCustomerData          func(childComplexity int, customerData types.CheckCustomerDataInput) int
+		CheckCustomerEmail         func(childComplexity int, email string, device types.DeviceInput) int
+		CreateAccount              func(childComplexity int, account types.AccountInput) int
+		CreateBeneficiariesByPhone func(childComplexity int, beneficiaries []*types.BeneficiaryByPhoneInput, transactionPassword string) int
+		CreateBeneficiary          func(childComplexity int, beneficiary types.BeneficiaryInput, transactionPassword string) int
+		CreateTransfer             func(childComplexity int, transfer types.TransactionInput, transactionPassword string) int
+		CreateVaultAccount         func(childComplexity int, account types.VaultAccountInput, transactionPassword string) int
+		DeactivateCredential       func(childComplexity int, credentialType types.IdentityCredentialsTypes) int
+		DeleteBeneficiaryAccount   func(childComplexity int, beneficiaryID string, accountID string, transactionPassword string) int
+		ForgotTransactionPassword  func(childComplexity int, newTransactionPassword string) int
+		Login                      func(childComplexity int, credentials types.AuthInput) int
+		RefreshToken               func(childComplexity int, token string) int
+		Register                   func(childComplexity int, customerDetails types.CustomerDetailsInput) int
+		RequestOtp                 func(childComplexity int, typeArg types.DeliveryMode, target string, expireTimeInSeconds *int64) int
+		RequestResubmit            func(childComplexity int, customerID string, reportIds []string, message *string) int
+		ResetLoginPassword         func(childComplexity int, otpToken string, email string, loginPassword string) int
+		ResetTransactionPassword   func(childComplexity int, otpToken string, email string, newTransactionPassword string, currentTransactionPassword string) int
+		SendNotification           func(childComplexity int, typeArg types.DeliveryMode, content string, templateID string) int
+		SetDevicePreferences       func(childComplexity int, preferences []*types.DevicePreferencesInput) int
+		SetDeviceToken             func(childComplexity int, tokens []*types.DeviceTokenInput) int
+		SetTransactionPassword     func(childComplexity int, password string) int
+		Signup                     func(childComplexity int, customer types.CustomerInput) int
+		StaffLogin                 func(childComplexity int, token string, authType types.AuthType) int
+		SubmitCdd                  func(childComplexity int, cdd types.CDDInput) int
+		UpdateAMLStatus            func(childComplexity int, id string, status types.AMLStatuses, message string) int
+		UpdateCustomerDetails      func(childComplexity int, customerDetails types.CustomerDetailsUpdateInput, transactionPassword string) int
+		UpdateKYCStatus            func(childComplexity int, id string, status types.KYCStatuses, message string) int
+		VerifyOtp                  func(childComplexity int, target string, otpToken string) int
 	}
 
 	Organization struct {
@@ -488,34 +489,35 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Account          func(childComplexity int, id string) int
-		Accounts         func(childComplexity int, first *int64, after *string, last *int64, before *string, statuses []types.AccountStatuses, types []types.ProductTypes) int
-		Addresses        func(childComplexity int, first *int64, after *string, last *int64, before *string, postcode *string) int
-		Banks            func(childComplexity int, first *int64, after *string, last *int64, before *string) int
-		Beneficiaries    func(childComplexity int, keywords *string, first *int64, after *string, last *int64, before *string, statuses []types.BeneficiaryStatuses) int
-		Beneficiary      func(childComplexity int, id string) int
-		Cdd              func(childComplexity int, filter types.CommonQueryFilterInput) int
-		Cdds             func(childComplexity int, first *int64, after *string, last *int64, before *string, statuses []types.CDDStatuses) int
-		CheckEmail       func(childComplexity int, email string) int
-		CheckPhoneNumber func(childComplexity int, phone string) int
-		Content          func(childComplexity int, id string) int
-		Contents         func(childComplexity int, first *int64, after *string, last *int64, before *string) int
-		Countries        func(childComplexity int, keywords *string, first *int64, after *string, last *int64, before *string) int
-		Currencies       func(childComplexity int, keywords *string, first *int64, after *string, last *int64, before *string) int
-		Currency         func(childComplexity int, id string) int
-		Customer         func(childComplexity int, id string) int
-		Customers        func(childComplexity int, keywords *string, first *int64, after *string, last *int64, before *string, statuses []types.CustomerStatuses) int
-		ExchangeRate     func(childComplexity int, transactionTypeID string) int
-		Fees             func(childComplexity int, transactionTypeID string) int
-		Me               func(childComplexity int) int
-		OnfidoSDKToken   func(childComplexity int) int
-		Product          func(childComplexity int, id string) int
-		Products         func(childComplexity int, first *int64, after *string, last *int64, before *string, statuses []types.ProductStatuses, typeArg *types.ProductTypes) int
-		Questionaries    func(childComplexity int, keywords *string, first *int64, after *string, last *int64, before *string, statuses []types.QuestionaryStatuses, typeArg []types.QuestionaryTypes) int
-		Questionary      func(childComplexity int, id string) int
-		Transaction      func(childComplexity int, id string) int
-		TransactionTypes func(childComplexity int, first *int64, after *string, last *int64, before *string, statuses []types.TransactionTypeStatuses) int
-		Transactions     func(childComplexity int, first *int64, after *string, last *int64, before *string, statuses []types.TransactionStatuses, accountIds []string, beneficiaryIds []string) int
+		Account                      func(childComplexity int, id string) int
+		Accounts                     func(childComplexity int, first *int64, after *string, last *int64, before *string, statuses []types.AccountStatuses, types []types.ProductTypes) int
+		Addresses                    func(childComplexity int, first *int64, after *string, last *int64, before *string, postcode *string) int
+		Banks                        func(childComplexity int, first *int64, after *string, last *int64, before *string) int
+		Beneficiaries                func(childComplexity int, keywords *string, first *int64, after *string, last *int64, before *string, statuses []types.BeneficiaryStatuses) int
+		Beneficiary                  func(childComplexity int, id string) int
+		Cdd                          func(childComplexity int, filter types.CommonQueryFilterInput) int
+		Cdds                         func(childComplexity int, first *int64, after *string, last *int64, before *string, statuses []types.CDDStatuses) int
+		CheckEmail                   func(childComplexity int, email string) int
+		CheckPhoneNumber             func(childComplexity int, phone string) int
+		Content                      func(childComplexity int, id string) int
+		Contents                     func(childComplexity int, first *int64, after *string, last *int64, before *string) int
+		Countries                    func(childComplexity int, keywords *string, first *int64, after *string, last *int64, before *string) int
+		Currencies                   func(childComplexity int, keywords *string, first *int64, after *string, last *int64, before *string) int
+		Currency                     func(childComplexity int, id string) int
+		Customer                     func(childComplexity int, id string) int
+		Customers                    func(childComplexity int, keywords *string, first *int64, after *string, last *int64, before *string, statuses []types.CustomerStatuses) int
+		ExchangeRate                 func(childComplexity int, transactionTypeID string) int
+		ExistingBeneficiariesByPhone func(childComplexity int, phones []string, transactionPassword string) int
+		Fees                         func(childComplexity int, transactionTypeID string, sourceAccountID string, targetAccountID string) int
+		Me                           func(childComplexity int) int
+		OnfidoSDKToken               func(childComplexity int) int
+		Product                      func(childComplexity int, id string) int
+		Products                     func(childComplexity int, first *int64, after *string, last *int64, before *string, statuses []types.ProductStatuses, typeArg *types.ProductTypes) int
+		Questionaries                func(childComplexity int, keywords *string, first *int64, after *string, last *int64, before *string, statuses []types.QuestionaryStatuses, typeArg []types.QuestionaryTypes) int
+		Questionary                  func(childComplexity int, id string) int
+		Transaction                  func(childComplexity int, id string) int
+		TransactionTypes             func(childComplexity int, first *int64, after *string, last *int64, before *string, statuses []types.TransactionTypeStatuses) int
+		Transactions                 func(childComplexity int, first *int64, after *string, last *int64, before *string, startDate *string, endDate *string, statuses []types.TransactionStatuses, accountIds []string, beneficiaryIds []string, hasBeneficiary *bool) int
 	}
 
 	Questionary struct {
@@ -685,6 +687,7 @@ type MutationResolver interface {
 	CreateAccount(ctx context.Context, account types.AccountInput) (*types.Response, error)
 	CreateVaultAccount(ctx context.Context, account types.VaultAccountInput, transactionPassword string) (*types.Response, error)
 	CreateBeneficiary(ctx context.Context, beneficiary types.BeneficiaryInput, transactionPassword string) (*types.Response, error)
+	CreateBeneficiariesByPhone(ctx context.Context, beneficiaries []*types.BeneficiaryByPhoneInput, transactionPassword string) (*types.Response, error)
 	AddBeneficiaryAccount(ctx context.Context, beneficiaryID string, account types.BeneficiaryAccountInput, transactionPassword string) (*types.Response, error)
 	DeleteBeneficiaryAccount(ctx context.Context, beneficiaryID string, accountID string, transactionPassword string) (*types.Response, error)
 	CreateTransfer(ctx context.Context, transfer types.TransactionInput, transactionPassword string) (*types.Response, error)
@@ -710,15 +713,16 @@ type QueryResolver interface {
 	Account(ctx context.Context, id string) (*types.Account, error)
 	Accounts(ctx context.Context, first *int64, after *string, last *int64, before *string, statuses []types.AccountStatuses, types []types.ProductTypes) (*types.AccountConnection, error)
 	Transaction(ctx context.Context, id string) (*types.Transaction, error)
-	Transactions(ctx context.Context, first *int64, after *string, last *int64, before *string, statuses []types.TransactionStatuses, accountIds []string, beneficiaryIds []string) (*types.TransactionConnection, error)
+	Transactions(ctx context.Context, first *int64, after *string, last *int64, before *string, startDate *string, endDate *string, statuses []types.TransactionStatuses, accountIds []string, beneficiaryIds []string, hasBeneficiary *bool) (*types.TransactionConnection, error)
 	Beneficiary(ctx context.Context, id string) (*types.Beneficiary, error)
 	Beneficiaries(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string, statuses []types.BeneficiaryStatuses) (*types.BeneficiaryConnection, error)
+	ExistingBeneficiariesByPhone(ctx context.Context, phones []string, transactionPassword string) ([]*string, error)
 	TransactionTypes(ctx context.Context, first *int64, after *string, last *int64, before *string, statuses []types.TransactionTypeStatuses) (*types.TransactionTypeConnection, error)
 	Questionary(ctx context.Context, id string) (*types.Questionary, error)
 	Questionaries(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string, statuses []types.QuestionaryStatuses, typeArg []types.QuestionaryTypes) (*types.QuestionaryConnection, error)
 	Currency(ctx context.Context, id string) (*types.Currency, error)
 	Currencies(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string) (*types.CurrencyConnection, error)
-	Fees(ctx context.Context, transactionTypeID string) ([]*types.Fee, error)
+	Fees(ctx context.Context, transactionTypeID string, sourceAccountID string, targetAccountID string) ([]*types.Fee, error)
 	ExchangeRate(ctx context.Context, transactionTypeID string) (*types.ExchangeRate, error)
 	Me(ctx context.Context) (types.MeResult, error)
 	Customer(ctx context.Context, id string) (*types.Customer, error)
@@ -2309,6 +2313,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateAccount(childComplexity, args["account"].(types.AccountInput)), true
 
+	case "Mutation.createBeneficiariesByPhone":
+		if e.complexity.Mutation.CreateBeneficiariesByPhone == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createBeneficiariesByPhone_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateBeneficiariesByPhone(childComplexity, args["beneficiaries"].([]*types.BeneficiaryByPhoneInput), args["transactionPassword"].(string)), true
+
 	case "Mutation.createBeneficiary":
 		if e.complexity.Mutation.CreateBeneficiary == nil {
 			break
@@ -3100,6 +3116,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.ExchangeRate(childComplexity, args["transactionTypeId"].(string)), true
 
+	case "Query.existingBeneficiariesByPhone":
+		if e.complexity.Query.ExistingBeneficiariesByPhone == nil {
+			break
+		}
+
+		args, err := ec.field_Query_existingBeneficiariesByPhone_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.ExistingBeneficiariesByPhone(childComplexity, args["phones"].([]string), args["transactionPassword"].(string)), true
+
 	case "Query.fees":
 		if e.complexity.Query.Fees == nil {
 			break
@@ -3110,7 +3138,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Fees(childComplexity, args["transactionTypeId"].(string)), true
+		return e.complexity.Query.Fees(childComplexity, args["transactionTypeId"].(string), args["sourceAccountId"].(string), args["targetAccountId"].(string)), true
 
 	case "Query.me":
 		if e.complexity.Query.Me == nil {
@@ -3208,7 +3236,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Transactions(childComplexity, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string), args["statuses"].([]types.TransactionStatuses), args["accountIds"].([]string), args["beneficiaryIds"].([]string)), true
+		return e.complexity.Query.Transactions(childComplexity, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string), args["startDate"].(*string), args["endDate"].(*string), args["statuses"].([]types.TransactionStatuses), args["accountIds"].([]string), args["beneficiaryIds"].([]string), args["hasBeneficiary"].(*bool)), true
 
 	case "Questionary.id":
 		if e.complexity.Questionary.ID == nil {
@@ -3846,6 +3874,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputAnswerInput,
 		ec.unmarshalInputAuthInput,
 		ec.unmarshalInputBeneficiaryAccountInput,
+		ec.unmarshalInputBeneficiaryByPhoneInput,
 		ec.unmarshalInputBeneficiaryInput,
 		ec.unmarshalInputCDDInput,
 		ec.unmarshalInputCheckCustomerDataInput,
@@ -3968,6 +3997,8 @@ var sources = []*ast.Source{
     createVaultAccount(account: VaultAccountInput!, transactionPassword: String!): Response!
     # Create a new Beneficiary
     createBeneficiary(beneficiary: BeneficiaryInput!, transactionPassword: String!): Response!
+    # Creates all beneficiaries that are attached to the phone list provided
+    createBeneficiariesByPhone(beneficiaries: [BeneficiaryByPhoneInput!]!, transactionPassword: String!): Response!
     # Add new account to existing beneficiary
     addBeneficiaryAccount(beneficiaryId: ID!, account: BeneficiaryAccountInput!, transactionPassword: String!): Response!
     # Delete an account from an existing beneficiary
@@ -4154,6 +4185,11 @@ input BeneficiaryInput {
     account: BeneficiaryAccountInput!
 }
 
+input BeneficiaryByPhoneInput {
+    phone: String!
+    name: String!
+}
+
 input BeneficiaryAccountInput {
     name: String
     currencyId: ID!
@@ -4296,12 +4332,18 @@ enum DeliveryMode {
         last: Int
         # Returns the elements in the list that come before the specified cursor.
         before: String
+        # Returns the elements in the list starting from the specified date.
+        startDate: Date
+        # Returns the elements in the list until the specified date.
+        endDate: Date
         # Filter transaction by it's status. If empty, should ignore the field
         statuses: [TransactionStatuses!]
         # Filter transaction by it's account. If empty, should ignore the field
         accountIds: [ID!]
         # Filter transaction by beneficiary. If empty, should ignore the field
         beneficiaryIds: [ID!]
+        # Filter transaction made to a beneficiaries only
+        hasBeneficiary: Boolean
     ): TransactionConnection
     # Fetch a customer beneficiary by ID
     beneficiary(id: ID!): Beneficiary!
@@ -4320,6 +4362,8 @@ enum DeliveryMode {
         # Filter transaction by it's status. If empty, should ignore the field
         statuses: [BeneficiaryStatuses!]
     ): BeneficiaryConnection
+    # Fetch the list of existing beneficiaries by the provided phone list (API only return the list of phones that exist in ROAVA)
+    existingBeneficiariesByPhone(phones: [String!]!, transactionPassword: String!): [String]!
     # Fetch a list of transactionTypes
     transactionTypes(
         # Returns the first n elements from the list.
@@ -4367,7 +4411,11 @@ enum DeliveryMode {
         # Returns the elements in the list that come before the specified cursor.
         before: String
     ): CurrencyConnection!
-    fees(transactionTypeId: ID!): [Fee!]!
+    fees(
+        transactionTypeId: ID!
+        sourceAccountId: ID!
+        targetAccountId: ID!
+    ): [Fee!]!
     exchangeRate(transactionTypeId: ID!): ExchangeRate!
 
     # ---- Dashboard -----
@@ -5371,6 +5419,30 @@ func (ec *executionContext) field_Mutation_createAccount_args(ctx context.Contex
 		}
 	}
 	args["account"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createBeneficiariesByPhone_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 []*types.BeneficiaryByPhoneInput
+	if tmp, ok := rawArgs["beneficiaries"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("beneficiaries"))
+		arg0, err = ec.unmarshalNBeneficiaryByPhoneInput2ᚕᚖmsᚗapiᚋtypesᚐBeneficiaryByPhoneInputᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["beneficiaries"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["transactionPassword"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("transactionPassword"))
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["transactionPassword"] = arg1
 	return args, nil
 }
 
@@ -6559,6 +6631,30 @@ func (ec *executionContext) field_Query_exchangeRate_args(ctx context.Context, r
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_existingBeneficiariesByPhone_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 []string
+	if tmp, ok := rawArgs["phones"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("phones"))
+		arg0, err = ec.unmarshalNString2ᚕstringᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["phones"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["transactionPassword"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("transactionPassword"))
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["transactionPassword"] = arg1
+	return args, nil
+}
+
 func (ec *executionContext) field_Query_fees_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -6571,6 +6667,24 @@ func (ec *executionContext) field_Query_fees_args(ctx context.Context, rawArgs m
 		}
 	}
 	args["transactionTypeId"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["sourceAccountId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sourceAccountId"))
+		arg1, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["sourceAccountId"] = arg1
+	var arg2 string
+	if tmp, ok := rawArgs["targetAccountId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("targetAccountId"))
+		arg2, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["targetAccountId"] = arg2
 	return args, nil
 }
 
@@ -6838,33 +6952,60 @@ func (ec *executionContext) field_Query_transactions_args(ctx context.Context, r
 		}
 	}
 	args["before"] = arg3
-	var arg4 []types.TransactionStatuses
+	var arg4 *string
+	if tmp, ok := rawArgs["startDate"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("startDate"))
+		arg4, err = ec.unmarshalODate2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["startDate"] = arg4
+	var arg5 *string
+	if tmp, ok := rawArgs["endDate"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("endDate"))
+		arg5, err = ec.unmarshalODate2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["endDate"] = arg5
+	var arg6 []types.TransactionStatuses
 	if tmp, ok := rawArgs["statuses"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("statuses"))
-		arg4, err = ec.unmarshalOTransactionStatuses2ᚕmsᚗapiᚋtypesᚐTransactionStatusesᚄ(ctx, tmp)
+		arg6, err = ec.unmarshalOTransactionStatuses2ᚕmsᚗapiᚋtypesᚐTransactionStatusesᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["statuses"] = arg4
-	var arg5 []string
+	args["statuses"] = arg6
+	var arg7 []string
 	if tmp, ok := rawArgs["accountIds"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("accountIds"))
-		arg5, err = ec.unmarshalOID2ᚕstringᚄ(ctx, tmp)
+		arg7, err = ec.unmarshalOID2ᚕstringᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["accountIds"] = arg5
-	var arg6 []string
+	args["accountIds"] = arg7
+	var arg8 []string
 	if tmp, ok := rawArgs["beneficiaryIds"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("beneficiaryIds"))
-		arg6, err = ec.unmarshalOID2ᚕstringᚄ(ctx, tmp)
+		arg8, err = ec.unmarshalOID2ᚕstringᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["beneficiaryIds"] = arg6
+	args["beneficiaryIds"] = arg8
+	var arg9 *bool
+	if tmp, ok := rawArgs["hasBeneficiary"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasBeneficiary"))
+		arg9, err = ec.unmarshalOBoolean2ᚖbool(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["hasBeneficiary"] = arg9
 	return args, nil
 }
 
@@ -18464,6 +18605,69 @@ func (ec *executionContext) fieldContext_Mutation_createBeneficiary(ctx context.
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_createBeneficiariesByPhone(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_createBeneficiariesByPhone(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateBeneficiariesByPhone(rctx, fc.Args["beneficiaries"].([]*types.BeneficiaryByPhoneInput), fc.Args["transactionPassword"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.Response)
+	fc.Result = res
+	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_createBeneficiariesByPhone(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "message":
+				return ec.fieldContext_Response_message(ctx, field)
+			case "success":
+				return ec.fieldContext_Response_success(ctx, field)
+			case "code":
+				return ec.fieldContext_Response_code(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Response", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_createBeneficiariesByPhone_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_addBeneficiaryAccount(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_addBeneficiaryAccount(ctx, field)
 	if err != nil {
@@ -21842,7 +22046,7 @@ func (ec *executionContext) _Query_transactions(ctx context.Context, field graph
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Transactions(rctx, fc.Args["first"].(*int64), fc.Args["after"].(*string), fc.Args["last"].(*int64), fc.Args["before"].(*string), fc.Args["statuses"].([]types.TransactionStatuses), fc.Args["accountIds"].([]string), fc.Args["beneficiaryIds"].([]string))
+		return ec.resolvers.Query().Transactions(rctx, fc.Args["first"].(*int64), fc.Args["after"].(*string), fc.Args["last"].(*int64), fc.Args["before"].(*string), fc.Args["startDate"].(*string), fc.Args["endDate"].(*string), fc.Args["statuses"].([]types.TransactionStatuses), fc.Args["accountIds"].([]string), fc.Args["beneficiaryIds"].([]string), fc.Args["hasBeneficiary"].(*bool))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -22013,6 +22217,61 @@ func (ec *executionContext) fieldContext_Query_beneficiaries(ctx context.Context
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_beneficiaries_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_existingBeneficiariesByPhone(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_existingBeneficiariesByPhone(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().ExistingBeneficiariesByPhone(rctx, fc.Args["phones"].([]string), fc.Args["transactionPassword"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*string)
+	fc.Result = res
+	return ec.marshalNString2ᚕᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_existingBeneficiariesByPhone(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_existingBeneficiariesByPhone_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -22356,7 +22615,7 @@ func (ec *executionContext) _Query_fees(ctx context.Context, field graphql.Colle
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Fees(rctx, fc.Args["transactionTypeId"].(string))
+		return ec.resolvers.Query().Fees(rctx, fc.Args["transactionTypeId"].(string), fc.Args["sourceAccountId"].(string), fc.Args["targetAccountId"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -29081,6 +29340,37 @@ func (ec *executionContext) unmarshalInputBeneficiaryAccountInput(ctx context.Co
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputBeneficiaryByPhoneInput(ctx context.Context, obj interface{}) (types.BeneficiaryByPhoneInput, error) {
+	var it types.BeneficiaryByPhoneInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	for k, v := range asMap {
+		switch k {
+		case "phone":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("phone"))
+			it.Phone, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputBeneficiaryInput(ctx context.Context, obj interface{}) (types.BeneficiaryInput, error) {
 	var it types.BeneficiaryInput
 	asMap := map[string]interface{}{}
@@ -32323,6 +32613,15 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "createBeneficiariesByPhone":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_createBeneficiariesByPhone(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "addBeneficiaryAccount":
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
@@ -33228,6 +33527,29 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_beneficiaries(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
+		case "existingBeneficiariesByPhone":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_existingBeneficiariesByPhone(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
 				return res
 			}
 
@@ -35199,6 +35521,28 @@ func (ec *executionContext) marshalNBeneficiaryAccountStatuses2msᚗapiᚋtypes�
 	return v
 }
 
+func (ec *executionContext) unmarshalNBeneficiaryByPhoneInput2ᚕᚖmsᚗapiᚋtypesᚐBeneficiaryByPhoneInputᚄ(ctx context.Context, v interface{}) ([]*types.BeneficiaryByPhoneInput, error) {
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*types.BeneficiaryByPhoneInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNBeneficiaryByPhoneInput2ᚖmsᚗapiᚋtypesᚐBeneficiaryByPhoneInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalNBeneficiaryByPhoneInput2ᚖmsᚗapiᚋtypesᚐBeneficiaryByPhoneInput(ctx context.Context, v interface{}) (*types.BeneficiaryByPhoneInput, error) {
+	res, err := ec.unmarshalInputBeneficiaryByPhoneInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNBeneficiaryInput2msᚗapiᚋtypesᚐBeneficiaryInput(ctx context.Context, v interface{}) (types.BeneficiaryInput, error) {
 	res, err := ec.unmarshalInputBeneficiaryInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -36634,6 +36978,64 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNString2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]string, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNString2string(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalNString2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNString2string(ctx, sel, v[i])
+	}
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) unmarshalNString2ᚕᚖstring(ctx context.Context, v interface{}) ([]*string, error) {
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*string, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalOString2ᚖstring(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalNString2ᚕᚖstring(ctx context.Context, sel ast.SelectionSet, v []*string) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalOString2ᚖstring(ctx, sel, v[i])
+	}
+
+	return ret
 }
 
 func (ec *executionContext) marshalNTokenResponse2msᚗapiᚋtypesᚐTokenResponse(ctx context.Context, sel ast.SelectionSet, v types.TokenResponse) graphql.Marshaler {

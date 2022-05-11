@@ -2878,7 +2878,7 @@ func Test_queryResolver_Transactions(t *testing.T) {
 					TotalCount: 2,
 				}, nil)
 
-				resp, err := resolver.Transactions(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, test.args.statuses, test.args.accountIds, test.args.beneficiaryIds)
+				resp, err := resolver.Transactions(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, nil, nil, test.args.statuses, test.args.accountIds, test.args.beneficiaryIds, nil)
 				assert.NoError(t, err)
 				assert.NotNil(t, resp)
 				assert.Equal(t, resp.TotalCount, int64(2))
@@ -3135,7 +3135,7 @@ func Test_queryResolver_Transactions(t *testing.T) {
 					TotalCount: 2,
 				}, nil)
 
-				resp, err := resolver.Transactions(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, test.args.statuses, test.args.accountIds, test.args.beneficiaryIds)
+				resp, err := resolver.Transactions(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, nil, nil, test.args.statuses, test.args.accountIds, test.args.beneficiaryIds, nil)
 				assert.NoError(t, err)
 				assert.NotNil(t, resp)
 				assert.Equal(t, resp.TotalCount, int64(2))
@@ -3288,7 +3288,7 @@ func Test_queryResolver_Transactions(t *testing.T) {
 					TotalCount: 1,
 				}, nil)
 
-				resp, err := resolver.Transactions(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, test.args.statuses, test.args.accountIds, test.args.beneficiaryIds)
+				resp, err := resolver.Transactions(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, nil, nil, test.args.statuses, test.args.accountIds, test.args.beneficiaryIds, nil)
 				assert.NoError(t, err)
 				assert.NotNil(t, resp)
 				assert.Equal(t, resp.TotalCount, int64(1))
@@ -3433,7 +3433,7 @@ func Test_queryResolver_Transactions(t *testing.T) {
 					TotalCount: 1,
 				}, nil)
 
-				resp, err := resolver.Transactions(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, test.args.statuses, test.args.accountIds, test.args.beneficiaryIds)
+				resp, err := resolver.Transactions(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, nil, nil, test.args.statuses, test.args.accountIds, test.args.beneficiaryIds, nil)
 				assert.NoError(t, err)
 				assert.NotNil(t, resp)
 				assert.Equal(t, resp.TotalCount, int64(1))
@@ -4818,7 +4818,7 @@ func Test_queryResolver_Fees(t *testing.T) {
 							},
 						},
 					}, nil)
-				resp, err := resolver.Fees(context.Background(), test.arg)
+				resp, err := resolver.Fees(context.Background(), test.arg, "", "")
 				assert.NoError(t, err)
 				assert.NotNil(t, resp)
 				assert.NotEmpty(t, resp)
@@ -4826,7 +4826,7 @@ func Test_queryResolver_Fees(t *testing.T) {
 			case errorNotFound:
 				request := &pricing.GetFeesRequest{TransactionTypeId: test.arg}
 				pricingServiceClient.EXPECT().GetFees(context.Background(), request).Return(nil, errors.New(""))
-				resp, err := resolver.Fees(context.Background(), test.arg)
+				resp, err := resolver.Fees(context.Background(), test.arg, "", "")
 				assert.Error(t, err)
 				assert.Nil(t, resp)
 			}
