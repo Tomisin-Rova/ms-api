@@ -10293,7 +10293,7 @@ func TestQueryResolver_ExistingBeneficiariesByPhone(t *testing.T) {
 		testType int
 	}{
 		{
-			name: "Test existing cuatomer with the given phone number",
+			name: "Test existing customer with the given phone number",
 			arg: arg{
 				phone:               []string{"phonenumber1"},
 				transactionpassword: "",
