@@ -6,6 +6,7 @@ package graph
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"go.uber.org/zap"
@@ -772,6 +773,10 @@ func (r *mutationResolver) CreateBeneficiary(ctx context.Context, beneficiary ty
 		Success: true,
 		Code:    int64(http.StatusOK),
 	}, nil
+}
+
+func (r *mutationResolver) CreateBeneficiariesByPhone(ctx context.Context, beneficiaries []*types.BeneficiaryByPhoneInput, transactionPassword string) (*types.Response, error) {
+	panic(fmt.Errorf("not implemented"))
 }
 
 func (r *mutationResolver) AddBeneficiaryAccount(ctx context.Context, beneficiaryID string, account types.BeneficiaryAccountInput, transactionPassword string) (*types.Response, error) {
