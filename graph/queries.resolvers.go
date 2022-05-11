@@ -546,12 +546,6 @@ func (r *queryResolver) Transactions(ctx context.Context, first *int64, after *s
 	if len(statuses) > 0 {
 		request.Statuses = transactionStatuses
 	}
-	// if startDate != nil {
-	// 	request.StartDate = timestamppb.New(formartedStartDate)
-	// }
-	// if endDate != nil {
-	// 	request.EndDate = timestamppb.New(formatedEndDate)
-	// }
 	if hasBeneficiary != nil {
 		request.HasBeneficiary = *hasBeneficiary
 	}
