@@ -1034,6 +1034,9 @@ func (h *helpersfactory) MakeTransactionFromProto(transaction *protoTypes.Transa
 					Code:   transaction.ExchangeRate.TargetCurrency.Code,
 					Name:   transaction.ExchangeRate.TargetCurrency.Name,
 				},
+				BuyPrice:  float64(transaction.ExchangeRate.BuyPrice),
+				SalePrice: float64(transaction.ExchangeRate.SalePrice),
+				Ts:        transaction.ExchangeRate.Ts.AsTime().Unix(),
 			}
 		}
 
@@ -1131,6 +1134,7 @@ func (h *helpersfactory) MakeExchangeRateFromProto(exchangeRate *protoTypes.Exch
 		},
 		BuyPrice:  float64(exchangeRate.BuyPrice),
 		SalePrice: float64(exchangeRate.SalePrice),
+		Ts:        exchangeRate.Ts.AsTime().Unix(),
 	}
 }
 
