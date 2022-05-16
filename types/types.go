@@ -152,13 +152,14 @@ type BankConnection struct {
 }
 
 type Beneficiary struct {
-	ID       string                `json:"id"`
-	Customer *Customer             `json:"customer"`
-	Name     string                `json:"name"`
-	Accounts []*BeneficiaryAccount `json:"accounts"`
-	Status   BeneficiaryStatuses   `json:"status"`
-	StatusTs int64                 `json:"statusTs"`
-	Ts       int64                 `json:"ts"`
+	ID                string                `json:"id"`
+	Customer          *Customer             `json:"customer"`
+	Name              string                `json:"name"`
+	Accounts          []*BeneficiaryAccount `json:"accounts"`
+	TransactionsCount int64                 `json:"transactionsCount"`
+	Status            BeneficiaryStatuses   `json:"status"`
+	StatusTs          int64                 `json:"statusTs"`
+	Ts                int64                 `json:"ts"`
 }
 
 type BeneficiaryAccount struct {
@@ -932,6 +933,47 @@ func (e *BeneficiaryAccountStatuses) UnmarshalGQL(v interface{}) error {
 }
 
 func (e BeneficiaryAccountStatuses) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type BeneficiarySort string
+
+const (
+	BeneficiarySortTs   BeneficiarySort = "TS"
+	BeneficiarySortName BeneficiarySort = "NAME"
+)
+
+var AllBeneficiarySort = []BeneficiarySort{
+	BeneficiarySortTs,
+	BeneficiarySortName,
+}
+
+func (e BeneficiarySort) IsValid() bool {
+	switch e {
+	case BeneficiarySortTs, BeneficiarySortName:
+		return true
+	}
+	return false
+}
+
+func (e BeneficiarySort) String() string {
+	return string(e)
+}
+
+func (e *BeneficiarySort) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = BeneficiarySort(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid BeneficiarySort", str)
+	}
+	return nil
+}
+
+func (e BeneficiarySort) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

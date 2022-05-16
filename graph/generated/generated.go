@@ -152,13 +152,14 @@ type ComplexityRoot struct {
 	}
 
 	Beneficiary struct {
-		Accounts func(childComplexity int) int
-		Customer func(childComplexity int) int
-		ID       func(childComplexity int) int
-		Name     func(childComplexity int) int
-		Status   func(childComplexity int) int
-		StatusTs func(childComplexity int) int
-		Ts       func(childComplexity int) int
+		Accounts          func(childComplexity int) int
+		Customer          func(childComplexity int) int
+		ID                func(childComplexity int) int
+		Name              func(childComplexity int) int
+		Status            func(childComplexity int) int
+		StatusTs          func(childComplexity int) int
+		TransactionsCount func(childComplexity int) int
+		Ts                func(childComplexity int) int
 	}
 
 	BeneficiaryAccount struct {
@@ -493,7 +494,7 @@ type ComplexityRoot struct {
 		Accounts                     func(childComplexity int, first *int64, after *string, last *int64, before *string, statuses []types.AccountStatuses, types []types.ProductTypes) int
 		Addresses                    func(childComplexity int, first *int64, after *string, last *int64, before *string, postcode *string) int
 		Banks                        func(childComplexity int, first *int64, after *string, last *int64, before *string) int
-		Beneficiaries                func(childComplexity int, keywords *string, first *int64, after *string, last *int64, before *string, statuses []types.BeneficiaryStatuses) int
+		Beneficiaries                func(childComplexity int, keywords *string, first *int64, after *string, last *int64, before *string, statuses []types.BeneficiaryStatuses, sortBy *types.BeneficiarySort) int
 		Beneficiary                  func(childComplexity int, id string) int
 		Cdd                          func(childComplexity int, filter types.CommonQueryFilterInput) int
 		Cdds                         func(childComplexity int, first *int64, after *string, last *int64, before *string, statuses []types.CDDStatuses) int
@@ -715,7 +716,7 @@ type QueryResolver interface {
 	Transaction(ctx context.Context, id string) (*types.Transaction, error)
 	Transactions(ctx context.Context, first *int64, after *string, last *int64, before *string, startDate *string, endDate *string, statuses []types.TransactionStatuses, accountIds []string, beneficiaryIds []string, hasBeneficiary *bool) (*types.TransactionConnection, error)
 	Beneficiary(ctx context.Context, id string) (*types.Beneficiary, error)
-	Beneficiaries(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string, statuses []types.BeneficiaryStatuses) (*types.BeneficiaryConnection, error)
+	Beneficiaries(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string, statuses []types.BeneficiaryStatuses, sortBy *types.BeneficiarySort) (*types.BeneficiaryConnection, error)
 	ExistingBeneficiariesByPhone(ctx context.Context, phones []string, transactionPassword string) ([]*string, error)
 	TransactionTypes(ctx context.Context, first *int64, after *string, last *int64, before *string, statuses []types.TransactionTypeStatuses) (*types.TransactionTypeConnection, error)
 	Questionary(ctx context.Context, id string) (*types.Questionary, error)
@@ -1241,6 +1242,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Beneficiary.StatusTs(childComplexity), true
+
+	case "Beneficiary.transactionsCount":
+		if e.complexity.Beneficiary.TransactionsCount == nil {
+			break
+		}
+
+		return e.complexity.Beneficiary.TransactionsCount(childComplexity), true
 
 	case "Beneficiary.ts":
 		if e.complexity.Beneficiary.Ts == nil {
@@ -2958,7 +2966,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Beneficiaries(childComplexity, args["keywords"].(*string), args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string), args["statuses"].([]types.BeneficiaryStatuses)), true
+		return e.complexity.Query.Beneficiaries(childComplexity, args["keywords"].(*string), args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string), args["statuses"].([]types.BeneficiaryStatuses), args["sortBy"].(*types.BeneficiarySort)), true
 
 	case "Query.beneficiary":
 		if e.complexity.Query.Beneficiary == nil {
@@ -4361,6 +4369,8 @@ enum DeliveryMode {
         before: String
         # Filter transaction by it's status. If empty, should ignore the field
         statuses: [BeneficiaryStatuses!]
+        # Sort beneficiaries by the requested field
+        sortBy: BeneficiarySort
     ): BeneficiaryConnection
     # Fetch the list of existing beneficiaries by the provided phone list (API only return the list of phones that exist in ROAVA)
     existingBeneficiariesByPhone(phones: [String!]!, transactionPassword: String!): [String]!
@@ -5205,6 +5215,7 @@ type Beneficiary {
     customer: Customer!
     name: String!
     accounts: [BeneficiaryAccount!]
+    transactionsCount: Int!
     status: BeneficiaryStatuses!
     statusTs: Int!
     ts: Int!
@@ -5231,6 +5242,11 @@ type BeneficiaryAccount {
 enum BeneficiaryAccountStatuses {
     ACTIVE
     INACTIVE
+}
+
+enum BeneficiarySort {
+    TS
+    NAME
 }
 
 ############# END BENEFICIARIES GROUP #############
@@ -6256,6 +6272,15 @@ func (ec *executionContext) field_Query_beneficiaries_args(ctx context.Context, 
 		}
 	}
 	args["statuses"] = arg5
+	var arg6 *types.BeneficiarySort
+	if tmp, ok := rawArgs["sortBy"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sortBy"))
+		arg6, err = ec.unmarshalOBeneficiarySort2ᚖmsᚗapiᚋtypesᚐBeneficiarySort(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["sortBy"] = arg6
 	return args, nil
 }
 
@@ -10337,6 +10362,50 @@ func (ec *executionContext) fieldContext_Beneficiary_accounts(ctx context.Contex
 	return fc, nil
 }
 
+func (ec *executionContext) _Beneficiary_transactionsCount(ctx context.Context, field graphql.CollectedField, obj *types.Beneficiary) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Beneficiary_transactionsCount(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TransactionsCount, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int64)
+	fc.Result = res
+	return ec.marshalNInt2int64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Beneficiary_transactionsCount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Beneficiary",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Beneficiary_status(ctx context.Context, field graphql.CollectedField, obj *types.Beneficiary) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Beneficiary_status(ctx, field)
 	if err != nil {
@@ -10557,6 +10626,8 @@ func (ec *executionContext) fieldContext_BeneficiaryAccount_beneficiary(ctx cont
 				return ec.fieldContext_Beneficiary_name(ctx, field)
 			case "accounts":
 				return ec.fieldContext_Beneficiary_accounts(ctx, field)
+			case "transactionsCount":
+				return ec.fieldContext_Beneficiary_transactionsCount(ctx, field)
 			case "status":
 				return ec.fieldContext_Beneficiary_status(ctx, field)
 			case "statusTs":
@@ -11003,6 +11074,8 @@ func (ec *executionContext) fieldContext_BeneficiaryConnection_nodes(ctx context
 				return ec.fieldContext_Beneficiary_name(ctx, field)
 			case "accounts":
 				return ec.fieldContext_Beneficiary_accounts(ctx, field)
+			case "transactionsCount":
+				return ec.fieldContext_Beneficiary_transactionsCount(ctx, field)
 			case "status":
 				return ec.fieldContext_Beneficiary_status(ctx, field)
 			case "statusTs":
@@ -22142,6 +22215,8 @@ func (ec *executionContext) fieldContext_Query_beneficiary(ctx context.Context, 
 				return ec.fieldContext_Beneficiary_name(ctx, field)
 			case "accounts":
 				return ec.fieldContext_Beneficiary_accounts(ctx, field)
+			case "transactionsCount":
+				return ec.fieldContext_Beneficiary_transactionsCount(ctx, field)
 			case "status":
 				return ec.fieldContext_Beneficiary_status(ctx, field)
 			case "statusTs":
@@ -22180,7 +22255,7 @@ func (ec *executionContext) _Query_beneficiaries(ctx context.Context, field grap
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Beneficiaries(rctx, fc.Args["keywords"].(*string), fc.Args["first"].(*int64), fc.Args["after"].(*string), fc.Args["last"].(*int64), fc.Args["before"].(*string), fc.Args["statuses"].([]types.BeneficiaryStatuses))
+		return ec.resolvers.Query().Beneficiaries(rctx, fc.Args["keywords"].(*string), fc.Args["first"].(*int64), fc.Args["after"].(*string), fc.Args["last"].(*int64), fc.Args["before"].(*string), fc.Args["statuses"].([]types.BeneficiaryStatuses), fc.Args["sortBy"].(*types.BeneficiarySort))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -26747,6 +26822,8 @@ func (ec *executionContext) fieldContext_TransactionTarget_beneficiary(ctx conte
 				return ec.fieldContext_Beneficiary_name(ctx, field)
 			case "accounts":
 				return ec.fieldContext_Beneficiary_accounts(ctx, field)
+			case "transactionsCount":
+				return ec.fieldContext_Beneficiary_transactionsCount(ctx, field)
 			case "status":
 				return ec.fieldContext_Beneficiary_status(ctx, field)
 			case "statusTs":
@@ -30853,6 +30930,13 @@ func (ec *executionContext) _Beneficiary(ctx context.Context, sel ast.SelectionS
 
 			out.Values[i] = ec._Beneficiary_accounts(ctx, field, obj)
 
+		case "transactionsCount":
+
+			out.Values[i] = ec._Beneficiary_transactionsCount(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "status":
 
 			out.Values[i] = ec._Beneficiary_status(ctx, field, obj)
@@ -37757,6 +37841,22 @@ func (ec *executionContext) marshalOBeneficiaryConnection2ᚖmsᚗapiᚋtypesᚐ
 		return graphql.Null
 	}
 	return ec._BeneficiaryConnection(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOBeneficiarySort2ᚖmsᚗapiᚋtypesᚐBeneficiarySort(ctx context.Context, v interface{}) (*types.BeneficiarySort, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(types.BeneficiarySort)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOBeneficiarySort2ᚖmsᚗapiᚋtypesᚐBeneficiarySort(ctx context.Context, sel ast.SelectionSet, v *types.BeneficiarySort) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
 }
 
 func (ec *executionContext) unmarshalOBeneficiaryStatuses2ᚕmsᚗapiᚋtypesᚐBeneficiaryStatusesᚄ(ctx context.Context, v interface{}) ([]types.BeneficiaryStatuses, error) {

@@ -515,8 +515,7 @@ func (r *queryResolver) Transactions(ctx context.Context, first *int64, after *s
 
 	// Build request
 	request := payment.GetTransactionsRequest{}
-
-	if startDate != nil {
+	if startDate != nil && *startDate != "" {
 		formartedStartDate, err := time.Parse("2006-01-02", *startDate)
 		if err != nil {
 			return nil, err
@@ -524,7 +523,7 @@ func (r *queryResolver) Transactions(ctx context.Context, first *int64, after *s
 
 		request.StartDate = timestamppb.New(formartedStartDate)
 	}
-	if endDate != nil {
+	if endDate != nil && *endDate != "" {
 		formatedEndDate, err := time.Parse("2006-01-02", *endDate)
 		if err != nil {
 			return nil, err
@@ -592,7 +591,7 @@ func (r *queryResolver) Beneficiary(ctx context.Context, id string) (*apiTypes.B
 	return helpers.MakeBeneficiaryFromProto(result), nil
 }
 
-func (r *queryResolver) Beneficiaries(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string, statuses []apiTypes.BeneficiaryStatuses) (*apiTypes.BeneficiaryConnection, error) {
+func (r *queryResolver) Beneficiaries(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string, statuses []apiTypes.BeneficiaryStatuses, sortBy *apiTypes.BeneficiarySort) (*apiTypes.BeneficiaryConnection, error) {
 	helper := helpersfactory{}
 	beneficiaryStatuses := make([]protoTypes.Beneficiary_BeneficiaryStatuses, len(statuses))
 

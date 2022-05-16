@@ -3,6 +3,8 @@ package graph
 import (
 	"context"
 	"errors"
+	terror "github.com/roava/zebra/errors"
+	errorvalues "ms.api/libs/errors"
 	"net/http"
 	"testing"
 	"time"
@@ -2744,13 +2746,6 @@ func Test_queryResolver_Transactions(t *testing.T) {
 					statuses[index] = helpers.GetProtoTransactionStatuses(state)
 				}
 
-				// goStartTime, err := time.Parse("", test.args.startDate)
-				// assert.NoError(t, err)
-				// goEndTime, err := time.Parse("", test.args.endDate)
-				// assert.NoError(t, err)
-				// protoStartDate := timestamppb.New(goStartTime)
-				// protoEndDate := timestamppb.New(goEndTime)
-
 				paymentServiceClient.EXPECT().GetTransactions(context.Background(),
 					&payment.GetTransactionsRequest{
 						First:          int32(test.args.first),
@@ -4436,6 +4431,7 @@ func Test_queryResolver_Beneficiaries(t *testing.T) {
 			last     int64
 			before   string
 			statuses []types.BeneficiaryStatuses
+			sortBy   types.BeneficiarySort
 		}
 		testType int
 	}{
@@ -4448,6 +4444,7 @@ func Test_queryResolver_Beneficiaries(t *testing.T) {
 				last     int64
 				before   string
 				statuses []types.BeneficiaryStatuses
+				sortBy   types.BeneficiarySort
 			}{
 				keywords: "test keywords",
 				first:    int64(5),
@@ -4455,6 +4452,7 @@ func Test_queryResolver_Beneficiaries(t *testing.T) {
 				last:     int64(10),
 				before:   "test before",
 				statuses: []types.BeneficiaryStatuses{types.BeneficiaryStatusesActive, types.BeneficiaryStatusesInactive},
+				sortBy:   "sortkey",
 			},
 			testType: pass_arguments,
 		},
@@ -4467,6 +4465,7 @@ func Test_queryResolver_Beneficiaries(t *testing.T) {
 				last     int64
 				before   string
 				statuses []types.BeneficiaryStatuses
+				sortBy   types.BeneficiarySort
 			}{
 				keywords: "",
 				first:    0,
@@ -4474,6 +4473,7 @@ func Test_queryResolver_Beneficiaries(t *testing.T) {
 				last:     int64(10),
 				before:   "",
 				statuses: []types.BeneficiaryStatuses{types.BeneficiaryStatusesActive, types.BeneficiaryStatusesInactive},
+				sortBy:   "sortkey",
 			},
 			testType: handle_failure,
 		},
@@ -4539,7 +4539,7 @@ func Test_queryResolver_Beneficiaries(t *testing.T) {
 						Statuses: statuses,
 					}).Return(mockResponse, nil)
 
-				resp, err := resolver.Beneficiaries(context.Background(), &test.args.keywords, &test.args.first, &test.args.after, &test.args.last, &test.args.before, test.args.statuses)
+				resp, err := resolver.Beneficiaries(context.Background(), &test.args.keywords, &test.args.first, &test.args.after, &test.args.last, &test.args.before, test.args.statuses, &test.args.sortBy)
 
 				assert.NoError(t, err)
 				assert.NotNil(t, resp)
@@ -4564,7 +4564,7 @@ func Test_queryResolver_Beneficiaries(t *testing.T) {
 						Statuses: statuses,
 					}).Return(nil, errors.New("test error"))
 
-				resp, err := resolver.Beneficiaries(context.Background(), &test.args.keywords, &test.args.first, &test.args.after, &test.args.last, &test.args.before, test.args.statuses)
+				resp, err := resolver.Beneficiaries(context.Background(), &test.args.keywords, &test.args.first, &test.args.after, &test.args.last, &test.args.before, test.args.statuses, &test.args.sortBy)
 				assert.Error(t, err)
 				assert.Nil(t, resp)
 				assert.Contains(t, err.Error(), "test error")
@@ -10274,6 +10274,96 @@ func TestQueryResolver_CheckPhoneNumber(t *testing.T) {
 				resp, err := resolver.CheckPhoneNumber(context.Background(), test.arg)
 				assert.NoError(t, err)
 				assert.Equal(t, resp, true)
+			}
+		})
+	}
+}
+
+func TestQueryResolver_ExistingBeneficiariesByPhone(t *testing.T) {
+
+	const (
+		success = iota
+		errorUnauthenticated
+		failOnGRPCError
+	)
+
+	type arg struct {
+		phone               []string
+		transactionpassword string
+	}
+
+	tests := []struct {
+		name     string
+		arg      arg
+		testType int
+	}{
+		{
+			name: "Test existing customer with the given phone number",
+			arg: arg{
+				phone:               []string{"phonenumber1"},
+				transactionpassword: "",
+			},
+			testType: success,
+		},
+		{
+			name:     "Test error unauthenticated",
+			testType: errorUnauthenticated,
+		},
+		{
+			name: "should fail on gRPC error",
+			arg: arg{
+				phone:               []string{"phonenumber1"},
+				transactionpassword: "",
+			},
+			testType: failOnGRPCError,
+		},
+	}
+
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	paymentServiceClient := mocks.NewMockPaymentServiceClient(controller)
+	resolverOpts := &ResolverOpts{
+		PaymentService: paymentServiceClient,
+	}
+
+	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Query()
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			switch test.testType {
+			case success:
+				ctx, _ := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{
+					Client:   models.APP,
+					ID:       "123456",
+					Email:    "email@roava.app",
+					DeviceID: "12345"})
+				paymentServiceClient.EXPECT().GetBeneficiariesByPhone(ctx, &payment.GetBeneficiariesByPhoneRequest{
+					Phones:              test.arg.phone,
+					TransactionPassword: test.arg.transactionpassword,
+				}).Return(&payment.GetBeneficiariesByPhoneResponse{Phones: test.arg.phone}, nil)
+				resp, err := resolver.ExistingBeneficiariesByPhone(ctx, test.arg.phone, test.arg.transactionpassword)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.NotEmpty(t, resp)
+			case errorUnauthenticated:
+				resp, err := resolver.ExistingBeneficiariesByPhone(context.Background(), test.arg.phone, test.arg.transactionpassword)
+				assert.Error(t, err)
+				assert.IsType(t, &terror.Terror{}, err)
+				assert.Equal(t, errorvalues.InvalidAuthenticationError, err.(*terror.Terror).Code())
+				assert.Nil(t, resp)
+			case failOnGRPCError:
+				ctx, _ := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{
+					Client:   models.APP,
+					ID:       "123456",
+					Email:    "email@roava.app",
+					DeviceID: "12345"})
+				paymentServiceClient.EXPECT().GetBeneficiariesByPhone(ctx, &payment.GetBeneficiariesByPhoneRequest{
+					Phones:              test.arg.phone,
+					TransactionPassword: test.arg.transactionpassword,
+				}).Return(nil, errors.New(""))
+				resp, err := resolver.ExistingBeneficiariesByPhone(ctx, test.arg.phone, test.arg.transactionpassword)
+				assert.Error(t, err)
+				assert.Nil(t, resp)
 			}
 		})
 	}
