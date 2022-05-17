@@ -514,17 +514,17 @@ func (r *queryResolver) Transactions(ctx context.Context, first *int64, after *s
 
 	// Build request
 	request := payment.GetTransactionsRequest{}
-
-	if startDate != nil {
-		formartedStartDate, err := time.Parse("2006-01-02", *startDate)
+	const dateTemplate = "02-01-2006"
+	if startDate != nil && *startDate != "" {
+		formartedStartDate, err := time.Parse(dateTemplate, *startDate)
 		if err != nil {
 			return nil, err
 		}
 
 		request.StartDate = timestamppb.New(formartedStartDate)
 	}
-	if endDate != nil {
-		formatedEndDate, err := time.Parse("2006-01-02", *endDate)
+	if endDate != nil && *endDate != "" {
+		formatedEndDate, err := time.Parse(dateTemplate, *endDate)
 		if err != nil {
 			return nil, err
 		}

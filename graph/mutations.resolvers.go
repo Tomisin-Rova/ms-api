@@ -263,21 +263,70 @@ func (r *mutationResolver) UpdateCustomerDetails(ctx context.Context, customerDe
 		return nil, err
 	}
 
+	var (
+		firstName, lastName, phone, email string
+	)
+	customerAddress := customerDetails.Address
+	if customerAddress == nil {
+		customerAddress = &types.AddressInput{}
+	}
+
+	var customerCountryId string
+	if customerAddress.CountryID != "" {
+		customerCountryId = customerAddress.CountryID
+	}
+
+	var customerState string
+	if customerAddress.State != nil {
+		customerState = *customerAddress.State
+	}
+
+	var customerCity string
+	if customerAddress.City != nil {
+		customerCity = *customerAddress.City
+	}
+
+	var customerStreet string
+	if customerAddress.Street != "" {
+		customerStreet = customerAddress.Street
+	}
+	var customerPostCode string
+	if customerAddress.Postcode != "" {
+		customerPostCode = customerAddress.Postcode
+	}
+
+	customerCoordinates := customerAddress.Cordinates
+	if customerCoordinates == nil {
+		customerCoordinates = &types.CordinatesInput{}
+	}
+
+	if customerDetails.FirstName != nil {
+		firstName = *customerDetails.FirstName
+	}
+	if customerDetails.LastName != nil {
+		lastName = *customerDetails.LastName
+	}
+	if customerDetails.Phone != nil {
+		phone = *customerDetails.Phone
+	}
+	if customerDetails.Email != nil {
+		email = *customerDetails.Email
+	}
 	// Build request
 	request := customer.CustomerDetailsUpdateRequest{
-		FirstName: *customerDetails.FirstName,
-		LastName:  *customerDetails.LastName,
-		Phone:     *customerDetails.Phone,
-		Email:     *customerDetails.Email,
+		FirstName: firstName,
+		LastName:  lastName,
+		Phone:     phone,
+		Email:     email,
 		Address: &customer.AddressInput{
-			CountryId: customerDetails.Address.CountryID,
-			State:     *customerDetails.Address.State,
-			City:      *customerDetails.Address.City,
-			Street:    customerDetails.Address.Street,
-			Postcode:  customerDetails.Address.Postcode,
+			CountryId: customerCountryId,
+			State:     customerState,
+			City:      customerCity,
+			Street:    customerStreet,
+			Postcode:  customerPostCode,
 			Cordinates: &customer.CordinatesInput{
-				Latitude:  float32(customerDetails.Address.Cordinates.Latitude),
-				Longitude: float32(customerDetails.Address.Cordinates.Longitude),
+				Latitude:  float32(customerCoordinates.Latitude),
+				Longitude: float32(customerCoordinates.Longitude),
 			},
 		},
 		TransactionPassword: transactionPassword,
