@@ -835,7 +835,9 @@ func (h *helpersfactory) GetProtoBeneficiaryStatuses(val types.BeneficiaryStatus
 
 func (h *helpersfactory) MakeProductFromProto(product *protoTypes.Product) *types.Product {
 	if product == nil {
-		return &types.Product{}
+		return &types.Product{
+			Currency: &types.Currency{},
+		}
 	}
 
 	termLength := int64(product.TermLength)
@@ -898,7 +900,13 @@ func (h *helpersfactory) MapFeeStatuses(val protoTypes.Fee_FeeStatuses) types.Fe
 
 func (h *helpersfactory) MakeAccountFromProto(account *protoTypes.Account) *types.Account {
 	if account == nil {
-		return &types.Account{}
+		return &types.Account{
+			ID:       "",
+			Customer: &types.Customer{},
+			Product: &types.Product{
+				Currency: &types.Currency{},
+			},
+		}
 	}
 
 	balances := &types.AccountBalances{}
@@ -1026,6 +1034,9 @@ func (h *helpersfactory) MakeTransactionFromProto(transaction *protoTypes.Transa
 					Code:   transaction.ExchangeRate.TargetCurrency.Code,
 					Name:   transaction.ExchangeRate.TargetCurrency.Name,
 				},
+				BuyPrice:  float64(transaction.ExchangeRate.BuyPrice),
+				SalePrice: float64(transaction.ExchangeRate.SalePrice),
+				Ts:        transaction.ExchangeRate.Ts.AsTime().Unix(),
 			}
 		}
 
@@ -1123,6 +1134,7 @@ func (h *helpersfactory) MakeExchangeRateFromProto(exchangeRate *protoTypes.Exch
 		},
 		BuyPrice:  float64(exchangeRate.BuyPrice),
 		SalePrice: float64(exchangeRate.SalePrice),
+		Ts:        exchangeRate.Ts.AsTime().Unix(),
 	}
 }
 

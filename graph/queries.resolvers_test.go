@@ -3,6 +3,8 @@ package graph
 import (
 	"context"
 	"errors"
+	terror "github.com/roava/zebra/errors"
+	errorvalues "ms.api/libs/errors"
 	"net/http"
 	"testing"
 	"time"
@@ -10265,6 +10267,96 @@ func TestQueryResolver_CheckPhoneNumber(t *testing.T) {
 				resp, err := resolver.CheckPhoneNumber(context.Background(), test.arg)
 				assert.NoError(t, err)
 				assert.Equal(t, resp, true)
+			}
+		})
+	}
+}
+
+func TestQueryResolver_ExistingBeneficiariesByPhone(t *testing.T) {
+
+	const (
+		success = iota
+		errorUnauthenticated
+		failOnGRPCError
+	)
+
+	type arg struct {
+		phone               []string
+		transactionpassword string
+	}
+
+	tests := []struct {
+		name     string
+		arg      arg
+		testType int
+	}{
+		{
+			name: "Test existing customer with the given phone number",
+			arg: arg{
+				phone:               []string{"phonenumber1"},
+				transactionpassword: "",
+			},
+			testType: success,
+		},
+		{
+			name:     "Test error unauthenticated",
+			testType: errorUnauthenticated,
+		},
+		{
+			name: "should fail on gRPC error",
+			arg: arg{
+				phone:               []string{"phonenumber1"},
+				transactionpassword: "",
+			},
+			testType: failOnGRPCError,
+		},
+	}
+
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	paymentServiceClient := mocks.NewMockPaymentServiceClient(controller)
+	resolverOpts := &ResolverOpts{
+		PaymentService: paymentServiceClient,
+	}
+
+	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Query()
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			switch test.testType {
+			case success:
+				ctx, _ := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{
+					Client:   models.APP,
+					ID:       "123456",
+					Email:    "email@roava.app",
+					DeviceID: "12345"})
+				paymentServiceClient.EXPECT().GetBeneficiariesByPhone(ctx, &payment.GetBeneficiariesByPhoneRequest{
+					Phones:              test.arg.phone,
+					TransactionPassword: test.arg.transactionpassword,
+				}).Return(&payment.GetBeneficiariesByPhoneResponse{Phones: test.arg.phone}, nil)
+				resp, err := resolver.ExistingBeneficiariesByPhone(ctx, test.arg.phone, test.arg.transactionpassword)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.NotEmpty(t, resp)
+			case errorUnauthenticated:
+				resp, err := resolver.ExistingBeneficiariesByPhone(context.Background(), test.arg.phone, test.arg.transactionpassword)
+				assert.Error(t, err)
+				assert.IsType(t, &terror.Terror{}, err)
+				assert.Equal(t, errorvalues.InvalidAuthenticationError, err.(*terror.Terror).Code())
+				assert.Nil(t, resp)
+			case failOnGRPCError:
+				ctx, _ := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{
+					Client:   models.APP,
+					ID:       "123456",
+					Email:    "email@roava.app",
+					DeviceID: "12345"})
+				paymentServiceClient.EXPECT().GetBeneficiariesByPhone(ctx, &payment.GetBeneficiariesByPhoneRequest{
+					Phones:              test.arg.phone,
+					TransactionPassword: test.arg.transactionpassword,
+				}).Return(nil, errors.New(""))
+				resp, err := resolver.ExistingBeneficiariesByPhone(ctx, test.arg.phone, test.arg.transactionpassword)
+				assert.Error(t, err)
+				assert.Nil(t, resp)
 			}
 		})
 	}
