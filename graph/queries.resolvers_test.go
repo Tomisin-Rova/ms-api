@@ -2993,7 +2993,7 @@ func Test_queryResolver_Transactions(t *testing.T) {
 					TotalCount: 2,
 				}, nil)
 
-				resp, err := resolver.Transactions(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, nil, nil, test.args.statuses, test.args.accountIds, test.args.beneficiaryIds, &test.args.hasBeneficiary)
+				resp, err := resolver.Transactions(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, &test.args.startDate, &test.args.endDate, test.args.statuses, test.args.accountIds, test.args.beneficiaryIds, &test.args.hasBeneficiary)
 				assert.NoError(t, err)
 				assert.NotNil(t, resp)
 				assert.Equal(t, resp.TotalCount, int64(2))
@@ -3250,7 +3250,7 @@ func Test_queryResolver_Transactions(t *testing.T) {
 					TotalCount: 2,
 				}, nil)
 
-				resp, err := resolver.Transactions(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, nil, nil, test.args.statuses, test.args.accountIds, test.args.beneficiaryIds, &test.args.hasBeneficiary)
+				resp, err := resolver.Transactions(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, &test.args.startDate, &test.args.endDate, test.args.statuses, test.args.accountIds, test.args.beneficiaryIds, &test.args.hasBeneficiary)
 				assert.NoError(t, err)
 				assert.NotNil(t, resp)
 				assert.Equal(t, resp.TotalCount, int64(2))
@@ -3549,7 +3549,7 @@ func Test_queryResolver_Transactions(t *testing.T) {
 					TotalCount: 1,
 				}, nil)
 
-				resp, err := resolver.Transactions(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, nil, nil, test.args.statuses, test.args.accountIds, test.args.beneficiaryIds, &test.args.hasBeneficiary)
+				resp, err := resolver.Transactions(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, &test.args.startDate, &test.args.endDate, test.args.statuses, test.args.accountIds, test.args.beneficiaryIds, &test.args.hasBeneficiary)
 				assert.NoError(t, err)
 				assert.NotNil(t, resp)
 				assert.Equal(t, resp.TotalCount, int64(1))
@@ -3812,7 +3812,7 @@ func Test_queryResolver_Transactions(t *testing.T) {
 					TotalCount: 2,
 				}, nil)
 
-				resp, err := resolver.Transactions(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, &test.args.startDate, nil, test.args.statuses, test.args.accountIds, test.args.beneficiaryIds, &test.args.hasBeneficiary)
+				resp, err := resolver.Transactions(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, &test.args.startDate, &test.args.endDate, test.args.statuses, test.args.accountIds, test.args.beneficiaryIds, &test.args.hasBeneficiary)
 				assert.NoError(t, err)
 				assert.NotNil(t, resp)
 				assert.Equal(t, resp.TotalCount, int64(2))
@@ -4075,7 +4075,7 @@ func Test_queryResolver_Transactions(t *testing.T) {
 					TotalCount: 2,
 				}, nil)
 
-				resp, err := resolver.Transactions(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, nil, &test.args.endDate, test.args.statuses, test.args.accountIds, test.args.beneficiaryIds, &test.args.hasBeneficiary)
+				resp, err := resolver.Transactions(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, &test.args.startDate, &test.args.endDate, test.args.statuses, test.args.accountIds, test.args.beneficiaryIds, &test.args.hasBeneficiary)
 				assert.NoError(t, err)
 				assert.NotNil(t, resp)
 				assert.Equal(t, resp.TotalCount, int64(2))
@@ -4333,7 +4333,7 @@ func Test_queryResolver_Transactions(t *testing.T) {
 					TotalCount: 2,
 				}, nil)
 
-				resp, err := resolver.Transactions(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, nil, nil, test.args.statuses, test.args.accountIds, test.args.beneficiaryIds, &test.args.hasBeneficiary)
+				resp, err := resolver.Transactions(context.Background(), &test.args.first, &test.args.after, &test.args.last, &test.args.before, &test.args.startDate, &test.args.endDate, test.args.statuses, test.args.accountIds, test.args.beneficiaryIds, &test.args.hasBeneficiary)
 				assert.NoError(t, err)
 				assert.NotNil(t, resp)
 				assert.Equal(t, resp.TotalCount, int64(2))
