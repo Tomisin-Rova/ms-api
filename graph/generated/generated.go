@@ -4421,11 +4421,8 @@ enum DeliveryMode {
         # Returns the elements in the list that come before the specified cursor.
         before: String
     ): CurrencyConnection!
-    # Fetch the fees by transactions
     fees(
-        # Filters the fees by it's transaction type. 
         transactionTypeId: ID!
-        # Filter 
         sourceAccountId: ID!
         targetAccountId: ID!
     ): [Fee!]!
