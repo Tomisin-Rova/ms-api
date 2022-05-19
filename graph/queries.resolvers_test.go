@@ -3,11 +3,12 @@ package graph
 import (
 	"context"
 	"errors"
-	terror "github.com/roava/zebra/errors"
-	errorvalues "ms.api/libs/errors"
 	"net/http"
 	"testing"
 	"time"
+
+	terror "github.com/roava/zebra/errors"
+	errorvalues "ms.api/libs/errors"
 
 	"github.com/golang/mock/gomock"
 	"github.com/roava/zebra/middleware"
@@ -5708,7 +5709,7 @@ func Test_queryResolver_Fees(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			switch test.testType {
 			case success:
-				request := &pricing.GetFeesRequest{TransactionTypeId: test.arg.TransactionTypeId}
+				request := &pricing.GetFeesRequest{TransactionTypeId: test.arg.TransactionTypeId, SourceAccountId: test.arg.SourceAccountId, TargetAccountId: test.arg.TargetAccountId}
 				pricingServiceClient.EXPECT().GetFees(context.Background(), request).Return(
 					&pricing.GetFeesResponse{
 						Fees: []*pbTypes.Fee{
@@ -5738,7 +5739,7 @@ func Test_queryResolver_Fees(t *testing.T) {
 				assert.NotEmpty(t, resp)
 
 			case errorNotFound:
-				request := &pricing.GetFeesRequest{TransactionTypeId: test.arg.TransactionTypeId}
+				request := &pricing.GetFeesRequest{TransactionTypeId: test.arg.TransactionTypeId, SourceAccountId: test.arg.SourceAccountId, TargetAccountId: test.arg.TargetAccountId}
 				pricingServiceClient.EXPECT().GetFees(context.Background(), request).Return(nil, errors.New(""))
 				resp, err := resolver.Fees(context.Background(), test.arg.TransactionTypeId, test.arg.SourceAccountId, test.arg.TargetAccountId)
 				assert.Error(t, err)

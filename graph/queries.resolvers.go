@@ -940,7 +940,7 @@ func (r *queryResolver) Currencies(ctx context.Context, keywords *string, first 
 }
 
 func (r *queryResolver) Fees(ctx context.Context, transactionTypeID string, sourceAccountID string, targetAccountID string) ([]*apiTypes.Fee, error) {
-	resp, err := r.PricingService.GetFees(ctx, &pricing.GetFeesRequest{TransactionTypeId: transactionTypeID})
+	resp, err := r.PricingService.GetFees(ctx, &pricing.GetFeesRequest{TransactionTypeId: transactionTypeID, SourceAccountId: sourceAccountID, TargetAccountId: targetAccountID})
 	if err != nil {
 		return nil, err
 	}
