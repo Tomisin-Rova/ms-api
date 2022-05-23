@@ -4446,7 +4446,7 @@ func Test_queryResolver_Beneficiaries(t *testing.T) {
 				last:     int64(10),
 				before:   "test before",
 				statuses: []types.BeneficiaryStatuses{types.BeneficiaryStatusesActive, types.BeneficiaryStatusesInactive},
-				sortBy:   "sortby",
+				sortBy:   types.BeneficiarySortName,
 			},
 			testType: pass_arguments,
 		},
@@ -4467,7 +4467,7 @@ func Test_queryResolver_Beneficiaries(t *testing.T) {
 				last:     int64(10),
 				before:   "",
 				statuses: []types.BeneficiaryStatuses{types.BeneficiaryStatusesActive, types.BeneficiaryStatusesInactive},
-				sortBy:   "sortby",
+				sortBy:   types.BeneficiarySortTs,
 			},
 			testType: handle_failure,
 		},
@@ -4523,6 +4523,17 @@ func Test_queryResolver_Beneficiaries(t *testing.T) {
 					TotalCount: 2,
 				}
 
+				var request payment.GetBeneficiariesRequest_BeneficiarySort
+
+				switch test.args.sortBy {
+				case types.BeneficiarySortName:
+					request = payment.GetBeneficiariesRequest_NAME
+				case types.BeneficiarySortTs:
+					request = payment.GetBeneficiariesRequest_TS
+				default:
+					request = payment.GetBeneficiariesRequest_TS
+				}
+
 				paymentServiceClient.EXPECT().GetBeneficiaries(context.Background(),
 					&payment.GetBeneficiariesRequest{
 						Keywords: test.args.keywords,
@@ -4531,6 +4542,7 @@ func Test_queryResolver_Beneficiaries(t *testing.T) {
 						Last:     int32(test.args.last),
 						Before:   test.args.before,
 						Statuses: statuses,
+						SortBy:   request,
 					}).Return(mockResponse, nil)
 
 				resp, err := resolver.Beneficiaries(context.Background(), &test.args.keywords, &test.args.first, &test.args.after, &test.args.last, &test.args.before, test.args.statuses, &test.args.sortBy)

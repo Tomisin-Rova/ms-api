@@ -624,6 +624,18 @@ func (r *queryResolver) Beneficiaries(ctx context.Context, keywords *string, fir
 		request.Statuses = beneficiaryStatuses
 	}
 
+	if sortBy != nil {
+		sort := *sortBy
+		switch sort {
+		case apiTypes.BeneficiarySortName:
+			request.SortBy = payment.GetBeneficiariesRequest_NAME
+		case apiTypes.BeneficiarySortTs:
+			request.SortBy = payment.GetBeneficiariesRequest_TS
+		default:
+			request.SortBy = payment.GetBeneficiariesRequest_TS
+		}
+	}
+
 	resp, err := r.PaymentService.GetBeneficiaries(ctx, &request)
 	if err != nil {
 		return nil, err
