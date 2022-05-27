@@ -198,6 +198,20 @@ type BeneficiaryInput struct {
 	Account *BeneficiaryAccountInput `json:"account"`
 }
 
+type BeneficiaryPreview struct {
+	Name          string    `json:"name"`
+	Currency      *Currency `json:"currency"`
+	AccountNumber string    `json:"accountNumber"`
+	Code          string    `json:"code"`
+}
+
+type BoundaryFee struct {
+	Lower      *float64 `json:"lower"`
+	Upper      *float64 `json:"upper"`
+	Amount     *float64 `json:"amount"`
+	Percentage *float64 `json:"percentage"`
+}
+
 type Cdd struct {
 	ID       string      `json:"id"`
 	Customer *Customer   `json:"customer"`
@@ -720,6 +734,18 @@ type TransactionTypeConnection struct {
 	Nodes      []*TransactionType `json:"nodes"`
 	PageInfo   *PageInfo          `json:"pageInfo"`
 	TotalCount int64              `json:"totalCount"`
+}
+
+type UpdateFXInput struct {
+	BaseCurrencyID string   `json:"baseCurrencyId"`
+	CurrencyID     string   `json:"currencyId"`
+	SalePrice      *float64 `json:"salePrice"`
+	BuyPrice       *float64 `json:"buyPrice"`
+}
+
+type UpdateFeesInput struct {
+	FeeID      string         `json:"feeID"`
+	Boundaries []*BoundaryFee `json:"boundaries"`
 }
 
 type VaultAccountInput struct {

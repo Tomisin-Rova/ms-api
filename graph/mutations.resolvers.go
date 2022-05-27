@@ -6,6 +6,7 @@ package graph
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"go.uber.org/zap"
@@ -1011,6 +1012,10 @@ func (r *mutationResolver) DeactivateCredential(ctx context.Context, credentialT
 	}, nil
 }
 
+func (r *mutationResolver) WithdrawVaultAccount(ctx context.Context, sourceAccountID string, targetAccountID string, transactionPassword string) (*types.Response, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
 func (r *mutationResolver) RequestResubmit(ctx context.Context, customerID string, reportIds []string, message *string) (*types.Response, error) {
 	// Get user claims
 	_, err := middlewares.GetClaimsFromCtx(ctx)
@@ -1130,6 +1135,14 @@ func (r *mutationResolver) UpdateAMLStatus(ctx context.Context, id string, statu
 		Success: response.Success,
 		Code:    int64(response.Code),
 	}, nil
+}
+
+func (r *mutationResolver) UpdateFx(ctx context.Context, exchangeRate types.UpdateFXInput) (*types.Response, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *mutationResolver) UpdateFees(ctx context.Context, pricingFees types.UpdateFeesInput) (*types.Response, error) {
+	panic(fmt.Errorf("not implemented"))
 }
 
 // Mutation returns generated.MutationResolver implementation.

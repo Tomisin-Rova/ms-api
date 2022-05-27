@@ -689,6 +689,36 @@ func (r *queryResolver) ExistingBeneficiariesByPhone(ctx context.Context, phones
 	return results, nil
 }
 
+func (r *queryResolver) ExistingBeneficiaryByAccount(ctx context.Context, accountNumber string) (*apiTypes.BeneficiaryPreview, error) {
+	// Get user claims
+	_, err := middlewares.GetClaimsFromCtx(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Build request
+	request := payment.GetBeneficiaryByAccountRequest{
+		AccountNumber: accountNumber,
+	}
+
+	// Execute RPC call
+	response, err := r.PaymentService.GetBeneficiaryByAccount(ctx, &request)
+	if err != nil {
+		return nil, err
+	}
+
+	helpers := &helpersfactory{}
+
+	currency := helpers.MakeCurrencyFromProto(response.Currency)
+
+	return &apiTypes.BeneficiaryPreview{
+		Name:          response.Name,
+		Currency:      currency,
+		AccountNumber: response.AccountNumber,
+		Code:          response.Code,
+	}, nil
+}
+
 func (r *queryResolver) TransactionTypes(ctx context.Context, first *int64, after *string, last *int64, before *string, statuses []apiTypes.TransactionTypeStatuses) (*apiTypes.TransactionTypeConnection, error) {
 	transactionTypesStatuses := make([]protoTypes.TransactionType_TransactionTypeStatuses, len(statuses))
 
