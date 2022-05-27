@@ -117,6 +117,46 @@ func (mr *MockPricingServiceClientMockRecorder) GetFees(ctx, in interface{}, opt
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFees", reflect.TypeOf((*MockPricingServiceClient)(nil).GetFees), varargs...)
 }
 
+// UpdateFX mocks base method.
+func (m *MockPricingServiceClient) UpdateFX(ctx context.Context, in *pricing.UpdateFXRequest, opts ...grpc.CallOption) (*types.DefaultResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UpdateFX", varargs...)
+	ret0, _ := ret[0].(*types.DefaultResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateFX indicates an expected call of UpdateFX.
+func (mr *MockPricingServiceClientMockRecorder) UpdateFX(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateFX", reflect.TypeOf((*MockPricingServiceClient)(nil).UpdateFX), varargs...)
+}
+
+// UpdateFees mocks base method.
+func (m *MockPricingServiceClient) UpdateFees(ctx context.Context, in *pricing.UpdateFeesRequest, opts ...grpc.CallOption) (*types.DefaultResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UpdateFees", varargs...)
+	ret0, _ := ret[0].(*types.DefaultResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateFees indicates an expected call of UpdateFees.
+func (mr *MockPricingServiceClientMockRecorder) UpdateFees(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateFees", reflect.TypeOf((*MockPricingServiceClient)(nil).UpdateFees), varargs...)
+}
+
 // MockPricingServiceServer is a mock of PricingServiceServer interface.
 type MockPricingServiceServer struct {
 	ctrl     *gomock.Controller
@@ -198,4 +238,34 @@ func (m *MockPricingServiceServer) GetFees(arg0 context.Context, arg1 *pricing.G
 func (mr *MockPricingServiceServerMockRecorder) GetFees(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFees", reflect.TypeOf((*MockPricingServiceServer)(nil).GetFees), arg0, arg1)
+}
+
+// UpdateFX mocks base method.
+func (m *MockPricingServiceServer) UpdateFX(arg0 context.Context, arg1 *pricing.UpdateFXRequest) (*types.DefaultResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateFX", arg0, arg1)
+	ret0, _ := ret[0].(*types.DefaultResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateFX indicates an expected call of UpdateFX.
+func (mr *MockPricingServiceServerMockRecorder) UpdateFX(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateFX", reflect.TypeOf((*MockPricingServiceServer)(nil).UpdateFX), arg0, arg1)
+}
+
+// UpdateFees mocks base method.
+func (m *MockPricingServiceServer) UpdateFees(arg0 context.Context, arg1 *pricing.UpdateFeesRequest) (*types.DefaultResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateFees", arg0, arg1)
+	ret0, _ := ret[0].(*types.DefaultResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateFees indicates an expected call of UpdateFees.
+func (mr *MockPricingServiceServerMockRecorder) UpdateFees(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateFees", reflect.TypeOf((*MockPricingServiceServer)(nil).UpdateFees), arg0, arg1)
 }

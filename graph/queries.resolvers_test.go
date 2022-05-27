@@ -10374,3 +10374,98 @@ func TestQueryResolver_ExistingBeneficiariesByPhone(t *testing.T) {
 		})
 	}
 }
+
+func TestQueryResolver_ExistingBeneficiaryByAccount(t *testing.T) {
+
+	const (
+		success = iota
+		errorUnauthenticated
+		failOnGRPCError
+	)
+
+	type arg struct {
+		accountNumber string
+	}
+
+	tests := []struct {
+		name     string
+		arg      arg
+		testType int
+	}{
+		{
+			name: "Test existing customer with the given phone number",
+			arg: arg{
+				accountNumber: "1234567",
+			},
+			testType: success,
+		},
+		{
+			name:     "Test error unauthenticated",
+			testType: errorUnauthenticated,
+		},
+		{
+			name: "should fail on gRPC error",
+			arg: arg{
+				accountNumber: "1234567",
+			},
+			testType: failOnGRPCError,
+		},
+	}
+
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	paymentServiceClient := mocks.NewMockPaymentServiceClient(controller)
+	resolverOpts := &ResolverOpts{
+		PaymentService: paymentServiceClient,
+	}
+
+	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Query()
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			switch test.testType {
+			case success:
+				ctx, _ := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{
+					Client:   models.APP,
+					ID:       "123456",
+					Email:    "email@roava.app",
+					DeviceID: "12345"})
+				paymentServiceClient.EXPECT().GetBeneficiaryByAccount(ctx, &payment.GetBeneficiaryByAccountRequest{
+					AccountNumber: test.arg.accountNumber,
+				}).Return(&payment.GetBeneficiaryByAccountResponse{
+					Name: "John Doe",
+					Currency: &pbTypes.Currency{
+						Id:     "1",
+						Symbol: "£",
+						Code:   "Euro",
+						Name:   "Pounds",
+					},
+					AccountNumber: "1234567",
+					Code:          "1234",
+				}, nil)
+				resp, err := resolver.ExistingBeneficiaryByAccount(ctx, test.arg.accountNumber)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.NotEmpty(t, resp)
+			case errorUnauthenticated:
+				resp, err := resolver.ExistingBeneficiaryByAccount(context.Background(), test.arg.accountNumber)
+				assert.Error(t, err)
+				assert.IsType(t, &terror.Terror{}, err)
+				assert.Equal(t, errorvalues.InvalidAuthenticationError, err.(*terror.Terror).Code())
+				assert.Nil(t, resp)
+			case failOnGRPCError:
+				ctx, _ := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{
+					Client:   models.APP,
+					ID:       "123456",
+					Email:    "email@roava.app",
+					DeviceID: "12345"})
+				paymentServiceClient.EXPECT().GetBeneficiaryByAccount(ctx, &payment.GetBeneficiaryByAccountRequest{
+					AccountNumber: test.arg.accountNumber,
+				}).Return(nil, errors.New(""))
+				resp, err := resolver.ExistingBeneficiaryByAccount(ctx, test.arg.accountNumber)
+				assert.Error(t, err)
+				assert.Nil(t, resp)
+			}
+		})
+	}
+}

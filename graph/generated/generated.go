@@ -181,6 +181,13 @@ type ComplexityRoot struct {
 		TotalCount func(childComplexity int) int
 	}
 
+	BeneficiaryPreview struct {
+		AccountNumber func(childComplexity int) int
+		Code          func(childComplexity int) int
+		Currency      func(childComplexity int) int
+		Name          func(childComplexity int) int
+	}
+
 	CDD struct {
 		Amls     func(childComplexity int) int
 		Customer func(childComplexity int) int
@@ -420,8 +427,11 @@ type ComplexityRoot struct {
 		SubmitCdd                  func(childComplexity int, cdd types.CDDInput) int
 		UpdateAMLStatus            func(childComplexity int, id string, status types.AMLStatuses, message string) int
 		UpdateCustomerDetails      func(childComplexity int, customerDetails types.CustomerDetailsUpdateInput, transactionPassword string) int
+		UpdateFees                 func(childComplexity int, pricingFees types.UpdateFeesInput) int
+		UpdateFx                   func(childComplexity int, exchangeRate types.UpdateFXInput) int
 		UpdateKYCStatus            func(childComplexity int, id string, status types.KYCStatuses, message string) int
 		VerifyOtp                  func(childComplexity int, target string, otpToken string) int
+		WithdrawVaultAccount       func(childComplexity int, sourceAccountID string, targetAccountID string, transactionPassword string) int
 	}
 
 	Organization struct {
@@ -509,6 +519,7 @@ type ComplexityRoot struct {
 		Customers                    func(childComplexity int, keywords *string, first *int64, after *string, last *int64, before *string, statuses []types.CustomerStatuses) int
 		ExchangeRate                 func(childComplexity int, transactionTypeID string) int
 		ExistingBeneficiariesByPhone func(childComplexity int, phones []string, transactionPassword string) int
+		ExistingBeneficiaryByAccount func(childComplexity int, accountNumber string) int
 		Fees                         func(childComplexity int, transactionTypeID string, sourceAccountID string, targetAccountID string) int
 		Me                           func(childComplexity int) int
 		OnfidoSDKToken               func(childComplexity int) int
@@ -694,10 +705,13 @@ type MutationResolver interface {
 	CreateTransfer(ctx context.Context, transfer types.TransactionInput, transactionPassword string) (*types.Response, error)
 	SendNotification(ctx context.Context, typeArg types.DeliveryMode, content string, templateID string) (*types.Response, error)
 	DeactivateCredential(ctx context.Context, credentialType types.IdentityCredentialsTypes) (*types.Response, error)
+	WithdrawVaultAccount(ctx context.Context, sourceAccountID string, targetAccountID string, transactionPassword string) (*types.Response, error)
 	RequestResubmit(ctx context.Context, customerID string, reportIds []string, message *string) (*types.Response, error)
 	StaffLogin(ctx context.Context, token string, authType types.AuthType) (*types.AuthResponse, error)
 	UpdateKYCStatus(ctx context.Context, id string, status types.KYCStatuses, message string) (*types.Response, error)
 	UpdateAMLStatus(ctx context.Context, id string, status types.AMLStatuses, message string) (*types.Response, error)
+	UpdateFx(ctx context.Context, exchangeRate types.UpdateFXInput) (*types.Response, error)
+	UpdateFees(ctx context.Context, pricingFees types.UpdateFeesInput) (*types.Response, error)
 }
 type QueryResolver interface {
 	CheckEmail(ctx context.Context, email string) (bool, error)
@@ -718,6 +732,7 @@ type QueryResolver interface {
 	Beneficiary(ctx context.Context, id string) (*types.Beneficiary, error)
 	Beneficiaries(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string, statuses []types.BeneficiaryStatuses, sortBy *types.BeneficiarySort) (*types.BeneficiaryConnection, error)
 	ExistingBeneficiariesByPhone(ctx context.Context, phones []string, transactionPassword string) ([]*string, error)
+	ExistingBeneficiaryByAccount(ctx context.Context, accountNumber string) (*types.BeneficiaryPreview, error)
 	TransactionTypes(ctx context.Context, first *int64, after *string, last *int64, before *string, statuses []types.TransactionTypeStatuses) (*types.TransactionTypeConnection, error)
 	Questionary(ctx context.Context, id string) (*types.Questionary, error)
 	Questionaries(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string, statuses []types.QuestionaryStatuses, typeArg []types.QuestionaryTypes) (*types.QuestionaryConnection, error)
@@ -1347,6 +1362,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.BeneficiaryConnection.TotalCount(childComplexity), true
+
+	case "BeneficiaryPreview.accountNumber":
+		if e.complexity.BeneficiaryPreview.AccountNumber == nil {
+			break
+		}
+
+		return e.complexity.BeneficiaryPreview.AccountNumber(childComplexity), true
+
+	case "BeneficiaryPreview.code":
+		if e.complexity.BeneficiaryPreview.Code == nil {
+			break
+		}
+
+		return e.complexity.BeneficiaryPreview.Code(childComplexity), true
+
+	case "BeneficiaryPreview.currency":
+		if e.complexity.BeneficiaryPreview.Currency == nil {
+			break
+		}
+
+		return e.complexity.BeneficiaryPreview.Currency(childComplexity), true
+
+	case "BeneficiaryPreview.name":
+		if e.complexity.BeneficiaryPreview.Name == nil {
+			break
+		}
+
+		return e.complexity.BeneficiaryPreview.Name(childComplexity), true
 
 	case "CDD.amls":
 		if e.complexity.CDD.Amls == nil {
@@ -2597,6 +2640,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.UpdateCustomerDetails(childComplexity, args["customerDetails"].(types.CustomerDetailsUpdateInput), args["transactionPassword"].(string)), true
 
+	case "Mutation.updateFees":
+		if e.complexity.Mutation.UpdateFees == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateFees_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateFees(childComplexity, args["pricingFees"].(types.UpdateFeesInput)), true
+
+	case "Mutation.updateFX":
+		if e.complexity.Mutation.UpdateFx == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateFX_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateFx(childComplexity, args["exchangeRate"].(types.UpdateFXInput)), true
+
 	case "Mutation.updateKYCStatus":
 		if e.complexity.Mutation.UpdateKYCStatus == nil {
 			break
@@ -2620,6 +2687,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.VerifyOtp(childComplexity, args["target"].(string), args["otpToken"].(string)), true
+
+	case "Mutation.withdrawVaultAccount":
+		if e.complexity.Mutation.WithdrawVaultAccount == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_withdrawVaultAccount_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.WithdrawVaultAccount(childComplexity, args["sourceAccountId"].(string), args["targetAccountId"].(string), args["transactionPassword"].(string)), true
 
 	case "Organization.id":
 		if e.complexity.Organization.ID == nil {
@@ -3135,6 +3214,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.ExistingBeneficiariesByPhone(childComplexity, args["phones"].([]string), args["transactionPassword"].(string)), true
+
+	case "Query.existingBeneficiaryByAccount":
+		if e.complexity.Query.ExistingBeneficiaryByAccount == nil {
+			break
+		}
+
+		args, err := ec.field_Query_existingBeneficiaryByAccount_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.ExistingBeneficiaryByAccount(childComplexity, args["accountNumber"].(string)), true
 
 	case "Query.fees":
 		if e.complexity.Query.Fees == nil {
@@ -3884,6 +3975,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputBeneficiaryAccountInput,
 		ec.unmarshalInputBeneficiaryByPhoneInput,
 		ec.unmarshalInputBeneficiaryInput,
+		ec.unmarshalInputBoundaryFee,
 		ec.unmarshalInputCDDInput,
 		ec.unmarshalInputCheckCustomerDataInput,
 		ec.unmarshalInputCommonQueryFilterInput,
@@ -3898,6 +3990,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputPOAInput,
 		ec.unmarshalInputQuestionaryAnswerInput,
 		ec.unmarshalInputTransactionInput,
+		ec.unmarshalInputUpdateFXInput,
+		ec.unmarshalInputUpdateFeesInput,
 		ec.unmarshalInputVaultAccountInput,
 	)
 	first := true
@@ -3959,7 +4053,8 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "graph/schemas/mutations.graphql", Input: `type Mutation {
+	{Name: "../schemas/mutations.graphql", Input: `# noinspection GraphQLTypeRedefinition
+type Mutation {
     # Create and send a new OTP
     # expireTime is expresend in seconds
     requestOTP(type: DeliveryMode!, target: String!, expireTimeInSeconds: Int): Response!
@@ -4017,6 +4112,10 @@ var sources = []*ast.Source{
     sendNotification(type: DeliveryMode!, content: String!, templateId: String!): Response!
     # Deactivate a credential
     deactivateCredential(credentialType: IdentityCredentialsTypes!): Response!
+    # Withdraw funds from a Vault Account
+    withdrawVaultAccount(sourceAccountId: ID!, targetAccountId: ID!, transactionPassword: String!): Response!
+
+
 
     # ---- Dashboard -----
     # Ask for a customer to resubmit a report
@@ -4027,6 +4126,10 @@ var sources = []*ast.Source{
     updateKYCStatus(id: ID!, status: KYCStatuses!,  message: String!): Response!
     # Update AML status
     updateAMLStatus(id: ID!, status: AMLStatuses!,  message: String!): Response!
+    # Update FX
+    updateFX(exchangeRate: UpdateFXInput!): Response!
+    # Update Fees
+    updateFees(pricingFees: UpdateFeesInput!): Response!
 }
 
 # API response interface
@@ -4225,6 +4328,26 @@ input CustomerDetailsUpdateInput {
     address: AddressInput
 }
 
+# update Fees
+input UpdateFeesInput{
+    feeID: ID!
+    boundaries: [BoundaryFee!]
+}
+
+input BoundaryFee{
+    lower: Float
+    upper: Float
+    amount: Float
+    percentage: Float
+}
+# update FX
+input UpdateFXInput {
+    baseCurrencyId: String!
+    currencyId: String!
+    salePrice: Float
+    buyPrice: Float
+}
+
 enum AuthType {
     GOOGLE
 }
@@ -4236,7 +4359,7 @@ enum DeliveryMode {
     PUSH
 }
 `, BuiltIn: false},
-	{Name: "graph/schemas/queries.graphql", Input: `type Query {
+	{Name: "../schemas/queries.graphql", Input: `type Query {
     # Check if there's a customer with the email given
     checkEmail(email: String!): Boolean!
     # Check if there's a customer with the phone number given
@@ -4374,6 +4497,8 @@ enum DeliveryMode {
     ): BeneficiaryConnection
     # Fetch the list of existing beneficiaries by the provided phone list (API only return the list of phones that exist in ROAVA)
     existingBeneficiariesByPhone(phones: [String!]!, transactionPassword: String!): [String]!
+    # Fetch existing beneficiary by account number
+    existingBeneficiaryByAccount(accountNumber: String!): BeneficiaryPreview!
     # Fetch a list of transactionTypes
     transactionTypes(
         # Returns the first n elements from the list.
@@ -4612,8 +4737,15 @@ type CountryConnection {
     pageInfo: PageInfo!
     # Identifies the total count of items in the connection
     totalCount: Int!
+}
+
+type BeneficiaryPreview {
+    name: String!
+    currency: Currency!
+    accountNumber: String!
+    code: String!
 }`, BuiltIn: false},
-	{Name: "graph/schemas/types.graphql", Input: `# Date scalar format DD-MM-YYYY
+	{Name: "../schemas/types.graphql", Input: `# Date scalar format DD-MM-YYYY
 scalar Date
 
 ############# USER GROUP #############
@@ -5972,6 +6104,36 @@ func (ec *executionContext) field_Mutation_updateCustomerDetails_args(ctx contex
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_updateFX_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 types.UpdateFXInput
+	if tmp, ok := rawArgs["exchangeRate"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("exchangeRate"))
+		arg0, err = ec.unmarshalNUpdateFXInput2msᚗapiᚋtypesᚐUpdateFXInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["exchangeRate"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateFees_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 types.UpdateFeesInput
+	if tmp, ok := rawArgs["pricingFees"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pricingFees"))
+		arg0, err = ec.unmarshalNUpdateFeesInput2msᚗapiᚋtypesᚐUpdateFeesInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["pricingFees"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_updateKYCStatus_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -6026,6 +6188,39 @@ func (ec *executionContext) field_Mutation_verifyOTP_args(ctx context.Context, r
 		}
 	}
 	args["otpToken"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_withdrawVaultAccount_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["sourceAccountId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sourceAccountId"))
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["sourceAccountId"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["targetAccountId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("targetAccountId"))
+		arg1, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["targetAccountId"] = arg1
+	var arg2 string
+	if tmp, ok := rawArgs["transactionPassword"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("transactionPassword"))
+		arg2, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["transactionPassword"] = arg2
 	return args, nil
 }
 
@@ -6677,6 +6872,21 @@ func (ec *executionContext) field_Query_existingBeneficiariesByPhone_args(ctx co
 		}
 	}
 	args["transactionPassword"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_existingBeneficiaryByAccount_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["accountNumber"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("accountNumber"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["accountNumber"] = arg0
 	return args, nil
 }
 
@@ -11179,6 +11389,192 @@ func (ec *executionContext) fieldContext_BeneficiaryConnection_totalCount(ctx co
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _BeneficiaryPreview_name(ctx context.Context, field graphql.CollectedField, obj *types.BeneficiaryPreview) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_BeneficiaryPreview_name(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_BeneficiaryPreview_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "BeneficiaryPreview",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _BeneficiaryPreview_currency(ctx context.Context, field graphql.CollectedField, obj *types.BeneficiaryPreview) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_BeneficiaryPreview_currency(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Currency, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.Currency)
+	fc.Result = res
+	return ec.marshalNCurrency2ᚖmsᚗapiᚋtypesᚐCurrency(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_BeneficiaryPreview_currency(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "BeneficiaryPreview",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Currency_id(ctx, field)
+			case "symbol":
+				return ec.fieldContext_Currency_symbol(ctx, field)
+			case "code":
+				return ec.fieldContext_Currency_code(ctx, field)
+			case "name":
+				return ec.fieldContext_Currency_name(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Currency", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _BeneficiaryPreview_accountNumber(ctx context.Context, field graphql.CollectedField, obj *types.BeneficiaryPreview) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_BeneficiaryPreview_accountNumber(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.AccountNumber, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_BeneficiaryPreview_accountNumber(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "BeneficiaryPreview",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _BeneficiaryPreview_code(ctx context.Context, field graphql.CollectedField, obj *types.BeneficiaryPreview) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_BeneficiaryPreview_code(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Code, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_BeneficiaryPreview_code(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "BeneficiaryPreview",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -19056,6 +19452,69 @@ func (ec *executionContext) fieldContext_Mutation_deactivateCredential(ctx conte
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_withdrawVaultAccount(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_withdrawVaultAccount(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().WithdrawVaultAccount(rctx, fc.Args["sourceAccountId"].(string), fc.Args["targetAccountId"].(string), fc.Args["transactionPassword"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.Response)
+	fc.Result = res
+	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_withdrawVaultAccount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "message":
+				return ec.fieldContext_Response_message(ctx, field)
+			case "success":
+				return ec.fieldContext_Response_success(ctx, field)
+			case "code":
+				return ec.fieldContext_Response_code(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Response", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_withdrawVaultAccount_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_requestResubmit(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_requestResubmit(ctx, field)
 	if err != nil {
@@ -19304,6 +19763,132 @@ func (ec *executionContext) fieldContext_Mutation_updateAMLStatus(ctx context.Co
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_updateAMLStatus_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_updateFX(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_updateFX(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateFx(rctx, fc.Args["exchangeRate"].(types.UpdateFXInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.Response)
+	fc.Result = res
+	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_updateFX(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "message":
+				return ec.fieldContext_Response_message(ctx, field)
+			case "success":
+				return ec.fieldContext_Response_success(ctx, field)
+			case "code":
+				return ec.fieldContext_Response_code(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Response", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_updateFX_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_updateFees(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_updateFees(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateFees(rctx, fc.Args["pricingFees"].(types.UpdateFeesInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.Response)
+	fc.Result = res
+	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_updateFees(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "message":
+				return ec.fieldContext_Response_message(ctx, field)
+			case "success":
+				return ec.fieldContext_Response_success(ctx, field)
+			case "code":
+				return ec.fieldContext_Response_code(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Response", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_updateFees_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -22347,6 +22932,71 @@ func (ec *executionContext) fieldContext_Query_existingBeneficiariesByPhone(ctx 
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_existingBeneficiariesByPhone_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_existingBeneficiaryByAccount(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_existingBeneficiaryByAccount(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().ExistingBeneficiaryByAccount(rctx, fc.Args["accountNumber"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.BeneficiaryPreview)
+	fc.Result = res
+	return ec.marshalNBeneficiaryPreview2ᚖmsᚗapiᚋtypesᚐBeneficiaryPreview(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_existingBeneficiaryByAccount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "name":
+				return ec.fieldContext_BeneficiaryPreview_name(ctx, field)
+			case "currency":
+				return ec.fieldContext_BeneficiaryPreview_currency(ctx, field)
+			case "accountNumber":
+				return ec.fieldContext_BeneficiaryPreview_accountNumber(ctx, field)
+			case "code":
+				return ec.fieldContext_BeneficiaryPreview_code(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type BeneficiaryPreview", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_existingBeneficiaryByAccount_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -29479,6 +30129,53 @@ func (ec *executionContext) unmarshalInputBeneficiaryInput(ctx context.Context, 
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputBoundaryFee(ctx context.Context, obj interface{}) (types.BoundaryFee, error) {
+	var it types.BoundaryFee
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	for k, v := range asMap {
+		switch k {
+		case "lower":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("lower"))
+			it.Lower, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "upper":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("upper"))
+			it.Upper, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "amount":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("amount"))
+			it.Amount, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "percentage":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("percentage"))
+			it.Percentage, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputCDDInput(ctx context.Context, obj interface{}) (types.CDDInput, error) {
 	var it types.CDDInput
 	asMap := map[string]interface{}{}
@@ -30080,6 +30777,84 @@ func (ec *executionContext) unmarshalInputTransactionInput(ctx context.Context, 
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idempotencyKey"))
 			it.IdempotencyKey, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUpdateFXInput(ctx context.Context, obj interface{}) (types.UpdateFXInput, error) {
+	var it types.UpdateFXInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	for k, v := range asMap {
+		switch k {
+		case "baseCurrencyId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("baseCurrencyId"))
+			it.BaseCurrencyID, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "currencyId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("currencyId"))
+			it.CurrencyID, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "salePrice":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("salePrice"))
+			it.SalePrice, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "buyPrice":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("buyPrice"))
+			it.BuyPrice, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUpdateFeesInput(ctx context.Context, obj interface{}) (types.UpdateFeesInput, error) {
+	var it types.UpdateFeesInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	for k, v := range asMap {
+		switch k {
+		case "feeID":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("feeID"))
+			it.FeeID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "boundaries":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("boundaries"))
+			it.Boundaries, err = ec.unmarshalOBoundaryFee2ᚕᚖmsᚗapiᚋtypesᚐBoundaryFeeᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -31075,6 +31850,55 @@ func (ec *executionContext) _BeneficiaryConnection(ctx context.Context, sel ast.
 		case "totalCount":
 
 			out.Values[i] = ec._BeneficiaryConnection_totalCount(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var beneficiaryPreviewImplementors = []string{"BeneficiaryPreview"}
+
+func (ec *executionContext) _BeneficiaryPreview(ctx context.Context, sel ast.SelectionSet, obj *types.BeneficiaryPreview) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, beneficiaryPreviewImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("BeneficiaryPreview")
+		case "name":
+
+			out.Values[i] = ec._BeneficiaryPreview_name(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "currency":
+
+			out.Values[i] = ec._BeneficiaryPreview_currency(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "accountNumber":
+
+			out.Values[i] = ec._BeneficiaryPreview_accountNumber(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "code":
+
+			out.Values[i] = ec._BeneficiaryPreview_code(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -32751,6 +33575,15 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "withdrawVaultAccount":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_withdrawVaultAccount(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "requestResubmit":
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
@@ -32782,6 +33615,24 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_updateAMLStatus(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "updateFX":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_updateFX(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "updateFees":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_updateFees(ctx, field)
 			})
 
 			if out.Values[i] == graphql.Null {
@@ -33631,6 +34482,29 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_existingBeneficiariesByPhone(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
+		case "existingBeneficiaryByAccount":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_existingBeneficiaryByAccount(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -35632,6 +36506,20 @@ func (ec *executionContext) unmarshalNBeneficiaryInput2msᚗapiᚋtypesᚐBenefi
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) marshalNBeneficiaryPreview2msᚗapiᚋtypesᚐBeneficiaryPreview(ctx context.Context, sel ast.SelectionSet, v types.BeneficiaryPreview) graphql.Marshaler {
+	return ec._BeneficiaryPreview(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNBeneficiaryPreview2ᚖmsᚗapiᚋtypesᚐBeneficiaryPreview(ctx context.Context, sel ast.SelectionSet, v *types.BeneficiaryPreview) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._BeneficiaryPreview(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNBeneficiaryStatuses2msᚗapiᚋtypesᚐBeneficiaryStatuses(ctx context.Context, v interface{}) (types.BeneficiaryStatuses, error) {
 	var res types.BeneficiaryStatuses
 	err := res.UnmarshalGQL(v)
@@ -35655,6 +36543,11 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNBoundaryFee2ᚖmsᚗapiᚋtypesᚐBoundaryFee(ctx context.Context, v interface{}) (*types.BoundaryFee, error) {
+	res, err := ec.unmarshalInputBoundaryFee(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNCDD2msᚗapiᚋtypesᚐCdd(ctx context.Context, sel ast.SelectionSet, v types.Cdd) graphql.Marshaler {
@@ -37317,6 +38210,16 @@ func (ec *executionContext) marshalNTransactionTypeStatuses2msᚗapiᚋtypesᚐT
 	return v
 }
 
+func (ec *executionContext) unmarshalNUpdateFXInput2msᚗapiᚋtypesᚐUpdateFXInput(ctx context.Context, v interface{}) (types.UpdateFXInput, error) {
+	res, err := ec.unmarshalInputUpdateFXInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNUpdateFeesInput2msᚗapiᚋtypesᚐUpdateFeesInput(ctx context.Context, v interface{}) (types.UpdateFeesInput, error) {
+	res, err := ec.unmarshalInputUpdateFeesInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNVaultAccountInput2msᚗapiᚋtypesᚐVaultAccountInput(ctx context.Context, v interface{}) (types.VaultAccountInput, error) {
 	res, err := ec.unmarshalInputVaultAccountInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -37947,6 +38850,26 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	}
 	res := graphql.MarshalBoolean(*v)
 	return res
+}
+
+func (ec *executionContext) unmarshalOBoundaryFee2ᚕᚖmsᚗapiᚋtypesᚐBoundaryFeeᚄ(ctx context.Context, v interface{}) ([]*types.BoundaryFee, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*types.BoundaryFee, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNBoundaryFee2ᚖmsᚗapiᚋtypesᚐBoundaryFee(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
 }
 
 func (ec *executionContext) unmarshalOCDDStatuses2ᚕmsᚗapiᚋtypesᚐCDDStatusesᚄ(ctx context.Context, v interface{}) ([]types.CDDStatuses, error) {

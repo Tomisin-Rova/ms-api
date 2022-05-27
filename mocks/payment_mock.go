@@ -217,6 +217,26 @@ func (mr *MockPaymentServiceClientMockRecorder) GetBeneficiary(ctx, in interface
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBeneficiary", reflect.TypeOf((*MockPaymentServiceClient)(nil).GetBeneficiary), varargs...)
 }
 
+// GetBeneficiaryByAccount mocks base method.
+func (m *MockPaymentServiceClient) GetBeneficiaryByAccount(ctx context.Context, in *payment.GetBeneficiaryByAccountRequest, opts ...grpc.CallOption) (*payment.GetBeneficiaryByAccountResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetBeneficiaryByAccount", varargs...)
+	ret0, _ := ret[0].(*payment.GetBeneficiaryByAccountResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetBeneficiaryByAccount indicates an expected call of GetBeneficiaryByAccount.
+func (mr *MockPaymentServiceClientMockRecorder) GetBeneficiaryByAccount(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBeneficiaryByAccount", reflect.TypeOf((*MockPaymentServiceClient)(nil).GetBeneficiaryByAccount), varargs...)
+}
+
 // GetTransaction mocks base method.
 func (m *MockPaymentServiceClient) GetTransaction(ctx context.Context, in *payment.GetTransactionRequest, opts ...grpc.CallOption) (*types.Transaction, error) {
 	m.ctrl.T.Helper()
@@ -275,6 +295,26 @@ func (mr *MockPaymentServiceClientMockRecorder) GetTransactions(ctx, in interfac
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTransactions", reflect.TypeOf((*MockPaymentServiceClient)(nil).GetTransactions), varargs...)
+}
+
+// WithdrawVaultAccount mocks base method.
+func (m *MockPaymentServiceClient) WithdrawVaultAccount(ctx context.Context, in *payment.WithdrawVaultAccountRequest, opts ...grpc.CallOption) (*types.DefaultResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WithdrawVaultAccount", varargs...)
+	ret0, _ := ret[0].(*types.DefaultResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WithdrawVaultAccount indicates an expected call of WithdrawVaultAccount.
+func (mr *MockPaymentServiceClientMockRecorder) WithdrawVaultAccount(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithdrawVaultAccount", reflect.TypeOf((*MockPaymentServiceClient)(nil).WithdrawVaultAccount), varargs...)
 }
 
 // MockPaymentServiceServer is a mock of PaymentServiceServer interface.
@@ -435,6 +475,21 @@ func (mr *MockPaymentServiceServerMockRecorder) GetBeneficiary(arg0, arg1 interf
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBeneficiary", reflect.TypeOf((*MockPaymentServiceServer)(nil).GetBeneficiary), arg0, arg1)
 }
 
+// GetBeneficiaryByAccount mocks base method.
+func (m *MockPaymentServiceServer) GetBeneficiaryByAccount(arg0 context.Context, arg1 *payment.GetBeneficiaryByAccountRequest) (*payment.GetBeneficiaryByAccountResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetBeneficiaryByAccount", arg0, arg1)
+	ret0, _ := ret[0].(*payment.GetBeneficiaryByAccountResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetBeneficiaryByAccount indicates an expected call of GetBeneficiaryByAccount.
+func (mr *MockPaymentServiceServerMockRecorder) GetBeneficiaryByAccount(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBeneficiaryByAccount", reflect.TypeOf((*MockPaymentServiceServer)(nil).GetBeneficiaryByAccount), arg0, arg1)
+}
+
 // GetTransaction mocks base method.
 func (m *MockPaymentServiceServer) GetTransaction(arg0 context.Context, arg1 *payment.GetTransactionRequest) (*types.Transaction, error) {
 	m.ctrl.T.Helper()
@@ -478,4 +533,19 @@ func (m *MockPaymentServiceServer) GetTransactions(arg0 context.Context, arg1 *p
 func (mr *MockPaymentServiceServerMockRecorder) GetTransactions(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTransactions", reflect.TypeOf((*MockPaymentServiceServer)(nil).GetTransactions), arg0, arg1)
+}
+
+// WithdrawVaultAccount mocks base method.
+func (m *MockPaymentServiceServer) WithdrawVaultAccount(arg0 context.Context, arg1 *payment.WithdrawVaultAccountRequest) (*types.DefaultResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "WithdrawVaultAccount", arg0, arg1)
+	ret0, _ := ret[0].(*types.DefaultResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WithdrawVaultAccount indicates an expected call of WithdrawVaultAccount.
+func (mr *MockPaymentServiceServerMockRecorder) WithdrawVaultAccount(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithdrawVaultAccount", reflect.TypeOf((*MockPaymentServiceServer)(nil).WithdrawVaultAccount), arg0, arg1)
 }
