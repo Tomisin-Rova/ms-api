@@ -1013,7 +1013,30 @@ func (r *mutationResolver) DeactivateCredential(ctx context.Context, credentialT
 }
 
 func (r *mutationResolver) WithdrawVaultAccount(ctx context.Context, sourceAccountID string, targetAccountID string, transactionPassword string) (*types.Response, error) {
-	panic(fmt.Errorf("not implemented"))
+	// Get user claims
+	_, err := middlewares.GetClaimsFromCtx(ctx)
+	if err != nil {
+		responseMessage := "User authentication failed"
+		return &types.Response{Message: &responseMessage, Success: false, Code: int64(500)}, err
+	}
+
+	// Build request
+	request := payment.WithdrawVaultAccountRequest{
+		SourceAccountId:     sourceAccountID,
+		TargetAccountId:     targetAccountID,
+		TransactionPassword: transactionPassword,
+	}
+
+	// Call RPC
+	response, err := r.PaymentService.WithdrawVaultAccount(ctx, &request)
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.Response{
+		Success: response.Success,
+		Code:    int64(response.Code),
+	}, nil
 }
 
 func (r *mutationResolver) RequestResubmit(ctx context.Context, customerID string, reportIds []string, message *string) (*types.Response, error) {
