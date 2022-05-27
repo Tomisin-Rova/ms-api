@@ -717,8 +717,6 @@ func (r *queryResolver) ExistingBeneficiaryByAccount(ctx context.Context, accoun
 		AccountNumber: response.AccountNumber,
 		Code:          response.Code,
 	}, nil
-
-	//return results, nil
 }
 
 func (r *queryResolver) TransactionTypes(ctx context.Context, first *int64, after *string, last *int64, before *string, statuses []apiTypes.TransactionTypeStatuses) (*apiTypes.TransactionTypeConnection, error) {
