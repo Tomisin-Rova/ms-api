@@ -3421,7 +3421,6 @@ func TestMutationResolver_UpdateCustomerDetails(t *testing.T) {
 func TestMutationResolver_UpdateFx(t *testing.T) {
 	const (
 		success = iota
-		errorUnauthenticated
 		errorCreatingFX
 	)
 	var FX = types.UpdateFXInput{
@@ -3436,10 +3435,6 @@ func TestMutationResolver_UpdateFx(t *testing.T) {
 		{
 			name:     "Test Success",
 			testType: success,
-		},
-		{
-			name:     "Test error unauthenticated",
-			testType: errorUnauthenticated,
 		},
 		{
 			name:     "Test error creating FX",
@@ -3481,12 +3476,6 @@ func TestMutationResolver_UpdateFx(t *testing.T) {
 					Success: true,
 					Code:    http.StatusOK,
 				}, resp)
-			case errorUnauthenticated:
-				resp, err := resolver.UpdateFx(context.Background(), FX)
-				assert.Error(t, err)
-				assert.IsType(t, &terror.Terror{}, err)
-				assert.Equal(t, errorvalues.InvalidAuthenticationError, err.(*terror.Terror).Code())
-				assert.Nil(t, resp)
 			case errorCreatingFX:
 				pricingServiceClient.EXPECT().UpdateFX(validCtx, &pricing.UpdateFXRequest{
 					BaseCurrencyId: FX.BaseCurrencyID,
@@ -3504,7 +3493,6 @@ func TestMutationResolver_UpdateFx(t *testing.T) {
 func TestMutationResolver_UpdateFees(t *testing.T) {
 	const (
 		success = iota
-		errorUnauthenticated
 		errorCreatingFees
 	)
 	var (
@@ -3518,9 +3506,10 @@ func TestMutationResolver_UpdateFees(t *testing.T) {
 				Type:              types.FeeTypesFixed,
 				Boundaries: []*types.BoundaryFee{
 					{
-						Lower:  &lower,
-						Upper:  &upper,
-						Amount: &amount,
+						Lower:      &lower,
+						Upper:      &upper,
+						Amount:     &amount,
+						Percentage: &percentage,
 					},
 				},
 			},
@@ -3531,6 +3520,7 @@ func TestMutationResolver_UpdateFees(t *testing.T) {
 					{
 						Lower:      &lower,
 						Upper:      &upper,
+						Amount:     &amount,
 						Percentage: &percentage,
 					},
 				},
@@ -3539,32 +3529,18 @@ func TestMutationResolver_UpdateFees(t *testing.T) {
 		feesRequest []*pricing.UpdateFeesRequest
 	)
 	for _, fee := range fees {
-		if fee.Type == types.FeeTypesFixed && fee.TransactionTypeID != "" {
-			var feeRequest pricing.UpdateFeesRequest
-			feeRequest.TransactionTypeId = fee.TransactionTypeID
-			var boundaryRequest pbTypes.FeeBoundaries
-			feeRequest.Type = pbTypes.Fee_FIXED
-			for _, reqBoundary := range fee.Boundaries {
-				boundaryRequest.Lower = float32(*reqBoundary.Lower)
-				boundaryRequest.Upper = float32(*reqBoundary.Upper)
-				boundaryRequest.Amount = float32(*reqBoundary.Amount)
-				feeRequest.Boundaries = append(feeRequest.Boundaries, &boundaryRequest)
-			}
-			feesRequest = append(feesRequest, &feeRequest)
+		var feeRequest pricing.UpdateFeesRequest
+		feeRequest.TransactionTypeId = fee.TransactionTypeID
+		var boundaryRequest pbTypes.FeeBoundaries
+		feeRequest.Type = pbTypes.Fee_FIXED
+		for _, reqBoundary := range fee.Boundaries {
+			boundaryRequest.Lower = float32(*reqBoundary.Lower)
+			boundaryRequest.Upper = float32(*reqBoundary.Upper)
+			boundaryRequest.Amount = float32(*reqBoundary.Amount)
+			boundaryRequest.Percentage = float32(*reqBoundary.Percentage)
+			feeRequest.Boundaries = append(feeRequest.Boundaries, &boundaryRequest)
 		}
-		if fee.Type == types.FeeTypesVariable && fee.TransactionTypeID != "" {
-			var feeRequest pricing.UpdateFeesRequest
-			feeRequest.TransactionTypeId = fee.TransactionTypeID
-			var boundaryRequest pbTypes.FeeBoundaries
-			feeRequest.Type = pbTypes.Fee_VARIABLE
-			for _, reqBoundary := range fee.Boundaries {
-				boundaryRequest.Lower = float32(*reqBoundary.Lower)
-				boundaryRequest.Upper = float32(*reqBoundary.Upper)
-				boundaryRequest.Percentage = float32(*reqBoundary.Percentage)
-				feeRequest.Boundaries = append(feeRequest.Boundaries, &boundaryRequest)
-			}
-			feesRequest = append(feesRequest, &feeRequest)
-		}
+		feesRequest = append(feesRequest, &feeRequest)
 	}
 
 	var tests = []struct {
@@ -3574,10 +3550,6 @@ func TestMutationResolver_UpdateFees(t *testing.T) {
 		{
 			name:     "Test Success",
 			testType: success,
-		},
-		{
-			name:     "Test error unauthenticated",
-			testType: errorUnauthenticated,
 		},
 		{
 			name:     "Test error creating FX",
@@ -3616,12 +3588,6 @@ func TestMutationResolver_UpdateFees(t *testing.T) {
 					Success: true,
 					Code:    http.StatusOK,
 				}, resp)
-			case errorUnauthenticated:
-				resp, err := resolver.UpdateFees(context.Background(), fees)
-				assert.Error(t, err)
-				assert.IsType(t, &terror.Terror{}, err)
-				assert.Equal(t, errorvalues.InvalidAuthenticationError, err.(*terror.Terror).Code())
-				assert.Nil(t, resp)
 			case errorCreatingFees:
 				pricingServiceClient.EXPECT().UpdateFees(validCtx, &pricing.UpdateFeesRequests{
 					Fees: feesRequest,
