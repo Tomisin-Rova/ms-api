@@ -91,3 +91,4 @@ $ make local environment=local
 | ErrInvalidDateFormat        | 7007    | invalid date format. Date format must be dd/mm/yyyy                                                                     |
 | ErrInvalidType              | 7008    | not a valid date                                                                                                        |
 | ErrInvalidAge               | 7009    | minimum age requirement for using Roava is 18years                                                                      |
+| InvalidRequestErr           | 7103    | invalid request error, failed to parse event                                                                            |

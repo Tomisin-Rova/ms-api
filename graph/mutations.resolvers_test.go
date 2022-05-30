@@ -3,6 +3,7 @@ package graph
 import (
 	"context"
 	"errors"
+	"ms.api/protos/pb/pricing"
 	"net/http"
 	"testing"
 
@@ -3415,4 +3416,187 @@ func TestMutationResolver_UpdateCustomerDetails(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestMutationResolver_UpdateFx(t *testing.T) {
+	const (
+		success = iota
+		errorCreatingFX
+	)
+	var FX = types.UpdateFXInput{
+		BaseCurrencyID: "baseCurrencyId",
+		CurrencyID:     "currencyId",
+		BuyPrice:       0.1,
+	}
+	var tests = []struct {
+		name     string
+		testType int
+	}{
+		{
+			name:     "Test Success",
+			testType: success,
+		},
+		{
+			name:     "Test error creating FX",
+			testType: errorCreatingFX,
+		},
+	}
+
+	validCtx, err := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{})
+	if err != nil {
+		assert.NoError(t, err)
+		t.Fail()
+	}
+
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	pricingServiceClient := mocks.NewMockPricingServiceClient(controller)
+	resolverOpts := &ResolverOpts{
+		PricingService: pricingServiceClient,
+	}
+	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			switch testCase.testType {
+			case success:
+				pricingServiceClient.EXPECT().UpdateFX(validCtx, &pricing.UpdateFXRequest{
+					BaseCurrencyId: FX.BaseCurrencyID,
+					CurrencyId:     FX.CurrencyID,
+					BuyPrice:       float32(FX.BuyPrice),
+				}).Return(&pbTypes.DefaultResponse{
+					Success: true,
+					Code:    http.StatusOK,
+				}, nil)
+
+				resp, err := resolver.UpdateFx(validCtx, FX)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, &types.Response{
+					Success: true,
+					Code:    http.StatusOK,
+				}, resp)
+			case errorCreatingFX:
+				pricingServiceClient.EXPECT().UpdateFX(validCtx, &pricing.UpdateFXRequest{
+					BaseCurrencyId: FX.BaseCurrencyID,
+					CurrencyId:     FX.CurrencyID,
+					BuyPrice:       float32(FX.BuyPrice),
+				}).Return(nil, errors.New(""))
+				resp, err := resolver.UpdateFx(validCtx, FX)
+				assert.Error(t, err)
+				assert.Nil(t, resp)
+			}
+		})
+	}
+}
+
+func TestMutationResolver_UpdateFees(t *testing.T) {
+	const (
+		success = iota
+		errorCreatingFees
+	)
+	var (
+		lower      = 1000.0
+		upper      = 2000.0
+		amount     = 100.0
+		percentage = 0.3
+		fees       = []*types.UpdateFeesInput{
+			{
+				TransactionTypeID: "transactionTypeId",
+				Type:              types.FeeTypesFixed,
+				Boundaries: []*types.BoundaryFee{
+					{
+						Lower:      &lower,
+						Upper:      &upper,
+						Amount:     &amount,
+						Percentage: &percentage,
+					},
+				},
+			},
+			{
+				TransactionTypeID: "transactionTypeId",
+				Type:              types.FeeTypesVariable,
+				Boundaries: []*types.BoundaryFee{
+					{
+						Lower:      &lower,
+						Upper:      &upper,
+						Amount:     &amount,
+						Percentage: &percentage,
+					},
+				},
+			},
+		}
+		feesRequest []*pricing.UpdateFeesRequest
+	)
+	for _, fee := range fees {
+		var feeRequest pricing.UpdateFeesRequest
+		feeRequest.TransactionTypeId = fee.TransactionTypeID
+		var boundaryRequest pbTypes.FeeBoundaries
+		feeRequest.Type = pbTypes.Fee_FIXED
+		for _, reqBoundary := range fee.Boundaries {
+			boundaryRequest.Lower = float32(*reqBoundary.Lower)
+			boundaryRequest.Upper = float32(*reqBoundary.Upper)
+			boundaryRequest.Amount = float32(*reqBoundary.Amount)
+			boundaryRequest.Percentage = float32(*reqBoundary.Percentage)
+			feeRequest.Boundaries = append(feeRequest.Boundaries, &boundaryRequest)
+		}
+		feesRequest = append(feesRequest, &feeRequest)
+	}
+
+	var tests = []struct {
+		name     string
+		testType int
+	}{
+		{
+			name:     "Test Success",
+			testType: success,
+		},
+		{
+			name:     "Test error creating FX",
+			testType: errorCreatingFees,
+		},
+	}
+
+	validCtx, err := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{})
+	if err != nil {
+		assert.NoError(t, err)
+		t.Fail()
+	}
+
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	pricingServiceClient := mocks.NewMockPricingServiceClient(controller)
+	resolverOpts := &ResolverOpts{
+		PricingService: pricingServiceClient,
+	}
+	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			switch testCase.testType {
+			case success:
+				pricingServiceClient.EXPECT().UpdateFees(validCtx, &pricing.UpdateFeesRequests{
+					Fees: feesRequest,
+				}).Return(&pbTypes.DefaultResponse{
+					Success: true,
+					Code:    http.StatusOK,
+				}, nil)
+				resp, err := resolver.UpdateFees(validCtx, fees)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, &types.Response{
+					Success: true,
+					Code:    http.StatusOK,
+				}, resp)
+			case errorCreatingFees:
+				pricingServiceClient.EXPECT().UpdateFees(validCtx, &pricing.UpdateFeesRequests{
+					Fees: feesRequest,
+				}).Return(nil, errors.New(""))
+				resp, err := resolver.UpdateFees(validCtx, fees)
+				assert.Error(t, err)
+				assert.Nil(t, resp)
+			}
+		})
+	}
+
 }

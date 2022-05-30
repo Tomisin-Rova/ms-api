@@ -8,17 +8,20 @@ import (
 const (
 	InternalErr                = 7101
 	InvalidAuthenticationError = 7102
+	InvalidRequestErr          = 7103
 )
 
 var (
 	errorTypes = map[int]string{
 		InternalErr:                "InternalErr",
 		InvalidAuthenticationError: "InvalidAuthenticationError",
+		InvalidRequestErr:          "InvalidRequestErr",
 	}
 
 	errorMessages = map[int]string{
 		InternalErr:                "failed to process the request, please try again later.",
 		InvalidAuthenticationError: "invalid authentication token provided",
+		InvalidRequestErr:          "invalid request error, failed to parse event",
 	}
 
 	errorDetail = map[int]string{
