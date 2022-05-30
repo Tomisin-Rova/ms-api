@@ -22,6 +22,7 @@ import (
 	"ms.api/protos/pb/messaging"
 	"ms.api/protos/pb/onboarding"
 	"ms.api/protos/pb/payment"
+	"ms.api/protos/pb/pricing"
 	pbTypes "ms.api/protos/pb/types"
 	"ms.api/protos/pb/verification"
 	"ms.api/server/http/middlewares"
@@ -1138,11 +1139,97 @@ func (r *mutationResolver) UpdateAMLStatus(ctx context.Context, id string, statu
 }
 
 func (r *mutationResolver) UpdateFx(ctx context.Context, exchangeRate types.UpdateFXInput) (*types.Response, error) {
-	panic(fmt.Errorf("not implemented"))
+	// Get user claims
+	_, err := middlewares.GetClaimsFromCtx(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var (
+		baseCurrencyId, currencyId string
+		buyPrice                   float32
+	)
+	if exchangeRate.BaseCurrencyID != "" {
+		baseCurrencyId = exchangeRate.BaseCurrencyID
+	}
+	if exchangeRate.CurrencyID != "" {
+		currencyId = exchangeRate.CurrencyID
+	}
+	buyPrice = float32(exchangeRate.BuyPrice)
+
+	request := pricing.UpdateFXRequest{
+		BaseCurrencyId: baseCurrencyId,
+		CurrencyId:     currencyId,
+		BuyPrice:       buyPrice,
+	}
+	// Execute RPC call
+	response, err := r.PricingService.UpdateFX(ctx, &request)
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.Response{
+		Success: response.Success,
+		Code:    int64(response.Code),
+	}, nil
 }
 
-func (r *mutationResolver) UpdateFees(ctx context.Context, pricingFees types.UpdateFeesInput) (*types.Response, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *mutationResolver) UpdateFees(ctx context.Context, fees []*types.UpdateFeesInput) (*types.Response, error) {
+	// Get user claims
+	_, err := middlewares.GetClaimsFromCtx(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var feesRequest []*pricing.UpdateFeesRequest
+
+	for _, fee := range fees {
+		if fee.TransactionTypeID == "" {
+			return nil, errorvalues.Format(errorvalues.InvalidRequestErr, errors.New("empty request"))
+		}
+		if fee.Boundaries == nil {
+			return nil, errorvalues.Format(errorvalues.InvalidRequestErr, errors.New("empty request"))
+		}
+		if fee.Type == types.FeeTypesFixed && fee.TransactionTypeID != "" {
+			var feeRequest pricing.UpdateFeesRequest
+			feeRequest.TransactionTypeId = fee.TransactionTypeID
+			var boundaryRequest pbTypes.FeeBoundaries
+			feeRequest.Type = pbTypes.Fee_FIXED
+			for _, reqBoundary := range fee.Boundaries {
+				boundaryRequest.Lower = float32(*reqBoundary.Lower)
+				boundaryRequest.Upper = float32(*reqBoundary.Upper)
+				boundaryRequest.Amount = float32(*reqBoundary.Amount)
+				feeRequest.Boundaries = append(feeRequest.Boundaries, &boundaryRequest)
+			}
+			feesRequest = append(feesRequest, &feeRequest)
+		}
+		if fee.Type == types.FeeTypesVariable && fee.TransactionTypeID != "" {
+			var feeRequest pricing.UpdateFeesRequest
+			feeRequest.TransactionTypeId = fee.TransactionTypeID
+			var boundaryRequest pbTypes.FeeBoundaries
+			feeRequest.Type = pbTypes.Fee_VARIABLE
+			for _, reqBoundary := range fee.Boundaries {
+				boundaryRequest.Lower = float32(*reqBoundary.Lower)
+				boundaryRequest.Upper = float32(*reqBoundary.Upper)
+				boundaryRequest.Percentage = float32(*reqBoundary.Percentage)
+				feeRequest.Boundaries = append(feeRequest.Boundaries, &boundaryRequest)
+			}
+			feesRequest = append(feesRequest, &feeRequest)
+		}
+	}
+
+	request := pricing.UpdateFeesRequests{
+		Fees: feesRequest,
+	}
+	// Execute RPC call
+	response, err := r.PricingService.UpdateFees(ctx, &request)
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.Response{
+		Success: response.Success,
+		Code:    int64(response.Code),
+	}, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

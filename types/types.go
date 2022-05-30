@@ -740,12 +740,13 @@ type UpdateFXInput struct {
 	BaseCurrencyID string   `json:"baseCurrencyId"`
 	CurrencyID     string   `json:"currencyId"`
 	SalePrice      *float64 `json:"salePrice"`
-	BuyPrice       *float64 `json:"buyPrice"`
+	BuyPrice       float64  `json:"buyPrice"`
 }
 
 type UpdateFeesInput struct {
-	FeeID      string         `json:"feeID"`
-	Boundaries []*BoundaryFee `json:"boundaries"`
+	TransactionTypeID string         `json:"transactionTypeId"`
+	Type              FeeTypes       `json:"type"`
+	Boundaries        []*BoundaryFee `json:"boundaries"`
 }
 
 type VaultAccountInput struct {
