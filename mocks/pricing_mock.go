@@ -138,7 +138,7 @@ func (mr *MockPricingServiceClientMockRecorder) UpdateFX(ctx, in interface{}, op
 }
 
 // UpdateFees mocks base method.
-func (m *MockPricingServiceClient) UpdateFees(ctx context.Context, in *pricing.UpdateFeesRequest, opts ...grpc.CallOption) (*types.DefaultResponse, error) {
+func (m *MockPricingServiceClient) UpdateFees(ctx context.Context, in *pricing.UpdateFeesRequests, opts ...grpc.CallOption) (*types.DefaultResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
 	for _, a := range opts {
@@ -256,7 +256,7 @@ func (mr *MockPricingServiceServerMockRecorder) UpdateFX(arg0, arg1 interface{})
 }
 
 // UpdateFees mocks base method.
-func (m *MockPricingServiceServer) UpdateFees(arg0 context.Context, arg1 *pricing.UpdateFeesRequest) (*types.DefaultResponse, error) {
+func (m *MockPricingServiceServer) UpdateFees(arg0 context.Context, arg1 *pricing.UpdateFeesRequests) (*types.DefaultResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateFees", arg0, arg1)
 	ret0, _ := ret[0].(*types.DefaultResponse)
