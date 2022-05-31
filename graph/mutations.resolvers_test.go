@@ -3,15 +3,11 @@ package graph
 import (
 	"context"
 	"errors"
-	"ms.api/protos/pb/pricing"
 	"net/http"
 	"testing"
 
-	terror "github.com/roava/zebra/errors"
-	accountPb "ms.api/protos/pb/account"
-	"ms.api/protos/pb/messaging"
-
 	"github.com/golang/mock/gomock"
+	terror "github.com/roava/zebra/errors"
 	"github.com/roava/zebra/middleware"
 	"github.com/roava/zebra/models"
 	"github.com/stretchr/testify/assert"
@@ -21,9 +17,13 @@ import (
 	emailvalidator "ms.api/libs/validator/email"
 	phonenumbervalidator "ms.api/libs/validator/phonenumbervalidator"
 	"ms.api/mocks"
+	accountPb "ms.api/protos/pb/account"
 	"ms.api/protos/pb/auth"
 	"ms.api/protos/pb/customer"
+	"ms.api/protos/pb/messaging"
 	"ms.api/protos/pb/onboarding"
+	"ms.api/protos/pb/payment"
+	"ms.api/protos/pb/pricing"
 	pbTypes "ms.api/protos/pb/types"
 	"ms.api/protos/pb/verification"
 	"ms.api/types"
@@ -3599,4 +3599,111 @@ func TestMutationResolver_UpdateFees(t *testing.T) {
 		})
 	}
 
+}
+
+func TestMutationResolver_WithdrawVaultAccount(t *testing.T) {
+	const (
+		success = iota
+		errorUnauthenticated
+		errorCallingRPC
+	)
+
+	type arg struct {
+		customerID string
+		reportIds  []string
+		message    *string
+	}
+	message := "Message"
+	var tests = []struct {
+		name     string
+		arg      arg
+		testType int
+	}{
+		{
+			name: "Test success",
+			arg: arg{
+				customerID: "customerId",
+				reportIds:  []string{"reportId1", "reportId2"},
+				message:    &message,
+			},
+			testType: success,
+		},
+		{
+			name:     "Test error unathenticated user",
+			testType: errorUnauthenticated,
+		},
+		{
+			name: "Test error requesting resubmit",
+			arg: arg{
+				customerID: "customerId",
+				reportIds:  []string{"reportId1", "reportId2"},
+				message:    &message,
+			},
+			testType: errorCallingRPC,
+		},
+	}
+
+	mockClaims := models.JWTClaims{ID: "customerID"}
+
+	mockRequest := payment.WithdrawVaultAccountRequest{
+		SourceAccountId:     "SourceAccountId",
+		TargetAccountId:     "TargetAccountId",
+		TransactionPassword: "TransactionPassword",
+	}
+
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	paymentsServiceClient := mocks.NewMockPaymentServiceClient(controller)
+	resolverOpts := &ResolverOpts{
+		PaymentService: paymentsServiceClient,
+	}
+	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			switch testCase.testType {
+			case success:
+				ctx, _ := middleware.PutClaimsOnContext(context.Background(), &mockClaims)
+
+				paymentsServiceClient.EXPECT().
+					WithdrawVaultAccount(ctx, &mockRequest).
+					Return(
+						&pbTypes.DefaultResponse{
+							Success: true,
+							Code:    http.StatusOK,
+						},
+						nil,
+					)
+
+				resp, err := resolver.WithdrawVaultAccount(ctx, mockRequest.SourceAccountId, mockRequest.TargetAccountId, mockRequest.TransactionPassword)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, &types.Response{
+					Success: true,
+					Code:    http.StatusOK,
+				}, resp)
+			case errorUnauthenticated:
+				ctx := context.Background()
+				resp, err := resolver.WithdrawVaultAccount(ctx, mockRequest.SourceAccountId, mockRequest.TargetAccountId, mockRequest.TransactionPassword)
+				assert.Error(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, &types.Response{
+					Message: &authFailedMessage,
+					Success: false,
+					Code:    http.StatusInternalServerError,
+				}, resp)
+			case errorCallingRPC:
+				ctx, _ := middleware.PutClaimsOnContext(context.Background(), &mockClaims)
+
+				paymentsServiceClient.EXPECT().
+					WithdrawVaultAccount(ctx, &mockRequest).
+					Return(nil, errors.New("mock error"))
+
+				resp, err := resolver.WithdrawVaultAccount(ctx, mockRequest.SourceAccountId, mockRequest.TargetAccountId, mockRequest.TransactionPassword)
+				assert.Error(t, err)
+				assert.Nil(t, resp)
+				assert.Contains(t, err.Error(), "mock error")
+			}
+		})
+	}
 }
