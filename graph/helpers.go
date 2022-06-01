@@ -778,13 +778,14 @@ func (h *helpersfactory) MakeBeneficiaryFromProto(beneficiary *protoTypes.Benefi
 		}
 
 		result = types.Beneficiary{
-			ID:       beneficiary.Id,
-			Customer: h.makeCustomerFromProto(beneficiary.Customer),
-			Name:     beneficiary.Name,
-			Accounts: beneficiaryAccounts,
-			Status:   h.MapProtoBeneficiaryStatuses(beneficiary.Status),
-			StatusTs: beneficiary.StatusTs.AsTime().Unix(),
-			Ts:       beneficiary.Ts.AsTime().Unix(),
+			ID:                beneficiary.Id,
+			Customer:          h.makeCustomerFromProto(beneficiary.Customer),
+			Name:              beneficiary.Name,
+			Accounts:          beneficiaryAccounts,
+			TransactionsCount: int64(beneficiary.TransactionsCount),
+			Status:            h.MapProtoBeneficiaryStatuses(beneficiary.Status),
+			StatusTs:          beneficiary.StatusTs.AsTime().Unix(),
+			Ts:                beneficiary.Ts.AsTime().Unix(),
 		}
 	}
 	return &result
