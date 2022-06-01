@@ -899,6 +899,17 @@ func (h *helpersfactory) MapFeeStatuses(val protoTypes.Fee_FeeStatuses) types.Fe
 	}
 }
 
+func (h *helpersfactory) MapStaffAuditLogType(val protoTypes.StaffAuditLog_StaffAuditLogTypes) types.StaffAuditLogType {
+	switch val {
+	case protoTypes.StaffAuditLog_FEES:
+		return types.StaffAuditLogTypeFees
+	case protoTypes.StaffAuditLog_FX_RATE:
+		return types.StaffAuditLogTypeFxRate
+	default:
+		return ""
+	}
+}
+
 func (h *helpersfactory) MakeAccountFromProto(account *protoTypes.Account) *types.Account {
 	if account == nil {
 		return &types.Account{
@@ -1118,6 +1129,44 @@ func (h *helpersfactory) MakeFeesFromProto(protoFees []*protoTypes.Fee) []*types
 	return fees
 }
 
+func (h *helpersfactory) makeFeeFromProto(protoFee *protoTypes.Fee) *types.Fee {
+	result := &types.Fee{}
+	if protoFee != nil {
+		feeBoundaries := make([]*types.FeeBoundaries, len(protoFee.Boundaries))
+		for i, boundary := range protoFee.Boundaries {
+			lower := float64(boundary.Lower)
+			upper := float64(boundary.Upper)
+			amount := float64(boundary.Amount)
+			percentage := float64(boundary.Percentage)
+
+			feeBoundaries[i] = &types.FeeBoundaries{
+				Lower:      &lower,
+				Upper:      &upper,
+				Amount:     &amount,
+				Percentage: &percentage,
+			}
+		}
+
+		result = &types.Fee{
+			ID: protoFee.Id,
+			TransactionType: &types.TransactionType{
+				ID:       protoFee.TransactionType.Id,
+				Name:     protoFee.TransactionType.Name,
+				Status:   h.MapTransactionTypeStatus(protoFee.TransactionType.Status),
+				StatusTs: protoFee.TransactionType.StatusTs.AsTime().Unix(),
+				Ts:       protoFee.TransactionType.Ts.AsTime().Unix(),
+			},
+			Type:       h.MapFeeTypes(protoFee.Type),
+			Boundaries: feeBoundaries,
+			Status:     h.MapFeeStatuses(protoFee.Status),
+			StatusTs:   protoFee.StatusTs.AsTime().Unix(),
+			Ts:         protoFee.Ts.AsTime().Unix(),
+		}
+	}
+
+	return result
+}
+
 func (h *helpersfactory) MakeExchangeRateFromProto(exchangeRate *protoTypes.ExchangeRate) *types.ExchangeRate {
 	return &types.ExchangeRate{
 		ID: exchangeRate.Id,
@@ -1159,4 +1208,43 @@ func (h *helpersfactory) MapCredentialTypes(val types.IdentityCredentialsTypes) 
 	default:
 		return -1
 	}
+}
+
+func (h *helpersfactory) MakeStaffAuditLogFromProto(staffAuditLog *protoTypes.StaffAuditLog) *types.StaffAuditLog {
+	result := &types.StaffAuditLog{}
+	if staffAuditLog != nil {
+		var oldStaffAuditLogValue, newStaffAuditLogValue types.StaffAuditLogValue
+		switch staffAuditLog.Type {
+		case protoTypes.StaffAuditLog_FEES:
+			// oldValue
+			oldFeeProto := staffAuditLog.OldValue.Data.(*protoTypes.StaffAuditLogValue_Fee).Fee
+			oldStaffAuditLogValue = h.makeFeeFromProto(oldFeeProto)
+
+			// newValue
+			newFeeProto := staffAuditLog.NewValue.Data.(*protoTypes.StaffAuditLogValue_Fee).Fee
+			newStaffAuditLogValue = h.makeFeeFromProto(newFeeProto)
+
+		case protoTypes.StaffAuditLog_FX_RATE:
+			// oldValue
+			oldFxRateProto := staffAuditLog.NewValue.Data.(*protoTypes.StaffAuditLogValue_ExchangeRate).ExchangeRate
+			oldStaffAuditLogValue = h.MakeExchangeRateFromProto(oldFxRateProto)
+
+			// newValue
+			newFxRateProto := staffAuditLog.NewValue.Data.(*protoTypes.StaffAuditLogValue_ExchangeRate).ExchangeRate
+			newStaffAuditLogValue = h.MakeExchangeRateFromProto(newFxRateProto)
+
+		default:
+			return result
+		}
+
+		result = &types.StaffAuditLog{
+			ID:       staffAuditLog.Id,
+			Staff:    h.makeStaffFromProto(staffAuditLog.Staff),
+			OldValue: oldStaffAuditLogValue,
+			NewValue: newStaffAuditLogValue,
+			Type:     h.MapStaffAuditLogType(staffAuditLog.Type),
+			Ts:       staffAuditLog.Ts.AsTime().Unix(),
+		}
+	}
+	return result
 }

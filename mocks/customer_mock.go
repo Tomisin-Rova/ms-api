@@ -412,6 +412,26 @@ func (mr *MockCustomerServiceClientMockRecorder) GetQuestionary(ctx, in interfac
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetQuestionary", reflect.TypeOf((*MockCustomerServiceClient)(nil).GetQuestionary), varargs...)
 }
 
+// GetStaffAuditLogs mocks base method.
+func (m *MockCustomerServiceClient) GetStaffAuditLogs(ctx context.Context, in *customer.GetStaffAuditLogsRequest, opts ...grpc.CallOption) (*customer.GetStaffAuditLogsResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetStaffAuditLogs", varargs...)
+	ret0, _ := ret[0].(*customer.GetStaffAuditLogsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetStaffAuditLogs indicates an expected call of GetStaffAuditLogs.
+func (mr *MockCustomerServiceClientMockRecorder) GetStaffAuditLogs(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStaffAuditLogs", reflect.TypeOf((*MockCustomerServiceClient)(nil).GetStaffAuditLogs), varargs...)
+}
+
 // Me mocks base method.
 func (m *MockCustomerServiceClient) Me(ctx context.Context, in *customer.MeRequest, opts ...grpc.CallOption) (*customer.MeResponse, error) {
 	m.ctrl.T.Helper()
@@ -848,6 +868,21 @@ func (m *MockCustomerServiceServer) GetQuestionary(arg0 context.Context, arg1 *c
 func (mr *MockCustomerServiceServerMockRecorder) GetQuestionary(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetQuestionary", reflect.TypeOf((*MockCustomerServiceServer)(nil).GetQuestionary), arg0, arg1)
+}
+
+// GetStaffAuditLogs mocks base method.
+func (m *MockCustomerServiceServer) GetStaffAuditLogs(arg0 context.Context, arg1 *customer.GetStaffAuditLogsRequest) (*customer.GetStaffAuditLogsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetStaffAuditLogs", arg0, arg1)
+	ret0, _ := ret[0].(*customer.GetStaffAuditLogsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetStaffAuditLogs indicates an expected call of GetStaffAuditLogs.
+func (mr *MockCustomerServiceServerMockRecorder) GetStaffAuditLogs(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStaffAuditLogs", reflect.TypeOf((*MockCustomerServiceServer)(nil).GetStaffAuditLogs), arg0, arg1)
 }
 
 // Me mocks base method.

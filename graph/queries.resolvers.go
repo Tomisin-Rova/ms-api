@@ -1249,6 +1249,52 @@ func (r *queryResolver) Cdds(ctx context.Context, first *int64, after *string, l
 	}, nil
 }
 
+func (r *queryResolver) StaffAuditLogs(ctx context.Context, first *int64, after *string, last *int64, before *string) (*apiTypes.StaffAuditLogConnection, error) {
+	// Build request
+	var request customer.GetStaffAuditLogsRequest
+
+	if first != nil {
+		request.First = int32(*first)
+	}
+
+	if after != nil {
+		request.After = *after
+	}
+
+	if last != nil {
+		request.Last = int32(*last)
+	}
+
+	if before != nil {
+		request.Before = *before
+	}
+
+	// Make call
+	resp, err := r.CustomerService.GetStaffAuditLogs(ctx, &request)
+	if err != nil {
+		return nil, err
+	}
+
+	// Build response
+	nodes := make([]*apiTypes.StaffAuditLog, len(resp.Nodes))
+	helper := helpersfactory{}
+
+	for i, node := range resp.Nodes {
+		nodes[i] = helper.MakeStaffAuditLogFromProto(node)
+	}
+
+	pageInfo := apiTypes.PageInfo{
+		HasNextPage:     resp.PaginationInfo.HasNextPage,
+		HasPreviousPage: resp.PaginationInfo.HasPreviousPage,
+		StartCursor:     &resp.PaginationInfo.StartCursor,
+		EndCursor:       &resp.PaginationInfo.EndCursor,
+	}
+
+	return &apiTypes.StaffAuditLogConnection{
+		Nodes: nodes, PageInfo: &pageInfo,
+		TotalCount: int64(resp.TotalCount)}, nil
+}
+
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
