@@ -528,6 +528,7 @@ type ComplexityRoot struct {
 		Products                     func(childComplexity int, first *int64, after *string, last *int64, before *string, statuses []types.ProductStatuses, typeArg *types.ProductTypes) int
 		Questionaries                func(childComplexity int, keywords *string, first *int64, after *string, last *int64, before *string, statuses []types.QuestionaryStatuses, typeArg []types.QuestionaryTypes) int
 		Questionary                  func(childComplexity int, id string) int
+		StaffAuditLogs               func(childComplexity int, first *int64, after *string, last *int64, before *string) int
 		Transaction                  func(childComplexity int, id string) int
 		TransactionTypes             func(childComplexity int, first *int64, after *string, last *int64, before *string, statuses []types.TransactionTypeStatuses) int
 		Transactions                 func(childComplexity int, first *int64, after *string, last *int64, before *string, startDate *string, endDate *string, statuses []types.TransactionStatuses, accountIds []string, beneficiaryIds []string, hasBeneficiary *bool) int
@@ -611,6 +612,21 @@ type ComplexityRoot struct {
 		Status    func(childComplexity int) int
 		StatusTs  func(childComplexity int) int
 		Ts        func(childComplexity int) int
+	}
+
+	StaffAuditLog struct {
+		ID       func(childComplexity int) int
+		NewValue func(childComplexity int) int
+		OldValue func(childComplexity int) int
+		Staff    func(childComplexity int) int
+		Ts       func(childComplexity int) int
+		Type     func(childComplexity int) int
+	}
+
+	StaffAuditLogConnection struct {
+		Nodes      func(childComplexity int) int
+		PageInfo   func(childComplexity int) int
+		TotalCount func(childComplexity int) int
 	}
 
 	TokenResponse struct {
@@ -746,6 +762,7 @@ type QueryResolver interface {
 	Customer(ctx context.Context, id string) (*types.Customer, error)
 	Customers(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string, statuses []types.CustomerStatuses) (*types.CustomerConnection, error)
 	Cdds(ctx context.Context, first *int64, after *string, last *int64, before *string, statuses []types.CDDStatuses) (*types.CDDConnection, error)
+	StaffAuditLogs(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.StaffAuditLogConnection, error)
 }
 
 type executableSchema struct {
@@ -3315,6 +3332,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Questionary(childComplexity, args["id"].(string)), true
 
+	case "Query.staffAuditLogs":
+		if e.complexity.Query.StaffAuditLogs == nil {
+			break
+		}
+
+		args, err := ec.field_Query_staffAuditLogs_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.StaffAuditLogs(childComplexity, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string)), true
+
 	case "Query.transaction":
 		if e.complexity.Query.Transaction == nil {
 			break
@@ -3700,6 +3729,69 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Staff.Ts(childComplexity), true
+
+	case "StaffAuditLog.id":
+		if e.complexity.StaffAuditLog.ID == nil {
+			break
+		}
+
+		return e.complexity.StaffAuditLog.ID(childComplexity), true
+
+	case "StaffAuditLog.newValue":
+		if e.complexity.StaffAuditLog.NewValue == nil {
+			break
+		}
+
+		return e.complexity.StaffAuditLog.NewValue(childComplexity), true
+
+	case "StaffAuditLog.oldValue":
+		if e.complexity.StaffAuditLog.OldValue == nil {
+			break
+		}
+
+		return e.complexity.StaffAuditLog.OldValue(childComplexity), true
+
+	case "StaffAuditLog.staff":
+		if e.complexity.StaffAuditLog.Staff == nil {
+			break
+		}
+
+		return e.complexity.StaffAuditLog.Staff(childComplexity), true
+
+	case "StaffAuditLog.ts":
+		if e.complexity.StaffAuditLog.Ts == nil {
+			break
+		}
+
+		return e.complexity.StaffAuditLog.Ts(childComplexity), true
+
+	case "StaffAuditLog.type":
+		if e.complexity.StaffAuditLog.Type == nil {
+			break
+		}
+
+		return e.complexity.StaffAuditLog.Type(childComplexity), true
+
+	case "StaffAuditLogConnection.nodes":
+		if e.complexity.StaffAuditLogConnection.Nodes == nil {
+			break
+		}
+
+		return e.complexity.StaffAuditLogConnection.Nodes(childComplexity), true
+
+	case "StaffAuditLogConnection.pageInfo":
+		if e.complexity.StaffAuditLogConnection.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.StaffAuditLogConnection.PageInfo(childComplexity), true
+
+	case "StaffAuditLogConnection.totalCount":
+		if e.complexity.StaffAuditLogConnection.TotalCount == nil {
+			break
+		}
+
+		return e.complexity.StaffAuditLogConnection.TotalCount(childComplexity), true
 
 	case "TokenResponse.code":
 		if e.complexity.TokenResponse.Code == nil {
@@ -4569,7 +4661,7 @@ enum DeliveryMode {
     exchangeRate(transactionTypeId: ID!): ExchangeRate!
 
     # ---- Dashboard -----
-    # Fetch customer or staf using JWT claims
+    # Fetch customer or staff using JWT claims
     me: MeResult!
     # Fetch the customer by given ID
     customer(
@@ -4603,6 +4695,17 @@ enum DeliveryMode {
         # Filter cdd by it's status. If empty, should ignore the field
         statuses: [CDDStatuses!]
     ): CDDConnection!
+    # Fetch a list of staff audit logs
+    staffAuditLogs(
+        # Returns the first n elements from the list.
+        first: Int
+        # Returns the elements in the list that come after the specified cursor.
+        after: String
+        # Returns the last n elements from the list.
+        last: Int
+        # Returns the elements in the list that come before the specified cursor.
+        before: String
+    ): StaffAuditLogConnection!
 }
 
 input CommonQueryFilterInput {
@@ -4759,6 +4862,16 @@ type BeneficiaryPreview {
     currency: Currency!
     accountNumber: String!
     code: String!
+}
+
+# The connection type for Staff audit logs.
+type StaffAuditLogConnection {
+    # A list of nodes
+    nodes: [StaffAuditLog!]!
+    # Information to aid in pagination
+    pageInfo: PageInfo!
+    # Identifies the total count of items in the connection
+    totalCount: Int!
 }`, BuiltIn: false},
 	{Name: "../schemas/types.graphql", Input: `# Date scalar format DD-MM-YYYY
 scalar Date
@@ -5434,6 +5547,22 @@ type Bank {
     bankShortName: String!
     active: Boolean!
     ts: Int!
+}
+
+enum StaffAuditLogType {
+    FX_RATE
+    FEES
+}
+
+union StaffAuditLogValue = Fee | ExchangeRate
+
+type StaffAuditLog {
+    id: ID!
+    staff:  Staff!
+    oldValue: StaffAuditLogValue
+    newValue: StaffAuditLogValue
+    type:     StaffAuditLogType!
+    ts:       Int!
 }
 
 ############# END OTHERS GROUP #############`, BuiltIn: false},
@@ -7127,6 +7256,48 @@ func (ec *executionContext) field_Query_questionary_args(ctx context.Context, ra
 		}
 	}
 	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_staffAuditLogs_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *int64
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg0, err = ec.unmarshalOInt2ᚖint64(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+		arg1, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg1
+	var arg2 *int64
+	if tmp, ok := rawArgs["last"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("last"))
+		arg2, err = ec.unmarshalOInt2ᚖint64(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["last"] = arg2
+	var arg3 *string
+	if tmp, ok := rawArgs["before"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("before"))
+		arg3, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["before"] = arg3
 	return args, nil
 }
 
@@ -23830,6 +24001,69 @@ func (ec *executionContext) fieldContext_Query_cdds(ctx context.Context, field g
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_staffAuditLogs(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_staffAuditLogs(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().StaffAuditLogs(rctx, fc.Args["first"].(*int64), fc.Args["after"].(*string), fc.Args["last"].(*int64), fc.Args["before"].(*string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.StaffAuditLogConnection)
+	fc.Result = res
+	return ec.marshalNStaffAuditLogConnection2ᚖmsᚗapiᚋtypesᚐStaffAuditLogConnection(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_staffAuditLogs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "nodes":
+				return ec.fieldContext_StaffAuditLogConnection_nodes(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_StaffAuditLogConnection_pageInfo(ctx, field)
+			case "totalCount":
+				return ec.fieldContext_StaffAuditLogConnection_totalCount(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type StaffAuditLogConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_staffAuditLogs_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query___type(ctx, field)
 	if err != nil {
@@ -26195,6 +26429,442 @@ func (ec *executionContext) _Staff_ts(ctx context.Context, field graphql.Collect
 func (ec *executionContext) fieldContext_Staff_ts(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Staff",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _StaffAuditLog_id(ctx context.Context, field graphql.CollectedField, obj *types.StaffAuditLog) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_StaffAuditLog_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_StaffAuditLog_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "StaffAuditLog",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _StaffAuditLog_staff(ctx context.Context, field graphql.CollectedField, obj *types.StaffAuditLog) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_StaffAuditLog_staff(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Staff, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.Staff)
+	fc.Result = res
+	return ec.marshalNStaff2ᚖmsᚗapiᚋtypesᚐStaff(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_StaffAuditLog_staff(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "StaffAuditLog",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Staff_id(ctx, field)
+			case "name":
+				return ec.fieldContext_Staff_name(ctx, field)
+			case "lastName":
+				return ec.fieldContext_Staff_lastName(ctx, field)
+			case "dob":
+				return ec.fieldContext_Staff_dob(ctx, field)
+			case "addresses":
+				return ec.fieldContext_Staff_addresses(ctx, field)
+			case "phones":
+				return ec.fieldContext_Staff_phones(ctx, field)
+			case "email":
+				return ec.fieldContext_Staff_email(ctx, field)
+			case "status":
+				return ec.fieldContext_Staff_status(ctx, field)
+			case "statusTs":
+				return ec.fieldContext_Staff_statusTs(ctx, field)
+			case "ts":
+				return ec.fieldContext_Staff_ts(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Staff", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _StaffAuditLog_oldValue(ctx context.Context, field graphql.CollectedField, obj *types.StaffAuditLog) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_StaffAuditLog_oldValue(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.OldValue, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(types.StaffAuditLogValue)
+	fc.Result = res
+	return ec.marshalOStaffAuditLogValue2msᚗapiᚋtypesᚐStaffAuditLogValue(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_StaffAuditLog_oldValue(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "StaffAuditLog",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type StaffAuditLogValue does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _StaffAuditLog_newValue(ctx context.Context, field graphql.CollectedField, obj *types.StaffAuditLog) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_StaffAuditLog_newValue(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NewValue, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(types.StaffAuditLogValue)
+	fc.Result = res
+	return ec.marshalOStaffAuditLogValue2msᚗapiᚋtypesᚐStaffAuditLogValue(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_StaffAuditLog_newValue(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "StaffAuditLog",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type StaffAuditLogValue does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _StaffAuditLog_type(ctx context.Context, field graphql.CollectedField, obj *types.StaffAuditLog) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_StaffAuditLog_type(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Type, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(types.StaffAuditLogType)
+	fc.Result = res
+	return ec.marshalNStaffAuditLogType2msᚗapiᚋtypesᚐStaffAuditLogType(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_StaffAuditLog_type(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "StaffAuditLog",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type StaffAuditLogType does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _StaffAuditLog_ts(ctx context.Context, field graphql.CollectedField, obj *types.StaffAuditLog) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_StaffAuditLog_ts(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Ts, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int64)
+	fc.Result = res
+	return ec.marshalNInt2int64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_StaffAuditLog_ts(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "StaffAuditLog",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _StaffAuditLogConnection_nodes(ctx context.Context, field graphql.CollectedField, obj *types.StaffAuditLogConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_StaffAuditLogConnection_nodes(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Nodes, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*types.StaffAuditLog)
+	fc.Result = res
+	return ec.marshalNStaffAuditLog2ᚕᚖmsᚗapiᚋtypesᚐStaffAuditLogᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_StaffAuditLogConnection_nodes(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "StaffAuditLogConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_StaffAuditLog_id(ctx, field)
+			case "staff":
+				return ec.fieldContext_StaffAuditLog_staff(ctx, field)
+			case "oldValue":
+				return ec.fieldContext_StaffAuditLog_oldValue(ctx, field)
+			case "newValue":
+				return ec.fieldContext_StaffAuditLog_newValue(ctx, field)
+			case "type":
+				return ec.fieldContext_StaffAuditLog_type(ctx, field)
+			case "ts":
+				return ec.fieldContext_StaffAuditLog_ts(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type StaffAuditLog", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _StaffAuditLogConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *types.StaffAuditLogConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_StaffAuditLogConnection_pageInfo(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PageInfo, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.PageInfo)
+	fc.Result = res
+	return ec.marshalNPageInfo2ᚖmsᚗapiᚋtypesᚐPageInfo(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_StaffAuditLogConnection_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "StaffAuditLogConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "hasNextPage":
+				return ec.fieldContext_PageInfo_hasNextPage(ctx, field)
+			case "hasPreviousPage":
+				return ec.fieldContext_PageInfo_hasPreviousPage(ctx, field)
+			case "startCursor":
+				return ec.fieldContext_PageInfo_startCursor(ctx, field)
+			case "endCursor":
+				return ec.fieldContext_PageInfo_endCursor(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type PageInfo", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _StaffAuditLogConnection_totalCount(ctx context.Context, field graphql.CollectedField, obj *types.StaffAuditLogConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_StaffAuditLogConnection_totalCount(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalCount, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int64)
+	fc.Result = res
+	return ec.marshalNInt2int64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_StaffAuditLogConnection_totalCount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "StaffAuditLogConnection",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -31089,6 +31759,29 @@ func (ec *executionContext) _MeResult(ctx context.Context, sel ast.SelectionSet,
 	}
 }
 
+func (ec *executionContext) _StaffAuditLogValue(ctx context.Context, sel ast.SelectionSet, obj types.StaffAuditLogValue) graphql.Marshaler {
+	switch obj := (obj).(type) {
+	case nil:
+		return graphql.Null
+	case types.Fee:
+		return ec._Fee(ctx, sel, &obj)
+	case *types.Fee:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Fee(ctx, sel, obj)
+	case types.ExchangeRate:
+		return ec._ExchangeRate(ctx, sel, &obj)
+	case *types.ExchangeRate:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._ExchangeRate(ctx, sel, obj)
+	default:
+		panic(fmt.Errorf("unexpected type %T", obj))
+	}
+}
+
 // endregion ************************** interface.gotpl ***************************
 
 // region    **************************** object.gotpl ****************************
@@ -32781,7 +33474,7 @@ func (ec *executionContext) _Email(ctx context.Context, sel ast.SelectionSet, ob
 	return out
 }
 
-var exchangeRateImplementors = []string{"ExchangeRate"}
+var exchangeRateImplementors = []string{"ExchangeRate", "StaffAuditLogValue"}
 
 func (ec *executionContext) _ExchangeRate(ctx context.Context, sel ast.SelectionSet, obj *types.ExchangeRate) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, exchangeRateImplementors)
@@ -32844,7 +33537,7 @@ func (ec *executionContext) _ExchangeRate(ctx context.Context, sel ast.Selection
 	return out
 }
 
-var feeImplementors = []string{"Fee"}
+var feeImplementors = []string{"Fee", "StaffAuditLogValue"}
 
 func (ec *executionContext) _Fee(ctx context.Context, sel ast.SelectionSet, obj *types.Fee) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, feeImplementors)
@@ -34915,6 +35608,29 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Concurrently(i, func() graphql.Marshaler {
 				return rrm(innerCtx)
 			})
+		case "staffAuditLogs":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_staffAuditLogs(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
 		case "__type":
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
@@ -35447,6 +36163,105 @@ func (ec *executionContext) _Staff(ctx context.Context, sel ast.SelectionSet, ob
 		case "ts":
 
 			out.Values[i] = ec._Staff_ts(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var staffAuditLogImplementors = []string{"StaffAuditLog"}
+
+func (ec *executionContext) _StaffAuditLog(ctx context.Context, sel ast.SelectionSet, obj *types.StaffAuditLog) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, staffAuditLogImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("StaffAuditLog")
+		case "id":
+
+			out.Values[i] = ec._StaffAuditLog_id(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "staff":
+
+			out.Values[i] = ec._StaffAuditLog_staff(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "oldValue":
+
+			out.Values[i] = ec._StaffAuditLog_oldValue(ctx, field, obj)
+
+		case "newValue":
+
+			out.Values[i] = ec._StaffAuditLog_newValue(ctx, field, obj)
+
+		case "type":
+
+			out.Values[i] = ec._StaffAuditLog_type(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "ts":
+
+			out.Values[i] = ec._StaffAuditLog_ts(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var staffAuditLogConnectionImplementors = []string{"StaffAuditLogConnection"}
+
+func (ec *executionContext) _StaffAuditLogConnection(ctx context.Context, sel ast.SelectionSet, obj *types.StaffAuditLogConnection) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, staffAuditLogConnectionImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("StaffAuditLogConnection")
+		case "nodes":
+
+			out.Values[i] = ec._StaffAuditLogConnection_nodes(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "pageInfo":
+
+			out.Values[i] = ec._StaffAuditLogConnection_pageInfo(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "totalCount":
+
+			out.Values[i] = ec._StaffAuditLogConnection_totalCount(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -38093,6 +38908,84 @@ func (ec *executionContext) marshalNStaff2ᚖmsᚗapiᚋtypesᚐStaff(ctx contex
 	return ec._Staff(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNStaffAuditLog2ᚕᚖmsᚗapiᚋtypesᚐStaffAuditLogᚄ(ctx context.Context, sel ast.SelectionSet, v []*types.StaffAuditLog) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNStaffAuditLog2ᚖmsᚗapiᚋtypesᚐStaffAuditLog(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNStaffAuditLog2ᚖmsᚗapiᚋtypesᚐStaffAuditLog(ctx context.Context, sel ast.SelectionSet, v *types.StaffAuditLog) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._StaffAuditLog(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNStaffAuditLogConnection2msᚗapiᚋtypesᚐStaffAuditLogConnection(ctx context.Context, sel ast.SelectionSet, v types.StaffAuditLogConnection) graphql.Marshaler {
+	return ec._StaffAuditLogConnection(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNStaffAuditLogConnection2ᚖmsᚗapiᚋtypesᚐStaffAuditLogConnection(ctx context.Context, sel ast.SelectionSet, v *types.StaffAuditLogConnection) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._StaffAuditLogConnection(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNStaffAuditLogType2msᚗapiᚋtypesᚐStaffAuditLogType(ctx context.Context, v interface{}) (types.StaffAuditLogType, error) {
+	var res types.StaffAuditLogType
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNStaffAuditLogType2msᚗapiᚋtypesᚐStaffAuditLogType(ctx context.Context, sel ast.SelectionSet, v types.StaffAuditLogType) graphql.Marshaler {
+	return v
+}
+
 func (ec *executionContext) unmarshalNStaffStatuses2msᚗapiᚋtypesᚐStaffStatuses(ctx context.Context, v interface{}) (types.StaffStatuses, error) {
 	var res types.StaffStatuses
 	err := res.UnmarshalGQL(v)
@@ -40194,6 +41087,13 @@ func (ec *executionContext) marshalOReview2ᚖmsᚗapiᚋtypesᚐReview(ctx cont
 		return graphql.Null
 	}
 	return ec._Review(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOStaffAuditLogValue2msᚗapiᚋtypesᚐStaffAuditLogValue(ctx context.Context, sel ast.SelectionSet, v types.StaffAuditLogValue) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._StaffAuditLogValue(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOString2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {
