@@ -10627,7 +10627,6 @@ func Test_queryResolver_StaffAuditLogs(t *testing.T) {
 
 	controller := gomock.NewController(t)
 	defer controller.Finish()
-
 	customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
 	resolverOpts := &ResolverOpts{
 		CustomerService: customerServiceClient,
