@@ -16,6 +16,10 @@ type MeResult interface {
 	IsMeResult()
 }
 
+type StaffAuditLogValue interface {
+	IsStaffAuditLogValue()
+}
+
 type Aml struct {
 	Organization *Organization `json:"organization"`
 	Identifier   string        `json:"identifier"`
@@ -401,6 +405,8 @@ type ExchangeRate struct {
 	Ts             int64     `json:"ts"`
 }
 
+func (ExchangeRate) IsStaffAuditLogValue() {}
+
 type Fee struct {
 	ID              string           `json:"id"`
 	TransactionType *TransactionType `json:"transactionType"`
@@ -410,6 +416,8 @@ type Fee struct {
 	StatusTs        int64            `json:"statusTs"`
 	Ts              int64            `json:"ts"`
 }
+
+func (Fee) IsStaffAuditLogValue() {}
 
 type FeeBoundaries struct {
 	Lower      *float64 `json:"lower"`
@@ -659,6 +667,21 @@ type Staff struct {
 }
 
 func (Staff) IsMeResult() {}
+
+type StaffAuditLog struct {
+	ID       string             `json:"id"`
+	Staff    *Staff             `json:"staff"`
+	OldValue StaffAuditLogValue `json:"oldValue"`
+	NewValue StaffAuditLogValue `json:"newValue"`
+	Type     StaffAuditLogType  `json:"type"`
+	Ts       int64              `json:"ts"`
+}
+
+type StaffAuditLogConnection struct {
+	Nodes      []*StaffAuditLog `json:"nodes"`
+	PageInfo   *PageInfo        `json:"pageInfo"`
+	TotalCount int64            `json:"totalCount"`
+}
 
 type TokenResponse struct {
 	Message *string `json:"message"`
@@ -2142,6 +2165,47 @@ func (e *ReportStatuses) UnmarshalGQL(v interface{}) error {
 }
 
 func (e ReportStatuses) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type StaffAuditLogType string
+
+const (
+	StaffAuditLogTypeFxRate StaffAuditLogType = "FX_RATE"
+	StaffAuditLogTypeFees   StaffAuditLogType = "FEES"
+)
+
+var AllStaffAuditLogType = []StaffAuditLogType{
+	StaffAuditLogTypeFxRate,
+	StaffAuditLogTypeFees,
+}
+
+func (e StaffAuditLogType) IsValid() bool {
+	switch e {
+	case StaffAuditLogTypeFxRate, StaffAuditLogTypeFees:
+		return true
+	}
+	return false
+}
+
+func (e StaffAuditLogType) String() string {
+	return string(e)
+}
+
+func (e *StaffAuditLogType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = StaffAuditLogType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid StaffAuditLogType", str)
+	}
+	return nil
+}
+
+func (e StaffAuditLogType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
