@@ -10569,3 +10569,307 @@ func TestQueryResolver_LookupBeneficiary(t *testing.T) {
 		})
 	}
 }
+
+func Test_queryResolver_StaffAuditLogs(t *testing.T) {
+	const (
+		successFirst = iota
+		successAfter
+		successLast
+		successBefore
+	)
+
+	type reqArg struct {
+		first  int64
+		after  string
+		last   int64
+		before string
+	}
+
+	tests := []struct {
+		name     string
+		args     reqArg
+		testType int
+	}{
+		{
+			name: "Test success using first arg",
+			args: reqArg{
+				first: int64(10),
+			},
+			testType: successFirst,
+		},
+
+		{
+			name: "Test success using after arg",
+			args: reqArg{
+				after: "after",
+				last:  int64(10),
+			},
+			testType: successAfter,
+		},
+
+		{
+			name: "Test success using last arg",
+			args: reqArg{
+				last: int64(10),
+			},
+			testType: successLast,
+		},
+
+		{
+			name: "Test success using before arg",
+			args: reqArg{
+				before: "before",
+				first:  int64(10),
+			},
+			testType: successBefore,
+		},
+	}
+
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+
+	customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
+	resolverOpts := &ResolverOpts{
+		CustomerService: customerServiceClient,
+	}
+
+	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Query()
+	ctx := context.Background()
+
+	nodes := []*pbTypes.StaffAuditLog{
+		{
+			Id: "node_id_1",
+			Staff: &pbTypes.Staff{
+				Id:       "staff_id",
+				Name:     "staff name",
+				LastName: "staff last name",
+				Dob:      "dd-mm-yyyy",
+				Addresses: []*pbTypes.Address{
+					{
+						Primary: true,
+						Country: &pbTypes.Country{
+							Id: "country_id",
+						},
+						Coordinates: &pbTypes.Coordinates{
+							Latitude:  3.49599,
+							Longitude: 3.55534,
+						},
+					},
+				},
+				Phones: []*pbTypes.Phone{
+					{
+						Primary:  true,
+						Number:   "+440884834833",
+						Verified: true,
+					},
+				},
+				Email:  "staff@mail.com",
+				Status: pbTypes.Staff_ACTIVE,
+			},
+			OldValue: &pbTypes.StaffAuditLogValue{
+				Data: &pbTypes.StaffAuditLogValue_Fee{
+					Fee: &pbTypes.Fee{
+						Id: "old_fee_id",
+						TransactionType: &pbTypes.TransactionType{
+							Id:       "transaction_type_id",
+							Name:     "Transaction type name",
+							Status:   pbTypes.TransactionType_ACTIVE,
+							StatusTs: timestamppb.Now(),
+							Ts:       timestamppb.Now(),
+						},
+						Type: pbTypes.Fee_FIXED,
+						Boundaries: []*pbTypes.FeeBoundaries{
+							{
+								Lower:      10.0,
+								Upper:      100.0,
+								Amount:     500.0,
+								Percentage: 0.0,
+							},
+						},
+						Status:   pbTypes.Fee_ACTIVE,
+						StatusTs: timestamppb.Now(),
+						Ts:       timestamppb.Now(),
+					},
+				},
+			},
+			NewValue: &pbTypes.StaffAuditLogValue{
+				Data: &pbTypes.StaffAuditLogValue_Fee{
+					Fee: &pbTypes.Fee{
+						Id: "new_fee_id",
+						TransactionType: &pbTypes.TransactionType{
+							Id:       "transaction_type_id",
+							Name:     "Transaction type name",
+							Status:   pbTypes.TransactionType_ACTIVE,
+							StatusTs: timestamppb.Now(),
+							Ts:       timestamppb.Now(),
+						},
+						Type: pbTypes.Fee_VARIABLE,
+						Boundaries: []*pbTypes.FeeBoundaries{
+							{
+								Lower:      10.0,
+								Upper:      100.0,
+								Amount:     500.0,
+								Percentage: 0.26,
+							},
+
+							{
+								Lower:      12.0,
+								Upper:      -1,
+								Amount:     600.0,
+								Percentage: 0.31,
+							},
+						},
+						Status: pbTypes.Fee_ACTIVE,
+						Ts:     timestamppb.Now(),
+					},
+				},
+			},
+			Type: pbTypes.StaffAuditLog_FEES,
+			Ts:   timestamppb.Now(),
+		},
+
+		{
+			Id: "node_id_2",
+			Staff: &pbTypes.Staff{
+				Id:       "staff_id",
+				Name:     "staff name",
+				LastName: "staff last name",
+				Dob:      "dd-mm-yyyy",
+				Addresses: []*pbTypes.Address{
+					{
+						Primary: true,
+						Country: &pbTypes.Country{
+							Id: "country_id",
+						},
+						Coordinates: &pbTypes.Coordinates{
+							Latitude:  3.49599,
+							Longitude: 3.55534,
+						},
+					},
+				},
+				Phones: []*pbTypes.Phone{
+					{
+						Primary:  true,
+						Number:   "+440884834833",
+						Verified: true,
+					},
+				},
+				Email:  "staff@mail.com",
+				Status: pbTypes.Staff_ACTIVE,
+			},
+			OldValue: &pbTypes.StaffAuditLogValue{
+				Data: &pbTypes.StaffAuditLogValue_ExchangeRate{
+					ExchangeRate: &pbTypes.ExchangeRate{
+						Id: "old_exchange_rate_id",
+						BaseCurrency: &pbTypes.Currency{
+							Id: "base_currency_id",
+						},
+						TargetCurrency: &pbTypes.Currency{
+							Id: "currency_id",
+						},
+						SalePrice: 100.0,
+						BuyPrice:  200.0,
+						Ts:        timestamppb.Now(),
+					},
+				},
+			},
+
+			NewValue: &pbTypes.StaffAuditLogValue{
+				Data: &pbTypes.StaffAuditLogValue_ExchangeRate{
+					ExchangeRate: &pbTypes.ExchangeRate{
+						Id: "new_exchange_rate_id",
+						BaseCurrency: &pbTypes.Currency{
+							Id: "base_currency_id",
+						},
+						TargetCurrency: &pbTypes.Currency{
+							Id: "currency_id",
+						},
+						SalePrice: 150.0,
+						BuyPrice:  600.0,
+						Ts:        timestamppb.Now(),
+					},
+				},
+			},
+			Type: pbTypes.StaffAuditLog_FX_RATE,
+			Ts:   timestamppb.Now(),
+		},
+	}
+
+	mockStaffAuditLogsResp := &customer.GetStaffAuditLogsResponse{
+		Nodes: nodes,
+		PaginationInfo: &pbTypes.PaginationInfo{
+			HasNextPage:     false,
+			HasPreviousPage: false,
+			StartCursor:     "start_cursor",
+			EndCursor:       "end_cursor",
+		},
+		TotalCount: 2,
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			switch testCase.testType {
+			case successFirst:
+
+				mockRequest := &customer.GetStaffAuditLogsRequest{
+					First:  int32(testCase.args.first),
+					After:  testCase.args.after,
+					Last:   int32(testCase.args.last),
+					Before: testCase.args.before,
+				}
+
+				customerServiceClient.EXPECT().GetStaffAuditLogs(ctx, mockRequest).Return(mockStaffAuditLogsResp, nil)
+
+				response, err := resolver.StaffAuditLogs(ctx, &testCase.args.first, &testCase.args.after, &testCase.args.last, &testCase.args.before)
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+				assert.Equal(t, len(nodes), int(response.TotalCount))
+
+			case successAfter:
+				mockRequest := &customer.GetStaffAuditLogsRequest{
+					First:  int32(testCase.args.first),
+					After:  testCase.args.after,
+					Last:   int32(testCase.args.last),
+					Before: testCase.args.before,
+				}
+
+				customerServiceClient.EXPECT().GetStaffAuditLogs(ctx, mockRequest).Return(mockStaffAuditLogsResp, nil)
+
+				response, err := resolver.StaffAuditLogs(ctx, &testCase.args.first, &testCase.args.after, &testCase.args.last, &testCase.args.before)
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+				assert.Equal(t, len(nodes), int(response.TotalCount))
+
+			case successBefore:
+				mockRequest := &customer.GetStaffAuditLogsRequest{
+					First:  int32(testCase.args.first),
+					After:  testCase.args.after,
+					Last:   int32(testCase.args.last),
+					Before: testCase.args.before,
+				}
+
+				customerServiceClient.EXPECT().GetStaffAuditLogs(ctx, mockRequest).Return(mockStaffAuditLogsResp, nil)
+
+				response, err := resolver.StaffAuditLogs(ctx, &testCase.args.first, &testCase.args.after, &testCase.args.last, &testCase.args.before)
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+				assert.Equal(t, len(nodes), int(response.TotalCount))
+
+			case successLast:
+				mockRequest := &customer.GetStaffAuditLogsRequest{
+					First:  int32(testCase.args.first),
+					After:  testCase.args.after,
+					Last:   int32(testCase.args.last),
+					Before: testCase.args.before,
+				}
+
+				customerServiceClient.EXPECT().GetStaffAuditLogs(ctx, mockRequest).Return(mockStaffAuditLogsResp, nil)
+
+				response, err := resolver.StaffAuditLogs(ctx, &testCase.args.first, &testCase.args.after, &testCase.args.last, &testCase.args.before)
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+				assert.Equal(t, len(nodes), int(response.TotalCount))
+			}
+		})
+	}
+}
