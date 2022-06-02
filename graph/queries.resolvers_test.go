@@ -10470,6 +10470,106 @@ func TestQueryResolver_ExistingBeneficiaryByAccount(t *testing.T) {
 	}
 }
 
+func TestQueryResolver_LookupBeneficiary(t *testing.T) {
+	const (
+		success = iota
+		errorLookup
+	)
+
+	tests := []struct {
+		name     string
+		testType int
+		arg      struct {
+			accountNumber string
+			code          string
+			currencyID    string
+		}
+	}{
+		{
+			name:     "lookup found",
+			testType: success,
+			arg: struct {
+				accountNumber string
+				code          string
+				currencyID    string
+			}{accountNumber: "2086549552", code: "999057", currencyID: "01fq5ds63haq9f1msfztea5zyw"},
+		},
+		{
+			name:     "Test error lookup",
+			testType: errorLookup,
+			arg: struct {
+				accountNumber string
+				code          string
+				currencyID    string
+			}{accountNumber: "", code: "", currencyID: ""},
+		},
+	}
+
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+
+	service := mocks.NewMockPaymentServiceClient(controller)
+
+	resolverOpts := &ResolverOpts{
+		PaymentService: service,
+	}
+	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Query()
+
+	ctx, _ := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{
+		Client:   models.APP,
+		ID:       "123456",
+		Email:    "email@roava.app",
+		DeviceID: "12345",
+	})
+
+	accountResponse := &payment.GetBeneficiaryByAccountResponse{
+		Name: "name",
+		Currency: &pbTypes.Currency{
+			Id:     "01fq5ds63haq9f1msfztea5zyw",
+			Symbol: "S",
+			Code:   "Code",
+			Name:   "name",
+		},
+		AccountNumber: "123",
+		Code:          "123",
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			switch test.testType {
+			case success:
+				request := &payment.LookUpBeneficiaryRequest{
+					AccountNumber: test.arg.accountNumber,
+					Code:          test.arg.code,
+					CurrencyId:    test.arg.currencyID,
+				}
+
+				service.EXPECT().LookupBeneficiary(ctx, request).Return(accountResponse, nil)
+
+				response, err := resolver.LookupBeneficiary(ctx, test.arg.accountNumber, test.arg.code, test.arg.currencyID)
+
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+				assert.Equal(t, test.arg.currencyID, response.Currency.ID)
+
+			case errorLookup:
+				request := &payment.LookUpBeneficiaryRequest{
+					AccountNumber: test.arg.accountNumber,
+					Code:          test.arg.code,
+					CurrencyId:    test.arg.currencyID,
+				}
+
+				service.EXPECT().LookupBeneficiary(ctx, request).Return(accountResponse, errors.New("error"))
+
+				response, err := resolver.LookupBeneficiary(ctx, test.arg.accountNumber, test.arg.code, test.arg.currencyID)
+
+				assert.Error(t, err)
+				assert.Nil(t, response)
+			}
+		})
+	}
+}
+
 func Test_queryResolver_StaffAuditLogs(t *testing.T) {
 	const (
 		successFirst = iota

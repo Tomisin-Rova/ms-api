@@ -6,7 +6,6 @@ package graph
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -721,7 +720,30 @@ func (r *queryResolver) ExistingBeneficiaryByAccount(ctx context.Context, accoun
 }
 
 func (r *queryResolver) LookupBeneficiary(ctx context.Context, accountNumber string, code string, currencyID string) (*apiTypes.BeneficiaryPreview, error) {
-	panic(fmt.Errorf("not implemented"))
+	// Get user claims
+	_, err := middlewares.GetClaimsFromCtx(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	result, err := r.PaymentService.LookupBeneficiary(ctx, &payment.LookUpBeneficiaryRequest{Code: code, AccountNumber: accountNumber, CurrencyId: currencyID})
+	if err != nil {
+		return nil, err
+	}
+
+	response := &apiTypes.BeneficiaryPreview{
+		Name: result.Name,
+		Currency: &apiTypes.Currency{
+			ID:     result.Currency.Id,
+			Symbol: result.Currency.Symbol,
+			Code:   result.Currency.Code,
+			Name:   result.Currency.Name,
+		},
+		AccountNumber: result.AccountNumber,
+		Code:          result.Code,
+	}
+
+	return response, nil
 }
 
 func (r *queryResolver) TransactionTypes(ctx context.Context, first *int64, after *string, last *int64, before *string, statuses []apiTypes.TransactionTypeStatuses) (*apiTypes.TransactionTypeConnection, error) {
