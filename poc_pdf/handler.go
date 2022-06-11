@@ -7,6 +7,7 @@ import (
 	"github.com/johnfercher/maroto/pkg/pdf"
 	"github.com/johnfercher/maroto/pkg/props"
 	"net/http"
+	"os"
 )
 
 func GeneratePdf(writer http.ResponseWriter, _ *http.Request) {
@@ -31,7 +32,13 @@ func generateFileBuffer() (error, *bytes.Buffer) {
 	m.RegisterHeader(func() {
 		m.Row(20, func() {
 			m.Col(3, func() {
-				_ = m.FileImage("poc_pdf/logo.png", props.Rect{
+				const logoPath = "poc_pdf/logo.png"
+				_, err := os.Stat(logoPath)
+				if err != nil {
+					//Do not add image
+					return
+				}
+				_ = m.FileImage(logoPath, props.Rect{
 					Center:  true,
 					Percent: 80,
 				})
