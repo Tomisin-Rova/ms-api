@@ -9,16 +9,15 @@ import (
 	"net/http"
 )
 
-func GeneratePdf(w http.ResponseWriter, request *http.Request) {
+func GeneratePdf(writer http.ResponseWriter, _ *http.Request) {
 	err, fileBuffer := generateFileBuffer()
 	if err != nil {
-		w.WriteHeader(http.StatusNoContent)
+		writer.WriteHeader(http.StatusNoContent)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "application/octet-stream")
-	w.Write(fileBuffer.Bytes())
-	return
+	writer.WriteHeader(http.StatusOK)
+	writer.Header().Set("Content-Type", "application/octet-stream")
+	_, _ = writer.Write(fileBuffer.Bytes())
 }
 
 func generateFileBuffer() (error, *bytes.Buffer) {
