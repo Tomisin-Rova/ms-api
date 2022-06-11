@@ -3,6 +3,7 @@ package httpServer
 import (
 	"context"
 	"fmt"
+	"ms.api/poc_pdf"
 	"net/http"
 	"time"
 
@@ -111,6 +112,8 @@ func MountServer(secrets *config.Secrets, logger *zap.Logger) *chi.Mux {
 	})
 
 	router.Handle("/graphql", server)
-
+	//TODO: Remove
+	//This is a public endpoint to test pdf proof of concept
+	router.Get("/pdf_gen", poc_pdf.GeneratePdf)
 	return router
 }
