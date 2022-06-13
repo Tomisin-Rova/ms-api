@@ -402,6 +402,7 @@ type ComplexityRoot struct {
 		AnswerQuestionary          func(childComplexity int, questionary types.QuestionaryAnswerInput) int
 		CheckBvn                   func(childComplexity int, bvn string, phone string) int
 		CheckCustomerData          func(childComplexity int, customerData types.CheckCustomerDataInput) int
+		CheckCustomerDetails       func(childComplexity int, customerDetails types.CheckCustomerDetailsInput, typeArg types.ActionType) int
 		CheckCustomerEmail         func(childComplexity int, email string, device types.DeviceInput) int
 		CreateAccount              func(childComplexity int, account types.AccountInput) int
 		CreateBeneficiariesByPhone func(childComplexity int, beneficiaries []*types.BeneficiaryByPhoneInput, transactionPassword string) int
@@ -424,9 +425,11 @@ type ComplexityRoot struct {
 		SetTransactionPassword     func(childComplexity int, password string) int
 		Signup                     func(childComplexity int, customer types.CustomerInput) int
 		StaffLogin                 func(childComplexity int, token string, authType types.AuthType) int
+		StaffUpdateCustomerDetails func(childComplexity int, customerDetails types.StaffCustomerDetailsUpdateInput) int
 		SubmitCdd                  func(childComplexity int, cdd types.CDDInput) int
 		UpdateAMLStatus            func(childComplexity int, id string, status types.AMLStatuses, message string) int
 		UpdateCustomerDetails      func(childComplexity int, customerDetails types.CustomerDetailsUpdateInput, transactionPassword string) int
+		UpdateDevice               func(childComplexity int, device types.DeviceInput) int
 		UpdateFees                 func(childComplexity int, fees []*types.UpdateFeesInput) int
 		UpdateFx                   func(childComplexity int, exchangeRate types.UpdateFXInput) int
 		UpdateKYCStatus            func(childComplexity int, id string, status types.KYCStatuses, message string) int
@@ -528,7 +531,7 @@ type ComplexityRoot struct {
 		Products                     func(childComplexity int, first *int64, after *string, last *int64, before *string, statuses []types.ProductStatuses, typeArg *types.ProductTypes) int
 		Questionaries                func(childComplexity int, keywords *string, first *int64, after *string, last *int64, before *string, statuses []types.QuestionaryStatuses, typeArg []types.QuestionaryTypes) int
 		Questionary                  func(childComplexity int, id string) int
-		StaffAuditLogs               func(childComplexity int, first *int64, after *string, last *int64, before *string) int
+		StaffAuditLogs               func(childComplexity int, first *int64, after *string, last *int64, before *string, types []types.StaffAuditLogType) int
 		Transaction                  func(childComplexity int, id string) int
 		TransactionTypes             func(childComplexity int, first *int64, after *string, last *int64, before *string, statuses []types.TransactionTypeStatuses) int
 		Transactions                 func(childComplexity int, first *int64, after *string, last *int64, before *string, startDate *string, endDate *string, statuses []types.TransactionStatuses, accountIds []string, beneficiaryIds []string, hasBeneficiary *bool) int
@@ -723,12 +726,15 @@ type MutationResolver interface {
 	SendNotification(ctx context.Context, typeArg types.DeliveryMode, content string, templateID string) (*types.Response, error)
 	DeactivateCredential(ctx context.Context, credentialType types.IdentityCredentialsTypes) (*types.Response, error)
 	WithdrawVaultAccount(ctx context.Context, sourceAccountID string, targetAccountID string, transactionPassword string) (*types.Response, error)
+	UpdateDevice(ctx context.Context, device types.DeviceInput) (*types.Response, error)
+	CheckCustomerDetails(ctx context.Context, customerDetails types.CheckCustomerDetailsInput, typeArg types.ActionType) (*types.Response, error)
 	RequestResubmit(ctx context.Context, customerID string, reportIds []string, message *string) (*types.Response, error)
 	StaffLogin(ctx context.Context, token string, authType types.AuthType) (*types.AuthResponse, error)
 	UpdateKYCStatus(ctx context.Context, id string, status types.KYCStatuses, message string) (*types.Response, error)
 	UpdateAMLStatus(ctx context.Context, id string, status types.AMLStatuses, message string) (*types.Response, error)
 	UpdateFx(ctx context.Context, exchangeRate types.UpdateFXInput) (*types.Response, error)
 	UpdateFees(ctx context.Context, fees []*types.UpdateFeesInput) (*types.Response, error)
+	StaffUpdateCustomerDetails(ctx context.Context, customerDetails types.StaffCustomerDetailsUpdateInput) (*types.Response, error)
 }
 type QueryResolver interface {
 	CheckEmail(ctx context.Context, email string) (bool, error)
@@ -762,7 +768,7 @@ type QueryResolver interface {
 	Customer(ctx context.Context, id string) (*types.Customer, error)
 	Customers(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string, statuses []types.CustomerStatuses) (*types.CustomerConnection, error)
 	Cdds(ctx context.Context, first *int64, after *string, last *int64, before *string, statuses []types.CDDStatuses) (*types.CDDConnection, error)
-	StaffAuditLogs(ctx context.Context, first *int64, after *string, last *int64, before *string) (*types.StaffAuditLogConnection, error)
+	StaffAuditLogs(ctx context.Context, first *int64, after *string, last *int64, before *string, types []types.StaffAuditLogType) (*types.StaffAuditLogConnection, error)
 }
 
 type executableSchema struct {
@@ -2359,6 +2365,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CheckCustomerData(childComplexity, args["customerData"].(types.CheckCustomerDataInput)), true
 
+	case "Mutation.checkCustomerDetails":
+		if e.complexity.Mutation.CheckCustomerDetails == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_checkCustomerDetails_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CheckCustomerDetails(childComplexity, args["customerDetails"].(types.CheckCustomerDetailsInput), args["type"].(types.ActionType)), true
+
 	case "Mutation.checkCustomerEmail":
 		if e.complexity.Mutation.CheckCustomerEmail == nil {
 			break
@@ -2623,6 +2641,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.StaffLogin(childComplexity, args["token"].(string), args["authType"].(types.AuthType)), true
 
+	case "Mutation.staffUpdateCustomerDetails":
+		if e.complexity.Mutation.StaffUpdateCustomerDetails == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_staffUpdateCustomerDetails_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.StaffUpdateCustomerDetails(childComplexity, args["customerDetails"].(types.StaffCustomerDetailsUpdateInput)), true
+
 	case "Mutation.submitCDD":
 		if e.complexity.Mutation.SubmitCdd == nil {
 			break
@@ -2658,6 +2688,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.UpdateCustomerDetails(childComplexity, args["customerDetails"].(types.CustomerDetailsUpdateInput), args["transactionPassword"].(string)), true
+
+	case "Mutation.updateDevice":
+		if e.complexity.Mutation.UpdateDevice == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateDevice_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateDevice(childComplexity, args["device"].(types.DeviceInput)), true
 
 	case "Mutation.updateFees":
 		if e.complexity.Mutation.UpdateFees == nil {
@@ -3342,7 +3384,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.StaffAuditLogs(childComplexity, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string)), true
+		return e.complexity.Query.StaffAuditLogs(childComplexity, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string), args["types"].([]types.StaffAuditLogType)), true
 
 	case "Query.transaction":
 		if e.complexity.Query.Transaction == nil {
@@ -4084,6 +4126,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputBoundaryFee,
 		ec.unmarshalInputCDDInput,
 		ec.unmarshalInputCheckCustomerDataInput,
+		ec.unmarshalInputCheckCustomerDetailsInput,
 		ec.unmarshalInputCommonQueryFilterInput,
 		ec.unmarshalInputCordinatesInput,
 		ec.unmarshalInputCustomerDetailsInput,
@@ -4095,6 +4138,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputKYCInput,
 		ec.unmarshalInputPOAInput,
 		ec.unmarshalInputQuestionaryAnswerInput,
+		ec.unmarshalInputStaffCustomerDetailsUpdateInput,
 		ec.unmarshalInputTransactionInput,
 		ec.unmarshalInputUpdateFXInput,
 		ec.unmarshalInputUpdateFeesInput,
@@ -4220,8 +4264,10 @@ type Mutation {
     deactivateCredential(credentialType: IdentityCredentialsTypes!): Response!
     # Withdraw funds from a Vault Account
     withdrawVaultAccount(sourceAccountId: ID!, targetAccountId: ID!, transactionPassword: String!): Response!
-
-
+    # Update device and deprecate old devices for customer
+    updateDevice(device: DeviceInput!): Response!
+    # Validates customer details in order to proceed with secure actions
+    checkCustomerDetails(customerDetails: CheckCustomerDetailsInput!, type: ActionType!): Response!
 
     # ---- Dashboard -----
     # Ask for a customer to resubmit a report
@@ -4235,7 +4281,10 @@ type Mutation {
     # Update FX
     updateFX(exchangeRate: UpdateFXInput!): Response!
     # Update Fees
-    updateFees(fees: [UpdateFeesInput!]!): Response!}
+    updateFees(fees: [UpdateFeesInput!]!): Response!
+    # Allows staff to update a customer's details
+    staffUpdateCustomerDetails(customerDetails: StaffCustomerDetailsUpdateInput!): Response!
+}
 
 # API response interface
 interface GraphQLResponse {
@@ -4433,6 +4482,16 @@ input CustomerDetailsUpdateInput {
     address: AddressInput
 }
 
+# update the details of one customer by Staff
+input StaffCustomerDetailsUpdateInput {
+    firstName: String
+    lastName: String
+    email: String
+    address: AddressInput
+    customerID: String!
+}
+
+
 # update Fees
 input UpdateFeesInput{
     transactionTypeId: ID!
@@ -4453,6 +4512,18 @@ input UpdateFXInput {
     salePrice: Float
     buyPrice: Float!
 }
+
+# customer details input for secure checks
+input CheckCustomerDetailsInput {
+    password: String!
+    phoneNumber: String!
+    dob: String!
+}
+
+enum ActionType {
+    DEVICE_UPDATE
+}
+
 enum AuthType {
     GOOGLE
 }
@@ -4463,6 +4534,7 @@ enum DeliveryMode {
     SMS
     PUSH
 }
+
 `, BuiltIn: false},
 	{Name: "../schemas/queries.graphql", Input: `type Query {
     # Check if there's a customer with the email given
@@ -4705,6 +4777,8 @@ enum DeliveryMode {
         last: Int
         # Returns the elements in the list that come before the specified cursor.
         before: String
+        # Filter audit logs by it's types. If empty, should ignore the field
+        types: [StaffAuditLogType!]
     ): StaffAuditLogConnection!
 }
 
@@ -5552,9 +5626,10 @@ type Bank {
 enum StaffAuditLogType {
     FX_RATE
     FEES
+    CUSTOMER_DETAILS_UPDATE
 }
 
-union StaffAuditLogValue = Fee | ExchangeRate
+union StaffAuditLogValue = Fee | ExchangeRate | Customer
 
 type StaffAuditLog {
     id: ID!
@@ -5672,6 +5747,30 @@ func (ec *executionContext) field_Mutation_checkCustomerData_args(ctx context.Co
 		}
 	}
 	args["customerData"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_checkCustomerDetails_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 types.CheckCustomerDetailsInput
+	if tmp, ok := rawArgs["customerDetails"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("customerDetails"))
+		arg0, err = ec.unmarshalNCheckCustomerDetailsInput2msᚗapiᚋtypesᚐCheckCustomerDetailsInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["customerDetails"] = arg0
+	var arg1 types.ActionType
+	if tmp, ok := rawArgs["type"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
+		arg1, err = ec.unmarshalNActionType2msᚗapiᚋtypesᚐActionType(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["type"] = arg1
 	return args, nil
 }
 
@@ -6176,6 +6275,21 @@ func (ec *executionContext) field_Mutation_staffLogin_args(ctx context.Context, 
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_staffUpdateCustomerDetails_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 types.StaffCustomerDetailsUpdateInput
+	if tmp, ok := rawArgs["customerDetails"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("customerDetails"))
+		arg0, err = ec.unmarshalNStaffCustomerDetailsUpdateInput2msᚗapiᚋtypesᚐStaffCustomerDetailsUpdateInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["customerDetails"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_submitCDD_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -6245,6 +6359,21 @@ func (ec *executionContext) field_Mutation_updateCustomerDetails_args(ctx contex
 		}
 	}
 	args["transactionPassword"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateDevice_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 types.DeviceInput
+	if tmp, ok := rawArgs["device"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("device"))
+		arg0, err = ec.unmarshalNDeviceInput2msᚗapiᚋtypesᚐDeviceInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["device"] = arg0
 	return args, nil
 }
 
@@ -7298,6 +7427,15 @@ func (ec *executionContext) field_Query_staffAuditLogs_args(ctx context.Context,
 		}
 	}
 	args["before"] = arg3
+	var arg4 []types.StaffAuditLogType
+	if tmp, ok := rawArgs["types"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("types"))
+		arg4, err = ec.unmarshalOStaffAuditLogType2ᚕmsᚗapiᚋtypesᚐStaffAuditLogTypeᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["types"] = arg4
 	return args, nil
 }
 
@@ -19734,6 +19872,132 @@ func (ec *executionContext) fieldContext_Mutation_withdrawVaultAccount(ctx conte
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_updateDevice(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_updateDevice(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateDevice(rctx, fc.Args["device"].(types.DeviceInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.Response)
+	fc.Result = res
+	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_updateDevice(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "message":
+				return ec.fieldContext_Response_message(ctx, field)
+			case "success":
+				return ec.fieldContext_Response_success(ctx, field)
+			case "code":
+				return ec.fieldContext_Response_code(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Response", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_updateDevice_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_checkCustomerDetails(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_checkCustomerDetails(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CheckCustomerDetails(rctx, fc.Args["customerDetails"].(types.CheckCustomerDetailsInput), fc.Args["type"].(types.ActionType))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.Response)
+	fc.Result = res
+	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_checkCustomerDetails(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "message":
+				return ec.fieldContext_Response_message(ctx, field)
+			case "success":
+				return ec.fieldContext_Response_success(ctx, field)
+			case "code":
+				return ec.fieldContext_Response_code(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Response", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_checkCustomerDetails_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_requestResubmit(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_requestResubmit(ctx, field)
 	if err != nil {
@@ -20108,6 +20372,69 @@ func (ec *executionContext) fieldContext_Mutation_updateFees(ctx context.Context
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_updateFees_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_staffUpdateCustomerDetails(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_staffUpdateCustomerDetails(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().StaffUpdateCustomerDetails(rctx, fc.Args["customerDetails"].(types.StaffCustomerDetailsUpdateInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.Response)
+	fc.Result = res
+	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_staffUpdateCustomerDetails(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "message":
+				return ec.fieldContext_Response_message(ctx, field)
+			case "success":
+				return ec.fieldContext_Response_success(ctx, field)
+			case "code":
+				return ec.fieldContext_Response_code(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Response", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_staffUpdateCustomerDetails_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -24015,7 +24342,7 @@ func (ec *executionContext) _Query_staffAuditLogs(ctx context.Context, field gra
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().StaffAuditLogs(rctx, fc.Args["first"].(*int64), fc.Args["after"].(*string), fc.Args["last"].(*int64), fc.Args["before"].(*string))
+		return ec.resolvers.Query().StaffAuditLogs(rctx, fc.Args["first"].(*int64), fc.Args["after"].(*string), fc.Args["last"].(*int64), fc.Args["before"].(*string), fc.Args["types"].([]types.StaffAuditLogType))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -31069,6 +31396,45 @@ func (ec *executionContext) unmarshalInputCheckCustomerDataInput(ctx context.Con
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputCheckCustomerDetailsInput(ctx context.Context, obj interface{}) (types.CheckCustomerDetailsInput, error) {
+	var it types.CheckCustomerDetailsInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	for k, v := range asMap {
+		switch k {
+		case "password":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("password"))
+			it.Password, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "phoneNumber":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("phoneNumber"))
+			it.PhoneNumber, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "dob":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("dob"))
+			it.Dob, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputCommonQueryFilterInput(ctx context.Context, obj interface{}) (types.CommonQueryFilterInput, error) {
 	var it types.CommonQueryFilterInput
 	asMap := map[string]interface{}{}
@@ -31490,6 +31856,61 @@ func (ec *executionContext) unmarshalInputQuestionaryAnswerInput(ctx context.Con
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputStaffCustomerDetailsUpdateInput(ctx context.Context, obj interface{}) (types.StaffCustomerDetailsUpdateInput, error) {
+	var it types.StaffCustomerDetailsUpdateInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	for k, v := range asMap {
+		switch k {
+		case "firstName":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("firstName"))
+			it.FirstName, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "lastName":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("lastName"))
+			it.LastName, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "email":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+			it.Email, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "address":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("address"))
+			it.Address, err = ec.unmarshalOAddressInput2ᚖmsᚗapiᚋtypesᚐAddressInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "customerID":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("customerID"))
+			it.CustomerID, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputTransactionInput(ctx context.Context, obj interface{}) (types.TransactionInput, error) {
 	var it types.TransactionInput
 	asMap := map[string]interface{}{}
@@ -31777,6 +32198,13 @@ func (ec *executionContext) _StaffAuditLogValue(ctx context.Context, sel ast.Sel
 			return graphql.Null
 		}
 		return ec._ExchangeRate(ctx, sel, obj)
+	case types.Customer:
+		return ec._Customer(ctx, sel, &obj)
+	case *types.Customer:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Customer(ctx, sel, obj)
 	default:
 		panic(fmt.Errorf("unexpected type %T", obj))
 	}
@@ -33143,7 +33571,7 @@ func (ec *executionContext) _CurrencyConnection(ctx context.Context, sel ast.Sel
 	return out
 }
 
-var customerImplementors = []string{"Customer", "MeResult"}
+var customerImplementors = []string{"Customer", "MeResult", "StaffAuditLogValue"}
 
 func (ec *executionContext) _Customer(ctx context.Context, sel ast.SelectionSet, obj *types.Customer) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, customerImplementors)
@@ -34398,6 +34826,24 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "updateDevice":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_updateDevice(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "checkCustomerDetails":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_checkCustomerDetails(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "requestResubmit":
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
@@ -34447,6 +34893,15 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_updateFees(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "staffUpdateCustomerDetails":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_staffUpdateCustomerDetails(ctx, field)
 			})
 
 			if out.Values[i] == graphql.Null {
@@ -37148,6 +37603,16 @@ func (ec *executionContext) marshalNAccountStatuses2msᚗapiᚋtypesᚐAccountSt
 	return v
 }
 
+func (ec *executionContext) unmarshalNActionType2msᚗapiᚋtypesᚐActionType(ctx context.Context, v interface{}) (types.ActionType, error) {
+	var res types.ActionType
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNActionType2msᚗapiᚋtypesᚐActionType(ctx context.Context, sel ast.SelectionSet, v types.ActionType) graphql.Marshaler {
+	return v
+}
+
 func (ec *executionContext) marshalNAddress2ᚕᚖmsᚗapiᚋtypesᚐAddressᚄ(ctx context.Context, sel ast.SelectionSet, v []*types.Address) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
@@ -37615,6 +38080,11 @@ func (ec *executionContext) marshalNCDDStatuses2msᚗapiᚋtypesᚐCDDStatuses(c
 
 func (ec *executionContext) unmarshalNCheckCustomerDataInput2msᚗapiᚋtypesᚐCheckCustomerDataInput(ctx context.Context, v interface{}) (types.CheckCustomerDataInput, error) {
 	res, err := ec.unmarshalInputCheckCustomerDataInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNCheckCustomerDetailsInput2msᚗapiᚋtypesᚐCheckCustomerDetailsInput(ctx context.Context, v interface{}) (types.CheckCustomerDetailsInput, error) {
+	res, err := ec.unmarshalInputCheckCustomerDetailsInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
@@ -38984,6 +39454,11 @@ func (ec *executionContext) unmarshalNStaffAuditLogType2msᚗapiᚋtypesᚐStaff
 
 func (ec *executionContext) marshalNStaffAuditLogType2msᚗapiᚋtypesᚐStaffAuditLogType(ctx context.Context, sel ast.SelectionSet, v types.StaffAuditLogType) graphql.Marshaler {
 	return v
+}
+
+func (ec *executionContext) unmarshalNStaffCustomerDetailsUpdateInput2msᚗapiᚋtypesᚐStaffCustomerDetailsUpdateInput(ctx context.Context, v interface{}) (types.StaffCustomerDetailsUpdateInput, error) {
+	res, err := ec.unmarshalInputStaffCustomerDetailsUpdateInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNStaffStatuses2msᚗapiᚋtypesᚐStaffStatuses(ctx context.Context, v interface{}) (types.StaffStatuses, error) {
@@ -41087,6 +41562,73 @@ func (ec *executionContext) marshalOReview2ᚖmsᚗapiᚋtypesᚐReview(ctx cont
 		return graphql.Null
 	}
 	return ec._Review(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOStaffAuditLogType2ᚕmsᚗapiᚋtypesᚐStaffAuditLogTypeᚄ(ctx context.Context, v interface{}) ([]types.StaffAuditLogType, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]types.StaffAuditLogType, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNStaffAuditLogType2msᚗapiᚋtypesᚐStaffAuditLogType(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOStaffAuditLogType2ᚕmsᚗapiᚋtypesᚐStaffAuditLogTypeᚄ(ctx context.Context, sel ast.SelectionSet, v []types.StaffAuditLogType) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNStaffAuditLogType2msᚗapiᚋtypesᚐStaffAuditLogType(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) marshalOStaffAuditLogValue2msᚗapiᚋtypesᚐStaffAuditLogValue(ctx context.Context, sel ast.SelectionSet, v types.StaffAuditLogValue) graphql.Marshaler {

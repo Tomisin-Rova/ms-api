@@ -132,6 +132,26 @@ func (mr *MockCustomerServiceClientMockRecorder) CheckCustomerData(ctx, in inter
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckCustomerData", reflect.TypeOf((*MockCustomerServiceClient)(nil).CheckCustomerData), varargs...)
 }
 
+// CheckCustomerDetails mocks base method.
+func (m *MockCustomerServiceClient) CheckCustomerDetails(ctx context.Context, in *customer.CheckCustomerDetailsRequest, opts ...grpc.CallOption) (*types.DefaultResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CheckCustomerDetails", varargs...)
+	ret0, _ := ret[0].(*types.DefaultResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CheckCustomerDetails indicates an expected call of CheckCustomerDetails.
+func (mr *MockCustomerServiceClientMockRecorder) CheckCustomerDetails(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckCustomerDetails", reflect.TypeOf((*MockCustomerServiceClient)(nil).CheckCustomerDetails), varargs...)
+}
+
 // CheckCustomerEmail mocks base method.
 func (m *MockCustomerServiceClient) CheckCustomerEmail(ctx context.Context, in *customer.CheckCustomerEmailRequest, opts ...grpc.CallOption) (*types.DefaultResponse, error) {
 	m.ctrl.T.Helper()
@@ -592,6 +612,46 @@ func (mr *MockCustomerServiceClientMockRecorder) SetTransactionPassword(ctx, in 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetTransactionPassword", reflect.TypeOf((*MockCustomerServiceClient)(nil).SetTransactionPassword), varargs...)
 }
 
+// StaffCustomerDetailsUpdate mocks base method.
+func (m *MockCustomerServiceClient) StaffCustomerDetailsUpdate(ctx context.Context, in *customer.StaffCustomerDetailsUpdateRequest, opts ...grpc.CallOption) (*types.DefaultResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "StaffCustomerDetailsUpdate", varargs...)
+	ret0, _ := ret[0].(*types.DefaultResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// StaffCustomerDetailsUpdate indicates an expected call of StaffCustomerDetailsUpdate.
+func (mr *MockCustomerServiceClientMockRecorder) StaffCustomerDetailsUpdate(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StaffCustomerDetailsUpdate", reflect.TypeOf((*MockCustomerServiceClient)(nil).StaffCustomerDetailsUpdate), varargs...)
+}
+
+// UpdateDevice mocks base method.
+func (m *MockCustomerServiceClient) UpdateDevice(ctx context.Context, in *customer.DeviceInputRequest, opts ...grpc.CallOption) (*types.DefaultResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UpdateDevice", varargs...)
+	ret0, _ := ret[0].(*types.DefaultResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateDevice indicates an expected call of UpdateDevice.
+func (mr *MockCustomerServiceClientMockRecorder) UpdateDevice(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateDevice", reflect.TypeOf((*MockCustomerServiceClient)(nil).UpdateDevice), varargs...)
+}
+
 // MockCustomerServiceServer is a mock of CustomerServiceServer interface.
 type MockCustomerServiceServer struct {
 	ctrl     *gomock.Controller
@@ -658,6 +718,21 @@ func (m *MockCustomerServiceServer) CheckCustomerData(arg0 context.Context, arg1
 func (mr *MockCustomerServiceServerMockRecorder) CheckCustomerData(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckCustomerData", reflect.TypeOf((*MockCustomerServiceServer)(nil).CheckCustomerData), arg0, arg1)
+}
+
+// CheckCustomerDetails mocks base method.
+func (m *MockCustomerServiceServer) CheckCustomerDetails(arg0 context.Context, arg1 *customer.CheckCustomerDetailsRequest) (*types.DefaultResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CheckCustomerDetails", arg0, arg1)
+	ret0, _ := ret[0].(*types.DefaultResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CheckCustomerDetails indicates an expected call of CheckCustomerDetails.
+func (mr *MockCustomerServiceServerMockRecorder) CheckCustomerDetails(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckCustomerDetails", reflect.TypeOf((*MockCustomerServiceServer)(nil).CheckCustomerDetails), arg0, arg1)
 }
 
 // CheckCustomerEmail mocks base method.
@@ -1003,4 +1078,34 @@ func (m *MockCustomerServiceServer) SetTransactionPassword(arg0 context.Context,
 func (mr *MockCustomerServiceServerMockRecorder) SetTransactionPassword(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetTransactionPassword", reflect.TypeOf((*MockCustomerServiceServer)(nil).SetTransactionPassword), arg0, arg1)
+}
+
+// StaffCustomerDetailsUpdate mocks base method.
+func (m *MockCustomerServiceServer) StaffCustomerDetailsUpdate(arg0 context.Context, arg1 *customer.StaffCustomerDetailsUpdateRequest) (*types.DefaultResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "StaffCustomerDetailsUpdate", arg0, arg1)
+	ret0, _ := ret[0].(*types.DefaultResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// StaffCustomerDetailsUpdate indicates an expected call of StaffCustomerDetailsUpdate.
+func (mr *MockCustomerServiceServerMockRecorder) StaffCustomerDetailsUpdate(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StaffCustomerDetailsUpdate", reflect.TypeOf((*MockCustomerServiceServer)(nil).StaffCustomerDetailsUpdate), arg0, arg1)
+}
+
+// UpdateDevice mocks base method.
+func (m *MockCustomerServiceServer) UpdateDevice(arg0 context.Context, arg1 *customer.DeviceInputRequest) (*types.DefaultResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateDevice", arg0, arg1)
+	ret0, _ := ret[0].(*types.DefaultResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateDevice indicates an expected call of UpdateDevice.
+func (mr *MockCustomerServiceServerMockRecorder) UpdateDevice(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateDevice", reflect.TypeOf((*MockCustomerServiceServer)(nil).UpdateDevice), arg0, arg1)
 }
