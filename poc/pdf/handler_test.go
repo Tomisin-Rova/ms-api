@@ -1,4 +1,4 @@
-package poc_pdf
+package pdf
 
 import (
 	"github.com/johnfercher/maroto/pkg/color"

@@ -1,4 +1,4 @@
-package poc_pdf
+package pdf
 
 import (
 	"bytes"
@@ -32,7 +32,7 @@ func generateFileBuffer() (error, *bytes.Buffer) {
 	m.RegisterHeader(func() {
 		m.Row(20, func() {
 			m.Col(3, func() {
-				const logoPath = "poc_pdf/logo.png"
+				const logoPath = "poc/pdf/logo.png"
 				_, err := os.Stat(logoPath)
 				if err != nil {
 					//Do not add image
@@ -47,7 +47,7 @@ func generateFileBuffer() (error, *bytes.Buffer) {
 			m.ColSpace(6)
 
 			m.Col(3, func() {
-				m.Text("AnyCompany Name Inc. 851 Any Street Name, Suite 120, Any City, CA 45123.", props.Text{
+				m.Text("Roava Inc. 81 Gracechurch Street, EC3V 0AU, London, United Kingdom.", props.Text{
 					Size:        8,
 					Align:       consts.Right,
 					Extrapolate: false,
@@ -89,7 +89,7 @@ func generateFileBuffer() (error, *bytes.Buffer) {
 
 	m.Row(10, func() {
 		m.Col(12, func() {
-			m.Text("Invoice ABC123456789", props.Text{
+			m.Text("Account Statement", props.Text{
 				Top:   3,
 				Style: consts.Bold,
 				Align: consts.Center,
@@ -133,25 +133,6 @@ func generateFileBuffer() (error, *bytes.Buffer) {
 		})
 	})
 
-	m.Row(15, func() {
-		m.Col(6, func() {
-			_ = m.Barcode("5123.151231.512314.1251251.123215", props.Barcode{
-				Percent: 0,
-				Proportion: props.Proportion{
-					Width:  20,
-					Height: 2,
-				},
-			})
-			m.Text("5123.151231.512314.1251251.123215", props.Text{
-				Top:    12,
-				Family: "",
-				Style:  consts.Bold,
-				Size:   9,
-				Align:  consts.Center,
-			})
-		})
-		m.ColSpace(6)
-	})
 	if byteData, err := m.Output(); err != nil {
 		return err, nil
 	} else {
