@@ -1092,6 +1092,8 @@ func (r *mutationResolver) CheckCustomerDetails(ctx context.Context, customerDet
 			Dob:         customerDetails.Dob,
 			ActionType:  customer.CheckCustomerDetailsRequest_DEVICE_UPDATE,
 		}
+	default:
+		return &types.Response{Success: false, Code: int64(400)}, errors.New("not a valid ActionType")
 	}
 	// Execute RPC call
 	response, err := r.CustomerService.CheckCustomerDetails(ctx, &request)
