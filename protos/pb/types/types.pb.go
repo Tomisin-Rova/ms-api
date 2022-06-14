@@ -1464,6 +1464,64 @@ func (LinkedTransaction_LinkedTransactionStatuses) EnumDescriptor() ([]byte, []i
 	return file_types_proto_rawDescGZIP(), []int{37, 1}
 }
 
+type LinkedTransactionMambu_ClearBankTypeStatus int32
+
+const (
+	LinkedTransactionMambu_SETTLED       LinkedTransactionMambu_ClearBankTypeStatus = 0
+	LinkedTransactionMambu_PENDING       LinkedTransactionMambu_ClearBankTypeStatus = 1
+	LinkedTransactionMambu_FAILED        LinkedTransactionMambu_ClearBankTypeStatus = 2
+	LinkedTransactionMambu_AML_SUSPENDED LinkedTransactionMambu_ClearBankTypeStatus = 3
+	LinkedTransactionMambu_AML_ACCEPTED  LinkedTransactionMambu_ClearBankTypeStatus = 4
+	LinkedTransactionMambu_AML_REJECTED  LinkedTransactionMambu_ClearBankTypeStatus = 5
+)
+
+// Enum value maps for LinkedTransactionMambu_ClearBankTypeStatus.
+var (
+	LinkedTransactionMambu_ClearBankTypeStatus_name = map[int32]string{
+		0: "SETTLED",
+		1: "PENDING",
+		2: "FAILED",
+		3: "AML_SUSPENDED",
+		4: "AML_ACCEPTED",
+		5: "AML_REJECTED",
+	}
+	LinkedTransactionMambu_ClearBankTypeStatus_value = map[string]int32{
+		"SETTLED":       0,
+		"PENDING":       1,
+		"FAILED":        2,
+		"AML_SUSPENDED": 3,
+		"AML_ACCEPTED":  4,
+		"AML_REJECTED":  5,
+	}
+)
+
+func (x LinkedTransactionMambu_ClearBankTypeStatus) Enum() *LinkedTransactionMambu_ClearBankTypeStatus {
+	p := new(LinkedTransactionMambu_ClearBankTypeStatus)
+	*p = x
+	return p
+}
+
+func (x LinkedTransactionMambu_ClearBankTypeStatus) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (LinkedTransactionMambu_ClearBankTypeStatus) Descriptor() protoreflect.EnumDescriptor {
+	return file_types_proto_enumTypes[30].Descriptor()
+}
+
+func (LinkedTransactionMambu_ClearBankTypeStatus) Type() protoreflect.EnumType {
+	return &file_types_proto_enumTypes[30]
+}
+
+func (x LinkedTransactionMambu_ClearBankTypeStatus) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use LinkedTransactionMambu_ClearBankTypeStatus.Descriptor instead.
+func (LinkedTransactionMambu_ClearBankTypeStatus) EnumDescriptor() ([]byte, []int) {
+	return file_types_proto_rawDescGZIP(), []int{39, 0}
+}
+
 type TransactionType_TransactionTypeStatuses int32
 
 const (
@@ -1494,11 +1552,11 @@ func (x TransactionType_TransactionTypeStatuses) String() string {
 }
 
 func (TransactionType_TransactionTypeStatuses) Descriptor() protoreflect.EnumDescriptor {
-	return file_types_proto_enumTypes[30].Descriptor()
+	return file_types_proto_enumTypes[31].Descriptor()
 }
 
 func (TransactionType_TransactionTypeStatuses) Type() protoreflect.EnumType {
-	return &file_types_proto_enumTypes[30]
+	return &file_types_proto_enumTypes[31]
 }
 
 func (x TransactionType_TransactionTypeStatuses) Number() protoreflect.EnumNumber {
@@ -1540,11 +1598,11 @@ func (x Fee_FeeTypes) String() string {
 }
 
 func (Fee_FeeTypes) Descriptor() protoreflect.EnumDescriptor {
-	return file_types_proto_enumTypes[31].Descriptor()
+	return file_types_proto_enumTypes[32].Descriptor()
 }
 
 func (Fee_FeeTypes) Type() protoreflect.EnumType {
-	return &file_types_proto_enumTypes[31]
+	return &file_types_proto_enumTypes[32]
 }
 
 func (x Fee_FeeTypes) Number() protoreflect.EnumNumber {
@@ -1586,11 +1644,11 @@ func (x Fee_FeeStatuses) String() string {
 }
 
 func (Fee_FeeStatuses) Descriptor() protoreflect.EnumDescriptor {
-	return file_types_proto_enumTypes[32].Descriptor()
+	return file_types_proto_enumTypes[33].Descriptor()
 }
 
 func (Fee_FeeStatuses) Type() protoreflect.EnumType {
-	return &file_types_proto_enumTypes[32]
+	return &file_types_proto_enumTypes[33]
 }
 
 func (x Fee_FeeStatuses) Number() protoreflect.EnumNumber {
@@ -1632,11 +1690,11 @@ func (x Beneficiary_BeneficiaryStatuses) String() string {
 }
 
 func (Beneficiary_BeneficiaryStatuses) Descriptor() protoreflect.EnumDescriptor {
-	return file_types_proto_enumTypes[33].Descriptor()
+	return file_types_proto_enumTypes[34].Descriptor()
 }
 
 func (Beneficiary_BeneficiaryStatuses) Type() protoreflect.EnumType {
-	return &file_types_proto_enumTypes[33]
+	return &file_types_proto_enumTypes[34]
 }
 
 func (x Beneficiary_BeneficiaryStatuses) Number() protoreflect.EnumNumber {
@@ -1678,11 +1736,11 @@ func (x BeneficiaryAccount_BeneficiaryAccountStatuses) String() string {
 }
 
 func (BeneficiaryAccount_BeneficiaryAccountStatuses) Descriptor() protoreflect.EnumDescriptor {
-	return file_types_proto_enumTypes[34].Descriptor()
+	return file_types_proto_enumTypes[35].Descriptor()
 }
 
 func (BeneficiaryAccount_BeneficiaryAccountStatuses) Type() protoreflect.EnumType {
-	return &file_types_proto_enumTypes[34]
+	return &file_types_proto_enumTypes[35]
 }
 
 func (x BeneficiaryAccount_BeneficiaryAccountStatuses) Number() protoreflect.EnumNumber {
@@ -1736,11 +1794,11 @@ func (x Content_ContentType) String() string {
 }
 
 func (Content_ContentType) Descriptor() protoreflect.EnumDescriptor {
-	return file_types_proto_enumTypes[35].Descriptor()
+	return file_types_proto_enumTypes[36].Descriptor()
 }
 
 func (Content_ContentType) Type() protoreflect.EnumType {
-	return &file_types_proto_enumTypes[35]
+	return &file_types_proto_enumTypes[36]
 }
 
 func (x Content_ContentType) Number() protoreflect.EnumNumber {
@@ -1782,11 +1840,11 @@ func (x JWTClaims_ClientType) String() string {
 }
 
 func (JWTClaims_ClientType) Descriptor() protoreflect.EnumDescriptor {
-	return file_types_proto_enumTypes[36].Descriptor()
+	return file_types_proto_enumTypes[37].Descriptor()
 }
 
 func (JWTClaims_ClientType) Type() protoreflect.EnumType {
-	return &file_types_proto_enumTypes[36]
+	return &file_types_proto_enumTypes[37]
 }
 
 func (x JWTClaims_ClientType) Number() protoreflect.EnumNumber {
@@ -1801,8 +1859,9 @@ func (JWTClaims_ClientType) EnumDescriptor() ([]byte, []int) {
 type StaffAuditLog_StaffAuditLogTypes int32
 
 const (
-	StaffAuditLog_FX_RATE StaffAuditLog_StaffAuditLogTypes = 0
-	StaffAuditLog_FEES    StaffAuditLog_StaffAuditLogTypes = 1
+	StaffAuditLog_FX_RATE                 StaffAuditLog_StaffAuditLogTypes = 0
+	StaffAuditLog_FEES                    StaffAuditLog_StaffAuditLogTypes = 1
+	StaffAuditLog_CUSTOMER_DETAILS_UPDATE StaffAuditLog_StaffAuditLogTypes = 2
 )
 
 // Enum value maps for StaffAuditLog_StaffAuditLogTypes.
@@ -1810,10 +1869,12 @@ var (
 	StaffAuditLog_StaffAuditLogTypes_name = map[int32]string{
 		0: "FX_RATE",
 		1: "FEES",
+		2: "CUSTOMER_DETAILS_UPDATE",
 	}
 	StaffAuditLog_StaffAuditLogTypes_value = map[string]int32{
-		"FX_RATE": 0,
-		"FEES":    1,
+		"FX_RATE":                 0,
+		"FEES":                    1,
+		"CUSTOMER_DETAILS_UPDATE": 2,
 	}
 )
 
@@ -1828,11 +1889,11 @@ func (x StaffAuditLog_StaffAuditLogTypes) String() string {
 }
 
 func (StaffAuditLog_StaffAuditLogTypes) Descriptor() protoreflect.EnumDescriptor {
-	return file_types_proto_enumTypes[37].Descriptor()
+	return file_types_proto_enumTypes[38].Descriptor()
 }
 
 func (StaffAuditLog_StaffAuditLogTypes) Type() protoreflect.EnumType {
-	return &file_types_proto_enumTypes[37]
+	return &file_types_proto_enumTypes[38]
 }
 
 func (x StaffAuditLog_StaffAuditLogTypes) Number() protoreflect.EnumNumber {
@@ -5149,7 +5210,8 @@ type LinkedTransactionMambu struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	TransactionEncodedKey string `protobuf:"bytes,1,opt,name=transaction_encoded_key,json=transactionEncodedKey,proto3" json:"transaction_encoded_key,omitempty"`
+	TransactionEncodedKey string                                     `protobuf:"bytes,1,opt,name=transaction_encoded_key,json=transactionEncodedKey,proto3" json:"transaction_encoded_key,omitempty"`
+	Status                LinkedTransactionMambu_ClearBankTypeStatus `protobuf:"varint,2,opt,name=status,proto3,enum=types.LinkedTransactionMambu_ClearBankTypeStatus" json:"status,omitempty"`
 }
 
 func (x *LinkedTransactionMambu) Reset() {
@@ -5189,6 +5251,13 @@ func (x *LinkedTransactionMambu) GetTransactionEncodedKey() string {
 		return x.TransactionEncodedKey
 	}
 	return ""
+}
+
+func (x *LinkedTransactionMambu) GetStatus() LinkedTransactionMambu_ClearBankTypeStatus {
+	if x != nil {
+		return x.Status
+	}
+	return LinkedTransactionMambu_SETTLED
 }
 
 type LinkedTransactionTarget struct {
@@ -6565,6 +6634,7 @@ type StaffAuditLogValue struct {
 	// Types that are assignable to Data:
 	//	*StaffAuditLogValue_Fee
 	//	*StaffAuditLogValue_ExchangeRate
+	//	*StaffAuditLogValue_Customer
 	Data isStaffAuditLogValue_Data `protobuf_oneof:"data"`
 }
 
@@ -6621,6 +6691,13 @@ func (x *StaffAuditLogValue) GetExchangeRate() *ExchangeRate {
 	return nil
 }
 
+func (x *StaffAuditLogValue) GetCustomer() *Customer {
+	if x, ok := x.GetData().(*StaffAuditLogValue_Customer); ok {
+		return x.Customer
+	}
+	return nil
+}
+
 type isStaffAuditLogValue_Data interface {
 	isStaffAuditLogValue_Data()
 }
@@ -6633,9 +6710,15 @@ type StaffAuditLogValue_ExchangeRate struct {
 	ExchangeRate *ExchangeRate `protobuf:"bytes,2,opt,name=exchange_rate,json=exchangeRate,proto3,oneof"` // Exchange rate.
 }
 
+type StaffAuditLogValue_Customer struct {
+	Customer *Customer `protobuf:"bytes,3,opt,name=customer,proto3,oneof"`
+}
+
 func (*StaffAuditLogValue_Fee) isStaffAuditLogValue_Data() {}
 
 func (*StaffAuditLogValue_ExchangeRate) isStaffAuditLogValue_Data() {}
+
+func (*StaffAuditLogValue_Customer) isStaffAuditLogValue_Data() {}
 
 type StaffAuditLog struct {
 	state         protoimpl.MessageState
@@ -7442,12 +7525,24 @@ var file_types_proto_rawDesc = []byte{
 	0x42, 0x12, 0x35, 0x0a, 0x16, 0x74, 0x72, 0x61, 0x6e, 0x73, 0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e,
 	0x5f, 0x69, 0x64, 0x65, 0x6e, 0x74, 0x69, 0x66, 0x69, 0x65, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28,
 	0x09, 0x52, 0x15, 0x74, 0x72, 0x61, 0x6e, 0x73, 0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x49, 0x64,
-	0x65, 0x6e, 0x74, 0x69, 0x66, 0x69, 0x65, 0x72, 0x22, 0x50, 0x0a, 0x16, 0x4c, 0x69, 0x6e, 0x6b,
-	0x65, 0x64, 0x54, 0x72, 0x61, 0x6e, 0x73, 0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x4d, 0x61, 0x6d,
-	0x62, 0x75, 0x12, 0x36, 0x0a, 0x17, 0x74, 0x72, 0x61, 0x6e, 0x73, 0x61, 0x63, 0x74, 0x69, 0x6f,
-	0x6e, 0x5f, 0x65, 0x6e, 0x63, 0x6f, 0x64, 0x65, 0x64, 0x5f, 0x6b, 0x65, 0x79, 0x18, 0x01, 0x20,
-	0x01, 0x28, 0x09, 0x52, 0x15, 0x74, 0x72, 0x61, 0x6e, 0x73, 0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e,
-	0x45, 0x6e, 0x63, 0x6f, 0x64, 0x65, 0x64, 0x4b, 0x65, 0x79, 0x22, 0xb1, 0x01, 0x0a, 0x17, 0x4c,
+	0x65, 0x6e, 0x74, 0x69, 0x66, 0x69, 0x65, 0x72, 0x22, 0x8f, 0x02, 0x0a, 0x16, 0x4c, 0x69, 0x6e,
+	0x6b, 0x65, 0x64, 0x54, 0x72, 0x61, 0x6e, 0x73, 0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x4d, 0x61,
+	0x6d, 0x62, 0x75, 0x12, 0x36, 0x0a, 0x17, 0x74, 0x72, 0x61, 0x6e, 0x73, 0x61, 0x63, 0x74, 0x69,
+	0x6f, 0x6e, 0x5f, 0x65, 0x6e, 0x63, 0x6f, 0x64, 0x65, 0x64, 0x5f, 0x6b, 0x65, 0x79, 0x18, 0x01,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x15, 0x74, 0x72, 0x61, 0x6e, 0x73, 0x61, 0x63, 0x74, 0x69, 0x6f,
+	0x6e, 0x45, 0x6e, 0x63, 0x6f, 0x64, 0x65, 0x64, 0x4b, 0x65, 0x79, 0x12, 0x49, 0x0a, 0x06, 0x73,
+	0x74, 0x61, 0x74, 0x75, 0x73, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x31, 0x2e, 0x74, 0x79,
+	0x70, 0x65, 0x73, 0x2e, 0x4c, 0x69, 0x6e, 0x6b, 0x65, 0x64, 0x54, 0x72, 0x61, 0x6e, 0x73, 0x61,
+	0x63, 0x74, 0x69, 0x6f, 0x6e, 0x4d, 0x61, 0x6d, 0x62, 0x75, 0x2e, 0x43, 0x6c, 0x65, 0x61, 0x72,
+	0x42, 0x61, 0x6e, 0x6b, 0x54, 0x79, 0x70, 0x65, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x52, 0x06,
+	0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x22, 0x72, 0x0a, 0x13, 0x43, 0x6c, 0x65, 0x61, 0x72, 0x42,
+	0x61, 0x6e, 0x6b, 0x54, 0x79, 0x70, 0x65, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x12, 0x0b, 0x0a,
+	0x07, 0x53, 0x45, 0x54, 0x54, 0x4c, 0x45, 0x44, 0x10, 0x00, 0x12, 0x0b, 0x0a, 0x07, 0x50, 0x45,
+	0x4e, 0x44, 0x49, 0x4e, 0x47, 0x10, 0x01, 0x12, 0x0a, 0x0a, 0x06, 0x46, 0x41, 0x49, 0x4c, 0x45,
+	0x44, 0x10, 0x02, 0x12, 0x11, 0x0a, 0x0d, 0x41, 0x4d, 0x4c, 0x5f, 0x53, 0x55, 0x53, 0x50, 0x45,
+	0x4e, 0x44, 0x45, 0x44, 0x10, 0x03, 0x12, 0x10, 0x0a, 0x0c, 0x41, 0x4d, 0x4c, 0x5f, 0x41, 0x43,
+	0x43, 0x45, 0x50, 0x54, 0x45, 0x44, 0x10, 0x04, 0x12, 0x10, 0x0a, 0x0c, 0x41, 0x4d, 0x4c, 0x5f,
+	0x52, 0x45, 0x4a, 0x45, 0x43, 0x54, 0x45, 0x44, 0x10, 0x05, 0x22, 0xb1, 0x01, 0x0a, 0x17, 0x4c,
 	0x69, 0x6e, 0x6b, 0x65, 0x64, 0x54, 0x72, 0x61, 0x6e, 0x73, 0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e,
 	0x54, 0x61, 0x72, 0x67, 0x65, 0x74, 0x12, 0x28, 0x0a, 0x07, 0x61, 0x63, 0x63, 0x6f, 0x75, 0x6e,
 	0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0e, 0x2e, 0x74, 0x79, 0x70, 0x65, 0x73, 0x2e,
@@ -7684,15 +7779,18 @@ var file_types_proto_rawDesc = []byte{
 	0x05, 0x20, 0x01, 0x28, 0x08, 0x52, 0x06, 0x61, 0x63, 0x74, 0x69, 0x76, 0x65, 0x12, 0x2a, 0x0a,
 	0x02, 0x74, 0x73, 0x18, 0x06, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67,
 	0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65,
-	0x73, 0x74, 0x61, 0x6d, 0x70, 0x52, 0x02, 0x74, 0x73, 0x22, 0x78, 0x0a, 0x12, 0x53, 0x74, 0x61,
-	0x66, 0x66, 0x41, 0x75, 0x64, 0x69, 0x74, 0x4c, 0x6f, 0x67, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x12,
-	0x1e, 0x0a, 0x03, 0x66, 0x65, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0a, 0x2e, 0x74,
-	0x79, 0x70, 0x65, 0x73, 0x2e, 0x46, 0x65, 0x65, 0x48, 0x00, 0x52, 0x03, 0x66, 0x65, 0x65, 0x12,
-	0x3a, 0x0a, 0x0d, 0x65, 0x78, 0x63, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x5f, 0x72, 0x61, 0x74, 0x65,
-	0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x13, 0x2e, 0x74, 0x79, 0x70, 0x65, 0x73, 0x2e, 0x45,
-	0x78, 0x63, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x52, 0x61, 0x74, 0x65, 0x48, 0x00, 0x52, 0x0c, 0x65,
-	0x78, 0x63, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x52, 0x61, 0x74, 0x65, 0x42, 0x06, 0x0a, 0x04, 0x64,
-	0x61, 0x74, 0x61, 0x22, 0xc9, 0x02, 0x0a, 0x0d, 0x53, 0x74, 0x61, 0x66, 0x66, 0x41, 0x75, 0x64,
+	0x73, 0x74, 0x61, 0x6d, 0x70, 0x52, 0x02, 0x74, 0x73, 0x22, 0xa7, 0x01, 0x0a, 0x12, 0x53, 0x74,
+	0x61, 0x66, 0x66, 0x41, 0x75, 0x64, 0x69, 0x74, 0x4c, 0x6f, 0x67, 0x56, 0x61, 0x6c, 0x75, 0x65,
+	0x12, 0x1e, 0x0a, 0x03, 0x66, 0x65, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0a, 0x2e,
+	0x74, 0x79, 0x70, 0x65, 0x73, 0x2e, 0x46, 0x65, 0x65, 0x48, 0x00, 0x52, 0x03, 0x66, 0x65, 0x65,
+	0x12, 0x3a, 0x0a, 0x0d, 0x65, 0x78, 0x63, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x5f, 0x72, 0x61, 0x74,
+	0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x13, 0x2e, 0x74, 0x79, 0x70, 0x65, 0x73, 0x2e,
+	0x45, 0x78, 0x63, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x52, 0x61, 0x74, 0x65, 0x48, 0x00, 0x52, 0x0c,
+	0x65, 0x78, 0x63, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x52, 0x61, 0x74, 0x65, 0x12, 0x2d, 0x0a, 0x08,
+	0x63, 0x75, 0x73, 0x74, 0x6f, 0x6d, 0x65, 0x72, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0f,
+	0x2e, 0x74, 0x79, 0x70, 0x65, 0x73, 0x2e, 0x43, 0x75, 0x73, 0x74, 0x6f, 0x6d, 0x65, 0x72, 0x48,
+	0x00, 0x52, 0x08, 0x63, 0x75, 0x73, 0x74, 0x6f, 0x6d, 0x65, 0x72, 0x42, 0x06, 0x0a, 0x04, 0x64,
+	0x61, 0x74, 0x61, 0x22, 0xe6, 0x02, 0x0a, 0x0d, 0x53, 0x74, 0x61, 0x66, 0x66, 0x41, 0x75, 0x64,
 	0x69, 0x74, 0x4c, 0x6f, 0x67, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28,
 	0x09, 0x52, 0x02, 0x69, 0x64, 0x12, 0x22, 0x0a, 0x05, 0x73, 0x74, 0x61, 0x66, 0x66, 0x18, 0x02,
 	0x20, 0x01, 0x28, 0x0b, 0x32, 0x0c, 0x2e, 0x74, 0x79, 0x70, 0x65, 0x73, 0x2e, 0x53, 0x74, 0x61,
@@ -7710,12 +7808,13 @@ var file_types_proto_rawDesc = []byte{
 	0x52, 0x04, 0x74, 0x79, 0x70, 0x65, 0x12, 0x2a, 0x0a, 0x02, 0x74, 0x73, 0x18, 0x06, 0x20, 0x01,
 	0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74,
 	0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x52, 0x02,
-	0x74, 0x73, 0x22, 0x2b, 0x0a, 0x12, 0x53, 0x74, 0x61, 0x66, 0x66, 0x41, 0x75, 0x64, 0x69, 0x74,
+	0x74, 0x73, 0x22, 0x48, 0x0a, 0x12, 0x53, 0x74, 0x61, 0x66, 0x66, 0x41, 0x75, 0x64, 0x69, 0x74,
 	0x4c, 0x6f, 0x67, 0x54, 0x79, 0x70, 0x65, 0x73, 0x12, 0x0b, 0x0a, 0x07, 0x46, 0x58, 0x5f, 0x52,
-	0x41, 0x54, 0x45, 0x10, 0x00, 0x12, 0x08, 0x0a, 0x04, 0x46, 0x45, 0x45, 0x53, 0x10, 0x01, 0x42,
-	0x18, 0x5a, 0x16, 0x6d, 0x73, 0x2e, 0x61, 0x70, 0x69, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x73,
-	0x2f, 0x70, 0x62, 0x2f, 0x74, 0x79, 0x70, 0x65, 0x73, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f,
-	0x33,
+	0x41, 0x54, 0x45, 0x10, 0x00, 0x12, 0x08, 0x0a, 0x04, 0x46, 0x45, 0x45, 0x53, 0x10, 0x01, 0x12,
+	0x1b, 0x0a, 0x17, 0x43, 0x55, 0x53, 0x54, 0x4f, 0x4d, 0x45, 0x52, 0x5f, 0x44, 0x45, 0x54, 0x41,
+	0x49, 0x4c, 0x53, 0x5f, 0x55, 0x50, 0x44, 0x41, 0x54, 0x45, 0x10, 0x02, 0x42, 0x18, 0x5a, 0x16,
+	0x6d, 0x73, 0x2e, 0x61, 0x70, 0x69, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x73, 0x2f, 0x70, 0x62,
+	0x2f, 0x74, 0x79, 0x70, 0x65, 0x73, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -7730,7 +7829,7 @@ func file_types_proto_rawDescGZIP() []byte {
 	return file_types_proto_rawDescData
 }
 
-var file_types_proto_enumTypes = make([]protoimpl.EnumInfo, 38)
+var file_types_proto_enumTypes = make([]protoimpl.EnumInfo, 39)
 var file_types_proto_msgTypes = make([]protoimpl.MessageInfo, 60)
 var file_types_proto_goTypes = []interface{}{
 	(Customer_CustomerStatuses)(0),                       // 0: types.Customer.CustomerStatuses
@@ -7763,251 +7862,254 @@ var file_types_proto_goTypes = []interface{}{
 	(Transaction_TransactionStatuses)(0),                 // 27: types.Transaction.TransactionStatuses
 	(LinkedTransaction_LinkedTransactionTypes)(0),        // 28: types.LinkedTransaction.LinkedTransactionTypes
 	(LinkedTransaction_LinkedTransactionStatuses)(0),     // 29: types.LinkedTransaction.LinkedTransactionStatuses
-	(TransactionType_TransactionTypeStatuses)(0),         // 30: types.TransactionType.TransactionTypeStatuses
-	(Fee_FeeTypes)(0),                                    // 31: types.Fee.FeeTypes
-	(Fee_FeeStatuses)(0),                                 // 32: types.Fee.FeeStatuses
-	(Beneficiary_BeneficiaryStatuses)(0),                 // 33: types.Beneficiary.BeneficiaryStatuses
-	(BeneficiaryAccount_BeneficiaryAccountStatuses)(0),   // 34: types.BeneficiaryAccount.BeneficiaryAccountStatuses
-	(Content_ContentType)(0),                             // 35: types.Content.ContentType
-	(JWTClaims_ClientType)(0),                            // 36: types.JWTClaims.ClientType
-	(StaffAuditLog_StaffAuditLogTypes)(0),                // 37: types.StaffAuditLog.StaffAuditLogTypes
-	(*Customer)(nil),                                     // 38: types.Customer
-	(*Email)(nil),                                        // 39: types.Email
-	(*Phone)(nil),                                        // 40: types.Phone
-	(*Address)(nil),                                      // 41: types.Address
-	(*Coordinates)(nil),                                  // 42: types.Coordinates
-	(*Identity)(nil),                                     // 43: types.Identity
-	(*IdentityCredentials)(nil),                          // 44: types.IdentityCredentials
-	(*Organization)(nil),                                 // 45: types.Organization
-	(*Staff)(nil),                                        // 46: types.Staff
-	(*Acceptance)(nil),                                   // 47: types.Acceptance
-	(*Questionary)(nil),                                  // 48: types.Questionary
-	(*QuestionaryQuestion)(nil),                          // 49: types.QuestionaryQuestion
-	(*QuestionaryPredefinedAnswer)(nil),                  // 50: types.QuestionaryPredefinedAnswer
-	(*QuestionaryAnswer)(nil),                            // 51: types.QuestionaryAnswer
-	(*QuestionaryAnswerQuestion)(nil),                    // 52: types.QuestionaryAnswerQuestion
-	(*Device)(nil),                                       // 53: types.Device
-	(*DevicePreferences)(nil),                            // 54: types.DevicePreferences
-	(*DeviceToken)(nil),                                  // 55: types.DeviceToken
-	(*Account)(nil),                                      // 56: types.Account
-	(*AccountFCMB)(nil),                                  // 57: types.AccountFCMB
-	(*AccountMambu)(nil),                                 // 58: types.AccountMambu
-	(*AccountBalances)(nil),                              // 59: types.AccountBalances
-	(*Product)(nil),                                      // 60: types.Product
-	(*ProductMambu)(nil),                                 // 61: types.ProductMambu
-	(*CDD)(nil),                                          // 62: types.CDD
-	(*AML)(nil),                                          // 63: types.AML
-	(*KYC)(nil),                                          // 64: types.KYC
-	(*Report)(nil),                                       // 65: types.Report
-	(*Review)(nil),                                       // 66: types.Review
-	(*POA)(nil),                                          // 67: types.POA
-	(*POAAction)(nil),                                    // 68: types.POAAction
-	(*AMLAction)(nil),                                    // 69: types.AMLAction
-	(*KYCAction)(nil),                                    // 70: types.KYCAction
-	(*Transaction)(nil),                                  // 71: types.Transaction
-	(*TransactionTarget)(nil),                            // 72: types.TransactionTarget
-	(*TransactionSource)(nil),                            // 73: types.TransactionSource
-	(*TransactionFee)(nil),                               // 74: types.TransactionFee
-	(*LinkedTransaction)(nil),                            // 75: types.LinkedTransaction
-	(*LinkedTransactionFCMB)(nil),                        // 76: types.LinkedTransactionFCMB
-	(*LinkedTransactionMambu)(nil),                       // 77: types.LinkedTransactionMambu
-	(*LinkedTransactionTarget)(nil),                      // 78: types.LinkedTransactionTarget
-	(*LinkedTransactionSource)(nil),                      // 79: types.LinkedTransactionSource
-	(*TransactionType)(nil),                              // 80: types.TransactionType
-	(*Fee)(nil),                                          // 81: types.Fee
-	(*FeeBoundaries)(nil),                                // 82: types.FeeBoundaries
-	(*ExchangeRate)(nil),                                 // 83: types.ExchangeRate
-	(*Beneficiary)(nil),                                  // 84: types.Beneficiary
-	(*BeneficiaryAccount)(nil),                           // 85: types.BeneficiaryAccount
-	(*Currency)(nil),                                     // 86: types.Currency
-	(*Country)(nil),                                      // 87: types.Country
-	(*Content)(nil),                                      // 88: types.Content
-	(*DefaultResponse)(nil),                              // 89: types.DefaultResponse
-	(*DeviceInput)(nil),                                  // 90: types.DeviceInput
-	(*DeviceTokenInput)(nil),                             // 91: types.DeviceTokenInput
-	(*DevicePreferencesInput)(nil),                       // 92: types.DevicePreferencesInput
-	(*PaginationInfo)(nil),                               // 93: types.PaginationInfo
-	(*JWTClaims)(nil),                                    // 94: types.JWTClaims
-	(*Bank)(nil),                                         // 95: types.Bank
-	(*StaffAuditLogValue)(nil),                           // 96: types.StaffAuditLogValue
-	(*StaffAuditLog)(nil),                                // 97: types.StaffAuditLog
-	(*timestamppb.Timestamp)(nil),                        // 98: google.protobuf.Timestamp
+	(LinkedTransactionMambu_ClearBankTypeStatus)(0),      // 30: types.LinkedTransactionMambu.ClearBankTypeStatus
+	(TransactionType_TransactionTypeStatuses)(0),         // 31: types.TransactionType.TransactionTypeStatuses
+	(Fee_FeeTypes)(0),                                    // 32: types.Fee.FeeTypes
+	(Fee_FeeStatuses)(0),                                 // 33: types.Fee.FeeStatuses
+	(Beneficiary_BeneficiaryStatuses)(0),                 // 34: types.Beneficiary.BeneficiaryStatuses
+	(BeneficiaryAccount_BeneficiaryAccountStatuses)(0),   // 35: types.BeneficiaryAccount.BeneficiaryAccountStatuses
+	(Content_ContentType)(0),                             // 36: types.Content.ContentType
+	(JWTClaims_ClientType)(0),                            // 37: types.JWTClaims.ClientType
+	(StaffAuditLog_StaffAuditLogTypes)(0),                // 38: types.StaffAuditLog.StaffAuditLogTypes
+	(*Customer)(nil),                                     // 39: types.Customer
+	(*Email)(nil),                                        // 40: types.Email
+	(*Phone)(nil),                                        // 41: types.Phone
+	(*Address)(nil),                                      // 42: types.Address
+	(*Coordinates)(nil),                                  // 43: types.Coordinates
+	(*Identity)(nil),                                     // 44: types.Identity
+	(*IdentityCredentials)(nil),                          // 45: types.IdentityCredentials
+	(*Organization)(nil),                                 // 46: types.Organization
+	(*Staff)(nil),                                        // 47: types.Staff
+	(*Acceptance)(nil),                                   // 48: types.Acceptance
+	(*Questionary)(nil),                                  // 49: types.Questionary
+	(*QuestionaryQuestion)(nil),                          // 50: types.QuestionaryQuestion
+	(*QuestionaryPredefinedAnswer)(nil),                  // 51: types.QuestionaryPredefinedAnswer
+	(*QuestionaryAnswer)(nil),                            // 52: types.QuestionaryAnswer
+	(*QuestionaryAnswerQuestion)(nil),                    // 53: types.QuestionaryAnswerQuestion
+	(*Device)(nil),                                       // 54: types.Device
+	(*DevicePreferences)(nil),                            // 55: types.DevicePreferences
+	(*DeviceToken)(nil),                                  // 56: types.DeviceToken
+	(*Account)(nil),                                      // 57: types.Account
+	(*AccountFCMB)(nil),                                  // 58: types.AccountFCMB
+	(*AccountMambu)(nil),                                 // 59: types.AccountMambu
+	(*AccountBalances)(nil),                              // 60: types.AccountBalances
+	(*Product)(nil),                                      // 61: types.Product
+	(*ProductMambu)(nil),                                 // 62: types.ProductMambu
+	(*CDD)(nil),                                          // 63: types.CDD
+	(*AML)(nil),                                          // 64: types.AML
+	(*KYC)(nil),                                          // 65: types.KYC
+	(*Report)(nil),                                       // 66: types.Report
+	(*Review)(nil),                                       // 67: types.Review
+	(*POA)(nil),                                          // 68: types.POA
+	(*POAAction)(nil),                                    // 69: types.POAAction
+	(*AMLAction)(nil),                                    // 70: types.AMLAction
+	(*KYCAction)(nil),                                    // 71: types.KYCAction
+	(*Transaction)(nil),                                  // 72: types.Transaction
+	(*TransactionTarget)(nil),                            // 73: types.TransactionTarget
+	(*TransactionSource)(nil),                            // 74: types.TransactionSource
+	(*TransactionFee)(nil),                               // 75: types.TransactionFee
+	(*LinkedTransaction)(nil),                            // 76: types.LinkedTransaction
+	(*LinkedTransactionFCMB)(nil),                        // 77: types.LinkedTransactionFCMB
+	(*LinkedTransactionMambu)(nil),                       // 78: types.LinkedTransactionMambu
+	(*LinkedTransactionTarget)(nil),                      // 79: types.LinkedTransactionTarget
+	(*LinkedTransactionSource)(nil),                      // 80: types.LinkedTransactionSource
+	(*TransactionType)(nil),                              // 81: types.TransactionType
+	(*Fee)(nil),                                          // 82: types.Fee
+	(*FeeBoundaries)(nil),                                // 83: types.FeeBoundaries
+	(*ExchangeRate)(nil),                                 // 84: types.ExchangeRate
+	(*Beneficiary)(nil),                                  // 85: types.Beneficiary
+	(*BeneficiaryAccount)(nil),                           // 86: types.BeneficiaryAccount
+	(*Currency)(nil),                                     // 87: types.Currency
+	(*Country)(nil),                                      // 88: types.Country
+	(*Content)(nil),                                      // 89: types.Content
+	(*DefaultResponse)(nil),                              // 90: types.DefaultResponse
+	(*DeviceInput)(nil),                                  // 91: types.DeviceInput
+	(*DeviceTokenInput)(nil),                             // 92: types.DeviceTokenInput
+	(*DevicePreferencesInput)(nil),                       // 93: types.DevicePreferencesInput
+	(*PaginationInfo)(nil),                               // 94: types.PaginationInfo
+	(*JWTClaims)(nil),                                    // 95: types.JWTClaims
+	(*Bank)(nil),                                         // 96: types.Bank
+	(*StaffAuditLogValue)(nil),                           // 97: types.StaffAuditLogValue
+	(*StaffAuditLog)(nil),                                // 98: types.StaffAuditLog
+	(*timestamppb.Timestamp)(nil),                        // 99: google.protobuf.Timestamp
 }
 var file_types_proto_depIdxs = []int32{
-	41,  // 0: types.Customer.addresses:type_name -> types.Address
-	40,  // 1: types.Customer.phones:type_name -> types.Phone
-	39,  // 2: types.Customer.email:type_name -> types.Email
+	42,  // 0: types.Customer.addresses:type_name -> types.Address
+	41,  // 1: types.Customer.phones:type_name -> types.Phone
+	40,  // 2: types.Customer.email:type_name -> types.Email
 	0,   // 3: types.Customer.status:type_name -> types.Customer.CustomerStatuses
-	98,  // 4: types.Customer.status_ts:type_name -> google.protobuf.Timestamp
-	98,  // 5: types.Customer.ts:type_name -> google.protobuf.Timestamp
+	99,  // 4: types.Customer.status_ts:type_name -> google.protobuf.Timestamp
+	99,  // 5: types.Customer.ts:type_name -> google.protobuf.Timestamp
 	1,   // 6: types.Customer.title:type_name -> types.Customer.CustomerTitle
-	87,  // 7: types.Address.country:type_name -> types.Country
-	42,  // 8: types.Address.coordinates:type_name -> types.Coordinates
-	38,  // 9: types.Identity.customer:type_name -> types.Customer
-	45,  // 10: types.Identity.organization:type_name -> types.Organization
-	44,  // 11: types.Identity.credentials:type_name -> types.IdentityCredentials
+	88,  // 7: types.Address.country:type_name -> types.Country
+	43,  // 8: types.Address.coordinates:type_name -> types.Coordinates
+	39,  // 9: types.Identity.customer:type_name -> types.Customer
+	46,  // 10: types.Identity.organization:type_name -> types.Organization
+	45,  // 11: types.Identity.credentials:type_name -> types.IdentityCredentials
 	2,   // 12: types.Identity.status:type_name -> types.Identity.IdentityStatuses
-	98,  // 13: types.Identity.status_ts:type_name -> google.protobuf.Timestamp
-	98,  // 14: types.Identity.ts:type_name -> google.protobuf.Timestamp
+	99,  // 13: types.Identity.status_ts:type_name -> google.protobuf.Timestamp
+	99,  // 14: types.Identity.ts:type_name -> google.protobuf.Timestamp
 	3,   // 15: types.IdentityCredentials.type:type_name -> types.IdentityCredentials.IdentityCredentialsTypes
 	4,   // 16: types.IdentityCredentials.status:type_name -> types.IdentityCredentials.IdentityCredentialsStatuses
-	98,  // 17: types.IdentityCredentials.status_ts:type_name -> google.protobuf.Timestamp
-	98,  // 18: types.IdentityCredentials.ts:type_name -> google.protobuf.Timestamp
-	98,  // 19: types.IdentityCredentials.update_ts:type_name -> google.protobuf.Timestamp
+	99,  // 17: types.IdentityCredentials.status_ts:type_name -> google.protobuf.Timestamp
+	99,  // 18: types.IdentityCredentials.ts:type_name -> google.protobuf.Timestamp
+	99,  // 19: types.IdentityCredentials.update_ts:type_name -> google.protobuf.Timestamp
 	5,   // 20: types.Organization.status:type_name -> types.Organization.OrganizationStatuses
-	98,  // 21: types.Organization.status_ts:type_name -> google.protobuf.Timestamp
-	98,  // 22: types.Organization.ts:type_name -> google.protobuf.Timestamp
-	41,  // 23: types.Staff.addresses:type_name -> types.Address
-	40,  // 24: types.Staff.phones:type_name -> types.Phone
+	99,  // 21: types.Organization.status_ts:type_name -> google.protobuf.Timestamp
+	99,  // 22: types.Organization.ts:type_name -> google.protobuf.Timestamp
+	42,  // 23: types.Staff.addresses:type_name -> types.Address
+	41,  // 24: types.Staff.phones:type_name -> types.Phone
 	6,   // 25: types.Staff.status:type_name -> types.Staff.StaffStatuses
-	98,  // 26: types.Staff.status_ts:type_name -> google.protobuf.Timestamp
-	98,  // 27: types.Staff.ts:type_name -> google.protobuf.Timestamp
-	88,  // 28: types.Acceptance.content:type_name -> types.Content
-	38,  // 29: types.Acceptance.customer:type_name -> types.Customer
-	98,  // 30: types.Acceptance.ts:type_name -> google.protobuf.Timestamp
+	99,  // 26: types.Staff.status_ts:type_name -> google.protobuf.Timestamp
+	99,  // 27: types.Staff.ts:type_name -> google.protobuf.Timestamp
+	89,  // 28: types.Acceptance.content:type_name -> types.Content
+	39,  // 29: types.Acceptance.customer:type_name -> types.Customer
+	99,  // 30: types.Acceptance.ts:type_name -> google.protobuf.Timestamp
 	7,   // 31: types.Questionary.type:type_name -> types.Questionary.QuestionaryTypes
-	49,  // 32: types.Questionary.questions:type_name -> types.QuestionaryQuestion
+	50,  // 32: types.Questionary.questions:type_name -> types.QuestionaryQuestion
 	8,   // 33: types.Questionary.status:type_name -> types.Questionary.QuestionaryStatuses
-	98,  // 34: types.Questionary.status_ts:type_name -> google.protobuf.Timestamp
-	98,  // 35: types.Questionary.ts:type_name -> google.protobuf.Timestamp
-	50,  // 36: types.QuestionaryQuestion.predefined_answers:type_name -> types.QuestionaryPredefinedAnswer
-	52,  // 37: types.QuestionaryAnswer.questions:type_name -> types.QuestionaryAnswerQuestion
-	98,  // 38: types.QuestionaryAnswer.ts:type_name -> google.protobuf.Timestamp
-	38,  // 39: types.Device.customer:type_name -> types.Customer
-	55,  // 40: types.Device.tokens:type_name -> types.DeviceToken
-	54,  // 41: types.Device.preferences:type_name -> types.DevicePreferences
+	99,  // 34: types.Questionary.status_ts:type_name -> google.protobuf.Timestamp
+	99,  // 35: types.Questionary.ts:type_name -> google.protobuf.Timestamp
+	51,  // 36: types.QuestionaryQuestion.predefined_answers:type_name -> types.QuestionaryPredefinedAnswer
+	53,  // 37: types.QuestionaryAnswer.questions:type_name -> types.QuestionaryAnswerQuestion
+	99,  // 38: types.QuestionaryAnswer.ts:type_name -> google.protobuf.Timestamp
+	39,  // 39: types.Device.customer:type_name -> types.Customer
+	56,  // 40: types.Device.tokens:type_name -> types.DeviceToken
+	55,  // 41: types.Device.preferences:type_name -> types.DevicePreferences
 	9,   // 42: types.Device.status:type_name -> types.Device.DeviceStatuses
-	98,  // 43: types.Device.status_ts:type_name -> google.protobuf.Timestamp
-	98,  // 44: types.Device.ts:type_name -> google.protobuf.Timestamp
+	99,  // 43: types.Device.status_ts:type_name -> google.protobuf.Timestamp
+	99,  // 44: types.Device.ts:type_name -> google.protobuf.Timestamp
 	10,  // 45: types.DevicePreferences.type:type_name -> types.DevicePreferences.DevicePreferencesTypes
 	11,  // 46: types.DeviceToken.type:type_name -> types.DeviceToken.DeviceTokenTypes
-	38,  // 47: types.Account.customer:type_name -> types.Customer
-	60,  // 48: types.Account.product:type_name -> types.Product
-	59,  // 49: types.Account.balances:type_name -> types.AccountBalances
-	58,  // 50: types.Account.mambu:type_name -> types.AccountMambu
-	57,  // 51: types.Account.fcmb:type_name -> types.AccountFCMB
+	39,  // 47: types.Account.customer:type_name -> types.Customer
+	61,  // 48: types.Account.product:type_name -> types.Product
+	60,  // 49: types.Account.balances:type_name -> types.AccountBalances
+	59,  // 50: types.Account.mambu:type_name -> types.AccountMambu
+	58,  // 51: types.Account.fcmb:type_name -> types.AccountFCMB
 	12,  // 52: types.Account.status:type_name -> types.Account.AccountStatuses
-	98,  // 53: types.Account.status_ts:type_name -> google.protobuf.Timestamp
-	98,  // 54: types.Account.ts:type_name -> google.protobuf.Timestamp
+	99,  // 53: types.Account.status_ts:type_name -> google.protobuf.Timestamp
+	99,  // 54: types.Account.ts:type_name -> google.protobuf.Timestamp
 	13,  // 55: types.Product.type:type_name -> types.Product.ProductTypes
-	86,  // 56: types.Product.currency:type_name -> types.Currency
-	61,  // 57: types.Product.mambu:type_name -> types.ProductMambu
+	87,  // 56: types.Product.currency:type_name -> types.Currency
+	62,  // 57: types.Product.mambu:type_name -> types.ProductMambu
 	14,  // 58: types.Product.status:type_name -> types.Product.ProductStatuses
-	98,  // 59: types.Product.status_ts:type_name -> google.protobuf.Timestamp
-	98,  // 60: types.Product.ts:type_name -> google.protobuf.Timestamp
-	38,  // 61: types.CDD.customer:type_name -> types.Customer
-	63,  // 62: types.CDD.amls:type_name -> types.AML
-	64,  // 63: types.CDD.kycs:type_name -> types.KYC
-	67,  // 64: types.CDD.poas:type_name -> types.POA
+	99,  // 59: types.Product.status_ts:type_name -> google.protobuf.Timestamp
+	99,  // 60: types.Product.ts:type_name -> google.protobuf.Timestamp
+	39,  // 61: types.CDD.customer:type_name -> types.Customer
+	64,  // 62: types.CDD.amls:type_name -> types.AML
+	65,  // 63: types.CDD.kycs:type_name -> types.KYC
+	68,  // 64: types.CDD.poas:type_name -> types.POA
 	15,  // 65: types.CDD.status:type_name -> types.CDD.CDDStatuses
-	98,  // 66: types.CDD.status_ts:type_name -> google.protobuf.Timestamp
-	98,  // 67: types.CDD.ts:type_name -> google.protobuf.Timestamp
-	45,  // 68: types.AML.organization:type_name -> types.Organization
-	69,  // 69: types.AML.actions:type_name -> types.AMLAction
+	99,  // 66: types.CDD.status_ts:type_name -> google.protobuf.Timestamp
+	99,  // 67: types.CDD.ts:type_name -> google.protobuf.Timestamp
+	46,  // 68: types.AML.organization:type_name -> types.Organization
+	70,  // 69: types.AML.actions:type_name -> types.AMLAction
 	16,  // 70: types.AML.status:type_name -> types.AML.AMLStatuses
-	98,  // 71: types.AML.status_ts:type_name -> google.protobuf.Timestamp
-	98,  // 72: types.AML.ts:type_name -> google.protobuf.Timestamp
-	45,  // 73: types.KYC.organization:type_name -> types.Organization
-	65,  // 74: types.KYC.reports:type_name -> types.Report
-	70,  // 75: types.KYC.actions:type_name -> types.KYCAction
+	99,  // 71: types.AML.status_ts:type_name -> google.protobuf.Timestamp
+	99,  // 72: types.AML.ts:type_name -> google.protobuf.Timestamp
+	46,  // 73: types.KYC.organization:type_name -> types.Organization
+	66,  // 74: types.KYC.reports:type_name -> types.Report
+	71,  // 75: types.KYC.actions:type_name -> types.KYCAction
 	17,  // 76: types.KYC.status:type_name -> types.KYC.KYCStatuses
-	98,  // 77: types.KYC.status_ts:type_name -> google.protobuf.Timestamp
-	98,  // 78: types.KYC.ts:type_name -> google.protobuf.Timestamp
+	99,  // 77: types.KYC.status_ts:type_name -> google.protobuf.Timestamp
+	99,  // 78: types.KYC.ts:type_name -> google.protobuf.Timestamp
 	18,  // 79: types.Report.type:type_name -> types.Report.ReportTypes
-	66,  // 80: types.Report.review:type_name -> types.Review
+	67,  // 80: types.Report.review:type_name -> types.Review
 	19,  // 81: types.Report.status:type_name -> types.Report.ReportStatuses
-	98,  // 82: types.Report.status_ts:type_name -> google.protobuf.Timestamp
-	98,  // 83: types.Report.ts:type_name -> google.protobuf.Timestamp
-	98,  // 84: types.Review.ts:type_name -> google.protobuf.Timestamp
-	45,  // 85: types.POA.organization:type_name -> types.Organization
-	66,  // 86: types.POA.review:type_name -> types.Review
-	68,  // 87: types.POA.actions:type_name -> types.POAAction
+	99,  // 82: types.Report.status_ts:type_name -> google.protobuf.Timestamp
+	99,  // 83: types.Report.ts:type_name -> google.protobuf.Timestamp
+	99,  // 84: types.Review.ts:type_name -> google.protobuf.Timestamp
+	46,  // 85: types.POA.organization:type_name -> types.Organization
+	67,  // 86: types.POA.review:type_name -> types.Review
+	69,  // 87: types.POA.actions:type_name -> types.POAAction
 	20,  // 88: types.POA.status:type_name -> types.POA.POAStatuses
-	98,  // 89: types.POA.status_ts:type_name -> google.protobuf.Timestamp
-	98,  // 90: types.POA.ts:type_name -> google.protobuf.Timestamp
+	99,  // 89: types.POA.status_ts:type_name -> google.protobuf.Timestamp
+	99,  // 90: types.POA.ts:type_name -> google.protobuf.Timestamp
 	21,  // 91: types.POAAction.type:type_name -> types.POAAction.POAActionTypes
-	46,  // 92: types.POAAction.reporter:type_name -> types.Staff
+	47,  // 92: types.POAAction.reporter:type_name -> types.Staff
 	22,  // 93: types.POAAction.target_status:type_name -> types.POAAction.POAStatuses
-	98,  // 94: types.POAAction.ts:type_name -> google.protobuf.Timestamp
+	99,  // 94: types.POAAction.ts:type_name -> google.protobuf.Timestamp
 	23,  // 95: types.AMLAction.type:type_name -> types.AMLAction.AMLActionTypes
-	46,  // 96: types.AMLAction.reporter:type_name -> types.Staff
+	47,  // 96: types.AMLAction.reporter:type_name -> types.Staff
 	24,  // 97: types.AMLAction.target_status:type_name -> types.AMLAction.AMLStatuses
-	98,  // 98: types.AMLAction.ts:type_name -> google.protobuf.Timestamp
+	99,  // 98: types.AMLAction.ts:type_name -> google.protobuf.Timestamp
 	25,  // 99: types.KYCAction.type:type_name -> types.KYCAction.KYCActionTypes
-	46,  // 100: types.KYCAction.reporter:type_name -> types.Staff
+	47,  // 100: types.KYCAction.reporter:type_name -> types.Staff
 	26,  // 101: types.KYCAction.target_status:type_name -> types.KYCAction.KYCStatuses
-	98,  // 102: types.KYCAction.ts:type_name -> google.protobuf.Timestamp
-	80,  // 103: types.Transaction.transaction_type:type_name -> types.TransactionType
-	74,  // 104: types.Transaction.fees:type_name -> types.TransactionFee
-	83,  // 105: types.Transaction.exchange_rate:type_name -> types.ExchangeRate
-	73,  // 106: types.Transaction.source:type_name -> types.TransactionSource
-	72,  // 107: types.Transaction.target:type_name -> types.TransactionTarget
-	75,  // 108: types.Transaction.linked_transactions:type_name -> types.LinkedTransaction
+	99,  // 102: types.KYCAction.ts:type_name -> google.protobuf.Timestamp
+	81,  // 103: types.Transaction.transaction_type:type_name -> types.TransactionType
+	75,  // 104: types.Transaction.fees:type_name -> types.TransactionFee
+	84,  // 105: types.Transaction.exchange_rate:type_name -> types.ExchangeRate
+	74,  // 106: types.Transaction.source:type_name -> types.TransactionSource
+	73,  // 107: types.Transaction.target:type_name -> types.TransactionTarget
+	76,  // 108: types.Transaction.linked_transactions:type_name -> types.LinkedTransaction
 	27,  // 109: types.Transaction.status:type_name -> types.Transaction.TransactionStatuses
-	98,  // 110: types.Transaction.status_ts:type_name -> google.protobuf.Timestamp
-	98,  // 111: types.Transaction.ts:type_name -> google.protobuf.Timestamp
-	38,  // 112: types.TransactionTarget.customer:type_name -> types.Customer
-	84,  // 113: types.TransactionTarget.beneficiary:type_name -> types.Beneficiary
-	56,  // 114: types.TransactionTarget.account:type_name -> types.Account
-	85,  // 115: types.TransactionTarget.beneficiary_account:type_name -> types.BeneficiaryAccount
-	38,  // 116: types.TransactionSource.customer:type_name -> types.Customer
-	56,  // 117: types.TransactionSource.account:type_name -> types.Account
+	99,  // 110: types.Transaction.status_ts:type_name -> google.protobuf.Timestamp
+	99,  // 111: types.Transaction.ts:type_name -> google.protobuf.Timestamp
+	39,  // 112: types.TransactionTarget.customer:type_name -> types.Customer
+	85,  // 113: types.TransactionTarget.beneficiary:type_name -> types.Beneficiary
+	57,  // 114: types.TransactionTarget.account:type_name -> types.Account
+	86,  // 115: types.TransactionTarget.beneficiary_account:type_name -> types.BeneficiaryAccount
+	39,  // 116: types.TransactionSource.customer:type_name -> types.Customer
+	57,  // 117: types.TransactionSource.account:type_name -> types.Account
 	28,  // 118: types.LinkedTransaction.type:type_name -> types.LinkedTransaction.LinkedTransactionTypes
-	86,  // 119: types.LinkedTransaction.currency:type_name -> types.Currency
-	79,  // 120: types.LinkedTransaction.source:type_name -> types.LinkedTransactionSource
-	78,  // 121: types.LinkedTransaction.target:type_name -> types.LinkedTransactionTarget
-	77,  // 122: types.LinkedTransaction.mambu:type_name -> types.LinkedTransactionMambu
-	76,  // 123: types.LinkedTransaction.fcmb:type_name -> types.LinkedTransactionFCMB
+	87,  // 119: types.LinkedTransaction.currency:type_name -> types.Currency
+	80,  // 120: types.LinkedTransaction.source:type_name -> types.LinkedTransactionSource
+	79,  // 121: types.LinkedTransaction.target:type_name -> types.LinkedTransactionTarget
+	78,  // 122: types.LinkedTransaction.mambu:type_name -> types.LinkedTransactionMambu
+	77,  // 123: types.LinkedTransaction.fcmb:type_name -> types.LinkedTransactionFCMB
 	29,  // 124: types.LinkedTransaction.status:type_name -> types.LinkedTransaction.LinkedTransactionStatuses
-	98,  // 125: types.LinkedTransaction.status_ts:type_name -> google.protobuf.Timestamp
-	98,  // 126: types.LinkedTransaction.ts:type_name -> google.protobuf.Timestamp
-	56,  // 127: types.LinkedTransactionTarget.account:type_name -> types.Account
-	85,  // 128: types.LinkedTransactionTarget.beneficiaryAccount:type_name -> types.BeneficiaryAccount
-	38,  // 129: types.LinkedTransactionSource.customer:type_name -> types.Customer
-	56,  // 130: types.LinkedTransactionSource.account:type_name -> types.Account
-	30,  // 131: types.TransactionType.status:type_name -> types.TransactionType.TransactionTypeStatuses
-	98,  // 132: types.TransactionType.status_ts:type_name -> google.protobuf.Timestamp
-	98,  // 133: types.TransactionType.ts:type_name -> google.protobuf.Timestamp
-	80,  // 134: types.Fee.transaction_type:type_name -> types.TransactionType
-	31,  // 135: types.Fee.type:type_name -> types.Fee.FeeTypes
-	82,  // 136: types.Fee.boundaries:type_name -> types.FeeBoundaries
-	32,  // 137: types.Fee.status:type_name -> types.Fee.FeeStatuses
-	98,  // 138: types.Fee.status_ts:type_name -> google.protobuf.Timestamp
-	98,  // 139: types.Fee.ts:type_name -> google.protobuf.Timestamp
-	86,  // 140: types.ExchangeRate.base_currency:type_name -> types.Currency
-	86,  // 141: types.ExchangeRate.target_currency:type_name -> types.Currency
-	98,  // 142: types.ExchangeRate.ts:type_name -> google.protobuf.Timestamp
-	38,  // 143: types.Beneficiary.customer:type_name -> types.Customer
-	85,  // 144: types.Beneficiary.accounts:type_name -> types.BeneficiaryAccount
-	33,  // 145: types.Beneficiary.status:type_name -> types.Beneficiary.BeneficiaryStatuses
-	98,  // 146: types.Beneficiary.status_ts:type_name -> google.protobuf.Timestamp
-	98,  // 147: types.Beneficiary.ts:type_name -> google.protobuf.Timestamp
-	84,  // 148: types.BeneficiaryAccount.beneficiary:type_name -> types.Beneficiary
-	56,  // 149: types.BeneficiaryAccount.account:type_name -> types.Account
-	86,  // 150: types.BeneficiaryAccount.currency:type_name -> types.Currency
-	34,  // 151: types.BeneficiaryAccount.status:type_name -> types.BeneficiaryAccount.BeneficiaryAccountStatuses
-	98,  // 152: types.BeneficiaryAccount.status_ts:type_name -> google.protobuf.Timestamp
-	98,  // 153: types.BeneficiaryAccount.ts:type_name -> google.protobuf.Timestamp
-	35,  // 154: types.Content.type:type_name -> types.Content.ContentType
-	98,  // 155: types.Content.ts:type_name -> google.protobuf.Timestamp
-	91,  // 156: types.DeviceInput.tokens:type_name -> types.DeviceTokenInput
-	92,  // 157: types.DeviceInput.preferences:type_name -> types.DevicePreferencesInput
-	11,  // 158: types.DeviceTokenInput.type:type_name -> types.DeviceToken.DeviceTokenTypes
-	10,  // 159: types.DevicePreferencesInput.type:type_name -> types.DevicePreferences.DevicePreferencesTypes
-	36,  // 160: types.JWTClaims.clientType:type_name -> types.JWTClaims.ClientType
-	98,  // 161: types.Bank.ts:type_name -> google.protobuf.Timestamp
-	81,  // 162: types.StaffAuditLogValue.fee:type_name -> types.Fee
-	83,  // 163: types.StaffAuditLogValue.exchange_rate:type_name -> types.ExchangeRate
-	46,  // 164: types.StaffAuditLog.staff:type_name -> types.Staff
-	96,  // 165: types.StaffAuditLog.old_value:type_name -> types.StaffAuditLogValue
-	96,  // 166: types.StaffAuditLog.new_value:type_name -> types.StaffAuditLogValue
-	37,  // 167: types.StaffAuditLog.type:type_name -> types.StaffAuditLog.StaffAuditLogTypes
-	98,  // 168: types.StaffAuditLog.ts:type_name -> google.protobuf.Timestamp
-	169, // [169:169] is the sub-list for method output_type
-	169, // [169:169] is the sub-list for method input_type
-	169, // [169:169] is the sub-list for extension type_name
-	169, // [169:169] is the sub-list for extension extendee
-	0,   // [0:169] is the sub-list for field type_name
+	99,  // 125: types.LinkedTransaction.status_ts:type_name -> google.protobuf.Timestamp
+	99,  // 126: types.LinkedTransaction.ts:type_name -> google.protobuf.Timestamp
+	30,  // 127: types.LinkedTransactionMambu.status:type_name -> types.LinkedTransactionMambu.ClearBankTypeStatus
+	57,  // 128: types.LinkedTransactionTarget.account:type_name -> types.Account
+	86,  // 129: types.LinkedTransactionTarget.beneficiaryAccount:type_name -> types.BeneficiaryAccount
+	39,  // 130: types.LinkedTransactionSource.customer:type_name -> types.Customer
+	57,  // 131: types.LinkedTransactionSource.account:type_name -> types.Account
+	31,  // 132: types.TransactionType.status:type_name -> types.TransactionType.TransactionTypeStatuses
+	99,  // 133: types.TransactionType.status_ts:type_name -> google.protobuf.Timestamp
+	99,  // 134: types.TransactionType.ts:type_name -> google.protobuf.Timestamp
+	81,  // 135: types.Fee.transaction_type:type_name -> types.TransactionType
+	32,  // 136: types.Fee.type:type_name -> types.Fee.FeeTypes
+	83,  // 137: types.Fee.boundaries:type_name -> types.FeeBoundaries
+	33,  // 138: types.Fee.status:type_name -> types.Fee.FeeStatuses
+	99,  // 139: types.Fee.status_ts:type_name -> google.protobuf.Timestamp
+	99,  // 140: types.Fee.ts:type_name -> google.protobuf.Timestamp
+	87,  // 141: types.ExchangeRate.base_currency:type_name -> types.Currency
+	87,  // 142: types.ExchangeRate.target_currency:type_name -> types.Currency
+	99,  // 143: types.ExchangeRate.ts:type_name -> google.protobuf.Timestamp
+	39,  // 144: types.Beneficiary.customer:type_name -> types.Customer
+	86,  // 145: types.Beneficiary.accounts:type_name -> types.BeneficiaryAccount
+	34,  // 146: types.Beneficiary.status:type_name -> types.Beneficiary.BeneficiaryStatuses
+	99,  // 147: types.Beneficiary.status_ts:type_name -> google.protobuf.Timestamp
+	99,  // 148: types.Beneficiary.ts:type_name -> google.protobuf.Timestamp
+	85,  // 149: types.BeneficiaryAccount.beneficiary:type_name -> types.Beneficiary
+	57,  // 150: types.BeneficiaryAccount.account:type_name -> types.Account
+	87,  // 151: types.BeneficiaryAccount.currency:type_name -> types.Currency
+	35,  // 152: types.BeneficiaryAccount.status:type_name -> types.BeneficiaryAccount.BeneficiaryAccountStatuses
+	99,  // 153: types.BeneficiaryAccount.status_ts:type_name -> google.protobuf.Timestamp
+	99,  // 154: types.BeneficiaryAccount.ts:type_name -> google.protobuf.Timestamp
+	36,  // 155: types.Content.type:type_name -> types.Content.ContentType
+	99,  // 156: types.Content.ts:type_name -> google.protobuf.Timestamp
+	92,  // 157: types.DeviceInput.tokens:type_name -> types.DeviceTokenInput
+	93,  // 158: types.DeviceInput.preferences:type_name -> types.DevicePreferencesInput
+	11,  // 159: types.DeviceTokenInput.type:type_name -> types.DeviceToken.DeviceTokenTypes
+	10,  // 160: types.DevicePreferencesInput.type:type_name -> types.DevicePreferences.DevicePreferencesTypes
+	37,  // 161: types.JWTClaims.clientType:type_name -> types.JWTClaims.ClientType
+	99,  // 162: types.Bank.ts:type_name -> google.protobuf.Timestamp
+	82,  // 163: types.StaffAuditLogValue.fee:type_name -> types.Fee
+	84,  // 164: types.StaffAuditLogValue.exchange_rate:type_name -> types.ExchangeRate
+	39,  // 165: types.StaffAuditLogValue.customer:type_name -> types.Customer
+	47,  // 166: types.StaffAuditLog.staff:type_name -> types.Staff
+	97,  // 167: types.StaffAuditLog.old_value:type_name -> types.StaffAuditLogValue
+	97,  // 168: types.StaffAuditLog.new_value:type_name -> types.StaffAuditLogValue
+	38,  // 169: types.StaffAuditLog.type:type_name -> types.StaffAuditLog.StaffAuditLogTypes
+	99,  // 170: types.StaffAuditLog.ts:type_name -> google.protobuf.Timestamp
+	171, // [171:171] is the sub-list for method output_type
+	171, // [171:171] is the sub-list for method input_type
+	171, // [171:171] is the sub-list for extension type_name
+	171, // [171:171] is the sub-list for extension extendee
+	0,   // [0:171] is the sub-list for field type_name
 }
 
 func init() { file_types_proto_init() }
@@ -8740,13 +8842,14 @@ func file_types_proto_init() {
 	file_types_proto_msgTypes[58].OneofWrappers = []interface{}{
 		(*StaffAuditLogValue_Fee)(nil),
 		(*StaffAuditLogValue_ExchangeRate)(nil),
+		(*StaffAuditLogValue_Customer)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_types_proto_rawDesc,
-			NumEnums:      38,
+			NumEnums:      39,
 			NumMessages:   60,
 			NumExtensions: 0,
 			NumServices:   0,

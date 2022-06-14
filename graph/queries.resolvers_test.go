@@ -10819,7 +10819,7 @@ func Test_queryResolver_StaffAuditLogs(t *testing.T) {
 
 				customerServiceClient.EXPECT().GetStaffAuditLogs(ctx, mockRequest).Return(mockStaffAuditLogsResp, nil)
 
-				response, err := resolver.StaffAuditLogs(ctx, &testCase.args.first, &testCase.args.after, &testCase.args.last, &testCase.args.before)
+				response, err := resolver.StaffAuditLogs(ctx, &testCase.args.first, &testCase.args.after, &testCase.args.last, &testCase.args.before, nil)
 				assert.NoError(t, err)
 				assert.NotNil(t, response)
 				assert.Equal(t, len(nodes), int(response.TotalCount))
@@ -10834,7 +10834,7 @@ func Test_queryResolver_StaffAuditLogs(t *testing.T) {
 
 				customerServiceClient.EXPECT().GetStaffAuditLogs(ctx, mockRequest).Return(mockStaffAuditLogsResp, nil)
 
-				response, err := resolver.StaffAuditLogs(ctx, &testCase.args.first, &testCase.args.after, &testCase.args.last, &testCase.args.before)
+				response, err := resolver.StaffAuditLogs(ctx, &testCase.args.first, &testCase.args.after, &testCase.args.last, &testCase.args.before, nil)
 				assert.NoError(t, err)
 				assert.NotNil(t, response)
 				assert.Equal(t, len(nodes), int(response.TotalCount))
@@ -10849,7 +10849,7 @@ func Test_queryResolver_StaffAuditLogs(t *testing.T) {
 
 				customerServiceClient.EXPECT().GetStaffAuditLogs(ctx, mockRequest).Return(mockStaffAuditLogsResp, nil)
 
-				response, err := resolver.StaffAuditLogs(ctx, &testCase.args.first, &testCase.args.after, &testCase.args.last, &testCase.args.before)
+				response, err := resolver.StaffAuditLogs(ctx, &testCase.args.first, &testCase.args.after, &testCase.args.last, &testCase.args.before, nil)
 				assert.NoError(t, err)
 				assert.NotNil(t, response)
 				assert.Equal(t, len(nodes), int(response.TotalCount))
@@ -10864,7 +10864,7 @@ func Test_queryResolver_StaffAuditLogs(t *testing.T) {
 
 				customerServiceClient.EXPECT().GetStaffAuditLogs(ctx, mockRequest).Return(mockStaffAuditLogsResp, nil)
 
-				response, err := resolver.StaffAuditLogs(ctx, &testCase.args.first, &testCase.args.after, &testCase.args.last, &testCase.args.before)
+				response, err := resolver.StaffAuditLogs(ctx, &testCase.args.first, &testCase.args.after, &testCase.args.last, &testCase.args.before, nil)
 				assert.NoError(t, err)
 				assert.NotNil(t, response)
 				assert.Equal(t, len(nodes), int(response.TotalCount))
