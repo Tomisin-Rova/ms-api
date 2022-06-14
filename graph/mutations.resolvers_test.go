@@ -3707,3 +3707,185 @@ func TestMutationResolver_WithdrawVaultAccount(t *testing.T) {
 		})
 	}
 }
+
+func TestMutationResolver_CheckCustomerDetails(t *testing.T) {
+	const (
+		success = iota
+		errorUnauthenticated
+		errorCheckingCustomerDetails
+	)
+	var tests = []struct {
+		name     string
+		testType int
+	}{
+		{
+			name:     "test Success",
+			testType: success,
+		},
+		{
+			name:     "Test error unauthenticated customer",
+			testType: errorUnauthenticated,
+		},
+		{
+			name:     "Test error checking customer details",
+			testType: errorCheckingCustomerDetails,
+		},
+	}
+	customerDetails := types.CheckCustomerDetailsInput{
+		Password:    "qr1234e",
+		PhoneNumber: "uva",
+		Dob:         "01-01-1900",
+	}
+	typeArg := types.ActionTypeDeviceUpdate
+	request := &customer.CheckCustomerDetailsRequest{
+		Password:    "qr1234e",
+		PhoneNumber: "uva",
+		Dob:         "01-01-1900",
+		ActionType:  customer.CheckCustomerDetailsRequest_DEVICE_UPDATE,
+	}
+	validCtx, err := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{})
+	if err != nil {
+		assert.NoError(t, err)
+		t.Fail()
+	}
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
+	resolverOpts := &ResolverOpts{
+		CustomerService: customerServiceClient,
+	}
+	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			switch testCase.testType {
+			case success:
+				customerServiceClient.EXPECT().CheckCustomerDetails(validCtx, request).Return(&pbTypes.DefaultResponse{
+					Success: true,
+					Code:    http.StatusOK,
+				}, nil)
+				resp, err := resolver.CheckCustomerDetails(validCtx, customerDetails, typeArg)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, &types.Response{
+					Success: true,
+					Code:    http.StatusOK,
+				}, resp)
+			case errorUnauthenticated:
+				resp, err := resolver.CheckCustomerDetails(context.Background(), customerDetails, typeArg)
+				assert.Error(t, err)
+				assert.IsType(t, &terror.Terror{}, err)
+				assert.Equal(t, errorvalues.InvalidAuthenticationError, err.(*terror.Terror).Code())
+				assert.Nil(t, resp)
+			case errorCheckingCustomerDetails:
+				customerServiceClient.EXPECT().CheckCustomerDetails(validCtx, request).Return(nil, errors.New(""))
+				resp, err := resolver.CheckCustomerDetails(validCtx, customerDetails, typeArg)
+				assert.Error(t, err)
+				assert.Nil(t, resp)
+			}
+		})
+	}
+}
+
+func TestMutationResolver_UpdateDevice(t *testing.T) {
+	const (
+		success = iota
+		errorUnauthenticated
+		errorUpdatingDevice
+	)
+	var tests = []struct {
+		name     string
+		testType int
+	}{
+		{
+			name:     "test Success",
+			testType: success,
+		},
+		{
+			name:     "Test error unauthenticated customer",
+			testType: errorUnauthenticated,
+		},
+		{
+			name:     "Test error updating device",
+			testType: errorUpdatingDevice,
+		},
+	}
+	device := types.DeviceInput{
+		Identifier: "identifier",
+		Os:         "os",
+		Brand:      "brand",
+		Tokens: []*types.DeviceTokenInput{
+			{
+				Type:  types.DeviceTokenTypesFirebase,
+				Value: "hjhfwifwr83283r9nvow9r8r731nvpo1391_=38238r",
+			},
+		},
+		Preferences: []*types.DevicePreferencesInput{
+			{
+				Type:  types.DevicePreferencesTypesPush,
+				Value: true,
+			},
+		},
+	}
+	request := &customer.DeviceInputRequest{
+		Device: &pbTypes.DeviceInput{
+			Identifier: device.Identifier,
+			Os:         device.Os,
+			Brand:      device.Brand,
+			Tokens: []*pbTypes.DeviceTokenInput{
+				{
+					Type:  pbTypes.DeviceToken_FIREBASE,
+					Value: "hjhfwifwr83283r9nvow9r8r731nvpo1391_=38238r",
+				},
+			},
+			Preferences: []*pbTypes.DevicePreferencesInput{
+				{
+					Type:  pbTypes.DevicePreferences_PUSH,
+					Value: true,
+				},
+			},
+		},
+	}
+	validCtx, err := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{})
+	if err != nil {
+		assert.NoError(t, err)
+		t.Fail()
+	}
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
+	resolverOpts := &ResolverOpts{
+		CustomerService: customerServiceClient,
+	}
+	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			switch testCase.testType {
+			case success:
+				customerServiceClient.EXPECT().UpdateDevice(validCtx, request).Return(&pbTypes.DefaultResponse{
+					Success: true,
+					Code:    http.StatusOK,
+				}, nil)
+
+				resp, err := resolver.UpdateDevice(validCtx, device)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, &types.Response{
+					Success: true,
+					Code:    http.StatusOK,
+				}, resp)
+			case errorUnauthenticated:
+				resp, err := resolver.UpdateDevice(context.Background(), device)
+				assert.Error(t, err)
+				assert.IsType(t, &terror.Terror{}, err)
+				assert.Equal(t, errorvalues.InvalidAuthenticationError, err.(*terror.Terror).Code())
+				assert.Nil(t, resp)
+			case errorUpdatingDevice:
+				customerServiceClient.EXPECT().UpdateDevice(validCtx, request).Return(nil, errors.New(""))
+				resp, err := resolver.UpdateDevice(validCtx, device)
+				assert.Error(t, err)
+				assert.Nil(t, resp)
+			}
+		})
+	}
+}

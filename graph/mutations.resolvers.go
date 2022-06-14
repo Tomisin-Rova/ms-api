@@ -1211,6 +1211,81 @@ func (r *mutationResolver) UpdateFees(ctx context.Context, fees []*types.UpdateF
 	}, nil
 }
 
+func (r *mutationResolver) UpdateDevice(ctx context.Context, device types.DeviceInput) (*types.Response, error) {
+	// Get user claims
+	_, err := middlewares.GetClaimsFromCtx(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	helpers := &helpersfactory{}
+	var tokens []*pbTypes.DeviceTokenInput
+	for _, deviceToken := range device.Tokens {
+		reqToken := &pbTypes.DeviceTokenInput{
+			Type:  pbTypes.DeviceToken_FIREBASE,
+			Value: deviceToken.Value,
+		}
+		tokens = append(tokens, reqToken)
+	}
+
+	var preferences []*pbTypes.DevicePreferencesInput
+	for _, preference := range device.Preferences {
+		reqPreference := &pbTypes.DevicePreferencesInput{
+			Type:  pbTypes.DevicePreferences_DevicePreferencesTypes(helpers.GetDeveicePreferenceTypesIndex(preference.Type)),
+			Value: preference.Value,
+		}
+		preferences = append(preferences, reqPreference)
+	}
+
+	request := customer.DeviceInputRequest{
+		Device: &pbTypes.DeviceInput{
+			Identifier:  device.Identifier,
+			Os:          device.Os,
+			Brand:       device.Brand,
+			Tokens:      tokens,
+			Preferences: preferences,
+		},
+	}
+
+	//	Execute RPC call
+	response, err := r.CustomerService.UpdateDevice(ctx, &request)
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.Response{
+		Success: response.Success,
+		Code:    int64(response.Code),
+	}, nil
+}
+
+func (r *mutationResolver) CheckCustomerDetails(ctx context.Context, customerDetails types.CheckCustomerDetailsInput, typeArg types.ActionType) (*types.Response, error) {
+	// Get user claims
+	_, err := middlewares.GetClaimsFromCtx(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var request customer.CheckCustomerDetailsRequest
+	switch typeArg {
+	case types.ActionTypeDeviceUpdate:
+		request = customer.CheckCustomerDetailsRequest{
+			Password:    customerDetails.Password,
+			PhoneNumber: customerDetails.PhoneNumber,
+			Dob:         customerDetails.Dob,
+			ActionType:  customer.CheckCustomerDetailsRequest_DEVICE_UPDATE,
+		}
+	}
+	// Execute RPC call
+	response, err := r.CustomerService.CheckCustomerDetails(ctx, &request)
+	if err != nil {
+		return nil, err
+	}
+	return &types.Response{
+		Success: response.Success,
+		Code:    int64(response.Code),
+	}, nil
+}
+
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 

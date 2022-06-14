@@ -249,6 +249,12 @@ type CheckCustomerDataInput struct {
 	DeviceIdentifier string `json:"deviceIdentifier"`
 }
 
+type CheckCustomerDetailsInput struct {
+	Password    string `json:"password"`
+	PhoneNumber string `json:"phoneNumber"`
+	Dob         string `json:"dob"`
+}
+
 type CommonQueryFilterInput struct {
 	ID         *string `json:"id"`
 	CustomerID *string `json:"customerId"`
@@ -903,6 +909,45 @@ func (e *AccountStatuses) UnmarshalGQL(v interface{}) error {
 }
 
 func (e AccountStatuses) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type ActionType string
+
+const (
+	ActionTypeDeviceUpdate ActionType = "DEVICE_UPDATE"
+)
+
+var AllActionType = []ActionType{
+	ActionTypeDeviceUpdate,
+}
+
+func (e ActionType) IsValid() bool {
+	switch e {
+	case ActionTypeDeviceUpdate:
+		return true
+	}
+	return false
+}
+
+func (e ActionType) String() string {
+	return string(e)
+}
+
+func (e *ActionType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ActionType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ActionType", str)
+	}
+	return nil
+}
+
+func (e ActionType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
