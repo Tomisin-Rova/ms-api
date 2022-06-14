@@ -3711,7 +3711,6 @@ func TestMutationResolver_WithdrawVaultAccount(t *testing.T) {
 func TestMutationResolver_CheckCustomerDetails(t *testing.T) {
 	const (
 		success = iota
-		errorUnauthenticated
 		errorCheckingCustomerDetails
 	)
 	var tests = []struct {
@@ -3721,10 +3720,6 @@ func TestMutationResolver_CheckCustomerDetails(t *testing.T) {
 		{
 			name:     "test Success",
 			testType: success,
-		},
-		{
-			name:     "Test error unauthenticated customer",
-			testType: errorUnauthenticated,
 		},
 		{
 			name:     "Test error checking customer details",
@@ -3743,11 +3738,6 @@ func TestMutationResolver_CheckCustomerDetails(t *testing.T) {
 		Dob:         "01-01-1900",
 		ActionType:  customer.CheckCustomerDetailsRequest_DEVICE_UPDATE,
 	}
-	validCtx, err := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{})
-	if err != nil {
-		assert.NoError(t, err)
-		t.Fail()
-	}
 	controller := gomock.NewController(t)
 	defer controller.Finish()
 	customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
@@ -3760,26 +3750,20 @@ func TestMutationResolver_CheckCustomerDetails(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			switch testCase.testType {
 			case success:
-				customerServiceClient.EXPECT().CheckCustomerDetails(validCtx, request).Return(&pbTypes.DefaultResponse{
+				customerServiceClient.EXPECT().CheckCustomerDetails(context.Background(), request).Return(&pbTypes.DefaultResponse{
 					Success: true,
 					Code:    http.StatusOK,
 				}, nil)
-				resp, err := resolver.CheckCustomerDetails(validCtx, customerDetails, typeArg)
+				resp, err := resolver.CheckCustomerDetails(context.Background(), customerDetails, typeArg)
 				assert.NoError(t, err)
 				assert.NotNil(t, resp)
 				assert.Equal(t, &types.Response{
 					Success: true,
 					Code:    http.StatusOK,
 				}, resp)
-			case errorUnauthenticated:
-				resp, err := resolver.CheckCustomerDetails(context.Background(), customerDetails, typeArg)
-				assert.Error(t, err)
-				assert.IsType(t, &terror.Terror{}, err)
-				assert.Equal(t, errorvalues.InvalidAuthenticationError, err.(*terror.Terror).Code())
-				assert.Nil(t, resp)
 			case errorCheckingCustomerDetails:
-				customerServiceClient.EXPECT().CheckCustomerDetails(validCtx, request).Return(nil, errors.New(""))
-				resp, err := resolver.CheckCustomerDetails(validCtx, customerDetails, typeArg)
+				customerServiceClient.EXPECT().CheckCustomerDetails(context.Background(), request).Return(nil, errors.New(""))
+				resp, err := resolver.CheckCustomerDetails(context.Background(), customerDetails, typeArg)
 				assert.Error(t, err)
 				assert.Nil(t, resp)
 			}
@@ -3790,7 +3774,6 @@ func TestMutationResolver_CheckCustomerDetails(t *testing.T) {
 func TestMutationResolver_UpdateDevice(t *testing.T) {
 	const (
 		success = iota
-		errorUnauthenticated
 		errorUpdatingDevice
 	)
 	var tests = []struct {
@@ -3800,10 +3783,6 @@ func TestMutationResolver_UpdateDevice(t *testing.T) {
 		{
 			name:     "test Success",
 			testType: success,
-		},
-		{
-			name:     "Test error unauthenticated customer",
-			testType: errorUnauthenticated,
 		},
 		{
 			name:     "Test error updating device",
@@ -3846,11 +3825,6 @@ func TestMutationResolver_UpdateDevice(t *testing.T) {
 			},
 		},
 	}
-	validCtx, err := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{})
-	if err != nil {
-		assert.NoError(t, err)
-		t.Fail()
-	}
 	controller := gomock.NewController(t)
 	defer controller.Finish()
 	customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
@@ -3862,27 +3836,21 @@ func TestMutationResolver_UpdateDevice(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			switch testCase.testType {
 			case success:
-				customerServiceClient.EXPECT().UpdateDevice(validCtx, request).Return(&pbTypes.DefaultResponse{
+				customerServiceClient.EXPECT().UpdateDevice(context.Background(), request).Return(&pbTypes.DefaultResponse{
 					Success: true,
 					Code:    http.StatusOK,
 				}, nil)
 
-				resp, err := resolver.UpdateDevice(validCtx, device)
+				resp, err := resolver.UpdateDevice(context.Background(), device)
 				assert.NoError(t, err)
 				assert.NotNil(t, resp)
 				assert.Equal(t, &types.Response{
 					Success: true,
 					Code:    http.StatusOK,
 				}, resp)
-			case errorUnauthenticated:
-				resp, err := resolver.UpdateDevice(context.Background(), device)
-				assert.Error(t, err)
-				assert.IsType(t, &terror.Terror{}, err)
-				assert.Equal(t, errorvalues.InvalidAuthenticationError, err.(*terror.Terror).Code())
-				assert.Nil(t, resp)
 			case errorUpdatingDevice:
-				customerServiceClient.EXPECT().UpdateDevice(validCtx, request).Return(nil, errors.New(""))
-				resp, err := resolver.UpdateDevice(validCtx, device)
+				customerServiceClient.EXPECT().UpdateDevice(context.Background(), request).Return(nil, errors.New(""))
+				resp, err := resolver.UpdateDevice(context.Background(), device)
 				assert.Error(t, err)
 				assert.Nil(t, resp)
 			}

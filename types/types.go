@@ -325,7 +325,8 @@ type Customer struct {
 	Ts        int64            `json:"ts"`
 }
 
-func (Customer) IsMeResult() {}
+func (Customer) IsMeResult()           {}
+func (Customer) IsStaffAuditLogValue() {}
 
 type CustomerConnection struct {
 	Nodes      []*Customer `json:"nodes"`
@@ -687,6 +688,14 @@ type StaffAuditLogConnection struct {
 	Nodes      []*StaffAuditLog `json:"nodes"`
 	PageInfo   *PageInfo        `json:"pageInfo"`
 	TotalCount int64            `json:"totalCount"`
+}
+
+type StaffCustomerDetailsUpdateInput struct {
+	FirstName  *string       `json:"firstName"`
+	LastName   *string       `json:"lastName"`
+	Email      *string       `json:"email"`
+	Address    *AddressInput `json:"address"`
+	CustomerID string        `json:"customerID"`
 }
 
 type TokenResponse struct {
@@ -2216,18 +2225,20 @@ func (e ReportStatuses) MarshalGQL(w io.Writer) {
 type StaffAuditLogType string
 
 const (
-	StaffAuditLogTypeFxRate StaffAuditLogType = "FX_RATE"
-	StaffAuditLogTypeFees   StaffAuditLogType = "FEES"
+	StaffAuditLogTypeFxRate                StaffAuditLogType = "FX_RATE"
+	StaffAuditLogTypeFees                  StaffAuditLogType = "FEES"
+	StaffAuditLogTypeCustomerDetailsUpdate StaffAuditLogType = "CUSTOMER_DETAILS_UPDATE"
 )
 
 var AllStaffAuditLogType = []StaffAuditLogType{
 	StaffAuditLogTypeFxRate,
 	StaffAuditLogTypeFees,
+	StaffAuditLogTypeCustomerDetailsUpdate,
 }
 
 func (e StaffAuditLogType) IsValid() bool {
 	switch e {
-	case StaffAuditLogTypeFxRate, StaffAuditLogTypeFees:
+	case StaffAuditLogTypeFxRate, StaffAuditLogTypeFees, StaffAuditLogTypeCustomerDetailsUpdate:
 		return true
 	}
 	return false
