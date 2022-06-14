@@ -12,7 +12,7 @@ func Test_generateFileBuffer(t *testing.T) {
 		name string
 	}{
 		{
-			name: "success",
+			name: "Test success",
 		},
 	}
 	for _, tt := range tests {
@@ -30,7 +30,7 @@ func Test_getDarkGrayColor(t *testing.T) {
 		want color.Color
 	}{
 		{
-			name: "success",
+			name: "Test success",
 			want: color.Color{
 				Red:   55,
 				Green: 55,
