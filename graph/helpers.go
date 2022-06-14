@@ -1226,7 +1226,7 @@ func (h *helpersfactory) MakeStaffAuditLogFromProto(staffAuditLog *protoTypes.St
 
 		case protoTypes.StaffAuditLog_FX_RATE:
 			// oldValue
-			oldFxRateProto := staffAuditLog.NewValue.Data.(*protoTypes.StaffAuditLogValue_ExchangeRate).ExchangeRate
+			oldFxRateProto := staffAuditLog.OldValue.Data.(*protoTypes.StaffAuditLogValue_ExchangeRate).ExchangeRate
 			oldStaffAuditLogValue = h.MakeExchangeRateFromProto(oldFxRateProto)
 
 			// newValue
