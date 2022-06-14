@@ -1212,12 +1212,6 @@ func (r *mutationResolver) UpdateFees(ctx context.Context, fees []*types.UpdateF
 }
 
 func (r *mutationResolver) UpdateDevice(ctx context.Context, device types.DeviceInput) (*types.Response, error) {
-	// Get user claims
-	_, err := middlewares.GetClaimsFromCtx(ctx)
-	if err != nil {
-		return nil, err
-	}
-
 	helpers := &helpersfactory{}
 	var tokens []*pbTypes.DeviceTokenInput
 	for _, deviceToken := range device.Tokens {
@@ -1260,11 +1254,6 @@ func (r *mutationResolver) UpdateDevice(ctx context.Context, device types.Device
 }
 
 func (r *mutationResolver) CheckCustomerDetails(ctx context.Context, customerDetails types.CheckCustomerDetailsInput, typeArg types.ActionType) (*types.Response, error) {
-	// Get user claims
-	_, err := middlewares.GetClaimsFromCtx(ctx)
-	if err != nil {
-		return nil, err
-	}
 	var request customer.CheckCustomerDetailsRequest
 	switch typeArg {
 	case types.ActionTypeDeviceUpdate:
