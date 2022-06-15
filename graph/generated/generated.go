@@ -429,7 +429,7 @@ type ComplexityRoot struct {
 		SubmitCdd                  func(childComplexity int, cdd types.CDDInput) int
 		UpdateAMLStatus            func(childComplexity int, id string, status types.AMLStatuses, message string) int
 		UpdateCustomerDetails      func(childComplexity int, customerDetails types.CustomerDetailsUpdateInput, transactionPassword string) int
-		UpdateDevice               func(childComplexity int, device types.DeviceInput) int
+		UpdateDevice               func(childComplexity int, phoneNumber string, device types.DeviceInput) int
 		UpdateFees                 func(childComplexity int, fees []*types.UpdateFeesInput) int
 		UpdateFx                   func(childComplexity int, exchangeRate types.UpdateFXInput) int
 		UpdateKYCStatus            func(childComplexity int, id string, status types.KYCStatuses, message string) int
@@ -532,6 +532,7 @@ type ComplexityRoot struct {
 		Questionaries                func(childComplexity int, keywords *string, first *int64, after *string, last *int64, before *string, statuses []types.QuestionaryStatuses, typeArg []types.QuestionaryTypes) int
 		Questionary                  func(childComplexity int, id string) int
 		StaffAuditLogs               func(childComplexity int, first *int64, after *string, last *int64, before *string, types []types.StaffAuditLogType) int
+		Statement                    func(childComplexity int, accountID string, startDate string, endDate string, transactionPassword string) int
 		Transaction                  func(childComplexity int, id string) int
 		TransactionTypes             func(childComplexity int, first *int64, after *string, last *int64, before *string, statuses []types.TransactionTypeStatuses) int
 		Transactions                 func(childComplexity int, first *int64, after *string, last *int64, before *string, startDate *string, endDate *string, statuses []types.TransactionStatuses, accountIds []string, beneficiaryIds []string, hasBeneficiary *bool) int
@@ -632,6 +633,12 @@ type ComplexityRoot struct {
 		TotalCount func(childComplexity int) int
 	}
 
+	StatementConnection struct {
+		EndDate   func(childComplexity int) int
+		Link      func(childComplexity int) int
+		StartDate func(childComplexity int) int
+	}
+
 	TokenResponse struct {
 		Code    func(childComplexity int) int
 		Message func(childComplexity int) int
@@ -726,7 +733,7 @@ type MutationResolver interface {
 	SendNotification(ctx context.Context, typeArg types.DeliveryMode, content string, templateID string) (*types.Response, error)
 	DeactivateCredential(ctx context.Context, credentialType types.IdentityCredentialsTypes) (*types.Response, error)
 	WithdrawVaultAccount(ctx context.Context, sourceAccountID string, targetAccountID string, transactionPassword string) (*types.Response, error)
-	UpdateDevice(ctx context.Context, device types.DeviceInput) (*types.Response, error)
+	UpdateDevice(ctx context.Context, phoneNumber string, device types.DeviceInput) (*types.Response, error)
 	CheckCustomerDetails(ctx context.Context, customerDetails types.CheckCustomerDetailsInput, typeArg types.ActionType) (*types.Response, error)
 	RequestResubmit(ctx context.Context, customerID string, reportIds []string, message *string) (*types.Response, error)
 	StaffLogin(ctx context.Context, token string, authType types.AuthType) (*types.AuthResponse, error)
@@ -769,6 +776,7 @@ type QueryResolver interface {
 	Customers(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string, statuses []types.CustomerStatuses) (*types.CustomerConnection, error)
 	Cdds(ctx context.Context, first *int64, after *string, last *int64, before *string, statuses []types.CDDStatuses) (*types.CDDConnection, error)
 	StaffAuditLogs(ctx context.Context, first *int64, after *string, last *int64, before *string, types []types.StaffAuditLogType) (*types.StaffAuditLogConnection, error)
+	Statement(ctx context.Context, accountID string, startDate string, endDate string, transactionPassword string) (*types.StatementConnection, error)
 }
 
 type executableSchema struct {
@@ -2699,7 +2707,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateDevice(childComplexity, args["device"].(types.DeviceInput)), true
+		return e.complexity.Mutation.UpdateDevice(childComplexity, args["phoneNumber"].(string), args["device"].(types.DeviceInput)), true
 
 	case "Mutation.updateFees":
 		if e.complexity.Mutation.UpdateFees == nil {
@@ -3386,6 +3394,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.StaffAuditLogs(childComplexity, args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string), args["types"].([]types.StaffAuditLogType)), true
 
+	case "Query.statement":
+		if e.complexity.Query.Statement == nil {
+			break
+		}
+
+		args, err := ec.field_Query_statement_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Statement(childComplexity, args["accountId"].(string), args["startDate"].(string), args["endDate"].(string), args["transactionPassword"].(string)), true
+
 	case "Query.transaction":
 		if e.complexity.Query.Transaction == nil {
 			break
@@ -3835,6 +3855,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.StaffAuditLogConnection.TotalCount(childComplexity), true
 
+	case "StatementConnection.endDate":
+		if e.complexity.StatementConnection.EndDate == nil {
+			break
+		}
+
+		return e.complexity.StatementConnection.EndDate(childComplexity), true
+
+	case "StatementConnection.link":
+		if e.complexity.StatementConnection.Link == nil {
+			break
+		}
+
+		return e.complexity.StatementConnection.Link(childComplexity), true
+
+	case "StatementConnection.startDate":
+		if e.complexity.StatementConnection.StartDate == nil {
+			break
+		}
+
+		return e.complexity.StatementConnection.StartDate(childComplexity), true
+
 	case "TokenResponse.code":
 		if e.complexity.TokenResponse.Code == nil {
 			break
@@ -4265,7 +4306,7 @@ type Mutation {
     # Withdraw funds from a Vault Account
     withdrawVaultAccount(sourceAccountId: ID!, targetAccountId: ID!, transactionPassword: String!): Response!
     # Update device and deprecate old devices for customer
-    updateDevice(device: DeviceInput!): Response!
+    updateDevice(phoneNumber: String!, device: DeviceInput!): Response!
     # Validates customer details in order to proceed with secure actions
     checkCustomerDetails(customerDetails: CheckCustomerDetailsInput!, type: ActionType!): Response!
 
@@ -4780,6 +4821,16 @@ enum DeliveryMode {
         # Filter audit logs by it's types. If empty, should ignore the field
         types: [StaffAuditLogType!]
     ): StaffAuditLogConnection!
+    # Generate customer account statement
+    statement(
+        # Specify customer account to return
+        accountId: ID!
+        # Returns statement records starting from the specified date.
+        startDate: Date!
+        # Returns statement records until the specified date.
+        endDate: Date!
+        # Transaction password.
+        transactionPassword: String!): StatementConnection!
 }
 
 input CommonQueryFilterInput {
@@ -4946,6 +4997,15 @@ type StaffAuditLogConnection {
     pageInfo: PageInfo!
     # Identifies the total count of items in the connection
     totalCount: Int!
+}
+
+type StatementConnection {
+    # Specified statement start date
+    startDate: Date!
+    # Specified statement end date
+    endDate: Date!
+    # URL containing generated pdf statement
+    link: String!
 }`, BuiltIn: false},
 	{Name: "../schemas/types.graphql", Input: `# Date scalar format DD-MM-YYYY
 scalar Date
@@ -6365,15 +6425,24 @@ func (ec *executionContext) field_Mutation_updateCustomerDetails_args(ctx contex
 func (ec *executionContext) field_Mutation_updateDevice_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 types.DeviceInput
-	if tmp, ok := rawArgs["device"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("device"))
-		arg0, err = ec.unmarshalNDeviceInput2msᚗapiᚋtypesᚐDeviceInput(ctx, tmp)
+	var arg0 string
+	if tmp, ok := rawArgs["phoneNumber"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("phoneNumber"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["device"] = arg0
+	args["phoneNumber"] = arg0
+	var arg1 types.DeviceInput
+	if tmp, ok := rawArgs["device"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("device"))
+		arg1, err = ec.unmarshalNDeviceInput2msᚗapiᚋtypesᚐDeviceInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["device"] = arg1
 	return args, nil
 }
 
@@ -7436,6 +7505,48 @@ func (ec *executionContext) field_Query_staffAuditLogs_args(ctx context.Context,
 		}
 	}
 	args["types"] = arg4
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_statement_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["accountId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("accountId"))
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["accountId"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["startDate"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("startDate"))
+		arg1, err = ec.unmarshalNDate2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["startDate"] = arg1
+	var arg2 string
+	if tmp, ok := rawArgs["endDate"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("endDate"))
+		arg2, err = ec.unmarshalNDate2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["endDate"] = arg2
+	var arg3 string
+	if tmp, ok := rawArgs["transactionPassword"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("transactionPassword"))
+		arg3, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["transactionPassword"] = arg3
 	return args, nil
 }
 
@@ -19886,7 +19997,7 @@ func (ec *executionContext) _Mutation_updateDevice(ctx context.Context, field gr
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateDevice(rctx, fc.Args["device"].(types.DeviceInput))
+		return ec.resolvers.Mutation().UpdateDevice(rctx, fc.Args["phoneNumber"].(string), fc.Args["device"].(types.DeviceInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -24391,6 +24502,69 @@ func (ec *executionContext) fieldContext_Query_staffAuditLogs(ctx context.Contex
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_statement(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_statement(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Statement(rctx, fc.Args["accountId"].(string), fc.Args["startDate"].(string), fc.Args["endDate"].(string), fc.Args["transactionPassword"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.StatementConnection)
+	fc.Result = res
+	return ec.marshalNStatementConnection2ᚖmsᚗapiᚋtypesᚐStatementConnection(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_statement(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "startDate":
+				return ec.fieldContext_StatementConnection_startDate(ctx, field)
+			case "endDate":
+				return ec.fieldContext_StatementConnection_endDate(ctx, field)
+			case "link":
+				return ec.fieldContext_StatementConnection_link(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type StatementConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_statement_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query___type(ctx, field)
 	if err != nil {
@@ -27197,6 +27371,138 @@ func (ec *executionContext) fieldContext_StaffAuditLogConnection_totalCount(ctx 
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _StatementConnection_startDate(ctx context.Context, field graphql.CollectedField, obj *types.StatementConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_StatementConnection_startDate(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.StartDate, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNDate2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_StatementConnection_startDate(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "StatementConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Date does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _StatementConnection_endDate(ctx context.Context, field graphql.CollectedField, obj *types.StatementConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_StatementConnection_endDate(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.EndDate, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNDate2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_StatementConnection_endDate(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "StatementConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Date does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _StatementConnection_link(ctx context.Context, field graphql.CollectedField, obj *types.StatementConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_StatementConnection_link(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Link, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_StatementConnection_link(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "StatementConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -36086,6 +36392,29 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Concurrently(i, func() graphql.Marshaler {
 				return rrm(innerCtx)
 			})
+		case "statement":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_statement(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
 		case "__type":
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
@@ -36717,6 +37046,48 @@ func (ec *executionContext) _StaffAuditLogConnection(ctx context.Context, sel as
 		case "totalCount":
 
 			out.Values[i] = ec._StaffAuditLogConnection_totalCount(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var statementConnectionImplementors = []string{"StatementConnection"}
+
+func (ec *executionContext) _StatementConnection(ctx context.Context, sel ast.SelectionSet, obj *types.StatementConnection) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, statementConnectionImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("StatementConnection")
+		case "startDate":
+
+			out.Values[i] = ec._StatementConnection_startDate(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "endDate":
+
+			out.Values[i] = ec._StatementConnection_endDate(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "link":
+
+			out.Values[i] = ec._StatementConnection_link(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -39469,6 +39840,20 @@ func (ec *executionContext) unmarshalNStaffStatuses2msᚗapiᚋtypesᚐStaffStat
 
 func (ec *executionContext) marshalNStaffStatuses2msᚗapiᚋtypesᚐStaffStatuses(ctx context.Context, sel ast.SelectionSet, v types.StaffStatuses) graphql.Marshaler {
 	return v
+}
+
+func (ec *executionContext) marshalNStatementConnection2msᚗapiᚋtypesᚐStatementConnection(ctx context.Context, sel ast.SelectionSet, v types.StatementConnection) graphql.Marshaler {
+	return ec._StatementConnection(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNStatementConnection2ᚖmsᚗapiᚋtypesᚐStatementConnection(ctx context.Context, sel ast.SelectionSet, v *types.StatementConnection) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._StatementConnection(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {

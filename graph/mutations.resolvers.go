@@ -1040,7 +1040,7 @@ func (r *mutationResolver) WithdrawVaultAccount(ctx context.Context, sourceAccou
 	}, nil
 }
 
-func (r *mutationResolver) UpdateDevice(ctx context.Context, device types.DeviceInput) (*types.Response, error) {
+func (r *mutationResolver) UpdateDevice(ctx context.Context, phoneNumber string, device types.DeviceInput) (*types.Response, error) {
 	helpers := &helpersfactory{}
 	var tokens []*pbTypes.DeviceTokenInput
 	for _, deviceToken := range device.Tokens {
@@ -1061,6 +1061,7 @@ func (r *mutationResolver) UpdateDevice(ctx context.Context, device types.Device
 	}
 
 	request := customer.DeviceInputRequest{
+		PhoneNumber: phoneNumber,
 		Device: &pbTypes.DeviceInput{
 			Identifier:  device.Identifier,
 			Os:          device.Os,

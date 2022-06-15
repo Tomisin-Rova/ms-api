@@ -6,6 +6,7 @@ package graph
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -1315,6 +1316,10 @@ func (r *queryResolver) StaffAuditLogs(ctx context.Context, first *int64, after 
 	return &apiTypes.StaffAuditLogConnection{
 		Nodes: nodes, PageInfo: &pageInfo,
 		TotalCount: int64(resp.TotalCount)}, nil
+}
+
+func (r *queryResolver) Statement(ctx context.Context, accountID string, startDate string, endDate string, transactionPassword string) (*apiTypes.StatementConnection, error) {
+	panic(fmt.Errorf("not implemented"))
 }
 
 // Query returns generated.QueryResolver implementation.

@@ -698,6 +698,12 @@ type StaffCustomerDetailsUpdateInput struct {
 	CustomerID string        `json:"customerID"`
 }
 
+type StatementConnection struct {
+	StartDate string `json:"startDate"`
+	EndDate   string `json:"endDate"`
+	Link      string `json:"link"`
+}
+
 type TokenResponse struct {
 	Message *string `json:"message"`
 	Success bool    `json:"success"`
