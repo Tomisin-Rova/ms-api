@@ -1040,7 +1040,7 @@ func (r *mutationResolver) WithdrawVaultAccount(ctx context.Context, sourceAccou
 	}, nil
 }
 
-func (r *mutationResolver) UpdateDevice(ctx context.Context, device types.DeviceInput) (*types.Response, error) {
+func (r *mutationResolver) UpdateDevice(ctx context.Context, phoneNumber string, device types.DeviceInput) (*types.Response, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
