@@ -249,6 +249,12 @@ type CheckCustomerDataInput struct {
 	DeviceIdentifier string `json:"deviceIdentifier"`
 }
 
+type CheckCustomerDetailsInput struct {
+	Password    string `json:"password"`
+	PhoneNumber string `json:"phoneNumber"`
+	Dob         string `json:"dob"`
+}
+
 type CommonQueryFilterInput struct {
 	ID         *string `json:"id"`
 	CustomerID *string `json:"customerId"`
@@ -319,7 +325,8 @@ type Customer struct {
 	Ts        int64            `json:"ts"`
 }
 
-func (Customer) IsMeResult() {}
+func (Customer) IsMeResult()           {}
+func (Customer) IsStaffAuditLogValue() {}
 
 type CustomerConnection struct {
 	Nodes      []*Customer `json:"nodes"`
@@ -683,6 +690,14 @@ type StaffAuditLogConnection struct {
 	TotalCount int64            `json:"totalCount"`
 }
 
+type StaffCustomerDetailsUpdateInput struct {
+	FirstName  *string       `json:"firstName"`
+	LastName   *string       `json:"lastName"`
+	Email      *string       `json:"email"`
+	Address    *AddressInput `json:"address"`
+	CustomerID string        `json:"customerID"`
+}
+
 type TokenResponse struct {
 	Message *string `json:"message"`
 	Success bool    `json:"success"`
@@ -903,6 +918,45 @@ func (e *AccountStatuses) UnmarshalGQL(v interface{}) error {
 }
 
 func (e AccountStatuses) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type ActionType string
+
+const (
+	ActionTypeDeviceUpdate ActionType = "DEVICE_UPDATE"
+)
+
+var AllActionType = []ActionType{
+	ActionTypeDeviceUpdate,
+}
+
+func (e ActionType) IsValid() bool {
+	switch e {
+	case ActionTypeDeviceUpdate:
+		return true
+	}
+	return false
+}
+
+func (e ActionType) String() string {
+	return string(e)
+}
+
+func (e *ActionType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ActionType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ActionType", str)
+	}
+	return nil
+}
+
+func (e ActionType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
@@ -2171,18 +2225,20 @@ func (e ReportStatuses) MarshalGQL(w io.Writer) {
 type StaffAuditLogType string
 
 const (
-	StaffAuditLogTypeFxRate StaffAuditLogType = "FX_RATE"
-	StaffAuditLogTypeFees   StaffAuditLogType = "FEES"
+	StaffAuditLogTypeFxRate                StaffAuditLogType = "FX_RATE"
+	StaffAuditLogTypeFees                  StaffAuditLogType = "FEES"
+	StaffAuditLogTypeCustomerDetailsUpdate StaffAuditLogType = "CUSTOMER_DETAILS_UPDATE"
 )
 
 var AllStaffAuditLogType = []StaffAuditLogType{
 	StaffAuditLogTypeFxRate,
 	StaffAuditLogTypeFees,
+	StaffAuditLogTypeCustomerDetailsUpdate,
 }
 
 func (e StaffAuditLogType) IsValid() bool {
 	switch e {
-	case StaffAuditLogTypeFxRate, StaffAuditLogTypeFees:
+	case StaffAuditLogTypeFxRate, StaffAuditLogTypeFees, StaffAuditLogTypeCustomerDetailsUpdate:
 		return true
 	}
 	return false

@@ -1271,7 +1271,7 @@ func (r *queryResolver) Cdds(ctx context.Context, first *int64, after *string, l
 	}, nil
 }
 
-func (r *queryResolver) StaffAuditLogs(ctx context.Context, first *int64, after *string, last *int64, before *string) (*apiTypes.StaffAuditLogConnection, error) {
+func (r *queryResolver) StaffAuditLogs(ctx context.Context, first *int64, after *string, last *int64, before *string, types []apiTypes.StaffAuditLogType) (*apiTypes.StaffAuditLogConnection, error) {
 	// Build request
 	var request customer.GetStaffAuditLogsRequest
 
