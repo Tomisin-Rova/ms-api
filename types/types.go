@@ -65,7 +65,7 @@ type Account struct {
 }
 
 type AccountBalances struct {
-	TotalBalance float64 `json:"totalBalance"`
+	TotalBalance string `json:"totalBalance"`
 }
 
 type AccountConnection struct {
