@@ -2807,7 +2807,7 @@ func Test_queryResolver_Transactions(t *testing.T) {
 											Code:          "code",
 											AccountNumber: "account_number",
 											Balances: &pbTypes.AccountBalances{
-												TotalBalance: 100.0,
+												TotalBalance: "100.0",
 											},
 											MaturityDate: "20",
 											Mambu: &pbTypes.AccountMambu{
@@ -2830,7 +2830,7 @@ func Test_queryResolver_Transactions(t *testing.T) {
 											Code:          "code",
 											AccountNumber: "account_number",
 											Balances: &pbTypes.AccountBalances{
-												TotalBalance: 100.0,
+												TotalBalance: "100.0",
 											},
 											MaturityDate: "20",
 											Mambu: &pbTypes.AccountMambu{
@@ -2919,7 +2919,7 @@ func Test_queryResolver_Transactions(t *testing.T) {
 											Code:          "code",
 											AccountNumber: "account_number",
 											Balances: &pbTypes.AccountBalances{
-												TotalBalance: 100.0,
+												TotalBalance: "100.0",
 											},
 											MaturityDate: "20",
 											Mambu: &pbTypes.AccountMambu{
@@ -2942,7 +2942,7 @@ func Test_queryResolver_Transactions(t *testing.T) {
 											Code:          "code",
 											AccountNumber: "account_number",
 											Balances: &pbTypes.AccountBalances{
-												TotalBalance: 100.0,
+												TotalBalance: "100.0",
 											},
 											MaturityDate: "20",
 											Mambu: &pbTypes.AccountMambu{
@@ -3064,7 +3064,7 @@ func Test_queryResolver_Transactions(t *testing.T) {
 											Code:          "code",
 											AccountNumber: "account_number",
 											Balances: &pbTypes.AccountBalances{
-												TotalBalance: 100.0,
+												TotalBalance: "100.0",
 											},
 											MaturityDate: "20",
 											Mambu: &pbTypes.AccountMambu{
@@ -3087,7 +3087,7 @@ func Test_queryResolver_Transactions(t *testing.T) {
 											Code:          "code",
 											AccountNumber: "account_number",
 											Balances: &pbTypes.AccountBalances{
-												TotalBalance: 100.0,
+												TotalBalance: "100.0",
 											},
 											MaturityDate: "20",
 											Mambu: &pbTypes.AccountMambu{
@@ -3176,7 +3176,7 @@ func Test_queryResolver_Transactions(t *testing.T) {
 											Code:          "code",
 											AccountNumber: "account_number",
 											Balances: &pbTypes.AccountBalances{
-												TotalBalance: 100.0,
+												TotalBalance: "100.0",
 											},
 											MaturityDate: "20",
 											Mambu: &pbTypes.AccountMambu{
@@ -3199,7 +3199,7 @@ func Test_queryResolver_Transactions(t *testing.T) {
 											Code:          "code",
 											AccountNumber: "account_number",
 											Balances: &pbTypes.AccountBalances{
-												TotalBalance: 100.0,
+												TotalBalance: "100.0",
 											},
 											MaturityDate: "20",
 											Mambu: &pbTypes.AccountMambu{
@@ -3329,7 +3329,7 @@ func Test_queryResolver_Transactions(t *testing.T) {
 											Code:          "code",
 											AccountNumber: "account_number",
 											Balances: &pbTypes.AccountBalances{
-												TotalBalance: 100.0,
+												TotalBalance: "100.0",
 											},
 											MaturityDate: "20",
 											Mambu: &pbTypes.AccountMambu{
@@ -3352,7 +3352,7 @@ func Test_queryResolver_Transactions(t *testing.T) {
 											Code:          "code",
 											AccountNumber: "account_number",
 											Balances: &pbTypes.AccountBalances{
-												TotalBalance: 100.0,
+												TotalBalance: "100.0",
 											},
 											MaturityDate: "20",
 											Mambu: &pbTypes.AccountMambu{
@@ -3475,7 +3475,7 @@ func Test_queryResolver_Transactions(t *testing.T) {
 											Code:          "code",
 											AccountNumber: "account_number",
 											Balances: &pbTypes.AccountBalances{
-												TotalBalance: 100.0,
+												TotalBalance: " 100.0",
 											},
 											MaturityDate: "20",
 											Mambu: &pbTypes.AccountMambu{
@@ -3498,7 +3498,7 @@ func Test_queryResolver_Transactions(t *testing.T) {
 											Code:          "code",
 											AccountNumber: "account_number",
 											Balances: &pbTypes.AccountBalances{
-												TotalBalance: 100.0,
+												TotalBalance: "100.0",
 											},
 											MaturityDate: "20",
 											Mambu: &pbTypes.AccountMambu{
@@ -3626,7 +3626,7 @@ func Test_queryResolver_Transactions(t *testing.T) {
 											Code:          "code",
 											AccountNumber: "account_number",
 											Balances: &pbTypes.AccountBalances{
-												TotalBalance: 100.0,
+												TotalBalance: " 100.0",
 											},
 											MaturityDate: "20",
 											Mambu: &pbTypes.AccountMambu{
@@ -3649,7 +3649,7 @@ func Test_queryResolver_Transactions(t *testing.T) {
 											Code:          "code",
 											AccountNumber: "account_number",
 											Balances: &pbTypes.AccountBalances{
-												TotalBalance: 100.0,
+												TotalBalance: "100.0",
 											},
 											MaturityDate: "20",
 											Mambu: &pbTypes.AccountMambu{
@@ -3738,7 +3738,7 @@ func Test_queryResolver_Transactions(t *testing.T) {
 											Code:          "code",
 											AccountNumber: "account_number",
 											Balances: &pbTypes.AccountBalances{
-												TotalBalance: 100.0,
+												TotalBalance: "100.0",
 											},
 											MaturityDate: "20",
 											Mambu: &pbTypes.AccountMambu{
@@ -3761,7 +3761,7 @@ func Test_queryResolver_Transactions(t *testing.T) {
 											Code:          "code",
 											AccountNumber: "account_number",
 											Balances: &pbTypes.AccountBalances{
-												TotalBalance: 100.0,
+												TotalBalance: "100.0",
 											},
 											MaturityDate: "20",
 											Mambu: &pbTypes.AccountMambu{
@@ -3889,7 +3889,7 @@ func Test_queryResolver_Transactions(t *testing.T) {
 											Code:          "code",
 											AccountNumber: "account_number",
 											Balances: &pbTypes.AccountBalances{
-												TotalBalance: 100.0,
+												TotalBalance: "100.0",
 											},
 											MaturityDate: "20",
 											Mambu: &pbTypes.AccountMambu{
@@ -3912,7 +3912,7 @@ func Test_queryResolver_Transactions(t *testing.T) {
 											Code:          "code",
 											AccountNumber: "account_number",
 											Balances: &pbTypes.AccountBalances{
-												TotalBalance: 100.0,
+												TotalBalance: "100.0",
 											},
 											MaturityDate: "20",
 											Mambu: &pbTypes.AccountMambu{
@@ -4001,7 +4001,7 @@ func Test_queryResolver_Transactions(t *testing.T) {
 											Code:          "code",
 											AccountNumber: "account_number",
 											Balances: &pbTypes.AccountBalances{
-												TotalBalance: 100.0,
+												TotalBalance: "100.0",
 											},
 											MaturityDate: "20",
 											Mambu: &pbTypes.AccountMambu{
@@ -4024,7 +4024,7 @@ func Test_queryResolver_Transactions(t *testing.T) {
 											Code:          "code",
 											AccountNumber: "account_number",
 											Balances: &pbTypes.AccountBalances{
-												TotalBalance: 100.0,
+												TotalBalance: "100.0",
 											},
 											MaturityDate: "20",
 											Mambu: &pbTypes.AccountMambu{
@@ -4147,7 +4147,7 @@ func Test_queryResolver_Transactions(t *testing.T) {
 											Code:          "code",
 											AccountNumber: "account_number",
 											Balances: &pbTypes.AccountBalances{
-												TotalBalance: 100.0,
+												TotalBalance: "100.0",
 											},
 											MaturityDate: "20",
 											Mambu: &pbTypes.AccountMambu{
@@ -4170,7 +4170,7 @@ func Test_queryResolver_Transactions(t *testing.T) {
 											Code:          "code",
 											AccountNumber: "account_number",
 											Balances: &pbTypes.AccountBalances{
-												TotalBalance: 100.0,
+												TotalBalance: "100.0",
 											},
 											MaturityDate: "20",
 											Mambu: &pbTypes.AccountMambu{
@@ -4259,7 +4259,7 @@ func Test_queryResolver_Transactions(t *testing.T) {
 											Code:          "code",
 											AccountNumber: "account_number",
 											Balances: &pbTypes.AccountBalances{
-												TotalBalance: 100.0,
+												TotalBalance: "100.0",
 											},
 											MaturityDate: "20",
 											Mambu: &pbTypes.AccountMambu{
@@ -4282,7 +4282,7 @@ func Test_queryResolver_Transactions(t *testing.T) {
 											Code:          "code",
 											AccountNumber: "account_number",
 											Balances: &pbTypes.AccountBalances{
-												TotalBalance: 100.0,
+												TotalBalance: "100.0",
 											},
 											MaturityDate: "20",
 											Mambu: &pbTypes.AccountMambu{
@@ -10095,7 +10095,7 @@ func TestQueryResolver_Transaction(t *testing.T) {
 									Code:          "code",
 									AccountNumber: "account_number",
 									Balances: &pbTypes.AccountBalances{
-										TotalBalance: 100.0,
+										TotalBalance: "100.0",
 									},
 									MaturityDate: "20",
 									Mambu: &pbTypes.AccountMambu{
@@ -10125,7 +10125,7 @@ func TestQueryResolver_Transaction(t *testing.T) {
 									Code:          "code",
 									AccountNumber: "account_number",
 									Balances: &pbTypes.AccountBalances{
-										TotalBalance: 100.0,
+										TotalBalance: "100.0",
 									},
 									MaturityDate: "20",
 									Mambu: &pbTypes.AccountMambu{
