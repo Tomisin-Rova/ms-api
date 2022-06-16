@@ -3418,157 +3418,6 @@ func TestMutationResolver_UpdateCustomerDetails(t *testing.T) {
 	}
 }
 
-func TestMutationResolver_StaffUpdateCustomerDetails(t *testing.T) {
-	const (
-		success = iota
-		errorUnauthenticated
-		errorUpdatingCustomerDetails
-	)
-	type arg struct {
-		CustomerDetails     types.StaffCustomerDetailsUpdateInput
-		TransactionPassword string
-	}
-	var (
-		firstName  = "firstName"
-		lastName   = "lastName"
-		email      = "janedoe@gmail.com"
-		state      = "state"
-		city       = "city"
-		customerID = "customerID"
-	)
-	var tests = []struct {
-		name     string
-		arg      arg
-		testType int
-	}{
-		{
-			name: "Test Success",
-			arg: arg{
-				CustomerDetails: types.StaffCustomerDetailsUpdateInput{
-					FirstName:  &firstName,
-					LastName:   &lastName,
-					Email:      &email,
-					CustomerID: customerID,
-					Address: &types.AddressInput{
-						CountryID: "countryId",
-						State:     &state,
-						City:      &city,
-						Street:    "street",
-						Postcode:  "postCode",
-						Cordinates: &types.CordinatesInput{
-							Latitude:  1.2333,
-							Longitude: 1.4555,
-						},
-					},
-				},
-			},
-			testType: success,
-		},
-		{
-			name:     "Test error unauthenticated customer",
-			testType: errorUnauthenticated,
-		},
-		{
-			name: "Test error updating customer details",
-			arg: arg{
-				CustomerDetails: types.StaffCustomerDetailsUpdateInput{
-					FirstName:  &firstName,
-					LastName:   &lastName,
-					Email:      &email,
-					CustomerID: customerID,
-					Address: &types.AddressInput{
-						CountryID: "countryId",
-						State:     &state,
-						City:      &city,
-						Street:    "street",
-						Postcode:  "postCode",
-						Cordinates: &types.CordinatesInput{
-							Latitude:  1.2333,
-							Longitude: 1.4555,
-						},
-					},
-				},
-			},
-			testType: errorUpdatingCustomerDetails,
-		},
-	}
-
-	validCtx, err := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{})
-	if err != nil {
-		assert.NoError(t, err)
-		t.Fail()
-	}
-	controller := gomock.NewController(t)
-	defer controller.Finish()
-	customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
-	resolverOpts := &ResolverOpts{
-		CustomerService: customerServiceClient,
-	}
-	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
-	for _, testCase := range tests {
-		t.Run(testCase.name, func(t *testing.T) {
-			switch testCase.testType {
-			case success:
-				customerServiceClient.EXPECT().StaffCustomerDetailsUpdate(validCtx, &customer.StaffCustomerDetailsUpdateRequest{
-					FirstName:  *testCase.arg.CustomerDetails.FirstName,
-					LastName:   *testCase.arg.CustomerDetails.LastName,
-					Email:      *testCase.arg.CustomerDetails.Email,
-					CustomerID: testCase.arg.CustomerDetails.CustomerID,
-					Address: &customer.AddressInput{
-						CountryId: testCase.arg.CustomerDetails.Address.CountryID,
-						State:     *testCase.arg.CustomerDetails.Address.State,
-						City:      *testCase.arg.CustomerDetails.Address.City,
-						Street:    testCase.arg.CustomerDetails.Address.Street,
-						Postcode:  testCase.arg.CustomerDetails.Address.Postcode,
-						Cordinates: &customer.CordinatesInput{
-							Latitude:  float32(testCase.arg.CustomerDetails.Address.Cordinates.Latitude),
-							Longitude: float32(testCase.arg.CustomerDetails.Address.Cordinates.Longitude),
-						},
-					},
-				}).Return(&pbTypes.DefaultResponse{
-					Success: true,
-					Code:    http.StatusOK,
-				}, nil)
-
-				resp, err := resolver.StaffUpdateCustomerDetails(validCtx, testCase.arg.CustomerDetails)
-				assert.NoError(t, err)
-				assert.NotNil(t, resp)
-				assert.Equal(t, &types.Response{
-					Success: true,
-					Code:    http.StatusOK,
-				}, resp)
-			case errorUnauthenticated:
-				resp, err := resolver.StaffUpdateCustomerDetails(context.Background(), testCase.arg.CustomerDetails)
-				assert.Error(t, err)
-				assert.IsType(t, &terror.Terror{}, err)
-				assert.Equal(t, errorvalues.InvalidAuthenticationError, err.(*terror.Terror).Code())
-				assert.Nil(t, resp)
-			case errorUpdatingCustomerDetails:
-				customerServiceClient.EXPECT().StaffCustomerDetailsUpdate(validCtx, &customer.StaffCustomerDetailsUpdateRequest{
-					FirstName:  *testCase.arg.CustomerDetails.FirstName,
-					LastName:   *testCase.arg.CustomerDetails.LastName,
-					Email:      *testCase.arg.CustomerDetails.Email,
-					CustomerID: testCase.arg.CustomerDetails.CustomerID,
-					Address: &customer.AddressInput{
-						CountryId: testCase.arg.CustomerDetails.Address.CountryID,
-						State:     *testCase.arg.CustomerDetails.Address.State,
-						City:      *testCase.arg.CustomerDetails.Address.City,
-						Street:    testCase.arg.CustomerDetails.Address.Street,
-						Postcode:  testCase.arg.CustomerDetails.Address.Postcode,
-						Cordinates: &customer.CordinatesInput{
-							Latitude:  float32(testCase.arg.CustomerDetails.Address.Cordinates.Latitude),
-							Longitude: float32(testCase.arg.CustomerDetails.Address.Cordinates.Longitude),
-						},
-					},
-				}).Return(nil, errors.New(""))
-				resp, err := resolver.StaffUpdateCustomerDetails(validCtx, testCase.arg.CustomerDetails)
-				assert.Error(t, err)
-				assert.Nil(t, resp)
-			}
-		})
-	}
-}
-
 func TestMutationResolver_UpdateFx(t *testing.T) {
 	const (
 		success = iota
@@ -3854,6 +3703,158 @@ func TestMutationResolver_WithdrawVaultAccount(t *testing.T) {
 				assert.Error(t, err)
 				assert.Nil(t, resp)
 				assert.Contains(t, err.Error(), "mock error")
+			}
+		})
+	}
+}
+
+func TestMutationResolver_CheckCustomerDetails(t *testing.T) {
+	const (
+		success = iota
+		errorCheckingCustomerDetails
+	)
+	var tests = []struct {
+		name     string
+		testType int
+	}{
+		{
+			name:     "test Success",
+			testType: success,
+		},
+		{
+			name:     "Test error checking customer details",
+			testType: errorCheckingCustomerDetails,
+		},
+	}
+	customerDetails := types.CheckCustomerDetailsInput{
+		Password:    "qr1234e",
+		PhoneNumber: "uva",
+		Dob:         "01-01-1900",
+	}
+	typeArg := types.ActionTypeDeviceUpdate
+	request := &customer.CheckCustomerDetailsRequest{
+		Password:    "qr1234e",
+		PhoneNumber: "uva",
+		Dob:         "01-01-1900",
+		ActionType:  customer.CheckCustomerDetailsRequest_DEVICE_UPDATE,
+	}
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
+	resolverOpts := &ResolverOpts{
+		CustomerService: customerServiceClient,
+	}
+	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			switch testCase.testType {
+			case success:
+				customerServiceClient.EXPECT().CheckCustomerDetails(context.Background(), request).Return(&pbTypes.DefaultResponse{
+					Success: true,
+					Code:    http.StatusOK,
+				}, nil)
+				resp, err := resolver.CheckCustomerDetails(context.Background(), customerDetails, typeArg)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, &types.Response{
+					Success: true,
+					Code:    http.StatusOK,
+				}, resp)
+			case errorCheckingCustomerDetails:
+				customerServiceClient.EXPECT().CheckCustomerDetails(context.Background(), request).Return(nil, errors.New(""))
+				resp, err := resolver.CheckCustomerDetails(context.Background(), customerDetails, typeArg)
+				assert.Error(t, err)
+				assert.Nil(t, resp)
+			}
+		})
+	}
+}
+
+func TestMutationResolver_UpdateDevice(t *testing.T) {
+	const (
+		success = iota
+		errorUpdatingDevice
+	)
+	var tests = []struct {
+		name     string
+		testType int
+	}{
+		{
+			name:     "test Success",
+			testType: success,
+		},
+		{
+			name:     "Test error updating device",
+			testType: errorUpdatingDevice,
+		},
+	}
+	phoneNumber := "phoneNumber"
+	device := types.DeviceInput{
+		Identifier: "identifier",
+		Os:         "os",
+		Brand:      "brand",
+		Tokens: []*types.DeviceTokenInput{
+			{
+				Type:  types.DeviceTokenTypesFirebase,
+				Value: "hjhfwifwr83283r9nvow9r8r731nvpo1391_=38238r",
+			},
+		},
+		Preferences: []*types.DevicePreferencesInput{
+			{
+				Type:  types.DevicePreferencesTypesPush,
+				Value: true,
+			},
+		},
+	}
+	request := &customer.DeviceInputRequest{
+		PhoneNumber: phoneNumber,
+		Device: &pbTypes.DeviceInput{
+			Identifier: device.Identifier,
+			Os:         device.Os,
+			Brand:      device.Brand,
+			Tokens: []*pbTypes.DeviceTokenInput{
+				{
+					Type:  pbTypes.DeviceToken_FIREBASE,
+					Value: "hjhfwifwr83283r9nvow9r8r731nvpo1391_=38238r",
+				},
+			},
+			Preferences: []*pbTypes.DevicePreferencesInput{
+				{
+					Type:  pbTypes.DevicePreferences_PUSH,
+					Value: true,
+				},
+			},
+		},
+	}
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
+	resolverOpts := &ResolverOpts{
+		CustomerService: customerServiceClient,
+	}
+	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			switch testCase.testType {
+			case success:
+				customerServiceClient.EXPECT().UpdateDevice(context.Background(), request).Return(&pbTypes.DefaultResponse{
+					Success: true,
+					Code:    http.StatusOK,
+				}, nil)
+
+				resp, err := resolver.UpdateDevice(context.Background(), phoneNumber, device)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, &types.Response{
+					Success: true,
+					Code:    http.StatusOK,
+				}, resp)
+			case errorUpdatingDevice:
+				customerServiceClient.EXPECT().UpdateDevice(context.Background(), request).Return(nil, errors.New(""))
+				resp, err := resolver.UpdateDevice(context.Background(), phoneNumber, device)
+				assert.Error(t, err)
+				assert.Nil(t, resp)
 			}
 		})
 	}

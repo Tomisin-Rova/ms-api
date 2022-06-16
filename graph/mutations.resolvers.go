@@ -1041,11 +1041,70 @@ func (r *mutationResolver) WithdrawVaultAccount(ctx context.Context, sourceAccou
 }
 
 func (r *mutationResolver) UpdateDevice(ctx context.Context, phoneNumber string, device types.DeviceInput) (*types.Response, error) {
-	panic(fmt.Errorf("not implemented"))
+	helpers := &helpersfactory{}
+	var tokens []*pbTypes.DeviceTokenInput
+	for _, deviceToken := range device.Tokens {
+		reqToken := &pbTypes.DeviceTokenInput{
+			Type:  pbTypes.DeviceToken_FIREBASE,
+			Value: deviceToken.Value,
+		}
+		tokens = append(tokens, reqToken)
+	}
+
+	var preferences []*pbTypes.DevicePreferencesInput
+	for _, preference := range device.Preferences {
+		reqPreference := &pbTypes.DevicePreferencesInput{
+			Type:  pbTypes.DevicePreferences_DevicePreferencesTypes(helpers.GetDeveicePreferenceTypesIndex(preference.Type)),
+			Value: preference.Value,
+		}
+		preferences = append(preferences, reqPreference)
+	}
+
+	request := customer.DeviceInputRequest{
+		PhoneNumber: phoneNumber,
+		Device: &pbTypes.DeviceInput{
+			Identifier:  device.Identifier,
+			Os:          device.Os,
+			Brand:       device.Brand,
+			Tokens:      tokens,
+			Preferences: preferences,
+		},
+	}
+
+	//	Execute RPC call
+	response, err := r.CustomerService.UpdateDevice(ctx, &request)
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.Response{
+		Success: response.Success,
+		Code:    int64(response.Code),
+	}, nil
 }
 
 func (r *mutationResolver) CheckCustomerDetails(ctx context.Context, customerDetails types.CheckCustomerDetailsInput, typeArg types.ActionType) (*types.Response, error) {
-	panic(fmt.Errorf("not implemented"))
+	var request customer.CheckCustomerDetailsRequest
+	switch typeArg {
+	case types.ActionTypeDeviceUpdate:
+		request = customer.CheckCustomerDetailsRequest{
+			Password:    customerDetails.Password,
+			PhoneNumber: customerDetails.PhoneNumber,
+			Dob:         customerDetails.Dob,
+			ActionType:  customer.CheckCustomerDetailsRequest_DEVICE_UPDATE,
+		}
+	default:
+		return &types.Response{Success: false, Code: int64(400)}, errors.New("not a valid ActionType")
+	}
+	// Execute RPC call
+	response, err := r.CustomerService.CheckCustomerDetails(ctx, &request)
+	if err != nil {
+		return nil, err
+	}
+	return &types.Response{
+		Success: response.Success,
+		Code:    int64(response.Code),
+	}, nil
 }
 
 func (r *mutationResolver) RequestResubmit(ctx context.Context, customerID string, reportIds []string, message *string) (*types.Response, error) {
@@ -1221,86 +1280,7 @@ func (r *mutationResolver) UpdateFees(ctx context.Context, fees []*types.UpdateF
 }
 
 func (r *mutationResolver) StaffUpdateCustomerDetails(ctx context.Context, customerDetails types.StaffCustomerDetailsUpdateInput) (*types.Response, error) {
-	// Get user claims
-	_, err := middlewares.GetClaimsFromCtx(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	var (
-		firstName, lastName, email string
-	)
-	customerAddress := customerDetails.Address
-	if customerAddress == nil {
-		customerAddress = &types.AddressInput{}
-	}
-
-	var customerCountryId string
-	if customerAddress.CountryID != "" {
-		customerCountryId = customerAddress.CountryID
-	}
-
-	var customerState string
-	if customerAddress.State != nil {
-		customerState = *customerAddress.State
-	}
-
-	var customerCity string
-	if customerAddress.City != nil {
-		customerCity = *customerAddress.City
-	}
-
-	var customerStreet string
-	if customerAddress.Street != "" {
-		customerStreet = customerAddress.Street
-	}
-	var customerPostCode string
-	if customerAddress.Postcode != "" {
-		customerPostCode = customerAddress.Postcode
-	}
-
-	customerCoordinates := customerAddress.Cordinates
-	if customerCoordinates == nil {
-		customerCoordinates = &types.CordinatesInput{}
-	}
-
-	if customerDetails.FirstName != nil {
-		firstName = *customerDetails.FirstName
-	}
-	if customerDetails.LastName != nil {
-		lastName = *customerDetails.LastName
-	}
-	if customerDetails.Email != nil {
-		email = *customerDetails.Email
-	}
-	// Build request
-	request := customer.StaffCustomerDetailsUpdateRequest{
-		FirstName: firstName,
-		LastName:  lastName,
-		Email:     email,
-		Address: &customer.AddressInput{
-			CountryId: customerCountryId,
-			State:     customerState,
-			City:      customerCity,
-			Street:    customerStreet,
-			Postcode:  customerPostCode,
-			Cordinates: &customer.CordinatesInput{
-				Latitude:  float32(customerCoordinates.Latitude),
-				Longitude: float32(customerCoordinates.Longitude),
-			},
-		},
-		CustomerID: customerDetails.CustomerID,
-	}
-	// Execute RPC call
-	response, err := r.CustomerService.StaffCustomerDetailsUpdate(ctx, &request)
-	if err != nil {
-		return nil, err
-	}
-
-	return &types.Response{
-		Success: response.Success,
-		Code:    int64(response.Code),
-	}, nil
+	panic(fmt.Errorf("not implemented"))
 }
 
 // Mutation returns generated.MutationResolver implementation.
