@@ -10576,6 +10576,7 @@ func Test_queryResolver_StaffAuditLogs(t *testing.T) {
 		successAfter
 		successLast
 		successBefore
+		successTypes
 	)
 
 	type reqArg struct {
@@ -10623,6 +10624,17 @@ func Test_queryResolver_StaffAuditLogs(t *testing.T) {
 				first:  int64(10),
 			},
 			testType: successBefore,
+		},
+
+		{
+			name: "Test success using types arg",
+			args: reqArg{
+				types: []types.StaffAuditLogType{
+					types.StaffAuditLogTypeFees,
+					types.StaffAuditLogTypeFxRate,
+				},
+			},
+			testType: successTypes,
 		},
 	}
 
@@ -10806,6 +10818,8 @@ func Test_queryResolver_StaffAuditLogs(t *testing.T) {
 		TotalCount: 2,
 	}
 
+	helper := helpersfactory{}
+
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {
 			switch testCase.testType {
@@ -10861,6 +10875,27 @@ func Test_queryResolver_StaffAuditLogs(t *testing.T) {
 					After:  testCase.args.after,
 					Last:   int32(testCase.args.last),
 					Before: testCase.args.before,
+				}
+
+				customerServiceClient.EXPECT().GetStaffAuditLogs(ctx, mockRequest).Return(mockStaffAuditLogsResp, nil)
+
+				response, err := resolver.StaffAuditLogs(ctx, &testCase.args.first, &testCase.args.after, &testCase.args.last, &testCase.args.before, testCase.args.types)
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+				assert.Equal(t, len(nodes), int(response.TotalCount))
+
+			case successTypes:
+				pTypes := make([]pbTypes.StaffAuditLog_StaffAuditLogTypes, len(testCase.args.types))
+				for i, logType := range testCase.args.types {
+					pTypes[i] = helper.MapProtoStaffAuditLogType(logType)
+				}
+
+				mockRequest := &customer.GetStaffAuditLogsRequest{
+					First:  int32(testCase.args.first),
+					After:  testCase.args.after,
+					Last:   int32(testCase.args.last),
+					Before: testCase.args.before,
+					Types:  pTypes,
 				}
 
 				customerServiceClient.EXPECT().GetStaffAuditLogs(ctx, mockRequest).Return(mockStaffAuditLogsResp, nil)

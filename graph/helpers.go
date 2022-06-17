@@ -31,6 +31,8 @@ type Helper interface {
 	MakeExchangeRateFromProto(protoExchangeRate *protoTypes.ExchangeRate) *types.ExchangeRate
 	MapProtoCredentialTypes(val protoTypes.IdentityCredentials_IdentityCredentialsTypes) types.IdentityCredentialsTypes
 	MapCredentialTypes(val types.IdentityCredentialsTypes) protoTypes.IdentityCredentials_IdentityCredentialsTypes
+	MapStaffAuditLogType(val protoTypes.StaffAuditLog_StaffAuditLogTypes) types.StaffAuditLogType
+	MapProtoStaffAuditLogType(val types.StaffAuditLogType) protoTypes.StaffAuditLog_StaffAuditLogTypes
 }
 
 type helpersfactory struct{}
@@ -907,6 +909,17 @@ func (h *helpersfactory) MapStaffAuditLogType(val protoTypes.StaffAuditLog_Staff
 		return types.StaffAuditLogTypeFxRate
 	default:
 		return ""
+	}
+}
+
+func (h *helpersfactory) MapProtoStaffAuditLogType(val types.StaffAuditLogType) protoTypes.StaffAuditLog_StaffAuditLogTypes {
+	switch val {
+	case types.StaffAuditLogTypeFees:
+		return protoTypes.StaffAuditLog_FEES
+	case types.StaffAuditLogTypeFxRate:
+		return protoTypes.StaffAuditLog_FX_RATE
+	default:
+		return -1
 	}
 }
 

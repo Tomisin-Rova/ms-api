@@ -1292,6 +1292,14 @@ func (r *queryResolver) StaffAuditLogs(ctx context.Context, first *int64, after 
 		request.Before = *before
 	}
 
+	if len(types) > 0 {
+		pTypes := make([]protoTypes.StaffAuditLog_StaffAuditLogTypes, len(types))
+		for i, t := range types {
+			pTypes[i] = r.helper.MapProtoStaffAuditLogType(t)
+		}
+		request.Types = pTypes
+	}
+
 	// Make call
 	resp, err := r.CustomerService.GetStaffAuditLogs(ctx, &request)
 	if err != nil {
