@@ -1230,21 +1230,37 @@ func (h *helpersfactory) MakeStaffAuditLogFromProto(staffAuditLog *protoTypes.St
 		switch staffAuditLog.Type {
 		case protoTypes.StaffAuditLog_FEES:
 			// oldValue
-			oldFeeProto := staffAuditLog.OldValue.Data.(*protoTypes.StaffAuditLogValue_Fee).Fee
-			oldStaffAuditLogValue = h.makeFeeFromProto(oldFeeProto)
+			if staffAuditLog.OldValue != nil && staffAuditLog.OldValue.Data != nil {
+				oldFeeProto := staffAuditLog.OldValue.Data.(*protoTypes.StaffAuditLogValue_Fee).Fee
+				if oldFeeProto != nil {
+					oldStaffAuditLogValue = h.makeFeeFromProto(oldFeeProto)
+				}
+			}
 
 			// newValue
-			newFeeProto := staffAuditLog.NewValue.Data.(*protoTypes.StaffAuditLogValue_Fee).Fee
-			newStaffAuditLogValue = h.makeFeeFromProto(newFeeProto)
+			if staffAuditLog.NewValue != nil && staffAuditLog.NewValue.Data != nil {
+				newFeeProto := staffAuditLog.NewValue.Data.(*protoTypes.StaffAuditLogValue_Fee).Fee
+				if newFeeProto != nil {
+					newStaffAuditLogValue = h.makeFeeFromProto(newFeeProto)
+				}
+			}
 
 		case protoTypes.StaffAuditLog_FX_RATE:
 			// oldValue
-			oldFxRateProto := staffAuditLog.OldValue.Data.(*protoTypes.StaffAuditLogValue_ExchangeRate).ExchangeRate
-			oldStaffAuditLogValue = h.MakeExchangeRateFromProto(oldFxRateProto)
+			if staffAuditLog.OldValue != nil && staffAuditLog.OldValue.Data != nil {
+				oldFxRateProto := staffAuditLog.OldValue.Data.(*protoTypes.StaffAuditLogValue_ExchangeRate).ExchangeRate
+				if oldFxRateProto != nil {
+					oldStaffAuditLogValue = h.MakeExchangeRateFromProto(oldFxRateProto)
+				}
+			}
 
 			// newValue
-			newFxRateProto := staffAuditLog.NewValue.Data.(*protoTypes.StaffAuditLogValue_ExchangeRate).ExchangeRate
-			newStaffAuditLogValue = h.MakeExchangeRateFromProto(newFxRateProto)
+			if staffAuditLog.NewValue != nil && staffAuditLog.NewValue.Data != nil {
+				newFxRateProto := staffAuditLog.NewValue.Data.(*protoTypes.StaffAuditLogValue_ExchangeRate).ExchangeRate
+				if newFxRateProto != nil {
+					newStaffAuditLogValue = h.MakeExchangeRateFromProto(newFxRateProto)
+				}
+			}
 
 		default:
 			return result
