@@ -1326,7 +1326,7 @@ func (r *queryResolver) StaffAuditLogs(ctx context.Context, first *int64, after 
 		TotalCount: int64(resp.TotalCount)}, nil
 }
 
-func (r *queryResolver) Statement(ctx context.Context, accountID string, startDate string, endDate string, transactionPassword string) (*apiTypes.StatementConnection, error) {
+func (r *queryResolver) Statement(ctx context.Context, accountID string, startDate string, endDate string, transactionPassword string) (*apiTypes.StatementResponse, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 

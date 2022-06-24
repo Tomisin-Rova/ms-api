@@ -936,7 +936,7 @@ func (h *helpersfactory) MakeAccountFromProto(account *protoTypes.Account) *type
 
 	balances := &types.AccountBalances{}
 	if account.Balances != nil {
-		balances.TotalBalance = account.Balances.TotalBalance
+		balances.TotalBalance = float64(account.Balances.TotalBalance)
 	}
 
 	fcmb := &types.AccountFcmb{}

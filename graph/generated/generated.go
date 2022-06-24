@@ -633,10 +633,11 @@ type ComplexityRoot struct {
 		TotalCount func(childComplexity int) int
 	}
 
-	StatementConnection struct {
-		EndDate   func(childComplexity int) int
-		Link      func(childComplexity int) int
-		StartDate func(childComplexity int) int
+	StatementResponse struct {
+		AccountID  func(childComplexity int) int
+		EndDate    func(childComplexity int) int
+		PDFContent func(childComplexity int) int
+		StartDate  func(childComplexity int) int
 	}
 
 	TokenResponse struct {
@@ -776,7 +777,7 @@ type QueryResolver interface {
 	Customers(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string, statuses []types.CustomerStatuses) (*types.CustomerConnection, error)
 	Cdds(ctx context.Context, first *int64, after *string, last *int64, before *string, statuses []types.CDDStatuses) (*types.CDDConnection, error)
 	StaffAuditLogs(ctx context.Context, first *int64, after *string, last *int64, before *string, types []types.StaffAuditLogType) (*types.StaffAuditLogConnection, error)
-	Statement(ctx context.Context, accountID string, startDate string, endDate string, transactionPassword string) (*types.StatementConnection, error)
+	Statement(ctx context.Context, accountID string, startDate string, endDate string, transactionPassword string) (*types.StatementResponse, error)
 }
 
 type executableSchema struct {
@@ -3855,26 +3856,33 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.StaffAuditLogConnection.TotalCount(childComplexity), true
 
-	case "StatementConnection.endDate":
-		if e.complexity.StatementConnection.EndDate == nil {
+	case "StatementResponse.accountId":
+		if e.complexity.StatementResponse.AccountID == nil {
 			break
 		}
 
-		return e.complexity.StatementConnection.EndDate(childComplexity), true
+		return e.complexity.StatementResponse.AccountID(childComplexity), true
 
-	case "StatementConnection.link":
-		if e.complexity.StatementConnection.Link == nil {
+	case "StatementResponse.endDate":
+		if e.complexity.StatementResponse.EndDate == nil {
 			break
 		}
 
-		return e.complexity.StatementConnection.Link(childComplexity), true
+		return e.complexity.StatementResponse.EndDate(childComplexity), true
 
-	case "StatementConnection.startDate":
-		if e.complexity.StatementConnection.StartDate == nil {
+	case "StatementResponse.pdfContent":
+		if e.complexity.StatementResponse.PDFContent == nil {
 			break
 		}
 
-		return e.complexity.StatementConnection.StartDate(childComplexity), true
+		return e.complexity.StatementResponse.PDFContent(childComplexity), true
+
+	case "StatementResponse.startDate":
+		if e.complexity.StatementResponse.StartDate == nil {
+			break
+		}
+
+		return e.complexity.StatementResponse.StartDate(childComplexity), true
 
 	case "TokenResponse.code":
 		if e.complexity.TokenResponse.Code == nil {
@@ -4830,7 +4838,7 @@ enum DeliveryMode {
         # Returns statement records until the specified date.
         endDate: Date!
         # Transaction password.
-        transactionPassword: String!): StatementConnection!
+        transactionPassword: String!): StatementResponse!
 }
 
 input CommonQueryFilterInput {
@@ -4999,13 +5007,15 @@ type StaffAuditLogConnection {
     totalCount: Int!
 }
 
-type StatementConnection {
+type StatementResponse {
+    # Represents the account id of returned statemment
+    accountId: ID!
     # Specified statement start date
     startDate: Date!
     # Specified statement end date
     endDate: Date!
-    # URL containing generated pdf statement
-    link: String!
+    # base64 string containing generated pdf statement
+    pdfContent: String
 }`, BuiltIn: false},
 	{Name: "../schemas/types.graphql", Input: `# Date scalar format DD-MM-YYYY
 scalar Date
@@ -5280,7 +5290,7 @@ type AccountMambu {
 }
 
 type AccountBalances {
-    totalBalance: String!
+    totalBalance: Float!
 }
 
 type Product {
@@ -9302,9 +9312,9 @@ func (ec *executionContext) _AccountBalances_totalBalance(ctx context.Context, f
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(float64)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNFloat2float64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_AccountBalances_totalBalance(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -9314,7 +9324,7 @@ func (ec *executionContext) fieldContext_AccountBalances_totalBalance(ctx contex
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
+			return nil, errors.New("field of type Float does not have child fields")
 		},
 	}
 	return fc, nil
@@ -24528,9 +24538,9 @@ func (ec *executionContext) _Query_statement(ctx context.Context, field graphql.
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*types.StatementConnection)
+	res := resTmp.(*types.StatementResponse)
 	fc.Result = res
-	return ec.marshalNStatementConnection2ᚖmsᚗapiᚋtypesᚐStatementConnection(ctx, field.Selections, res)
+	return ec.marshalNStatementResponse2ᚖmsᚗapiᚋtypesᚐStatementResponse(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_statement(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -24541,14 +24551,16 @@ func (ec *executionContext) fieldContext_Query_statement(ctx context.Context, fi
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "accountId":
+				return ec.fieldContext_StatementResponse_accountId(ctx, field)
 			case "startDate":
-				return ec.fieldContext_StatementConnection_startDate(ctx, field)
+				return ec.fieldContext_StatementResponse_startDate(ctx, field)
 			case "endDate":
-				return ec.fieldContext_StatementConnection_endDate(ctx, field)
-			case "link":
-				return ec.fieldContext_StatementConnection_link(ctx, field)
+				return ec.fieldContext_StatementResponse_endDate(ctx, field)
+			case "pdfContent":
+				return ec.fieldContext_StatementResponse_pdfContent(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type StatementConnection", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type StatementResponse", field.Name)
 		},
 	}
 	defer func() {
@@ -27376,8 +27388,52 @@ func (ec *executionContext) fieldContext_StaffAuditLogConnection_totalCount(ctx 
 	return fc, nil
 }
 
-func (ec *executionContext) _StatementConnection_startDate(ctx context.Context, field graphql.CollectedField, obj *types.StatementConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_StatementConnection_startDate(ctx, field)
+func (ec *executionContext) _StatementResponse_accountId(ctx context.Context, field graphql.CollectedField, obj *types.StatementResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_StatementResponse_accountId(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.AccountID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_StatementResponse_accountId(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "StatementResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _StatementResponse_startDate(ctx context.Context, field graphql.CollectedField, obj *types.StatementResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_StatementResponse_startDate(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -27407,9 +27463,9 @@ func (ec *executionContext) _StatementConnection_startDate(ctx context.Context, 
 	return ec.marshalNDate2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_StatementConnection_startDate(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_StatementResponse_startDate(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "StatementConnection",
+		Object:     "StatementResponse",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -27420,8 +27476,8 @@ func (ec *executionContext) fieldContext_StatementConnection_startDate(ctx conte
 	return fc, nil
 }
 
-func (ec *executionContext) _StatementConnection_endDate(ctx context.Context, field graphql.CollectedField, obj *types.StatementConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_StatementConnection_endDate(ctx, field)
+func (ec *executionContext) _StatementResponse_endDate(ctx context.Context, field graphql.CollectedField, obj *types.StatementResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_StatementResponse_endDate(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -27451,9 +27507,9 @@ func (ec *executionContext) _StatementConnection_endDate(ctx context.Context, fi
 	return ec.marshalNDate2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_StatementConnection_endDate(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_StatementResponse_endDate(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "StatementConnection",
+		Object:     "StatementResponse",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -27464,8 +27520,8 @@ func (ec *executionContext) fieldContext_StatementConnection_endDate(ctx context
 	return fc, nil
 }
 
-func (ec *executionContext) _StatementConnection_link(ctx context.Context, field graphql.CollectedField, obj *types.StatementConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_StatementConnection_link(ctx, field)
+func (ec *executionContext) _StatementResponse_pdfContent(ctx context.Context, field graphql.CollectedField, obj *types.StatementResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_StatementResponse_pdfContent(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -27478,26 +27534,23 @@ func (ec *executionContext) _StatementConnection_link(ctx context.Context, field
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Link, nil
+		return obj.PDFContent, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_StatementConnection_link(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_StatementResponse_pdfContent(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "StatementConnection",
+		Object:     "StatementResponse",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -37061,37 +37114,41 @@ func (ec *executionContext) _StaffAuditLogConnection(ctx context.Context, sel as
 	return out
 }
 
-var statementConnectionImplementors = []string{"StatementConnection"}
+var statementResponseImplementors = []string{"StatementResponse"}
 
-func (ec *executionContext) _StatementConnection(ctx context.Context, sel ast.SelectionSet, obj *types.StatementConnection) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, statementConnectionImplementors)
+func (ec *executionContext) _StatementResponse(ctx context.Context, sel ast.SelectionSet, obj *types.StatementResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, statementResponseImplementors)
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("StatementConnection")
+			out.Values[i] = graphql.MarshalString("StatementResponse")
+		case "accountId":
+
+			out.Values[i] = ec._StatementResponse_accountId(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "startDate":
 
-			out.Values[i] = ec._StatementConnection_startDate(ctx, field, obj)
+			out.Values[i] = ec._StatementResponse_startDate(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "endDate":
 
-			out.Values[i] = ec._StatementConnection_endDate(ctx, field, obj)
+			out.Values[i] = ec._StatementResponse_endDate(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "link":
+		case "pdfContent":
 
-			out.Values[i] = ec._StatementConnection_link(ctx, field, obj)
+			out.Values[i] = ec._StatementResponse_pdfContent(ctx, field, obj)
 
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -39842,18 +39899,18 @@ func (ec *executionContext) marshalNStaffStatuses2msᚗapiᚋtypesᚐStaffStatus
 	return v
 }
 
-func (ec *executionContext) marshalNStatementConnection2msᚗapiᚋtypesᚐStatementConnection(ctx context.Context, sel ast.SelectionSet, v types.StatementConnection) graphql.Marshaler {
-	return ec._StatementConnection(ctx, sel, &v)
+func (ec *executionContext) marshalNStatementResponse2msᚗapiᚋtypesᚐStatementResponse(ctx context.Context, sel ast.SelectionSet, v types.StatementResponse) graphql.Marshaler {
+	return ec._StatementResponse(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNStatementConnection2ᚖmsᚗapiᚋtypesᚐStatementConnection(ctx context.Context, sel ast.SelectionSet, v *types.StatementConnection) graphql.Marshaler {
+func (ec *executionContext) marshalNStatementResponse2ᚖmsᚗapiᚋtypesᚐStatementResponse(ctx context.Context, sel ast.SelectionSet, v *types.StatementResponse) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
-	return ec._StatementConnection(ctx, sel, v)
+	return ec._StatementResponse(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
