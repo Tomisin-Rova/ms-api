@@ -6,7 +6,6 @@ package graph
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 
 	"go.uber.org/zap"
@@ -1280,7 +1279,80 @@ func (r *mutationResolver) UpdateFees(ctx context.Context, fees []*types.UpdateF
 }
 
 func (r *mutationResolver) StaffUpdateCustomerDetails(ctx context.Context, customerDetails types.StaffCustomerDetailsUpdateInput) (*types.Response, error) {
-	panic(fmt.Errorf("not implemented"))
+	// Get user claims
+	_, err := middlewares.GetClaimsFromCtx(ctx)
+	if err != nil {
+		responseMessage := "User authentication failed"
+		return &types.Response{Message: &responseMessage, Success: false, Code: int64(500)}, err
+	}
+
+	var (
+		firstName, lastName, email string
+		customerAddress            *customer.AddressInput
+	)
+
+	if customerDetails.FirstName != nil {
+		firstName = *customerDetails.FirstName
+	}
+
+	if customerDetails.LastName != nil {
+		lastName = *customerDetails.LastName
+	}
+
+	if customerDetails.Email != nil {
+		email = *customerDetails.Email
+	}
+
+	if customerDetails.Address != nil {
+		var (
+			state, city string
+			coordinates *customer.CordinatesInput
+		)
+
+		if customerDetails.Address.State != nil {
+			state = *customerDetails.Address.State
+		}
+
+		if customerDetails.Address.City != nil {
+			city = *customerDetails.Address.City
+		}
+
+		if customerDetails.Address.Cordinates != nil {
+			coordinates = &customer.CordinatesInput{
+				Latitude:  float32(customerDetails.Address.Cordinates.Latitude),
+				Longitude: float32(customerDetails.Address.Cordinates.Longitude),
+			}
+		}
+
+		customerAddress = &customer.AddressInput{
+			CountryId:  customerDetails.Address.CountryID,
+			State:      state,
+			City:       city,
+			Street:     customerDetails.Address.Street,
+			Postcode:   customerDetails.Address.Postcode,
+			Cordinates: coordinates,
+		}
+	}
+
+	// Build request
+	request := customer.StaffCustomerDetailsUpdateRequest{
+		CustomerID: customerDetails.CustomerID,
+		FirstName:  firstName,
+		LastName:   lastName,
+		Email:      email,
+		Address:    customerAddress,
+	}
+
+	// Execute RPC call
+	response, err := r.CustomerService.StaffCustomerDetailsUpdate(ctx, &request)
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.Response{
+		Success: response.Success,
+		Code:    int64(response.Code),
+	}, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.
