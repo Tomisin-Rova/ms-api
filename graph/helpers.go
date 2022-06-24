@@ -907,6 +907,8 @@ func (h *helpersfactory) MapStaffAuditLogType(val protoTypes.StaffAuditLog_Staff
 		return types.StaffAuditLogTypeFees
 	case protoTypes.StaffAuditLog_FX_RATE:
 		return types.StaffAuditLogTypeFxRate
+	case protoTypes.StaffAuditLog_CUSTOMER_DETAILS_UPDATE:
+		return types.StaffAuditLogTypeCustomerDetailsUpdate
 	default:
 		return ""
 	}
