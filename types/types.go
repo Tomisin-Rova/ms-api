@@ -65,7 +65,7 @@ type Account struct {
 }
 
 type AccountBalances struct {
-	TotalBalance string `json:"totalBalance"`
+	TotalBalance float64 `json:"totalBalance"`
 }
 
 type AccountConnection struct {
@@ -698,10 +698,11 @@ type StaffCustomerDetailsUpdateInput struct {
 	CustomerID string        `json:"customerID"`
 }
 
-type StatementConnection struct {
-	StartDate string `json:"startDate"`
-	EndDate   string `json:"endDate"`
-	Link      string `json:"link"`
+type StatementResponse struct {
+	AccountID  string  `json:"accountId"`
+	StartDate  string  `json:"startDate"`
+	EndDate    string  `json:"endDate"`
+	PDFContent *string `json:"pdfContent"`
 }
 
 type TokenResponse struct {

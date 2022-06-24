@@ -3859,3 +3859,139 @@ func TestMutationResolver_UpdateDevice(t *testing.T) {
 		})
 	}
 }
+
+func TestMutationResolver_StaffUpdateCustomerDetails(t *testing.T) {
+	const (
+		success = iota
+		errorUnauthenticated
+		errorCallingRPC
+	)
+
+	type arg struct {
+		customerID string
+		reportIds  []string
+		message    *string
+	}
+	message := "Message"
+	var tests = []struct {
+		name     string
+		arg      arg
+		testType int
+	}{
+		{
+			name: "Test success",
+			arg: arg{
+				customerID: "customerId",
+				reportIds:  []string{"reportId1", "reportId2"},
+				message:    &message,
+			},
+			testType: success,
+		},
+		{
+			name:     "Test error unathenticated user",
+			testType: errorUnauthenticated,
+		},
+		{
+			name: "Test error requesting resubmit",
+			arg: arg{
+				customerID: "customerId",
+				reportIds:  []string{"reportId1", "reportId2"},
+				message:    &message,
+			},
+			testType: errorCallingRPC,
+		},
+	}
+
+	mockClaims := models.JWTClaims{ID: "customerID"}
+
+	mockRequestModel := customer.StaffCustomerDetailsUpdateRequest{
+		CustomerID: "mockRequestCustomerID",
+		FirstName:  "mockRequestFirstName",
+		LastName:   "mockRequestLastName",
+		Email:      "mockRequestEmail",
+		Address: &customer.AddressInput{
+			CountryId: "mockRequestAddressCountryID",
+			State:     "mockRequestAddressState",
+			City:      "mockRequestAddressCity",
+			Street:    "mockRequestAddressStreet",
+			Postcode:  "mockRequestAddressPostCode",
+			Cordinates: &customer.CordinatesInput{
+				Latitude:  1,
+				Longitude: 2,
+			},
+		},
+	}
+	mockRequest := types.StaffCustomerDetailsUpdateInput{
+		CustomerID: mockRequestModel.CustomerID,
+		FirstName:  &mockRequestModel.FirstName,
+		LastName:   &mockRequestModel.LastName,
+		Email:      &mockRequestModel.Email,
+		Address: &types.AddressInput{
+			CountryID: mockRequestModel.Address.CountryId,
+			State:     &mockRequestModel.Address.State,
+			City:      &mockRequestModel.Address.City,
+			Street:    mockRequestModel.Address.Street,
+			Postcode:  mockRequestModel.Address.Postcode,
+			Cordinates: &types.CordinatesInput{
+				Latitude:  float64(mockRequestModel.Address.Cordinates.Latitude),
+				Longitude: float64(mockRequestModel.Address.Cordinates.Longitude),
+			},
+		},
+	}
+
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
+	resolverOpts := &ResolverOpts{
+		CustomerService: customerServiceClient,
+	}
+	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			switch testCase.testType {
+			case success:
+				ctx, _ := middleware.PutClaimsOnContext(context.Background(), &mockClaims)
+
+				customerServiceClient.EXPECT().
+					StaffCustomerDetailsUpdate(ctx, &mockRequestModel).
+					Return(
+						&pbTypes.DefaultResponse{
+							Success: true,
+							Code:    http.StatusOK,
+						},
+						nil,
+					)
+
+				resp, err := resolver.StaffUpdateCustomerDetails(ctx, mockRequest)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, &types.Response{
+					Success: true,
+					Code:    http.StatusOK,
+				}, resp)
+			case errorUnauthenticated:
+				ctx := context.Background()
+				resp, err := resolver.StaffUpdateCustomerDetails(ctx, mockRequest)
+				assert.Error(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, &types.Response{
+					Message: &authFailedMessage,
+					Success: false,
+					Code:    http.StatusInternalServerError,
+				}, resp)
+			case errorCallingRPC:
+				ctx, _ := middleware.PutClaimsOnContext(context.Background(), &mockClaims)
+
+				customerServiceClient.EXPECT().
+					StaffCustomerDetailsUpdate(ctx, &mockRequestModel).
+					Return(nil, errors.New("mock error"))
+
+				resp, err := resolver.StaffUpdateCustomerDetails(ctx, mockRequest)
+				assert.Error(t, err)
+				assert.Nil(t, resp)
+				assert.Contains(t, err.Error(), "mock error")
+			}
+		})
+	}
+}

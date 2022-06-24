@@ -907,6 +907,8 @@ func (h *helpersfactory) MapStaffAuditLogType(val protoTypes.StaffAuditLog_Staff
 		return types.StaffAuditLogTypeFees
 	case protoTypes.StaffAuditLog_FX_RATE:
 		return types.StaffAuditLogTypeFxRate
+	case protoTypes.StaffAuditLog_CUSTOMER_DETAILS_UPDATE:
+		return types.StaffAuditLogTypeCustomerDetailsUpdate
 	default:
 		return ""
 	}
@@ -918,6 +920,8 @@ func (h *helpersfactory) MapProtoStaffAuditLogType(val types.StaffAuditLogType) 
 		return protoTypes.StaffAuditLog_FEES
 	case types.StaffAuditLogTypeFxRate:
 		return protoTypes.StaffAuditLog_FX_RATE
+	case types.StaffAuditLogTypeCustomerDetailsUpdate:
+		return protoTypes.StaffAuditLog_CUSTOMER_DETAILS_UPDATE
 	default:
 		return -1
 	}
@@ -936,7 +940,7 @@ func (h *helpersfactory) MakeAccountFromProto(account *protoTypes.Account) *type
 
 	balances := &types.AccountBalances{}
 	if account.Balances != nil {
-		balances.TotalBalance = account.Balances.TotalBalance
+		balances.TotalBalance = float64(account.Balances.TotalBalance)
 	}
 
 	fcmb := &types.AccountFcmb{}
@@ -1259,6 +1263,23 @@ func (h *helpersfactory) MakeStaffAuditLogFromProto(staffAuditLog *protoTypes.St
 				newFxRateProto := staffAuditLog.NewValue.Data.(*protoTypes.StaffAuditLogValue_ExchangeRate).ExchangeRate
 				if newFxRateProto != nil {
 					newStaffAuditLogValue = h.MakeExchangeRateFromProto(newFxRateProto)
+				}
+			}
+
+		case protoTypes.StaffAuditLog_CUSTOMER_DETAILS_UPDATE:
+			// oldValue
+			if staffAuditLog.OldValue != nil && staffAuditLog.OldValue.Data != nil {
+				oldCustomerProto := staffAuditLog.OldValue.Data.(*protoTypes.StaffAuditLogValue_Customer).Customer
+				if oldCustomerProto != nil {
+					oldStaffAuditLogValue = h.makeCustomerFromProto(oldCustomerProto)
+				}
+			}
+
+			// newValue
+			if staffAuditLog.NewValue != nil && staffAuditLog.NewValue.Data != nil {
+				newCustomerProto := staffAuditLog.NewValue.Data.(*protoTypes.StaffAuditLogValue_Customer).Customer
+				if newCustomerProto != nil {
+					newStaffAuditLogValue = h.makeCustomerFromProto(newCustomerProto)
 				}
 			}
 
