@@ -1228,11 +1228,17 @@ func (r *mutationResolver) UpdateAMLStatus(ctx context.Context, id string, statu
 }
 
 func (r *mutationResolver) UpdateFx(ctx context.Context, exchangeRate types.UpdateFXInput) (*types.Response, error) {
+	var salePrice float32
+	if exchangeRate.SalePrice != nil {
+		salePrice = float32(*exchangeRate.SalePrice)
+	}
 	request := pricing.UpdateFXRequest{
 		BaseCurrencyId: exchangeRate.BaseCurrencyID,
 		CurrencyId:     exchangeRate.CurrencyID,
 		BuyPrice:       float32(exchangeRate.BuyPrice),
+		SalePrice:      salePrice,
 	}
+
 	// Execute RPC call
 	response, err := r.PricingService.UpdateFX(ctx, &request)
 	if err != nil {
