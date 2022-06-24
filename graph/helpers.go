@@ -918,6 +918,8 @@ func (h *helpersfactory) MapProtoStaffAuditLogType(val types.StaffAuditLogType) 
 		return protoTypes.StaffAuditLog_FEES
 	case types.StaffAuditLogTypeFxRate:
 		return protoTypes.StaffAuditLog_FX_RATE
+	case types.StaffAuditLogTypeCustomerDetailsUpdate:
+		return protoTypes.StaffAuditLog_CUSTOMER_DETAILS_UPDATE
 	default:
 		return -1
 	}
@@ -1259,6 +1261,23 @@ func (h *helpersfactory) MakeStaffAuditLogFromProto(staffAuditLog *protoTypes.St
 				newFxRateProto := staffAuditLog.NewValue.Data.(*protoTypes.StaffAuditLogValue_ExchangeRate).ExchangeRate
 				if newFxRateProto != nil {
 					newStaffAuditLogValue = h.MakeExchangeRateFromProto(newFxRateProto)
+				}
+			}
+
+		case protoTypes.StaffAuditLog_CUSTOMER_DETAILS_UPDATE:
+			// oldValue
+			if staffAuditLog.OldValue != nil && staffAuditLog.OldValue.Data != nil {
+				oldCustomerProto := staffAuditLog.OldValue.Data.(*protoTypes.StaffAuditLogValue_Customer).Customer
+				if oldCustomerProto != nil {
+					oldStaffAuditLogValue = h.makeCustomerFromProto(oldCustomerProto)
+				}
+			}
+
+			// newValue
+			if staffAuditLog.NewValue != nil && staffAuditLog.NewValue.Data != nil {
+				newCustomerProto := staffAuditLog.NewValue.Data.(*protoTypes.StaffAuditLogValue_Customer).Customer
+				if newCustomerProto != nil {
+					newStaffAuditLogValue = h.makeCustomerFromProto(newCustomerProto)
 				}
 			}
 

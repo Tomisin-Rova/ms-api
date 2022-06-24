@@ -10632,6 +10632,7 @@ func Test_queryResolver_StaffAuditLogs(t *testing.T) {
 				types: []types.StaffAuditLogType{
 					types.StaffAuditLogTypeFees,
 					types.StaffAuditLogTypeFxRate,
+					types.StaffAuditLogTypeCustomerDetailsUpdate,
 				},
 			},
 			testType: successTypes,
@@ -10648,48 +10649,66 @@ func Test_queryResolver_StaffAuditLogs(t *testing.T) {
 	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Query()
 	ctx := context.Background()
 
+	protoCountry := pbTypes.Country{
+		Id: "country_id",
+	}
+
+	protoAddress := pbTypes.Address{
+		Primary: true,
+		Country: &protoCountry,
+		Coordinates: &pbTypes.Coordinates{
+			Latitude:  3.49599,
+			Longitude: 3.55534,
+		},
+	}
+
+	protoPhone := pbTypes.Phone{
+		Primary:  true,
+		Number:   "+440884834833",
+		Verified: true,
+	}
+
+	protoStaff := pbTypes.Staff{
+		Id:       "staff_id",
+		Name:     "staff name",
+		LastName: "staff last name",
+		Dob:      "dd-mm-yyyy",
+		Addresses: []*pbTypes.Address{
+			&protoAddress,
+		},
+		Phones: []*pbTypes.Phone{
+			&protoPhone,
+		},
+		Email:  "staff@mail.com",
+		Status: pbTypes.Staff_ACTIVE,
+	}
+
+	protoTransactionType := pbTypes.TransactionType{
+		Id:       "transaction_type_id",
+		Name:     "Transaction type name",
+		Status:   pbTypes.TransactionType_ACTIVE,
+		StatusTs: timestamppb.Now(),
+		Ts:       timestamppb.Now(),
+	}
+
+	protoCurrency1 := pbTypes.Currency{
+		Id: "currency_id_1",
+	}
+
+	protoCurrency2 := pbTypes.Currency{
+		Id: "currency_id_2",
+	}
+
 	nodes := []*pbTypes.StaffAuditLog{
 		{
-			Id: "node_id_1",
-			Staff: &pbTypes.Staff{
-				Id:       "staff_id",
-				Name:     "staff name",
-				LastName: "staff last name",
-				Dob:      "dd-mm-yyyy",
-				Addresses: []*pbTypes.Address{
-					{
-						Primary: true,
-						Country: &pbTypes.Country{
-							Id: "country_id",
-						},
-						Coordinates: &pbTypes.Coordinates{
-							Latitude:  3.49599,
-							Longitude: 3.55534,
-						},
-					},
-				},
-				Phones: []*pbTypes.Phone{
-					{
-						Primary:  true,
-						Number:   "+440884834833",
-						Verified: true,
-					},
-				},
-				Email:  "staff@mail.com",
-				Status: pbTypes.Staff_ACTIVE,
-			},
+			Id:    "node_id_1",
+			Staff: &protoStaff,
 			OldValue: &pbTypes.StaffAuditLogValue{
 				Data: &pbTypes.StaffAuditLogValue_Fee{
 					Fee: &pbTypes.Fee{
-						Id: "old_fee_id",
-						TransactionType: &pbTypes.TransactionType{
-							Id:       "transaction_type_id",
-							Name:     "Transaction type name",
-							Status:   pbTypes.TransactionType_ACTIVE,
-							StatusTs: timestamppb.Now(),
-							Ts:       timestamppb.Now(),
-						},
-						Type: pbTypes.Fee_FIXED,
+						Id:              "old_fee_id",
+						TransactionType: &protoTransactionType,
+						Type:            pbTypes.Fee_FIXED,
 						Boundaries: []*pbTypes.FeeBoundaries{
 							{
 								Lower:      10.0,
@@ -10707,15 +10726,9 @@ func Test_queryResolver_StaffAuditLogs(t *testing.T) {
 			NewValue: &pbTypes.StaffAuditLogValue{
 				Data: &pbTypes.StaffAuditLogValue_Fee{
 					Fee: &pbTypes.Fee{
-						Id: "new_fee_id",
-						TransactionType: &pbTypes.TransactionType{
-							Id:       "transaction_type_id",
-							Name:     "Transaction type name",
-							Status:   pbTypes.TransactionType_ACTIVE,
-							StatusTs: timestamppb.Now(),
-							Ts:       timestamppb.Now(),
-						},
-						Type: pbTypes.Fee_VARIABLE,
+						Id:              "new_fee_id",
+						TransactionType: &protoTransactionType,
+						Type:            pbTypes.Fee_VARIABLE,
 						Boundaries: []*pbTypes.FeeBoundaries{
 							{
 								Lower:      10.0,
@@ -10741,47 +10754,17 @@ func Test_queryResolver_StaffAuditLogs(t *testing.T) {
 		},
 
 		{
-			Id: "node_id_2",
-			Staff: &pbTypes.Staff{
-				Id:       "staff_id",
-				Name:     "staff name",
-				LastName: "staff last name",
-				Dob:      "dd-mm-yyyy",
-				Addresses: []*pbTypes.Address{
-					{
-						Primary: true,
-						Country: &pbTypes.Country{
-							Id: "country_id",
-						},
-						Coordinates: &pbTypes.Coordinates{
-							Latitude:  3.49599,
-							Longitude: 3.55534,
-						},
-					},
-				},
-				Phones: []*pbTypes.Phone{
-					{
-						Primary:  true,
-						Number:   "+440884834833",
-						Verified: true,
-					},
-				},
-				Email:  "staff@mail.com",
-				Status: pbTypes.Staff_ACTIVE,
-			},
+			Id:    "node_id_2",
+			Staff: &protoStaff,
 			OldValue: &pbTypes.StaffAuditLogValue{
 				Data: &pbTypes.StaffAuditLogValue_ExchangeRate{
 					ExchangeRate: &pbTypes.ExchangeRate{
-						Id: "old_exchange_rate_id",
-						BaseCurrency: &pbTypes.Currency{
-							Id: "base_currency_id",
-						},
-						TargetCurrency: &pbTypes.Currency{
-							Id: "currency_id",
-						},
-						SalePrice: 100.0,
-						BuyPrice:  200.0,
-						Ts:        timestamppb.Now(),
+						Id:             "old_exchange_rate_id",
+						BaseCurrency:   &protoCurrency1,
+						TargetCurrency: &protoCurrency2,
+						SalePrice:      100.0,
+						BuyPrice:       200.0,
+						Ts:             timestamppb.Now(),
 					},
 				},
 			},
@@ -10789,20 +10772,72 @@ func Test_queryResolver_StaffAuditLogs(t *testing.T) {
 			NewValue: &pbTypes.StaffAuditLogValue{
 				Data: &pbTypes.StaffAuditLogValue_ExchangeRate{
 					ExchangeRate: &pbTypes.ExchangeRate{
-						Id: "new_exchange_rate_id",
-						BaseCurrency: &pbTypes.Currency{
-							Id: "base_currency_id",
-						},
-						TargetCurrency: &pbTypes.Currency{
-							Id: "currency_id",
-						},
-						SalePrice: 150.0,
-						BuyPrice:  600.0,
-						Ts:        timestamppb.Now(),
+						Id:             "new_exchange_rate_id",
+						BaseCurrency:   &protoCurrency1,
+						TargetCurrency: &protoCurrency2,
+						SalePrice:      150.0,
+						BuyPrice:       600.0,
+						Ts:             timestamppb.Now(),
 					},
 				},
 			},
 			Type: pbTypes.StaffAuditLog_FX_RATE,
+			Ts:   timestamppb.Now(),
+		},
+
+		{
+			Id:    "node_id_3",
+			Staff: &protoStaff,
+			OldValue: &pbTypes.StaffAuditLogValue{
+				Data: &pbTypes.StaffAuditLogValue_Customer{
+					Customer: &pbTypes.Customer{
+						Id:        "old_customer_id",
+						Title:     pbTypes.Customer_MR,
+						FirstName: "old customer first name",
+						LastName:  "old customer last name",
+						Dob:       "old customer dob",
+						Bvn:       "old customer bvn",
+						Addresses: []*pbTypes.Address{
+							&protoAddress,
+						},
+						Phones: []*pbTypes.Phone{
+							&protoPhone,
+						},
+						Email: &pbTypes.Email{
+							Address: "old customer email address",
+						},
+						Status:   0,
+						StatusTs: timestamppb.Now(),
+						Ts:       timestamppb.Now(),
+					},
+				},
+			},
+
+			NewValue: &pbTypes.StaffAuditLogValue{
+				Data: &pbTypes.StaffAuditLogValue_Customer{
+					Customer: &pbTypes.Customer{
+						Id:        "new_customer_id",
+						Title:     pbTypes.Customer_MR,
+						FirstName: "new customer first name",
+						LastName:  "new customer last name",
+						Dob:       "new customer dob",
+						Bvn:       "new customer bvn",
+						Addresses: []*pbTypes.Address{
+							&protoAddress,
+						},
+						Phones: []*pbTypes.Phone{
+							&protoPhone,
+						},
+						Email: &pbTypes.Email{
+							Address: "new customer email address",
+						},
+						Status:   0,
+						StatusTs: timestamppb.Now(),
+						Ts:       timestamppb.Now(),
+					},
+				},
+			},
+			Type: pbTypes.StaffAuditLog_CUSTOMER_DETAILS_UPDATE,
 			Ts:   timestamppb.Now(),
 		},
 	}
@@ -10815,7 +10850,7 @@ func Test_queryResolver_StaffAuditLogs(t *testing.T) {
 			StartCursor:     "start_cursor",
 			EndCursor:       "end_cursor",
 		},
-		TotalCount: 2,
+		TotalCount: 3,
 	}
 
 	helper := helpersfactory{}
