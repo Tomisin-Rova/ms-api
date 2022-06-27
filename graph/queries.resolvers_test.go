@@ -10943,3 +10943,163 @@ func Test_queryResolver_StaffAuditLogs(t *testing.T) {
 		})
 	}
 }
+
+func Test_queryResolver_Statement(t *testing.T) {
+	const (
+		success = iota
+		errorParsingStartDate
+		errorParsingEndDate
+		errorResp
+
+		dateTemplate        = "02-01-2006"
+		transactionPassword = "validTransactionPassword"
+	)
+
+	tests := []struct {
+		name string
+		args struct {
+			accountId string
+			startDate string
+			endDate   string
+		}
+		testType int
+	}{
+		{
+			name: "Test request statement statement successful",
+			args: struct {
+				accountId string
+				startDate string
+				endDate   string
+			}{
+				accountId: "account_id",
+				startDate: "27-05-2022",
+				endDate:   "05-06-2022",
+			},
+			testType: success,
+		},
+
+		{
+			name: "Test error parsing start date",
+			args: struct {
+				accountId string
+				startDate string
+				endDate   string
+			}{
+				accountId: "account_id",
+				startDate: "invalid_start_date",
+				endDate:   "05-06-2022",
+			},
+			testType: errorParsingStartDate,
+		},
+
+		{
+			name: "Test error parsing end date",
+			args: struct {
+				accountId string
+				startDate string
+				endDate   string
+			}{
+				accountId: "account_id",
+				startDate: "27-05-2022",
+				endDate:   "invaid_end_date",
+			},
+			testType: errorParsingEndDate,
+		},
+
+		{
+			name: "Test error response",
+			args: struct {
+				accountId string
+				startDate string
+				endDate   string
+			}{
+				accountId: "account_id",
+				startDate: "27-05-2022",
+				endDate:   "05-06-2022",
+			},
+			testType: errorResp,
+		},
+	}
+
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	accountServiceClient := mocks.NewMockAccountServiceClient(controller)
+	resolverOpts := &ResolverOpts{
+		AccountService: accountServiceClient,
+	}
+
+	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Query()
+	ctx := context.Background()
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			switch testCase.testType {
+			case success:
+				startDate, err := time.Parse(dateTemplate, testCase.args.startDate)
+				assert.NoError(t, err)
+
+				endDate, err := time.Parse(dateTemplate, testCase.args.endDate)
+				assert.NoError(t, err)
+
+				protoStartDate := timestamppb.New(startDate)
+				protoEndDate := timestamppb.New(endDate)
+
+				pdfContent := "base64 encoded string pdf representaion"
+
+				mockRequest := &account.GetAccountStatementRequest{
+					AccountId:           testCase.args.accountId,
+					StartDate:           protoStartDate,
+					EndDate:             protoEndDate,
+					TransactionPassword: transactionPassword,
+				}
+
+				mockResponse := &account.GetAccountStatementResponse{
+					AccountId:  testCase.args.accountId,
+					StartDate:  protoStartDate,
+					EndDate:    protoEndDate,
+					PdfContent: pdfContent,
+				}
+
+				accountServiceClient.EXPECT().GetAccountStatement(ctx, mockRequest).Return(mockResponse, nil)
+
+				resp, err := resolver.Statement(ctx, testCase.args.accountId, testCase.args.startDate, testCase.args.endDate, transactionPassword)
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, pdfContent, *resp.PDFContent)
+
+			case errorParsingStartDate:
+				resp, err := resolver.Statement(ctx, testCase.args.accountId, testCase.args.startDate, testCase.args.endDate, transactionPassword)
+				assert.Error(t, err)
+				assert.Nil(t, resp)
+
+			case errorParsingEndDate:
+				resp, err := resolver.Statement(ctx, testCase.args.accountId, testCase.args.startDate, testCase.args.endDate, transactionPassword)
+				assert.Error(t, err)
+				assert.Nil(t, resp)
+
+			case errorResp:
+				startDate, err := time.Parse(dateTemplate, testCase.args.startDate)
+				assert.NoError(t, err)
+
+				endDate, err := time.Parse(dateTemplate, testCase.args.endDate)
+				assert.NoError(t, err)
+
+				protoStartDate := timestamppb.New(startDate)
+				protoEndDate := timestamppb.New(endDate)
+
+				mockRequest := &account.GetAccountStatementRequest{
+					AccountId:           testCase.args.accountId,
+					StartDate:           protoStartDate,
+					EndDate:             protoEndDate,
+					TransactionPassword: transactionPassword,
+				}
+
+				accountServiceClient.EXPECT().GetAccountStatement(ctx, mockRequest).Return(nil, errors.New(""))
+
+				resp, err := resolver.Statement(ctx, testCase.args.accountId, testCase.args.startDate, testCase.args.endDate, transactionPassword)
+				assert.Error(t, err)
+				assert.Nil(t, resp)
+			}
+		})
+	}
+}

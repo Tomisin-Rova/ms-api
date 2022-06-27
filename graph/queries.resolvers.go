@@ -6,7 +6,6 @@ package graph
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -1327,7 +1326,47 @@ func (r *queryResolver) StaffAuditLogs(ctx context.Context, first *int64, after 
 }
 
 func (r *queryResolver) Statement(ctx context.Context, accountID string, startDate string, endDate string, transactionPassword string) (*apiTypes.StatementResponse, error) {
-	panic(fmt.Errorf("not implemented"))
+	const dateTemplate = "02-01-2006"
+
+	// Build request
+	request := &account.GetAccountStatementRequest{
+		AccountId:           accountID,
+		TransactionPassword: transactionPassword,
+	}
+
+	if startDate != "" {
+		formartedStartDate, err := time.Parse(dateTemplate, startDate)
+		if err != nil {
+			return nil, err
+		}
+
+		request.StartDate = timestamppb.New(formartedStartDate)
+	}
+
+	if endDate != "" {
+		formartedEndDate, err := time.Parse(dateTemplate, endDate)
+		if err != nil {
+			return nil, err
+		}
+
+		request.EndDate = timestamppb.New(formartedEndDate)
+	}
+
+	// Execute RPC call
+	resp, err := r.AccountService.GetAccountStatement(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+
+	// Build responnse
+	response := &apiTypes.StatementResponse{
+		AccountID:  resp.AccountId,
+		PDFContent: &resp.PdfContent,
+		StartDate:  resp.StartDate.AsTime().Format(dateTemplate),
+		EndDate:    resp.EndDate.AsTime().Format(dateTemplate),
+	}
+
+	return response, nil
 }
 
 // Query returns generated.QueryResolver implementation.
