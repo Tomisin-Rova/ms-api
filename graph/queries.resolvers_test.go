@@ -1541,6 +1541,7 @@ func Test_queryResolver_Me(t *testing.T) {
 								Address:  "example@mail.com",
 								Verified: true,
 							},
+							HasPin:   true,
 							Status:   pbTypes.Customer_SIGNEDUP,
 							StatusTs: timestamppb.Now(),
 							Ts:       timestamppb.Now(),

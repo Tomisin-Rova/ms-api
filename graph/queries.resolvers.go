@@ -1140,6 +1140,7 @@ func (r *queryResolver) Me(ctx context.Context) (apiTypes.MeResult, error) {
 				Address:  appCustomer.Email.Address,
 				Verified: appCustomer.Email.Verified,
 			},
+			HasPin:   appCustomer.HasPin,
 			Status:   helpers.MapProtoCustomerStatuses(appCustomer.Status),
 			StatusTs: appCustomer.StatusTs.AsTime().Unix(),
 			Ts:       appCustomer.Ts.AsTime().Unix(),
