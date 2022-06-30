@@ -1304,12 +1304,12 @@ func (h *helpersfactory) makeStatesFromProto(states []*protoTypes.State) []*type
 		return make([]*types.State, 0)
 	}
 
-	states_ := make([]*types.State, len(states))
+	newStates := make([]*types.State, len(states))
 	for i, state := range states {
-		states_[i] = &types.State{
+		newStates[i] = &types.State{
 			IsoCode: state.IsoCode,
 			Name:    state.Name,
 		}
 	}
-	return states_
+	return newStates
 }
