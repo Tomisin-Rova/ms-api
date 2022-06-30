@@ -228,6 +228,7 @@ type ComplexityRoot struct {
 		CodeAlpha3 func(childComplexity int) int
 		ID         func(childComplexity int) int
 		Name       func(childComplexity int) int
+		States     func(childComplexity int) int
 	}
 
 	CountryConnection struct {
@@ -255,6 +256,7 @@ type ComplexityRoot struct {
 		Dob       func(childComplexity int) int
 		Email     func(childComplexity int) int
 		FirstName func(childComplexity int) int
+		HasPin    func(childComplexity int) int
 		ID        func(childComplexity int) int
 		LastName  func(childComplexity int) int
 		Phones    func(childComplexity int) int
@@ -631,6 +633,11 @@ type ComplexityRoot struct {
 		Nodes      func(childComplexity int) int
 		PageInfo   func(childComplexity int) int
 		TotalCount func(childComplexity int) int
+	}
+
+	State struct {
+		IsoCode func(childComplexity int) int
+		Name    func(childComplexity int) int
 	}
 
 	StatementResponse struct {
@@ -1593,6 +1600,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Country.Name(childComplexity), true
 
+	case "Country.states":
+		if e.complexity.Country.States == nil {
+			break
+		}
+
+		return e.complexity.Country.States(childComplexity), true
+
 	case "CountryConnection.nodes":
 		if e.complexity.CountryConnection.Nodes == nil {
 			break
@@ -1697,6 +1711,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Customer.FirstName(childComplexity), true
+
+	case "Customer.hasPIN":
+		if e.complexity.Customer.HasPin == nil {
+			break
+		}
+
+		return e.complexity.Customer.HasPin(childComplexity), true
 
 	case "Customer.id":
 		if e.complexity.Customer.ID == nil {
@@ -3856,6 +3877,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.StaffAuditLogConnection.TotalCount(childComplexity), true
 
+	case "State.isoCode":
+		if e.complexity.State.IsoCode == nil {
+			break
+		}
+
+		return e.complexity.State.IsoCode(childComplexity), true
+
+	case "State.name":
+		if e.complexity.State.Name == nil {
+			break
+		}
+
+		return e.complexity.State.Name(childComplexity), true
+
 	case "StatementResponse.accountId":
 		if e.complexity.StatementResponse.AccountID == nil {
 			break
@@ -5032,6 +5067,7 @@ type Customer {
     addresses: [Address!]!
     phones: [Phone!]
     email: Email!
+    hasPIN: Boolean!
     status: CustomerStatuses!
     statusTs: Int!
     ts: Int!
@@ -5665,6 +5701,12 @@ type Country {
     id: ID!
     codeAlpha2: String!
     codeAlpha3: String!
+    name: String!
+    states: [State!]!
+}
+
+type State {
+    isoCode: String!
     name: String!
 }
 
@@ -8568,6 +8610,8 @@ func (ec *executionContext) fieldContext_Acceptance_customer(ctx context.Context
 				return ec.fieldContext_Customer_phones(ctx, field)
 			case "email":
 				return ec.fieldContext_Customer_email(ctx, field)
+			case "hasPIN":
+				return ec.fieldContext_Customer_hasPIN(ctx, field)
 			case "status":
 				return ec.fieldContext_Customer_status(ctx, field)
 			case "statusTs":
@@ -8726,6 +8770,8 @@ func (ec *executionContext) fieldContext_Account_customer(ctx context.Context, f
 				return ec.fieldContext_Customer_phones(ctx, field)
 			case "email":
 				return ec.fieldContext_Customer_email(ctx, field)
+			case "hasPIN":
+				return ec.fieldContext_Customer_hasPIN(ctx, field)
 			case "status":
 				return ec.fieldContext_Customer_status(ctx, field)
 			case "statusTs":
@@ -9757,6 +9803,8 @@ func (ec *executionContext) fieldContext_Address_country(ctx context.Context, fi
 				return ec.fieldContext_Country_codeAlpha3(ctx, field)
 			case "name":
 				return ec.fieldContext_Country_name(ctx, field)
+			case "states":
+				return ec.fieldContext_Country_states(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Country", field.Name)
 		},
@@ -10927,6 +10975,8 @@ func (ec *executionContext) fieldContext_Beneficiary_customer(ctx context.Contex
 				return ec.fieldContext_Customer_phones(ctx, field)
 			case "email":
 				return ec.fieldContext_Customer_email(ctx, field)
+			case "hasPIN":
+				return ec.fieldContext_Customer_hasPIN(ctx, field)
 			case "status":
 				return ec.fieldContext_Customer_status(ctx, field)
 			case "statusTs":
@@ -12159,6 +12209,8 @@ func (ec *executionContext) fieldContext_CDD_customer(ctx context.Context, field
 				return ec.fieldContext_Customer_phones(ctx, field)
 			case "email":
 				return ec.fieldContext_Customer_email(ctx, field)
+			case "hasPIN":
+				return ec.fieldContext_Customer_hasPIN(ctx, field)
 			case "status":
 				return ec.fieldContext_Customer_status(ctx, field)
 			case "statusTs":
@@ -13234,6 +13286,56 @@ func (ec *executionContext) fieldContext_Country_name(ctx context.Context, field
 	return fc, nil
 }
 
+func (ec *executionContext) _Country_states(ctx context.Context, field graphql.CollectedField, obj *types.Country) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Country_states(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.States, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*types.State)
+	fc.Result = res
+	return ec.marshalNState2ᚕᚖmsᚗapiᚋtypesᚐStateᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Country_states(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Country",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "isoCode":
+				return ec.fieldContext_State_isoCode(ctx, field)
+			case "name":
+				return ec.fieldContext_State_name(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type State", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _CountryConnection_nodes(ctx context.Context, field graphql.CollectedField, obj *types.CountryConnection) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_CountryConnection_nodes(ctx, field)
 	if err != nil {
@@ -13281,6 +13383,8 @@ func (ec *executionContext) fieldContext_CountryConnection_nodes(ctx context.Con
 				return ec.fieldContext_Country_codeAlpha3(ctx, field)
 			case "name":
 				return ec.fieldContext_Country_name(ctx, field)
+			case "states":
+				return ec.fieldContext_Country_states(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Country", field.Name)
 		},
@@ -14134,6 +14238,50 @@ func (ec *executionContext) fieldContext_Customer_email(ctx context.Context, fie
 	return fc, nil
 }
 
+func (ec *executionContext) _Customer_hasPIN(ctx context.Context, field graphql.CollectedField, obj *types.Customer) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Customer_hasPIN(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.HasPin, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Customer_hasPIN(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Customer",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Customer_status(ctx context.Context, field graphql.CollectedField, obj *types.Customer) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Customer_status(ctx, field)
 	if err != nil {
@@ -14323,6 +14471,8 @@ func (ec *executionContext) fieldContext_CustomerConnection_nodes(ctx context.Co
 				return ec.fieldContext_Customer_phones(ctx, field)
 			case "email":
 				return ec.fieldContext_Customer_email(ctx, field)
+			case "hasPIN":
+				return ec.fieldContext_Customer_hasPIN(ctx, field)
 			case "status":
 				return ec.fieldContext_Customer_status(ctx, field)
 			case "statusTs":
@@ -14535,6 +14685,8 @@ func (ec *executionContext) fieldContext_Device_customer(ctx context.Context, fi
 				return ec.fieldContext_Customer_phones(ctx, field)
 			case "email":
 				return ec.fieldContext_Customer_email(ctx, field)
+			case "hasPIN":
+				return ec.fieldContext_Customer_hasPIN(ctx, field)
 			case "status":
 				return ec.fieldContext_Customer_status(ctx, field)
 			case "statusTs":
@@ -16046,6 +16198,8 @@ func (ec *executionContext) fieldContext_Identity_customer(ctx context.Context, 
 				return ec.fieldContext_Customer_phones(ctx, field)
 			case "email":
 				return ec.fieldContext_Customer_email(ctx, field)
+			case "hasPIN":
+				return ec.fieldContext_Customer_hasPIN(ctx, field)
 			case "status":
 				return ec.fieldContext_Customer_status(ctx, field)
 			case "statusTs":
@@ -17854,6 +18008,8 @@ func (ec *executionContext) fieldContext_LinkedTransactionSource_customer(ctx co
 				return ec.fieldContext_Customer_phones(ctx, field)
 			case "email":
 				return ec.fieldContext_Customer_email(ctx, field)
+			case "hasPIN":
+				return ec.fieldContext_Customer_hasPIN(ctx, field)
 			case "status":
 				return ec.fieldContext_Customer_status(ctx, field)
 			case "statusTs":
@@ -24299,6 +24455,8 @@ func (ec *executionContext) fieldContext_Query_customer(ctx context.Context, fie
 				return ec.fieldContext_Customer_phones(ctx, field)
 			case "email":
 				return ec.fieldContext_Customer_email(ctx, field)
+			case "hasPIN":
+				return ec.fieldContext_Customer_hasPIN(ctx, field)
 			case "status":
 				return ec.fieldContext_Customer_status(ctx, field)
 			case "statusTs":
@@ -27388,6 +27546,94 @@ func (ec *executionContext) fieldContext_StaffAuditLogConnection_totalCount(ctx 
 	return fc, nil
 }
 
+func (ec *executionContext) _State_isoCode(ctx context.Context, field graphql.CollectedField, obj *types.State) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_State_isoCode(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsoCode, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_State_isoCode(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "State",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _State_name(ctx context.Context, field graphql.CollectedField, obj *types.State) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_State_name(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_State_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "State",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _StatementResponse_accountId(ctx context.Context, field graphql.CollectedField, obj *types.StatementResponse) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_StatementResponse_accountId(ctx, field)
 	if err != nil {
@@ -28646,6 +28892,8 @@ func (ec *executionContext) fieldContext_TransactionSource_customer(ctx context.
 				return ec.fieldContext_Customer_phones(ctx, field)
 			case "email":
 				return ec.fieldContext_Customer_email(ctx, field)
+			case "hasPIN":
+				return ec.fieldContext_Customer_hasPIN(ctx, field)
 			case "status":
 				return ec.fieldContext_Customer_status(ctx, field)
 			case "statusTs":
@@ -28878,6 +29126,8 @@ func (ec *executionContext) fieldContext_TransactionTarget_customer(ctx context.
 				return ec.fieldContext_Customer_phones(ctx, field)
 			case "email":
 				return ec.fieldContext_Customer_email(ctx, field)
+			case "hasPIN":
+				return ec.fieldContext_Customer_hasPIN(ctx, field)
 			case "status":
 				return ec.fieldContext_Customer_status(ctx, field)
 			case "statusTs":
@@ -33786,6 +34036,13 @@ func (ec *executionContext) _Country(ctx context.Context, sel ast.SelectionSet, 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "states":
+
+			out.Values[i] = ec._Country_states(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -33993,6 +34250,13 @@ func (ec *executionContext) _Customer(ctx context.Context, sel ast.SelectionSet,
 		case "email":
 
 			out.Values[i] = ec._Customer_email(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "hasPIN":
+
+			out.Values[i] = ec._Customer_hasPIN(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -37114,6 +37378,41 @@ func (ec *executionContext) _StaffAuditLogConnection(ctx context.Context, sel as
 	return out
 }
 
+var stateImplementors = []string{"State"}
+
+func (ec *executionContext) _State(ctx context.Context, sel ast.SelectionSet, obj *types.State) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, stateImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("State")
+		case "isoCode":
+
+			out.Values[i] = ec._State_isoCode(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "name":
+
+			out.Values[i] = ec._State_name(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var statementResponseImplementors = []string{"StatementResponse"}
 
 func (ec *executionContext) _StatementResponse(ctx context.Context, sel ast.SelectionSet, obj *types.StatementResponse) graphql.Marshaler {
@@ -39897,6 +40196,60 @@ func (ec *executionContext) unmarshalNStaffStatuses2msᚗapiᚋtypesᚐStaffStat
 
 func (ec *executionContext) marshalNStaffStatuses2msᚗapiᚋtypesᚐStaffStatuses(ctx context.Context, sel ast.SelectionSet, v types.StaffStatuses) graphql.Marshaler {
 	return v
+}
+
+func (ec *executionContext) marshalNState2ᚕᚖmsᚗapiᚋtypesᚐStateᚄ(ctx context.Context, sel ast.SelectionSet, v []*types.State) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNState2ᚖmsᚗapiᚋtypesᚐState(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNState2ᚖmsᚗapiᚋtypesᚐState(ctx context.Context, sel ast.SelectionSet, v *types.State) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._State(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNStatementResponse2msᚗapiᚋtypesᚐStatementResponse(ctx context.Context, sel ast.SelectionSet, v types.StatementResponse) graphql.Marshaler {
