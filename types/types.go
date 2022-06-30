@@ -285,10 +285,11 @@ type CordinatesInput struct {
 }
 
 type Country struct {
-	ID         string `json:"id"`
-	CodeAlpha2 string `json:"codeAlpha2"`
-	CodeAlpha3 string `json:"codeAlpha3"`
-	Name       string `json:"name"`
+	ID         string   `json:"id"`
+	CodeAlpha2 string   `json:"codeAlpha2"`
+	CodeAlpha3 string   `json:"codeAlpha3"`
+	Name       string   `json:"name"`
+	States     []*State `json:"states"`
 }
 
 type CountryConnection struct {
@@ -320,6 +321,7 @@ type Customer struct {
 	Addresses []*Address       `json:"addresses"`
 	Phones    []*Phone         `json:"phones"`
 	Email     *Email           `json:"email"`
+	HasPin    bool             `json:"hasPIN"`
 	Status    CustomerStatuses `json:"status"`
 	StatusTs  int64            `json:"statusTs"`
 	Ts        int64            `json:"ts"`
@@ -696,6 +698,11 @@ type StaffCustomerDetailsUpdateInput struct {
 	Email      *string       `json:"email"`
 	Address    *AddressInput `json:"address"`
 	CustomerID string        `json:"customerID"`
+}
+
+type State struct {
+	IsoCode string `json:"isoCode"`
+	Name    string `json:"name"`
 }
 
 type StatementResponse struct {
