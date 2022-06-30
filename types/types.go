@@ -68,6 +68,12 @@ type AccountBalances struct {
 	TotalBalance float64 `json:"totalBalance"`
 }
 
+type AccountCloseInput struct {
+	AccountID           string                   `json:"accountId"`
+	DepositAccount      *BeneficiaryAccountInput `json:"depositAccount"`
+	TransactionPassword string                   `json:"transactionPassword"`
+}
+
 type AccountConnection struct {
 	Nodes      []*Account `json:"nodes"`
 	PageInfo   *PageInfo  `json:"pageInfo"`
