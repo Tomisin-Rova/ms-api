@@ -158,6 +158,7 @@ func (r *queryResolver) Countries(ctx context.Context, keywords *string, first *
 	}
 
 	// Build response
+	helpers := &helpersfactory{}
 	nodes := make([]*apiTypes.Country, len(response.Nodes))
 	for index, node := range response.Nodes {
 		address := apiTypes.Country{
@@ -165,6 +166,7 @@ func (r *queryResolver) Countries(ctx context.Context, keywords *string, first *
 			CodeAlpha2: node.CodeAlpha2,
 			CodeAlpha3: node.CodeAlpha3,
 			Name:       node.Name,
+			States:     helpers.makeStatesFromProto(node.States),
 		}
 
 		nodes[index] = &address
