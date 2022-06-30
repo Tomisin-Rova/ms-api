@@ -6,7 +6,6 @@ package graph
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 
 	"go.uber.org/zap"
@@ -1108,7 +1107,8 @@ func (r *mutationResolver) CheckCustomerDetails(ctx context.Context, customerDet
 }
 
 func (r *mutationResolver) CloseAccount(ctx context.Context, accountCloseInput types.AccountCloseInput) (*types.Response, error) {
-	panic(fmt.Errorf("not implemented"))
+	responseMessage := "not found"
+	return &types.Response{Message: &responseMessage, Success: false, Code: int64(400)}, errors.New("not yet implemented")
 }
 
 func (r *mutationResolver) RequestResubmit(ctx context.Context, customerID string, reportIds []string, message *string) (*types.Response, error) {

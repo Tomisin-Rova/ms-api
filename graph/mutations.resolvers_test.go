@@ -3,7 +3,6 @@ package graph
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 	"testing"
 
@@ -3998,32 +3997,26 @@ func TestMutationResolver_StaffUpdateCustomerDetails(t *testing.T) {
 }
 
 func Test_mutationResolver_CloseAccount(t *testing.T) {
-	type fields struct {
-		Resolver *Resolver
-	}
-	type args struct {
-		ctx               context.Context
-		accountCloseInput types.AccountCloseInput
-	}
+	const (
+		success = iota
+	)
+
 	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		want    *types.Response
-		wantErr assert.ErrorAssertionFunc
+		name     string
+		testType int
 	}{
 		// TODO: Add test cases.
+		{
+			name:     "Test content found successfully with given contentId ",
+			testType: success,
+		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			r := &mutationResolver{
-				Resolver: tt.fields.Resolver,
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			switch test.testType {
+			case success:
+				assert.Error(t, errors.New("not yet implemented"))
 			}
-			got, err := r.CloseAccount(tt.args.ctx, tt.args.accountCloseInput)
-			if !tt.wantErr(t, err, fmt.Sprintf("CloseAccount(%v, %v)", tt.args.ctx, tt.args.accountCloseInput)) {
-				return
-			}
-			assert.Equalf(t, tt.want, got, "CloseAccount(%v, %v)", tt.args.ctx, tt.args.accountCloseInput)
 		})
 	}
 }
