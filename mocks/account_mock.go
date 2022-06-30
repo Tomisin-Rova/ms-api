@@ -37,6 +37,26 @@ func (m *MockAccountServiceClient) EXPECT() *MockAccountServiceClientMockRecorde
 	return m.recorder
 }
 
+// CloseAccount mocks base method.
+func (m *MockAccountServiceClient) CloseAccount(ctx context.Context, in *account.CloseAccountRequest, opts ...grpc.CallOption) (*account.CloseAccountResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CloseAccount", varargs...)
+	ret0, _ := ret[0].(*account.CloseAccountResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CloseAccount indicates an expected call of CloseAccount.
+func (mr *MockAccountServiceClientMockRecorder) CloseAccount(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CloseAccount", reflect.TypeOf((*MockAccountServiceClient)(nil).CloseAccount), varargs...)
+}
+
 // CreateAccount mocks base method.
 func (m *MockAccountServiceClient) CreateAccount(ctx context.Context, in *account.CreateAccountRequest, opts ...grpc.CallOption) (*types.Account, error) {
 	m.ctrl.T.Helper()
@@ -198,6 +218,21 @@ func NewMockAccountServiceServer(ctrl *gomock.Controller) *MockAccountServiceSer
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockAccountServiceServer) EXPECT() *MockAccountServiceServerMockRecorder {
 	return m.recorder
+}
+
+// CloseAccount mocks base method.
+func (m *MockAccountServiceServer) CloseAccount(arg0 context.Context, arg1 *account.CloseAccountRequest) (*account.CloseAccountResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CloseAccount", arg0, arg1)
+	ret0, _ := ret[0].(*account.CloseAccountResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CloseAccount indicates an expected call of CloseAccount.
+func (mr *MockAccountServiceServerMockRecorder) CloseAccount(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CloseAccount", reflect.TypeOf((*MockAccountServiceServer)(nil).CloseAccount), arg0, arg1)
 }
 
 // CreateAccount mocks base method.

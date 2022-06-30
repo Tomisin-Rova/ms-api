@@ -3995,3 +3995,37 @@ func TestMutationResolver_StaffUpdateCustomerDetails(t *testing.T) {
 		})
 	}
 }
+
+func Test_mutationResolver_CloseAccount(t *testing.T) {
+	const (
+		success = iota
+	)
+
+	tests := []struct {
+		name     string
+		testType int
+	}{
+		// TODO: Add test cases.
+		{
+			name:     "Test content found successfully with given contentId ",
+			testType: success,
+		},
+	}
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
+	resolverOpts := &ResolverOpts{
+		CustomerService: customerServiceClient,
+	}
+	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			switch test.testType {
+			case success:
+				resp, err := resolver.CloseAccount(context.Background(), types.AccountCloseInput{})
+				assert.Error(t, err)
+				assert.NotNil(t, resp)
+			}
+		})
+	}
+}

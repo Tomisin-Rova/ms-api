@@ -1106,6 +1106,11 @@ func (r *mutationResolver) CheckCustomerDetails(ctx context.Context, customerDet
 	}, nil
 }
 
+func (r *mutationResolver) CloseAccount(ctx context.Context, accountCloseInput types.AccountCloseInput) (*types.Response, error) {
+	responseMessage := "not found"
+	return &types.Response{Message: &responseMessage, Success: false, Code: int64(400)}, errors.New("not yet implemented")
+}
+
 func (r *mutationResolver) RequestResubmit(ctx context.Context, customerID string, reportIds []string, message *string) (*types.Response, error) {
 	// Get user claims
 	_, err := middlewares.GetClaimsFromCtx(ctx)

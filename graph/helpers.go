@@ -1298,3 +1298,18 @@ func (h *helpersfactory) MakeStaffAuditLogFromProto(staffAuditLog *protoTypes.St
 	}
 	return result
 }
+
+func (h *helpersfactory) makeStatesFromProto(states []*protoTypes.State) []*types.State {
+	if states == nil {
+		return make([]*types.State, 0)
+	}
+
+	newStates := make([]*types.State, len(states))
+	for i, state := range states {
+		newStates[i] = &types.State{
+			IsoCode: state.IsoCode,
+			Name:    state.Name,
+		}
+	}
+	return newStates
+}

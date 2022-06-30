@@ -406,6 +406,7 @@ type ComplexityRoot struct {
 		CheckCustomerData          func(childComplexity int, customerData types.CheckCustomerDataInput) int
 		CheckCustomerDetails       func(childComplexity int, customerDetails types.CheckCustomerDetailsInput, typeArg types.ActionType) int
 		CheckCustomerEmail         func(childComplexity int, email string, device types.DeviceInput) int
+		CloseAccount               func(childComplexity int, accountCloseInput types.AccountCloseInput) int
 		CreateAccount              func(childComplexity int, account types.AccountInput) int
 		CreateBeneficiariesByPhone func(childComplexity int, beneficiaries []*types.BeneficiaryByPhoneInput, transactionPassword string) int
 		CreateBeneficiary          func(childComplexity int, beneficiary types.BeneficiaryInput, transactionPassword string) int
@@ -743,6 +744,7 @@ type MutationResolver interface {
 	WithdrawVaultAccount(ctx context.Context, sourceAccountID string, targetAccountID string, transactionPassword string) (*types.Response, error)
 	UpdateDevice(ctx context.Context, phoneNumber string, device types.DeviceInput) (*types.Response, error)
 	CheckCustomerDetails(ctx context.Context, customerDetails types.CheckCustomerDetailsInput, typeArg types.ActionType) (*types.Response, error)
+	CloseAccount(ctx context.Context, accountCloseInput types.AccountCloseInput) (*types.Response, error)
 	RequestResubmit(ctx context.Context, customerID string, reportIds []string, message *string) (*types.Response, error)
 	StaffLogin(ctx context.Context, token string, authType types.AuthType) (*types.AuthResponse, error)
 	UpdateKYCStatus(ctx context.Context, id string, status types.KYCStatuses, message string) (*types.Response, error)
@@ -2418,6 +2420,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CheckCustomerEmail(childComplexity, args["email"].(string), args["device"].(types.DeviceInput)), true
+
+	case "Mutation.closeAccount":
+		if e.complexity.Mutation.CloseAccount == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_closeAccount_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CloseAccount(childComplexity, args["accountCloseInput"].(types.AccountCloseInput)), true
 
 	case "Mutation.createAccount":
 		if e.complexity.Mutation.CreateAccount == nil {
@@ -4200,6 +4214,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	rc := graphql.GetOperationContext(ctx)
 	ec := executionContext{rc, e}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputAccountCloseInput,
 		ec.unmarshalInputAccountInput,
 		ec.unmarshalInputAddressInput,
 		ec.unmarshalInputAnswerInput,
@@ -4352,6 +4367,8 @@ type Mutation {
     updateDevice(phoneNumber: String!, device: DeviceInput!): Response!
     # Validates customer details in order to proceed with secure actions
     checkCustomerDetails(customerDetails: CheckCustomerDetailsInput!, type: ActionType!): Response!
+    # Closes a user account
+    closeAccount(accountCloseInput: AccountCloseInput!): Response!
 
     # ---- Dashboard -----
     # Ask for a customer to resubmit a report
@@ -4619,7 +4636,12 @@ enum DeliveryMode {
     PUSH
 }
 
-`, BuiltIn: false},
+# Customer account close input 
+input AccountCloseInput {
+    accountId: ID!
+    depositAccount: BeneficiaryAccountInput!
+    transactionPassword: String!
+}`, BuiltIn: false},
 	{Name: "../schemas/queries.graphql", Input: `type Query {
     # Check if there's a customer with the email given
     checkEmail(email: String!): Boolean!
@@ -5907,6 +5929,21 @@ func (ec *executionContext) field_Mutation_checkCustomerEmail_args(ctx context.C
 		}
 	}
 	args["device"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_closeAccount_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 types.AccountCloseInput
+	if tmp, ok := rawArgs["accountCloseInput"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("accountCloseInput"))
+		arg0, err = ec.unmarshalNAccountCloseInput2msᚗapiᚋtypesᚐAccountCloseInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["accountCloseInput"] = arg0
 	return args, nil
 }
 
@@ -20275,6 +20312,69 @@ func (ec *executionContext) fieldContext_Mutation_checkCustomerDetails(ctx conte
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_closeAccount(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_closeAccount(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CloseAccount(rctx, fc.Args["accountCloseInput"].(types.AccountCloseInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.Response)
+	fc.Result = res
+	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_closeAccount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "message":
+				return ec.fieldContext_Response_message(ctx, field)
+			case "success":
+				return ec.fieldContext_Response_success(ctx, field)
+			case "code":
+				return ec.fieldContext_Response_code(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Response", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_closeAccount_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_requestResubmit(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_requestResubmit(ctx, field)
 	if err != nil {
@@ -31575,6 +31675,45 @@ func (ec *executionContext) fieldContext___Type_specifiedByURL(ctx context.Conte
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputAccountCloseInput(ctx context.Context, obj interface{}) (types.AccountCloseInput, error) {
+	var it types.AccountCloseInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	for k, v := range asMap {
+		switch k {
+		case "accountId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("accountId"))
+			it.AccountID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "depositAccount":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("depositAccount"))
+			it.DepositAccount, err = ec.unmarshalNBeneficiaryAccountInput2ᚖmsᚗapiᚋtypesᚐBeneficiaryAccountInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "transactionPassword":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("transactionPassword"))
+			it.TransactionPassword, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputAccountInput(ctx context.Context, obj interface{}) (types.AccountInput, error) {
 	var it types.AccountInput
 	asMap := map[string]interface{}{}
@@ -35467,6 +35606,15 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "closeAccount":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_closeAccount(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "requestResubmit":
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
@@ -38299,6 +38447,11 @@ func (ec *executionContext) marshalNAccount2ᚖmsᚗapiᚋtypesᚐAccount(ctx co
 		return graphql.Null
 	}
 	return ec._Account(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNAccountCloseInput2msᚗapiᚋtypesᚐAccountCloseInput(ctx context.Context, v interface{}) (types.AccountCloseInput, error) {
+	res, err := ec.unmarshalInputAccountCloseInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNAccountConnection2msᚗapiᚋtypesᚐAccountConnection(ctx context.Context, sel ast.SelectionSet, v types.AccountConnection) graphql.Marshaler {

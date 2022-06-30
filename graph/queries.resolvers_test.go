@@ -9549,12 +9549,19 @@ func TestQueryResolver_Countries(t *testing.T) {
 								CodeAlpha2: "GB",
 								CodeAlpha3: "GBR",
 								Name:       "United Kingdom",
+								States: []*pbTypes.State{
+									{
+										IsoCode: "1234A",
+										Name:    "Abia",
+									},
+								},
 							},
 							{
 								Id:         "01fq5gdynykttt7t1rytp9fy9c",
 								CodeAlpha2: "NG",
 								CodeAlpha3: "NGA",
 								Name:       "Nigeria",
+								States:     []*pbTypes.State{},
 							},
 						},
 						PaginationInfo: &pbTypes.PaginationInfo{
@@ -9577,12 +9584,19 @@ func TestQueryResolver_Countries(t *testing.T) {
 							CodeAlpha2: "GB",
 							CodeAlpha3: "GBR",
 							Name:       "United Kingdom",
+							States: []*types.State{
+								{
+									IsoCode: "1234A",
+									Name:    "Abia",
+								},
+							},
 						},
 						{
 							ID:         "01fq5gdynykttt7t1rytp9fy9c",
 							CodeAlpha2: "NG",
 							CodeAlpha3: "NGA",
 							Name:       "Nigeria",
+							States:     []*types.State{},
 						},
 					},
 					PageInfo: &types.PageInfo{
@@ -9610,12 +9624,14 @@ func TestQueryResolver_Countries(t *testing.T) {
 								CodeAlpha2: "GB",
 								CodeAlpha3: "GBR",
 								Name:       "United Kingdom",
+								States:     []*pbTypes.State{},
 							},
 							{
 								Id:         "01fq5gdynykttt7t1rytp9fy9c",
 								CodeAlpha2: "NG",
 								CodeAlpha3: "NGA",
 								Name:       "Nigeria",
+								States:     []*pbTypes.State{},
 							},
 						},
 						PaginationInfo: &pbTypes.PaginationInfo{
@@ -9638,12 +9654,14 @@ func TestQueryResolver_Countries(t *testing.T) {
 							CodeAlpha2: "GB",
 							CodeAlpha3: "GBR",
 							Name:       "United Kingdom",
+							States:     []*types.State{},
 						},
 						{
 							ID:         "01fq5gdynykttt7t1rytp9fy9c",
 							CodeAlpha2: "NG",
 							CodeAlpha3: "NGA",
 							Name:       "Nigeria",
+							States:     []*types.State{},
 						},
 					},
 					PageInfo: &types.PageInfo{
@@ -9671,12 +9689,14 @@ func TestQueryResolver_Countries(t *testing.T) {
 								CodeAlpha2: "GB",
 								CodeAlpha3: "GBR",
 								Name:       "United Kingdom",
+								States:     []*pbTypes.State{},
 							},
 							{
 								Id:         "01fq5gdynykttt7t1rytp9fy9c",
 								CodeAlpha2: "NG",
 								CodeAlpha3: "NGA",
 								Name:       "Nigeria",
+								States:     []*pbTypes.State{},
 							},
 						},
 						PaginationInfo: &pbTypes.PaginationInfo{
@@ -9699,12 +9719,14 @@ func TestQueryResolver_Countries(t *testing.T) {
 							CodeAlpha2: "GB",
 							CodeAlpha3: "GBR",
 							Name:       "United Kingdom",
+							States:     []*types.State{},
 						},
 						{
 							ID:         "01fq5gdynykttt7t1rytp9fy9c",
 							CodeAlpha2: "NG",
 							CodeAlpha3: "NGA",
 							Name:       "Nigeria",
+							States:     []*types.State{},
 						},
 					},
 					PageInfo: &types.PageInfo{
@@ -9732,12 +9754,14 @@ func TestQueryResolver_Countries(t *testing.T) {
 								CodeAlpha2: "GB",
 								CodeAlpha3: "GBR",
 								Name:       "United Kingdom",
+								States:     []*pbTypes.State{},
 							},
 							{
 								Id:         "01fq5gdynykttt7t1rytp9fy9c",
 								CodeAlpha2: "NG",
 								CodeAlpha3: "NGA",
 								Name:       "Nigeria",
+								States:     []*pbTypes.State{},
 							},
 						},
 						PaginationInfo: &pbTypes.PaginationInfo{
@@ -9760,12 +9784,14 @@ func TestQueryResolver_Countries(t *testing.T) {
 							CodeAlpha2: "GB",
 							CodeAlpha3: "GBR",
 							Name:       "United Kingdom",
+							States:     []*types.State{},
 						},
 						{
 							ID:         "01fq5gdynykttt7t1rytp9fy9c",
 							CodeAlpha2: "NG",
 							CodeAlpha3: "NGA",
 							Name:       "Nigeria",
+							States:     []*types.State{},
 						},
 					},
 					PageInfo: &types.PageInfo{
@@ -9793,12 +9819,14 @@ func TestQueryResolver_Countries(t *testing.T) {
 								CodeAlpha2: "GB",
 								CodeAlpha3: "GBR",
 								Name:       "United Kingdom",
+								States:     []*pbTypes.State{},
 							},
 							{
 								Id:         "01fq5gdynykttt7t1rytp9fy9c",
 								CodeAlpha2: "NG",
 								CodeAlpha3: "NGA",
 								Name:       "Nigeria",
+								States:     []*pbTypes.State{},
 							},
 						},
 						PaginationInfo: &pbTypes.PaginationInfo{
@@ -9821,12 +9849,14 @@ func TestQueryResolver_Countries(t *testing.T) {
 							CodeAlpha2: "GB",
 							CodeAlpha3: "GBR",
 							Name:       "United Kingdom",
+							States:     []*types.State{},
 						},
 						{
 							ID:         "01fq5gdynykttt7t1rytp9fy9c",
 							CodeAlpha2: "NG",
 							CodeAlpha3: "NGA",
 							Name:       "Nigeria",
+							States:     []*types.State{},
 						},
 					},
 					PageInfo: &types.PageInfo{
@@ -9854,12 +9884,14 @@ func TestQueryResolver_Countries(t *testing.T) {
 								CodeAlpha2: "GB",
 								CodeAlpha3: "GBR",
 								Name:       "United Kingdom",
+								States:     []*pbTypes.State{},
 							},
 							{
 								Id:         "01fq5gdynykttt7t1rytp9fy9c",
 								CodeAlpha2: "NG",
 								CodeAlpha3: "NGA",
 								Name:       "Nigeria",
+								States:     []*pbTypes.State{},
 							},
 						},
 						PaginationInfo: &pbTypes.PaginationInfo{
@@ -9882,12 +9914,14 @@ func TestQueryResolver_Countries(t *testing.T) {
 							CodeAlpha2: "GB",
 							CodeAlpha3: "GBR",
 							Name:       "United Kingdom",
+							States:     []*types.State{},
 						},
 						{
 							ID:         "01fq5gdynykttt7t1rytp9fy9c",
 							CodeAlpha2: "NG",
 							CodeAlpha3: "NGA",
 							Name:       "Nigeria",
+							States:     []*types.State{},
 						},
 					},
 					PageInfo: &types.PageInfo{
