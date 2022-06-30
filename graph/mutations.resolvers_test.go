@@ -3,6 +3,7 @@ package graph
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"testing"
 
@@ -3992,6 +3993,37 @@ func TestMutationResolver_StaffUpdateCustomerDetails(t *testing.T) {
 				assert.Nil(t, resp)
 				assert.Contains(t, err.Error(), "mock error")
 			}
+		})
+	}
+}
+
+func Test_mutationResolver_CloseAccount(t *testing.T) {
+	type fields struct {
+		Resolver *Resolver
+	}
+	type args struct {
+		ctx               context.Context
+		accountCloseInput types.AccountCloseInput
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    *types.Response
+		wantErr assert.ErrorAssertionFunc
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := &mutationResolver{
+				Resolver: tt.fields.Resolver,
+			}
+			got, err := r.CloseAccount(tt.args.ctx, tt.args.accountCloseInput)
+			if !tt.wantErr(t, err, fmt.Sprintf("CloseAccount(%v, %v)", tt.args.ctx, tt.args.accountCloseInput)) {
+				return
+			}
+			assert.Equalf(t, tt.want, got, "CloseAccount(%v, %v)", tt.args.ctx, tt.args.accountCloseInput)
 		})
 	}
 }
