@@ -28,6 +28,7 @@ import (
 	"ms.api/types"
 )
 
+// RequestOtp is the resolver for the requestOTP field.
 func (r *mutationResolver) RequestOtp(ctx context.Context, typeArg types.DeliveryMode, target string, expireTimeInSeconds *int64) (*types.Response, error) {
 	const defaultExpirationTime = 60
 	// Build request
@@ -59,6 +60,7 @@ func (r *mutationResolver) RequestOtp(ctx context.Context, typeArg types.Deliver
 	}, nil
 }
 
+// VerifyOtp is the resolver for the verifyOTP field.
 func (r *mutationResolver) VerifyOtp(ctx context.Context, target string, otpToken string) (*types.Response, error) {
 	// Build request
 	request := verification.VerifyOTPRequest{
@@ -77,6 +79,7 @@ func (r *mutationResolver) VerifyOtp(ctx context.Context, target string, otpToke
 	}, nil
 }
 
+// Signup is the resolver for the signup field.
 func (r *mutationResolver) Signup(ctx context.Context, customer types.CustomerInput) (*types.AuthResponse, error) {
 	err := r.phoneValidator.ValidatePhoneNumber(customer.Phone)
 	if err != nil {
@@ -162,6 +165,7 @@ func (r *mutationResolver) Signup(ctx context.Context, customer types.CustomerIn
 	}, nil
 }
 
+// ResetLoginPassword is the resolver for the resetLoginPassword field.
 func (r *mutationResolver) ResetLoginPassword(ctx context.Context, otpToken string, email string, loginPassword string) (*types.Response, error) {
 	// Build request
 	request := customer.ResetLoginPasswordRequest{
@@ -181,6 +185,7 @@ func (r *mutationResolver) ResetLoginPassword(ctx context.Context, otpToken stri
 	}, nil
 }
 
+// CheckCustomerEmail is the resolver for the checkCustomerEmail field.
 func (r *mutationResolver) CheckCustomerEmail(ctx context.Context, email string, device types.DeviceInput) (*types.Response, error) {
 	_, err := emailvalidator.Validate(email)
 	if err != nil {
@@ -225,6 +230,7 @@ func (r *mutationResolver) CheckCustomerEmail(ctx context.Context, email string,
 	return &types.Response{Success: resp.Success, Code: int64(resp.Code)}, nil
 }
 
+// CheckCustomerData is the resolver for the checkCustomerData field.
 func (r *mutationResolver) CheckCustomerData(ctx context.Context, customerData types.CheckCustomerDataInput) (*types.Response, error) {
 	_, err := emailvalidator.Validate(customerData.Email)
 	if err != nil {
@@ -257,6 +263,7 @@ func (r *mutationResolver) CheckCustomerData(ctx context.Context, customerData t
 	return &types.Response{Success: resp.Success, Code: int64(resp.Code)}, nil
 }
 
+// UpdateCustomerDetails is the resolver for the updateCustomerDetails field.
 func (r *mutationResolver) UpdateCustomerDetails(ctx context.Context, customerDetails types.CustomerDetailsUpdateInput, transactionPassword string) (*types.Response, error) {
 	// Get user claims
 	_, err := middlewares.GetClaimsFromCtx(ctx)
@@ -344,6 +351,7 @@ func (r *mutationResolver) UpdateCustomerDetails(ctx context.Context, customerDe
 	}, nil
 }
 
+// Register is the resolver for the register field.
 func (r *mutationResolver) Register(ctx context.Context, customerDetails types.CustomerDetailsInput) (*types.Response, error) {
 	var responseMessage string
 	_, err := middlewares.GetClaimsFromCtx(ctx)
@@ -406,6 +414,7 @@ func (r *mutationResolver) Register(ctx context.Context, customerDetails types.C
 	return &types.Response{Message: &responseMessage, Success: true, Code: int64(200)}, nil
 }
 
+// SubmitCdd is the resolver for the submitCDD field.
 func (r *mutationResolver) SubmitCdd(ctx context.Context, cdd types.CDDInput) (*types.Response, error) {
 	// Get user claims
 	_, err := middlewares.GetClaimsFromCtx(ctx)
@@ -451,6 +460,7 @@ func (r *mutationResolver) SubmitCdd(ctx context.Context, cdd types.CDDInput) (*
 	}, nil
 }
 
+// AnswerQuestionary is the resolver for the answerQuestionary field.
 func (r *mutationResolver) AnswerQuestionary(ctx context.Context, questionary types.QuestionaryAnswerInput) (*types.Response, error) {
 	var responseMessage string
 
@@ -492,6 +502,7 @@ func (r *mutationResolver) AnswerQuestionary(ctx context.Context, questionary ty
 	return &types.Response{Message: &responseMessage, Success: resp.Success, Code: int64(resp.Code)}, nil
 }
 
+// AcceptContent is the resolver for the acceptContent field.
 func (r *mutationResolver) AcceptContent(ctx context.Context, contentID string) (*types.Response, error) {
 	res, err := r.CustomerService.SetAcceptance(ctx, &customer.SetAcceptanceRequest{ContentId: contentID})
 	if err != nil {
@@ -506,6 +517,7 @@ func (r *mutationResolver) AcceptContent(ctx context.Context, contentID string) 
 	}, nil
 }
 
+// SetTransactionPassword is the resolver for the setTransactionPassword field.
 func (r *mutationResolver) SetTransactionPassword(ctx context.Context, password string) (*types.Response, error) {
 	// Get user claims
 	_, err := middlewares.GetClaimsFromCtx(ctx)
@@ -529,6 +541,7 @@ func (r *mutationResolver) SetTransactionPassword(ctx context.Context, password 
 	}, nil
 }
 
+// ForgotTransactionPassword is the resolver for the forgotTransactionPassword field.
 func (r *mutationResolver) ForgotTransactionPassword(ctx context.Context, newTransactionPassword string) (*types.Response, error) {
 	// Get user claims
 	_, err := middlewares.GetClaimsFromCtx(ctx)
@@ -552,6 +565,7 @@ func (r *mutationResolver) ForgotTransactionPassword(ctx context.Context, newTra
 	}, nil
 }
 
+// ResetTransactionPassword is the resolver for the resetTransactionPassword field.
 func (r *mutationResolver) ResetTransactionPassword(ctx context.Context, otpToken string, email string, newTransactionPassword string, currentTransactionPassword string) (*types.Response, error) {
 	// Get user claims
 	_, err := middlewares.GetClaimsFromCtx(ctx)
@@ -578,6 +592,7 @@ func (r *mutationResolver) ResetTransactionPassword(ctx context.Context, otpToke
 	}, nil
 }
 
+// Login is the resolver for the login field.
 func (r *mutationResolver) Login(ctx context.Context, credentials types.AuthInput) (*types.AuthResponse, error) {
 	email, err := r.emailValidator.Validate(credentials.Email)
 	if err != nil {
@@ -619,6 +634,7 @@ func (r *mutationResolver) Login(ctx context.Context, credentials types.AuthInpu
 	}, nil
 }
 
+// RefreshToken is the resolver for the refreshToken field.
 func (r *mutationResolver) RefreshToken(ctx context.Context, token string) (*types.AuthResponse, error) {
 	result, err := r.AuthService.RefreshToken(ctx, &auth.RefreshTokenRequest{Token: token})
 	if err != nil {
@@ -637,6 +653,7 @@ func (r *mutationResolver) RefreshToken(ctx context.Context, token string) (*typ
 	}, nil
 }
 
+// SetDeviceToken is the resolver for the setDeviceToken field.
 func (r *mutationResolver) SetDeviceToken(ctx context.Context, tokens []*types.DeviceTokenInput) (*types.Response, error) {
 	var responseMessage string
 	_, err := middlewares.GetClaimsFromCtx(ctx)
@@ -664,6 +681,7 @@ func (r *mutationResolver) SetDeviceToken(ctx context.Context, tokens []*types.D
 	return &types.Response{Message: &responseMessage, Success: resp.Success, Code: int64(resp.Code)}, err
 }
 
+// SetDevicePreferences is the resolver for the setDevicePreferences field.
 func (r *mutationResolver) SetDevicePreferences(ctx context.Context, preferences []*types.DevicePreferencesInput) (*types.Response, error) {
 	var responseMessage string
 	helpers := &helpersfactory{}
@@ -698,6 +716,7 @@ func (r *mutationResolver) SetDevicePreferences(ctx context.Context, preferences
 	return &types.Response{Message: &responseMessage, Success: false, Code: int64(500)}, err
 }
 
+// CheckBvn is the resolver for the checkBVN field.
 func (r *mutationResolver) CheckBvn(ctx context.Context, bvn string, phone string) (*types.Response, error) {
 	// Get user claims
 	_, err := middlewares.GetClaimsFromCtx(ctx)
@@ -721,6 +740,7 @@ func (r *mutationResolver) CheckBvn(ctx context.Context, bvn string, phone strin
 	}, nil
 }
 
+// CreateAccount is the resolver for the createAccount field.
 func (r *mutationResolver) CreateAccount(ctx context.Context, account types.AccountInput) (*types.Response, error) {
 	// Get user claims
 	_, err := middlewares.GetClaimsFromCtx(ctx)
@@ -744,6 +764,7 @@ func (r *mutationResolver) CreateAccount(ctx context.Context, account types.Acco
 	}, nil
 }
 
+// CreateVaultAccount is the resolver for the createVaultAccount field.
 func (r *mutationResolver) CreateVaultAccount(ctx context.Context, account types.VaultAccountInput, transactionPassword string) (*types.Response, error) {
 	// Authenticate user
 	_, err := middlewares.GetClaimsFromCtx(ctx)
@@ -782,6 +803,7 @@ func (r *mutationResolver) CreateVaultAccount(ctx context.Context, account types
 	}, nil
 }
 
+// CreateBeneficiary is the resolver for the createBeneficiary field.
 func (r *mutationResolver) CreateBeneficiary(ctx context.Context, beneficiary types.BeneficiaryInput, transactionPassword string) (*types.Response, error) {
 	// Authenticate user
 	_, err := middlewares.GetClaimsFromCtx(ctx)
@@ -824,6 +846,7 @@ func (r *mutationResolver) CreateBeneficiary(ctx context.Context, beneficiary ty
 	}, nil
 }
 
+// CreateBeneficiariesByPhone is the resolver for the createBeneficiariesByPhone field.
 func (r *mutationResolver) CreateBeneficiariesByPhone(ctx context.Context, beneficiaries []*types.BeneficiaryByPhoneInput, transactionPassword string) (*types.Response, error) {
 	// Authenticate user
 	_, err := middlewares.GetClaimsFromCtx(ctx)
@@ -860,6 +883,7 @@ func (r *mutationResolver) CreateBeneficiariesByPhone(ctx context.Context, benef
 	}, nil
 }
 
+// AddBeneficiaryAccount is the resolver for the addBeneficiaryAccount field.
 func (r *mutationResolver) AddBeneficiaryAccount(ctx context.Context, beneficiaryID string, account types.BeneficiaryAccountInput, transactionPassword string) (*types.Response, error) {
 	// Authenticate user
 	_, err := middlewares.GetClaimsFromCtx(ctx)
@@ -896,6 +920,7 @@ func (r *mutationResolver) AddBeneficiaryAccount(ctx context.Context, beneficiar
 	}, nil
 }
 
+// DeleteBeneficiaryAccount is the resolver for the deleteBeneficiaryAccount field.
 func (r *mutationResolver) DeleteBeneficiaryAccount(ctx context.Context, beneficiaryID string, accountID string, transactionPassword string) (*types.Response, error) {
 	// Authenticate user
 	_, err := middlewares.GetClaimsFromCtx(ctx)
@@ -924,6 +949,7 @@ func (r *mutationResolver) DeleteBeneficiaryAccount(ctx context.Context, benefic
 	}, nil
 }
 
+// CreateTransfer is the resolver for the createTransfer field.
 func (r *mutationResolver) CreateTransfer(ctx context.Context, transfer types.TransactionInput, transactionPassword string) (*types.Response, error) {
 	// Auhtenticate user
 	_, err := middlewares.GetClaimsFromCtx(ctx)
@@ -963,6 +989,7 @@ func (r *mutationResolver) CreateTransfer(ctx context.Context, transfer types.Tr
 	}, nil
 }
 
+// SendNotification is the resolver for the sendNotification field.
 func (r *mutationResolver) SendNotification(ctx context.Context, typeArg types.DeliveryMode, content string, templateID string) (*types.Response, error) {
 	_, err := middlewares.GetClaimsFromCtx(ctx)
 	if err != nil {
@@ -989,6 +1016,7 @@ func (r *mutationResolver) SendNotification(ctx context.Context, typeArg types.D
 	}, nil
 }
 
+// DeactivateCredential is the resolver for the deactivateCredential field.
 func (r *mutationResolver) DeactivateCredential(ctx context.Context, credentialType types.IdentityCredentialsTypes) (*types.Response, error) {
 	// Get user claims
 	_, err := middlewares.GetClaimsFromCtx(ctx)
@@ -1012,6 +1040,7 @@ func (r *mutationResolver) DeactivateCredential(ctx context.Context, credentialT
 	}, nil
 }
 
+// WithdrawVaultAccount is the resolver for the withdrawVaultAccount field.
 func (r *mutationResolver) WithdrawVaultAccount(ctx context.Context, sourceAccountID string, targetAccountID string, transactionPassword string) (*types.Response, error) {
 	// Get user claims
 	_, err := middlewares.GetClaimsFromCtx(ctx)
@@ -1039,6 +1068,7 @@ func (r *mutationResolver) WithdrawVaultAccount(ctx context.Context, sourceAccou
 	}, nil
 }
 
+// UpdateDevice is the resolver for the updateDevice field.
 func (r *mutationResolver) UpdateDevice(ctx context.Context, phoneNumber string, device types.DeviceInput) (*types.Response, error) {
 	helpers := &helpersfactory{}
 	var tokens []*pbTypes.DeviceTokenInput
@@ -1082,6 +1112,7 @@ func (r *mutationResolver) UpdateDevice(ctx context.Context, phoneNumber string,
 	}, nil
 }
 
+// CheckCustomerDetails is the resolver for the checkCustomerDetails field.
 func (r *mutationResolver) CheckCustomerDetails(ctx context.Context, customerDetails types.CheckCustomerDetailsInput, typeArg types.ActionType) (*types.Response, error) {
 	var request customer.CheckCustomerDetailsRequest
 	switch typeArg {
@@ -1106,11 +1137,7 @@ func (r *mutationResolver) CheckCustomerDetails(ctx context.Context, customerDet
 	}, nil
 }
 
-func (r *mutationResolver) CloseAccount(ctx context.Context, accountCloseInput types.AccountCloseInput) (*types.Response, error) {
-	responseMessage := "not found"
-	return &types.Response{Message: &responseMessage, Success: false, Code: int64(400)}, errors.New("not yet implemented")
-}
-
+// RequestResubmit is the resolver for the requestResubmit field.
 func (r *mutationResolver) RequestResubmit(ctx context.Context, customerID string, reportIds []string, message *string) (*types.Response, error) {
 	// Get user claims
 	_, err := middlewares.GetClaimsFromCtx(ctx)
@@ -1139,6 +1166,7 @@ func (r *mutationResolver) RequestResubmit(ctx context.Context, customerID strin
 	}, nil
 }
 
+// StaffLogin is the resolver for the staffLogin field.
 func (r *mutationResolver) StaffLogin(ctx context.Context, token string, authType types.AuthType) (*types.AuthResponse, error) {
 	loginType := r.helper.StaffLoginTypeFromModel(authType)
 	tokens, err := r.AuthService.StaffLogin(ctx, &auth.StaffLoginRequest{Token: token, AuthType: loginType})
@@ -1162,6 +1190,7 @@ func (r *mutationResolver) StaffLogin(ctx context.Context, token string, authTyp
 	}, nil
 }
 
+// UpdateKYCStatus is the resolver for the updateKYCStatus field.
 func (r *mutationResolver) UpdateKYCStatus(ctx context.Context, id string, status types.KYCStatuses, message string) (*types.Response, error) {
 	// Get user claims
 	_, err := middlewares.GetClaimsFromCtx(ctx)
@@ -1197,6 +1226,7 @@ func (r *mutationResolver) UpdateKYCStatus(ctx context.Context, id string, statu
 	}, nil
 }
 
+// UpdateAMLStatus is the resolver for the updateAMLStatus field.
 func (r *mutationResolver) UpdateAMLStatus(ctx context.Context, id string, status types.AMLStatuses, message string) (*types.Response, error) {
 	// Get user claims
 	_, err := middlewares.GetClaimsFromCtx(ctx)
@@ -1232,6 +1262,7 @@ func (r *mutationResolver) UpdateAMLStatus(ctx context.Context, id string, statu
 	}, nil
 }
 
+// UpdateFx is the resolver for the updateFX field.
 func (r *mutationResolver) UpdateFx(ctx context.Context, exchangeRate types.UpdateFXInput) (*types.Response, error) {
 	var salePrice float32
 	if exchangeRate.SalePrice != nil {
@@ -1256,6 +1287,7 @@ func (r *mutationResolver) UpdateFx(ctx context.Context, exchangeRate types.Upda
 	}, nil
 }
 
+// UpdateFees is the resolver for the updateFees field.
 func (r *mutationResolver) UpdateFees(ctx context.Context, fees []*types.UpdateFeesInput) (*types.Response, error) {
 	var feesRequest []*pricing.UpdateFeesRequest
 
@@ -1289,6 +1321,7 @@ func (r *mutationResolver) UpdateFees(ctx context.Context, fees []*types.UpdateF
 	}, nil
 }
 
+// StaffUpdateCustomerDetails is the resolver for the staffUpdateCustomerDetails field.
 func (r *mutationResolver) StaffUpdateCustomerDetails(ctx context.Context, customerDetails types.StaffCustomerDetailsUpdateInput) (*types.Response, error) {
 	// Get user claims
 	_, err := middlewares.GetClaimsFromCtx(ctx)
@@ -1363,6 +1396,53 @@ func (r *mutationResolver) StaffUpdateCustomerDetails(ctx context.Context, custo
 	return &types.Response{
 		Success: response.Success,
 		Code:    int64(response.Code),
+	}, nil
+}
+
+// CloseAccount is the resolver for the closeAccount field.
+func (r *mutationResolver) CloseAccount(ctx context.Context, accountCloseInput types.AccountCloseInput) (*types.Response, error) {
+	// Get user claims
+	_, err := middlewares.GetClaimsFromCtx(ctx)
+	if err != nil {
+		responseMessage := "User authentication failed"
+		return &types.Response{Message: &responseMessage, Success: false, Code: http.StatusBadGateway}, err
+	}
+
+	if accountCloseInput.AccountID == "" {
+		responseMessage := "Empty account ID"
+		return &types.Response{Message: &responseMessage, Success: false, Code: http.StatusBadRequest}, err
+	}
+
+	if accountCloseInput.TransactionPassword == "" {
+		responseMessage := "Empty Transaction password"
+		return &types.Response{Message: &responseMessage, Success: false, Code: http.StatusBadRequest}, err
+	}
+	if accountCloseInput.DepositAccount.AccountNumber == "" {
+		responseMessage := "Empty Account Information"
+		return &types.Response{Message: &responseMessage, Success: false, Code: http.StatusBadRequest}, err
+	}
+
+	//Build request
+	request := accountPb.CloseAccountRequest{
+		AccountId: accountCloseInput.AccountID,
+		DepositAccount: &accountPb.BeneficiaryAccountInput{
+			Name:          *accountCloseInput.DepositAccount.Name,
+			CurrencyId:    accountCloseInput.DepositAccount.CurrencyID,
+			AccountNumber: accountCloseInput.DepositAccount.AccountNumber,
+			Code:          accountCloseInput.DepositAccount.Code,
+		},
+		TransactionPassword: accountCloseInput.TransactionPassword,
+	}
+
+	// Call RPC
+	_, err = r.AccountService.CloseAccount(ctx, &request)
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.Response{
+		Success: true,
+		Code:    http.StatusOK,
 	}, nil
 }
 
