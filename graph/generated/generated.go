@@ -31682,7 +31682,12 @@ func (ec *executionContext) unmarshalInputAccountCloseInput(ctx context.Context,
 		asMap[k] = v
 	}
 
-	for k, v := range asMap {
+	fieldsInOrder := [...]string{"accountId", "depositAccount", "transactionPassword"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
 		switch k {
 		case "accountId":
 			var err error
@@ -31721,7 +31726,12 @@ func (ec *executionContext) unmarshalInputAccountInput(ctx context.Context, obj 
 		asMap[k] = v
 	}
 
-	for k, v := range asMap {
+	fieldsInOrder := [...]string{"productId"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
 		switch k {
 		case "productId":
 			var err error
@@ -31744,7 +31754,12 @@ func (ec *executionContext) unmarshalInputAddressInput(ctx context.Context, obj 
 		asMap[k] = v
 	}
 
-	for k, v := range asMap {
+	fieldsInOrder := [...]string{"countryId", "state", "city", "street", "postcode", "cordinates"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
 		switch k {
 		case "countryId":
 			var err error
@@ -31807,7 +31822,12 @@ func (ec *executionContext) unmarshalInputAnswerInput(ctx context.Context, obj i
 		asMap[k] = v
 	}
 
-	for k, v := range asMap {
+	fieldsInOrder := [...]string{"id", "answer", "predefinedAnswers"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
 		switch k {
 		case "id":
 			var err error
@@ -31846,7 +31866,12 @@ func (ec *executionContext) unmarshalInputAuthInput(ctx context.Context, obj int
 		asMap[k] = v
 	}
 
-	for k, v := range asMap {
+	fieldsInOrder := [...]string{"email", "password", "deviceIdentifier"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
 		switch k {
 		case "email":
 			var err error
@@ -31885,7 +31910,12 @@ func (ec *executionContext) unmarshalInputBeneficiaryAccountInput(ctx context.Co
 		asMap[k] = v
 	}
 
-	for k, v := range asMap {
+	fieldsInOrder := [...]string{"name", "currencyId", "accountNumber", "code"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
 		switch k {
 		case "name":
 			var err error
@@ -31932,7 +31962,12 @@ func (ec *executionContext) unmarshalInputBeneficiaryByPhoneInput(ctx context.Co
 		asMap[k] = v
 	}
 
-	for k, v := range asMap {
+	fieldsInOrder := [...]string{"phone", "name"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
 		switch k {
 		case "phone":
 			var err error
@@ -31963,7 +31998,12 @@ func (ec *executionContext) unmarshalInputBeneficiaryInput(ctx context.Context, 
 		asMap[k] = v
 	}
 
-	for k, v := range asMap {
+	fieldsInOrder := [...]string{"name", "account"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
 		switch k {
 		case "name":
 			var err error
@@ -31994,7 +32034,12 @@ func (ec *executionContext) unmarshalInputBoundaryFee(ctx context.Context, obj i
 		asMap[k] = v
 	}
 
-	for k, v := range asMap {
+	fieldsInOrder := [...]string{"lower", "upper", "amount", "percentage"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
 		switch k {
 		case "lower":
 			var err error
@@ -32041,7 +32086,12 @@ func (ec *executionContext) unmarshalInputCDDInput(ctx context.Context, obj inte
 		asMap[k] = v
 	}
 
-	for k, v := range asMap {
+	fieldsInOrder := [...]string{"kyc", "aml", "poa"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
 		switch k {
 		case "kyc":
 			var err error
@@ -32080,7 +32130,12 @@ func (ec *executionContext) unmarshalInputCheckCustomerDataInput(ctx context.Con
 		asMap[k] = v
 	}
 
-	for k, v := range asMap {
+	fieldsInOrder := [...]string{"email", "firstName", "lastName", "dob", "accountNumber", "sortCode", "deviceIdentifier"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
 		switch k {
 		case "email":
 			var err error
@@ -32151,7 +32206,12 @@ func (ec *executionContext) unmarshalInputCheckCustomerDetailsInput(ctx context.
 		asMap[k] = v
 	}
 
-	for k, v := range asMap {
+	fieldsInOrder := [...]string{"password", "phoneNumber", "dob"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
 		switch k {
 		case "password":
 			var err error
@@ -32190,7 +32250,12 @@ func (ec *executionContext) unmarshalInputCommonQueryFilterInput(ctx context.Con
 		asMap[k] = v
 	}
 
-	for k, v := range asMap {
+	fieldsInOrder := [...]string{"id", "customerId", "last"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
 		switch k {
 		case "id":
 			var err error
@@ -32229,7 +32294,12 @@ func (ec *executionContext) unmarshalInputCordinatesInput(ctx context.Context, o
 		asMap[k] = v
 	}
 
-	for k, v := range asMap {
+	fieldsInOrder := [...]string{"latitude", "longitude"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
 		switch k {
 		case "latitude":
 			var err error
@@ -32260,7 +32330,12 @@ func (ec *executionContext) unmarshalInputCustomerDetailsInput(ctx context.Conte
 		asMap[k] = v
 	}
 
-	for k, v := range asMap {
+	fieldsInOrder := [...]string{"title", "firstName", "lastName", "dob", "address"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
 		switch k {
 		case "title":
 			var err error
@@ -32315,7 +32390,12 @@ func (ec *executionContext) unmarshalInputCustomerDetailsUpdateInput(ctx context
 		asMap[k] = v
 	}
 
-	for k, v := range asMap {
+	fieldsInOrder := [...]string{"firstName", "lastName", "phone", "email", "address"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
 		switch k {
 		case "firstName":
 			var err error
@@ -32370,7 +32450,12 @@ func (ec *executionContext) unmarshalInputCustomerInput(ctx context.Context, obj
 		asMap[k] = v
 	}
 
-	for k, v := range asMap {
+	fieldsInOrder := [...]string{"phone", "email", "loginPassword", "device"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
 		switch k {
 		case "phone":
 			var err error
@@ -32417,7 +32502,12 @@ func (ec *executionContext) unmarshalInputDeviceInput(ctx context.Context, obj i
 		asMap[k] = v
 	}
 
-	for k, v := range asMap {
+	fieldsInOrder := [...]string{"identifier", "os", "brand", "tokens", "preferences"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
 		switch k {
 		case "identifier":
 			var err error
@@ -32472,7 +32562,12 @@ func (ec *executionContext) unmarshalInputDevicePreferencesInput(ctx context.Con
 		asMap[k] = v
 	}
 
-	for k, v := range asMap {
+	fieldsInOrder := [...]string{"type", "value"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
 		switch k {
 		case "type":
 			var err error
@@ -32503,7 +32598,12 @@ func (ec *executionContext) unmarshalInputDeviceTokenInput(ctx context.Context, 
 		asMap[k] = v
 	}
 
-	for k, v := range asMap {
+	fieldsInOrder := [...]string{"type", "value"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
 		switch k {
 		case "type":
 			var err error
@@ -32534,7 +32634,12 @@ func (ec *executionContext) unmarshalInputKYCInput(ctx context.Context, obj inte
 		asMap[k] = v
 	}
 
-	for k, v := range asMap {
+	fieldsInOrder := [...]string{"reportTypes"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
 		switch k {
 		case "reportTypes":
 			var err error
@@ -32557,7 +32662,12 @@ func (ec *executionContext) unmarshalInputPOAInput(ctx context.Context, obj inte
 		asMap[k] = v
 	}
 
-	for k, v := range asMap {
+	fieldsInOrder := [...]string{"data"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
 		switch k {
 		case "data":
 			var err error
@@ -32580,7 +32690,12 @@ func (ec *executionContext) unmarshalInputQuestionaryAnswerInput(ctx context.Con
 		asMap[k] = v
 	}
 
-	for k, v := range asMap {
+	fieldsInOrder := [...]string{"id", "answers"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
 		switch k {
 		case "id":
 			var err error
@@ -32611,7 +32726,12 @@ func (ec *executionContext) unmarshalInputStaffCustomerDetailsUpdateInput(ctx co
 		asMap[k] = v
 	}
 
-	for k, v := range asMap {
+	fieldsInOrder := [...]string{"firstName", "lastName", "email", "address", "customerID"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
 		switch k {
 		case "firstName":
 			var err error
@@ -32666,7 +32786,12 @@ func (ec *executionContext) unmarshalInputTransactionInput(ctx context.Context, 
 		asMap[k] = v
 	}
 
-	for k, v := range asMap {
+	fieldsInOrder := [...]string{"transactionTypeId", "reference", "feeIds", "exchangeRateId", "amount", "sourceAccountId", "targetAccountId", "idempotencyKey"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
 		switch k {
 		case "transactionTypeId":
 			var err error
@@ -32745,7 +32870,12 @@ func (ec *executionContext) unmarshalInputUpdateFXInput(ctx context.Context, obj
 		asMap[k] = v
 	}
 
-	for k, v := range asMap {
+	fieldsInOrder := [...]string{"baseCurrencyId", "currencyId", "salePrice", "buyPrice"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
 		switch k {
 		case "baseCurrencyId":
 			var err error
@@ -32792,7 +32922,12 @@ func (ec *executionContext) unmarshalInputUpdateFeesInput(ctx context.Context, o
 		asMap[k] = v
 	}
 
-	for k, v := range asMap {
+	fieldsInOrder := [...]string{"transactionTypeId", "type", "boundaries"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
 		switch k {
 		case "transactionTypeId":
 			var err error
@@ -32831,7 +32966,12 @@ func (ec *executionContext) unmarshalInputVaultAccountInput(ctx context.Context,
 		asMap[k] = v
 	}
 
-	for k, v := range asMap {
+	fieldsInOrder := [...]string{"productId", "sourceAccount", "amount", "name"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
 		switch k {
 		case "productId":
 			var err error

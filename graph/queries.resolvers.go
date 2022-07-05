@@ -25,6 +25,7 @@ import (
 	apiTypes "ms.api/types"
 )
 
+// CheckEmail is the resolver for the checkEmail field.
 func (r *queryResolver) CheckEmail(ctx context.Context, email string) (bool, error) {
 	_, err := emailvalidator.Validate(email)
 	if err != nil {
@@ -40,6 +41,7 @@ func (r *queryResolver) CheckEmail(ctx context.Context, email string) (bool, err
 	return resp.Success, nil
 }
 
+// CheckPhoneNumber is the resolver for the checkPhoneNumber field.
 func (r *queryResolver) CheckPhoneNumber(ctx context.Context, phone string) (bool, error) {
 	phonevalidator := phonenumbervalidator.Validator{}
 	err := phonevalidator.ValidatePhoneNumber(phone)
@@ -56,6 +58,7 @@ func (r *queryResolver) CheckPhoneNumber(ctx context.Context, phone string) (boo
 	return resp.Success, nil
 }
 
+// Addresses is the resolver for the addresses field.
 func (r *queryResolver) Addresses(ctx context.Context, first *int64, after *string, last *int64, before *string, postcode *string) (*apiTypes.AddressConnection, error) {
 	// Build request
 	var request customer.GetAddressesRequest
@@ -132,6 +135,7 @@ func (r *queryResolver) Addresses(ctx context.Context, first *int64, after *stri
 	return result, nil
 }
 
+// Countries is the resolver for the countries field.
 func (r *queryResolver) Countries(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string) (*apiTypes.CountryConnection, error) {
 	// Build request
 	var request customer.GetCountriesRequest
@@ -188,6 +192,7 @@ func (r *queryResolver) Countries(ctx context.Context, keywords *string, first *
 	return result, nil
 }
 
+// OnfidoSDKToken is the resolver for the onfidoSDKToken field.
 func (r *queryResolver) OnfidoSDKToken(ctx context.Context) (*apiTypes.TokenResponse, error) {
 	// Get user claims
 	_, err := middlewares.GetClaimsFromCtx(ctx)
@@ -208,6 +213,7 @@ func (r *queryResolver) OnfidoSDKToken(ctx context.Context) (*apiTypes.TokenResp
 	}, nil
 }
 
+// Cdd is the resolver for the cdd field.
 func (r *queryResolver) Cdd(ctx context.Context, filter apiTypes.CommonQueryFilterInput) (*apiTypes.Cdd, error) {
 	request := onboarding.GetCDDRequest{Last: false}
 	if filter.ID != nil {
@@ -240,6 +246,7 @@ func (r *queryResolver) Cdd(ctx context.Context, filter apiTypes.CommonQueryFilt
 	return cdd, nil
 }
 
+// Content is the resolver for the content field.
 func (r *queryResolver) Content(ctx context.Context, id string) (*apiTypes.Content, error) {
 	res, err := r.CustomerService.GetContent(ctx, &customer.GetContentRequest{Id: id})
 	if err != nil {
@@ -256,6 +263,7 @@ func (r *queryResolver) Content(ctx context.Context, id string) (*apiTypes.Conte
 	return result, nil
 }
 
+// Contents is the resolver for the contents field.
 func (r *queryResolver) Contents(ctx context.Context, first *int64, after *string, last *int64, before *string) (*apiTypes.ContentConnection, error) {
 	// Build request
 	var request customer.GetContentsRequest
@@ -306,6 +314,7 @@ func (r *queryResolver) Contents(ctx context.Context, first *int64, after *strin
 	return result, nil
 }
 
+// Product is the resolver for the product field.
 func (r *queryResolver) Product(ctx context.Context, id string) (*apiTypes.Product, error) {
 	result, err := r.AccountService.GetProduct(ctx, &account.GetProductRequest{Id: id})
 	if err != nil {
@@ -317,6 +326,7 @@ func (r *queryResolver) Product(ctx context.Context, id string) (*apiTypes.Produ
 	return helpers.MakeProductFromProto(result), nil
 }
 
+// Products is the resolver for the products field.
 func (r *queryResolver) Products(ctx context.Context, first *int64, after *string, last *int64, before *string, statuses []apiTypes.ProductStatuses, typeArg *apiTypes.ProductTypes) (*apiTypes.ProductConnection, error) {
 	helper := helpersfactory{}
 	productStatuses := make([]protoTypes.Product_ProductStatuses, len(statuses))
@@ -374,6 +384,7 @@ func (r *queryResolver) Products(ctx context.Context, first *int64, after *strin
 		TotalCount: int64(resp.TotalCount)}, nil
 }
 
+// Banks is the resolver for the banks field.
 func (r *queryResolver) Banks(ctx context.Context, first *int64, after *string, last *int64, before *string) (*apiTypes.BankConnection, error) {
 	// Build request
 	var request payment.GetBanksRequest
@@ -427,6 +438,7 @@ func (r *queryResolver) Banks(ctx context.Context, first *int64, after *string, 
 	return result, nil
 }
 
+// Account is the resolver for the account field.
 func (r *queryResolver) Account(ctx context.Context, id string) (*apiTypes.Account, error) {
 	request := account.GetAccountRequest{Id: id}
 	account, err := r.AccountService.GetAccount(ctx, &request)
@@ -438,6 +450,7 @@ func (r *queryResolver) Account(ctx context.Context, id string) (*apiTypes.Accou
 	return helpers.MakeAccountFromProto(account), nil
 }
 
+// Accounts is the resolver for the accounts field.
 func (r *queryResolver) Accounts(ctx context.Context, first *int64, after *string, last *int64, before *string, statuses []apiTypes.AccountStatuses, types []apiTypes.ProductTypes) (*apiTypes.AccountConnection, error) {
 	helpers := helpersfactory{}
 	request := account.GetAccountsRequest{
@@ -493,6 +506,7 @@ func (r *queryResolver) Accounts(ctx context.Context, first *int64, after *strin
 	}, nil
 }
 
+// Transaction is the resolver for the transaction field.
 func (r *queryResolver) Transaction(ctx context.Context, id string) (*apiTypes.Transaction, error) {
 	result, err := r.PaymentService.GetTransaction(ctx, &payment.GetTransactionRequest{Id: id})
 	if err != nil {
@@ -504,6 +518,7 @@ func (r *queryResolver) Transaction(ctx context.Context, id string) (*apiTypes.T
 	return helpers.MakeTransactionFromProto(result), nil
 }
 
+// Transactions is the resolver for the transactions field.
 func (r *queryResolver) Transactions(ctx context.Context, first *int64, after *string, last *int64, before *string, startDate *string, endDate *string, statuses []apiTypes.TransactionStatuses, accountIds []string, beneficiaryIds []string, hasBeneficiary *bool) (*apiTypes.TransactionConnection, error) {
 	helper := helpersfactory{}
 	transactionStatuses := make([]protoTypes.Transaction_TransactionStatuses, len(statuses))
@@ -582,6 +597,7 @@ func (r *queryResolver) Transactions(ctx context.Context, first *int64, after *s
 	}, nil
 }
 
+// Beneficiary is the resolver for the beneficiary field.
 func (r *queryResolver) Beneficiary(ctx context.Context, id string) (*apiTypes.Beneficiary, error) {
 	result, err := r.PaymentService.GetBeneficiary(ctx, &payment.GetBeneficiaryRequest{Id: id})
 	if err != nil {
@@ -593,6 +609,7 @@ func (r *queryResolver) Beneficiary(ctx context.Context, id string) (*apiTypes.B
 	return helpers.MakeBeneficiaryFromProto(result), nil
 }
 
+// Beneficiaries is the resolver for the beneficiaries field.
 func (r *queryResolver) Beneficiaries(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string, statuses []apiTypes.BeneficiaryStatuses, sortBy *apiTypes.BeneficiarySort) (*apiTypes.BeneficiaryConnection, error) {
 	helper := helpersfactory{}
 	beneficiaryStatuses := make([]protoTypes.Beneficiary_BeneficiaryStatuses, len(statuses))
@@ -665,6 +682,7 @@ func (r *queryResolver) Beneficiaries(ctx context.Context, keywords *string, fir
 	}, nil
 }
 
+// ExistingBeneficiariesByPhone is the resolver for the existingBeneficiariesByPhone field.
 func (r *queryResolver) ExistingBeneficiariesByPhone(ctx context.Context, phones []string, transactionPassword string) ([]*string, error) {
 	// Get user claims
 	_, err := middlewares.GetClaimsFromCtx(ctx)
@@ -691,6 +709,7 @@ func (r *queryResolver) ExistingBeneficiariesByPhone(ctx context.Context, phones
 	return results, nil
 }
 
+// ExistingBeneficiaryByAccount is the resolver for the existingBeneficiaryByAccount field.
 func (r *queryResolver) ExistingBeneficiaryByAccount(ctx context.Context, accountNumber string) (*apiTypes.BeneficiaryPreview, error) {
 	// Get user claims
 	_, err := middlewares.GetClaimsFromCtx(ctx)
@@ -721,6 +740,7 @@ func (r *queryResolver) ExistingBeneficiaryByAccount(ctx context.Context, accoun
 	}, nil
 }
 
+// LookupBeneficiary is the resolver for the lookupBeneficiary field.
 func (r *queryResolver) LookupBeneficiary(ctx context.Context, accountNumber string, code string, currencyID string) (*apiTypes.BeneficiaryPreview, error) {
 	// Get user claims
 	_, err := middlewares.GetClaimsFromCtx(ctx)
@@ -748,6 +768,7 @@ func (r *queryResolver) LookupBeneficiary(ctx context.Context, accountNumber str
 	return response, nil
 }
 
+// TransactionTypes is the resolver for the transactionTypes field.
 func (r *queryResolver) TransactionTypes(ctx context.Context, first *int64, after *string, last *int64, before *string, statuses []apiTypes.TransactionTypeStatuses) (*apiTypes.TransactionTypeConnection, error) {
 	transactionTypesStatuses := make([]protoTypes.TransactionType_TransactionTypeStatuses, len(statuses))
 
@@ -807,6 +828,7 @@ func (r *queryResolver) TransactionTypes(ctx context.Context, first *int64, afte
 		TotalCount: int64(resp.TotalCount)}, nil
 }
 
+// Questionary is the resolver for the questionary field.
 func (r *queryResolver) Questionary(ctx context.Context, id string) (*apiTypes.Questionary, error) {
 	resp, err := r.CustomerService.GetQuestionary(ctx, &customer.GetQuestionaryRequest{Id: id})
 	if err != nil {
@@ -856,6 +878,7 @@ func (r *queryResolver) Questionary(ctx context.Context, id string) (*apiTypes.Q
 	return &response, nil
 }
 
+// Questionaries is the resolver for the questionaries field.
 func (r *queryResolver) Questionaries(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string, statuses []apiTypes.QuestionaryStatuses, typeArg []apiTypes.QuestionaryTypes) (*apiTypes.QuestionaryConnection, error) {
 	helper := helpersfactory{}
 	questionaryStatuses := make([]protoTypes.Questionary_QuestionaryStatuses, 0)
@@ -947,6 +970,7 @@ func (r *queryResolver) Questionaries(ctx context.Context, keywords *string, fir
 	}, nil
 }
 
+// Currency is the resolver for the currency field.
 func (r *queryResolver) Currency(ctx context.Context, id string) (*apiTypes.Currency, error) {
 	// Make call
 	currency, err := r.PricingService.GetCurrency(ctx, &pricing.GetCurrencyRequest{Id: id})
@@ -962,6 +986,7 @@ func (r *queryResolver) Currency(ctx context.Context, id string) (*apiTypes.Curr
 	}, nil
 }
 
+// Currencies is the resolver for the currencies field.
 func (r *queryResolver) Currencies(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string) (*apiTypes.CurrencyConnection, error) {
 	// Build request
 	var request pricing.GetCurrenciesRequest
@@ -1010,6 +1035,7 @@ func (r *queryResolver) Currencies(ctx context.Context, keywords *string, first 
 	return response, nil
 }
 
+// Fees is the resolver for the fees field.
 func (r *queryResolver) Fees(ctx context.Context, transactionTypeID string, sourceAccountID string, targetAccountID string) ([]*apiTypes.Fee, error) {
 	resp, err := r.PricingService.GetFees(ctx, &pricing.GetFeesRequest{TransactionTypeId: transactionTypeID, SourceAccountId: sourceAccountID, TargetAccountId: targetAccountID})
 	if err != nil {
@@ -1019,6 +1045,7 @@ func (r *queryResolver) Fees(ctx context.Context, transactionTypeID string, sour
 	return r.helper.MakeFeesFromProto(resp.Fees), nil
 }
 
+// ExchangeRate is the resolver for the exchangeRate field.
 func (r *queryResolver) ExchangeRate(ctx context.Context, transactionTypeID string) (*apiTypes.ExchangeRate, error) {
 	resp, err := r.PricingService.GetExchangeRate(ctx, &pricing.GetExchangeRateRequest{TransactionTypeId: transactionTypeID})
 	if err != nil {
@@ -1028,6 +1055,7 @@ func (r *queryResolver) ExchangeRate(ctx context.Context, transactionTypeID stri
 	return r.helper.MakeExchangeRateFromProto(resp.ExchangeRate), nil
 }
 
+// Me is the resolver for the me field.
 func (r *queryResolver) Me(ctx context.Context) (apiTypes.MeResult, error) {
 	claims, err := middlewares.GetClaimsFromCtx(ctx)
 	if err != nil {
@@ -1150,6 +1178,7 @@ func (r *queryResolver) Me(ctx context.Context) (apiTypes.MeResult, error) {
 	return apiTypes.Customer{}, errors.New("unknown error occurred")
 }
 
+// Customer is the resolver for the customer field.
 func (r *queryResolver) Customer(ctx context.Context, id string) (*apiTypes.Customer, error) {
 	result, err := r.CustomerService.GetCustomer(ctx, &customer.GetCustomerRequest{Id: id})
 	if err != nil {
@@ -1161,6 +1190,7 @@ func (r *queryResolver) Customer(ctx context.Context, id string) (*apiTypes.Cust
 	return helpers.makeCustomerFromProto(result), nil
 }
 
+// Customers is the resolver for the customers field.
 func (r *queryResolver) Customers(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string, statuses []apiTypes.CustomerStatuses) (*apiTypes.CustomerConnection, error) {
 	helper := helpersfactory{}
 	customerStatuses := make([]protoTypes.Customer_CustomerStatuses, 0)
@@ -1214,6 +1244,7 @@ func (r *queryResolver) Customers(ctx context.Context, keywords *string, first *
 		TotalCount: int64(resp.TotalCount)}, nil
 }
 
+// Cdds is the resolver for the cdds field.
 func (r *queryResolver) Cdds(ctx context.Context, first *int64, after *string, last *int64, before *string, statuses []apiTypes.CDDStatuses) (*apiTypes.CDDConnection, error) {
 	helpers := helpersfactory{}
 	cddStatuses := make([]protoTypes.CDD_CDDStatuses, len(statuses))
@@ -1274,6 +1305,7 @@ func (r *queryResolver) Cdds(ctx context.Context, first *int64, after *string, l
 	}, nil
 }
 
+// StaffAuditLogs is the resolver for the staffAuditLogs field.
 func (r *queryResolver) StaffAuditLogs(ctx context.Context, first *int64, after *string, last *int64, before *string, types []apiTypes.StaffAuditLogType) (*apiTypes.StaffAuditLogConnection, error) {
 	// Build request
 	var request customer.GetStaffAuditLogsRequest
@@ -1328,6 +1360,7 @@ func (r *queryResolver) StaffAuditLogs(ctx context.Context, first *int64, after 
 		TotalCount: int64(resp.TotalCount)}, nil
 }
 
+// Statement is the resolver for the statement field.
 func (r *queryResolver) Statement(ctx context.Context, accountID string, startDate string, endDate string, transactionPassword string) (*apiTypes.StatementResponse, error) {
 	const dateTemplate = "02-01-2006"
 

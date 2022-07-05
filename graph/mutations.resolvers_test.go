@@ -3999,32 +3999,125 @@ func TestMutationResolver_StaffUpdateCustomerDetails(t *testing.T) {
 func Test_mutationResolver_CloseAccount(t *testing.T) {
 	const (
 		success = iota
+		errorUnauthenticated
+		errorClosingAccount
 	)
+
+	var accountName = "accountName"
 
 	tests := []struct {
 		name     string
+		arg      types.AccountCloseInput
 		testType int
 	}{
 		// TODO: Add test cases.
 		{
-			name:     "Test content found successfully with given contentId ",
+			name: "Success",
+			arg: types.AccountCloseInput{
+				AccountID: "account-id",
+				DepositAccount: &types.BeneficiaryAccountInput{
+					Name:          &accountName,
+					CurrencyID:    "currency-id",
+					AccountNumber: "account-number",
+					Code:          "code",
+				},
+				TransactionPassword: "transaction_password",
+			},
 			testType: success,
 		},
+		{
+			name: "Error Getting authenticated",
+			arg: types.AccountCloseInput{
+				AccountID: "account-id",
+				DepositAccount: &types.BeneficiaryAccountInput{
+					Name:          &accountName,
+					CurrencyID:    "currency-id",
+					AccountNumber: "account-number",
+					Code:          "code",
+				},
+				TransactionPassword: "transaction_password",
+			},
+			testType: errorUnauthenticated,
+		},
+		{
+			name: "Error Closing Acount",
+			arg: types.AccountCloseInput{
+				AccountID: "account-id",
+				DepositAccount: &types.BeneficiaryAccountInput{
+					Name:          &accountName,
+					CurrencyID:    "currency-id",
+					AccountNumber: "account-number",
+					Code:          "code",
+				},
+				TransactionPassword: "transaction_password",
+			},
+			testType: errorClosingAccount,
+		},
 	}
-	controller := gomock.NewController(t)
-	defer controller.Finish()
-	customerServiceClient := mocks.NewMockCustomerServiceClient(controller)
-	resolverOpts := &ResolverOpts{
-		CustomerService: customerServiceClient,
-	}
-	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
 	for _, test := range tests {
+		controller := gomock.NewController(t)
+		defer controller.Finish()
+		accountServiceClient := mocks.NewMockAccountServiceClient(controller)
+		resolverOpts := &ResolverOpts{
+			AccountService: accountServiceClient,
+		}
+		resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
 		t.Run(test.name, func(t *testing.T) {
 			switch test.testType {
 			case success:
-				resp, err := resolver.CloseAccount(context.Background(), types.AccountCloseInput{})
+				ctx, _ := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{
+					Client:   models.APP,
+					ID:       "123456",
+					Email:    "email@roava.app",
+					DeviceID: "12345"})
+
+				request := accountPb.CloseAccountRequest{
+					AccountId: test.arg.AccountID,
+					DepositAccount: &accountPb.BeneficiaryAccountInput{
+						Name:          *test.arg.DepositAccount.Name,
+						CurrencyId:    test.arg.DepositAccount.CurrencyID,
+						AccountNumber: test.arg.DepositAccount.AccountNumber,
+						Code:          test.arg.DepositAccount.Code,
+					},
+					TransactionPassword: test.arg.TransactionPassword,
+				}
+				accountServiceClient.EXPECT().CloseAccount(ctx, &request).Return(&accountPb.CloseAccountResponse{}, nil)
+				resp, err := resolver.CloseAccount(ctx, test.arg)
+				assert.NoError(t, err)
+				assert.Equal(t, &types.Response{
+					Success: true,
+					Code:    http.StatusOK,
+				}, resp)
+
+			case errorUnauthenticated:
+				_, err := resolver.CloseAccount(context.Background(), test.arg)
+
 				assert.Error(t, err)
-				assert.NotNil(t, resp)
+				assert.IsType(t, &terror.Terror{}, err)
+				assert.Equal(t, errorvalues.InvalidAuthenticationError, err.(*terror.Terror).Code())
+
+			case errorClosingAccount:
+				ctx, _ := middleware.PutClaimsOnContext(context.Background(), &models.JWTClaims{
+					Client:   models.APP,
+					ID:       "123456",
+					Email:    "email@roava.app",
+					DeviceID: "12345",
+				})
+				request := accountPb.CloseAccountRequest{
+					AccountId: test.arg.AccountID,
+					DepositAccount: &accountPb.BeneficiaryAccountInput{
+						Name:          *test.arg.DepositAccount.Name,
+						CurrencyId:    test.arg.DepositAccount.CurrencyID,
+						AccountNumber: test.arg.DepositAccount.AccountNumber,
+						Code:          test.arg.DepositAccount.Code,
+					},
+					TransactionPassword: test.arg.TransactionPassword,
+				}
+				accountServiceClient.EXPECT().CloseAccount(ctx, &request).Return(nil, errors.New("some error"))
+
+				resp, err := resolver.CloseAccount(ctx, test.arg)
+				assert.Error(t, err)
+				assert.Nil(t, resp)
 			}
 		})
 	}
