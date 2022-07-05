@@ -3790,6 +3790,7 @@ func TestMutationResolver_UpdateDevice(t *testing.T) {
 		},
 	}
 	phoneNumber := "phoneNumber"
+	otp := "123456"
 	device := types.DeviceInput{
 		Identifier: "identifier",
 		Os:         "os",
@@ -3809,6 +3810,7 @@ func TestMutationResolver_UpdateDevice(t *testing.T) {
 	}
 	request := &customer.DeviceInputRequest{
 		PhoneNumber: phoneNumber,
+		Otp:         otp,
 		Device: &pbTypes.DeviceInput{
 			Identifier: device.Identifier,
 			Os:         device.Os,
@@ -3843,7 +3845,7 @@ func TestMutationResolver_UpdateDevice(t *testing.T) {
 					Code:    http.StatusOK,
 				}, nil)
 
-				resp, err := resolver.UpdateDevice(context.Background(), phoneNumber, device)
+				resp, err := resolver.UpdateDevice(context.Background(), phoneNumber, otp, device)
 				assert.NoError(t, err)
 				assert.NotNil(t, resp)
 				assert.Equal(t, &types.Response{
@@ -3852,7 +3854,7 @@ func TestMutationResolver_UpdateDevice(t *testing.T) {
 				}, resp)
 			case errorUpdatingDevice:
 				customerServiceClient.EXPECT().UpdateDevice(context.Background(), request).Return(nil, errors.New(""))
-				resp, err := resolver.UpdateDevice(context.Background(), phoneNumber, device)
+				resp, err := resolver.UpdateDevice(context.Background(), phoneNumber, otp, device)
 				assert.Error(t, err)
 				assert.Nil(t, resp)
 			}
