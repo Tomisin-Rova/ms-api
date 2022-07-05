@@ -1408,20 +1408,6 @@ func (r *mutationResolver) CloseAccount(ctx context.Context, accountCloseInput t
 		return &types.Response{Message: &responseMessage, Success: false, Code: http.StatusBadGateway}, err
 	}
 
-	if accountCloseInput.AccountID == "" {
-		responseMessage := "Empty account ID"
-		return &types.Response{Message: &responseMessage, Success: false, Code: http.StatusBadRequest}, err
-	}
-
-	if accountCloseInput.TransactionPassword == "" {
-		responseMessage := "Empty Transaction password"
-		return &types.Response{Message: &responseMessage, Success: false, Code: http.StatusBadRequest}, err
-	}
-	if accountCloseInput.DepositAccount.AccountNumber == "" {
-		responseMessage := "Empty Account Information"
-		return &types.Response{Message: &responseMessage, Success: false, Code: http.StatusBadRequest}, err
-	}
-
 	//Build request
 	request := accountPb.CloseAccountRequest{
 		AccountId: accountCloseInput.AccountID,
