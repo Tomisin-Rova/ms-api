@@ -86,6 +86,7 @@ type ComplexityRoot struct {
 		Status        func(childComplexity int) int
 		StatusTs      func(childComplexity int) int
 		Ts            func(childComplexity int) int
+		Vault         func(childComplexity int) int
 	}
 
 	AccountBalances struct {
@@ -106,6 +107,11 @@ type ComplexityRoot struct {
 	AccountMambu struct {
 		BranchKey  func(childComplexity int) int
 		EncodedKey func(childComplexity int) int
+	}
+
+	AccountVault struct {
+		InterestAccumulated func(childComplexity int) int
+		PrincipalAmount     func(childComplexity int) int
 	}
 
 	Address struct {
@@ -432,7 +438,7 @@ type ComplexityRoot struct {
 		SubmitCdd                  func(childComplexity int, cdd types.CDDInput) int
 		UpdateAMLStatus            func(childComplexity int, id string, status types.AMLStatuses, message string) int
 		UpdateCustomerDetails      func(childComplexity int, customerDetails types.CustomerDetailsUpdateInput, transactionPassword string) int
-		UpdateDevice               func(childComplexity int, phoneNumber string, device types.DeviceInput) int
+		UpdateDevice               func(childComplexity int, phoneNumber string, otp string, device types.DeviceInput) int
 		UpdateFees                 func(childComplexity int, fees []*types.UpdateFeesInput) int
 		UpdateFx                   func(childComplexity int, exchangeRate types.UpdateFXInput) int
 		UpdateKYCStatus            func(childComplexity int, id string, status types.KYCStatuses, message string) int
@@ -742,7 +748,7 @@ type MutationResolver interface {
 	SendNotification(ctx context.Context, typeArg types.DeliveryMode, content string, templateID string) (*types.Response, error)
 	DeactivateCredential(ctx context.Context, credentialType types.IdentityCredentialsTypes) (*types.Response, error)
 	WithdrawVaultAccount(ctx context.Context, sourceAccountID string, targetAccountID string, transactionPassword string) (*types.Response, error)
-	UpdateDevice(ctx context.Context, phoneNumber string, device types.DeviceInput) (*types.Response, error)
+	UpdateDevice(ctx context.Context, phoneNumber string, otp string, device types.DeviceInput) (*types.Response, error)
 	CheckCustomerDetails(ctx context.Context, customerDetails types.CheckCustomerDetailsInput, typeArg types.ActionType) (*types.Response, error)
 	CloseAccount(ctx context.Context, accountCloseInput types.AccountCloseInput) (*types.Response, error)
 	RequestResubmit(ctx context.Context, customerID string, reportIds []string, message *string) (*types.Response, error)
@@ -1028,6 +1034,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Account.Ts(childComplexity), true
 
+	case "Account.vault":
+		if e.complexity.Account.Vault == nil {
+			break
+		}
+
+		return e.complexity.Account.Vault(childComplexity), true
+
 	case "AccountBalances.totalBalance":
 		if e.complexity.AccountBalances.TotalBalance == nil {
 			break
@@ -1083,6 +1096,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.AccountMambu.EncodedKey(childComplexity), true
+
+	case "AccountVault.interestAccumulated":
+		if e.complexity.AccountVault.InterestAccumulated == nil {
+			break
+		}
+
+		return e.complexity.AccountVault.InterestAccumulated(childComplexity), true
+
+	case "AccountVault.principalAmount":
+		if e.complexity.AccountVault.PrincipalAmount == nil {
+			break
+		}
+
+		return e.complexity.AccountVault.PrincipalAmount(childComplexity), true
 
 	case "Address.city":
 		if e.complexity.Address.City == nil {
@@ -2743,7 +2770,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateDevice(childComplexity, args["phoneNumber"].(string), args["device"].(types.DeviceInput)), true
+		return e.complexity.Mutation.UpdateDevice(childComplexity, args["phoneNumber"].(string), args["otp"].(string), args["device"].(types.DeviceInput)), true
 
 	case "Mutation.updateFees":
 		if e.complexity.Mutation.UpdateFees == nil {
@@ -4364,7 +4391,7 @@ type Mutation {
     # Withdraw funds from a Vault Account
     withdrawVaultAccount(sourceAccountId: ID!, targetAccountId: ID!, transactionPassword: String!): Response!
     # Update device and deprecate old devices for customer
-    updateDevice(phoneNumber: String!, device: DeviceInput!): Response!
+    updateDevice(phoneNumber: String!, otp: String!, device: DeviceInput!): Response!
     # Validates customer details in order to proceed with secure actions
     checkCustomerDetails(customerDetails: CheckCustomerDetailsInput!, type: ActionType!): Response!
     # Closes a user account
@@ -5326,9 +5353,15 @@ type Account {
     balances: AccountBalances
     mambu: AccountMambu
     fcmb: AccountFCMB
+    vault: AccountVault
     status: AccountStatuses!
     statusTs: Int!
     ts: Int!
+}
+
+type AccountVault {
+    principalAmount: Float
+    interestAccumulated: Float
 }
 
 enum AccountStatuses {
@@ -6523,15 +6556,24 @@ func (ec *executionContext) field_Mutation_updateDevice_args(ctx context.Context
 		}
 	}
 	args["phoneNumber"] = arg0
-	var arg1 types.DeviceInput
-	if tmp, ok := rawArgs["device"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("device"))
-		arg1, err = ec.unmarshalNDeviceInput2msᚗapiᚋtypesᚐDeviceInput(ctx, tmp)
+	var arg1 string
+	if tmp, ok := rawArgs["otp"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("otp"))
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["device"] = arg1
+	args["otp"] = arg1
+	var arg2 types.DeviceInput
+	if tmp, ok := rawArgs["device"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("device"))
+		arg2, err = ec.unmarshalNDeviceInput2msᚗapiᚋtypesᚐDeviceInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["device"] = arg2
 	return args, nil
 }
 
@@ -9237,6 +9279,53 @@ func (ec *executionContext) fieldContext_Account_fcmb(ctx context.Context, field
 	return fc, nil
 }
 
+func (ec *executionContext) _Account_vault(ctx context.Context, field graphql.CollectedField, obj *types.Account) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Account_vault(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Vault, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*types.AccountVault)
+	fc.Result = res
+	return ec.marshalOAccountVault2ᚖmsᚗapiᚋtypesᚐAccountVault(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Account_vault(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Account",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "principalAmount":
+				return ec.fieldContext_AccountVault_principalAmount(ctx, field)
+			case "interestAccumulated":
+				return ec.fieldContext_AccountVault_interestAccumulated(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type AccountVault", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Account_status(ctx context.Context, field graphql.CollectedField, obj *types.Account) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Account_status(ctx, field)
 	if err != nil {
@@ -9474,6 +9563,8 @@ func (ec *executionContext) fieldContext_AccountConnection_nodes(ctx context.Con
 				return ec.fieldContext_Account_mambu(ctx, field)
 			case "fcmb":
 				return ec.fieldContext_Account_fcmb(ctx, field)
+			case "vault":
+				return ec.fieldContext_Account_vault(ctx, field)
 			case "status":
 				return ec.fieldContext_Account_status(ctx, field)
 			case "statusTs":
@@ -9744,6 +9835,88 @@ func (ec *executionContext) fieldContext_AccountMambu_branchKey(ctx context.Cont
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AccountVault_principalAmount(ctx context.Context, field graphql.CollectedField, obj *types.AccountVault) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AccountVault_principalAmount(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PrincipalAmount, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*float64)
+	fc.Result = res
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AccountVault_principalAmount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AccountVault",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AccountVault_interestAccumulated(ctx context.Context, field graphql.CollectedField, obj *types.AccountVault) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AccountVault_interestAccumulated(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.InterestAccumulated, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*float64)
+	fc.Result = res
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AccountVault_interestAccumulated(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AccountVault",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
 		},
 	}
 	return fc, nil
@@ -11512,6 +11685,8 @@ func (ec *executionContext) fieldContext_BeneficiaryAccount_account(ctx context.
 				return ec.fieldContext_Account_mambu(ctx, field)
 			case "fcmb":
 				return ec.fieldContext_Account_fcmb(ctx, field)
+			case "vault":
+				return ec.fieldContext_Account_vault(ctx, field)
 			case "status":
 				return ec.fieldContext_Account_status(ctx, field)
 			case "statusTs":
@@ -18121,6 +18296,8 @@ func (ec *executionContext) fieldContext_LinkedTransactionSource_account(ctx con
 				return ec.fieldContext_Account_mambu(ctx, field)
 			case "fcmb":
 				return ec.fieldContext_Account_fcmb(ctx, field)
+			case "vault":
+				return ec.fieldContext_Account_vault(ctx, field)
 			case "status":
 				return ec.fieldContext_Account_status(ctx, field)
 			case "statusTs":
@@ -18236,6 +18413,8 @@ func (ec *executionContext) fieldContext_LinkedTransactionTarget_account(ctx con
 				return ec.fieldContext_Account_mambu(ctx, field)
 			case "fcmb":
 				return ec.fieldContext_Account_fcmb(ctx, field)
+			case "vault":
+				return ec.fieldContext_Account_vault(ctx, field)
 			case "status":
 				return ec.fieldContext_Account_status(ctx, field)
 			case "statusTs":
@@ -20200,7 +20379,7 @@ func (ec *executionContext) _Mutation_updateDevice(ctx context.Context, field gr
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateDevice(rctx, fc.Args["phoneNumber"].(string), fc.Args["device"].(types.DeviceInput))
+		return ec.resolvers.Mutation().UpdateDevice(rctx, fc.Args["phoneNumber"].(string), fc.Args["otp"].(string), fc.Args["device"].(types.DeviceInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -23445,6 +23624,8 @@ func (ec *executionContext) fieldContext_Query_account(ctx context.Context, fiel
 				return ec.fieldContext_Account_mambu(ctx, field)
 			case "fcmb":
 				return ec.fieldContext_Account_fcmb(ctx, field)
+			case "vault":
+				return ec.fieldContext_Account_vault(ctx, field)
 			case "status":
 				return ec.fieldContext_Account_status(ctx, field)
 			case "statusTs":
@@ -29068,6 +29249,8 @@ func (ec *executionContext) fieldContext_TransactionSource_account(ctx context.C
 				return ec.fieldContext_Account_mambu(ctx, field)
 			case "fcmb":
 				return ec.fieldContext_Account_fcmb(ctx, field)
+			case "vault":
+				return ec.fieldContext_Account_vault(ctx, field)
 			case "status":
 				return ec.fieldContext_Account_status(ctx, field)
 			case "statusTs":
@@ -29361,6 +29544,8 @@ func (ec *executionContext) fieldContext_TransactionTarget_account(ctx context.C
 				return ec.fieldContext_Account_mambu(ctx, field)
 			case "fcmb":
 				return ec.fieldContext_Account_fcmb(ctx, field)
+			case "vault":
+				return ec.fieldContext_Account_vault(ctx, field)
 			case "status":
 				return ec.fieldContext_Account_status(ctx, field)
 			case "statusTs":
@@ -33348,6 +33533,10 @@ func (ec *executionContext) _Account(ctx context.Context, sel ast.SelectionSet, 
 
 			out.Values[i] = ec._Account_fcmb(ctx, field, obj)
 
+		case "vault":
+
+			out.Values[i] = ec._Account_vault(ctx, field, obj)
+
 		case "status":
 
 			out.Values[i] = ec._Account_status(ctx, field, obj)
@@ -33496,6 +33685,35 @@ func (ec *executionContext) _AccountMambu(ctx context.Context, sel ast.Selection
 		case "branchKey":
 
 			out.Values[i] = ec._AccountMambu_branchKey(ctx, field, obj)
+
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var accountVaultImplementors = []string{"AccountVault"}
+
+func (ec *executionContext) _AccountVault(ctx context.Context, sel ast.SelectionSet, obj *types.AccountVault) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, accountVaultImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("AccountVault")
+		case "principalAmount":
+
+			out.Values[i] = ec._AccountVault_principalAmount(ctx, field, obj)
+
+		case "interestAccumulated":
+
+			out.Values[i] = ec._AccountVault_interestAccumulated(ctx, field, obj)
 
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -41299,6 +41517,13 @@ func (ec *executionContext) marshalOAccountStatuses2ᚕmsᚗapiᚋtypesᚐAccoun
 	}
 
 	return ret
+}
+
+func (ec *executionContext) marshalOAccountVault2ᚖmsᚗapiᚋtypesᚐAccountVault(ctx context.Context, sel ast.SelectionSet, v *types.AccountVault) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._AccountVault(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOAddressInput2ᚖmsᚗapiᚋtypesᚐAddressInput(ctx context.Context, v interface{}) (*types.AddressInput, error) {

@@ -59,6 +59,7 @@ type Account struct {
 	Balances      *AccountBalances `json:"balances"`
 	Mambu         *AccountMambu    `json:"mambu"`
 	Fcmb          *AccountFcmb     `json:"fcmb"`
+	Vault         *AccountVault    `json:"vault"`
 	Status        AccountStatuses  `json:"status"`
 	StatusTs      int64            `json:"statusTs"`
 	Ts            int64            `json:"ts"`
@@ -92,6 +93,11 @@ type AccountInput struct {
 type AccountMambu struct {
 	EncodedKey *string `json:"encodedKey"`
 	BranchKey  *string `json:"branchKey"`
+}
+
+type AccountVault struct {
+	PrincipalAmount     *float64 `json:"principalAmount"`
+	InterestAccumulated *float64 `json:"interestAccumulated"`
 }
 
 type Address struct {

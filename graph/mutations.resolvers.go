@@ -1069,7 +1069,7 @@ func (r *mutationResolver) WithdrawVaultAccount(ctx context.Context, sourceAccou
 }
 
 // UpdateDevice is the resolver for the updateDevice field.
-func (r *mutationResolver) UpdateDevice(ctx context.Context, phoneNumber string, device types.DeviceInput) (*types.Response, error) {
+func (r *mutationResolver) UpdateDevice(ctx context.Context, phoneNumber string, otp string, device types.DeviceInput) (*types.Response, error) {
 	helpers := &helpersfactory{}
 	var tokens []*pbTypes.DeviceTokenInput
 	for _, deviceToken := range device.Tokens {
@@ -1091,6 +1091,7 @@ func (r *mutationResolver) UpdateDevice(ctx context.Context, phoneNumber string,
 
 	request := customer.DeviceInputRequest{
 		PhoneNumber: phoneNumber,
+		Otp:         otp,
 		Device: &pbTypes.DeviceInput{
 			Identifier:  device.Identifier,
 			Os:          device.Os,
@@ -1134,6 +1135,39 @@ func (r *mutationResolver) CheckCustomerDetails(ctx context.Context, customerDet
 	return &types.Response{
 		Success: response.Success,
 		Code:    int64(response.Code),
+	}, nil
+}
+
+// CloseAccount is the resolver for the closeAccount field.
+func (r *mutationResolver) CloseAccount(ctx context.Context, accountCloseInput types.AccountCloseInput) (*types.Response, error) {
+	// Get user claims
+	_, err := middlewares.GetClaimsFromCtx(ctx)
+	if err != nil {
+		responseMessage := "User authentication failed"
+		return &types.Response{Message: &responseMessage, Success: false, Code: http.StatusBadGateway}, err
+	}
+
+	//Build request
+	request := accountPb.CloseAccountRequest{
+		AccountId: accountCloseInput.AccountID,
+		DepositAccount: &accountPb.BeneficiaryAccountInput{
+			Name:          *accountCloseInput.DepositAccount.Name,
+			CurrencyId:    accountCloseInput.DepositAccount.CurrencyID,
+			AccountNumber: accountCloseInput.DepositAccount.AccountNumber,
+			Code:          accountCloseInput.DepositAccount.Code,
+		},
+		TransactionPassword: accountCloseInput.TransactionPassword,
+	}
+
+	// Call RPC
+	_, err = r.AccountService.CloseAccount(ctx, &request)
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.Response{
+		Success: true,
+		Code:    http.StatusOK,
 	}, nil
 }
 
@@ -1396,39 +1430,6 @@ func (r *mutationResolver) StaffUpdateCustomerDetails(ctx context.Context, custo
 	return &types.Response{
 		Success: response.Success,
 		Code:    int64(response.Code),
-	}, nil
-}
-
-// CloseAccount is the resolver for the closeAccount field.
-func (r *mutationResolver) CloseAccount(ctx context.Context, accountCloseInput types.AccountCloseInput) (*types.Response, error) {
-	// Get user claims
-	_, err := middlewares.GetClaimsFromCtx(ctx)
-	if err != nil {
-		responseMessage := "User authentication failed"
-		return &types.Response{Message: &responseMessage, Success: false, Code: http.StatusBadGateway}, err
-	}
-
-	//Build request
-	request := accountPb.CloseAccountRequest{
-		AccountId: accountCloseInput.AccountID,
-		DepositAccount: &accountPb.BeneficiaryAccountInput{
-			Name:          *accountCloseInput.DepositAccount.Name,
-			CurrencyId:    accountCloseInput.DepositAccount.CurrencyID,
-			AccountNumber: accountCloseInput.DepositAccount.AccountNumber,
-			Code:          accountCloseInput.DepositAccount.Code,
-		},
-		TransactionPassword: accountCloseInput.TransactionPassword,
-	}
-
-	// Call RPC
-	_, err = r.AccountService.CloseAccount(ctx, &request)
-	if err != nil {
-		return nil, err
-	}
-
-	return &types.Response{
-		Success: true,
-		Code:    http.StatusOK,
 	}, nil
 }
 
