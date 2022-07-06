@@ -949,6 +949,13 @@ func (h *helpersfactory) MakeAccountFromProto(account *protoTypes.Account) *type
 		fcmb.NgnAccountNumber = &account.Fcmb.NgnAccountNumber
 	}
 
+	principalAmount := float64(account.Vault.PrincipalAmount)
+	interestAmount := float64(account.Vault.InterestAccumulated)
+	var vault = &types.AccountVault{
+		PrincipalAmount:     &principalAmount,
+		InterestAccumulated: &interestAmount,
+	}
+
 	return &types.Account{
 		ID:            account.Id,
 		Customer:      h.makeCustomerFromProto(account.Customer),
@@ -961,6 +968,7 @@ func (h *helpersfactory) MakeAccountFromProto(account *protoTypes.Account) *type
 		Balances:      balances,
 		Mambu:         h.makeMambuAccountFromProto(account.Mambu),
 		Fcmb:          fcmb,
+		Vault:         vault,
 		Status:        h.MapProtoAccountStatuses(account.Status),
 		StatusTs:      account.StatusTs.AsTime().Unix(),
 		Ts:            account.Ts.AsTime().Unix(),
