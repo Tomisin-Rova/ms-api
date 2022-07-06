@@ -97,6 +97,26 @@ func (mr *MockPaymentServiceClientMockRecorder) CreateBeneficiary(ctx, in interf
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateBeneficiary", reflect.TypeOf((*MockPaymentServiceClient)(nil).CreateBeneficiary), varargs...)
 }
 
+// CreateScheduledTransfer mocks base method.
+func (m *MockPaymentServiceClient) CreateScheduledTransfer(ctx context.Context, in *payment.CreateScheduledTransferRequest, opts ...grpc.CallOption) (*types.DefaultResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CreateScheduledTransfer", varargs...)
+	ret0, _ := ret[0].(*types.DefaultResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateScheduledTransfer indicates an expected call of CreateScheduledTransfer.
+func (mr *MockPaymentServiceClientMockRecorder) CreateScheduledTransfer(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateScheduledTransfer", reflect.TypeOf((*MockPaymentServiceClient)(nil).CreateScheduledTransfer), varargs...)
+}
+
 // CreateTransfer mocks base method.
 func (m *MockPaymentServiceClient) CreateTransfer(ctx context.Context, in *payment.CreateTransferRequest, opts ...grpc.CallOption) (*types.DefaultResponse, error) {
 	m.ctrl.T.Helper()
@@ -403,6 +423,21 @@ func (m *MockPaymentServiceServer) CreateBeneficiary(arg0 context.Context, arg1 
 func (mr *MockPaymentServiceServerMockRecorder) CreateBeneficiary(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateBeneficiary", reflect.TypeOf((*MockPaymentServiceServer)(nil).CreateBeneficiary), arg0, arg1)
+}
+
+// CreateScheduledTransfer mocks base method.
+func (m *MockPaymentServiceServer) CreateScheduledTransfer(arg0 context.Context, arg1 *payment.CreateScheduledTransferRequest) (*types.DefaultResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateScheduledTransfer", arg0, arg1)
+	ret0, _ := ret[0].(*types.DefaultResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateScheduledTransfer indicates an expected call of CreateScheduledTransfer.
+func (mr *MockPaymentServiceServerMockRecorder) CreateScheduledTransfer(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateScheduledTransfer", reflect.TypeOf((*MockPaymentServiceServer)(nil).CreateScheduledTransfer), arg0, arg1)
 }
 
 // CreateTransfer mocks base method.

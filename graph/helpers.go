@@ -949,11 +949,13 @@ func (h *helpersfactory) MakeAccountFromProto(account *protoTypes.Account) *type
 		fcmb.NgnAccountNumber = &account.Fcmb.NgnAccountNumber
 	}
 
-	principalAmount := float64(account.Vault.PrincipalAmount)
-	interestAmount := float64(account.Vault.InterestAccumulated)
-	var vault = &types.AccountVault{
-		PrincipalAmount:     &principalAmount,
-		InterestAccumulated: &interestAmount,
+	vault := &types.AccountVault{}
+	if account.Vault != nil {
+		principalAmount := float64(account.Vault.PrincipalAmount)
+		interestAmount := float64(account.Vault.InterestAccumulated)
+
+		vault.InterestAccumulated = &interestAmount
+		vault.PrincipalAmount = &principalAmount
 	}
 
 	return &types.Account{
