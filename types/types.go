@@ -674,6 +674,38 @@ type Review struct {
 	Ts       int64   `json:"ts"`
 }
 
+type ScheduledTransaction struct {
+	ID              string                         `json:"id"`
+	TransactionType *TransactionType               `json:"transactionType"`
+	Reference       string                         `json:"reference"`
+	Source          *ScheduledTransactionSource    `json:"source"`
+	Target          *ScheduledTransactionTarget    `json:"target"`
+	Amount          float64                        `json:"amount"`
+	RepeatType      ScheduledTransactionRepeatType `json:"repeatType"`
+	Status          ScheduledTransactionStatus     `json:"status"`
+	StatusTs        int64                          `json:"statusTs"`
+	Ts              int64                          `json:"ts"`
+}
+
+type ScheduledTransactionInput struct {
+	TransactionTypeID string                         `json:"transactionTypeId"`
+	Reference         *string                        `json:"reference"`
+	SourceAccountID   string                         `json:"sourceAccountId"`
+	TargetAccountID   string                         `json:"targetAccountId"`
+	RepeatType        ScheduledTransactionRepeatType `json:"repeatType"`
+	Amount            float64                        `json:"amount"`
+}
+
+type ScheduledTransactionSource struct {
+	Customer *Customer `json:"customer"`
+	Account  *Account  `json:"account"`
+}
+
+type ScheduledTransactionTarget struct {
+	Beneficiary        *Beneficiary        `json:"beneficiary"`
+	BeneficiaryAccount *BeneficiaryAccount `json:"beneficiaryAccount"`
+}
+
 type Staff struct {
 	ID        string        `json:"id"`
 	Name      string        `json:"name"`
@@ -2245,6 +2277,92 @@ func (e *ReportStatuses) UnmarshalGQL(v interface{}) error {
 }
 
 func (e ReportStatuses) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type ScheduledTransactionRepeatType string
+
+const (
+	ScheduledTransactionRepeatTypeOneTime  ScheduledTransactionRepeatType = "ONE_TIME"
+	ScheduledTransactionRepeatTypeWeekly   ScheduledTransactionRepeatType = "WEEKLY"
+	ScheduledTransactionRepeatTypeMonthly  ScheduledTransactionRepeatType = "MONTHLY"
+	ScheduledTransactionRepeatTypeAnnually ScheduledTransactionRepeatType = "ANNUALLY"
+)
+
+var AllScheduledTransactionRepeatType = []ScheduledTransactionRepeatType{
+	ScheduledTransactionRepeatTypeOneTime,
+	ScheduledTransactionRepeatTypeWeekly,
+	ScheduledTransactionRepeatTypeMonthly,
+	ScheduledTransactionRepeatTypeAnnually,
+}
+
+func (e ScheduledTransactionRepeatType) IsValid() bool {
+	switch e {
+	case ScheduledTransactionRepeatTypeOneTime, ScheduledTransactionRepeatTypeWeekly, ScheduledTransactionRepeatTypeMonthly, ScheduledTransactionRepeatTypeAnnually:
+		return true
+	}
+	return false
+}
+
+func (e ScheduledTransactionRepeatType) String() string {
+	return string(e)
+}
+
+func (e *ScheduledTransactionRepeatType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ScheduledTransactionRepeatType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ScheduledTransactionRepeatType", str)
+	}
+	return nil
+}
+
+func (e ScheduledTransactionRepeatType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type ScheduledTransactionStatus string
+
+const (
+	ScheduledTransactionStatusActive   ScheduledTransactionStatus = "ACTIVE"
+	ScheduledTransactionStatusInactive ScheduledTransactionStatus = "INACTIVE"
+)
+
+var AllScheduledTransactionStatus = []ScheduledTransactionStatus{
+	ScheduledTransactionStatusActive,
+	ScheduledTransactionStatusInactive,
+}
+
+func (e ScheduledTransactionStatus) IsValid() bool {
+	switch e {
+	case ScheduledTransactionStatusActive, ScheduledTransactionStatusInactive:
+		return true
+	}
+	return false
+}
+
+func (e ScheduledTransactionStatus) String() string {
+	return string(e)
+}
+
+func (e *ScheduledTransactionStatus) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ScheduledTransactionStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ScheduledTransactionStatus", str)
+	}
+	return nil
+}
+
+func (e ScheduledTransactionStatus) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

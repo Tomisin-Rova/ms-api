@@ -416,6 +416,7 @@ type ComplexityRoot struct {
 		CreateAccount              func(childComplexity int, account types.AccountInput) int
 		CreateBeneficiariesByPhone func(childComplexity int, beneficiaries []*types.BeneficiaryByPhoneInput, transactionPassword string) int
 		CreateBeneficiary          func(childComplexity int, beneficiary types.BeneficiaryInput, transactionPassword string) int
+		CreateScheduledTransfer    func(childComplexity int, scheduledTransfer types.ScheduledTransactionInput, transactionPassword string) int
 		CreateTransfer             func(childComplexity int, transfer types.TransactionInput, transactionPassword string) int
 		CreateVaultAccount         func(childComplexity int, account types.VaultAccountInput, transactionPassword string) int
 		DeactivateCredential       func(childComplexity int, credentialType types.IdentityCredentialsTypes) int
@@ -614,6 +615,29 @@ type ComplexityRoot struct {
 		Ts       func(childComplexity int) int
 	}
 
+	ScheduledTransaction struct {
+		Amount          func(childComplexity int) int
+		ID              func(childComplexity int) int
+		Reference       func(childComplexity int) int
+		RepeatType      func(childComplexity int) int
+		Source          func(childComplexity int) int
+		Status          func(childComplexity int) int
+		StatusTs        func(childComplexity int) int
+		Target          func(childComplexity int) int
+		TransactionType func(childComplexity int) int
+		Ts              func(childComplexity int) int
+	}
+
+	ScheduledTransactionSource struct {
+		Account  func(childComplexity int) int
+		Customer func(childComplexity int) int
+	}
+
+	ScheduledTransactionTarget struct {
+		Beneficiary        func(childComplexity int) int
+		BeneficiaryAccount func(childComplexity int) int
+	}
+
 	Staff struct {
 		Addresses func(childComplexity int) int
 		Dob       func(childComplexity int) int
@@ -751,6 +775,7 @@ type MutationResolver interface {
 	UpdateDevice(ctx context.Context, phoneNumber string, otp string, device types.DeviceInput) (*types.Response, error)
 	CheckCustomerDetails(ctx context.Context, customerDetails types.CheckCustomerDetailsInput, typeArg types.ActionType) (*types.Response, error)
 	CloseAccount(ctx context.Context, accountCloseInput types.AccountCloseInput) (*types.Response, error)
+	CreateScheduledTransfer(ctx context.Context, scheduledTransfer types.ScheduledTransactionInput, transactionPassword string) (*types.Response, error)
 	RequestResubmit(ctx context.Context, customerID string, reportIds []string, message *string) (*types.Response, error)
 	StaffLogin(ctx context.Context, token string, authType types.AuthType) (*types.AuthResponse, error)
 	UpdateKYCStatus(ctx context.Context, id string, status types.KYCStatuses, message string) (*types.Response, error)
@@ -2496,6 +2521,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateBeneficiary(childComplexity, args["beneficiary"].(types.BeneficiaryInput), args["transactionPassword"].(string)), true
 
+	case "Mutation.createScheduledTransfer":
+		if e.complexity.Mutation.CreateScheduledTransfer == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createScheduledTransfer_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateScheduledTransfer(childComplexity, args["scheduledTransfer"].(types.ScheduledTransactionInput), args["transactionPassword"].(string)), true
+
 	case "Mutation.createTransfer":
 		if e.complexity.Mutation.CreateTransfer == nil {
 			break
@@ -3785,6 +3822,104 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Review.Ts(childComplexity), true
 
+	case "ScheduledTransaction.amount":
+		if e.complexity.ScheduledTransaction.Amount == nil {
+			break
+		}
+
+		return e.complexity.ScheduledTransaction.Amount(childComplexity), true
+
+	case "ScheduledTransaction.id":
+		if e.complexity.ScheduledTransaction.ID == nil {
+			break
+		}
+
+		return e.complexity.ScheduledTransaction.ID(childComplexity), true
+
+	case "ScheduledTransaction.reference":
+		if e.complexity.ScheduledTransaction.Reference == nil {
+			break
+		}
+
+		return e.complexity.ScheduledTransaction.Reference(childComplexity), true
+
+	case "ScheduledTransaction.repeatType":
+		if e.complexity.ScheduledTransaction.RepeatType == nil {
+			break
+		}
+
+		return e.complexity.ScheduledTransaction.RepeatType(childComplexity), true
+
+	case "ScheduledTransaction.source":
+		if e.complexity.ScheduledTransaction.Source == nil {
+			break
+		}
+
+		return e.complexity.ScheduledTransaction.Source(childComplexity), true
+
+	case "ScheduledTransaction.status":
+		if e.complexity.ScheduledTransaction.Status == nil {
+			break
+		}
+
+		return e.complexity.ScheduledTransaction.Status(childComplexity), true
+
+	case "ScheduledTransaction.statusTs":
+		if e.complexity.ScheduledTransaction.StatusTs == nil {
+			break
+		}
+
+		return e.complexity.ScheduledTransaction.StatusTs(childComplexity), true
+
+	case "ScheduledTransaction.target":
+		if e.complexity.ScheduledTransaction.Target == nil {
+			break
+		}
+
+		return e.complexity.ScheduledTransaction.Target(childComplexity), true
+
+	case "ScheduledTransaction.transactionType":
+		if e.complexity.ScheduledTransaction.TransactionType == nil {
+			break
+		}
+
+		return e.complexity.ScheduledTransaction.TransactionType(childComplexity), true
+
+	case "ScheduledTransaction.ts":
+		if e.complexity.ScheduledTransaction.Ts == nil {
+			break
+		}
+
+		return e.complexity.ScheduledTransaction.Ts(childComplexity), true
+
+	case "ScheduledTransactionSource.account":
+		if e.complexity.ScheduledTransactionSource.Account == nil {
+			break
+		}
+
+		return e.complexity.ScheduledTransactionSource.Account(childComplexity), true
+
+	case "ScheduledTransactionSource.customer":
+		if e.complexity.ScheduledTransactionSource.Customer == nil {
+			break
+		}
+
+		return e.complexity.ScheduledTransactionSource.Customer(childComplexity), true
+
+	case "ScheduledTransactionTarget.beneficiary":
+		if e.complexity.ScheduledTransactionTarget.Beneficiary == nil {
+			break
+		}
+
+		return e.complexity.ScheduledTransactionTarget.Beneficiary(childComplexity), true
+
+	case "ScheduledTransactionTarget.beneficiaryAccount":
+		if e.complexity.ScheduledTransactionTarget.BeneficiaryAccount == nil {
+			break
+		}
+
+		return e.complexity.ScheduledTransactionTarget.BeneficiaryAccount(childComplexity), true
+
 	case "Staff.addresses":
 		if e.complexity.Staff.Addresses == nil {
 			break
@@ -4264,6 +4399,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputKYCInput,
 		ec.unmarshalInputPOAInput,
 		ec.unmarshalInputQuestionaryAnswerInput,
+		ec.unmarshalInputScheduledTransactionInput,
 		ec.unmarshalInputStaffCustomerDetailsUpdateInput,
 		ec.unmarshalInputTransactionInput,
 		ec.unmarshalInputUpdateFXInput,
@@ -4396,6 +4532,8 @@ type Mutation {
     checkCustomerDetails(customerDetails: CheckCustomerDetailsInput!, type: ActionType!): Response!
     # Closes a user account
     closeAccount(accountCloseInput: AccountCloseInput!): Response!
+    # Schedules a transfer to a beneficiary account
+    createScheduledTransfer(scheduledTransfer: ScheduledTransactionInput!, transactionPassword: String!): Response!
 
     # ---- Dashboard -----
     # Ask for a customer to resubmit a report
@@ -4601,6 +4739,15 @@ input TransactionInput {
     idempotencyKey: String!
 }
 
+input ScheduledTransactionInput {
+    transactionTypeId: ID!
+    reference: String
+    sourceAccountId: ID!
+    targetAccountId: ID!
+    repeatType: ScheduledTransactionRepeatType!
+    amount: Float!
+}
+
 # update the details of the customer logged in
 input CustomerDetailsUpdateInput {
     firstName: String
@@ -4668,7 +4815,8 @@ input AccountCloseInput {
     accountId: ID!
     depositAccount: BeneficiaryAccountInput!
     transactionPassword: String!
-}`, BuiltIn: false},
+}
+`, BuiltIn: false},
 	{Name: "../schemas/queries.graphql", Input: `type Query {
     # Check if there's a customer with the email given
     checkEmail(email: String!): Boolean!
@@ -5698,6 +5846,41 @@ type ExchangeRate {
     ts: Int!
 }
 
+type ScheduledTransaction {
+    id: ID!
+    transactionType: TransactionType!
+    reference: String!
+    source: ScheduledTransactionSource!
+    target: ScheduledTransactionTarget!
+    amount: Float!
+    repeatType: ScheduledTransactionRepeatType!
+    status: ScheduledTransactionStatus!
+    statusTs: Int!
+    ts: Int!
+}
+
+type ScheduledTransactionTarget {
+    beneficiary: Beneficiary!
+    beneficiaryAccount: BeneficiaryAccount!
+}
+
+type ScheduledTransactionSource {
+    customer: Customer!
+    account: Account!
+}
+
+enum ScheduledTransactionRepeatType {
+    ONE_TIME
+    WEEKLY
+    MONTHLY
+    ANNUALLY
+}
+
+enum ScheduledTransactionStatus {
+    ACTIVE
+    INACTIVE
+}
+
 ############# END TRANSACTIONS GROUP #############
 
 ############# BENEFICIARIES GROUP #############
@@ -6031,6 +6214,30 @@ func (ec *executionContext) field_Mutation_createBeneficiary_args(ctx context.Co
 		}
 	}
 	args["beneficiary"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["transactionPassword"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("transactionPassword"))
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["transactionPassword"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createScheduledTransfer_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 types.ScheduledTransactionInput
+	if tmp, ok := rawArgs["scheduledTransfer"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scheduledTransfer"))
+		arg0, err = ec.unmarshalNScheduledTransactionInput2msᚗapiᚋtypesᚐScheduledTransactionInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["scheduledTransfer"] = arg0
 	var arg1 string
 	if tmp, ok := rawArgs["transactionPassword"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("transactionPassword"))
@@ -20554,6 +20761,69 @@ func (ec *executionContext) fieldContext_Mutation_closeAccount(ctx context.Conte
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_createScheduledTransfer(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_createScheduledTransfer(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateScheduledTransfer(rctx, fc.Args["scheduledTransfer"].(types.ScheduledTransactionInput), fc.Args["transactionPassword"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.Response)
+	fc.Result = res
+	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_createScheduledTransfer(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "message":
+				return ec.fieldContext_Response_message(ctx, field)
+			case "success":
+				return ec.fieldContext_Response_success(ctx, field)
+			case "code":
+				return ec.fieldContext_Response_code(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Response", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_createScheduledTransfer_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_requestResubmit(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_requestResubmit(ctx, field)
 	if err != nil {
@@ -26933,6 +27203,746 @@ func (ec *executionContext) fieldContext_Review_ts(ctx context.Context, field gr
 	return fc, nil
 }
 
+func (ec *executionContext) _ScheduledTransaction_id(ctx context.Context, field graphql.CollectedField, obj *types.ScheduledTransaction) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ScheduledTransaction_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ScheduledTransaction_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ScheduledTransaction",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ScheduledTransaction_transactionType(ctx context.Context, field graphql.CollectedField, obj *types.ScheduledTransaction) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ScheduledTransaction_transactionType(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TransactionType, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.TransactionType)
+	fc.Result = res
+	return ec.marshalNTransactionType2ᚖmsᚗapiᚋtypesᚐTransactionType(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ScheduledTransaction_transactionType(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ScheduledTransaction",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_TransactionType_id(ctx, field)
+			case "name":
+				return ec.fieldContext_TransactionType_name(ctx, field)
+			case "status":
+				return ec.fieldContext_TransactionType_status(ctx, field)
+			case "statusTs":
+				return ec.fieldContext_TransactionType_statusTs(ctx, field)
+			case "ts":
+				return ec.fieldContext_TransactionType_ts(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type TransactionType", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ScheduledTransaction_reference(ctx context.Context, field graphql.CollectedField, obj *types.ScheduledTransaction) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ScheduledTransaction_reference(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Reference, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ScheduledTransaction_reference(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ScheduledTransaction",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ScheduledTransaction_source(ctx context.Context, field graphql.CollectedField, obj *types.ScheduledTransaction) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ScheduledTransaction_source(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Source, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.ScheduledTransactionSource)
+	fc.Result = res
+	return ec.marshalNScheduledTransactionSource2ᚖmsᚗapiᚋtypesᚐScheduledTransactionSource(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ScheduledTransaction_source(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ScheduledTransaction",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "customer":
+				return ec.fieldContext_ScheduledTransactionSource_customer(ctx, field)
+			case "account":
+				return ec.fieldContext_ScheduledTransactionSource_account(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ScheduledTransactionSource", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ScheduledTransaction_target(ctx context.Context, field graphql.CollectedField, obj *types.ScheduledTransaction) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ScheduledTransaction_target(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Target, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.ScheduledTransactionTarget)
+	fc.Result = res
+	return ec.marshalNScheduledTransactionTarget2ᚖmsᚗapiᚋtypesᚐScheduledTransactionTarget(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ScheduledTransaction_target(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ScheduledTransaction",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "beneficiary":
+				return ec.fieldContext_ScheduledTransactionTarget_beneficiary(ctx, field)
+			case "beneficiaryAccount":
+				return ec.fieldContext_ScheduledTransactionTarget_beneficiaryAccount(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ScheduledTransactionTarget", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ScheduledTransaction_amount(ctx context.Context, field graphql.CollectedField, obj *types.ScheduledTransaction) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ScheduledTransaction_amount(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Amount, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(float64)
+	fc.Result = res
+	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ScheduledTransaction_amount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ScheduledTransaction",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ScheduledTransaction_repeatType(ctx context.Context, field graphql.CollectedField, obj *types.ScheduledTransaction) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ScheduledTransaction_repeatType(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.RepeatType, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(types.ScheduledTransactionRepeatType)
+	fc.Result = res
+	return ec.marshalNScheduledTransactionRepeatType2msᚗapiᚋtypesᚐScheduledTransactionRepeatType(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ScheduledTransaction_repeatType(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ScheduledTransaction",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ScheduledTransactionRepeatType does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ScheduledTransaction_status(ctx context.Context, field graphql.CollectedField, obj *types.ScheduledTransaction) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ScheduledTransaction_status(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Status, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(types.ScheduledTransactionStatus)
+	fc.Result = res
+	return ec.marshalNScheduledTransactionStatus2msᚗapiᚋtypesᚐScheduledTransactionStatus(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ScheduledTransaction_status(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ScheduledTransaction",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ScheduledTransactionStatus does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ScheduledTransaction_statusTs(ctx context.Context, field graphql.CollectedField, obj *types.ScheduledTransaction) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ScheduledTransaction_statusTs(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.StatusTs, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int64)
+	fc.Result = res
+	return ec.marshalNInt2int64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ScheduledTransaction_statusTs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ScheduledTransaction",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ScheduledTransaction_ts(ctx context.Context, field graphql.CollectedField, obj *types.ScheduledTransaction) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ScheduledTransaction_ts(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Ts, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int64)
+	fc.Result = res
+	return ec.marshalNInt2int64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ScheduledTransaction_ts(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ScheduledTransaction",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ScheduledTransactionSource_customer(ctx context.Context, field graphql.CollectedField, obj *types.ScheduledTransactionSource) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ScheduledTransactionSource_customer(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Customer, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.Customer)
+	fc.Result = res
+	return ec.marshalNCustomer2ᚖmsᚗapiᚋtypesᚐCustomer(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ScheduledTransactionSource_customer(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ScheduledTransactionSource",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Customer_id(ctx, field)
+			case "title":
+				return ec.fieldContext_Customer_title(ctx, field)
+			case "firstName":
+				return ec.fieldContext_Customer_firstName(ctx, field)
+			case "lastName":
+				return ec.fieldContext_Customer_lastName(ctx, field)
+			case "dob":
+				return ec.fieldContext_Customer_dob(ctx, field)
+			case "bvn":
+				return ec.fieldContext_Customer_bvn(ctx, field)
+			case "addresses":
+				return ec.fieldContext_Customer_addresses(ctx, field)
+			case "phones":
+				return ec.fieldContext_Customer_phones(ctx, field)
+			case "email":
+				return ec.fieldContext_Customer_email(ctx, field)
+			case "hasPIN":
+				return ec.fieldContext_Customer_hasPIN(ctx, field)
+			case "status":
+				return ec.fieldContext_Customer_status(ctx, field)
+			case "statusTs":
+				return ec.fieldContext_Customer_statusTs(ctx, field)
+			case "ts":
+				return ec.fieldContext_Customer_ts(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Customer", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ScheduledTransactionSource_account(ctx context.Context, field graphql.CollectedField, obj *types.ScheduledTransactionSource) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ScheduledTransactionSource_account(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Account, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.Account)
+	fc.Result = res
+	return ec.marshalNAccount2ᚖmsᚗapiᚋtypesᚐAccount(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ScheduledTransactionSource_account(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ScheduledTransactionSource",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Account_id(ctx, field)
+			case "customer":
+				return ec.fieldContext_Account_customer(ctx, field)
+			case "product":
+				return ec.fieldContext_Account_product(ctx, field)
+			case "name":
+				return ec.fieldContext_Account_name(ctx, field)
+			case "iban":
+				return ec.fieldContext_Account_iban(ctx, field)
+			case "accountNumber":
+				return ec.fieldContext_Account_accountNumber(ctx, field)
+			case "code":
+				return ec.fieldContext_Account_code(ctx, field)
+			case "maturityDate":
+				return ec.fieldContext_Account_maturityDate(ctx, field)
+			case "balances":
+				return ec.fieldContext_Account_balances(ctx, field)
+			case "mambu":
+				return ec.fieldContext_Account_mambu(ctx, field)
+			case "fcmb":
+				return ec.fieldContext_Account_fcmb(ctx, field)
+			case "vault":
+				return ec.fieldContext_Account_vault(ctx, field)
+			case "status":
+				return ec.fieldContext_Account_status(ctx, field)
+			case "statusTs":
+				return ec.fieldContext_Account_statusTs(ctx, field)
+			case "ts":
+				return ec.fieldContext_Account_ts(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Account", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ScheduledTransactionTarget_beneficiary(ctx context.Context, field graphql.CollectedField, obj *types.ScheduledTransactionTarget) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ScheduledTransactionTarget_beneficiary(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Beneficiary, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.Beneficiary)
+	fc.Result = res
+	return ec.marshalNBeneficiary2ᚖmsᚗapiᚋtypesᚐBeneficiary(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ScheduledTransactionTarget_beneficiary(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ScheduledTransactionTarget",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Beneficiary_id(ctx, field)
+			case "customer":
+				return ec.fieldContext_Beneficiary_customer(ctx, field)
+			case "name":
+				return ec.fieldContext_Beneficiary_name(ctx, field)
+			case "accounts":
+				return ec.fieldContext_Beneficiary_accounts(ctx, field)
+			case "transactionsCount":
+				return ec.fieldContext_Beneficiary_transactionsCount(ctx, field)
+			case "status":
+				return ec.fieldContext_Beneficiary_status(ctx, field)
+			case "statusTs":
+				return ec.fieldContext_Beneficiary_statusTs(ctx, field)
+			case "ts":
+				return ec.fieldContext_Beneficiary_ts(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Beneficiary", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ScheduledTransactionTarget_beneficiaryAccount(ctx context.Context, field graphql.CollectedField, obj *types.ScheduledTransactionTarget) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ScheduledTransactionTarget_beneficiaryAccount(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.BeneficiaryAccount, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.BeneficiaryAccount)
+	fc.Result = res
+	return ec.marshalNBeneficiaryAccount2ᚖmsᚗapiᚋtypesᚐBeneficiaryAccount(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ScheduledTransactionTarget_beneficiaryAccount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ScheduledTransactionTarget",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_BeneficiaryAccount_id(ctx, field)
+			case "beneficiary":
+				return ec.fieldContext_BeneficiaryAccount_beneficiary(ctx, field)
+			case "name":
+				return ec.fieldContext_BeneficiaryAccount_name(ctx, field)
+			case "account":
+				return ec.fieldContext_BeneficiaryAccount_account(ctx, field)
+			case "currency":
+				return ec.fieldContext_BeneficiaryAccount_currency(ctx, field)
+			case "accountNumber":
+				return ec.fieldContext_BeneficiaryAccount_accountNumber(ctx, field)
+			case "code":
+				return ec.fieldContext_BeneficiaryAccount_code(ctx, field)
+			case "status":
+				return ec.fieldContext_BeneficiaryAccount_status(ctx, field)
+			case "statusTs":
+				return ec.fieldContext_BeneficiaryAccount_statusTs(ctx, field)
+			case "ts":
+				return ec.fieldContext_BeneficiaryAccount_ts(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type BeneficiaryAccount", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Staff_id(ctx context.Context, field graphql.CollectedField, obj *types.Staff) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Staff_id(ctx, field)
 	if err != nil {
@@ -32904,6 +33914,74 @@ func (ec *executionContext) unmarshalInputQuestionaryAnswerInput(ctx context.Con
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputScheduledTransactionInput(ctx context.Context, obj interface{}) (types.ScheduledTransactionInput, error) {
+	var it types.ScheduledTransactionInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"transactionTypeId", "reference", "sourceAccountId", "targetAccountId", "repeatType", "amount"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "transactionTypeId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("transactionTypeId"))
+			it.TransactionTypeID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "reference":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("reference"))
+			it.Reference, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "sourceAccountId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sourceAccountId"))
+			it.SourceAccountID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "targetAccountId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("targetAccountId"))
+			it.TargetAccountID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "repeatType":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("repeatType"))
+			it.RepeatType, err = ec.unmarshalNScheduledTransactionRepeatType2msᚗapiᚋtypesᚐScheduledTransactionRepeatType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "amount":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("amount"))
+			it.Amount, err = ec.unmarshalNFloat2float64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputStaffCustomerDetailsUpdateInput(ctx context.Context, obj interface{}) (types.StaffCustomerDetailsUpdateInput, error) {
 	var it types.StaffCustomerDetailsUpdateInput
 	asMap := map[string]interface{}{}
@@ -35973,6 +37051,15 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "createScheduledTransfer":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_createScheduledTransfer(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "requestResubmit":
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
@@ -37685,6 +38772,167 @@ func (ec *executionContext) _Review(ctx context.Context, sel ast.SelectionSet, o
 		case "ts":
 
 			out.Values[i] = ec._Review_ts(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var scheduledTransactionImplementors = []string{"ScheduledTransaction"}
+
+func (ec *executionContext) _ScheduledTransaction(ctx context.Context, sel ast.SelectionSet, obj *types.ScheduledTransaction) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, scheduledTransactionImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ScheduledTransaction")
+		case "id":
+
+			out.Values[i] = ec._ScheduledTransaction_id(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "transactionType":
+
+			out.Values[i] = ec._ScheduledTransaction_transactionType(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "reference":
+
+			out.Values[i] = ec._ScheduledTransaction_reference(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "source":
+
+			out.Values[i] = ec._ScheduledTransaction_source(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "target":
+
+			out.Values[i] = ec._ScheduledTransaction_target(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "amount":
+
+			out.Values[i] = ec._ScheduledTransaction_amount(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "repeatType":
+
+			out.Values[i] = ec._ScheduledTransaction_repeatType(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "status":
+
+			out.Values[i] = ec._ScheduledTransaction_status(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "statusTs":
+
+			out.Values[i] = ec._ScheduledTransaction_statusTs(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "ts":
+
+			out.Values[i] = ec._ScheduledTransaction_ts(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var scheduledTransactionSourceImplementors = []string{"ScheduledTransactionSource"}
+
+func (ec *executionContext) _ScheduledTransactionSource(ctx context.Context, sel ast.SelectionSet, obj *types.ScheduledTransactionSource) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, scheduledTransactionSourceImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ScheduledTransactionSource")
+		case "customer":
+
+			out.Values[i] = ec._ScheduledTransactionSource_customer(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "account":
+
+			out.Values[i] = ec._ScheduledTransactionSource_account(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var scheduledTransactionTargetImplementors = []string{"ScheduledTransactionTarget"}
+
+func (ec *executionContext) _ScheduledTransactionTarget(ctx context.Context, sel ast.SelectionSet, obj *types.ScheduledTransactionTarget) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, scheduledTransactionTargetImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ScheduledTransactionTarget")
+		case "beneficiary":
+
+			out.Values[i] = ec._ScheduledTransactionTarget_beneficiary(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "beneficiaryAccount":
+
+			out.Values[i] = ec._ScheduledTransactionTarget_beneficiaryAccount(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -40604,6 +41852,51 @@ func (ec *executionContext) marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx 
 		return graphql.Null
 	}
 	return ec._Response(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNScheduledTransactionInput2msᚗapiᚋtypesᚐScheduledTransactionInput(ctx context.Context, v interface{}) (types.ScheduledTransactionInput, error) {
+	res, err := ec.unmarshalInputScheduledTransactionInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNScheduledTransactionRepeatType2msᚗapiᚋtypesᚐScheduledTransactionRepeatType(ctx context.Context, v interface{}) (types.ScheduledTransactionRepeatType, error) {
+	var res types.ScheduledTransactionRepeatType
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNScheduledTransactionRepeatType2msᚗapiᚋtypesᚐScheduledTransactionRepeatType(ctx context.Context, sel ast.SelectionSet, v types.ScheduledTransactionRepeatType) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) marshalNScheduledTransactionSource2ᚖmsᚗapiᚋtypesᚐScheduledTransactionSource(ctx context.Context, sel ast.SelectionSet, v *types.ScheduledTransactionSource) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._ScheduledTransactionSource(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNScheduledTransactionStatus2msᚗapiᚋtypesᚐScheduledTransactionStatus(ctx context.Context, v interface{}) (types.ScheduledTransactionStatus, error) {
+	var res types.ScheduledTransactionStatus
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNScheduledTransactionStatus2msᚗapiᚋtypesᚐScheduledTransactionStatus(ctx context.Context, sel ast.SelectionSet, v types.ScheduledTransactionStatus) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) marshalNScheduledTransactionTarget2ᚖmsᚗapiᚋtypesᚐScheduledTransactionTarget(ctx context.Context, sel ast.SelectionSet, v *types.ScheduledTransactionTarget) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._ScheduledTransactionTarget(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNStaff2ᚖmsᚗapiᚋtypesᚐStaff(ctx context.Context, sel ast.SelectionSet, v *types.Staff) graphql.Marshaler {

@@ -6,6 +6,7 @@ package graph
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"go.uber.org/zap"
@@ -1169,6 +1170,11 @@ func (r *mutationResolver) CloseAccount(ctx context.Context, accountCloseInput t
 		Success: true,
 		Code:    http.StatusOK,
 	}, nil
+}
+
+// CreateScheduledTransfer is the resolver for the createScheduledTransfer field.
+func (r *mutationResolver) CreateScheduledTransfer(ctx context.Context, scheduledTransfer types.ScheduledTransactionInput, transactionPassword string) (*types.Response, error) {
+	panic(fmt.Errorf("not implemented"))
 }
 
 // RequestResubmit is the resolver for the requestResubmit field.
