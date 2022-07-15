@@ -1161,13 +1161,13 @@ func (r *mutationResolver) CloseAccount(ctx context.Context, accountCloseInput t
 	}
 
 	// Call RPC
-	_, err = r.AccountService.CloseAccount(ctx, &request)
+	response, err := r.AccountService.CloseAccount(ctx, &request)
 	if err != nil {
 		return nil, err
 	}
 
 	return &types.Response{
-		Success: true,
+		Success: response.Success,
 		Code:    http.StatusOK,
 	}, nil
 }

@@ -681,6 +681,7 @@ type ScheduledTransaction struct {
 	Source          *ScheduledTransactionSource    `json:"source"`
 	Target          *ScheduledTransactionTarget    `json:"target"`
 	Amount          float64                        `json:"amount"`
+	ReferenceDate   int64                          `json:"referenceDate"`
 	RepeatType      ScheduledTransactionRepeatType `json:"repeatType"`
 	Status          ScheduledTransactionStatus     `json:"status"`
 	StatusTs        int64                          `json:"statusTs"`
@@ -692,6 +693,7 @@ type ScheduledTransactionInput struct {
 	Reference         *string                        `json:"reference"`
 	SourceAccountID   string                         `json:"sourceAccountId"`
 	TargetAccountID   string                         `json:"targetAccountId"`
+	ReferenceDate     int64                          `json:"referenceDate"`
 	RepeatType        ScheduledTransactionRepeatType `json:"repeatType"`
 	Amount            float64                        `json:"amount"`
 }

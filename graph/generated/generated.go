@@ -619,6 +619,7 @@ type ComplexityRoot struct {
 		Amount          func(childComplexity int) int
 		ID              func(childComplexity int) int
 		Reference       func(childComplexity int) int
+		ReferenceDate   func(childComplexity int) int
 		RepeatType      func(childComplexity int) int
 		Source          func(childComplexity int) int
 		Status          func(childComplexity int) int
@@ -3843,6 +3844,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ScheduledTransaction.Reference(childComplexity), true
 
+	case "ScheduledTransaction.referenceDate":
+		if e.complexity.ScheduledTransaction.ReferenceDate == nil {
+			break
+		}
+
+		return e.complexity.ScheduledTransaction.ReferenceDate(childComplexity), true
+
 	case "ScheduledTransaction.repeatType":
 		if e.complexity.ScheduledTransaction.RepeatType == nil {
 			break
@@ -4744,6 +4752,7 @@ input ScheduledTransactionInput {
     reference: String
     sourceAccountId: ID!
     targetAccountId: ID!
+    referenceDate: Int!
     repeatType: ScheduledTransactionRepeatType!
     amount: Float!
 }
@@ -5853,6 +5862,7 @@ type ScheduledTransaction {
     source: ScheduledTransactionSource!
     target: ScheduledTransactionTarget!
     amount: Float!
+    referenceDate: Int!
     repeatType: ScheduledTransactionRepeatType!
     status: ScheduledTransactionStatus!
     statusTs: Int!
@@ -27491,6 +27501,50 @@ func (ec *executionContext) fieldContext_ScheduledTransaction_amount(ctx context
 	return fc, nil
 }
 
+func (ec *executionContext) _ScheduledTransaction_referenceDate(ctx context.Context, field graphql.CollectedField, obj *types.ScheduledTransaction) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ScheduledTransaction_referenceDate(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ReferenceDate, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int64)
+	fc.Result = res
+	return ec.marshalNInt2int64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ScheduledTransaction_referenceDate(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ScheduledTransaction",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _ScheduledTransaction_repeatType(ctx context.Context, field graphql.CollectedField, obj *types.ScheduledTransaction) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_ScheduledTransaction_repeatType(ctx, field)
 	if err != nil {
@@ -33921,7 +33975,7 @@ func (ec *executionContext) unmarshalInputScheduledTransactionInput(ctx context.
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"transactionTypeId", "reference", "sourceAccountId", "targetAccountId", "repeatType", "amount"}
+	fieldsInOrder := [...]string{"transactionTypeId", "reference", "sourceAccountId", "targetAccountId", "referenceDate", "repeatType", "amount"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -33957,6 +34011,14 @@ func (ec *executionContext) unmarshalInputScheduledTransactionInput(ctx context.
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("targetAccountId"))
 			it.TargetAccountID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "referenceDate":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("referenceDate"))
+			it.ReferenceDate, err = ec.unmarshalNInt2int64(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -38835,6 +38897,13 @@ func (ec *executionContext) _ScheduledTransaction(ctx context.Context, sel ast.S
 		case "amount":
 
 			out.Values[i] = ec._ScheduledTransaction_amount(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "referenceDate":
+
+			out.Values[i] = ec._ScheduledTransaction_referenceDate(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++

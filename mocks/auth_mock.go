@@ -11,6 +11,7 @@ import (
 	gomock "github.com/golang/mock/gomock"
 	grpc "google.golang.org/grpc"
 	auth "ms.api/protos/pb/auth"
+	types "ms.api/protos/pb/types"
 )
 
 // MockAuthServiceClient is a mock of AuthServiceClient interface.
@@ -136,6 +137,26 @@ func (mr *MockAuthServiceClientMockRecorder) ValidateToken(ctx, in interface{}, 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateToken", reflect.TypeOf((*MockAuthServiceClient)(nil).ValidateToken), varargs...)
 }
 
+// ValidateTransactionPin mocks base method.
+func (m *MockAuthServiceClient) ValidateTransactionPin(ctx context.Context, in *auth.ValidateTransactionPinRequest, opts ...grpc.CallOption) (*types.DefaultResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ValidateTransactionPin", varargs...)
+	ret0, _ := ret[0].(*types.DefaultResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ValidateTransactionPin indicates an expected call of ValidateTransactionPin.
+func (mr *MockAuthServiceClientMockRecorder) ValidateTransactionPin(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateTransactionPin", reflect.TypeOf((*MockAuthServiceClient)(nil).ValidateTransactionPin), varargs...)
+}
+
 // MockAuthServiceServer is a mock of AuthServiceServer interface.
 type MockAuthServiceServer struct {
 	ctrl     *gomock.Controller
@@ -232,4 +253,19 @@ func (m *MockAuthServiceServer) ValidateToken(arg0 context.Context, arg1 *auth.V
 func (mr *MockAuthServiceServerMockRecorder) ValidateToken(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateToken", reflect.TypeOf((*MockAuthServiceServer)(nil).ValidateToken), arg0, arg1)
+}
+
+// ValidateTransactionPin mocks base method.
+func (m *MockAuthServiceServer) ValidateTransactionPin(arg0 context.Context, arg1 *auth.ValidateTransactionPinRequest) (*types.DefaultResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ValidateTransactionPin", arg0, arg1)
+	ret0, _ := ret[0].(*types.DefaultResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ValidateTransactionPin indicates an expected call of ValidateTransactionPin.
+func (mr *MockAuthServiceServerMockRecorder) ValidateTransactionPin(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateTransactionPin", reflect.TypeOf((*MockAuthServiceServer)(nil).ValidateTransactionPin), arg0, arg1)
 }
