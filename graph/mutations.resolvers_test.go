@@ -3,8 +3,10 @@ package graph
 import (
 	"context"
 	"errors"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/golang/mock/gomock"
 	terror "github.com/roava/zebra/errors"
@@ -4119,6 +4121,120 @@ func Test_mutationResolver_CloseAccount(t *testing.T) {
 
 				resp, err := resolver.CloseAccount(ctx, test.arg)
 				assert.Error(t, err)
+				assert.Nil(t, resp)
+			}
+		})
+	}
+}
+
+func Test_mutationResolver_CreateScheduledTransfer(t *testing.T) {
+	const (
+		success = iota
+		errorUnauthenticated
+		errorCreatingScheduledTransfer
+	)
+
+	tests := []struct {
+		name     string
+		testType int
+	}{
+		{
+			name:     "Success",
+			testType: success,
+		},
+		{
+			name:     "Error unauthenticated",
+			testType: errorUnauthenticated,
+		},
+		{
+			name:     "Error creating Scheduled Transfer",
+			testType: errorCreatingScheduledTransfer,
+		},
+	}
+
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	paymentServiceClient := mocks.NewMockPaymentServiceClient(controller)
+	resolverOpts := &ResolverOpts{
+		PaymentService: paymentServiceClient,
+	}
+	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
+
+	mockTime := time.Unix(0, 0)
+	mockScheduledTransactionInput := payment.ScheduledTransactionInput{
+		TransactionTypeId: "mockScheduledTransactionInputTransactionTypeID",
+		Reference:         "mockScheduledTransactionInputReference",
+		SourceAccountId:   "mockScheduledTransactionInputSourceAccountID",
+		TargetAccountId:   "mockScheduledTransactionInputTargetAccountID",
+		ReferenceDate:     timestamppb.New(mockTime),
+		RepeatType:        pbTypes.ScheduledTransaction_ONE_TIME,
+		Amount:            42.42,
+	}
+
+	mockTransactionPassword := "mockTransactionPassword"
+	mockRequest := payment.CreateScheduledTransferRequest{
+		Transfer:            &mockScheduledTransactionInput,
+		TransactionPassword: mockTransactionPassword,
+	}
+
+	testArg := types.ScheduledTransactionInput{
+		TransactionTypeID: "mockScheduledTransactionInputTransactionTypeID",
+		Reference: func() *string {
+			s := "mockScheduledTransactionInputReference"
+			return &s
+		}(),
+		SourceAccountID: "mockScheduledTransactionInputSourceAccountID",
+		TargetAccountID: "mockScheduledTransactionInputTargetAccountID",
+		ReferenceDate:   mockTime.Unix(),
+		RepeatType:      types.ScheduledTransactionRepeatTypeOneTime,
+		Amount:          42.42,
+	}
+
+	mockClaims := models.JWTClaims{
+		Client:   models.APP,
+		ID:       "123456",
+		Email:    "email@roava.app",
+		DeviceID: "12345",
+	}
+	ctx, _ := middleware.PutClaimsOnContext(context.Background(), &mockClaims)
+
+	mockError := errors.New("mock error")
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			switch test.testType {
+			case success:
+				paymentServiceClient.EXPECT().
+					CreateScheduledTransfer(ctx, &mockRequest).
+					Return(&pbTypes.DefaultResponse{
+						Success: true,
+						Code:    http.StatusOK,
+					}, nil)
+				resp, err := resolver.CreateScheduledTransfer(ctx, testArg, mockTransactionPassword)
+				assert.NoError(t, err)
+				assert.Equal(t, &types.Response{
+					Success: true,
+					Code:    http.StatusOK,
+				}, resp)
+
+			case errorUnauthenticated:
+				resp, err := resolver.CreateScheduledTransfer(context.Background(), testArg, mockTransactionPassword)
+
+				assert.Error(t, err)
+				assert.IsType(t, &terror.Terror{}, err)
+				assert.Equal(t, errorvalues.InvalidAuthenticationError, err.(*terror.Terror).Code())
+				assert.Equal(t, "User authentication failed", *resp.Message)
+				assert.Equal(t, false, resp.Success)
+				assert.Equal(t, int64(http.StatusInternalServerError), resp.Code)
+
+			case errorCreatingScheduledTransfer:
+				paymentServiceClient.EXPECT().
+					CreateScheduledTransfer(ctx, &mockRequest).
+					Return(nil, mockError)
+
+				resp, err := resolver.CreateScheduledTransfer(ctx, testArg, mockTransactionPassword)
+				assert.Error(t, err)
+				assert.Equal(t, mockError, err)
 				assert.Nil(t, resp)
 			}
 		})

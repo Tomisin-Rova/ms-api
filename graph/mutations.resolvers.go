@@ -6,10 +6,11 @@ package graph
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
+	"time"
 
 	"go.uber.org/zap"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"ms.api/graph/generated"
 	errorvalues "ms.api/libs/errors"
 	"ms.api/libs/validator/datevalidator"
@@ -1174,7 +1175,42 @@ func (r *mutationResolver) CloseAccount(ctx context.Context, accountCloseInput t
 
 // CreateScheduledTransfer is the resolver for the createScheduledTransfer field.
 func (r *mutationResolver) CreateScheduledTransfer(ctx context.Context, scheduledTransfer types.ScheduledTransactionInput, transactionPassword string) (*types.Response, error) {
-	panic(fmt.Errorf("not implemented"))
+	// Get user claims
+	_, err := middlewares.GetClaimsFromCtx(ctx)
+	if err != nil {
+		responseMessage := "User authentication failed"
+		return &types.Response{Message: &responseMessage, Success: false, Code: int64(500)}, err
+	}
+
+	var reference string
+	if scheduledTransfer.Reference != nil {
+		reference = *scheduledTransfer.Reference
+	}
+
+	// Build request
+	request := payment.CreateScheduledTransferRequest{
+		Transfer: &payment.ScheduledTransactionInput{
+			TransactionTypeId: scheduledTransfer.TransactionTypeID,
+			Reference:         reference,
+			SourceAccountId:   scheduledTransfer.SourceAccountID,
+			TargetAccountId:   scheduledTransfer.TargetAccountID,
+			ReferenceDate:     timestamppb.New(time.Unix(scheduledTransfer.ReferenceDate, 0)),
+			RepeatType:        r.helper.MapProtoScheduledTransactionRepeatType(scheduledTransfer.RepeatType),
+			Amount:            float32(scheduledTransfer.Amount),
+		},
+		TransactionPassword: transactionPassword,
+	}
+
+	// Call RPC
+	response, err := r.PaymentService.CreateScheduledTransfer(ctx, &request)
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.Response{
+		Success: response.Success,
+		Code:    int64(response.Code),
+	}, nil
 }
 
 // RequestResubmit is the resolver for the requestResubmit field.
