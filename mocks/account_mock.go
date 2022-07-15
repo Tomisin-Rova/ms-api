@@ -38,14 +38,14 @@ func (m *MockAccountServiceClient) EXPECT() *MockAccountServiceClientMockRecorde
 }
 
 // CloseAccount mocks base method.
-func (m *MockAccountServiceClient) CloseAccount(ctx context.Context, in *account.CloseAccountRequest, opts ...grpc.CallOption) (*account.CloseAccountResponse, error) {
+func (m *MockAccountServiceClient) CloseAccount(ctx context.Context, in *account.CloseAccountRequest, opts ...grpc.CallOption) (*types.DefaultResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "CloseAccount", varargs...)
-	ret0, _ := ret[0].(*account.CloseAccountResponse)
+	ret0, _ := ret[0].(*types.DefaultResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -221,10 +221,10 @@ func (m *MockAccountServiceServer) EXPECT() *MockAccountServiceServerMockRecorde
 }
 
 // CloseAccount mocks base method.
-func (m *MockAccountServiceServer) CloseAccount(arg0 context.Context, arg1 *account.CloseAccountRequest) (*account.CloseAccountResponse, error) {
+func (m *MockAccountServiceServer) CloseAccount(arg0 context.Context, arg1 *account.CloseAccountRequest) (*types.DefaultResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CloseAccount", arg0, arg1)
-	ret0, _ := ret[0].(*account.CloseAccountResponse)
+	ret0, _ := ret[0].(*types.DefaultResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

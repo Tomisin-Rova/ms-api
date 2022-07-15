@@ -4085,7 +4085,11 @@ func Test_mutationResolver_CloseAccount(t *testing.T) {
 					},
 					TransactionPassword: test.arg.TransactionPassword,
 				}
-				accountServiceClient.EXPECT().CloseAccount(ctx, &request).Return(&accountPb.CloseAccountResponse{}, nil)
+				mockResponse := &pbTypes.DefaultResponse{
+					Success: true,
+					Code:    200,
+				}
+				accountServiceClient.EXPECT().CloseAccount(ctx, &request).Return(mockResponse, nil)
 				resp, err := resolver.CloseAccount(ctx, test.arg)
 				assert.NoError(t, err)
 				assert.Equal(t, &types.Response{
