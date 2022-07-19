@@ -1,0 +1,96 @@
+package graph
+
+import (
+	"github.com/stretchr/testify/assert"
+	pbTypes "ms.api/protos/pb/types"
+	"ms.api/types"
+	"testing"
+)
+
+func TestHelpers_ScheduledTransactionRepeatType(t *testing.T) {
+	const (
+		protoToSchema = iota
+		schemaToProto
+	)
+
+	var tests = []struct {
+		name     string
+		testType int
+	}{
+		{
+			name:     "Test proto to schema",
+			testType: protoToSchema,
+		},
+		{
+			name:     "Test schema to proto",
+			testType: schemaToProto,
+		},
+	}
+
+	data := map[pbTypes.ScheduledTransaction_ScheduledTransactionRepeatType]types.ScheduledTransactionRepeatType{
+		pbTypes.ScheduledTransaction_ONE_TIME: types.ScheduledTransactionRepeatTypeOneTime,
+		pbTypes.ScheduledTransaction_WEEKLY:   types.ScheduledTransactionRepeatTypeWeekly,
+		pbTypes.ScheduledTransaction_MONTHLY:  types.ScheduledTransactionRepeatTypeMonthly,
+		pbTypes.ScheduledTransaction_ANNUALLY: types.ScheduledTransactionRepeatTypeAnnually,
+	}
+
+	h := &helpersfactory{}
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			for proto, schema := range data {
+				switch testCase.testType {
+				case protoToSchema:
+					result := h.MapScheduledTransactionRepeatType(proto)
+					assert.Equal(t, schema, result)
+				case schemaToProto:
+					result := h.MapProtoScheduledTransactionRepeatType(schema)
+					assert.Equal(t, proto, result)
+				}
+			}
+		})
+	}
+}
+
+func TestHelpers_ScheduledTransactionStatus(t *testing.T) {
+	const (
+		protoToSchema = iota
+		schemaToProto
+	)
+
+	var tests = []struct {
+		name     string
+		testType int
+	}{
+		{
+			name:     "Test proto to schema",
+			testType: protoToSchema,
+		},
+		{
+			name:     "Test schema to proto",
+			testType: schemaToProto,
+		},
+	}
+
+	data := map[pbTypes.ScheduledTransaction_ScheduledTransactionStatuses]types.ScheduledTransactionStatus{
+		pbTypes.ScheduledTransaction_ACTIVE:   types.ScheduledTransactionStatusActive,
+		pbTypes.ScheduledTransaction_INACTIVE: types.ScheduledTransactionStatusInactive,
+	}
+
+	h := &helpersfactory{}
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			for proto, schema := range data {
+				switch testCase.testType {
+				case protoToSchema:
+					result := h.MapScheduledTransactionStatus(proto)
+					assert.Equal(t, schema, result)
+				case schemaToProto:
+					result := h.MapProtoScheduledTransactionStatus(schema)
+					assert.Equal(t, proto, result)
+				}
+			}
+		})
+	}
+}

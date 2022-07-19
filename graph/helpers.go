@@ -33,6 +33,10 @@ type Helper interface {
 	MapCredentialTypes(val types.IdentityCredentialsTypes) protoTypes.IdentityCredentials_IdentityCredentialsTypes
 	MapStaffAuditLogType(val protoTypes.StaffAuditLog_StaffAuditLogTypes) types.StaffAuditLogType
 	MapProtoStaffAuditLogType(val types.StaffAuditLogType) protoTypes.StaffAuditLog_StaffAuditLogTypes
+	MapScheduledTransactionRepeatType(val protoTypes.ScheduledTransaction_ScheduledTransactionRepeatType) types.ScheduledTransactionRepeatType
+	MapProtoScheduledTransactionRepeatType(val types.ScheduledTransactionRepeatType) protoTypes.ScheduledTransaction_ScheduledTransactionRepeatType
+	MapScheduledTransactionStatus(val protoTypes.ScheduledTransaction_ScheduledTransactionStatuses) types.ScheduledTransactionStatus
+	MapProtoScheduledTransactionStatus(val types.ScheduledTransactionStatus) protoTypes.ScheduledTransaction_ScheduledTransactionStatuses
 }
 
 type helpersfactory struct{}
@@ -1322,4 +1326,56 @@ func (h *helpersfactory) makeStatesFromProto(states []*protoTypes.State) []*type
 		}
 	}
 	return newStates
+}
+
+func (h *helpersfactory) MapScheduledTransactionRepeatType(val protoTypes.ScheduledTransaction_ScheduledTransactionRepeatType) types.ScheduledTransactionRepeatType {
+	switch val {
+	case protoTypes.ScheduledTransaction_ONE_TIME:
+		return types.ScheduledTransactionRepeatTypeOneTime
+	case protoTypes.ScheduledTransaction_WEEKLY:
+		return types.ScheduledTransactionRepeatTypeWeekly
+	case protoTypes.ScheduledTransaction_MONTHLY:
+		return types.ScheduledTransactionRepeatTypeMonthly
+	case protoTypes.ScheduledTransaction_ANNUALLY:
+		return types.ScheduledTransactionRepeatTypeAnnually
+	default:
+		return ""
+	}
+}
+
+func (h *helpersfactory) MapProtoScheduledTransactionRepeatType(val types.ScheduledTransactionRepeatType) protoTypes.ScheduledTransaction_ScheduledTransactionRepeatType {
+	switch val {
+	case types.ScheduledTransactionRepeatTypeOneTime:
+		return protoTypes.ScheduledTransaction_ONE_TIME
+	case types.ScheduledTransactionRepeatTypeWeekly:
+		return protoTypes.ScheduledTransaction_WEEKLY
+	case types.ScheduledTransactionRepeatTypeMonthly:
+		return protoTypes.ScheduledTransaction_MONTHLY
+	case types.ScheduledTransactionRepeatTypeAnnually:
+		return protoTypes.ScheduledTransaction_ANNUALLY
+	default:
+		return -100
+	}
+}
+
+func (h *helpersfactory) MapScheduledTransactionStatus(val protoTypes.ScheduledTransaction_ScheduledTransactionStatuses) types.ScheduledTransactionStatus {
+	switch val {
+	case protoTypes.ScheduledTransaction_ACTIVE:
+		return types.ScheduledTransactionStatusActive
+	case protoTypes.ScheduledTransaction_INACTIVE:
+		return types.ScheduledTransactionStatusInactive
+	default:
+		return ""
+	}
+}
+
+func (h *helpersfactory) MapProtoScheduledTransactionStatus(val types.ScheduledTransactionStatus) protoTypes.ScheduledTransaction_ScheduledTransactionStatuses {
+	switch val {
+	case types.ScheduledTransactionStatusActive:
+		return protoTypes.ScheduledTransaction_ACTIVE
+	case types.ScheduledTransactionStatusInactive:
+		return protoTypes.ScheduledTransaction_INACTIVE
+	default:
+		return -100
+	}
 }
