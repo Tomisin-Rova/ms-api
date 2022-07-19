@@ -6,6 +6,7 @@ package graph
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -1124,6 +1125,7 @@ func (r *mutationResolver) CheckCustomerDetails(ctx context.Context, customerDet
 			Password:    customerDetails.Password,
 			PhoneNumber: customerDetails.PhoneNumber,
 			Dob:         customerDetails.Dob,
+			Email:       customerDetails.Email,
 			ActionType:  customer.CheckCustomerDetailsRequest_DEVICE_UPDATE,
 		}
 	default:
@@ -1473,6 +1475,11 @@ func (r *mutationResolver) StaffUpdateCustomerDetails(ctx context.Context, custo
 		Success: response.Success,
 		Code:    int64(response.Code),
 	}, nil
+}
+
+// WithdrawVaultAccountNoSource is the resolver for the withdrawVaultAccountNoSource field.
+func (r *mutationResolver) WithdrawVaultAccountNoSource(ctx context.Context, vaultAccountID string, beneficiary types.BeneficiaryAccountInput, transactionPin string) (*types.Response, error) {
+	panic(fmt.Errorf("not implemented"))
 }
 
 // Mutation returns generated.MutationResolver implementation.

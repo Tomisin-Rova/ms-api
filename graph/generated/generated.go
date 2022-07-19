@@ -405,46 +405,47 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		AcceptContent              func(childComplexity int, contentID string) int
-		AddBeneficiaryAccount      func(childComplexity int, beneficiaryID string, account types.BeneficiaryAccountInput, transactionPassword string) int
-		AnswerQuestionary          func(childComplexity int, questionary types.QuestionaryAnswerInput) int
-		CheckBvn                   func(childComplexity int, bvn string, phone string) int
-		CheckCustomerData          func(childComplexity int, customerData types.CheckCustomerDataInput) int
-		CheckCustomerDetails       func(childComplexity int, customerDetails types.CheckCustomerDetailsInput, typeArg types.ActionType) int
-		CheckCustomerEmail         func(childComplexity int, email string, device types.DeviceInput) int
-		CloseAccount               func(childComplexity int, accountCloseInput types.AccountCloseInput) int
-		CreateAccount              func(childComplexity int, account types.AccountInput) int
-		CreateBeneficiariesByPhone func(childComplexity int, beneficiaries []*types.BeneficiaryByPhoneInput, transactionPassword string) int
-		CreateBeneficiary          func(childComplexity int, beneficiary types.BeneficiaryInput, transactionPassword string) int
-		CreateScheduledTransfer    func(childComplexity int, scheduledTransfer types.ScheduledTransactionInput, transactionPassword string) int
-		CreateTransfer             func(childComplexity int, transfer types.TransactionInput, transactionPassword string) int
-		CreateVaultAccount         func(childComplexity int, account types.VaultAccountInput, transactionPassword string) int
-		DeactivateCredential       func(childComplexity int, credentialType types.IdentityCredentialsTypes) int
-		DeleteBeneficiaryAccount   func(childComplexity int, beneficiaryID string, accountID string, transactionPassword string) int
-		ForgotTransactionPassword  func(childComplexity int, newTransactionPassword string) int
-		Login                      func(childComplexity int, credentials types.AuthInput) int
-		RefreshToken               func(childComplexity int, token string) int
-		Register                   func(childComplexity int, customerDetails types.CustomerDetailsInput) int
-		RequestOtp                 func(childComplexity int, typeArg types.DeliveryMode, target string, expireTimeInSeconds *int64) int
-		RequestResubmit            func(childComplexity int, customerID string, reportIds []string, message *string) int
-		ResetLoginPassword         func(childComplexity int, otpToken string, email string, loginPassword string) int
-		ResetTransactionPassword   func(childComplexity int, otpToken string, email string, newTransactionPassword string, currentTransactionPassword string) int
-		SendNotification           func(childComplexity int, typeArg types.DeliveryMode, content string, templateID string) int
-		SetDevicePreferences       func(childComplexity int, preferences []*types.DevicePreferencesInput) int
-		SetDeviceToken             func(childComplexity int, tokens []*types.DeviceTokenInput) int
-		SetTransactionPassword     func(childComplexity int, password string) int
-		Signup                     func(childComplexity int, customer types.CustomerInput) int
-		StaffLogin                 func(childComplexity int, token string, authType types.AuthType) int
-		StaffUpdateCustomerDetails func(childComplexity int, customerDetails types.StaffCustomerDetailsUpdateInput) int
-		SubmitCdd                  func(childComplexity int, cdd types.CDDInput) int
-		UpdateAMLStatus            func(childComplexity int, id string, status types.AMLStatuses, message string) int
-		UpdateCustomerDetails      func(childComplexity int, customerDetails types.CustomerDetailsUpdateInput, transactionPassword string) int
-		UpdateDevice               func(childComplexity int, phoneNumber string, otp string, device types.DeviceInput) int
-		UpdateFees                 func(childComplexity int, fees []*types.UpdateFeesInput) int
-		UpdateFx                   func(childComplexity int, exchangeRate types.UpdateFXInput) int
-		UpdateKYCStatus            func(childComplexity int, id string, status types.KYCStatuses, message string) int
-		VerifyOtp                  func(childComplexity int, target string, otpToken string) int
-		WithdrawVaultAccount       func(childComplexity int, sourceAccountID string, targetAccountID string, transactionPassword string) int
+		AcceptContent                func(childComplexity int, contentID string) int
+		AddBeneficiaryAccount        func(childComplexity int, beneficiaryID string, account types.BeneficiaryAccountInput, transactionPassword string) int
+		AnswerQuestionary            func(childComplexity int, questionary types.QuestionaryAnswerInput) int
+		CheckBvn                     func(childComplexity int, bvn string, phone string) int
+		CheckCustomerData            func(childComplexity int, customerData types.CheckCustomerDataInput) int
+		CheckCustomerDetails         func(childComplexity int, customerDetails types.CheckCustomerDetailsInput, typeArg types.ActionType) int
+		CheckCustomerEmail           func(childComplexity int, email string, device types.DeviceInput) int
+		CloseAccount                 func(childComplexity int, accountCloseInput types.AccountCloseInput) int
+		CreateAccount                func(childComplexity int, account types.AccountInput) int
+		CreateBeneficiariesByPhone   func(childComplexity int, beneficiaries []*types.BeneficiaryByPhoneInput, transactionPassword string) int
+		CreateBeneficiary            func(childComplexity int, beneficiary types.BeneficiaryInput, transactionPassword string) int
+		CreateScheduledTransfer      func(childComplexity int, scheduledTransfer types.ScheduledTransactionInput, transactionPassword string) int
+		CreateTransfer               func(childComplexity int, transfer types.TransactionInput, transactionPassword string) int
+		CreateVaultAccount           func(childComplexity int, account types.VaultAccountInput, transactionPassword string) int
+		DeactivateCredential         func(childComplexity int, credentialType types.IdentityCredentialsTypes) int
+		DeleteBeneficiaryAccount     func(childComplexity int, beneficiaryID string, accountID string, transactionPassword string) int
+		ForgotTransactionPassword    func(childComplexity int, newTransactionPassword string) int
+		Login                        func(childComplexity int, credentials types.AuthInput) int
+		RefreshToken                 func(childComplexity int, token string) int
+		Register                     func(childComplexity int, customerDetails types.CustomerDetailsInput) int
+		RequestOtp                   func(childComplexity int, typeArg types.DeliveryMode, target string, expireTimeInSeconds *int64) int
+		RequestResubmit              func(childComplexity int, customerID string, reportIds []string, message *string) int
+		ResetLoginPassword           func(childComplexity int, otpToken string, email string, loginPassword string) int
+		ResetTransactionPassword     func(childComplexity int, otpToken string, email string, newTransactionPassword string, currentTransactionPassword string) int
+		SendNotification             func(childComplexity int, typeArg types.DeliveryMode, content string, templateID string) int
+		SetDevicePreferences         func(childComplexity int, preferences []*types.DevicePreferencesInput) int
+		SetDeviceToken               func(childComplexity int, tokens []*types.DeviceTokenInput) int
+		SetTransactionPassword       func(childComplexity int, password string) int
+		Signup                       func(childComplexity int, customer types.CustomerInput) int
+		StaffLogin                   func(childComplexity int, token string, authType types.AuthType) int
+		StaffUpdateCustomerDetails   func(childComplexity int, customerDetails types.StaffCustomerDetailsUpdateInput) int
+		SubmitCdd                    func(childComplexity int, cdd types.CDDInput) int
+		UpdateAMLStatus              func(childComplexity int, id string, status types.AMLStatuses, message string) int
+		UpdateCustomerDetails        func(childComplexity int, customerDetails types.CustomerDetailsUpdateInput, transactionPassword string) int
+		UpdateDevice                 func(childComplexity int, phoneNumber string, otp string, device types.DeviceInput) int
+		UpdateFees                   func(childComplexity int, fees []*types.UpdateFeesInput) int
+		UpdateFx                     func(childComplexity int, exchangeRate types.UpdateFXInput) int
+		UpdateKYCStatus              func(childComplexity int, id string, status types.KYCStatuses, message string) int
+		VerifyOtp                    func(childComplexity int, target string, otpToken string) int
+		WithdrawVaultAccount         func(childComplexity int, sourceAccountID string, targetAccountID string, transactionPassword string) int
+		WithdrawVaultAccountNoSource func(childComplexity int, vaultAccountID string, beneficiary types.BeneficiaryAccountInput, transactionPin string) int
 	}
 
 	Organization struct {
@@ -498,6 +499,7 @@ type ComplexityRoot struct {
 		Status                func(childComplexity int) int
 		StatusTs              func(childComplexity int) int
 		TermLength            func(childComplexity int) int
+		TermUnit              func(childComplexity int) int
 		Ts                    func(childComplexity int) int
 		Type                  func(childComplexity int) int
 	}
@@ -784,6 +786,7 @@ type MutationResolver interface {
 	UpdateFx(ctx context.Context, exchangeRate types.UpdateFXInput) (*types.Response, error)
 	UpdateFees(ctx context.Context, fees []*types.UpdateFeesInput) (*types.Response, error)
 	StaffUpdateCustomerDetails(ctx context.Context, customerDetails types.StaffCustomerDetailsUpdateInput) (*types.Response, error)
+	WithdrawVaultAccountNoSource(ctx context.Context, vaultAccountID string, beneficiary types.BeneficiaryAccountInput, transactionPin string) (*types.Response, error)
 }
 type QueryResolver interface {
 	CheckEmail(ctx context.Context, email string) (bool, error)
@@ -2870,6 +2873,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.WithdrawVaultAccount(childComplexity, args["sourceAccountId"].(string), args["targetAccountId"].(string), args["transactionPassword"].(string)), true
 
+	case "Mutation.withdrawVaultAccountNoSource":
+		if e.complexity.Mutation.WithdrawVaultAccountNoSource == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_withdrawVaultAccountNoSource_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.WithdrawVaultAccountNoSource(childComplexity, args["vaultAccountId"].(string), args["beneficiary"].(types.BeneficiaryAccountInput), args["transactionPIN"].(string)), true
+
 	case "Organization.id":
 		if e.complexity.Organization.ID == nil {
 			break
@@ -3114,6 +3129,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Product.TermLength(childComplexity), true
+
+	case "Product.termUnit":
+		if e.complexity.Product.TermUnit == nil {
+			break
+		}
+
+		return e.complexity.Product.TermUnit(childComplexity), true
 
 	case "Product.ts":
 		if e.complexity.Product.Ts == nil {
@@ -4558,6 +4580,8 @@ type Mutation {
     updateFees(fees: [UpdateFeesInput!]!): Response!
     # Allows staff to update a customer's details
     staffUpdateCustomerDetails(customerDetails: StaffCustomerDetailsUpdateInput!): Response!
+    # Vault withdrawal without source account
+    withdrawVaultAccountNoSource(vaultAccountId: ID!, beneficiary: BeneficiaryAccountInput!, transactionPIN: String!): Response!
 }
 
 # API response interface
@@ -4802,6 +4826,7 @@ input CheckCustomerDetailsInput {
     password: String!
     phoneNumber: String!
     dob: String!
+    email: String!
 }
 
 enum ActionType {
@@ -5547,6 +5572,7 @@ type Product {
     currency: Currency!
     name: String
     termLength: Int
+    termUnit: String
     interestRate: Float
     minimumOpeningBalance: Float
     mambu: ProductMambu
@@ -6878,6 +6904,39 @@ func (ec *executionContext) field_Mutation_verifyOTP_args(ctx context.Context, r
 		}
 	}
 	args["otpToken"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_withdrawVaultAccountNoSource_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["vaultAccountId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vaultAccountId"))
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["vaultAccountId"] = arg0
+	var arg1 types.BeneficiaryAccountInput
+	if tmp, ok := rawArgs["beneficiary"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("beneficiary"))
+		arg1, err = ec.unmarshalNBeneficiaryAccountInput2msᚗapiᚋtypesᚐBeneficiaryAccountInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["beneficiary"] = arg1
+	var arg2 string
+	if tmp, ok := rawArgs["transactionPIN"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("transactionPIN"))
+		arg2, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["transactionPIN"] = arg2
 	return args, nil
 }
 
@@ -9130,6 +9189,8 @@ func (ec *executionContext) fieldContext_Account_product(ctx context.Context, fi
 				return ec.fieldContext_Product_name(ctx, field)
 			case "termLength":
 				return ec.fieldContext_Product_termLength(ctx, field)
+			case "termUnit":
+				return ec.fieldContext_Product_termUnit(ctx, field)
 			case "interestRate":
 				return ec.fieldContext_Product_interestRate(ctx, field)
 			case "minimumOpeningBalance":
@@ -21277,6 +21338,69 @@ func (ec *executionContext) fieldContext_Mutation_staffUpdateCustomerDetails(ctx
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_withdrawVaultAccountNoSource(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_withdrawVaultAccountNoSource(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().WithdrawVaultAccountNoSource(rctx, fc.Args["vaultAccountId"].(string), fc.Args["beneficiary"].(types.BeneficiaryAccountInput), fc.Args["transactionPIN"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.Response)
+	fc.Result = res
+	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_withdrawVaultAccountNoSource(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "message":
+				return ec.fieldContext_Response_message(ctx, field)
+			case "success":
+				return ec.fieldContext_Response_success(ctx, field)
+			case "code":
+				return ec.fieldContext_Response_code(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Response", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_withdrawVaultAccountNoSource_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Organization_id(ctx context.Context, field graphql.CollectedField, obj *types.Organization) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Organization_id(ctx, field)
 	if err != nil {
@@ -22681,6 +22805,47 @@ func (ec *executionContext) fieldContext_Product_termLength(ctx context.Context,
 	return fc, nil
 }
 
+func (ec *executionContext) _Product_termUnit(ctx context.Context, field graphql.CollectedField, obj *types.Product) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Product_termUnit(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TermUnit, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Product_termUnit(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Product",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Product_interestRate(ctx context.Context, field graphql.CollectedField, obj *types.Product) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Product_interestRate(ctx, field)
 	if err != nil {
@@ -22989,6 +23154,8 @@ func (ec *executionContext) fieldContext_ProductConnection_nodes(ctx context.Con
 				return ec.fieldContext_Product_name(ctx, field)
 			case "termLength":
 				return ec.fieldContext_Product_termLength(ctx, field)
+			case "termUnit":
+				return ec.fieldContext_Product_termUnit(ctx, field)
 			case "interestRate":
 				return ec.fieldContext_Product_interestRate(ctx, field)
 			case "minimumOpeningBalance":
@@ -23687,6 +23854,8 @@ func (ec *executionContext) fieldContext_Query_product(ctx context.Context, fiel
 				return ec.fieldContext_Product_name(ctx, field)
 			case "termLength":
 				return ec.fieldContext_Product_termLength(ctx, field)
+			case "termUnit":
+				return ec.fieldContext_Product_termUnit(ctx, field)
 			case "interestRate":
 				return ec.fieldContext_Product_interestRate(ctx, field)
 			case "minimumOpeningBalance":
@@ -33455,7 +33624,7 @@ func (ec *executionContext) unmarshalInputCheckCustomerDetailsInput(ctx context.
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"password", "phoneNumber", "dob"}
+	fieldsInOrder := [...]string{"password", "phoneNumber", "dob", "email"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -33483,6 +33652,14 @@ func (ec *executionContext) unmarshalInputCheckCustomerDetailsInput(ctx context.
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("dob"))
 			it.Dob, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "email":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+			it.Email, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -37185,6 +37362,15 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "withdrawVaultAccountNoSource":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_withdrawVaultAccountNoSource(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -37503,6 +37689,10 @@ func (ec *executionContext) _Product(ctx context.Context, sel ast.SelectionSet, 
 		case "termLength":
 
 			out.Values[i] = ec._Product_termLength(ctx, field, obj)
+
+		case "termUnit":
+
+			out.Values[i] = ec._Product_termUnit(ctx, field, obj)
 
 		case "interestRate":
 

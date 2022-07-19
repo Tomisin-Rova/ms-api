@@ -265,6 +265,7 @@ type CheckCustomerDetailsInput struct {
 	Password    string `json:"password"`
 	PhoneNumber string `json:"phoneNumber"`
 	Dob         string `json:"dob"`
+	Email       string `json:"email"`
 }
 
 type CommonQueryFilterInput struct {
@@ -574,6 +575,7 @@ type Product struct {
 	Currency              *Currency       `json:"currency"`
 	Name                  *string         `json:"name"`
 	TermLength            *int64          `json:"termLength"`
+	TermUnit              *string         `json:"termUnit"`
 	InterestRate          *float64        `json:"interestRate"`
 	MinimumOpeningBalance *float64        `json:"minimumOpeningBalance"`
 	Mambu                 *ProductMambu   `json:"mambu"`
