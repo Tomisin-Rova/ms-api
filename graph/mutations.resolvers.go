@@ -1124,6 +1124,7 @@ func (r *mutationResolver) CheckCustomerDetails(ctx context.Context, customerDet
 			Password:    customerDetails.Password,
 			PhoneNumber: customerDetails.PhoneNumber,
 			Dob:         customerDetails.Dob,
+			Email:       customerDetails.Email,
 			ActionType:  customer.CheckCustomerDetailsRequest_DEVICE_UPDATE,
 		}
 	default:

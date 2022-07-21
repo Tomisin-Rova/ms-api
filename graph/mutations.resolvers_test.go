@@ -3733,12 +3733,14 @@ func TestMutationResolver_CheckCustomerDetails(t *testing.T) {
 		Password:    "qr1234e",
 		PhoneNumber: "uva",
 		Dob:         "01-01-1900",
+		Email:       "someemail@example.com",
 	}
 	typeArg := types.ActionTypeDeviceUpdate
 	request := &customer.CheckCustomerDetailsRequest{
 		Password:    "qr1234e",
 		PhoneNumber: "uva",
 		Dob:         "01-01-1900",
+		Email:       "someemail@example.com",
 		ActionType:  customer.CheckCustomerDetailsRequest_DEVICE_UPDATE,
 	}
 	controller := gomock.NewController(t)
