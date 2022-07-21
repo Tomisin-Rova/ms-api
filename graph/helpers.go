@@ -860,6 +860,7 @@ func (h *helpersfactory) MakeProductFromProto(product *protoTypes.Product) *type
 		Type:                  h.MapProtoProductTypes(product.Type),
 		Currency:              h.MakeCurrencyFromProto(product.Currency),
 		TermLength:            &termLength,
+		TermUnit:              &product.TermUnit,
 		InterestRate:          &interestRate,
 		MinimumOpeningBalance: &minimumOpeningBalance,
 		Mambu:                 mambu,
