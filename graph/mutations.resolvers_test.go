@@ -3,10 +3,11 @@ package graph
 import (
 	"context"
 	"errors"
-	"google.golang.org/protobuf/types/known/timestamppb"
 	"net/http"
 	"testing"
 	"time"
+
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/golang/mock/gomock"
 	terror "github.com/roava/zebra/errors"
@@ -4243,4 +4244,17 @@ func Test_mutationResolver_CreateScheduledTransfer(t *testing.T) {
 			}
 		})
 	}
+}
+
+func Test_mutationResolver_WithdrawVaultAccountNoSource(t *testing.T) {
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	accounntServiceClient := mocks.NewMockAccountServiceClient(controller)
+	resolverOpts := &ResolverOpts{
+		AccountService: accounntServiceClient,
+	}
+	resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Mutation()
+	resp, err := resolver.WithdrawVaultAccountNoSource(context.Background(), "", types.BeneficiaryAccountInput{}, "")
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusNotFound, int(resp.Code))
 }

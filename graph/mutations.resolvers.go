@@ -1475,6 +1475,11 @@ func (r *mutationResolver) StaffUpdateCustomerDetails(ctx context.Context, custo
 	}, nil
 }
 
+// WithdrawVaultAccountNoSource is the resolver for the withdrawVaultAccountNoSource field.
+func (r *mutationResolver) WithdrawVaultAccountNoSource(ctx context.Context, vaultAccountID string, beneficiary types.BeneficiaryAccountInput, transactionPin string) (*types.Response, error) {
+	return &types.Response{Code: http.StatusNotFound, Success: false}, nil
+}
+
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 

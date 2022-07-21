@@ -357,6 +357,26 @@ func (mr *MockPaymentServiceClientMockRecorder) WithdrawVaultAccount(ctx, in int
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithdrawVaultAccount", reflect.TypeOf((*MockPaymentServiceClient)(nil).WithdrawVaultAccount), varargs...)
 }
 
+// WithdrawVaultAccountNoSource mocks base method.
+func (m *MockPaymentServiceClient) WithdrawVaultAccountNoSource(ctx context.Context, in *payment.WithdrawVaultNoSourceRequest, opts ...grpc.CallOption) (*types.DefaultResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WithdrawVaultAccountNoSource", varargs...)
+	ret0, _ := ret[0].(*types.DefaultResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WithdrawVaultAccountNoSource indicates an expected call of WithdrawVaultAccountNoSource.
+func (mr *MockPaymentServiceClientMockRecorder) WithdrawVaultAccountNoSource(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithdrawVaultAccountNoSource", reflect.TypeOf((*MockPaymentServiceClient)(nil).WithdrawVaultAccountNoSource), varargs...)
+}
+
 // MockPaymentServiceServer is a mock of PaymentServiceServer interface.
 type MockPaymentServiceServer struct {
 	ctrl     *gomock.Controller
@@ -618,4 +638,19 @@ func (m *MockPaymentServiceServer) WithdrawVaultAccount(arg0 context.Context, ar
 func (mr *MockPaymentServiceServerMockRecorder) WithdrawVaultAccount(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithdrawVaultAccount", reflect.TypeOf((*MockPaymentServiceServer)(nil).WithdrawVaultAccount), arg0, arg1)
+}
+
+// WithdrawVaultAccountNoSource mocks base method.
+func (m *MockPaymentServiceServer) WithdrawVaultAccountNoSource(arg0 context.Context, arg1 *payment.WithdrawVaultNoSourceRequest) (*types.DefaultResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "WithdrawVaultAccountNoSource", arg0, arg1)
+	ret0, _ := ret[0].(*types.DefaultResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WithdrawVaultAccountNoSource indicates an expected call of WithdrawVaultAccountNoSource.
+func (mr *MockPaymentServiceServerMockRecorder) WithdrawVaultAccountNoSource(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithdrawVaultAccountNoSource", reflect.TypeOf((*MockPaymentServiceServer)(nil).WithdrawVaultAccountNoSource), arg0, arg1)
 }
