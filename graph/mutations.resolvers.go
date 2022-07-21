@@ -6,7 +6,6 @@ package graph
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -1479,7 +1478,7 @@ func (r *mutationResolver) StaffUpdateCustomerDetails(ctx context.Context, custo
 
 // WithdrawVaultAccountNoSource is the resolver for the withdrawVaultAccountNoSource field.
 func (r *mutationResolver) WithdrawVaultAccountNoSource(ctx context.Context, vaultAccountID string, beneficiary types.BeneficiaryAccountInput, transactionPin string) (*types.Response, error) {
-	panic(fmt.Errorf("not implemented"))
+	return &types.Response{Code: http.StatusNotFound, Success: false}, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.
