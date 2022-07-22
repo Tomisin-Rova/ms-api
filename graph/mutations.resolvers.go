@@ -1372,7 +1372,7 @@ func (r *mutationResolver) UpdateFees(ctx context.Context, fees []*types.UpdateF
 		var feeRequest pricing.UpdateFeesRequest
 		feeRequest.TransactionTypeId = fee.TransactionTypeID
 		var boundaryRequest pbTypes.FeeBoundaries
-		feeRequest.Type = pbTypes.Fee_FIXED
+		feeRequest.Type = r.helper.MapProtoFeeTypes(fee.Type)
 		for _, reqBoundary := range fee.Boundaries {
 			boundaryRequest.Lower = float32(*reqBoundary.Lower)
 			boundaryRequest.Upper = float32(*reqBoundary.Upper)
