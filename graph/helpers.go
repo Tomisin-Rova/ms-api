@@ -22,6 +22,8 @@ type Helper interface {
 	PreferenceInputFromModel(input types.DevicePreferencesTypes) protoTypes.DevicePreferences_DevicePreferencesTypes
 	StaffLoginTypeFromModel(input types.AuthType) auth.StaffLoginRequest_AuthType
 	MakeFeesFromProto(protoFees []*protoTypes.Fee) []*types.Fee
+	MapFeeTypes(val protoTypes.Fee_FeeTypes) types.FeeTypes
+	MapProtoFeeTypes(val types.FeeTypes) protoTypes.Fee_FeeTypes
 	MapTransactionTypeStatus(val protoTypes.TransactionType_TransactionTypeStatuses) types.TransactionTypeStatuses
 	GetProtoTransactionTypesStatuses(val types.TransactionTypeStatuses) protoTypes.TransactionType_TransactionTypeStatuses
 	GetProtoDeviceTokenType(val types.DeviceTokenTypes) protoTypes.DeviceToken_DeviceTokenTypes
@@ -892,6 +894,17 @@ func (h *helpersfactory) MapFeeTypes(val protoTypes.Fee_FeeTypes) types.FeeTypes
 		return types.FeeTypesVariable
 	default:
 		return ""
+	}
+}
+
+func (h *helpersfactory) MapProtoFeeTypes(val types.FeeTypes) protoTypes.Fee_FeeTypes {
+	switch val {
+	case types.FeeTypesFixed:
+		return protoTypes.Fee_FIXED
+	case types.FeeTypesVariable:
+		return protoTypes.Fee_VARIABLE
+	default:
+		return -100
 	}
 }
 
