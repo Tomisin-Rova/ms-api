@@ -3535,6 +3535,14 @@ func TestMutationResolver_UpdateFees(t *testing.T) {
 		var feeRequest pricing.UpdateFeesRequest
 		feeRequest.TransactionTypeId = fee.TransactionTypeID
 		var boundaryRequest pbTypes.FeeBoundaries
+		switch fee.Type {
+		case types.FeeTypesFixed:
+			feeRequest.Type = pbTypes.Fee_FIXED
+		case types.FeeTypesVariable:
+			feeRequest.Type = pbTypes.Fee_VARIABLE
+		default:
+			feeRequest.Type = -100
+		}
 		feeRequest.Type = pbTypes.Fee_FIXED
 		for _, reqBoundary := range fee.Boundaries {
 			boundaryRequest.Lower = float32(*reqBoundary.Lower)
