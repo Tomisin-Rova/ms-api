@@ -94,3 +94,46 @@ func TestHelpers_ScheduledTransactionStatus(t *testing.T) {
 		})
 	}
 }
+
+func TestHelpers_FeeType(t *testing.T) {
+	const (
+		protoToSchema = iota
+		schemaToProto
+	)
+
+	var tests = []struct {
+		name     string
+		testType int
+	}{
+		{
+			name:     "Test proto to schema",
+			testType: protoToSchema,
+		},
+		{
+			name:     "Test schema to proto",
+			testType: schemaToProto,
+		},
+	}
+
+	data := map[pbTypes.Fee_FeeTypes]types.FeeTypes{
+		pbTypes.Fee_FIXED:    types.FeeTypesFixed,
+		pbTypes.Fee_VARIABLE: types.FeeTypesVariable,
+	}
+
+	h := &helpersfactory{}
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			for proto, schema := range data {
+				switch testCase.testType {
+				case protoToSchema:
+					result := h.MapFeeTypes(proto)
+					assert.Equal(t, schema, result)
+				case schemaToProto:
+					result := h.MapProtoFeeTypes(schema)
+					assert.Equal(t, proto, result)
+				}
+			}
+		})
+	}
+}
