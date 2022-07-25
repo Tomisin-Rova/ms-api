@@ -335,7 +335,7 @@ type Customer struct {
 	Phones     []*Phone         `json:"phones"`
 	Email      *Email           `json:"email"`
 	HasPin     bool             `json:"hasPIN"`
-	IsPinBlock bool             `json:"isPinBlock"`
+	PinBlocked bool             `json:"pinBlocked"`
 	Status     CustomerStatuses `json:"status"`
 	StatusTs   int64            `json:"statusTs"`
 	Ts         int64            `json:"ts"`
