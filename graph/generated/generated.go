@@ -257,19 +257,20 @@ type ComplexityRoot struct {
 	}
 
 	Customer struct {
-		Addresses func(childComplexity int) int
-		Bvn       func(childComplexity int) int
-		Dob       func(childComplexity int) int
-		Email     func(childComplexity int) int
-		FirstName func(childComplexity int) int
-		HasPin    func(childComplexity int) int
-		ID        func(childComplexity int) int
-		LastName  func(childComplexity int) int
-		Phones    func(childComplexity int) int
-		Status    func(childComplexity int) int
-		StatusTs  func(childComplexity int) int
-		Title     func(childComplexity int) int
-		Ts        func(childComplexity int) int
+		Addresses  func(childComplexity int) int
+		Bvn        func(childComplexity int) int
+		Dob        func(childComplexity int) int
+		Email      func(childComplexity int) int
+		FirstName  func(childComplexity int) int
+		HasPin     func(childComplexity int) int
+		ID         func(childComplexity int) int
+		IsPinBlock func(childComplexity int) int
+		LastName   func(childComplexity int) int
+		Phones     func(childComplexity int) int
+		Status     func(childComplexity int) int
+		StatusTs   func(childComplexity int) int
+		Title      func(childComplexity int) int
+		Ts         func(childComplexity int) int
 	}
 
 	CustomerConnection struct {
@@ -1783,6 +1784,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Customer.ID(childComplexity), true
+
+	case "Customer.isPinBlock":
+		if e.complexity.Customer.IsPinBlock == nil {
+			break
+		}
+
+		return e.complexity.Customer.IsPinBlock(childComplexity), true
 
 	case "Customer.lastName":
 		if e.complexity.Customer.LastName == nil {
@@ -5299,6 +5307,7 @@ type Customer {
     phones: [Phone!]
     email: Email!
     hasPIN: Boolean!
+    isPinBlock: Boolean!
     status: CustomerStatuses!
     statusTs: Int!
     ts: Int!
@@ -8967,6 +8976,8 @@ func (ec *executionContext) fieldContext_Acceptance_customer(ctx context.Context
 				return ec.fieldContext_Customer_email(ctx, field)
 			case "hasPIN":
 				return ec.fieldContext_Customer_hasPIN(ctx, field)
+			case "isPinBlock":
+				return ec.fieldContext_Customer_isPinBlock(ctx, field)
 			case "status":
 				return ec.fieldContext_Customer_status(ctx, field)
 			case "statusTs":
@@ -9127,6 +9138,8 @@ func (ec *executionContext) fieldContext_Account_customer(ctx context.Context, f
 				return ec.fieldContext_Customer_email(ctx, field)
 			case "hasPIN":
 				return ec.fieldContext_Customer_hasPIN(ctx, field)
+			case "isPinBlock":
+				return ec.fieldContext_Customer_isPinBlock(ctx, field)
 			case "status":
 				return ec.fieldContext_Customer_status(ctx, field)
 			case "statusTs":
@@ -11465,6 +11478,8 @@ func (ec *executionContext) fieldContext_Beneficiary_customer(ctx context.Contex
 				return ec.fieldContext_Customer_email(ctx, field)
 			case "hasPIN":
 				return ec.fieldContext_Customer_hasPIN(ctx, field)
+			case "isPinBlock":
+				return ec.fieldContext_Customer_isPinBlock(ctx, field)
 			case "status":
 				return ec.fieldContext_Customer_status(ctx, field)
 			case "statusTs":
@@ -12701,6 +12716,8 @@ func (ec *executionContext) fieldContext_CDD_customer(ctx context.Context, field
 				return ec.fieldContext_Customer_email(ctx, field)
 			case "hasPIN":
 				return ec.fieldContext_Customer_hasPIN(ctx, field)
+			case "isPinBlock":
+				return ec.fieldContext_Customer_isPinBlock(ctx, field)
 			case "status":
 				return ec.fieldContext_Customer_status(ctx, field)
 			case "statusTs":
@@ -14772,6 +14789,50 @@ func (ec *executionContext) fieldContext_Customer_hasPIN(ctx context.Context, fi
 	return fc, nil
 }
 
+func (ec *executionContext) _Customer_isPinBlock(ctx context.Context, field graphql.CollectedField, obj *types.Customer) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Customer_isPinBlock(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsPinBlock, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Customer_isPinBlock(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Customer",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Customer_status(ctx context.Context, field graphql.CollectedField, obj *types.Customer) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Customer_status(ctx, field)
 	if err != nil {
@@ -14963,6 +15024,8 @@ func (ec *executionContext) fieldContext_CustomerConnection_nodes(ctx context.Co
 				return ec.fieldContext_Customer_email(ctx, field)
 			case "hasPIN":
 				return ec.fieldContext_Customer_hasPIN(ctx, field)
+			case "isPinBlock":
+				return ec.fieldContext_Customer_isPinBlock(ctx, field)
 			case "status":
 				return ec.fieldContext_Customer_status(ctx, field)
 			case "statusTs":
@@ -15177,6 +15240,8 @@ func (ec *executionContext) fieldContext_Device_customer(ctx context.Context, fi
 				return ec.fieldContext_Customer_email(ctx, field)
 			case "hasPIN":
 				return ec.fieldContext_Customer_hasPIN(ctx, field)
+			case "isPinBlock":
+				return ec.fieldContext_Customer_isPinBlock(ctx, field)
 			case "status":
 				return ec.fieldContext_Customer_status(ctx, field)
 			case "statusTs":
@@ -16690,6 +16755,8 @@ func (ec *executionContext) fieldContext_Identity_customer(ctx context.Context, 
 				return ec.fieldContext_Customer_email(ctx, field)
 			case "hasPIN":
 				return ec.fieldContext_Customer_hasPIN(ctx, field)
+			case "isPinBlock":
+				return ec.fieldContext_Customer_isPinBlock(ctx, field)
 			case "status":
 				return ec.fieldContext_Customer_status(ctx, field)
 			case "statusTs":
@@ -18500,6 +18567,8 @@ func (ec *executionContext) fieldContext_LinkedTransactionSource_customer(ctx co
 				return ec.fieldContext_Customer_email(ctx, field)
 			case "hasPIN":
 				return ec.fieldContext_Customer_hasPIN(ctx, field)
+			case "isPinBlock":
+				return ec.fieldContext_Customer_isPinBlock(ctx, field)
 			case "status":
 				return ec.fieldContext_Customer_status(ctx, field)
 			case "statusTs":
@@ -25187,6 +25256,8 @@ func (ec *executionContext) fieldContext_Query_customer(ctx context.Context, fie
 				return ec.fieldContext_Customer_email(ctx, field)
 			case "hasPIN":
 				return ec.fieldContext_Customer_hasPIN(ctx, field)
+			case "isPinBlock":
+				return ec.fieldContext_Customer_isPinBlock(ctx, field)
 			case "status":
 				return ec.fieldContext_Customer_status(ctx, field)
 			case "statusTs":
@@ -27949,6 +28020,8 @@ func (ec *executionContext) fieldContext_ScheduledTransactionSource_customer(ctx
 				return ec.fieldContext_Customer_email(ctx, field)
 			case "hasPIN":
 				return ec.fieldContext_Customer_hasPIN(ctx, field)
+			case "isPinBlock":
+				return ec.fieldContext_Customer_isPinBlock(ctx, field)
 			case "status":
 				return ec.fieldContext_Customer_status(ctx, field)
 			case "statusTs":
@@ -30408,6 +30481,8 @@ func (ec *executionContext) fieldContext_TransactionSource_customer(ctx context.
 				return ec.fieldContext_Customer_email(ctx, field)
 			case "hasPIN":
 				return ec.fieldContext_Customer_hasPIN(ctx, field)
+			case "isPinBlock":
+				return ec.fieldContext_Customer_isPinBlock(ctx, field)
 			case "status":
 				return ec.fieldContext_Customer_status(ctx, field)
 			case "statusTs":
@@ -30644,6 +30719,8 @@ func (ec *executionContext) fieldContext_TransactionTarget_customer(ctx context.
 				return ec.fieldContext_Customer_email(ctx, field)
 			case "hasPIN":
 				return ec.fieldContext_Customer_hasPIN(ctx, field)
+			case "isPinBlock":
+				return ec.fieldContext_Customer_isPinBlock(ctx, field)
 			case "status":
 				return ec.fieldContext_Customer_status(ctx, field)
 			case "statusTs":
@@ -36071,6 +36148,13 @@ func (ec *executionContext) _Customer(ctx context.Context, sel ast.SelectionSet,
 		case "hasPIN":
 
 			out.Values[i] = ec._Customer_hasPIN(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "isPinBlock":
+
+			out.Values[i] = ec._Customer_isPinBlock(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++

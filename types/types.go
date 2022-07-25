@@ -325,19 +325,20 @@ type CurrencyConnection struct {
 }
 
 type Customer struct {
-	ID        string           `json:"id"`
-	Title     CustomerTitle    `json:"title"`
-	FirstName string           `json:"firstName"`
-	LastName  string           `json:"lastName"`
-	Dob       string           `json:"dob"`
-	Bvn       *string          `json:"bvn"`
-	Addresses []*Address       `json:"addresses"`
-	Phones    []*Phone         `json:"phones"`
-	Email     *Email           `json:"email"`
-	HasPin    bool             `json:"hasPIN"`
-	Status    CustomerStatuses `json:"status"`
-	StatusTs  int64            `json:"statusTs"`
-	Ts        int64            `json:"ts"`
+	ID         string           `json:"id"`
+	Title      CustomerTitle    `json:"title"`
+	FirstName  string           `json:"firstName"`
+	LastName   string           `json:"lastName"`
+	Dob        string           `json:"dob"`
+	Bvn        *string          `json:"bvn"`
+	Addresses  []*Address       `json:"addresses"`
+	Phones     []*Phone         `json:"phones"`
+	Email      *Email           `json:"email"`
+	HasPin     bool             `json:"hasPIN"`
+	IsPinBlock bool             `json:"isPinBlock"`
+	Status     CustomerStatuses `json:"status"`
+	StatusTs   int64            `json:"statusTs"`
+	Ts         int64            `json:"ts"`
 }
 
 func (Customer) IsMeResult()           {}
