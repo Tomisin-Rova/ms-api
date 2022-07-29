@@ -6,6 +6,7 @@ package graph
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -1390,12 +1391,15 @@ func (r *queryResolver) Statement(ctx context.Context, accountID string, startDa
 	}
 
 	// Execute RPC call
+
+	r.logger.Info(fmt.Sprintf("Executing Get Account Statement RPC for the following range %s - %s", startDate, endDate))
+
 	resp, err := r.AccountService.GetAccountStatement(ctx, request)
 	if err != nil {
 		return nil, err
 	}
 
-	// Build responnse
+	// Build response
 	response := &apiTypes.StatementResponse{
 		AccountID:  resp.AccountId,
 		PDFContent: &resp.PdfContent,
