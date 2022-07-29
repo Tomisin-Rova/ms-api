@@ -1395,7 +1395,12 @@ func (r *queryResolver) Statement(ctx context.Context, accountID string, startDa
 	r.logger.Info(fmt.Sprintf("Executing Get Account Statement RPC for the following range %s - %s", startDate, endDate))
 
 	resp, err := r.AccountService.GetAccountStatement(ctx, request)
+
 	if err != nil {
+		r.logger.Error(
+			"An Error Occur While Generating Statement",
+			zap.Error(err),
+		)
 		return nil, err
 	}
 
