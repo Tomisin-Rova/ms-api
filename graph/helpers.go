@@ -143,6 +143,8 @@ func (h *helpersfactory) MapProtoCustomerStatuses(val protoTypes.Customer_Custom
 		return types.CustomerStatusesRegistered
 	case protoTypes.Customer_EXITED:
 		return types.CustomerStatusesExited
+	case protoTypes.Customer_NGN_ONBOARDED:
+		return types.CustomerStatusesNgnOnboarded
 	default:
 		// should never happen
 		return ""
@@ -163,6 +165,8 @@ func (h *helpersfactory) GetProtoCustomerStatuses(val types.CustomerStatuses) pr
 		return protoTypes.Customer_REJECTED
 	case types.CustomerStatusesExited:
 		return protoTypes.Customer_EXITED
+	case types.CustomerStatusesNgnOnboarded:
+		return protoTypes.Customer_NGN_ONBOARDED
 	default:
 		// should never happen
 		return -1
