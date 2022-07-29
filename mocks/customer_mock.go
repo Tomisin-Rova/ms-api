@@ -552,6 +552,26 @@ func (mr *MockCustomerServiceClientMockRecorder) SetAcceptance(ctx, in interface
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetAcceptance", reflect.TypeOf((*MockCustomerServiceClient)(nil).SetAcceptance), varargs...)
 }
 
+// SetCustomerPreferences mocks base method.
+func (m *MockCustomerServiceClient) SetCustomerPreferences(ctx context.Context, in *customer.SetCustomerPreferencesRequest, opts ...grpc.CallOption) (*types.DefaultResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SetCustomerPreferences", varargs...)
+	ret0, _ := ret[0].(*types.DefaultResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SetCustomerPreferences indicates an expected call of SetCustomerPreferences.
+func (mr *MockCustomerServiceClientMockRecorder) SetCustomerPreferences(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetCustomerPreferences", reflect.TypeOf((*MockCustomerServiceClient)(nil).SetCustomerPreferences), varargs...)
+}
+
 // SetDevicePreferences mocks base method.
 func (m *MockCustomerServiceClient) SetDevicePreferences(ctx context.Context, in *customer.SetDevicePreferencesRequest, opts ...grpc.CallOption) (*types.Device, error) {
 	m.ctrl.T.Helper()
@@ -1033,6 +1053,21 @@ func (m *MockCustomerServiceServer) SetAcceptance(arg0 context.Context, arg1 *cu
 func (mr *MockCustomerServiceServerMockRecorder) SetAcceptance(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetAcceptance", reflect.TypeOf((*MockCustomerServiceServer)(nil).SetAcceptance), arg0, arg1)
+}
+
+// SetCustomerPreferences mocks base method.
+func (m *MockCustomerServiceServer) SetCustomerPreferences(arg0 context.Context, arg1 *customer.SetCustomerPreferencesRequest) (*types.DefaultResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetCustomerPreferences", arg0, arg1)
+	ret0, _ := ret[0].(*types.DefaultResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SetCustomerPreferences indicates an expected call of SetCustomerPreferences.
+func (mr *MockCustomerServiceServerMockRecorder) SetCustomerPreferences(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetCustomerPreferences", reflect.TypeOf((*MockCustomerServiceServer)(nil).SetCustomerPreferences), arg0, arg1)
 }
 
 // SetDevicePreferences mocks base method.

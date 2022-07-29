@@ -257,26 +257,32 @@ type ComplexityRoot struct {
 	}
 
 	Customer struct {
-		Addresses  func(childComplexity int) int
-		Bvn        func(childComplexity int) int
-		Dob        func(childComplexity int) int
-		Email      func(childComplexity int) int
-		FirstName  func(childComplexity int) int
-		HasPin     func(childComplexity int) int
-		ID         func(childComplexity int) int
-		LastName   func(childComplexity int) int
-		Phones     func(childComplexity int) int
-		PinBlocked func(childComplexity int) int
-		Status     func(childComplexity int) int
-		StatusTs   func(childComplexity int) int
-		Title      func(childComplexity int) int
-		Ts         func(childComplexity int) int
+		Addresses   func(childComplexity int) int
+		Bvn         func(childComplexity int) int
+		Dob         func(childComplexity int) int
+		Email       func(childComplexity int) int
+		FirstName   func(childComplexity int) int
+		HasPin      func(childComplexity int) int
+		ID          func(childComplexity int) int
+		LastName    func(childComplexity int) int
+		Phones      func(childComplexity int) int
+		PinBlocked  func(childComplexity int) int
+		Preferences func(childComplexity int) int
+		Status      func(childComplexity int) int
+		StatusTs    func(childComplexity int) int
+		Title       func(childComplexity int) int
+		Ts          func(childComplexity int) int
 	}
 
 	CustomerConnection struct {
 		Nodes      func(childComplexity int) int
 		PageInfo   func(childComplexity int) int
 		TotalCount func(childComplexity int) int
+	}
+
+	CustomerPreferences struct {
+		Type  func(childComplexity int) int
+		Value func(childComplexity int) int
 	}
 
 	Device struct {
@@ -431,6 +437,7 @@ type ComplexityRoot struct {
 		ResetLoginPassword           func(childComplexity int, otpToken string, email string, loginPassword string) int
 		ResetTransactionPassword     func(childComplexity int, otpToken string, email string, newTransactionPassword string, currentTransactionPassword string) int
 		SendNotification             func(childComplexity int, typeArg types.DeliveryMode, content string, templateID string) int
+		SetCustomerPreferences       func(childComplexity int, preferences []*types.CustomerPreferencesInput) int
 		SetDevicePreferences         func(childComplexity int, preferences []*types.DevicePreferencesInput) int
 		SetDeviceToken               func(childComplexity int, tokens []*types.DeviceTokenInput) int
 		SetTransactionPassword       func(childComplexity int, password string) int
@@ -780,6 +787,7 @@ type MutationResolver interface {
 	CheckCustomerDetails(ctx context.Context, customerDetails types.CheckCustomerDetailsInput, typeArg types.ActionType) (*types.Response, error)
 	CloseAccount(ctx context.Context, accountCloseInput types.AccountCloseInput) (*types.Response, error)
 	CreateScheduledTransfer(ctx context.Context, scheduledTransfer types.ScheduledTransactionInput, transactionPassword string) (*types.Response, error)
+	SetCustomerPreferences(ctx context.Context, preferences []*types.CustomerPreferencesInput) (*types.Response, error)
 	RequestResubmit(ctx context.Context, customerID string, reportIds []string, message *string) (*types.Response, error)
 	StaffLogin(ctx context.Context, token string, authType types.AuthType) (*types.AuthResponse, error)
 	UpdateKYCStatus(ctx context.Context, id string, status types.KYCStatuses, message string) (*types.Response, error)
@@ -1806,6 +1814,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Customer.PinBlocked(childComplexity), true
 
+	case "Customer.preferences":
+		if e.complexity.Customer.Preferences == nil {
+			break
+		}
+
+		return e.complexity.Customer.Preferences(childComplexity), true
+
 	case "Customer.status":
 		if e.complexity.Customer.Status == nil {
 			break
@@ -1854,6 +1869,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.CustomerConnection.TotalCount(childComplexity), true
+
+	case "CustomerPreferences.type":
+		if e.complexity.CustomerPreferences.Type == nil {
+			break
+		}
+
+		return e.complexity.CustomerPreferences.Type(childComplexity), true
+
+	case "CustomerPreferences.value":
+		if e.complexity.CustomerPreferences.Value == nil {
+			break
+		}
+
+		return e.complexity.CustomerPreferences.Value(childComplexity), true
 
 	case "Device.brand":
 		if e.complexity.Device.Brand == nil {
@@ -2700,6 +2729,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.SendNotification(childComplexity, args["type"].(types.DeliveryMode), args["content"].(string), args["templateId"].(string)), true
+
+	case "Mutation.setCustomerPreferences":
+		if e.complexity.Mutation.SetCustomerPreferences == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_setCustomerPreferences_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.SetCustomerPreferences(childComplexity, args["preferences"].([]*types.CustomerPreferencesInput)), true
 
 	case "Mutation.setDevicePreferences":
 		if e.complexity.Mutation.SetDevicePreferences == nil {
@@ -4431,6 +4472,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputCustomerDetailsInput,
 		ec.unmarshalInputCustomerDetailsUpdateInput,
 		ec.unmarshalInputCustomerInput,
+		ec.unmarshalInputCustomerPreferencesInput,
 		ec.unmarshalInputDeviceInput,
 		ec.unmarshalInputDevicePreferencesInput,
 		ec.unmarshalInputDeviceTokenInput,
@@ -4572,6 +4614,8 @@ type Mutation {
     closeAccount(accountCloseInput: AccountCloseInput!): Response!
     # Schedules a transfer to a beneficiary account
     createScheduledTransfer(scheduledTransfer: ScheduledTransactionInput!, transactionPassword: String!): Response!
+    # Create|Update the customer preference(s) given
+    setCustomerPreferences(preferences: [CustomerPreferencesInput!]): Response!
 
     # ---- Dashboard -----
     # Ask for a customer to resubmit a report
@@ -4674,6 +4718,11 @@ input CustomerDetailsInput {
     lastName: String!
     dob: Date!
     address: AddressInput!
+}
+
+input CustomerPreferencesInput {
+    type: CustomerPreferencesTypes!
+    value: Boolean!
 }
 
 input AddressInput {
@@ -5308,6 +5357,7 @@ type Customer {
     email: Email!
     hasPIN: Boolean!
     pinBlocked: Boolean!
+    preferences: [CustomerPreferences!]
     status: CustomerStatuses!
     statusTs: Int!
     ts: Int!
@@ -5320,6 +5370,15 @@ enum CustomerTitle {
     MS
 }
 
+type CustomerPreferences {
+    type: CustomerPreferencesTypes!
+    value: Boolean!
+}
+
+enum CustomerPreferencesTypes {
+    MARKETING
+}
+
 enum CustomerStatuses {
     SIGNEDUP
     REGISTERED
@@ -5327,6 +5386,7 @@ enum CustomerStatuses {
     ONBOARDED
     REJECTED
     EXITED
+    NGN_ONBOARDED
 }
 
 type Email {
@@ -6622,6 +6682,21 @@ func (ec *executionContext) field_Mutation_sendNotification_args(ctx context.Con
 		}
 	}
 	args["templateId"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_setCustomerPreferences_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 []*types.CustomerPreferencesInput
+	if tmp, ok := rawArgs["preferences"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("preferences"))
+		arg0, err = ec.unmarshalOCustomerPreferencesInput2ᚕᚖmsᚗapiᚋtypesᚐCustomerPreferencesInputᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["preferences"] = arg0
 	return args, nil
 }
 
@@ -8978,6 +9053,8 @@ func (ec *executionContext) fieldContext_Acceptance_customer(ctx context.Context
 				return ec.fieldContext_Customer_hasPIN(ctx, field)
 			case "pinBlocked":
 				return ec.fieldContext_Customer_pinBlocked(ctx, field)
+			case "preferences":
+				return ec.fieldContext_Customer_preferences(ctx, field)
 			case "status":
 				return ec.fieldContext_Customer_status(ctx, field)
 			case "statusTs":
@@ -9140,6 +9217,8 @@ func (ec *executionContext) fieldContext_Account_customer(ctx context.Context, f
 				return ec.fieldContext_Customer_hasPIN(ctx, field)
 			case "pinBlocked":
 				return ec.fieldContext_Customer_pinBlocked(ctx, field)
+			case "preferences":
+				return ec.fieldContext_Customer_preferences(ctx, field)
 			case "status":
 				return ec.fieldContext_Customer_status(ctx, field)
 			case "statusTs":
@@ -11480,6 +11559,8 @@ func (ec *executionContext) fieldContext_Beneficiary_customer(ctx context.Contex
 				return ec.fieldContext_Customer_hasPIN(ctx, field)
 			case "pinBlocked":
 				return ec.fieldContext_Customer_pinBlocked(ctx, field)
+			case "preferences":
+				return ec.fieldContext_Customer_preferences(ctx, field)
 			case "status":
 				return ec.fieldContext_Customer_status(ctx, field)
 			case "statusTs":
@@ -12718,6 +12799,8 @@ func (ec *executionContext) fieldContext_CDD_customer(ctx context.Context, field
 				return ec.fieldContext_Customer_hasPIN(ctx, field)
 			case "pinBlocked":
 				return ec.fieldContext_Customer_pinBlocked(ctx, field)
+			case "preferences":
+				return ec.fieldContext_Customer_preferences(ctx, field)
 			case "status":
 				return ec.fieldContext_Customer_status(ctx, field)
 			case "statusTs":
@@ -14833,6 +14916,53 @@ func (ec *executionContext) fieldContext_Customer_pinBlocked(ctx context.Context
 	return fc, nil
 }
 
+func (ec *executionContext) _Customer_preferences(ctx context.Context, field graphql.CollectedField, obj *types.Customer) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Customer_preferences(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Preferences, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*types.CustomerPreferences)
+	fc.Result = res
+	return ec.marshalOCustomerPreferences2ᚕᚖmsᚗapiᚋtypesᚐCustomerPreferencesᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Customer_preferences(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Customer",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "type":
+				return ec.fieldContext_CustomerPreferences_type(ctx, field)
+			case "value":
+				return ec.fieldContext_CustomerPreferences_value(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type CustomerPreferences", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Customer_status(ctx context.Context, field graphql.CollectedField, obj *types.Customer) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Customer_status(ctx, field)
 	if err != nil {
@@ -15026,6 +15156,8 @@ func (ec *executionContext) fieldContext_CustomerConnection_nodes(ctx context.Co
 				return ec.fieldContext_Customer_hasPIN(ctx, field)
 			case "pinBlocked":
 				return ec.fieldContext_Customer_pinBlocked(ctx, field)
+			case "preferences":
+				return ec.fieldContext_Customer_preferences(ctx, field)
 			case "status":
 				return ec.fieldContext_Customer_status(ctx, field)
 			case "statusTs":
@@ -15137,6 +15269,94 @@ func (ec *executionContext) fieldContext_CustomerConnection_totalCount(ctx conte
 	return fc, nil
 }
 
+func (ec *executionContext) _CustomerPreferences_type(ctx context.Context, field graphql.CollectedField, obj *types.CustomerPreferences) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CustomerPreferences_type(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Type, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(types.CustomerPreferencesTypes)
+	fc.Result = res
+	return ec.marshalNCustomerPreferencesTypes2msᚗapiᚋtypesᚐCustomerPreferencesTypes(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CustomerPreferences_type(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CustomerPreferences",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type CustomerPreferencesTypes does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CustomerPreferences_value(ctx context.Context, field graphql.CollectedField, obj *types.CustomerPreferences) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CustomerPreferences_value(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Value, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CustomerPreferences_value(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CustomerPreferences",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Device_id(ctx context.Context, field graphql.CollectedField, obj *types.Device) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Device_id(ctx, field)
 	if err != nil {
@@ -15242,6 +15462,8 @@ func (ec *executionContext) fieldContext_Device_customer(ctx context.Context, fi
 				return ec.fieldContext_Customer_hasPIN(ctx, field)
 			case "pinBlocked":
 				return ec.fieldContext_Customer_pinBlocked(ctx, field)
+			case "preferences":
+				return ec.fieldContext_Customer_preferences(ctx, field)
 			case "status":
 				return ec.fieldContext_Customer_status(ctx, field)
 			case "statusTs":
@@ -16757,6 +16979,8 @@ func (ec *executionContext) fieldContext_Identity_customer(ctx context.Context, 
 				return ec.fieldContext_Customer_hasPIN(ctx, field)
 			case "pinBlocked":
 				return ec.fieldContext_Customer_pinBlocked(ctx, field)
+			case "preferences":
+				return ec.fieldContext_Customer_preferences(ctx, field)
 			case "status":
 				return ec.fieldContext_Customer_status(ctx, field)
 			case "statusTs":
@@ -18569,6 +18793,8 @@ func (ec *executionContext) fieldContext_LinkedTransactionSource_customer(ctx co
 				return ec.fieldContext_Customer_hasPIN(ctx, field)
 			case "pinBlocked":
 				return ec.fieldContext_Customer_pinBlocked(ctx, field)
+			case "preferences":
+				return ec.fieldContext_Customer_preferences(ctx, field)
 			case "status":
 				return ec.fieldContext_Customer_status(ctx, field)
 			case "statusTs":
@@ -20958,6 +21184,69 @@ func (ec *executionContext) fieldContext_Mutation_createScheduledTransfer(ctx co
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_createScheduledTransfer_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_setCustomerPreferences(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_setCustomerPreferences(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().SetCustomerPreferences(rctx, fc.Args["preferences"].([]*types.CustomerPreferencesInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.Response)
+	fc.Result = res
+	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_setCustomerPreferences(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "message":
+				return ec.fieldContext_Response_message(ctx, field)
+			case "success":
+				return ec.fieldContext_Response_success(ctx, field)
+			case "code":
+				return ec.fieldContext_Response_code(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Response", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_setCustomerPreferences_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -25258,6 +25547,8 @@ func (ec *executionContext) fieldContext_Query_customer(ctx context.Context, fie
 				return ec.fieldContext_Customer_hasPIN(ctx, field)
 			case "pinBlocked":
 				return ec.fieldContext_Customer_pinBlocked(ctx, field)
+			case "preferences":
+				return ec.fieldContext_Customer_preferences(ctx, field)
 			case "status":
 				return ec.fieldContext_Customer_status(ctx, field)
 			case "statusTs":
@@ -28022,6 +28313,8 @@ func (ec *executionContext) fieldContext_ScheduledTransactionSource_customer(ctx
 				return ec.fieldContext_Customer_hasPIN(ctx, field)
 			case "pinBlocked":
 				return ec.fieldContext_Customer_pinBlocked(ctx, field)
+			case "preferences":
+				return ec.fieldContext_Customer_preferences(ctx, field)
 			case "status":
 				return ec.fieldContext_Customer_status(ctx, field)
 			case "statusTs":
@@ -30483,6 +30776,8 @@ func (ec *executionContext) fieldContext_TransactionSource_customer(ctx context.
 				return ec.fieldContext_Customer_hasPIN(ctx, field)
 			case "pinBlocked":
 				return ec.fieldContext_Customer_pinBlocked(ctx, field)
+			case "preferences":
+				return ec.fieldContext_Customer_preferences(ctx, field)
 			case "status":
 				return ec.fieldContext_Customer_status(ctx, field)
 			case "statusTs":
@@ -30721,6 +31016,8 @@ func (ec *executionContext) fieldContext_TransactionTarget_customer(ctx context.
 				return ec.fieldContext_Customer_hasPIN(ctx, field)
 			case "pinBlocked":
 				return ec.fieldContext_Customer_pinBlocked(ctx, field)
+			case "preferences":
+				return ec.fieldContext_Customer_preferences(ctx, field)
 			case "status":
 				return ec.fieldContext_Customer_status(ctx, field)
 			case "statusTs":
@@ -33998,6 +34295,42 @@ func (ec *executionContext) unmarshalInputCustomerInput(ctx context.Context, obj
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputCustomerPreferencesInput(ctx context.Context, obj interface{}) (types.CustomerPreferencesInput, error) {
+	var it types.CustomerPreferencesInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"type", "value"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "type":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
+			it.Type, err = ec.unmarshalNCustomerPreferencesTypes2msᚗapiᚋtypesᚐCustomerPreferencesTypes(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "value":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("value"))
+			it.Value, err = ec.unmarshalNBoolean2bool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputDeviceInput(ctx context.Context, obj interface{}) (types.DeviceInput, error) {
 	var it types.DeviceInput
 	asMap := map[string]interface{}{}
@@ -36159,6 +36492,10 @@ func (ec *executionContext) _Customer(ctx context.Context, sel ast.SelectionSet,
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "preferences":
+
+			out.Values[i] = ec._Customer_preferences(ctx, field, obj)
+
 		case "status":
 
 			out.Values[i] = ec._Customer_status(ctx, field, obj)
@@ -36218,6 +36555,41 @@ func (ec *executionContext) _CustomerConnection(ctx context.Context, sel ast.Sel
 		case "totalCount":
 
 			out.Values[i] = ec._CustomerConnection_totalCount(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var customerPreferencesImplementors = []string{"CustomerPreferences"}
+
+func (ec *executionContext) _CustomerPreferences(ctx context.Context, sel ast.SelectionSet, obj *types.CustomerPreferences) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, customerPreferencesImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("CustomerPreferences")
+		case "type":
+
+			out.Values[i] = ec._CustomerPreferences_type(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "value":
+
+			out.Values[i] = ec._CustomerPreferences_value(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -37378,6 +37750,15 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_createScheduledTransfer(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "setCustomerPreferences":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_setCustomerPreferences(ctx, field)
 			})
 
 			if out.Values[i] == graphql.Null {
@@ -41241,6 +41622,31 @@ func (ec *executionContext) unmarshalNCustomerInput2msᚗapiᚋtypesᚐCustomerI
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) marshalNCustomerPreferences2ᚖmsᚗapiᚋtypesᚐCustomerPreferences(ctx context.Context, sel ast.SelectionSet, v *types.CustomerPreferences) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._CustomerPreferences(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNCustomerPreferencesInput2ᚖmsᚗapiᚋtypesᚐCustomerPreferencesInput(ctx context.Context, v interface{}) (*types.CustomerPreferencesInput, error) {
+	res, err := ec.unmarshalInputCustomerPreferencesInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNCustomerPreferencesTypes2msᚗapiᚋtypesᚐCustomerPreferencesTypes(ctx context.Context, v interface{}) (types.CustomerPreferencesTypes, error) {
+	var res types.CustomerPreferencesTypes
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNCustomerPreferencesTypes2msᚗapiᚋtypesᚐCustomerPreferencesTypes(ctx context.Context, sel ast.SelectionSet, v types.CustomerPreferencesTypes) graphql.Marshaler {
+	return v
+}
+
 func (ec *executionContext) unmarshalNCustomerStatuses2msᚗapiᚋtypesᚐCustomerStatuses(ctx context.Context, v interface{}) (types.CustomerStatuses, error) {
 	var res types.CustomerStatuses
 	err := res.UnmarshalGQL(v)
@@ -43427,6 +43833,73 @@ func (ec *executionContext) marshalOCustomer2ᚖmsᚗapiᚋtypesᚐCustomer(ctx 
 		return graphql.Null
 	}
 	return ec._Customer(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOCustomerPreferences2ᚕᚖmsᚗapiᚋtypesᚐCustomerPreferencesᚄ(ctx context.Context, sel ast.SelectionSet, v []*types.CustomerPreferences) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNCustomerPreferences2ᚖmsᚗapiᚋtypesᚐCustomerPreferences(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) unmarshalOCustomerPreferencesInput2ᚕᚖmsᚗapiᚋtypesᚐCustomerPreferencesInputᚄ(ctx context.Context, v interface{}) ([]*types.CustomerPreferencesInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*types.CustomerPreferencesInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNCustomerPreferencesInput2ᚖmsᚗapiᚋtypesᚐCustomerPreferencesInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
 }
 
 func (ec *executionContext) unmarshalOCustomerStatuses2ᚕmsᚗapiᚋtypesᚐCustomerStatusesᚄ(ctx context.Context, v interface{}) ([]types.CustomerStatuses, error) {

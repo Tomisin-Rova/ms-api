@@ -6,6 +6,7 @@ package graph
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -1212,6 +1213,11 @@ func (r *mutationResolver) CreateScheduledTransfer(ctx context.Context, schedule
 		Success: response.Success,
 		Code:    int64(response.Code),
 	}, nil
+}
+
+// SetCustomerPreferences is the resolver for the setCustomerPreferences field.
+func (r *mutationResolver) SetCustomerPreferences(ctx context.Context, preferences []*types.CustomerPreferencesInput) (*types.Response, error) {
+	panic(fmt.Errorf("not implemented"))
 }
 
 // RequestResubmit is the resolver for the requestResubmit field.

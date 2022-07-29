@@ -325,20 +325,21 @@ type CurrencyConnection struct {
 }
 
 type Customer struct {
-	ID         string           `json:"id"`
-	Title      CustomerTitle    `json:"title"`
-	FirstName  string           `json:"firstName"`
-	LastName   string           `json:"lastName"`
-	Dob        string           `json:"dob"`
-	Bvn        *string          `json:"bvn"`
-	Addresses  []*Address       `json:"addresses"`
-	Phones     []*Phone         `json:"phones"`
-	Email      *Email           `json:"email"`
-	HasPin     bool             `json:"hasPIN"`
-	PinBlocked bool             `json:"pinBlocked"`
-	Status     CustomerStatuses `json:"status"`
-	StatusTs   int64            `json:"statusTs"`
-	Ts         int64            `json:"ts"`
+	ID          string                 `json:"id"`
+	Title       CustomerTitle          `json:"title"`
+	FirstName   string                 `json:"firstName"`
+	LastName    string                 `json:"lastName"`
+	Dob         string                 `json:"dob"`
+	Bvn         *string                `json:"bvn"`
+	Addresses   []*Address             `json:"addresses"`
+	Phones      []*Phone               `json:"phones"`
+	Email       *Email                 `json:"email"`
+	HasPin      bool                   `json:"hasPIN"`
+	PinBlocked  bool                   `json:"pinBlocked"`
+	Preferences []*CustomerPreferences `json:"preferences"`
+	Status      CustomerStatuses       `json:"status"`
+	StatusTs    int64                  `json:"statusTs"`
+	Ts          int64                  `json:"ts"`
 }
 
 func (Customer) IsMeResult()           {}
@@ -371,6 +372,16 @@ type CustomerInput struct {
 	Email         string       `json:"email"`
 	LoginPassword string       `json:"loginPassword"`
 	Device        *DeviceInput `json:"device"`
+}
+
+type CustomerPreferences struct {
+	Type  CustomerPreferencesTypes `json:"type"`
+	Value bool                     `json:"value"`
+}
+
+type CustomerPreferencesInput struct {
+	Type  CustomerPreferencesTypes `json:"type"`
+	Value bool                     `json:"value"`
 }
 
 type Device struct {
@@ -1279,15 +1290,55 @@ func (e ContentType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+type CustomerPreferencesTypes string
+
+const (
+	CustomerPreferencesTypesMarketing CustomerPreferencesTypes = "MARKETING"
+)
+
+var AllCustomerPreferencesTypes = []CustomerPreferencesTypes{
+	CustomerPreferencesTypesMarketing,
+}
+
+func (e CustomerPreferencesTypes) IsValid() bool {
+	switch e {
+	case CustomerPreferencesTypesMarketing:
+		return true
+	}
+	return false
+}
+
+func (e CustomerPreferencesTypes) String() string {
+	return string(e)
+}
+
+func (e *CustomerPreferencesTypes) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = CustomerPreferencesTypes(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid CustomerPreferencesTypes", str)
+	}
+	return nil
+}
+
+func (e CustomerPreferencesTypes) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 type CustomerStatuses string
 
 const (
-	CustomerStatusesSignedup   CustomerStatuses = "SIGNEDUP"
-	CustomerStatusesRegistered CustomerStatuses = "REGISTERED"
-	CustomerStatusesVerified   CustomerStatuses = "VERIFIED"
-	CustomerStatusesOnboarded  CustomerStatuses = "ONBOARDED"
-	CustomerStatusesRejected   CustomerStatuses = "REJECTED"
-	CustomerStatusesExited     CustomerStatuses = "EXITED"
+	CustomerStatusesSignedup     CustomerStatuses = "SIGNEDUP"
+	CustomerStatusesRegistered   CustomerStatuses = "REGISTERED"
+	CustomerStatusesVerified     CustomerStatuses = "VERIFIED"
+	CustomerStatusesOnboarded    CustomerStatuses = "ONBOARDED"
+	CustomerStatusesRejected     CustomerStatuses = "REJECTED"
+	CustomerStatusesExited       CustomerStatuses = "EXITED"
+	CustomerStatusesNgnOnboarded CustomerStatuses = "NGN_ONBOARDED"
 )
 
 var AllCustomerStatuses = []CustomerStatuses{
@@ -1297,11 +1348,12 @@ var AllCustomerStatuses = []CustomerStatuses{
 	CustomerStatusesOnboarded,
 	CustomerStatusesRejected,
 	CustomerStatusesExited,
+	CustomerStatusesNgnOnboarded,
 }
 
 func (e CustomerStatuses) IsValid() bool {
 	switch e {
-	case CustomerStatusesSignedup, CustomerStatusesRegistered, CustomerStatusesVerified, CustomerStatusesOnboarded, CustomerStatusesRejected, CustomerStatusesExited:
+	case CustomerStatusesSignedup, CustomerStatusesRegistered, CustomerStatusesVerified, CustomerStatusesOnboarded, CustomerStatusesRejected, CustomerStatusesExited, CustomerStatusesNgnOnboarded:
 		return true
 	}
 	return false
