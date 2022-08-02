@@ -39,6 +39,7 @@ type Helper interface {
 	MapProtoScheduledTransactionRepeatType(val types.ScheduledTransactionRepeatType) protoTypes.ScheduledTransaction_ScheduledTransactionRepeatType
 	MapScheduledTransactionStatus(val protoTypes.ScheduledTransaction_ScheduledTransactionStatuses) types.ScheduledTransactionStatus
 	MapProtoScheduledTransactionStatus(val types.ScheduledTransactionStatus) protoTypes.ScheduledTransaction_ScheduledTransactionStatuses
+	MapProtoCustomerPreferenceType(val types.CustomerPreferencesTypes) protoTypes.CustomerPreferences_CustomerPreferencesTypes
 }
 
 type helpersfactory struct{}
@@ -1395,5 +1396,14 @@ func (h *helpersfactory) MapProtoScheduledTransactionStatus(val types.ScheduledT
 		return protoTypes.ScheduledTransaction_INACTIVE
 	default:
 		return -100
+	}
+}
+
+func (h *helpersfactory) MapProtoCustomerPreferenceType(val types.CustomerPreferencesTypes) protoTypes.CustomerPreferences_CustomerPreferencesTypes {
+	switch val {
+	case types.CustomerPreferencesTypesMarketing:
+		return protoTypes.CustomerPreferences_MARKETING
+	default:
+		return protoTypes.CustomerPreferences_MARKETING
 	}
 }

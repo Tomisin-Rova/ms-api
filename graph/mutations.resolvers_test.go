@@ -4267,3 +4267,112 @@ func Test_mutationResolver_WithdrawVaultAccountNoSource(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusNotFound, int(resp.Code))
 }
+
+func TestMutationResolver_SetCustomerPreferences(t *testing.T) {
+	const (
+		success = iota
+		errorGettingClaims
+		errorRPC
+	)
+
+	var tests = []struct {
+		name     string
+		arg      []*types.CustomerPreferencesInput
+		testType int
+	}{
+		{
+			name: "Test success",
+			arg: []*types.CustomerPreferencesInput{
+				{
+					Type:  types.CustomerPreferencesTypesMarketing,
+					Value: false,
+				},
+			},
+			testType: success,
+		},
+		{
+			name: "Test error getting claims",
+			arg: []*types.CustomerPreferencesInput{
+				{
+					Type:  types.CustomerPreferencesTypesMarketing,
+					Value: false,
+				},
+			},
+			testType: errorGettingClaims,
+		},
+		{
+			name: "Test error calling RPC",
+			arg: []*types.CustomerPreferencesInput{
+				{
+					Type:  types.CustomerPreferencesTypesMarketing,
+					Value: false,
+				},
+			},
+			testType: errorRPC,
+		},
+	}
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			controller := gomock.NewController(t)
+			defer controller.Finish()
+			customerService := mocks.NewMockCustomerServiceClient(controller)
+
+			resolver := NewResolver(&ResolverOpts{
+				CustomerService: customerService,
+				Helper:          &helpersfactory{},
+			}, zaptest.NewLogger(t)).Mutation()
+
+			switch testCase.testType {
+			case success:
+				mockClaims := models.JWTClaims{
+					Client:   models.APP,
+					ID:       "clientId",
+					Email:    "email@roava.app",
+					DeviceID: "deviceId",
+				}
+				ctx, _ := middleware.PutClaimsOnContext(context.Background(), &mockClaims)
+
+				customerService.EXPECT().SetCustomerPreferences(ctx, &customer.SetCustomerPreferencesRequest{
+					Preferences: []*customer.CustomerPreferencesInput{
+						{
+							Type:  pbTypes.CustomerPreferences_MARKETING,
+							Value: false,
+						},
+					},
+				}).Return(&pbTypes.DefaultResponse{
+					Success: true,
+					Code:    http.StatusOK,
+				}, nil)
+
+				response, err := resolver.SetCustomerPreferences(ctx, testCase.arg)
+				assert.NoError(t, err)
+				assert.NotNil(t, response)
+			case errorGettingClaims:
+				response, err := resolver.SetCustomerPreferences(context.Background(), testCase.arg)
+				assert.Error(t, err)
+				assert.Nil(t, response)
+			case errorRPC:
+				mockClaims := models.JWTClaims{
+					Client:   models.APP,
+					ID:       "clientId",
+					Email:    "email@roava.app",
+					DeviceID: "deviceId",
+				}
+				ctx, _ := middleware.PutClaimsOnContext(context.Background(), &mockClaims)
+
+				customerService.EXPECT().SetCustomerPreferences(ctx, &customer.SetCustomerPreferencesRequest{
+					Preferences: []*customer.CustomerPreferencesInput{
+						{
+							Type:  pbTypes.CustomerPreferences_MARKETING,
+							Value: false,
+						},
+					},
+				}).Return(nil, errors.New(""))
+
+				response, err := resolver.SetCustomerPreferences(ctx, testCase.arg)
+				assert.Error(t, err)
+				assert.Nil(t, response)
+			}
+		})
+	}
+}
