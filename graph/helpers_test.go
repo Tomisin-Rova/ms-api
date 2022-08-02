@@ -1,10 +1,13 @@
 package graph
 
 import (
-	"github.com/stretchr/testify/assert"
-	pbTypes "ms.api/protos/pb/types"
-	"ms.api/types"
 	"testing"
+
+	pbTypes "ms.api/protos/pb/types"
+	protoTypes "ms.api/protos/pb/types"
+	"ms.api/types"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestHelpers_ScheduledTransactionRepeatType(t *testing.T) {
@@ -139,6 +142,46 @@ func TestHelpers_FeeType(t *testing.T) {
 					result := h.MapProtoFeeTypes(schema)
 					assert.Equal(t, proto, result)
 				}
+			}
+		})
+	}
+}
+
+func TestHelpersfactory_MapProtoCustomerPreferenceType(t *testing.T) {
+	const (
+		marketing = iota
+		defaultResponse
+	)
+
+	var tests = []struct {
+		name     string
+		arg      types.CustomerPreferencesTypes
+		testType int
+	}{
+		{
+			name:     "Test marketing",
+			arg:      types.CustomerPreferencesTypesMarketing,
+			testType: marketing,
+		},
+		{
+			name:     "Test default response",
+			arg:      types.CustomerPreferencesTypes("Something"),
+			testType: defaultResponse,
+		},
+	}
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			factory := &helpersfactory{}
+
+			switch testCase.testType {
+			case marketing:
+				response := factory.MapProtoCustomerPreferenceType(testCase.arg)
+				assert.NotNil(t, response)
+				assert.Equal(t, protoTypes.CustomerPreferences_MARKETING, response)
+			case defaultResponse:
+				response := factory.MapProtoCustomerPreferenceType(testCase.arg)
+				assert.NotNil(t, response)
+				assert.Equal(t, protoTypes.CustomerPreferences_MARKETING, response)
 			}
 		})
 	}

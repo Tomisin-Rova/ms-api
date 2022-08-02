@@ -6,7 +6,6 @@ package graph
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -1217,7 +1216,36 @@ func (r *mutationResolver) CreateScheduledTransfer(ctx context.Context, schedule
 
 // SetCustomerPreferences is the resolver for the setCustomerPreferences field.
 func (r *mutationResolver) SetCustomerPreferences(ctx context.Context, preferences []*types.CustomerPreferencesInput) (*types.Response, error) {
-	panic(fmt.Errorf("not implemented"))
+	// Get user claims
+	_, err := middlewares.GetClaimsFromCtx(ctx)
+	if err != nil {
+		return nil, errorvalues.Format(errorvalues.InvalidAuthenticationError, err)
+	}
+
+	// Build request
+	request := customer.SetCustomerPreferencesRequest{
+		Preferences: func() []*customer.CustomerPreferencesInput {
+			protoPreferences := make([]*customer.CustomerPreferencesInput, len(preferences))
+			for index, preference := range preferences {
+				protoPreferences[index] = &customer.CustomerPreferencesInput{
+					Type:  r.helper.MapProtoCustomerPreferenceType(preference.Type),
+					Value: preference.Value,
+				}
+			}
+
+			return protoPreferences
+		}(),
+	}
+	// Call RPC
+	response, err := r.CustomerService.SetCustomerPreferences(ctx, &request)
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.Response{
+		Success: response.Success,
+		Code:    int64(response.Code),
+	}, nil
 }
 
 // RequestResubmit is the resolver for the requestResubmit field.
