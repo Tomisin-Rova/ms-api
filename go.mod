@@ -8,7 +8,7 @@ require (
 	github.com/golang/mock v1.6.0
 	github.com/gorilla/websocket v1.5.0
 	github.com/johnfercher/maroto v0.37.0
-	github.com/roava/zebra v0.0.0-20220805142822-bca40acbf9e5
+	github.com/roava/zebra v0.0.0-20220808140005-7a830a6fa6f7
 	github.com/rs/cors v1.8.0
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.1

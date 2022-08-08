@@ -1462,3 +1462,23 @@ func (h *helpersfactory) makeTagsAndTopicFromProto(tags []string, topics protoTy
 		return faqTag, types.FAQTopicAboutRova
 	}
 }
+func (r *helpersfactory) paginationDetails(keywords *string, first *int64, after *string, last *int64, before *string) *onboarding.GetFAQRequest {
+	var request onboarding.GetFAQRequest
+	//var helper helpersfactory
+	if keywords != nil {
+		request.Keywords = *keywords
+	}
+	if first != nil {
+		request.First = int32(*first)
+	}
+	if after != nil {
+		request.After = *after
+	}
+	if last != nil {
+		request.Last = int32(*last)
+	}
+	if before != nil {
+		request.Before = *before
+	}
+	return &request
+}

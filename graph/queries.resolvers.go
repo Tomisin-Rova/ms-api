@@ -1419,20 +1419,20 @@ func (r *queryResolver) Statement(ctx context.Context, accountID string, startDa
 func (r *queryResolver) Faqs(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string, filter apiTypes.FilterType) (*apiTypes.FAQConnection, error) {
 	helper := helpersfactory{}
 
-	request := r.paginationDetails(keywords, first, after, last, before, filter)
+	request := helper.paginationDetails(keywords, first, after, last, before)
 	if filter != "" {
 		request.Filter = helper.MapProtoFAQTypes(filter)
 	}
 
-	resp, err := r.OnBoardingService.GetFAQs(ctx, &request)
+	resp, err := r.OnBoardingService.GetFAQs(ctx, request)
 	if err != nil {
 		return nil, err
 	}
 
 	nodes := make([]*apiTypes.Faq, 0)
 	for _, node := range resp.Nodes {
-		faq_ := helper.makeFAQFromProto(node)
-		nodes = append(nodes, faq_)
+		reqFAQ := helper.makeFAQFromProto(node)
+		nodes = append(nodes, reqFAQ)
 	}
 	pageInfo := apiTypes.PageInfo{
 		HasNextPage:     resp.PaginationInfo.HasNextPage,
@@ -1445,27 +1445,6 @@ func (r *queryResolver) Faqs(ctx context.Context, keywords *string, first *int64
 		PageInfo:   &pageInfo,
 		TotalCount: int64(resp.TotalCount),
 	}, nil
-}
-
-func (r *Resolver) paginationDetails(keywords *string, first *int64, after *string, last *int64, before *string, filter apiTypes.FilterType) onboarding.GetFAQRequest {
-	var request onboarding.GetFAQRequest
-	//var helper helpersfactory
-	if keywords != nil {
-		request.Keywords = *keywords
-	}
-	if first != nil {
-		request.First = int32(*first)
-	}
-	if after != nil {
-		request.After = *after
-	}
-	if last != nil {
-		request.Last = int32(*last)
-	}
-	if before != nil {
-		request.Before = *before
-	}
-	return request
 }
 
 // Query returns generated.QueryResolver implementation.
