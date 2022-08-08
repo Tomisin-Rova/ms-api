@@ -1516,19 +1516,21 @@ func (r *mutationResolver) WithdrawVaultAccountNoSource(ctx context.Context, vau
 	return &types.Response{Code: http.StatusNotFound, Success: false}, nil
 }
 
+var notImplemented = "not implemented"
+
 // CreateFaq is the resolver for the createFAQ field.
 func (r *mutationResolver) CreateFaq(ctx context.Context, faq types.CreateFAQInput) (*types.Response, error) {
-	panic(fmt.Errorf("not implemented"))
+	panic(fmt.Errorf(notImplemented))
 }
 
 // DeleteFaq is the resolver for the deleteFAQ field.
 func (r *mutationResolver) DeleteFaq(ctx context.Context, fAQid string) (*types.Response, error) {
-	panic(fmt.Errorf("not implemented"))
+	panic(fmt.Errorf(notImplemented))
 }
 
 // UpdateFaq is the resolver for the updateFAQ field.
 func (r *mutationResolver) UpdateFaq(ctx context.Context, faq types.UpdateFAQInput) (*types.Response, error) {
-	panic(fmt.Errorf("not implemented"))
+	panic(fmt.Errorf(notImplemented))
 }
 
 // Mutation returns generated.MutationResolver implementation.

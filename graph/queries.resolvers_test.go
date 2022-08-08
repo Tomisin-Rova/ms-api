@@ -11144,6 +11144,10 @@ func Test_queryResolver_Faq(t *testing.T) {
 	const (
 		first_ten_faqs = iota
 		last_ten_faqs
+		first_twenty_faqs
+		last_twenty_faqs
+		first_100_faqs
+		last_100_faqs
 	)
 	args := struct {
 		keywords string
@@ -11176,13 +11180,53 @@ func Test_queryResolver_Faq(t *testing.T) {
 			},
 			{
 				Id:         "2",
-				Question:   "How can I close my account",
-				Answer:     "Thank you for considering us. The first step is to sign in",
+				Question:   "Tell me about ROVA",
+				Answer:     "ROVA provides for you a borderless banking experience",
 				IsFeatured: true,
-				Tags:       []string{"#accounts", "#customer"},
+				Tags:       []string{"#about", "#customer"},
 				Ts:         timestamppb.Now(),
 				UpdateTs:   timestamppb.Now(),
-				Topic:      pbTypes.FAQ_ACCOUNT_OPENING,
+				Topic:      pbTypes.FAQ_ABOUT_ROVA,
+			},
+			{
+				Id:         "3",
+				Question:   "How can I get my account statement",
+				Answer:     "Please visit your profile",
+				IsFeatured: true,
+				Tags:       []string{"#statement", "#customer"},
+				Ts:         timestamppb.Now(),
+				UpdateTs:   timestamppb.Now(),
+				Topic:      pbTypes.FAQ_STATEMENT,
+			},
+			{
+				Id:         "4",
+				Question:   "How can I make payment to Ghana",
+				Answer:     "Thank you for considering us. The first step is to sign in",
+				IsFeatured: true,
+				Tags:       []string{"#payment", "#customer"},
+				Ts:         timestamppb.Now(),
+				UpdateTs:   timestamppb.Now(),
+				Topic:      pbTypes.FAQ_PAYMENTS,
+			},
+			{
+				Id:         "5",
+				Question:   "How can I make fund my GBP account",
+				Answer:     "Thank you for considering us. The first step is to sign in",
+				IsFeatured: true,
+				Tags:       []string{"#funding", "#customer"},
+				Ts:         timestamppb.Now(),
+				UpdateTs:   timestamppb.Now(),
+				Topic:      pbTypes.FAQ_FUNDING,
+			},
+			{
+				Id:         "6",
+				Question:   "How safe is my money with ROVA?",
+				Answer:     "Thank you for considering us. The first step is to sign in",
+				IsFeatured: true,
+				Tags:       []string{"#security", "#customer"},
+				Ts:         timestamppb.Now(),
+				UpdateTs:   timestamppb.Now(),
+				Topic:      pbTypes.FAQ_SECURITY,
 			},
 		},
 		PaginationInfo: &pbTypes.PaginationInfo{
@@ -11205,6 +11249,22 @@ func Test_queryResolver_Faq(t *testing.T) {
 		{
 			name:     "Test last ten faq successfully",
 			testType: last_ten_faqs,
+		},
+		{
+			name:     "Test first twenty faq successfully",
+			testType: first_twenty_faqs,
+		},
+		{
+			name:     "Test last twenty faq successfully",
+			testType: last_twenty_faqs,
+		},
+		{
+			name:     "Test first 100 faq successfully",
+			testType: first_100_faqs,
+		},
+		{
+			name:     "Test last 100 faq successfully",
+			testType: last_100_faqs,
 		},
 	}
 
@@ -11245,17 +11305,95 @@ func Test_queryResolver_Faq(t *testing.T) {
 					After:    emptyString,
 					Last:     int32(10),
 					Before:   emptyString,
-					Filter:   helpers.MapProtoFAQTypes(types.FilterTypeSearch),
+					Filter:   helpers.MapProtoFAQTypes(types.FilterTypeSpecific),
 				}
 				onboardingServiceClient.EXPECT().GetFAQs(context.Background(), getFAQRequest).Return(getFAQResponse, nil)
 
 				args.first = 0
 				args.last = 10
+				args.filter = types.FilterTypeSpecific
 				resp, err := resolver.Faqs(context.Background(), &args.keywords, &args.first, &args.after, &args.last, &args.before, args.filter)
 
 				assert.NoError(t, err)
 				assert.NotNil(t, resp)
 				assert.Equal(t, resp.TotalCount, int64(2))
+			case first_twenty_faqs:
+				getFAQRequest := &onboarding.GetFAQRequest{
+					Keywords: emptyString,
+					First:    int32(20),
+					After:    emptyString,
+					Last:     0,
+					Before:   emptyString,
+					Filter:   helpers.MapProtoFAQTypes(types.FilterTypeAll),
+				}
+				onboardingServiceClient.EXPECT().GetFAQs(context.Background(), getFAQRequest).Return(getFAQResponse, nil)
+
+				args.first = 20
+				args.last = 0
+				args.filter = types.FilterTypeAll
+				resp, err := resolver.Faqs(context.Background(), &args.keywords, &args.first, &args.after, &args.last, &args.before, args.filter)
+
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, resp.TotalCount, int64(2))
+			case last_twenty_faqs:
+				getFAQRequest := &onboarding.GetFAQRequest{
+					Keywords: emptyString,
+					First:    0,
+					After:    emptyString,
+					Last:     int32(20),
+					Before:   emptyString,
+					Filter:   helpers.MapProtoFAQTypes(types.FilterTypeFeatured),
+				}
+				onboardingServiceClient.EXPECT().GetFAQs(context.Background(), getFAQRequest).Return(getFAQResponse, nil)
+
+				args.first = 0
+				args.last = 20
+				args.filter = types.FilterTypeFeatured
+				resp, err := resolver.Faqs(context.Background(), &args.keywords, &args.first, &args.after, &args.last, &args.before, args.filter)
+
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, resp.TotalCount, int64(2))
+			case first_100_faqs:
+				getFAQRequest := &onboarding.GetFAQRequest{
+					Keywords: emptyString,
+					First:    int32(100),
+					After:    emptyString,
+					Last:     0,
+					Before:   emptyString,
+					Filter:   helpers.MapProtoFAQTypes(types.FilterTypeFeatured),
+				}
+				onboardingServiceClient.EXPECT().GetFAQs(context.Background(), getFAQRequest).Return(getFAQResponse, nil)
+
+				args.first = 100
+				args.last = 0
+				args.filter = types.FilterTypeFeatured
+				resp, err := resolver.Faqs(context.Background(), &args.keywords, &args.first, &args.after, &args.last, &args.before, args.filter)
+
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, resp.TotalCount, int64(2))
+			case last_100_faqs:
+				getFAQRequest := &onboarding.GetFAQRequest{
+					Keywords: emptyString,
+					First:    0,
+					After:    emptyString,
+					Last:     int32(100),
+					Before:   emptyString,
+					Filter:   helpers.MapProtoFAQTypes(types.FilterTypeFeatured),
+				}
+				onboardingServiceClient.EXPECT().GetFAQs(context.Background(), getFAQRequest).Return(getFAQResponse, nil)
+
+				args.first = 0
+				args.last = 100
+				args.filter = types.FilterTypeFeatured
+				resp, err := resolver.Faqs(context.Background(), &args.keywords, &args.first, &args.after, &args.last, &args.before, args.filter)
+
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, resp.TotalCount, int64(2))
+
 			}
 		})
 	}

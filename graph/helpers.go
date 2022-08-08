@@ -1440,26 +1440,25 @@ func (h *helpersfactory) makeFAQFromProto(faq *protoTypes.FAQ) *types.Faq {
 }
 
 func (h *helpersfactory) makeTagsAndTopicFromProto(tags []string, topics protoTypes.FAQ_FAQTopic) ([]*string, types.FAQTopic) {
-	var tags_ []*string
+	var faqTag []*string
 	if tags != nil {
-		tags_ = make([]*string, len(tags))
+		faqTag = make([]*string, len(tags))
 		for i, tag := range tags {
-			tags_[i] = &tag
+			faqTag[i] = &tag
 		}
 	}
 	switch topics {
 	case protoTypes.FAQ_ACCOUNT_OPENING:
-		return tags_, types.FAQTopicAccountOpening
+		return faqTag, types.FAQTopicAccountOpening
 	case protoTypes.FAQ_FUNDING:
-		return tags_, types.FAQTopicFunding
+		return faqTag, types.FAQTopicFunding
 	case protoTypes.FAQ_PAYMENTS:
-		return tags_, types.FAQTopicPayments
+		return faqTag, types.FAQTopicPayments
 	case protoTypes.FAQ_STATEMENT:
-		return tags_, types.FAQTopicStatement
+		return faqTag, types.FAQTopicStatement
 	case protoTypes.FAQ_SECURITY:
-		return tags_, types.FAQTopicSecurity
+		return faqTag, types.FAQTopicSecurity
 	default:
-		return tags_, types.FAQTopicAboutRova
-
+		return faqTag, types.FAQTopicAboutRova
 	}
 }
