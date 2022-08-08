@@ -6,6 +6,7 @@ package graph
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -1513,6 +1514,21 @@ func (r *mutationResolver) StaffUpdateCustomerDetails(ctx context.Context, custo
 // WithdrawVaultAccountNoSource is the resolver for the withdrawVaultAccountNoSource field.
 func (r *mutationResolver) WithdrawVaultAccountNoSource(ctx context.Context, vaultAccountID string, beneficiary types.BeneficiaryAccountInput, transactionPin string) (*types.Response, error) {
 	return &types.Response{Code: http.StatusNotFound, Success: false}, nil
+}
+
+// CreateFaq is the resolver for the createFAQ field.
+func (r *mutationResolver) CreateFaq(ctx context.Context, faq types.CreateFAQInput) (*types.Response, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+// DeleteFaq is the resolver for the deleteFAQ field.
+func (r *mutationResolver) DeleteFaq(ctx context.Context, fAQid string) (*types.Response, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+// UpdateFaq is the resolver for the updateFAQ field.
+func (r *mutationResolver) UpdateFaq(ctx context.Context, faq types.UpdateFAQInput) (*types.Response, error) {
+	panic(fmt.Errorf("not implemented"))
 }
 
 // Mutation returns generated.MutationResolver implementation.

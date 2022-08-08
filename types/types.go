@@ -311,6 +311,17 @@ type CountryConnection struct {
 	TotalCount int64      `json:"totalCount"`
 }
 
+type CreateFAQInput struct {
+	ID         string    `json:"id"`
+	Question   string    `json:"question"`
+	Answer     string    `json:"answer"`
+	IsFeatured bool      `json:"isFeatured"`
+	Tags       []*string `json:"tags"`
+	Ts         int64     `json:"ts"`
+	UpdateTs   int64     `json:"updateTs"`
+	Topic      FAQTopic  `json:"topic"`
+}
+
 type Currency struct {
 	ID     string `json:"id"`
 	Symbol string `json:"symbol"`
@@ -440,6 +451,23 @@ type ExchangeRate struct {
 }
 
 func (ExchangeRate) IsStaffAuditLogValue() {}
+
+type Faq struct {
+	ID         string    `json:"id"`
+	Question   string    `json:"question"`
+	Answer     string    `json:"answer"`
+	IsFeatured bool      `json:"isFeatured"`
+	Tags       []*string `json:"tags"`
+	Ts         int64     `json:"ts"`
+	UpdateTs   int64     `json:"updateTs"`
+	Topic      FAQTopic  `json:"topic"`
+}
+
+type FAQConnection struct {
+	Nodes      []*Faq    `json:"nodes"`
+	PageInfo   *PageInfo `json:"pageInfo"`
+	TotalCount int64     `json:"totalCount"`
+}
 
 type Fee struct {
 	ID              string           `json:"id"`
@@ -846,6 +874,13 @@ type TransactionTypeConnection struct {
 	Nodes      []*TransactionType `json:"nodes"`
 	PageInfo   *PageInfo          `json:"pageInfo"`
 	TotalCount int64              `json:"totalCount"`
+}
+
+type UpdateFAQInput struct {
+	ID         string    `json:"id"`
+	Answer     string    `json:"answer"`
+	IsFeatured bool      `json:"isFeatured"`
+	Tags       []*string `json:"tags"`
 }
 
 type UpdateFXInput struct {
@@ -1589,6 +1624,55 @@ func (e DeviceTokenTypes) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+type FAQTopic string
+
+const (
+	FAQTopicAboutRova      FAQTopic = "ABOUT_ROVA"
+	FAQTopicAccountOpening FAQTopic = "ACCOUNT_OPENING"
+	FAQTopicFunding        FAQTopic = "FUNDING"
+	FAQTopicPayments       FAQTopic = "PAYMENTS"
+	FAQTopicStatement      FAQTopic = "STATEMENT"
+	FAQTopicSecurity       FAQTopic = "SECURITY"
+)
+
+var AllFAQTopic = []FAQTopic{
+	FAQTopicAboutRova,
+	FAQTopicAccountOpening,
+	FAQTopicFunding,
+	FAQTopicPayments,
+	FAQTopicStatement,
+	FAQTopicSecurity,
+}
+
+func (e FAQTopic) IsValid() bool {
+	switch e {
+	case FAQTopicAboutRova, FAQTopicAccountOpening, FAQTopicFunding, FAQTopicPayments, FAQTopicStatement, FAQTopicSecurity:
+		return true
+	}
+	return false
+}
+
+func (e FAQTopic) String() string {
+	return string(e)
+}
+
+func (e *FAQTopic) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = FAQTopic(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid FAQTopic", str)
+	}
+	return nil
+}
+
+func (e FAQTopic) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 type FeeStatuses string
 
 const (
@@ -1668,6 +1752,51 @@ func (e *FeeTypes) UnmarshalGQL(v interface{}) error {
 }
 
 func (e FeeTypes) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type FilterType string
+
+const (
+	FilterTypeFeatured FilterType = "FEATURED"
+	FilterTypeSearch   FilterType = "SEARCH"
+	FilterTypeAll      FilterType = "ALL"
+	FilterTypeSpecific FilterType = "SPECIFIC"
+)
+
+var AllFilterType = []FilterType{
+	FilterTypeFeatured,
+	FilterTypeSearch,
+	FilterTypeAll,
+	FilterTypeSpecific,
+}
+
+func (e FilterType) IsValid() bool {
+	switch e {
+	case FilterTypeFeatured, FilterTypeSearch, FilterTypeAll, FilterTypeSpecific:
+		return true
+	}
+	return false
+}
+
+func (e FilterType) String() string {
+	return string(e)
+}
+
+func (e *FilterType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = FilterType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid FilterType", str)
+	}
+	return nil
+}
+
+func (e FilterType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

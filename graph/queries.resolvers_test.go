@@ -11139,3 +11139,124 @@ func Test_queryResolver_Statement(t *testing.T) {
 		})
 	}
 }
+
+func Test_queryResolver_Faq(t *testing.T) {
+	const (
+		first_ten_faqs = iota
+		last_ten_faqs
+	)
+	args := struct {
+		keywords string
+		first    int64
+		after    string
+		last     int64
+		before   string
+		filter   types.FilterType
+	}{
+		keywords: emptyString,
+		first:    0,
+		after:    emptyString,
+		last:     0,
+		before:   emptyString,
+		filter:   types.FilterTypeSearch,
+	}
+
+	helpers := helpersfactory{}
+	getFAQResponse := &onboarding.GetFAQResponse{
+		Nodes: []*pbTypes.FAQ{
+			{
+				Id:         "1",
+				Question:   "How can I open an account",
+				Answer:     "Thank you for considering us. The first step is to sign up",
+				IsFeatured: true,
+				Tags:       []string{"#accounts", "#customer"},
+				Ts:         timestamppb.Now(),
+				UpdateTs:   timestamppb.Now(),
+				Topic:      pbTypes.FAQ_ACCOUNT_OPENING,
+			},
+			{
+				Id:         "2",
+				Question:   "How can I close my account",
+				Answer:     "Thank you for considering us. The first step is to sign in",
+				IsFeatured: true,
+				Tags:       []string{"#accounts", "#customer"},
+				Ts:         timestamppb.Now(),
+				UpdateTs:   timestamppb.Now(),
+				Topic:      pbTypes.FAQ_ACCOUNT_OPENING,
+			},
+		},
+		PaginationInfo: &pbTypes.PaginationInfo{
+			HasNextPage:     false,
+			HasPreviousPage: false,
+			StartCursor:     "start_cursor",
+			EndCursor:       "end_cursor",
+		},
+		TotalCount: 2,
+	}
+
+	tests := []struct {
+		name     string
+		testType int
+	}{
+		{
+			name:     "Test first ten faq successfully",
+			testType: first_ten_faqs,
+		},
+		{
+			name:     "Test last ten faq successfully",
+			testType: last_ten_faqs,
+		},
+	}
+
+	for _, test := range tests {
+		controller := gomock.NewController(t)
+		defer controller.Finish()
+		onboardingServiceClient := mocks.NewMockOnboardingServiceClient(controller)
+		resolverOpts := &ResolverOpts{
+			OnboardingService: onboardingServiceClient,
+		}
+		resolver := NewResolver(resolverOpts, zaptest.NewLogger(t)).Query()
+
+		t.Run(test.name, func(t *testing.T) {
+			switch test.testType {
+			case first_ten_faqs:
+				getFAQRequest := &onboarding.GetFAQRequest{
+					Keywords: emptyString,
+					First:    int32(10),
+					After:    emptyString,
+					Last:     0,
+					Before:   emptyString,
+					Filter:   helpers.MapProtoFAQTypes(types.FilterTypeSearch),
+				}
+
+				onboardingServiceClient.EXPECT().GetFAQs(context.Background(), getFAQRequest).Return(getFAQResponse, nil)
+
+				args.first = 10
+				resp, err := resolver.Faqs(context.Background(), &args.keywords, &args.first, &args.after, &args.last, &args.before, args.filter)
+
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, resp.TotalCount, int64(2))
+
+			case last_ten_faqs:
+				getFAQRequest := &onboarding.GetFAQRequest{
+					Keywords: emptyString,
+					First:    0,
+					After:    emptyString,
+					Last:     int32(10),
+					Before:   emptyString,
+					Filter:   helpers.MapProtoFAQTypes(types.FilterTypeSearch),
+				}
+				onboardingServiceClient.EXPECT().GetFAQs(context.Background(), getFAQRequest).Return(getFAQResponse, nil)
+
+				args.first = 0
+				args.last = 10
+				resp, err := resolver.Faqs(context.Background(), &args.keywords, &args.first, &args.after, &args.last, &args.before, args.filter)
+
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, resp.TotalCount, int64(2))
+			}
+		})
+	}
+}

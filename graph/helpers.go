@@ -2,6 +2,7 @@ package graph
 
 import (
 	"ms.api/protos/pb/auth"
+	"ms.api/protos/pb/onboarding"
 	protoTypes "ms.api/protos/pb/types"
 	"ms.api/types"
 )
@@ -40,6 +41,7 @@ type Helper interface {
 	MapScheduledTransactionStatus(val protoTypes.ScheduledTransaction_ScheduledTransactionStatuses) types.ScheduledTransactionStatus
 	MapProtoScheduledTransactionStatus(val types.ScheduledTransactionStatus) protoTypes.ScheduledTransaction_ScheduledTransactionStatuses
 	MapProtoCustomerPreferenceType(val types.CustomerPreferencesTypes) protoTypes.CustomerPreferences_CustomerPreferencesTypes
+	MapProtoFAQTypes(val types.FilterType) onboarding.GetFAQRequest_FAQFilter
 }
 
 type helpersfactory struct{}
@@ -1405,5 +1407,59 @@ func (h *helpersfactory) MapProtoCustomerPreferenceType(val types.CustomerPrefer
 		return protoTypes.CustomerPreferences_MARKETING
 	default:
 		return protoTypes.CustomerPreferences_MARKETING
+	}
+}
+
+func (h *helpersfactory) MapProtoFAQTypes(val types.FilterType) onboarding.GetFAQRequest_FAQFilter {
+	switch val {
+	case types.FilterTypeSearch:
+		return onboarding.GetFAQRequest_SEARCH
+	case types.FilterTypeAll:
+		return onboarding.GetFAQRequest_ALL
+	case types.FilterTypeSpecific:
+		return onboarding.GetFAQRequest_SPECIFIC
+	default:
+		return onboarding.GetFAQRequest_FEATURED
+	}
+}
+
+func (h *helpersfactory) makeFAQFromProto(faq *protoTypes.FAQ) *types.Faq {
+	var result *types.Faq
+	tags, topic := h.makeTagsAndTopicFromProto(faq.Tags, faq.Topic)
+	result = &types.Faq{
+		ID:         faq.Id,
+		Question:   faq.Question,
+		Answer:     faq.Answer,
+		IsFeatured: faq.IsFeatured,
+		Tags:       tags,
+		Ts:         faq.Ts.AsTime().Unix(),
+		UpdateTs:   faq.UpdateTs.AsTime().Unix(),
+		Topic:      topic,
+	}
+	return result
+}
+
+func (h *helpersfactory) makeTagsAndTopicFromProto(tags []string, topics protoTypes.FAQ_FAQTopic) ([]*string, types.FAQTopic) {
+	var tags_ []*string
+	if tags != nil {
+		tags_ = make([]*string, len(tags))
+		for i, tag := range tags {
+			tags_[i] = &tag
+		}
+	}
+	switch topics {
+	case protoTypes.FAQ_ACCOUNT_OPENING:
+		return tags_, types.FAQTopicAccountOpening
+	case protoTypes.FAQ_FUNDING:
+		return tags_, types.FAQTopicFunding
+	case protoTypes.FAQ_PAYMENTS:
+		return tags_, types.FAQTopicPayments
+	case protoTypes.FAQ_STATEMENT:
+		return tags_, types.FAQTopicStatement
+	case protoTypes.FAQ_SECURITY:
+		return tags_, types.FAQTopicSecurity
+	default:
+		return tags_, types.FAQTopicAboutRova
+
 	}
 }

@@ -1415,6 +1415,52 @@ func (r *queryResolver) Statement(ctx context.Context, accountID string, startDa
 	return response, nil
 }
 
+// Faqs is the resolver for the faqs field.
+func (r *queryResolver) Faqs(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string, filter apiTypes.FilterType) (*apiTypes.FAQConnection, error) {
+	helper := helpersfactory{}
+	var request onboarding.GetFAQRequest
+	if keywords != nil {
+		request.Keywords = *keywords
+	}
+	if first != nil {
+		request.First = int32(*first)
+	}
+	if after != nil {
+		request.After = *after
+	}
+	if last != nil {
+		request.Last = int32(*last)
+	}
+	if before != nil {
+		request.Before = *before
+	}
+	if filter != "" {
+		request.Filter = helper.MapProtoFAQTypes(filter)
+	}
+
+	resp, err := r.OnBoardingService.GetFAQs(ctx, &request)
+	if err != nil {
+		return nil, err
+	}
+
+	nodes := make([]*apiTypes.Faq, 0)
+	for _, node := range resp.Nodes {
+		faq_ := helper.makeFAQFromProto(node)
+		nodes = append(nodes, faq_)
+	}
+	pageInfo := apiTypes.PageInfo{
+		HasNextPage:     resp.PaginationInfo.HasNextPage,
+		HasPreviousPage: resp.PaginationInfo.HasPreviousPage,
+		StartCursor:     &resp.PaginationInfo.StartCursor,
+		EndCursor:       &resp.PaginationInfo.EndCursor,
+	}
+	return &apiTypes.FAQConnection{
+		Nodes:      nodes,
+		PageInfo:   &pageInfo,
+		TotalCount: int64(resp.TotalCount),
+	}, nil
+}
+
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
