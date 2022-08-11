@@ -322,6 +322,23 @@ type ComplexityRoot struct {
 		Ts             func(childComplexity int) int
 	}
 
+	FAQ struct {
+		Answer     func(childComplexity int) int
+		ID         func(childComplexity int) int
+		IsFeatured func(childComplexity int) int
+		Question   func(childComplexity int) int
+		Tags       func(childComplexity int) int
+		Topic      func(childComplexity int) int
+		Ts         func(childComplexity int) int
+		UpdateTs   func(childComplexity int) int
+	}
+
+	FAQConnection struct {
+		Nodes      func(childComplexity int) int
+		PageInfo   func(childComplexity int) int
+		TotalCount func(childComplexity int) int
+	}
+
 	Fee struct {
 		Boundaries      func(childComplexity int) int
 		ID              func(childComplexity int) int
@@ -423,11 +440,13 @@ type ComplexityRoot struct {
 		CreateAccount                func(childComplexity int, account types.AccountInput) int
 		CreateBeneficiariesByPhone   func(childComplexity int, beneficiaries []*types.BeneficiaryByPhoneInput, transactionPassword string) int
 		CreateBeneficiary            func(childComplexity int, beneficiary types.BeneficiaryInput, transactionPassword string) int
+		CreateFaq                    func(childComplexity int, faq types.CreateFAQInput) int
 		CreateScheduledTransfer      func(childComplexity int, scheduledTransfer types.ScheduledTransactionInput, transactionPassword string) int
 		CreateTransfer               func(childComplexity int, transfer types.TransactionInput, transactionPassword string) int
 		CreateVaultAccount           func(childComplexity int, account types.VaultAccountInput, transactionPassword string) int
 		DeactivateCredential         func(childComplexity int, credentialType types.IdentityCredentialsTypes) int
 		DeleteBeneficiaryAccount     func(childComplexity int, beneficiaryID string, accountID string, transactionPassword string) int
+		DeleteFaq                    func(childComplexity int, fAQid string) int
 		ForgotTransactionPassword    func(childComplexity int, newTransactionPassword string) int
 		Login                        func(childComplexity int, credentials types.AuthInput) int
 		RefreshToken                 func(childComplexity int, token string) int
@@ -448,6 +467,7 @@ type ComplexityRoot struct {
 		UpdateAMLStatus              func(childComplexity int, id string, status types.AMLStatuses, message string) int
 		UpdateCustomerDetails        func(childComplexity int, customerDetails types.CustomerDetailsUpdateInput, transactionPassword string) int
 		UpdateDevice                 func(childComplexity int, phoneNumber string, otp string, device types.DeviceInput) int
+		UpdateFaq                    func(childComplexity int, faq types.UpdateFAQInput) int
 		UpdateFees                   func(childComplexity int, fees []*types.UpdateFeesInput) int
 		UpdateFx                     func(childComplexity int, exchangeRate types.UpdateFXInput) int
 		UpdateKYCStatus              func(childComplexity int, id string, status types.KYCStatuses, message string) int
@@ -543,6 +563,7 @@ type ComplexityRoot struct {
 		ExchangeRate                 func(childComplexity int, transactionTypeID string) int
 		ExistingBeneficiariesByPhone func(childComplexity int, phones []string, transactionPassword string) int
 		ExistingBeneficiaryByAccount func(childComplexity int, accountNumber string) int
+		Faqs                         func(childComplexity int, keywords *string, first *int64, after *string, last *int64, before *string, filter types.FilterType) int
 		Fees                         func(childComplexity int, transactionTypeID string, sourceAccountID string, targetAccountID string) int
 		LookupBeneficiary            func(childComplexity int, accountNumber string, code string, currencyID string) int
 		Me                           func(childComplexity int) int
@@ -796,6 +817,9 @@ type MutationResolver interface {
 	UpdateFees(ctx context.Context, fees []*types.UpdateFeesInput) (*types.Response, error)
 	StaffUpdateCustomerDetails(ctx context.Context, customerDetails types.StaffCustomerDetailsUpdateInput) (*types.Response, error)
 	WithdrawVaultAccountNoSource(ctx context.Context, vaultAccountID string, beneficiary types.BeneficiaryAccountInput, transactionPin string) (*types.Response, error)
+	CreateFaq(ctx context.Context, faq types.CreateFAQInput) (*types.Response, error)
+	DeleteFaq(ctx context.Context, fAQid string) (*types.Response, error)
+	UpdateFaq(ctx context.Context, faq types.UpdateFAQInput) (*types.Response, error)
 }
 type QueryResolver interface {
 	CheckEmail(ctx context.Context, email string) (bool, error)
@@ -831,6 +855,7 @@ type QueryResolver interface {
 	Cdds(ctx context.Context, first *int64, after *string, last *int64, before *string, statuses []types.CDDStatuses) (*types.CDDConnection, error)
 	StaffAuditLogs(ctx context.Context, first *int64, after *string, last *int64, before *string, types []types.StaffAuditLogType) (*types.StaffAuditLogConnection, error)
 	Statement(ctx context.Context, accountID string, startDate string, endDate string, transactionPassword string) (*types.StatementResponse, error)
+	Faqs(ctx context.Context, keywords *string, first *int64, after *string, last *int64, before *string, filter types.FilterType) (*types.FAQConnection, error)
 }
 
 type executableSchema struct {
@@ -2038,6 +2063,83 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ExchangeRate.Ts(childComplexity), true
 
+	case "FAQ.answer":
+		if e.complexity.FAQ.Answer == nil {
+			break
+		}
+
+		return e.complexity.FAQ.Answer(childComplexity), true
+
+	case "FAQ.id":
+		if e.complexity.FAQ.ID == nil {
+			break
+		}
+
+		return e.complexity.FAQ.ID(childComplexity), true
+
+	case "FAQ.isFeatured":
+		if e.complexity.FAQ.IsFeatured == nil {
+			break
+		}
+
+		return e.complexity.FAQ.IsFeatured(childComplexity), true
+
+	case "FAQ.question":
+		if e.complexity.FAQ.Question == nil {
+			break
+		}
+
+		return e.complexity.FAQ.Question(childComplexity), true
+
+	case "FAQ.tags":
+		if e.complexity.FAQ.Tags == nil {
+			break
+		}
+
+		return e.complexity.FAQ.Tags(childComplexity), true
+
+	case "FAQ.topic":
+		if e.complexity.FAQ.Topic == nil {
+			break
+		}
+
+		return e.complexity.FAQ.Topic(childComplexity), true
+
+	case "FAQ.ts":
+		if e.complexity.FAQ.Ts == nil {
+			break
+		}
+
+		return e.complexity.FAQ.Ts(childComplexity), true
+
+	case "FAQ.updateTs":
+		if e.complexity.FAQ.UpdateTs == nil {
+			break
+		}
+
+		return e.complexity.FAQ.UpdateTs(childComplexity), true
+
+	case "FAQConnection.nodes":
+		if e.complexity.FAQConnection.Nodes == nil {
+			break
+		}
+
+		return e.complexity.FAQConnection.Nodes(childComplexity), true
+
+	case "FAQConnection.pageInfo":
+		if e.complexity.FAQConnection.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.FAQConnection.PageInfo(childComplexity), true
+
+	case "FAQConnection.totalCount":
+		if e.complexity.FAQConnection.TotalCount == nil {
+			break
+		}
+
+		return e.complexity.FAQConnection.TotalCount(childComplexity), true
+
 	case "Fee.boundaries":
 		if e.complexity.Fee.Boundaries == nil {
 			break
@@ -2562,6 +2664,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateBeneficiary(childComplexity, args["beneficiary"].(types.BeneficiaryInput), args["transactionPassword"].(string)), true
 
+	case "Mutation.createFAQ":
+		if e.complexity.Mutation.CreateFaq == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createFAQ_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateFaq(childComplexity, args["FAQ"].(types.CreateFAQInput)), true
+
 	case "Mutation.createScheduledTransfer":
 		if e.complexity.Mutation.CreateScheduledTransfer == nil {
 			break
@@ -2621,6 +2735,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.DeleteBeneficiaryAccount(childComplexity, args["beneficiaryId"].(string), args["accountId"].(string), args["transactionPassword"].(string)), true
+
+	case "Mutation.deleteFAQ":
+		if e.complexity.Mutation.DeleteFaq == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteFAQ_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteFaq(childComplexity, args["FAQid"].(string)), true
 
 	case "Mutation.forgotTransactionPassword":
 		if e.complexity.Mutation.ForgotTransactionPassword == nil {
@@ -2861,6 +2987,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.UpdateDevice(childComplexity, args["phoneNumber"].(string), args["otp"].(string), args["device"].(types.DeviceInput)), true
+
+	case "Mutation.updateFAQ":
+		if e.complexity.Mutation.UpdateFaq == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateFAQ_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateFaq(childComplexity, args["FAQ"].(types.UpdateFAQInput)), true
 
 	case "Mutation.updateFees":
 		if e.complexity.Mutation.UpdateFees == nil {
@@ -3467,6 +3605,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.ExistingBeneficiaryByAccount(childComplexity, args["accountNumber"].(string)), true
+
+	case "Query.faqs":
+		if e.complexity.Query.Faqs == nil {
+			break
+		}
+
+		args, err := ec.field_Query_faqs_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Faqs(childComplexity, args["keywords"].(*string), args["first"].(*int64), args["after"].(*string), args["last"].(*int64), args["before"].(*string), args["filter"].(types.FilterType)), true
 
 	case "Query.fees":
 		if e.complexity.Query.Fees == nil {
@@ -4469,6 +4619,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputCheckCustomerDetailsInput,
 		ec.unmarshalInputCommonQueryFilterInput,
 		ec.unmarshalInputCordinatesInput,
+		ec.unmarshalInputCreateFAQInput,
 		ec.unmarshalInputCustomerDetailsInput,
 		ec.unmarshalInputCustomerDetailsUpdateInput,
 		ec.unmarshalInputCustomerInput,
@@ -4482,6 +4633,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputScheduledTransactionInput,
 		ec.unmarshalInputStaffCustomerDetailsUpdateInput,
 		ec.unmarshalInputTransactionInput,
+		ec.unmarshalInputUpdateFAQInput,
 		ec.unmarshalInputUpdateFXInput,
 		ec.unmarshalInputUpdateFeesInput,
 		ec.unmarshalInputVaultAccountInput,
@@ -4634,6 +4786,10 @@ type Mutation {
     staffUpdateCustomerDetails(customerDetails: StaffCustomerDetailsUpdateInput!): Response!
     # Vault withdrawal without source account
     withdrawVaultAccountNoSource(vaultAccountId: ID!, beneficiary: BeneficiaryAccountInput!, transactionPIN: String!): Response!
+    # create FAQ
+    createFAQ(FAQ: CreateFAQInput!): Response!
+    deleteFAQ(FAQid: ID!): Response!
+    updateFAQ(FAQ: UpdateFAQInput!): Response!
 }
 
 # API response interface
@@ -4907,6 +5063,25 @@ input AccountCloseInput {
     depositAccount: BeneficiaryAccountInput!
     transactionPassword: String!
 }
+
+# create FAQ
+input CreateFAQInput {
+    id: String!
+    question: String!
+    answer: String!
+    isFeatured: Boolean!
+    tags: [String]
+    ts: Int!
+    updateTs: Int!
+    topic: FAQTopic!
+}
+
+input UpdateFAQInput {
+    id: String!
+    answer: String!
+    isFeatured: Boolean!
+    tags: [String]
+}
 `, BuiltIn: false},
 	{Name: "../schemas/queries.graphql", Input: `type Query {
     # Check if there's a customer with the email given
@@ -5162,6 +5337,22 @@ input AccountCloseInput {
         endDate: Date!
         # Transaction password.
         transactionPassword: String!): StatementResponse!
+    # Fetch a list of FAQs
+    faqs(
+        # Search text
+        keywords: String
+        # Returns the first n elements from the list.
+        first: Int
+        # Returns the elements in the list that come after the specified cursor.
+        after: String
+        # Returns the last n elements from the list.
+        last: Int
+        # Returns the elements in the list that come before the specified cursor.
+        before: String
+        # Filter defines the search filter - feature, search, specific, all
+        # The available search filter is SEARCH
+        filter: FilterType!
+    ): FAQConnection!
 }
 
 input CommonQueryFilterInput {
@@ -5339,6 +5530,27 @@ type StatementResponse {
     endDate: Date!
     # base64 string containing generated pdf statement
     pdfContent: String
+}
+
+# enum FAQFilter defines the filter type
+enum FilterType {
+    # defines searching by featured faq
+    FEATURED
+    # defines searching by text
+    SEARCH
+    # defines retrieving all
+    ALL
+    # defines searching by faq id
+    SPECIFIC
+}
+
+# The connection type for FAQ
+type FAQConnection {
+    nodes: [FAQ!]!
+    # Information to aid pagination
+    pageInfo: PageInfo!
+    # Identifies the total count of items in the connection
+    totalCount: Int!
 }`, BuiltIn: false},
 	{Name: "../schemas/types.graphql", Input: `# Date scalar format DD-MM-YYYY
 scalar Date
@@ -6031,6 +6243,30 @@ enum BeneficiarySort {
 
 ############# END BENEFICIARIES GROUP #############
 
+############# FAQs #############
+
+type FAQ {
+    id: String!
+    question: String!
+    answer: String!
+    isFeatured: Boolean!
+    tags: [String]
+    ts: Int!
+    updateTs: Int!
+    topic: FAQTopic!
+}
+
+enum FAQTopic {
+    ABOUT_ROVA
+    ACCOUNT_OPENING
+    FUNDING
+    PAYMENTS
+    STATEMENT
+    SECURITY
+}
+
+############# END OF FAQs #############
+
 ############# OTHERS GROUP #############
 
 type Currency {
@@ -6331,6 +6567,21 @@ func (ec *executionContext) field_Mutation_createBeneficiary_args(ctx context.Co
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_createFAQ_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 types.CreateFAQInput
+	if tmp, ok := rawArgs["FAQ"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("FAQ"))
+		arg0, err = ec.unmarshalNCreateFAQInput2msᚗapiᚋtypesᚐCreateFAQInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["FAQ"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_createScheduledTransfer_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -6448,6 +6699,21 @@ func (ec *executionContext) field_Mutation_deleteBeneficiaryAccount_args(ctx con
 		}
 	}
 	args["transactionPassword"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_deleteFAQ_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["FAQid"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("FAQid"))
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["FAQid"] = arg0
 	return args, nil
 }
 
@@ -6901,6 +7167,21 @@ func (ec *executionContext) field_Mutation_updateDevice_args(ctx context.Context
 		}
 	}
 	args["device"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateFAQ_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 types.UpdateFAQInput
+	if tmp, ok := rawArgs["FAQ"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("FAQ"))
+		arg0, err = ec.unmarshalNUpdateFAQInput2msᚗapiᚋtypesᚐUpdateFAQInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["FAQ"] = arg0
 	return args, nil
 }
 
@@ -7720,6 +8001,66 @@ func (ec *executionContext) field_Query_existingBeneficiaryByAccount_args(ctx co
 		}
 	}
 	args["accountNumber"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_faqs_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *string
+	if tmp, ok := rawArgs["keywords"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("keywords"))
+		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["keywords"] = arg0
+	var arg1 *int64
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg1, err = ec.unmarshalOInt2ᚖint64(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg1
+	var arg2 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+		arg2, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg2
+	var arg3 *int64
+	if tmp, ok := rawArgs["last"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("last"))
+		arg3, err = ec.unmarshalOInt2ᚖint64(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["last"] = arg3
+	var arg4 *string
+	if tmp, ok := rawArgs["before"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("before"))
+		arg4, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["before"] = arg4
+	var arg5 types.FilterType
+	if tmp, ok := rawArgs["filter"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
+		arg5, err = ec.unmarshalNFilterType2msᚗapiᚋtypesᚐFilterType(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["filter"] = arg5
 	return args, nil
 }
 
@@ -16383,6 +16724,515 @@ func (ec *executionContext) fieldContext_ExchangeRate_ts(ctx context.Context, fi
 	return fc, nil
 }
 
+func (ec *executionContext) _FAQ_id(ctx context.Context, field graphql.CollectedField, obj *types.Faq) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_FAQ_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_FAQ_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "FAQ",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _FAQ_question(ctx context.Context, field graphql.CollectedField, obj *types.Faq) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_FAQ_question(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Question, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_FAQ_question(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "FAQ",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _FAQ_answer(ctx context.Context, field graphql.CollectedField, obj *types.Faq) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_FAQ_answer(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Answer, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_FAQ_answer(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "FAQ",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _FAQ_isFeatured(ctx context.Context, field graphql.CollectedField, obj *types.Faq) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_FAQ_isFeatured(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsFeatured, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_FAQ_isFeatured(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "FAQ",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _FAQ_tags(ctx context.Context, field graphql.CollectedField, obj *types.Faq) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_FAQ_tags(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Tags, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*string)
+	fc.Result = res
+	return ec.marshalOString2ᚕᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_FAQ_tags(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "FAQ",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _FAQ_ts(ctx context.Context, field graphql.CollectedField, obj *types.Faq) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_FAQ_ts(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Ts, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int64)
+	fc.Result = res
+	return ec.marshalNInt2int64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_FAQ_ts(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "FAQ",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _FAQ_updateTs(ctx context.Context, field graphql.CollectedField, obj *types.Faq) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_FAQ_updateTs(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UpdateTs, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int64)
+	fc.Result = res
+	return ec.marshalNInt2int64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_FAQ_updateTs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "FAQ",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _FAQ_topic(ctx context.Context, field graphql.CollectedField, obj *types.Faq) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_FAQ_topic(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Topic, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(types.FAQTopic)
+	fc.Result = res
+	return ec.marshalNFAQTopic2msᚗapiᚋtypesᚐFAQTopic(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_FAQ_topic(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "FAQ",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type FAQTopic does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _FAQConnection_nodes(ctx context.Context, field graphql.CollectedField, obj *types.FAQConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_FAQConnection_nodes(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Nodes, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*types.Faq)
+	fc.Result = res
+	return ec.marshalNFAQ2ᚕᚖmsᚗapiᚋtypesᚐFaqᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_FAQConnection_nodes(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "FAQConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_FAQ_id(ctx, field)
+			case "question":
+				return ec.fieldContext_FAQ_question(ctx, field)
+			case "answer":
+				return ec.fieldContext_FAQ_answer(ctx, field)
+			case "isFeatured":
+				return ec.fieldContext_FAQ_isFeatured(ctx, field)
+			case "tags":
+				return ec.fieldContext_FAQ_tags(ctx, field)
+			case "ts":
+				return ec.fieldContext_FAQ_ts(ctx, field)
+			case "updateTs":
+				return ec.fieldContext_FAQ_updateTs(ctx, field)
+			case "topic":
+				return ec.fieldContext_FAQ_topic(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type FAQ", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _FAQConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *types.FAQConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_FAQConnection_pageInfo(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PageInfo, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.PageInfo)
+	fc.Result = res
+	return ec.marshalNPageInfo2ᚖmsᚗapiᚋtypesᚐPageInfo(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_FAQConnection_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "FAQConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "hasNextPage":
+				return ec.fieldContext_PageInfo_hasNextPage(ctx, field)
+			case "hasPreviousPage":
+				return ec.fieldContext_PageInfo_hasPreviousPage(ctx, field)
+			case "startCursor":
+				return ec.fieldContext_PageInfo_startCursor(ctx, field)
+			case "endCursor":
+				return ec.fieldContext_PageInfo_endCursor(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type PageInfo", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _FAQConnection_totalCount(ctx context.Context, field graphql.CollectedField, obj *types.FAQConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_FAQConnection_totalCount(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalCount, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int64)
+	fc.Result = res
+	return ec.marshalNInt2int64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_FAQConnection_totalCount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "FAQConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Fee_id(ctx context.Context, field graphql.CollectedField, obj *types.Fee) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Fee_id(ctx, field)
 	if err != nil {
@@ -21759,6 +22609,195 @@ func (ec *executionContext) fieldContext_Mutation_withdrawVaultAccountNoSource(c
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_createFAQ(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_createFAQ(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateFaq(rctx, fc.Args["FAQ"].(types.CreateFAQInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.Response)
+	fc.Result = res
+	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_createFAQ(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "message":
+				return ec.fieldContext_Response_message(ctx, field)
+			case "success":
+				return ec.fieldContext_Response_success(ctx, field)
+			case "code":
+				return ec.fieldContext_Response_code(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Response", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_createFAQ_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_deleteFAQ(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_deleteFAQ(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteFaq(rctx, fc.Args["FAQid"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.Response)
+	fc.Result = res
+	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_deleteFAQ(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "message":
+				return ec.fieldContext_Response_message(ctx, field)
+			case "success":
+				return ec.fieldContext_Response_success(ctx, field)
+			case "code":
+				return ec.fieldContext_Response_code(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Response", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_deleteFAQ_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_updateFAQ(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_updateFAQ(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateFaq(rctx, fc.Args["FAQ"].(types.UpdateFAQInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.Response)
+	fc.Result = res
+	return ec.marshalNResponse2ᚖmsᚗapiᚋtypesᚐResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_updateFAQ(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "message":
+				return ec.fieldContext_Response_message(ctx, field)
+			case "success":
+				return ec.fieldContext_Response_success(ctx, field)
+			case "code":
+				return ec.fieldContext_Response_code(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Response", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_updateFAQ_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Organization_id(ctx context.Context, field graphql.CollectedField, obj *types.Organization) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Organization_id(ctx, field)
 	if err != nil {
@@ -25821,6 +26860,69 @@ func (ec *executionContext) fieldContext_Query_statement(ctx context.Context, fi
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_statement_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_faqs(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_faqs(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Faqs(rctx, fc.Args["keywords"].(*string), fc.Args["first"].(*int64), fc.Args["after"].(*string), fc.Args["last"].(*int64), fc.Args["before"].(*string), fc.Args["filter"].(types.FilterType))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*types.FAQConnection)
+	fc.Result = res
+	return ec.marshalNFAQConnection2ᚖmsᚗapiᚋtypesᚐFAQConnection(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_faqs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "nodes":
+				return ec.fieldContext_FAQConnection_nodes(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_FAQConnection_pageInfo(ctx, field)
+			case "totalCount":
+				return ec.fieldContext_FAQConnection_totalCount(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type FAQConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_faqs_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -34123,6 +35225,90 @@ func (ec *executionContext) unmarshalInputCordinatesInput(ctx context.Context, o
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputCreateFAQInput(ctx context.Context, obj interface{}) (types.CreateFAQInput, error) {
+	var it types.CreateFAQInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id", "question", "answer", "isFeatured", "tags", "ts", "updateTs", "topic"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			it.ID, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "question":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("question"))
+			it.Question, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "answer":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("answer"))
+			it.Answer, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "isFeatured":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("isFeatured"))
+			it.IsFeatured, err = ec.unmarshalNBoolean2bool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "tags":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tags"))
+			it.Tags, err = ec.unmarshalOString2ᚕᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "ts":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ts"))
+			it.Ts, err = ec.unmarshalNInt2int64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updateTs":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("updateTs"))
+			it.UpdateTs, err = ec.unmarshalNInt2int64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "topic":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("topic"))
+			it.Topic, err = ec.unmarshalNFAQTopic2msᚗapiᚋtypesᚐFAQTopic(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputCustomerDetailsInput(ctx context.Context, obj interface{}) (types.CustomerDetailsInput, error) {
 	var it types.CustomerDetailsInput
 	asMap := map[string]interface{}{}
@@ -34766,6 +35952,58 @@ func (ec *executionContext) unmarshalInputTransactionInput(ctx context.Context, 
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idempotencyKey"))
 			it.IdempotencyKey, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUpdateFAQInput(ctx context.Context, obj interface{}) (types.UpdateFAQInput, error) {
+	var it types.UpdateFAQInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id", "answer", "isFeatured", "tags"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			it.ID, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "answer":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("answer"))
+			it.Answer, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "isFeatured":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("isFeatured"))
+			it.IsFeatured, err = ec.unmarshalNBoolean2bool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "tags":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tags"))
+			it.Tags, err = ec.unmarshalOString2ᚕᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -36858,6 +38096,122 @@ func (ec *executionContext) _ExchangeRate(ctx context.Context, sel ast.Selection
 	return out
 }
 
+var fAQImplementors = []string{"FAQ"}
+
+func (ec *executionContext) _FAQ(ctx context.Context, sel ast.SelectionSet, obj *types.Faq) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, fAQImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("FAQ")
+		case "id":
+
+			out.Values[i] = ec._FAQ_id(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "question":
+
+			out.Values[i] = ec._FAQ_question(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "answer":
+
+			out.Values[i] = ec._FAQ_answer(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "isFeatured":
+
+			out.Values[i] = ec._FAQ_isFeatured(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "tags":
+
+			out.Values[i] = ec._FAQ_tags(ctx, field, obj)
+
+		case "ts":
+
+			out.Values[i] = ec._FAQ_ts(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "updateTs":
+
+			out.Values[i] = ec._FAQ_updateTs(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "topic":
+
+			out.Values[i] = ec._FAQ_topic(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var fAQConnectionImplementors = []string{"FAQConnection"}
+
+func (ec *executionContext) _FAQConnection(ctx context.Context, sel ast.SelectionSet, obj *types.FAQConnection) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, fAQConnectionImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("FAQConnection")
+		case "nodes":
+
+			out.Values[i] = ec._FAQConnection_nodes(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "pageInfo":
+
+			out.Values[i] = ec._FAQConnection_pageInfo(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "totalCount":
+
+			out.Values[i] = ec._FAQConnection_totalCount(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var feeImplementors = []string{"Fee", "StaffAuditLogValue"}
 
 func (ec *executionContext) _Fee(ctx context.Context, sel ast.SelectionSet, obj *types.Fee) graphql.Marshaler {
@@ -37831,6 +39185,33 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_withdrawVaultAccountNoSource(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "createFAQ":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_createFAQ(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "deleteFAQ":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_deleteFAQ(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "updateFAQ":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_updateFAQ(ctx, field)
 			})
 
 			if out.Values[i] == graphql.Null {
@@ -39029,6 +40410,29 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_statement(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
+		case "faqs":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_faqs(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -41463,6 +42867,11 @@ func (ec *executionContext) marshalNCountryConnection2ᚖmsᚗapiᚋtypesᚐCoun
 	return ec._CountryConnection(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNCreateFAQInput2msᚗapiᚋtypesᚐCreateFAQInput(ctx context.Context, v interface{}) (types.CreateFAQInput, error) {
+	res, err := ec.unmarshalInputCreateFAQInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) marshalNCurrency2msᚗapiᚋtypesᚐCurrency(ctx context.Context, sel ast.SelectionSet, v types.Currency) graphql.Marshaler {
 	return ec._Currency(ctx, sel, &v)
 }
@@ -41798,6 +43207,84 @@ func (ec *executionContext) marshalNExchangeRate2ᚖmsᚗapiᚋtypesᚐExchangeR
 	return ec._ExchangeRate(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNFAQ2ᚕᚖmsᚗapiᚋtypesᚐFaqᚄ(ctx context.Context, sel ast.SelectionSet, v []*types.Faq) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNFAQ2ᚖmsᚗapiᚋtypesᚐFaq(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNFAQ2ᚖmsᚗapiᚋtypesᚐFaq(ctx context.Context, sel ast.SelectionSet, v *types.Faq) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._FAQ(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNFAQConnection2msᚗapiᚋtypesᚐFAQConnection(ctx context.Context, sel ast.SelectionSet, v types.FAQConnection) graphql.Marshaler {
+	return ec._FAQConnection(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNFAQConnection2ᚖmsᚗapiᚋtypesᚐFAQConnection(ctx context.Context, sel ast.SelectionSet, v *types.FAQConnection) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._FAQConnection(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNFAQTopic2msᚗapiᚋtypesᚐFAQTopic(ctx context.Context, v interface{}) (types.FAQTopic, error) {
+	var res types.FAQTopic
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNFAQTopic2msᚗapiᚋtypesᚐFAQTopic(ctx context.Context, sel ast.SelectionSet, v types.FAQTopic) graphql.Marshaler {
+	return v
+}
+
 func (ec *executionContext) marshalNFee2ᚕᚖmsᚗapiᚋtypesᚐFeeᚄ(ctx context.Context, sel ast.SelectionSet, v []*types.Fee) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
@@ -41923,6 +43410,16 @@ func (ec *executionContext) unmarshalNFeeTypes2msᚗapiᚋtypesᚐFeeTypes(ctx c
 }
 
 func (ec *executionContext) marshalNFeeTypes2msᚗapiᚋtypesᚐFeeTypes(ctx context.Context, sel ast.SelectionSet, v types.FeeTypes) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) unmarshalNFilterType2msᚗapiᚋtypesᚐFilterType(ctx context.Context, v interface{}) (types.FilterType, error) {
+	var res types.FilterType
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNFilterType2msᚗapiᚋtypesᚐFilterType(ctx context.Context, sel ast.SelectionSet, v types.FilterType) graphql.Marshaler {
 	return v
 }
 
@@ -43085,6 +44582,11 @@ func (ec *executionContext) unmarshalNTransactionTypeStatuses2msᚗapiᚋtypes�
 
 func (ec *executionContext) marshalNTransactionTypeStatuses2msᚗapiᚋtypesᚐTransactionTypeStatuses(ctx context.Context, sel ast.SelectionSet, v types.TransactionTypeStatuses) graphql.Marshaler {
 	return v
+}
+
+func (ec *executionContext) unmarshalNUpdateFAQInput2msᚗapiᚋtypesᚐUpdateFAQInput(ctx context.Context, v interface{}) (types.UpdateFAQInput, error) {
+	res, err := ec.unmarshalInputUpdateFAQInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNUpdateFXInput2msᚗapiᚋtypesᚐUpdateFXInput(ctx context.Context, v interface{}) (types.UpdateFXInput, error) {
@@ -45093,6 +46595,38 @@ func (ec *executionContext) marshalOString2ᚕstringᚄ(ctx context.Context, sel
 		if e == graphql.Null {
 			return graphql.Null
 		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) unmarshalOString2ᚕᚖstring(ctx context.Context, v interface{}) ([]*string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*string, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalOString2ᚖstring(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOString2ᚕᚖstring(ctx context.Context, sel ast.SelectionSet, v []*string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalOString2ᚖstring(ctx, sel, v[i])
 	}
 
 	return ret

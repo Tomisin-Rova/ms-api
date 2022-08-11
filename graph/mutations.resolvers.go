@@ -6,6 +6,7 @@ package graph
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -1515,7 +1516,30 @@ func (r *mutationResolver) WithdrawVaultAccountNoSource(ctx context.Context, vau
 	return &types.Response{Code: http.StatusNotFound, Success: false}, nil
 }
 
+// CreateFaq is the resolver for the createFAQ field.
+func (r *mutationResolver) CreateFaq(ctx context.Context, faq types.CreateFAQInput) (*types.Response, error) {
+	panic(fmt.Errorf(notImplemented))
+}
+
+// DeleteFaq is the resolver for the deleteFAQ field.
+func (r *mutationResolver) DeleteFaq(ctx context.Context, fAQid string) (*types.Response, error) {
+	panic(fmt.Errorf(notImplemented))
+}
+
+// UpdateFaq is the resolver for the updateFAQ field.
+func (r *mutationResolver) UpdateFaq(ctx context.Context, faq types.UpdateFAQInput) (*types.Response, error) {
+	panic(fmt.Errorf(notImplemented))
+}
+
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 
 type mutationResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//    it when you're done.
+//  - You have helper methods in this file. Move them out to keep these resolver files clean.
+var notImplemented = "not implemented"
