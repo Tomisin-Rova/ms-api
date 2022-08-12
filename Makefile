@@ -89,7 +89,7 @@ tools:
 lint:
 	@hash golangci-lint > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		export BINARY="golangci-lint"; \
-		curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOPATH)/bin v1.45.2; \
+		curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/v1.48.0/install.sh | sh -s -- -b $(GOPATH)/bin v1.48.2; \
 	fi
 	golangci-lint run --timeout 5m
 
