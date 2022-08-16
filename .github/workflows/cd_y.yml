@@ -1,0 +1,216 @@
+name: Build, deploy to DEV
+on:
+  pull_request:
+    types: [opened, reopened]
+  push:
+    branches: [dev-y]
+
+env:
+  PROJECT_ID: ${{ secrets.PROJECT_SHARED }}
+  GITHUB_SHA: ${{ github.sha }}
+  GITHUB_REF: ${{ github.ref }}
+  ORG: roava.io/services
+  IMAGE: ms.api
+  REGISTRY_HOSTNAME: eu.gcr.io/${{ secrets.PROJECT_SHARED }}
+  VERSION: develop-y
+
+  GCP_PROJECT_NAME: "dev-roava-io"
+
+jobs:
+  lint:
+    name: Lint
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - name: ENV
+        run: env
+      # Setup Go
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ^1.17 # The Go version to download (if necessary) and use.
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Check out code
+        uses: actions/checkout@v2
+      # Set credentials to get zebra library
+      - name: Setup credentials to access private repo
+        run: git config --global url."https://${{ secrets.PAT }}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
+      # Run fmt of code
+      - name: check formatting
+        run: make fmt-check
+      # Run vet & lint on the code
+      - name: Run code vet
+        run: make vet
+      # Run vet & lint on the code
+      - name: Run code lint
+        run: make lint
+
+  test:
+    name: Test
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    needs: [lint] # Only run this workflow when "lint" workflow succeeds
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Setup Go
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ^1.17 # The Go version to download (if necessary) and use.
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Check out code
+        uses: actions/checkout@v2
+      # Set credentials to get zebra library
+      - name: Setup credentials to access private repo
+        run: git config --global url."https://${{ secrets.PAT }}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
+      # Run unit tests + coverage
+      - name: Run unit tests
+        run: make test
+
+  sonarcloud:
+    name: SonarCloud
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ^1.17 # The Go version to download (if necessary) and use.
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+        # Set credentials to get zebra library
+      - name: Setup credentials to access private repo
+        run: git config --global url."https://${{ secrets.PAT }}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
+      - name: Generate test cover report
+        run:  go test -race -covermode=atomic -coverprofile=coverage.out -json ./... > report.json
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  build:
+    name: Build
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Setup Go
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ^1.17 # The Go version to download (if necessary) and use.
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Check out code
+        uses: actions/checkout@v2
+      # Set credentials to get zebra library
+      - name: Setup credentials to access private repo
+        run: git config --global url."https://${{ secrets.PAT }}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
+      # Run build of the application
+      - name: Run build
+        run: go build .
+
+  package:
+    name: Package (docker)
+    runs-on: ubuntu-latest
+    needs: [build] # Only run this workflow when "build" workflow succeeds
+
+    steps:
+      - name: Get short commit id
+        id: vars
+        run: echo "::set-output name=SHORT_COMMIT_ID::$(git rev-parse --short HEAD)"
+
+      - name: Print version
+        run: |
+          echo [github.tag]: $VERSION
+          echo [github.sha]: ${{ github.sha }}
+          echo [github.ref]: ${{ github.ref }}
+          echo [github.actor]: trigered by $GITHUB_ACTOR
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup gcloud CLI
+        uses: google-github-actions/setup-gcloud@v0
+        with:
+          version: "290.0.1"
+          service_account_key: ${{ secrets.SA_SHARED }}
+          project_id: ${{ secrets.PROJECT_SHARED }}
+
+      - name: Configure docker
+        run: |
+          # Set up docker to authenticate
+          # via gcloud command-line tool.
+          gcloud auth configure-docker
+
+      # images name in format - [ORG]/[IMAGE] e.g. roava.io/myimage
+      - name: Build the Docker image
+        id: build
+        run: |
+          export TAG=`echo $VERSION`
+          export CONTAINER=`echo $ORG/$IMAGE`
+          docker build -t "$REGISTRY_HOSTNAME"/"$CONTAINER":"$TAG" \
+          -t "$REGISTRY_HOSTNAME"/"$CONTAINER":"${GITHUB_SHA::8}" \
+          -t "$REGISTRY_HOSTNAME"/"$CONTAINER":"$GITHUB_SHA" \
+            --build-arg GITHUB_SHA="$GITHUB_SHA" \
+            --build-arg ACCESS_TOKEN="${{ secrets.PAT }}" \
+            --build-arg GITHUB_REF="$GITHUB_REF" .
+          docker tag "$REGISTRY_HOSTNAME"/"$CONTAINER":"$TAG" "$REGISTRY_HOSTNAME"/"$CONTAINER":latest
+
+      - name: Publish
+        id: publish
+        run: |
+          export TAG=`echo $VERSION`
+          export CONTAINER=`echo $ORG/$IMAGE`
+          docker push "$REGISTRY_HOSTNAME"/"$CONTAINER":"$TAG"
+          docker push "$REGISTRY_HOSTNAME"/"$CONTAINER":latest
+
+  deploy:
+    name: Deploy to DEV
+    runs-on: [self-hosted, linux, x64, dev]
+    needs: [package]
+
+    steps:
+
+      - name: Check out my other private repo
+        uses: actions/checkout@master
+        with:
+          repository: roava/deploy
+          token: ${{ secrets.PAT }}
+
+      - name: Replace image in config
+        run: |
+          sed -i -e "s/\${parameters.gcp_project_name}/${GCP_PROJECT_NAME}/g" templates/ms.api.yaml
+          sed -i -e "s/\${parameters.version}/develop/g" templates/*.yaml
+          sed -i -e "s/\:develop/:${VERSION}/g" templates/${{github.event.repository.name}}.yaml
+          
+      
+      - name: check change
+        run: cat templates/${{github.event.repository.name}}.yaml
+      
+      - id: auth
+        uses: 'google-github-actions/auth@v0.4.0'
+        with:
+          credentials_json: '${{ secrets.SV_ACCOUNT_DEV }}'
+
+      - id: get-credentials
+        uses: 'google-github-actions/get-gke-credentials@v0.4.0'
+        with:
+          cluster_name: 'services-cluster'
+          use_internal_ip: true
+          location: 'europe-west2-a'
+      
+      - name: deploy all services.
+        run : kubectl apply -f templates/ --record -n develop-y
+
+      - name: adding annotations
+        run : kubectl annotate --overwrite -f templates/${{github.event.repository.name}}.yaml kubernetes.io/change-cause="deploy to templates/${{github.event.repository.name}}.yaml from ${GITHUB_REF_NAME}" -n develop-y
+      
+      - name: restarting pod
+        run : |
+          SERVICE=`echo ${{github.event.repository.name}} | sed 's/\./-/g'`
+          kubectl rollout restart deployment $SERVICE -n develop-y
+          sh validation.sh $SERVICE
+
