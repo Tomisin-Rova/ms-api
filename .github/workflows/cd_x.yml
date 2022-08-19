@@ -1,9 +1,9 @@
-name: Build, deploy to DEV
+name: Build, deploy to DEV-X
 on:
   pull_request:
+    branches:
+      - dev-x
     types: [opened, reopened]
-  push:
-    branches: [dev-x]
 
 env:
   PROJECT_ID: ${{ secrets.PROJECT_SHARED }}
@@ -168,7 +168,7 @@ jobs:
           docker push "$REGISTRY_HOSTNAME"/"$CONTAINER":latest
 
   deploy:
-    name: Deploy to DEV
+    name: Deploy to DEV-X
     runs-on: [self-hosted, linux, x64, dev]
     needs: [package]
 

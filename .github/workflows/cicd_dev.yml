@@ -1,9 +1,10 @@
-name: Build, deploy to DEV
+name: Build, deploy to QA-Y
 on:
-  pull_request:
-    types: [opened, reopened]
   push:
-    branches: [develop]
+    paths-ignore:
+      - '.github/workflows/**'
+    branches:
+      - dev-y
 
 env:
   PROJECT_ID: ${{ secrets.PROJECT_SHARED }}
@@ -167,7 +168,7 @@ jobs:
           docker push "$REGISTRY_HOSTNAME"/"$CONTAINER":latest
 
   deploy:
-    name: Deploy to DEV
+    name: Deploy to QA-Y
     runs-on: [self-hosted, linux, x64, dev]
     needs: [package]
 

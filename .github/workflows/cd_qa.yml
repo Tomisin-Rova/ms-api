@@ -1,8 +1,10 @@
-name: Build, deploy to QA
+name: Build, deploy to QA-X
 on:
   push:
-    tags:
-      - '*-rc.[0-9]+'
+    paths-ignore:
+      - '.github/workflows/**'
+    branches:
+      - dev-x
 
 env:
   PROJECT_ID: ${{ secrets.PROJECT_SHARED }}
@@ -143,7 +145,7 @@ jobs:
           docker push "$REGISTRY_HOSTNAME"/"$CONTAINER":latest
   
   deploy:
-    name: Deploy to QA
+    name: Deploy to QA-X
     runs-on: [self-hosted, linux, x64, dev]
     needs: [package]
 

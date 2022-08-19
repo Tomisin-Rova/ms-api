@@ -2,6 +2,7 @@ name: Build, deploy to UAT
 on:
   push:
     branches:
+      - develop
       - master
 
 env:
